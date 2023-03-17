@@ -1,0 +1,167 @@
+/* 
+ * ChatGPT Chatbot for WordPress - Stylesheet
+ * 
+ * This CSS file contains styles for the ChatGPT Chatbot plugin.
+ * It includes styles for the chatbot interface, messages, and other UI elements.
+ * 
+ * Customize these styles to match your website's design.
+ *
+ */
+
+#chatgpt-chatbot {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    height: 450px;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+#chatgpt-chatbot-header {
+    background-color: #222;
+    color: #fff;
+    padding: 10px;
+    font-size: 16px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+#chatgpt-chatbot-conversation {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+#chatgpt-chatbot-input {
+    display: flex;
+    padding: 10px;
+}
+
+#chatgpt-chatbot-message {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px;
+}
+
+#chatgpt-chatbot-submit {
+    background-color: #222;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 6px 12px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+/* CSS for append message */
+.chat-message {
+    margin: 5px;
+    padding: 5px;
+    max-width: 75%;
+    word-wrap: break-word;
+}
+
+.user-message {
+    text-align: right;
+}
+
+.user-text {
+    display: inline-block;
+    background-color: #007bff; /* Change the background color to blue */
+    color: #ffffff; /* Change the text color to white */
+    padding: 5px 10px;
+    border-radius: 12px;
+    border-bottom-right-radius: 0;
+}
+
+.bot-message {
+    text-align: left;
+}
+
+.bot-text {
+    display: inline-block;
+    font-weight: bold;
+    background-color: #5BC236; /* Change the background color to green */
+    color: #ffffff; /* Change the text color to white */
+    padding: 5px 10px;
+    border-radius: 12px;
+    border-bottom-left-radius: 0;
+}
+
+.error-message {
+    text-align: center;
+}
+
+.error-text {
+    color: red;
+    font-weight: bold;
+}
+
+.message-space {
+    height: 10px;
+}
+
+/* Collapse chatbot upon user request */
+.chatbot-collapse-btn {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 1.5%;
+    right: 2%;
+    /* background-color: #f1f1f1; */
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    padding: 15px;
+}
+
+.chatbot-collapsed {
+    width: 48px;
+    height: 48px;
+    background-color: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+}
+
+/* Show the chatbot open button in the lower right corner of the window */
+#chatbot-open-btn {
+    position: fixed;
+    bottom: 5%;
+    right: 5%;
+    background-color: #ec2d2d;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    float: right;
+}
+
+#chatgpt-open-btn {
+    position: fixed;
+    bottom: 2%;
+    right: 2%;
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+    padding: 15px;
+    float: right;
+    box-shadow: 2px 4px 15px rgb(102, 92, 143);
+}
+
+#chatgpt-open-btn:hover {
+    background-color: #0257b3;    
+}
+
+#chatgptTitle.title {
+    color: white;
+    font-size: 30px;
+    /* font-weight: 300; */
+}
