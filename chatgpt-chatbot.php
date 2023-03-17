@@ -118,3 +118,4 @@ function chatgpt_chatbot_call_api($api_key, $message) {
         return 'Error Line 94: Unable to fetch response from ChatGPT API';
     }
 }
+
