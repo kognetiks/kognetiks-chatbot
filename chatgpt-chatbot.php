@@ -109,7 +109,6 @@ function chatgpt_chatbot_call_api($api_key, $message) {
     }
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
-
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
