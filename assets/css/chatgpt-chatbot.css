@@ -8,6 +8,17 @@
  *
  */
 
+
+/* Reset font family for Dashicons */
+.chatbot-container .chatbot-collapse-btn.dashicons.dashicons-format-chat {
+    font-family: dashicons;
+}
+
+/* Set font family to sans-serif for all text within the plugin */
+.chatbot-container * {
+    font-family: sans-serif;
+}
+
 #chatgpt-chatbot {
     position: fixed;
     bottom: 10px;
