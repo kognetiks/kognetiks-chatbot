@@ -20,18 +20,12 @@ jQuery(document).ready(function ($) {
     // $('body').append(chatbotContainer);
     conversation.append(chatbotContainer);
 
-    // Set local storage to false when navigating away from the page
-    $(window).on('beforeunload', function() {
-        localStorage.setItem('chatgptChatbotOpened', 'false');
-    });
-
-    function initializeChatbot() {
+     function initializeChatbot() {
         // remove once resolved
         // console.log("initializeChatbot");
-        // localStorage.removeItem('chatgptChatbotOpened');
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
         var initialGreeting = 'Hello! How can I help you today?';
-        // console.log(isFirstTime);
+        console.log(isFirstTime);
         if (isFirstTime) {
             // console.log("never opened");
             initialGreeting = 'Hello! How can I help you today?';
