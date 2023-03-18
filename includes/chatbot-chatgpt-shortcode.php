@@ -1,9 +1,9 @@
 <?php
 /**
- * ChatGPT Chatbot for WordPress - Shortcode Registration
+ * Chatbot ChatGPT for WordPress - Shortcode Registration
  *
  * This file contains the code for registering the shortcode used
- * to display the ChatGPT Chatbot on the website.
+ * to display the Chatbot ChatGPT on the website.
  *
  * @package chatbot-chatgpt
  */
@@ -13,7 +13,7 @@ function chatbot_chatgpt_shortcode() {
     ?>
     <div id="chatbot-chatgpt">
         <div id="chatbot-chatgpt-header">
-            <div id="chatgptTitle" class="title">ChatGPT Chatbot</div>
+            <div id="chatgptTitle" class="title">Chatbot ChatGPT</div>
         </div>
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">

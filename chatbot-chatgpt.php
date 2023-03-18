@@ -1,8 +1,8 @@
 <?php
 /*
- * Plugin Name: ChatGPT Chatbot
+ * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
- * Description: A simple plugin to add a ChatGPT Chatbot to your Wordpress Website.
+ * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
  * Version:     1.0.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
@@ -17,7 +17,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * 
  * You should have received a copy of the GNU General Public License
- * along with ChatGPT Chatbot. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
+ * along with Chatbot ChatGPT. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
  * 
 */
 

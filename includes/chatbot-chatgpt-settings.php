@@ -1,8 +1,8 @@
 <?php
 /**
- * ChatGPT Chatbot for WordPress - Settings Page
+ * Chatbot ChatGPT for WordPress - Settings Page
  *
- * This file contains the code for the ChatGPT Chatbot settings page.
+ * This file contains the code for the Chatbot ChatGPT settings page.
  * It allows users to configure the API key and other parameters
  * required to access the ChatGPT API from their own account.
  *
@@ -10,7 +10,7 @@
  */
 
 function chatbot_chatgpt_settings_page() {
-    add_options_page('ChatGPT Chatbot Settings', 'ChatGPT Chatbot', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
+    add_options_page('Chatbot ChatGPT Settings', 'Chatbot ChatGPT', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
 }
 add_action('admin_menu', 'chatbot_chatgpt_settings_page');
 
