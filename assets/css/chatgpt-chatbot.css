@@ -134,6 +134,7 @@
     cursor: pointer;
     text-align: center;
     padding: 15px;
+    border-radius: 10%;
 }
 
 .chatbot-collapsed {
@@ -167,6 +168,7 @@
     padding: 15px;
     float: right;
     box-shadow: 2px 4px 15px rgb(102, 92, 143);
+    border-radius: 10%;
 }
 
 #chatgpt-open-btn:hover {

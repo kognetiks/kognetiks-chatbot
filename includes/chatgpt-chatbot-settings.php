@@ -63,6 +63,7 @@ add_action('admin_init', 'chatgpt_chatbot_settings_init');
 // Settings section callback
 function chatgpt_chatbot_section_callback($args) {
     ?>
+    <p>This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p>
     <p>Enter your ChatGPT API key below:</p>
     <?php
 }

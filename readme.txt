@@ -17,7 +17,7 @@ ChatGPT is a conversational AI platform that uses natural language processing an
 
 ChatGPT Chatbot leverages the OpenAI platform and brings it to life within your WordPress Website.
 
-**Important Note:** This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at https://beta.openai.com/signup/.
+**Important Note:** This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
 
 = Features =
 
@@ -49,7 +49,7 @@ Now your website visitors can enjoy a seamless and personalized chat experience 
 
 = How do I obtain an API key for ChatGPT? =
 
-To obtain an API key, sign up for an account at https://beta.openai.com/signup/. Once registered, you will have access to your API key.
+To obtain an API key, sign up for an account at https://platform.openai.com/account/api-keys. Once registered, you will have access to your API key.
 
 = Can I customize the appearance of the chatbot? =
 
@@ -58,6 +58,10 @@ Yes, the plugin comes with a default style, but you can easily customize the cha
 = Is the chatbot available in multiple languages? =
 
 The ChatGPT API currently supports English. However, you can configure the chatbot to work with other languages supported by OpenAI in the future as the API evolves.
+
+= Which OpenAI model does the plugin use? =
+
+Current the plugin uses the gpt-3.5-turbo model from OpenAI.  This is the same model used in the ChatGPT product.
 
 == Changelog ==
 

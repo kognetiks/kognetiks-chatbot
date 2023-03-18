@@ -89,7 +89,7 @@ function chatgpt_chatbot_call_api($api_key, $message) {
 
     $body = array(
         'max_tokens' => 150,
-        'model' => 'gpt-3.5-turbo',
+        'model' => $model,
         'temperature' => 0.5,
         'messages' => array(array('role' => 'user', 'content' => $message)),
     );
@@ -99,23 +99,25 @@ function chatgpt_chatbot_call_api($api_key, $message) {
         'body' => json_encode($body),
         'method' => 'POST',
         'data_format' => 'body',
-        'timeout' => 15, // Increase the timeout values to 15 seconds
+        'timeout' => 15, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
     $response = wp_remote_post($api_url, $args);
 
+    // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
-        return 'Error Line 86: ' . $response->get_error_message();
+        return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
-
+        // Handle the response from the chat engine
         return $response_body['choices'][0]['message']['content'];
     } else {
-        return 'Error Line 94: Unable to fetch response from ChatGPT API';
+        // Handle any errors that are returned from the chat engine
+        return 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 }
 
