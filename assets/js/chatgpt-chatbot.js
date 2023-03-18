@@ -25,7 +25,7 @@ jQuery(document).ready(function ($) {
         // console.log("initializeChatbot");
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
         var initialGreeting = 'Hello! How can I help you today?';
-        console.log(isFirstTime);
+        // console.log(isFirstTime);
         if (isFirstTime) {
             // console.log("never opened");
             initialGreeting = 'Hello! How can I help you today?';
