@@ -84,8 +84,8 @@
 
 .user-text {
     display: inline-block;
-    background-color: #007bff; /* Change the background color to blue */
-    color: #ffffff; /* Change the text color to white */
+    background-color: #007bff;
+    color: #ffffff;
     padding: 5px 10px;
     border-radius: 12px;
     border-bottom-right-radius: 0;
@@ -99,8 +99,8 @@
 .bot-text {
     display: inline-block;
     /* font-weight: bold; */
-    background-color: #5BC236; /* Change the background color to green */
-    color: #ffffff; /* Change the text color to white */
+    background-color: #5BC236;
+    color: #ffffff;
     padding: 5px 10px;
     border-radius: 12px;
     border-bottom-left-radius: 0;
@@ -179,4 +179,39 @@
     color: white;
     font-size: 30px;
     /* font-weight: 300; */
+}
+
+.typing-indicator {
+    display: inline-flex; /* Changed from flex to inline-flex */
+    justify-content: flex-start;
+    background-color: #5BC236; /* Match the green background color */
+    border-radius: 12px; /* Match the border radius */
+    padding: 5px 10px; /* Match the padding */
+    border-bottom-left-radius: 0; /* Match the border-bottom-left-radius */
+}
+
+.typing-dot {
+    margin-right: 3px;
+    animation: typing 1s infinite;
+    color: #ffffff; /* Match the white color of the dots */
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }

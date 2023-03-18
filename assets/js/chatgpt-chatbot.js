@@ -91,13 +91,28 @@ jQuery(document).ready(function ($) {
 
 }
 
+function showTypingIndicator() {
+    var typingIndicator = $('<div></div>').addClass('typing-indicator');
+    var dot1 = $('<span>.</span>').addClass('typing-dot');
+    var dot2 = $('<span>.</span>').addClass('typing-dot');
+    var dot3 = $('<span>.</span>').addClass('typing-dot');
+    
+    typingIndicator.append(dot1, dot2, dot3);
+    conversation.append(typingIndicator);
+    conversation.scrollTop(conversation[0].scrollHeight);
+}
+
+function removeTypingIndicator() {
+    $('.typing-indicator').remove();
+}
+
     submitButton.on('click', function () {
         var message = messageInput.val().trim();
       
         if (!message) {
             return;
         }
-
+            
         messageInput.val('');
         appendMessage(message, 'user');
 
@@ -109,19 +124,23 @@ jQuery(document).ready(function ($) {
                 message: message,
             },
             beforeSend: function () {
+                showTypingIndicator();
                 submitButton.prop('disabled', true);
             },
             success: function (response) {
-               if (response.success) {
+                removeTypingIndicator();
+                if (response.success) {
                     appendMessage(response.data, 'bot');
                 } else {
                     appendMessage('Error: ' + response.data, 'error');
                 }
             },
             error: function () {
+                removeTypingIndicator();
                 appendMessage('Error: Unable to send message', 'error');
             },
             complete: function () {
+                removeTypingIndicator();
                 submitButton.prop('disabled', false);
             },
         });
