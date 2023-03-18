@@ -8,7 +8,6 @@ jQuery(document).ready(function ($) {
     chatGptOpenButton.hide();
 
     var chatbotContainer = $('<div></div>').addClass('chatbot-container');
-    // var chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').text('-'); // Add a collapse button
     var chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
     var chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
@@ -17,22 +16,16 @@ jQuery(document).ready(function ($) {
     chatbotContainer.append(chatbotCollapsed);
 
     // Add initial greeting to the chatbot
-    // $('body').append(chatbotContainer);
     conversation.append(chatbotContainer);
 
      function initializeChatbot() {
-        // remove once resolved
-        // console.log("initializeChatbot");
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
-        var initialGreeting = 'Hello! How can I help you today?';
-        // console.log(isFirstTime);
+        var initialGreeting;
         if (isFirstTime) {
-            // console.log("never opened");
             initialGreeting = 'Hello! How can I help you today?';
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');
         } else {
-            // console.log("opened before");
             initialGreeting = 'Hello again! How can I help you?';
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');        

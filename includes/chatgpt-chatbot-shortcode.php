@@ -21,7 +21,6 @@ function chatgpt_chatbot_shortcode() {
             <button id="chatgpt-chatbot-submit">Send</button>
         </div>
     </div>
-    <!-- <button id="chatgpt-open-btn">+</button> -->
     <button id="chatgpt-open-btn">
     <i class="dashicons dashicons-format-chat"></i>
     </button>
