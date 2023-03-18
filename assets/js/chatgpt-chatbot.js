@@ -26,25 +26,22 @@ jQuery(document).ready(function ($) {
     });
 
     function initializeChatbot() {
-        console.log("initializeChatbot");
-        console.log(localStorage.getItem('chatgptChatbotOpened'));
+        // remove once resolved
+        // console.log("initializeChatbot");
+        // localStorage.removeItem('chatgptChatbotOpened');
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
+        var initialGreeting = 'Hello! How can I help you today?';
         // console.log(isFirstTime);
         if (isFirstTime) {
-            console.log("isFirstTime is null");
-            var initialGreeting = 'Hello! How can I help you today?';
+            // console.log("never opened");
+            initialGreeting = 'Hello! How can I help you today?';
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');
-        } else if (isFirstTime == true) {
-            console.log("isFirstTime is true");
-            var initialGreeting = 'Hello! How can I help you today?';
+        } else {
+            // console.log("opened before");
+            initialGreeting = 'Hello again! How can I help you?';
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
-            localStorage.setItem('chatgptChatbotOpened', 'true');
-         } else if (isFirstTime == false) {
-            console.log("isFirstTime is false");
-            var initialGreeting = 'Hello again! How can I help you?';
-            appendMessage(initialGreeting, 'bot', 'initial-greeting');
-            localStorage.setItem('chatgptChatbotOpened', 'true');            
+            localStorage.setItem('chatgptChatbotOpened', 'true');        
          }
  }
 
