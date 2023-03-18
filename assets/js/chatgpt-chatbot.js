@@ -112,7 +112,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function (response) {
-                if (response.success) {
+               if (response.success) {
                     appendMessage(response.data, 'bot');
                 } else {
                     appendMessage('Error: ' + response.data, 'error');

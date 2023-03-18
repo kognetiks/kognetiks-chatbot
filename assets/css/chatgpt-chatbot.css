@@ -74,7 +74,7 @@
 .chat-message {
     margin: 5px;
     padding: 5px;
-    max-width: 75%;
+    max-width: 100%;
     word-wrap: break-word;
 }
 
@@ -89,6 +89,7 @@
     padding: 5px 10px;
     border-radius: 12px;
     border-bottom-right-radius: 0;
+    overflow-wrap: anywhere;
 }
 
 .bot-message {
@@ -97,12 +98,13 @@
 
 .bot-text {
     display: inline-block;
-    font-weight: bold;
+    /* font-weight: bold; */
     background-color: #5BC236; /* Change the background color to green */
     color: #ffffff; /* Change the text color to white */
     padding: 5px 10px;
     border-radius: 12px;
     border-bottom-left-radius: 0;
+    overflow-wrap: anywhere;
 }
 
 .error-message {
