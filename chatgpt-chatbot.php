@@ -1,7 +1,7 @@
 <?php
 /*
  * Plugin Name: ChatGPT Chatbot
- * Plugin URI:  https://github.com/kognetiks/chatgpt-chatbot
+ * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a ChatGPT Chatbot to your Wordpress Website.
  * Version:     1.0.0
  * Author:      Kognetiks.com
@@ -30,23 +30,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include necessary files
-require_once plugin_dir_path(__FILE__) . 'includes/chatgpt-chatbot-settings.php';
-require_once plugin_dir_path(__FILE__) . 'includes/chatgpt-chatbot-shortcode.php';
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 
 // Enqueue plugin scripts and styles
-function chatgpt_chatbot_enqueue_scripts() {
-    wp_enqueue_style('chatgpt-chatbot-css', plugins_url('assets/css/chatgpt-chatbot.css', __FILE__));
-    wp_enqueue_script('chatgpt-chatbot-js', plugins_url('assets/js/chatgpt-chatbot.js', __FILE__), array('jquery'), '1.0', true);
+function chatbot_chatgpt_enqueue_scripts() {
+    wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
 
-    wp_localize_script('chatgpt-chatbot-js', 'chatgpt_chatbot_params', array(
+    wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'api_key' => esc_attr(get_option('chatgpt_api_key')),
     ));
 }
-add_action('wp_enqueue_scripts', 'chatgpt_chatbot_enqueue_scripts');
+add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
 // Handle Ajax requests
-function chatgpt_chatbot_send_message() {
+function chatbot_chatgpt_send_message() {
     // Get the save API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
     // Get the saved model from the settings or default to gpt-3.5-turbo
@@ -60,25 +60,25 @@ function chatgpt_chatbot_send_message() {
     }
 
     // Send message to ChatGPT API
-    $response = chatgpt_chatbot_call_api($api_key, $message);
+    $response = chatbot_chatgpt_call_api($api_key, $message);
 
     // Return response
     wp_send_json_success($response);
 }
 
 // Add link to chatgtp options - setting page
-function chatgpt_chatbot_plugin_action_links($links) {
-    $settings_link = '<a href="../wp-admin/options-general.php?page=chatgpt-chatbot">' . __('Settings', 'chatgpt-chatbot') . '</a>';
+function chatbot_chatgpt_plugin_action_links($links) {
+    $settings_link = '<a href="../wp-admin/options-general.php?page=chatbot-chatgpt">' . __('Settings', 'chatbot-chatgpt') . '</a>';
     array_unshift($links, $settings_link);
     return $links;
 }
 
-add_action('wp_ajax_chatgpt_chatbot_send_message', 'chatgpt_chatbot_send_message');
-add_action('wp_ajax_nopriv_chatgpt_chatbot_send_message', 'chatgpt_chatbot_send_message');
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatgpt_chatbot_plugin_action_links');
+add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
 
 // Call the ChatGPT API
-function chatgpt_chatbot_call_api($api_key, $message) {
+function chatbot_chatgpt_call_api($api_key, $message) {
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     $api_url = 'https://api.openai.com/v1/chat/completions';
 

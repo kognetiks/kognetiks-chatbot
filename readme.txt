@@ -33,17 +33,17 @@ ChatGPT Chatbot leverages the OpenAI platform using the gpt-3.5-turbo model brin
 1. Install and activate the ChatGPT Chatbot plugin.
 2. Navigate to the settings page (Settings > ChatGPT Chatbot) and enter your API key.
 3. Customize the chatbot appearance and other parameters as needed.
-4. Add the chatbot to any page or post using the provided shortcode: [chatgpt_chatbot]
+4. Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]
 
 Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI's ChatGPT API.
 
 == Installation ==
 
-1. Upload the 'chatgpt-chatbot' folder to the '/wp-content/plugins/' directory.
+1. Upload the 'chatbot-chatgpt' folder to the '/wp-content/plugins/' directory.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Go to the 'Settings > ChatGPT Chatbot' page and enter your OpenAI API key.
 4. Customize the chatbot appearance and other parameters as needed.
-5. Add the chatbot to any page or post using the provided shortcode: [chatgpt_chatbot]
+5. Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]
 
 == Frequently Asked Questions ==
 
@@ -53,7 +53,7 @@ To obtain an API key, sign up for an account at https://platform.openai.com/acco
 
 = Can I customize the appearance of the chatbot? =
 
-Yes, the plugin comes with a default style, but you can easily customize the chatbot's appearance by editing the chatgpt-chatbot.css file or adding custom CSS rules to your WordPress theme.
+Yes, the plugin comes with a default style, but you can easily customize the chatbot's appearance by editing the chatbot-chatgpt.css file or adding custom CSS rules to your WordPress theme.
 
 = Is the chatbot available in multiple languages? =
 

@@ -1,9 +1,9 @@
 jQuery(document).ready(function ($) {
  
-    var messageInput = $('#chatgpt-chatbot-message');
-    var conversation = $('#chatgpt-chatbot-conversation');
-    var submitButton = $('#chatgpt-chatbot-submit');
-    var chatGptChatBot = $('#chatgpt-chatbot');
+    var messageInput = $('#chatbot-chatgpt-message');
+    var conversation = $('#chatbot-chatgpt-conversation');
+    var submitButton = $('#chatbot-chatgpt-submit');
+    var chatGptChatBot = $('#chatbot-chatgpt');
     var chatGptOpenButton = $('#chatgpt-open-btn');
     chatGptOpenButton.hide();
 
@@ -110,10 +110,10 @@ function removeTypingIndicator() {
         appendMessage(message, 'user');
 
         $.ajax({
-            url: chatgpt_chatbot_params.ajax_url,
+            url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
             data: {
-                action: 'chatgpt_chatbot_send_message',
+                action: 'chatbot_chatgpt_send_message',
                 message: message,
             },
             beforeSend: function () {

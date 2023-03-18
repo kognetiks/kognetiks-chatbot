@@ -5,20 +5,20 @@
  * This file contains the code for registering the shortcode used
  * to display the ChatGPT Chatbot on the website.
  *
- * @package chatgpt-chatbot
+ * @package chatbot-chatgpt
  */
 
-function chatgpt_chatbot_shortcode() {
+function chatbot_chatgpt_shortcode() {
     ob_start();
     ?>
-    <div id="chatgpt-chatbot">
-        <div id="chatgpt-chatbot-header">
+    <div id="chatbot-chatgpt">
+        <div id="chatbot-chatgpt-header">
             <div id="chatgptTitle" class="title">ChatGPT Chatbot</div>
         </div>
-        <div id="chatgpt-chatbot-conversation"></div>
-        <div id="chatgpt-chatbot-input">
-            <input type="text" id="chatgpt-chatbot-message" placeholder="Type your message...">
-            <button id="chatgpt-chatbot-submit">Send</button>
+        <div id="chatbot-chatgpt-conversation"></div>
+        <div id="chatbot-chatgpt-input">
+            <input type="text" id="chatbot-chatgpt-message" placeholder="Type your message...">
+            <button id="chatbot-chatgpt-submit">Send</button>
         </div>
     </div>
     <button id="chatgpt-open-btn">
@@ -27,4 +27,4 @@ function chatgpt_chatbot_shortcode() {
     <?php
     return ob_get_clean();
 }
-add_shortcode('chatgpt_chatbot', 'chatgpt_chatbot_shortcode');
+add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
