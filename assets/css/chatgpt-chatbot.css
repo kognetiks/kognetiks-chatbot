@@ -128,13 +128,16 @@
     justify-content: center;
     top: 1.5%;
     right: 2%;
-    /* background-color: #f1f1f1; */
     background-color: #007bff;
     border: none;
     cursor: pointer;
     text-align: center;
     padding: 15px;
     border-radius: 10%;
+}
+
+.chatbot-collapse-btn:hover {
+    background-color: #0257b3;    
 }
 
 .chatbot-collapsed {
@@ -172,7 +175,7 @@
 }
 
 #chatgpt-open-btn:hover {
-    background-color: #0257b3;    
+    background-color: #0257b3;
 }
 
 #chatgptTitle.title {

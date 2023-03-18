@@ -16,6 +16,7 @@ add_action('admin_menu', 'chatgpt_chatbot_settings_page');
 
 // Settings page HTML
 function chatgpt_chatbot_settings_page_html() {
+ 
     if (!current_user_can('manage_options')) {
         return;
     }
@@ -42,6 +43,7 @@ function chatgpt_chatbot_settings_page_html() {
 // Register settings
 function chatgpt_chatbot_settings_init() {
     register_setting('chatgpt_chatbot', 'chatgpt_api_key');
+    register_setting('chatgpt_chatbot', 'chatgpt_model_choice');
 
     add_settings_section(
         'chatgpt_chatbot_section',
@@ -57,14 +59,24 @@ function chatgpt_chatbot_settings_init() {
         'chatgpt_chatbot',
         'chatgpt_chatbot_section'
     );
+
+    add_settings_field(
+        'chatgpt_model_choice',
+        'ChatGPT Model Choice',
+        'chatgpt_chatbot_model_choice_callback',
+        'chatgpt_chatbot',
+        'chatgpt_chatbot_section'
+    );
 }
+
 add_action('admin_init', 'chatgpt_chatbot_settings_init');
 
 // Settings section callback
 function chatgpt_chatbot_section_callback($args) {
     ?>
     <p>This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p>
-    <p>Enter your ChatGPT API key below:</p>
+    <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" taget="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
+    <p>Enter your ChatGPT API key below and select the OpenAI model of your choice.</p>
     <?php
 }
 
@@ -75,3 +87,15 @@ function chatgpt_chatbot_api_key_callback($args) {
     <input type="text" id="chatgpt_api_key" name="chatgpt_api_key" value="<?php echo $api_key; ?>" class="regular-text">
     <?php
 }
+
+function chatgpt_chatbot_model_choice_callback($args) {
+    // Get the saved chatgpt_model_choice value or default to "gpt-3.5-turbo"
+    $model_choice = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    ?>
+    <select id="chatgpt_model_choice" name="chatgpt_model_choice">
+        <!-- <option value="gpt-4" <?php selected($model_choice, 'gpt-4'); ?>>gpt-4</option> -->
+        <option value="gpt-3.5-turbo" <?php selected($model_choice, 'gpt-3.5-turbo'); ?>>gpt-3.5-turbo</option>
+    </select>
+    <?php
+}
+

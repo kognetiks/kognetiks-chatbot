@@ -15,9 +15,9 @@ ChatGPT Chatbot for WordPress is a plugin that allows you to effortlessly integr
 
 ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner. It is designed to answer questions, provide suggestions, and engage in conversations with users. ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, ChatGPT can be used in various fields such as healthcare, education, finance, and many more.
 
-ChatGPT Chatbot leverages the OpenAI platform and brings it to life within your WordPress Website.
+ChatGPT Chatbot leverages the OpenAI platform using the gpt-3.5-turbo model brings it to life within your WordPress Website.
 
-**Important Note:** This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
+**Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
 
 = Features =
 

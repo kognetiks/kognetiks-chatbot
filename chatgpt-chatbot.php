@@ -47,7 +47,11 @@ add_action('wp_enqueue_scripts', 'chatgpt_chatbot_enqueue_scripts');
 
 // Handle Ajax requests
 function chatgpt_chatbot_send_message() {
+    // Get the save API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
+    // Get the saved model from the settings or default to gpt-3.5-turbo
+    $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
+    // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
     // Check API key and message
@@ -75,8 +79,7 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatgpt_chatbot_
 
 // Call the ChatGPT API
 function chatgpt_chatbot_call_api($api_key, $message) {
-    // $api_url = 'https://api.openai.com/v1/engines/davinci-codex/completions';
-    // Replaced with the current ChatGPT API URL
+    // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     $api_url = 'https://api.openai.com/v1/chat/completions';
 
     $headers = array(
@@ -85,7 +88,10 @@ function chatgpt_chatbot_call_api($api_key, $message) {
     );
 
     // Select the OpenAI Model
-    $model = "gpt-3.5-turbo";
+    // $model = "gpt-3.5-turbo";
+    // Get the saved model from the settings or default to "gpt-3.5-turbo"
+    $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
+    // console.log($model);
 
     $body = array(
         'max_tokens' => 150,
