@@ -17,7 +17,7 @@ function chatbot_chatgpt_shortcode() {
         </div>
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
-            <input type="text" id="chatbot-chatgpt-message" placeholder="Type your message...">
+            <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( 'Type your message...' ); ?>">
             <button id="chatbot-chatgpt-submit">Send</button>
         </div>
     </div>

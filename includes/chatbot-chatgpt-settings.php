@@ -84,7 +84,7 @@ function chatbot_chatgpt_section_callback($args) {
 function chatbot_chatgpt_api_key_callback($args) {
     $api_key = esc_attr(get_option('chatgpt_api_key'));
     ?>
-    <input type="text" id="chatgpt_api_key" name="chatgpt_api_key" value="<?php echo $api_key; ?>" class="regular-text">
+    <input type="text" id="chatgpt_api_key" name="chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text">
     <?php
 }
 
@@ -93,8 +93,8 @@ function chatbot_chatgpt_model_choice_callback($args) {
     $model_choice = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     ?>
     <select id="chatgpt_model_choice" name="chatgpt_model_choice">
-        <!-- <option value="gpt-4" <?php selected($model_choice, 'gpt-4'); ?>>gpt-4</option> -->
-        <option value="gpt-3.5-turbo" <?php selected($model_choice, 'gpt-3.5-turbo'); ?>>gpt-3.5-turbo</option>
+        <!-- <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option> -->
+        <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
     </select>
     <?php
 }
