@@ -1,10 +1,11 @@
 === Chatbot ChatGPT for WordPress ===
-Contributors: Kognetiks.com
-Tags: chatbot, chatgpt, openai, ai, customer-support
-Requires at least: 4.0
+Contributors: Kognetiks
+Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
+Donate link: https://kognetiks.com/wordpress-plugins/donate/
+Requires at least: 5.0
 Tested up to: 6.1.1
 Stable tag: 1.0.0
-Requires PHP: 5.6 or later
+Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,9 +19,11 @@ ChatGPT is a conversational AI platform that uses natural language processing an
 
 Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo model brings it to life within your WordPress Website.
 
-**Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
+**Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
 
-= Features =
+Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/)
+
+== Features ==
 
 * Easy setup and integration with OpenAI's ChatGPT API
 * Floating chatbot interface with customizable appearance
@@ -29,12 +32,13 @@ Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo model brin
 * Initial greeting message for first-time users
 * Shortcode to embed the chatbot on any page or post
 
-= Getting Started =
+== Getting Started ==
 
-1. Install and activate the Chatbot ChatGPT plugin.
-2. Navigate to the settings page (Settings > Chatbot ChatGPT) and enter your API key.
-3. Customize the chatbot appearance and other parameters as needed.
-4. Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]
+1. Obtain your API key by signign up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
+2. Install and activate the Chatbot ChatGPT plugin.
+3. Navigate to the settings page (Settings > Chatbot ChatGPT) and enter your API key.
+4. Customize the chatbot appearance and other parameters as needed.
+5. Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]
 
 Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI's ChatGPT API.
 
@@ -50,7 +54,7 @@ Now your website visitors can enjoy a seamless and personalized chat experience 
 
 = How do I obtain an API key for ChatGPT? =
 
-To obtain an API key, sign up for an account at https://platform.openai.com/account/api-keys. Once registered, you will have access to your API key.
+To obtain an API key, sign up for an account at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys). Once registered, you will have access to your API key.
 
 = Can I customize the appearance of the chatbot? =
 
@@ -63,6 +67,12 @@ The ChatGPT API currently supports English. However, you can configure the chatb
 = Which OpenAI model does the plugin use? =
 
 Current the plugin uses the gpt-3.5-turbo model from OpenAI.  This is the same model used in the ChatGPT product.
+
+== Screenshots ==
+
+1. Inital Chatbot ChatGPT display
+2. Ask Chatbot ChatGPT any question
+3. Get a resposne from ChatbotChatGPT
 
 == Changelog ==
 
