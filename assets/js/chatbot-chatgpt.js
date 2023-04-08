@@ -10,12 +10,18 @@ jQuery(document).ready(function ($) {
     
     // Initially hide the chatbot - Ver 1.1.0
     chatGptChatBot.hide();
-    chatGptOpenButton.show();   
+    chatGptOpenButton.show();
 
     var chatbotContainer = $('<div></div>').addClass('chatbot-container');
     var chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
     var chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
+    // Support variable greetings based on setting - Ver 1.1.0
+    var initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
+    localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
+    var subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
+    localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
+        
     // Append the collapse button and collapsed chatbot icon to the chatbot container
     chatbotContainer.append(chatbotCollapseBtn);
     chatbotContainer.append(chatbotCollapsed);
@@ -26,15 +32,17 @@ jQuery(document).ready(function ($) {
      function initializeChatbot() {
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
         var initialGreeting;
+ 
         if (isFirstTime) {
-            initialGreeting = 'Hello! How can I help you today?';
+            initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');
         } else {
-            initialGreeting = 'Hello again! How can I help you?';
+            initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
-            localStorage.setItem('chatgptChatbotOpened', 'true');        
-         } 
+            localStorage.setItem('chatgptChatbotOpened', 'true');
+        }
+    
     }
 
     // Call the initializeChatbot() function after appending the chatbot to the page
@@ -162,7 +170,12 @@ jQuery(document).ready(function ($) {
     // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0
     function loadChatbotStatus() {
         const chatGPTChatBotStatus = localStorage.getItem('chatGPTChatBotStatus');
-    
+ 
+        // const initialGreeting = localStorage.getItem('chatgpt_initial_greeting');
+        // localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
+        // const subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting');
+        // localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
+            
         // Add test to see if bot should start opened or closed - Ver 1.1.0
         if (chatGPTChatBotStatus === null) {
             if (chatgpt_start_status === 'closed') {

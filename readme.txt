@@ -3,8 +3,8 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
-Tested up to: 6.1.1
-Stable tag: 1.0.0
+Tested up to: 6.2
+Stable tag: 1.1.0
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -31,6 +31,9 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 * Collapsible chatbot interface when not in use
 * Initial greeting message for first-time users
 * Shortcode to embed the chatbot on any page or post
+* Setting to determine if chatbot should start opened or closed
+* Chatbot maintains state when navigating between pages
+* Chatbot name and initial and subsequent greetings are configurable
 
 == Getting Started ==
 
@@ -72,14 +75,15 @@ Current the plugin uses the gpt-3.5-turbo model from OpenAI.  This is the same m
 
 1. Inital Chatbot ChatGPT display
 2. Ask Chatbot ChatGPT any question
-3. Get a resposne from ChatbotChatGPT
+3. Get a response from ChatbotChatGPT
+4. Settings and Options
 
 == Changelog ==
 
 = 1.1.0 =
-* If closed stay closed or if open stay open when navigating across pages.
+* If bot is  closed stay closed or if open stay open when navigating between pages.
 * Ensure the Dashicons font is properly enqueued.
-* Added options to change Bot Name, Start Open/CLosed, and personalize Initial and Subsequent Greetings
+* Added options to change Bot Name, start with the bot Open or CLosed, and option to personalize Initial and Subsequent Greetings by the bot.
 
 = 1.0.0 =
 * Initial release.

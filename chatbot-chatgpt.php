@@ -129,3 +129,16 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     }
 }
 
+
+function enqueue_greetings_script() {
+    wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
+
+    $greetings = array(
+        'initial_greeting' => get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?'),
+        'subsequent_greeting' => get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?'),
+    );
+
+    wp_localize_script('greetings', 'greetings_data', $greetings);
+}
+add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
+

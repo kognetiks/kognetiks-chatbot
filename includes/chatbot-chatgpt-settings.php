@@ -160,13 +160,13 @@ function chatbot_chatgpt_start_status_callback($args) {
 function chatbot_chatgpt_initial_greeting_callback($args) {
     $initial_greeting = esc_attr(get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?'));
     ?>
-    <textarea id="chatgpt_initial_greeting" name="chatgpt_initial_greeting" rows="4" cols="50"><?php echo esc_textarea( $initial_greeting ); ?></textarea>
+    <textarea id="chatgpt_initial_greeting" name="chatgpt_initial_greeting" rows="2" cols="50"><?php echo esc_textarea( $initial_greeting ); ?></textarea>
     <?php
 }
 
 function chatbot_chatgpt_subsequent_greeting_callback($args) {
     $subsequent_greeting = esc_attr(get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
     ?>
-    <textarea id="chatgpt_subsequent_greeting" name="chatgpt_subsequent_greeting" rows="4" cols="50"><?php echo esc_textarea( $subsequent_greeting ); ?></textarea>
+    <textarea id="chatgpt_subsequent_greeting" name="chatgpt_subsequent_greeting" rows="2" cols="50"><?php echo esc_textarea( $subsequent_greeting ); ?></textarea>
     <?php
 }
