@@ -5,6 +5,8 @@ jQuery(document).ready(function ($) {
     var submitButton = $('#chatbot-chatgpt-submit');
     var chatGptChatBot = $('#chatbot-chatgpt');
     var chatGptOpenButton = $('#chatgpt-open-btn');
+    // Use 'open' for an open chatbot or 'closed' for a closed chatbot - Ver 1.1.0
+    var chatgpt_start_status = 'closed';
     
     // Initially hide the chatbot - Ver 1.1.0
     chatGptChatBot.hide();
@@ -161,7 +163,16 @@ jQuery(document).ready(function ($) {
     function loadChatbotStatus() {
         const chatGPTChatBotStatus = localStorage.getItem('chatGPTChatBotStatus');
     
-        if (chatGPTChatBotStatus === 'closed') {
+        // Add test to see if bot should start opened or closed - Ver 1.1.0
+        if (chatGPTChatBotStatus === null) {
+            if (chatgpt_start_status === 'closed') {
+                chatGptChatBot.hide();
+                chatGptOpenButton.show();
+            } else {
+                chatGptChatBot.show();
+                chatGptOpenButton.hide();
+            }
+        } else if (chatGPTChatBotStatus === 'closed') {
             if (chatGptChatBot.is(':visible')) {
                 chatGptChatBot.hide();
                 chatGptOpenButton.show();
@@ -172,6 +183,7 @@ jQuery(document).ready(function ($) {
                 chatGptOpenButton.hide();
             }
         }
+    
     }
     
     // Call the loadChatbotStatus function here - Ver 1.1.0
