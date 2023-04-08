@@ -35,6 +35,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php
 
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
+    // Ensure the Dashicons font is properly enqueued - Ver 1.1.0
+    wp_enqueue_style( 'dashicons' );
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
 

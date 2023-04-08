@@ -9,11 +9,13 @@
  */
 
 function chatbot_chatgpt_shortcode() {
+    // Retrieve the bot name - Ver 1.1.0
+    $bot_name = get_option('chatgpt_bot_name', 'ChatGPT');
     ob_start();
     ?>
     <div id="chatbot-chatgpt">
         <div id="chatbot-chatgpt-header">
-            <div id="chatgptTitle" class="title">Chatbot ChatGPT</div>
+            <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
         </div>
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">

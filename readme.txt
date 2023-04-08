@@ -76,6 +76,11 @@ Current the plugin uses the gpt-3.5-turbo model from OpenAI.  This is the same m
 
 == Changelog ==
 
+= 1.1.0 =
+* If closed stay closed or if open stay open when navigating across pages.
+* Ensure the Dashicons font is properly enqueued.
+* Added options to change Bot Name, Start Open/CLosed, and personalize Initial and Subsequent Greetings
+
 = 1.0.0 =
 * Initial release.
 

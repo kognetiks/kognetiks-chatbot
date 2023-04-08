@@ -5,7 +5,10 @@ jQuery(document).ready(function ($) {
     var submitButton = $('#chatbot-chatgpt-submit');
     var chatGptChatBot = $('#chatbot-chatgpt');
     var chatGptOpenButton = $('#chatgpt-open-btn');
-    chatGptOpenButton.hide();
+    
+    // Initially hide the chatbot - Ver 1.1.0
+    chatGptChatBot.hide();
+    chatGptOpenButton.show();   
 
     var chatbotContainer = $('<div></div>').addClass('chatbot-container');
     var chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
@@ -29,23 +32,18 @@ jQuery(document).ready(function ($) {
             initialGreeting = 'Hello again! How can I help you?';
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');        
-         }
- }
+         } 
+    }
 
     // Call the initializeChatbot() function after appending the chatbot to the page
     initializeChatbot();
 
-    // Add the toggleChatbot() function
-    function toggleChatbot() {
-        if (chatGptChatBot.is(':visible')) {
-            chatGptChatBot.hide();
-            chatGptOpenButton.show();
-        } else {
-            chatGptChatBot.show();
-            chatGptOpenButton.hide();
-        }
-    }
-    
+    // Add chatbot header, body, and other elements - Ver 1.1.0
+    var chatbotHeader = $('<div></div>').addClass('chatbot-header');
+    chatGptChatBot.append(chatbotHeader);
+    chatbotContainer.append(chatbotCollapseBtn);
+    chatbotContainer.append(chatbotCollapsed);
+
     // Attach the click event listeners for the collapse button and collapsed chatbot icon
     chatbotCollapseBtn.on('click', toggleChatbot);
     chatbotCollapsed.on('click', toggleChatbot);
@@ -82,22 +80,22 @@ jQuery(document).ready(function ($) {
 
     conversation.scrollTop(conversation[0].scrollHeight);
 
-}
+    }
 
-function showTypingIndicator() {
-    var typingIndicator = $('<div></div>').addClass('typing-indicator');
-    var dot1 = $('<span>.</span>').addClass('typing-dot');
-    var dot2 = $('<span>.</span>').addClass('typing-dot');
-    var dot3 = $('<span>.</span>').addClass('typing-dot');
-    
-    typingIndicator.append(dot1, dot2, dot3);
-    conversation.append(typingIndicator);
-    conversation.scrollTop(conversation[0].scrollHeight);
-}
+    function showTypingIndicator() {
+        var typingIndicator = $('<div></div>').addClass('typing-indicator');
+        var dot1 = $('<span>.</span>').addClass('typing-dot');
+        var dot2 = $('<span>.</span>').addClass('typing-dot');
+        var dot3 = $('<span>.</span>').addClass('typing-dot');
+        
+        typingIndicator.append(dot1, dot2, dot3);
+        conversation.append(typingIndicator);
+        conversation.scrollTop(conversation[0].scrollHeight);
+    }
 
-function removeTypingIndicator() {
-    $('.typing-indicator').remove();
-}
+    function removeTypingIndicator() {
+        $('.typing-indicator').remove();
+    }
 
     submitButton.on('click', function () {
         var message = messageInput.val().trim();
@@ -145,4 +143,38 @@ function removeTypingIndicator() {
             submitButton.click();
         }
     });
+
+    // Add the toggleChatbot() function - Ver 1.1.0
+    function toggleChatbot() {
+        if (chatGptChatBot.is(':visible')) {
+            chatGptChatBot.hide();
+            chatGptOpenButton.show();
+            localStorage.setItem('chatGPTChatBotStatus', 'closed');
+        } else {
+            chatGptChatBot.show();
+            chatGptOpenButton.hide();
+            localStorage.setItem('chatGPTChatBotStatus', 'open');
+        }
+    }
+
+    // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0
+    function loadChatbotStatus() {
+        const chatGPTChatBotStatus = localStorage.getItem('chatGPTChatBotStatus');
+    
+        if (chatGPTChatBotStatus === 'closed') {
+            if (chatGptChatBot.is(':visible')) {
+                chatGptChatBot.hide();
+                chatGptOpenButton.show();
+            }
+        } else if (chatGPTChatBotStatus === 'open') {
+            if (chatGptChatBot.is(':hidden')) {
+                chatGptChatBot.show();
+                chatGptOpenButton.hide();
+            }
+        }
+    }
+    
+    // Call the loadChatbotStatus function here - Ver 1.1.0
+    loadChatbotStatus();
+
 });

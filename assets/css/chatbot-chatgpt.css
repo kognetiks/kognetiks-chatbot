@@ -33,6 +33,11 @@
     flex-direction: column;
 }
 
+/* Hide the bot if closed when navigating between pages - Ver 1.1.0 */
+/* #chatbot-chatgpt-hide {
+    display: none;
+} */
+
 #chatbot-chatgpt-header {
     background-color: #222;
     color: #fff;
