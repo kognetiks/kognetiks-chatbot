@@ -10,10 +10,11 @@
 
 function chatbot_chatgpt_shortcode() {
     // Retrieve the bot name - Ver 1.1.0
-    $bot_name = get_option('chatgpt_bot_name', 'ChatGPT');
+    // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
+    $bot_name = get_option('chatgpt_bot_name', 'Chatbot ChatGPT');
     ob_start();
     ?>
-    <div id="chatbot-chatgpt">
+    <div id="chatbot-chatgpt" style="display: none;">
         <div id="chatbot-chatgpt-header">
             <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
         </div>
@@ -23,7 +24,7 @@ function chatbot_chatgpt_shortcode() {
             <button id="chatbot-chatgpt-submit">Send</button>
         </div>
     </div>
-    <button id="chatgpt-open-btn">
+    <button id="chatgpt-open-btn" style="display: none;">
     <i class="dashicons dashicons-format-chat"></i>
     </button>
     <?php

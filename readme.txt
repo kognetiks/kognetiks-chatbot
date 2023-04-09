@@ -80,10 +80,14 @@ Current the plugin uses the gpt-3.5-turbo model from OpenAI.  This is the same m
 
 == Changelog ==
 
+= 1.2.1 =
+* Removed initial styling on bot to ensure it renders at the appropriate time.
+* Save the conversation locally between bot sessions in local storage.
+
 = 1.1.0 =
-* If bot is  closed stay closed or if open stay open when navigating between pages.
+* If bot is closed stay closed or if open stay open when navigating between pages.
 * Ensure the Dashicons font is properly enqueued.
-* Added options to change Bot Name, start with the bot Open or CLosed, and option to personalize Initial and Subsequent Greetings by the bot.
+* Added options to change Bot Name, start with the bot Open or Closed, and option to personalize Initial and Subsequent Greetings by the bot.
 
 = 1.0.0 =
 * Initial release.
