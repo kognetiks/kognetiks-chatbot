@@ -80,7 +80,7 @@ Current the plugin uses the gpt-3.5-turbo model from OpenAI.  This is the same m
 
 == Changelog ==
 
-= 1.2.1 =
+= 1.2.0 =
 * Removed initial styling on bot to ensure it renders at the appropriate time.
 * Save the conversation locally between bot sessions in local storage.
 
