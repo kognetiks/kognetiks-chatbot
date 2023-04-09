@@ -35,11 +35,6 @@
     z-index: 100;
 }
 
-/* Hide the bot if closed when navigating between pages - Ver 1.1.0 */
-/* #chatbot-chatgpt-hide {
-    display: none;
-} */
-
 #chatbot-chatgpt-header {
     background-color: #222;
     color: #fff;
@@ -179,6 +174,8 @@
     float: right;
     box-shadow: 2px 4px 15px rgb(102, 92, 143);
     border-radius: 10%;
+    /* Add z-index - Ver 1.2.1 */
+    z-index: 100;
 }
 
 #chatgpt-open-btn:hover {
