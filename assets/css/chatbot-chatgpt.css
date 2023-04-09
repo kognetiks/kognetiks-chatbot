@@ -31,6 +31,8 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
+    /* Add z-index - Ver 1.2.1 */
+    z-index: 100;
 }
 
 /* Hide the bot if closed when navigating between pages - Ver 1.1.0 */
