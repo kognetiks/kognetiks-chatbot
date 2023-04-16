@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
 Tested up to: 6.2
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -87,6 +87,9 @@ As soon as the API for GPT-4 is available for general use, you will be able to s
 8. Mobile Experience - Chatbot ChatGPT minimize (Lower Right)
 
 == Changelog ==
+
+= 1.4.0 =
+* SVN Update Error - 1.2.0 did not update to 1.3.0
 
 = 1.3.0 =
 * Updated Setting Page adding tabs for API/Model, Greetings, and Support
