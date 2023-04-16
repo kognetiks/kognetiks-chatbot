@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
 Tested up to: 6.2
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -39,7 +39,7 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 
 1. Obtain your API key by signign up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
 2. Install and activate the Chatbot ChatGPT plugin.
-3. Navigate to the settings page (Settings > Chatbot ChatGPT) and enter your API key.
+3. Navigate to the settings page (Settings > API/Model) and enter your API key.
 4. Customize the chatbot appearance and other parameters as needed.
 5. Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]
 
@@ -63,22 +63,34 @@ To obtain an API key, sign up for an account at [https://platform.openai.com/acc
 
 Yes, the plugin comes with a default style, but you can easily customize the chatbot's appearance by editing the chatbot-chatgpt.css file or adding custom CSS rules to your WordPress theme.
 
+You can also customize the name of the chatbot, as well as changing the initial greeting and subsequent greeting.
+
 = Is the chatbot available in multiple languages? =
 
 The ChatGPT API currently supports English. However, you can configure the chatbot to work with other languages supported by OpenAI in the future as the API evolves.
 
 = Which OpenAI model does the plugin use? =
 
-Current the plugin uses the gpt-3.5-turbo model from OpenAI.  This is the same model used in the ChatGPT product.
+Currently the plugin uses the gpt-3.5-turbo model from OpenAI.  This is the same model used in the ChatGPT product.
+
+As soon as the API for GPT-4 is available for general use, you will be able to select from the latest available models.
 
 == Screenshots ==
 
 1. Inital Chatbot ChatGPT display
 2. Ask Chatbot ChatGPT any question
-3. Get a response from ChatbotChatGPT
+3. Get a response from Chatbot ChatGPT
 4. Settings and Options
+5. Mobile Experience - Initial Chatbot ChatGPT display
+6. Mobile Experience - Ask Chatbot ChatGTP any question
+7. Mobile Experience - Get a response from Chatbot ChatGPT
+8. Mobile Experience - Chatbot ChatGPT minimize (Lower Right)
 
 == Changelog ==
+
+= 1.3.0 =
+* Updated Setting Page adding tabs for API/Model, Greetings, and Support
+* Updated directory assets
 
 = 1.2.0 =
 * Removed initial styling on bot to ensure it renders at the appropriate time.
