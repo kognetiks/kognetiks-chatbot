@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.4.0
+ * Version:     1.4.1
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -21,7 +21,7 @@
  * 
 */
 
-// // If this file is called directly, die.
+// If this file is called directly, die.
 defined( 'WPINC' ) || die;
 
 // If this file is called directly, die.
@@ -39,6 +39,18 @@ function chatbot_chatgpt_enqueue_scripts() {
     wp_enqueue_style( 'dashicons' );
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
+
+    // Ver 1.4.1
+    // Enqueue the chatbot-chatgpt-local.js file
+    wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
+    $chatbot_settings = array(
+        'chatgpt_bot_name' => esc_attr(get_option('chatgpt_bot_name')),
+        'chatgpt_initial_greeting' => esc_attr(get_option('chatgpt_initial_greeting')),
+        'chatgpt_subsequent_greeting' => esc_attr(get_option('chatgpt_subsequent_greeting')),
+        'chatGPTChatBotStatus' => esc_attr(get_option('chatGPTChatBotStatus')),
+        'chatgpt_disclaimer_setting' => esc_attr(get_option('chatgpt_disclaimer_setting')),
+    );
+    wp_localize_script('chatbot-chatgpt-localize', 'chatbotSettings', $chatbot_settings);
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
@@ -141,4 +153,3 @@ function enqueue_greetings_script() {
     wp_localize_script('greetings', 'greetings_data', $greetings);
 }
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
-

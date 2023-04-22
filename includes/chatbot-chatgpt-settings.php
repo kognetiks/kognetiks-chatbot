@@ -31,49 +31,67 @@ function chatbot_chatgpt_settings_page_html() {
     
     ?>
     <div class="wrap">
-    <h1><span class="dashicons dashicons-format-chat"></span> <?php echo esc_html(get_admin_page_title()); ?></h1>
+        <h1><span class="dashicons dashicons-format-chat"></span> <?php echo esc_html(get_admin_page_title()); ?></h1>
 
-    <!-- Message Box - Ver 1.3.0 -->
-    <div id="message-box-container"></div>
+        <!-- Message Box - Ver 1.3.0 -->
+        <div id="message-box-container"></div>
 
-    <!-- Message Box - Ver 1.3.0 -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
-            const reminderCount = localStorage.getItem('reminderCount') || 0;
+        <!-- Message Box - Ver 1.3.0 -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
+                // Read the start status - Ver 1.4.1
+                const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
+                const reminderCount = localStorage.getItem('reminderCount') || 0;
 
-            if (reminderCount < 5) {
-                const messageBox = document.createElement('div');
-                messageBox.id = 'rateReviewMessageBox';
-                messageBox.innerHTML = `
-                <div id="rateReviewMessageBox" style="background-color: white; border: 1px solid black; padding: 10px; position: relative;">
-                    <div class="message-content" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>If you and your visitors are enjoying having this chatbot on your site, please take a moment to <a href="https://wordpress.org/support/plugin/chatbot-chatgpt/reviews/" target="_blank">rate and review this plugin</a>. Thank you!</span>
-                        <button id="closeMessageBox" class="dashicons dashicons-dismiss" style="background: none; border: none; cursor: pointer; outline: none; padding: 0; margin-left: 10px;"></button>
-                        
+                if (reminderCount < 5) {
+                    const messageBox = document.createElement('div');
+                    messageBox.id = 'rateReviewMessageBox';
+                    messageBox.innerHTML = `
+                    <div id="rateReviewMessageBox" style="background-color: white; border: 1px solid black; padding: 10px; position: relative;">
+                        <div class="message-content" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>If you and your visitors are enjoying having this chatbot on your site, please take a moment to <a href="https://wordpress.org/support/plugin/chatbot-chatgpt/reviews/" target="_blank">rate and review this plugin</a>. Thank you!</span>
+                            <button id="closeMessageBox" class="dashicons dashicons-dismiss" style="background: none; border: none; cursor: pointer; outline: none; padding: 0; margin-left: 10px;"></button>
+                            
+                        </div>
                     </div>
-                </div>
-                `;
+                    `;
 
-                document.querySelector('#message-box-container').insertAdjacentElement('beforeend', messageBox);
+                    document.querySelector('#message-box-container').insertAdjacentElement('beforeend', messageBox);
 
-                document.getElementById('closeMessageBox').addEventListener('click', function() {
-                    messageBox.style.display = 'none';
-                    localStorage.setItem('reminderCount', parseInt(reminderCount, 10) + 1);
-                });
-            }
-
-            // Update the chatgpt_subsequent_greeting value in the local storage when the form is submitted - Ver 1.3.0
-            chatgptSettingsForm.addEventListener('submit', function() {
-                localStorage.setItem('chatgpt_name', chatgptNameInput.value);
-                localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
-                localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
-                localStorage.setItem('chatgpt_open_status', chatgptOpenStatusInput.checked);
-
+                    document.getElementById('closeMessageBox').addEventListener('click', function() {
+                        messageBox.style.display = 'none';
+                        localStorage.setItem('reminderCount', parseInt(reminderCount, 10) + 1);
+                    });
+                }
             });
+        </script>
+    
+        <script>
+            jQuery(document).ready(function($) {
+                // Get the form element by its id
+                var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
 
-        });
-    </script>
+                // Add the event listener for the form submission
+                if (chatgptSettingsForm) {
+                    chatgptSettingsForm.addEventListener('submit', function() {
+                        // Get the input elements by their ids
+                        const chatgptNameInput = document.getElementById('chatgpt_bot_name');
+                        const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
+                        const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
+                        const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
+                        const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
+
+                        // Update the local storage with the input values
+                        localStorage.setItem('chatgpt_name', chatgptNameInput.value);
+                        localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
+                        localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
+                        localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
+                        localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
+                    });
+                }
+            });
+        </script>
 
         <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
@@ -83,7 +101,8 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
         </h2>
 
-        <form action="options.php" method="post">
+        <!-- Updated id - Ver 1.4.1 -->
+        <form id="chatgpt-settings-form" action="options.php" method="post">
             <?php
             if ($active_tab == 'settings') {
                 settings_fields('chatbot_chatgpt_settings');
@@ -103,8 +122,12 @@ function chatbot_chatgpt_settings_page_html() {
             ?>
         </form>
     </div>
+    <!-- Added closing tags for body and html - Ver 1.4.1 -->
+    </body>
+    </html>
     <?php
 }
+
 
 // Register settings
 function chatbot_chatgpt_settings_init() {
@@ -138,9 +161,11 @@ function chatbot_chatgpt_settings_init() {
 
     // Settings settings tab - Ver 1.3.0
     register_setting('chatbot_chatgpt_settings', 'chatgpt_bot_name');
-    register_setting('chatbot_chatgpt_settings', 'chatgpt_start_status');
+    register_setting('chatbot_chatgpt_settings', 'chatGPTChatBotStatus');
     register_setting('chatbot_chatgpt_settings', 'chatgpt_initial_greeting');
     register_setting('chatbot_chatgpt_settings', 'chatgpt_subsequent_greeting');
+    // Option to remove the OpenAI disclaimer - Ver 1.4.1
+    register_setting('chatbot_chatgpt_settings', 'chatgpt_disclaimer_setting');
 
     add_settings_section(
         'chatbot_chatgpt_settings_section',
@@ -158,9 +183,9 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatgpt_start_status',
+        'chatGPTChatBotStatus',
         'Start Status',
-        'chatbot_chatgpt_start_status_callback',
+        'chatbot_chatGPTChatBotStatus_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
     );
@@ -177,6 +202,15 @@ function chatbot_chatgpt_settings_init() {
         'chatgpt_subsequent_greeting',
         'Subsequent Greeting',
         'chatbot_chatgpt_subsequent_greeting_callback',
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_settings_section'
+    );
+
+    // Option to remove the OpenAI disclaimer - Ver 1.4.1
+    add_settings_field(
+        'chatgpt_disclaimer_setting',
+        'Include "As an AI language model" disclaimer',
+        'chatgpt_disclaimer_setting_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
     );
@@ -316,10 +350,10 @@ function chatbot_chatgpt_bot_name_callback($args) {
     <?php
 }
 
-function chatbot_chatgpt_start_status_callback($args) {
-    $start_status = get_option('chatgpt_start_status', 'closed');
+function chatbot_chatGPTChatBotStatus_callback($args) {
+    $start_status = get_option('chatGPTChatBotStatus', 'closed');
     ?>
-    <select id="chatgpt_start_status" name="chatgpt_start_status">
+    <select id="chatGPTChatBotStatus" name="chatGPTChatBotStatus">
         <option value="open" <?php selected( $start_status, 'open' ); ?>>Open</option>
         <option value="closed" <?php selected( $start_status, 'closed' ); ?>>Closed</option>
     </select>
@@ -339,6 +373,18 @@ function chatbot_chatgpt_subsequent_greeting_callback($args) {
     <textarea id="chatgpt_subsequent_greeting" name="chatgpt_subsequent_greeting" rows="2" cols="50"><?php echo esc_textarea( $subsequent_greeting ); ?></textarea>
     <?php
 }
+
+// Option to remove OpenAI disclaimer - Ver 1.4.1
+function chatgpt_disclaimer_setting_callback() {
+    $chatgpt_disclaimer_setting = get_option('chatgpt_disclaimer_setting', 'Yes');
+    ?>
+    <select id="chatgpt_disclaimer_setting" name="chatgpt_disclaimer_setting">
+        <option value="Yes" <?php selected( $chatgpt_disclaimer_setting, 'yes' ); ?>>Yes</option>
+        <option value="No" <?php selected( $chatgpt_disclaimer_setting, 'no' ); ?>>No</option>
+    </select>
+    <?php    
+}
+
 
 // Premium Key - Ver 1.3.0
 function chatbot_chatgpt_premium_key_callback($args) {

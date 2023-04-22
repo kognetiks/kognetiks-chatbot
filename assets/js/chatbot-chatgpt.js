@@ -21,6 +21,8 @@ jQuery(document).ready(function ($) {
     localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
     var subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
     localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
+    // Remove disclaimer - Ver 1.4.1
+    var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
         
     // Append the collapse button and collapsed chatbot icon to the chatbot container
     chatbotContainer.append(chatbotCollapseBtn);
@@ -43,21 +45,15 @@ jQuery(document).ready(function ($) {
             initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');
-            // Load the conversation after the subsequent greeting is appended - Ver 1.2.0
-            // loadConversation();
         }
     }
 
-    // Call the initializeChatbot() function after appending the chatbot to the page
-    // Remove the call to inialize the bot - Ver 1.2.1
-    // initializeChatbot();
 
     // Add chatbot header, body, and other elements - Ver 1.1.0
     var chatbotHeader = $('<div></div>').addClass('chatbot-header');
     chatGptChatBot.append(chatbotHeader);
+
     // Fix for Ver 1.2.0
-    // chatbotContainer.append(chatbotCollapseBtn);
-    // chatbotContainer.append(chatbotCollapsed);
     chatbotHeader.append(chatbotCollapseBtn);
     chatbotHeader.append(chatbotCollapsed);
 
@@ -119,7 +115,8 @@ jQuery(document).ready(function ($) {
 
     submitButton.on('click', function () {
         var message = messageInput.val().trim();
-      
+        var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
+
         if (!message) {
             return;
         }
@@ -141,7 +138,17 @@ jQuery(document).ready(function ($) {
             success: function (response) {
                 removeTypingIndicator();
                 if (response.success) {
-                    appendMessage(response.data, 'bot');
+                    let botResponse = response.data;
+                    const prefix_a = "As an AI language model, ";
+                    const prefix_b = "I am an AI language model and ";
+
+                    if (botResponse.startsWith(prefix_a) && chatgpt_disclaimer_setting === 'No') {
+                        botResponse = botResponse.slice(prefix_a.length);
+                    } else if (botResponse.startsWith(prefix_b) && chatgpt_disclaimer_setting === 'No') {
+                        botResponse = botResponse.slice(prefix_b.length);
+                    }
+                                    
+                    appendMessage(botResponse, 'bot');
                 } else {
                     appendMessage('Error: ' + response.data, 'error');
                 }
@@ -179,11 +186,12 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0
+    // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0 and updated for Ver 1.4.1
     function loadChatbotStatus() {
         const chatGPTChatBotStatus = localStorage.getItem('chatGPTChatBotStatus');
-       
-        // Add test to see if bot should start opened or closed - Ver 1.1.0
+        // const chatGPTChatBotStatus = localStorage.getItem('chatgpt_start_status');
+        
+        // If the chatbot status is not set in local storage, use chatgpt_start_status
         if (chatGPTChatBotStatus === null) {
             if (chatgpt_start_status === 'closed') {
                 chatGptChatBot.hide();
@@ -191,9 +199,9 @@ jQuery(document).ready(function ($) {
             } else {
                 chatGptChatBot.show();
                 chatGptOpenButton.hide();
-                // Load the conversation when the chatbot is shown on page load - Ver 1.2.0
+                // Load the conversation when the chatbot is shown on page load
                 loadConversation();
-                scrollToBottom(); // Call the scrollToBottom function here - Ver 1.2.1
+                scrollToBottom();
             }
         } else if (chatGPTChatBotStatus === 'closed') {
             if (chatGptChatBot.is(':visible')) {
@@ -204,12 +212,11 @@ jQuery(document).ready(function ($) {
             if (chatGptChatBot.is(':hidden')) {
                 chatGptChatBot.show();
                 chatGptOpenButton.hide();
-                // loadConversation(); // Call loadConvesration function here - Ver 1.2.1
-                scrollToBottom(); // Call the scrollToBottom function here - Ver 1.2.1    
+                scrollToBottom();
             }
         }
-      
     }
+
 
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
