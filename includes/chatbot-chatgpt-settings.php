@@ -67,48 +67,33 @@ function chatbot_chatgpt_settings_page_html() {
         });
     </script>
    
-
     <script>
-        // Update the chatgpt_subsequent_greeting value in the local storage when the form is submitted - Ver 1.3.0 and updated again in Ver 1.4.1
-        chatgptSettingsForm.addEventListener('submit', function() {
-            // Get the inputs elements by their ids
-            const chatgptNameInput = document.getElementById('chatgpt_bot_name');
-            const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
-            const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
-            const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
-            // Option to remove OpenAI disclaimer - Ver 1.4.1
-            const chatgptDisclaimerSettingInput = document.getElementByID('chatgpt_disclaimer_setting');
+        jQuery(document).ready(function($) {
+            // Get the form element by its id
+            var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
 
-            // Update the local storage with the input values
-            localStorage.setItem('chatgpt_name', chatgptNameInput.value);
-            localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
-            localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
-            localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
-            // Option to remove OpenAI disclaimer - Ver 1.4.1
-            // localStorage.setItem('chatgpt_disclaimer_setting', JSON.stringify({ include_disclaimer: '1' }));
-            localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value );
+            // Add the event listener for the form submission
+            if (chatgptSettingsForm) {
+                chatgptSettingsForm.addEventListener('submit', function() {
+                    // Get the input elements by their ids
+                    const chatgptNameInput = document.getElementById('chatgpt_bot_name');
+                    const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
+                    const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
+                    const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
+                    const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
 
-            localStorage.setItem('chatgptStartStatusInput', $chatGPTChatBotStatus);
-            localStorage.setItem('reminderCount', $reminderCount);
-
-            // Ver 1.4.1
-            // Enqueue the chatbot-chatgpt-local.js file
-            wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
-
-            // $chatbot_settings = array(
-            //     'chatgpt_bot_name' => get_option('chatgpt_bot_name'),
-            //     'chatgpt_initial_greeting' => get_option('chatgpt_initial_greeting'),
-            //     'chatgpt_subsequent_greeting' => get_option('chatgpt_subsequent_greeting'),
-            //     'chatGPTChatBotStatus' => get_option('chatGPTChatBotStatus'),
-            //     'chatgpt_disclaimer_setting' => get_option('chatgpt_disclaimer_setting'),
-            // );
-
-            wp_localize_script('chatbot-chatgpt-localize', 'chatbotSettings', $chatbot_settings)
-
+                    // Update the local storage with the input values
+                    localStorage.setItem('chatgpt_name', chatgptNameInput.value);
+                    localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
+                    localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
+                    localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
+                    localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
+                });
+            }
         });
-
-        // });
     </script>
+
+
 
         <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
@@ -144,6 +129,7 @@ function chatbot_chatgpt_settings_page_html() {
     </html>
     <?php
 }
+
 
 // Register settings
 function chatbot_chatgpt_settings_init() {
@@ -392,8 +378,13 @@ function chatbot_chatgpt_subsequent_greeting_callback($args) {
 
 // Option to remove OpenAI disclaimer - Ver 1.4.1
 function chatgpt_disclaimer_setting_callback() {
-    $chatgpt_disclaimer_setting = get_option('chatgpt_disclaimer_setting');
-    echo "<input type='checkbox' name='chatgpt_disclaimer_setting' " . checked(1, $chatgpt_disclaimer_setting, false) . " value='1'>";
+    $chatgpt_disclaimer_setting = get_option('chatgpt_disclaimer_setting', 'Yes');
+    ?>
+    <select id="chatgpt_disclaimer_setting" name="chatgpt_disclaimer_setting">
+        <option value="Yes" <?php selected( $chatgpt_disclaimer_setting, 'yes' ); ?>>Yes</option>
+        <option value="No" <?php selected( $chatgpt_disclaimer_setting, 'no' ); ?>>No</option>
+    </select>
+    <?php    
 }
 
 

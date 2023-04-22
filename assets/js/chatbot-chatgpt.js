@@ -21,13 +21,8 @@ jQuery(document).ready(function ($) {
     localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
     var subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
     localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
-    //
-    var chatgpt_disclaimer_setting = JSON.parse(localStorage.getItem('chatgpt_disclaimer_setting')) || { include_disclaimer: '1' };
-
-    // Ver 1.4.1
-    var reminderCount = localStorage.getItem('reminderCount');
-    localStorage.setItem('reminderCount', "UGH!");
-
+    // Remove disclaimer - Ver 1.4.1
+    var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
         
     // Append the collapse button and collapsed chatbot icon to the chatbot container
     chatbotContainer.append(chatbotCollapseBtn);
@@ -38,7 +33,6 @@ jQuery(document).ready(function ($) {
 
     function initializeChatbot() {
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
-        var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting');
         var initialGreeting;
     
         if (isFirstTime) {
@@ -127,7 +121,8 @@ jQuery(document).ready(function ($) {
 
     submitButton.on('click', function () {
         var message = messageInput.val().trim();
-      
+        var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
+        
         if (!message) {
             return;
         }
@@ -147,19 +142,18 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function (response) {
-                console.log('chatgpt_disclaimer_setting:', chatgpt_disclaimer_setting);
                 removeTypingIndicator();
                 if (response.success) {
                     let botResponse = response.data;
                     const prefix_a = "As an AI language model, ";
                     const prefix_b = "I am an AI language model and ";
-                    
-                    if (botResponse.startsWith(prefix_a) && (!chatgpt_disclaimer_setting || chatgpt_disclaimer_setting.include_disclaimer != '1')) {
+
+                    if (botResponse.startsWith(prefix_a) && chatgpt_disclaimer_setting === 'No') {
                         botResponse = botResponse.slice(prefix_a.length);
-                    } else if (botResponse.startsWith(prefix_b) && (!chatgpt_disclaimer_setting || chatgpt_disclaimer_setting.include_disclaimer != '1')) {
+                    } else if (botResponse.startsWith(prefix_b) && chatgpt_disclaimer_setting === 'No') {
                         botResponse = botResponse.slice(prefix_b.length);
                     }
-                    
+                                    
                     appendMessage(botResponse, 'bot');
                 } else {
                     appendMessage('Error: ' + response.data, 'error');

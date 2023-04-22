@@ -2,14 +2,14 @@ jQuery(document).ready(function ($) {
     
     function chatbot_chatgpt_localize() {
         // Access the variables passed from PHP using the chatbotSettings object
-        var chatgptName = chatbotSettings.name || '';
+        var chatgptName = chatbotSettings.chatgpt_bot_name || 'Chatbot ChatGPT';
         var chatgptInitialGreeting = chatbotSettings.initial_greeting || 'Hello! How can I help you today?';
         var chatgptSubsequentGreeting = chatbotSettings.subsequent_greeting || 'Hello again! How can I help you?';
         var chatgptStartStatus = chatbotSettings.start_status || 'closed';
         var chatgptDisclaimerSetting = chatbotSettings.disclaimer_setting || '1';
 
         // Set the variables in localStorage
-        localStorage.setItem('chatgpt_name', chatgptName);
+        localStorage.setItem('chatgpt_bot_name', chatgptName);
         localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreeting);
         localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreeting);
         localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatus);
@@ -25,7 +25,7 @@ jQuery(document).ready(function ($) {
                 const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
                 const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
 
-                localStorage.setItem('chatgpt_name', chatgptNameInput.value);
+                localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
                 localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
                 localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
                 localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
