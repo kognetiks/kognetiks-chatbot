@@ -64,58 +64,50 @@ function chatbot_chatgpt_settings_page_html() {
                     localStorage.setItem('reminderCount', parseInt(reminderCount, 10) + 1);
                 });
             }
+        });
+    </script>
+   
 
-            // Update the chatgpt_subsequent_greeting value in the local storage when the form is submitted - Ver 1.3.0 and updated again in Ver 1.4.1
-            chatgptSettingsForm.addEventListener('submit', function() {
-                // // Get the inputs elements by their ids
-                // const chatgptNameInput = document.getElementById('chatgpt_bot_name');
-                // const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
-                // const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
-                // const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
-                // // Option to remove OpenAI disclaimer - Ver 1.4.1
-                // const chatgptDisclaimerSettingInput = document.getElementByID('chatgpt_disclaimer_setting');
+    <script>
+        // Update the chatgpt_subsequent_greeting value in the local storage when the form is submitted - Ver 1.3.0 and updated again in Ver 1.4.1
+        chatgptSettingsForm.addEventListener('submit', function() {
+            // Get the inputs elements by their ids
+            const chatgptNameInput = document.getElementById('chatgpt_bot_name');
+            const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
+            const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
+            const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
+            // Option to remove OpenAI disclaimer - Ver 1.4.1
+            const chatgptDisclaimerSettingInput = document.getElementByID('chatgpt_disclaimer_setting');
 
-                // // Update the local storage with the input values
-                // localStorage.setItem('chatgpt_name', chatgptNameInput.value);
-                // localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
-                // localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
-                // localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
-                // // Option to remove OpenAI disclaimer - Ver 1.4.1
-                // // localStorage.setItem('chatgpt_disclaimer_setting', JSON.stringify({ include_disclaimer: '1' }));
-                // localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value );
+            // Update the local storage with the input values
+            localStorage.setItem('chatgpt_name', chatgptNameInput.value);
+            localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
+            localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
+            localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
+            // Option to remove OpenAI disclaimer - Ver 1.4.1
+            // localStorage.setItem('chatgpt_disclaimer_setting', JSON.stringify({ include_disclaimer: '1' }));
+            localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value );
 
-                // // Ver 1.4.1
-                // wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
+            localStorage.setItem('chatgptStartStatusInput', $chatGPTChatBotStatus);
+            localStorage.setItem('reminderCount', $reminderCount);
 
-                // // Pass PHP variables to your JavaScript file - Ver 1.4.1
-                // $chatbot_settings = array(
-                //     'chatgpt_bot_name' => get_option('chatgpt_name'),
-                //     'chatgpt_initial_greeting' => get_option('chatgpt_initial_greeting'),
-                //     'chatgpt_subsequent_greeting' => get_option('chatgpt_subsequent_greeting'),
-                //     'chatGPTChatBotStatus' => get_option('chatGPTChatBotStatus'),
-                //     'chatgpt_disclaimer_setting' => get_option('chatgpt_disclaimer_setting'),
-                // );
+            // Ver 1.4.1
+            // Enqueue the chatbot-chatgpt-local.js file
+            wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
 
-                // // Ver 1.4.1
-                // wp_localize_script('chatbot-chatgpt-localize', 'chatbotSettings', $chatbot_settings);
+            // $chatbot_settings = array(
+            //     'chatgpt_bot_name' => get_option('chatgpt_bot_name'),
+            //     'chatgpt_initial_greeting' => get_option('chatgpt_initial_greeting'),
+            //     'chatgpt_subsequent_greeting' => get_option('chatgpt_subsequent_greeting'),
+            //     'chatGPTChatBotStatus' => get_option('chatGPTChatBotStatus'),
+            //     'chatgpt_disclaimer_setting' => get_option('chatgpt_disclaimer_setting'),
+            // );
 
-                // Enqueue the chatbot-chatgpt-local.js file
-                wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('chatbot_chatgpt_localize'), '1.0.0', true);
-
-                // Pass PHP variables to your JavaScript file - Ver 1.4.1
-                $chatbot_settings = array(
-                    'chatgpt_bot_name' => get_option('chatgpt_bot_name'),
-                    'chatgpt_initial_greeting' => get_option('chatgpt_initial_greeting'),
-                    'chatgpt_subsequent_greeting' => get_option('chatgpt_subsequent_greeting'),
-                    'chatGPTChatBotStatus' => get_option('chatGPTChatBotStatus'),
-                    'chatgpt_disclaimer_setting' => get_option('chatgpt_disclaimer_setting'),
-                );
-
-                wp_localize_script('chatbot_chatgpt_localize', 'chatbotSettings', $chatbot_settings);
-
-            });
+            wp_localize_script('chatbot-chatgpt-localize', 'chatbotSettings', $chatbot_settings)
 
         });
+
+        // });
     </script>
 
         <h2 class="nav-tab-wrapper">

@@ -23,6 +23,11 @@ jQuery(document).ready(function ($) {
     localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
     //
     var chatgpt_disclaimer_setting = JSON.parse(localStorage.getItem('chatgpt_disclaimer_setting')) || { include_disclaimer: '1' };
+
+    // Ver 1.4.1
+    var reminderCount = localStorage.getItem('reminderCount');
+    localStorage.setItem('reminderCount', "UGH!");
+
         
     // Append the collapse button and collapsed chatbot icon to the chatbot container
     chatbotContainer.append(chatbotCollapseBtn);
