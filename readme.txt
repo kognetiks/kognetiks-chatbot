@@ -88,6 +88,10 @@ As soon as the API for GPT-4 is available for general use, you will be able to s
 
 == Changelog ==
 
+= 1.4.1 = 
+* Updated start bot open or closed
+* Add or remove default AI disclaimer
+
 = 1.4.0 =
 * SVN Update Error - 1.2.0 did not update to 1.3.0
 
