@@ -21,7 +21,7 @@
  * 
 */
 
-// // If this file is called directly, die.
+// If this file is called directly, die.
 defined( 'WPINC' ) || die;
 
 // If this file is called directly, die.
@@ -39,6 +39,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     wp_enqueue_style( 'dashicons' );
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),

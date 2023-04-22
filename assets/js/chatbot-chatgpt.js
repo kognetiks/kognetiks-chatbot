@@ -21,6 +21,8 @@ jQuery(document).ready(function ($) {
     localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
     var subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
     localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
+    //
+    var chatgpt_disclaimer_setting = JSON.parse(localStorage.getItem('chatgpt_disclaimer_setting')) || { include_disclaimer: '1' };
         
     // Append the collapse button and collapsed chatbot icon to the chatbot container
     chatbotContainer.append(chatbotCollapseBtn);
@@ -31,6 +33,7 @@ jQuery(document).ready(function ($) {
 
     function initializeChatbot() {
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
+        var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting');
         var initialGreeting;
     
         if (isFirstTime) {
@@ -139,9 +142,20 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function (response) {
+                console.log('chatgpt_disclaimer_setting:', chatgpt_disclaimer_setting);
                 removeTypingIndicator();
                 if (response.success) {
-                    appendMessage(response.data, 'bot');
+                    let botResponse = response.data;
+                    const prefix_a = "As an AI language model, ";
+                    const prefix_b = "I am an AI language model and ";
+                    
+                    if (botResponse.startsWith(prefix_a) && (!chatgpt_disclaimer_setting || chatgpt_disclaimer_setting.include_disclaimer != '1')) {
+                        botResponse = botResponse.slice(prefix_a.length);
+                    } else if (botResponse.startsWith(prefix_b) && (!chatgpt_disclaimer_setting || chatgpt_disclaimer_setting.include_disclaimer != '1')) {
+                        botResponse = botResponse.slice(prefix_b.length);
+                    }
+                    
+                    appendMessage(botResponse, 'bot');
                 } else {
                     appendMessage('Error: ' + response.data, 'error');
                 }
@@ -179,11 +193,12 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0
+    // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0 and updated for Ver 1.4.1
     function loadChatbotStatus() {
         const chatGPTChatBotStatus = localStorage.getItem('chatGPTChatBotStatus');
-       
-        // Add test to see if bot should start opened or closed - Ver 1.1.0
+        // const chatGPTChatBotStatus = localStorage.getItem('chatgpt_start_status');
+        
+        // If the chatbot status is not set in local storage, use chatgpt_start_status
         if (chatGPTChatBotStatus === null) {
             if (chatgpt_start_status === 'closed') {
                 chatGptChatBot.hide();
@@ -191,9 +206,9 @@ jQuery(document).ready(function ($) {
             } else {
                 chatGptChatBot.show();
                 chatGptOpenButton.hide();
-                // Load the conversation when the chatbot is shown on page load - Ver 1.2.0
+                // Load the conversation when the chatbot is shown on page load
                 loadConversation();
-                scrollToBottom(); // Call the scrollToBottom function here - Ver 1.2.1
+                scrollToBottom();
             }
         } else if (chatGPTChatBotStatus === 'closed') {
             if (chatGptChatBot.is(':visible')) {
@@ -204,12 +219,11 @@ jQuery(document).ready(function ($) {
             if (chatGptChatBot.is(':hidden')) {
                 chatGptChatBot.show();
                 chatGptOpenButton.hide();
-                // loadConversation(); // Call loadConvesration function here - Ver 1.2.1
-                scrollToBottom(); // Call the scrollToBottom function here - Ver 1.2.1    
+                scrollToBottom();
             }
         }
-      
     }
+
 
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
