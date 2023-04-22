@@ -45,21 +45,15 @@ jQuery(document).ready(function ($) {
             initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');
-            // Load the conversation after the subsequent greeting is appended - Ver 1.2.0
-            // loadConversation();
         }
     }
 
-    // Call the initializeChatbot() function after appending the chatbot to the page
-    // Remove the call to inialize the bot - Ver 1.2.1
-    // initializeChatbot();
 
     // Add chatbot header, body, and other elements - Ver 1.1.0
     var chatbotHeader = $('<div></div>').addClass('chatbot-header');
     chatGptChatBot.append(chatbotHeader);
+
     // Fix for Ver 1.2.0
-    // chatbotContainer.append(chatbotCollapseBtn);
-    // chatbotContainer.append(chatbotCollapsed);
     chatbotHeader.append(chatbotCollapseBtn);
     chatbotHeader.append(chatbotCollapsed);
 
@@ -122,7 +116,7 @@ jQuery(document).ready(function ($) {
     submitButton.on('click', function () {
         var message = messageInput.val().trim();
         var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
-        
+
         if (!message) {
             return;
         }

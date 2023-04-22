@@ -31,69 +31,67 @@ function chatbot_chatgpt_settings_page_html() {
     
     ?>
     <div class="wrap">
-    <h1><span class="dashicons dashicons-format-chat"></span> <?php echo esc_html(get_admin_page_title()); ?></h1>
+        <h1><span class="dashicons dashicons-format-chat"></span> <?php echo esc_html(get_admin_page_title()); ?></h1>
 
-    <!-- Message Box - Ver 1.3.0 -->
-    <div id="message-box-container"></div>
+        <!-- Message Box - Ver 1.3.0 -->
+        <div id="message-box-container"></div>
 
-    <!-- Message Box - Ver 1.3.0 -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
-            // Read the start status - Ver 1.4.1
-            const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
-            const reminderCount = localStorage.getItem('reminderCount') || 0;
+        <!-- Message Box - Ver 1.3.0 -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
+                // Read the start status - Ver 1.4.1
+                const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
+                const reminderCount = localStorage.getItem('reminderCount') || 0;
 
-            if (reminderCount < 5) {
-                const messageBox = document.createElement('div');
-                messageBox.id = 'rateReviewMessageBox';
-                messageBox.innerHTML = `
-                <div id="rateReviewMessageBox" style="background-color: white; border: 1px solid black; padding: 10px; position: relative;">
-                    <div class="message-content" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>If you and your visitors are enjoying having this chatbot on your site, please take a moment to <a href="https://wordpress.org/support/plugin/chatbot-chatgpt/reviews/" target="_blank">rate and review this plugin</a>. Thank you!</span>
-                        <button id="closeMessageBox" class="dashicons dashicons-dismiss" style="background: none; border: none; cursor: pointer; outline: none; padding: 0; margin-left: 10px;"></button>
-                        
+                if (reminderCount < 5) {
+                    const messageBox = document.createElement('div');
+                    messageBox.id = 'rateReviewMessageBox';
+                    messageBox.innerHTML = `
+                    <div id="rateReviewMessageBox" style="background-color: white; border: 1px solid black; padding: 10px; position: relative;">
+                        <div class="message-content" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>If you and your visitors are enjoying having this chatbot on your site, please take a moment to <a href="https://wordpress.org/support/plugin/chatbot-chatgpt/reviews/" target="_blank">rate and review this plugin</a>. Thank you!</span>
+                            <button id="closeMessageBox" class="dashicons dashicons-dismiss" style="background: none; border: none; cursor: pointer; outline: none; padding: 0; margin-left: 10px;"></button>
+                            
+                        </div>
                     </div>
-                </div>
-                `;
+                    `;
 
-                document.querySelector('#message-box-container').insertAdjacentElement('beforeend', messageBox);
+                    document.querySelector('#message-box-container').insertAdjacentElement('beforeend', messageBox);
 
-                document.getElementById('closeMessageBox').addEventListener('click', function() {
-                    messageBox.style.display = 'none';
-                    localStorage.setItem('reminderCount', parseInt(reminderCount, 10) + 1);
-                });
-            }
-        });
-    </script>
-   
-    <script>
-        jQuery(document).ready(function($) {
-            // Get the form element by its id
-            var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
+                    document.getElementById('closeMessageBox').addEventListener('click', function() {
+                        messageBox.style.display = 'none';
+                        localStorage.setItem('reminderCount', parseInt(reminderCount, 10) + 1);
+                    });
+                }
+            });
+        </script>
+    
+        <script>
+            jQuery(document).ready(function($) {
+                // Get the form element by its id
+                var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
 
-            // Add the event listener for the form submission
-            if (chatgptSettingsForm) {
-                chatgptSettingsForm.addEventListener('submit', function() {
-                    // Get the input elements by their ids
-                    const chatgptNameInput = document.getElementById('chatgpt_bot_name');
-                    const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
-                    const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
-                    const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
-                    const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
+                // Add the event listener for the form submission
+                if (chatgptSettingsForm) {
+                    chatgptSettingsForm.addEventListener('submit', function() {
+                        // Get the input elements by their ids
+                        const chatgptNameInput = document.getElementById('chatgpt_bot_name');
+                        const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
+                        const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
+                        const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
+                        const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
 
-                    // Update the local storage with the input values
-                    localStorage.setItem('chatgpt_name', chatgptNameInput.value);
-                    localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
-                    localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
-                    localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
-                    localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
-                });
-            }
-        });
-    </script>
-
-
+                        // Update the local storage with the input values
+                        localStorage.setItem('chatgpt_name', chatgptNameInput.value);
+                        localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
+                        localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
+                        localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
+                        localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
+                    });
+                }
+            });
+        </script>
 
         <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
