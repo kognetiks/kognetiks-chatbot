@@ -334,9 +334,8 @@ function chatbot_chatgpt_model_choice_callback($args) {
     $model_choice = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
     ?>
     <select id="chatgpt_model_choice" name="chatgpt_model_choice">
-        <!-- Coming Soon in Ver 2.0.0
+        <!-- Coming Soon in Ver 1.4.2 -->
         <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
-        -->
         <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
     </select>
     <?php

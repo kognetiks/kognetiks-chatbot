@@ -105,7 +105,6 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // $model = "gpt-3.5-turbo";
     // Get the saved model from the settings or default to "gpt-3.5-turbo"
     $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
-    // console.log($model);
 
     $body = array(
         'max_tokens' => 150,
