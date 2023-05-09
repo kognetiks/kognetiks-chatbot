@@ -88,6 +88,10 @@ As soon as the API for GPT-4 is available for general use, you will be able to s
 
 == Changelog ==
 
+= 1.4.2 =
+* Added support for GPT-4 is settings
+* Added support for narrow or wide bot
+
 = 1.4.1 = 
 * Updated start bot open or closed
 * Add or remove default AI disclaimer

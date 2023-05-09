@@ -81,6 +81,9 @@ function chatbot_chatgpt_settings_page_html() {
                         const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
                         const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
                         const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
+                        // New options for max tokens and width - Ver 1.4.2
+                        const chatgptMaxTokensSettingInput = document.getElementById('chatgpt_max_tokens_setting');
+                        const chatgptChatbotWidthSettingInput = document.getElementById('chatbot_width_setting');
 
                         // Update the local storage with the input values
                         localStorage.setItem('chatgpt_name', chatgptNameInput.value);
@@ -88,6 +91,9 @@ function chatbot_chatgpt_settings_page_html() {
                         localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
                         localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
                         localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
+                        // New options for max tokens and width - Ver 1.4.2
+                        localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
+                        localStorage.setItem('chatbot_width_setting', chatbptChatbotWidthSettingInput);
                     });
                 }
             });
@@ -135,6 +141,8 @@ function chatbot_chatgpt_settings_init() {
     // API/Model settings tab - Ver 1.3.0
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_api_key');
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_model_choice');
+    // Max Tokens setting options - Ver 1.4.2
+    register_setting('chatbot_chatgpt_api_model', 'chatgpt_max_tokens_setting');
 
     add_settings_section(
         'chatbot_chatgpt_api_model_section',
@@ -159,6 +167,15 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_api_model_section'
     );
 
+    // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
+    add_settings_field(
+        'chatgpt_max_tokens_setting',
+        'Maximum Tokens Setting',
+        'chatbot_chatgpt_max_tokens_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
     // Settings settings tab - Ver 1.3.0
     register_setting('chatbot_chatgpt_settings', 'chatgpt_bot_name');
     register_setting('chatbot_chatgpt_settings', 'chatGPTChatBotStatus');
@@ -166,6 +183,8 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_settings', 'chatgpt_subsequent_greeting');
     // Option to remove the OpenAI disclaimer - Ver 1.4.1
     register_setting('chatbot_chatgpt_settings', 'chatgpt_disclaimer_setting');
+    // Option to select narrow or wide chatboat - Ver 1.4.2
+    register_setting('chatbot_chatgpt_settings', 'chatbot_width_setting');
 
     add_settings_section(
         'chatbot_chatgpt_settings_section',
@@ -211,6 +230,15 @@ function chatbot_chatgpt_settings_init() {
         'chatgpt_disclaimer_setting',
         'Include "As an AI language model" disclaimer',
         'chatgpt_disclaimer_setting_callback',
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_settings_section'
+    );
+
+    // Option to change the width of the bot from narrow to wide - Ver 1.4.2
+    add_settings_field(
+        'Chatbot_width_setting',
+        'Chatbot Width Settting',
+        'chatbot_width_setting_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
     );
@@ -334,9 +362,28 @@ function chatbot_chatgpt_model_choice_callback($args) {
     $model_choice = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
     ?>
     <select id="chatgpt_model_choice" name="chatgpt_model_choice">
-        <!-- Coming Soon in Ver 1.4.2 -->
+        <!-- Allow for gpt-4 in Ver 1.4.2 -->
         <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
         <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
+    </select>
+    <?php
+}
+
+// Max Tokens choice - Ver 1.4.2
+function chatbot_chatgpt_max_tokens_callback($args) {
+    // Get the saved chatgpt_max_tokens_setting or default to 150
+    $max_tokens = get_option('chatgpt_max_tokens_setting', 150);
+    ?>
+    <select id="chatgpt_max_tokens_setting" name="chatgpt_max_tokens_setting">
+        <option value="<?php echo esc_attr( '100' ); ?>" <?php selected( $max_tokens, '100' ); ?>><?php echo esc_html( '100' ); ?></option>
+        <option value="<?php echo esc_attr( '150' ); ?>" <?php selected( $max_tokens, '150' ); ?>><?php echo esc_html( '150' ); ?></option>
+        <option value="<?php echo esc_attr( '200' ); ?>" <?php selected( $max_tokens, '200' ); ?>><?php echo esc_html( '200' ); ?></option>
+        <option value="<?php echo esc_attr( '250' ); ?>" <?php selected( $max_tokens, '250' ); ?>><?php echo esc_html( '250' ); ?></option>
+        <option value="<?php echo esc_attr( '300' ); ?>" <?php selected( $max_tokens, '300' ); ?>><?php echo esc_html( '300' ); ?></option>
+        <option value="<?php echo esc_attr( '350' ); ?>" <?php selected( $max_tokens, '350' ); ?>><?php echo esc_html( '350' ); ?></option>
+        <option value="<?php echo esc_attr( '400' ); ?>" <?php selected( $max_tokens, '400' ); ?>><?php echo esc_html( '400' ); ?></option>
+        <option value="<?php echo esc_attr( '450' ); ?>" <?php selected( $max_tokens, '450' ); ?>><?php echo esc_html( '450' ); ?></option>
+        <option value="<?php echo esc_attr( '500' ); ?>" <?php selected( $max_tokens, '500' ); ?>><?php echo esc_html( '500' ); ?></option>
     </select>
     <?php
 }
@@ -384,6 +431,16 @@ function chatgpt_disclaimer_setting_callback() {
     <?php    
 }
 
+// Option for narrow or wide chatbot - Ver 1.4.2
+function chatbot_width_setting_callback() {
+    $chatbot_width_setting = get_option('chatbot_width_setting', 'Narrow');
+    ?>
+    <select id="chatbot_width_setting" name = "chatbot_width_setting">
+        <option value="Narrow" <?php selected( $chatbot_width_setting, 'Narrow' ); ?>>Narrow</option>
+        <option value="Wide" <?php selected( $chatbot_width_setting, 'Wide' ); ?>>Wide</option>
+    </select>
+    <?php
+}
 
 // Premium Key - Ver 1.3.0
 function chatbot_chatgpt_premium_key_callback($args) {

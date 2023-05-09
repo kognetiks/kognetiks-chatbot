@@ -65,6 +65,8 @@ function chatbot_chatgpt_send_message() {
     $api_key = esc_attr(get_option('chatgpt_api_key'));
     // Get the saved model from the settings or default to gpt-3.5-turbo
     $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
+    // Max tokens - Ver 1.4.2
+    $max_tokens = get_option('chatgpt_max_tokens_setting', 150);
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
@@ -102,14 +104,16 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     );
 
     // Select the OpenAI Model
-    // $model = "gpt-3.5-turbo";
     // Get the saved model from the settings or default to "gpt-3.5-turbo"
     $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
+    // Max tokens - Ver 1.4.2
+    $max_tokens = get_option('chatgpt_max_tokens_setting', 150);
 
     $body = array(
-        'max_tokens' => 150,
+        'max_tokens' => $max_tokens,
         'model' => $model,
         'temperature' => 0.5,
+
         'messages' => array(array('role' => 'user', 'content' => $message)),
     );
 

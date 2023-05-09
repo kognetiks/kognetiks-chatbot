@@ -35,6 +35,23 @@
     z-index: 100;
 }
 
+/* Wide - Ver 1.4.2 */
+#chatbot-chatgpt-fat {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 600px;
+    height: 450px;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    /* Add z-index - Ver 1.2.1 */
+    z-index: 100;
+}
+
 #chatbot-chatgpt-header {
     background-color: #222;
     color: #fff;
