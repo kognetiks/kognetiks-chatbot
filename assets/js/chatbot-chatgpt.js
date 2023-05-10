@@ -3,7 +3,19 @@ jQuery(document).ready(function ($) {
     var messageInput = $('#chatbot-chatgpt-message');
     var conversation = $('#chatbot-chatgpt-conversation');
     var submitButton = $('#chatbot-chatgpt-submit');
-    var chatGptChatBot = $('#chatbot-chatgpt');
+
+    // Set bot width with the default Narrow or from setting Wide - Ver 1.4.2
+    var chatgpt_width_setting = localStorage.getItem('chatbot_width_setting') || 'Narrow';
+    localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
+
+    var chatGptChatBot;
+    if (chatgpt_width_setting === 'Wide') {
+        chatGptChatBot = $('#chatbot-chatgpt-wide-body');
+    } else {
+        chatGptChatBot = $('#chatbot-chatgpt');
+    }
+
+
     var chatGptOpenButton = $('#chatgpt-open-btn');
     // Use 'open' for an open chatbot or 'closed' for a closed chatbot - Ver 1.1.0
     var chatgpt_start_status = 'closed';
@@ -21,9 +33,9 @@ jQuery(document).ready(function ($) {
     localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
     var subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
     localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
-    // Remove disclaimer - Ver 1.4.1
+    // Handle disclaimer - Ver 1.4.1
     var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
-        
+
     // Append the collapse button and collapsed chatbot icon to the chatbot container
     chatbotContainer.append(chatbotCollapseBtn);
     chatbotContainer.append(chatbotCollapsed);
@@ -91,7 +103,9 @@ jQuery(document).ready(function ($) {
         conversation.append(spaceElement);
     }
 
-    conversation.scrollTop(conversation[0].scrollHeight);
+    // Ver 1.2.4
+    // conversation.scrollTop(conversation[0].scrollHeight);
+    conversation.scrollToBottom(conversation[0].scrollHeight);
 
     // Save the conversation locally between bot sessions - Ver 1.2.0
     localStorage.setItem('chatgpt_conversation', conversation.html());

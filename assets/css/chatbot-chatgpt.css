@@ -36,11 +36,11 @@
 }
 
 /* Wide - Ver 1.4.2 */
-#chatbot-chatgpt-fat {
+#chatbot-chatgpt-wide-body {
     position: fixed;
     bottom: 10px;
     right: 10px;
-    width: 600px;
+    width: 500px;
     height: 450px;
     background-color: #f1f1f1;
     border: 1px solid #ccc;

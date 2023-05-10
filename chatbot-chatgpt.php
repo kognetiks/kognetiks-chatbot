@@ -64,9 +64,9 @@ function chatbot_chatgpt_send_message() {
     // Get the save API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
     // Get the saved model from the settings or default to gpt-3.5-turbo
-    $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
+    $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     // Max tokens - Ver 1.4.2
-    $max_tokens = get_option('chatgpt_max_tokens_setting', 150);
+    $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
@@ -105,9 +105,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Select the OpenAI Model
     // Get the saved model from the settings or default to "gpt-3.5-turbo"
-    $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
+    $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     // Max tokens - Ver 1.4.2
-    $max_tokens = intval(get_option('chatgpt_max_tokens_setting', '150'));
+    $max_tokens = intval(esc_attr(get_option('chatgpt_max_tokens_setting', '150')));
     // $max_tokens = 250;
 
     $body = array(
@@ -123,7 +123,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         'body' => json_encode($body),
         'method' => 'POST',
         'data_format' => 'body',
-        'timeout' => 15, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
+        'timeout' => 30, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
     $response = wp_remote_post($api_url, $args);
@@ -150,8 +150,8 @@ function enqueue_greetings_script() {
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
     $greetings = array(
-        'initial_greeting' => get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?'),
-        'subsequent_greeting' => get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?'),
+        'initial_greeting' => esc_attr(get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?')),
+        'subsequent_greeting' => esc_attr(get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?')),
     );
 
     wp_localize_script('greetings', 'greetings_data', $greetings);

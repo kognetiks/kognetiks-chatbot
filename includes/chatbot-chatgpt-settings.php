@@ -86,14 +86,14 @@ function chatbot_chatgpt_settings_page_html() {
                         const chatgptChatbotWidthSettingInput = document.getElementById('chatbot_width_setting');
 
                         // Update the local storage with the input values
-                        localStorage.setItem('chatgpt_name', chatgptNameInput.value);
+                        localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
                         localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
                         localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
                         localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
                         localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
                         // New options for max tokens and width - Ver 1.4.2
                         localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
-                        localStorage.setItem('chatbot_width_setting', chatbptChatbotWidthSettingInput);
+                        localStorage.setItem('chatbot_width_setting', chatgptChatbotWidthSettingInput);
                     });
                 }
             });
@@ -229,7 +229,7 @@ function chatbot_chatgpt_settings_init() {
     // Option to change the width of the bot from narrow to wide - Ver 1.4.2
     add_settings_field(
         'chatbot_width_setting',
-        'Chatbot Width Settting',
+        'Chatbot Width Setting',
         'chatbot_width_setting_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
@@ -351,7 +351,7 @@ function chatbot_chatgpt_support_section_callback($args) {
 
 // API key field callback
 function chatbot_chatgpt_api_key_callback($args) {
-    $api_key = get_option('chatgpt_api_key');
+    $api_key = esc_attr(get_option('chatgpt_api_key'));
     ?>
     <input type="text" id="chatgpt_api_key" name="chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text">
     <?php
@@ -360,7 +360,7 @@ function chatbot_chatgpt_api_key_callback($args) {
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
     // Get the saved chatgpt_model_choice value or default to "gpt-3.5-turbo"
-    $model_choice = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
+    $model_choice = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     ?>
     <select id="chatgpt_model_choice" name="chatgpt_model_choice">
         <!-- Allow for gpt-4 in Ver 1.4.2 -->
@@ -373,7 +373,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
 // Max Tokens choice - Ver 1.4.2
 function chatbot_chatgpt_max_tokens_callback($args) {
     // Get the saved chatgpt_max_tokens_setting or default to 150
-    $max_tokens = get_option('chatgpt_max_tokens_setting', 150);
+    $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
     ?>
     <select id="chatgpt_max_tokens_setting" name="chatgpt_max_tokens_setting">
         <option value="<?php echo esc_attr( '100' ); ?>" <?php selected( $max_tokens, '100' ); ?>><?php echo esc_html( '100' ); ?></option>
@@ -391,14 +391,14 @@ function chatbot_chatgpt_max_tokens_callback($args) {
 
 // Chatbot ChatGPT Name
 function chatbot_chatgpt_bot_name_callback($args) {
-    $bot_name = get_option('chatgpt_bot_name', 'Chatbot ChatGPT');
+    $bot_name = esc_attr(get_option('chatgpt_bot_name', 'Chatbot ChatGPT'));
     ?>
     <input type="text" id="chatgpt_bot_name" name="chatgpt_bot_name" value="<?php echo esc_attr( $bot_name ); ?>" class="regular-text">
     <?php
 }
 
 function chatbot_chatGPTChatBotStatus_callback($args) {
-    $start_status = get_option('chatGPTChatBotStatus', 'closed');
+    $start_status = esc_attr(get_option('chatGPTChatBotStatus', 'closed'));
     ?>
     <select id="chatGPTChatBotStatus" name="chatGPTChatBotStatus">
         <option value="open" <?php selected( $start_status, 'open' ); ?>>Open</option>
@@ -408,14 +408,14 @@ function chatbot_chatGPTChatBotStatus_callback($args) {
 }
 
 function chatbot_chatgpt_initial_greeting_callback($args) {
-    $initial_greeting = get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?');
+    $initial_greeting = esc_attr(get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?'));
     ?>
     <textarea id="chatgpt_initial_greeting" name="chatgpt_initial_greeting" rows="2" cols="50"><?php echo esc_textarea( $initial_greeting ); ?></textarea>
     <?php
 }
 
 function chatbot_chatgpt_subsequent_greeting_callback($args) {
-    $subsequent_greeting = get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?');
+    $subsequent_greeting = esc_attr(get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
     ?>
     <textarea id="chatgpt_subsequent_greeting" name="chatgpt_subsequent_greeting" rows="2" cols="50"><?php echo esc_textarea( $subsequent_greeting ); ?></textarea>
     <?php
@@ -423,7 +423,7 @@ function chatbot_chatgpt_subsequent_greeting_callback($args) {
 
 // Option to remove OpenAI disclaimer - Ver 1.4.1
 function chatgpt_disclaimer_setting_callback() {
-    $chatgpt_disclaimer_setting = get_option('chatgpt_disclaimer_setting', 'Yes');
+    $chatgpt_disclaimer_setting = esc_attr(get_option('chatgpt_disclaimer_setting', 'Yes'));
     ?>
     <select id="chatgpt_disclaimer_setting" name="chatgpt_disclaimer_setting">
         <option value="Yes" <?php selected( $chatgpt_disclaimer_setting, 'yes' ); ?>>Yes</option>
@@ -434,7 +434,7 @@ function chatgpt_disclaimer_setting_callback() {
 
 // Option for narrow or wide chatbot - Ver 1.4.2
 function chatbot_width_setting_callback() {
-    $chatbot_width_setting = get_option('chatbot_width_setting', 'Narrow');
+    $chatbot_width_setting = esc_attr(get_option('chatbot_width_setting', 'Narrow'));
     ?>
     <select id="chatbot_width_setting" name = "chatbot_width_setting">
         <option value="Narrow" <?php selected( $chatbot_width_setting, 'Narrow' ); ?>>Narrow</option>
@@ -445,7 +445,7 @@ function chatbot_width_setting_callback() {
 
 // Premium Key - Ver 1.3.0
 function chatbot_chatgpt_premium_key_callback($args) {
-    $premium_key = get_option('chatgpt_premium_key');
+    $premium_key = esc_attr(get_option('chatgpt_premium_key'));
     ?>
     <input type="text" id="chatgpt_premium_key" name="chatgpt_premium_key" value="<?php echo esc_attr( $premium_key ); ?>" class="regular-text">
     <?php
