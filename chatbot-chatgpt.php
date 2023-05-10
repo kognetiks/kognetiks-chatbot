@@ -107,11 +107,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Get the saved model from the settings or default to "gpt-3.5-turbo"
     $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
     // Max tokens - Ver 1.4.2
-    $max_tokens = get_option('chatgpt_max_tokens_setting', 150);
+    $max_tokens = intval(get_option('chatgpt_max_tokens_setting', '150'));
+    // $max_tokens = 250;
 
     $body = array(
-        'max_tokens' => $max_tokens,
         'model' => $model,
+        'max_tokens' => $max_tokens,
         'temperature' => 0.5,
 
         'messages' => array(array('role' => 'user', 'content' => $message)),

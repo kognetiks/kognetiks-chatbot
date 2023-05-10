@@ -167,15 +167,6 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_api_model_section'
     );
 
-    // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
-    add_settings_field(
-        'chatgpt_max_tokens_setting',
-        'Maximum Tokens Setting',
-        'chatbot_chatgpt_max_tokens_callback',
-        'chatbot_chatgpt_api_model',
-        'chatbot_chatgpt_api_model_section'
-    );
-
     // Settings settings tab - Ver 1.3.0
     register_setting('chatbot_chatgpt_settings', 'chatgpt_bot_name');
     register_setting('chatbot_chatgpt_settings', 'chatGPTChatBotStatus');
@@ -184,6 +175,7 @@ function chatbot_chatgpt_settings_init() {
     // Option to remove the OpenAI disclaimer - Ver 1.4.1
     register_setting('chatbot_chatgpt_settings', 'chatgpt_disclaimer_setting');
     // Option to select narrow or wide chatboat - Ver 1.4.2
+    register_setting('chatbot_chatgpt_settings', 'chatgpt_max_tokens_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_width_setting');
 
     add_settings_section(
@@ -236,11 +228,20 @@ function chatbot_chatgpt_settings_init() {
 
     // Option to change the width of the bot from narrow to wide - Ver 1.4.2
     add_settings_field(
-        'Chatbot_width_setting',
+        'chatbot_width_setting',
         'Chatbot Width Settting',
         'chatbot_width_setting_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
+    );
+
+    // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
+    add_settings_field(
+        'chatgpt_max_tokens_setting',
+        'Maximum Tokens Setting',
+        'chatbot_chatgpt_max_tokens_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
     );
 
     // Premium settings tab - Ver 1.3.0
