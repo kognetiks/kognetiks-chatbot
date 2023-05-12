@@ -49,6 +49,8 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_subsequent_greeting' => esc_attr(get_option('chatgpt_subsequent_greeting')),
         'chatGPTChatBotStatus' => esc_attr(get_option('chatGPTChatBotStatus')),
         'chatgpt_disclaimer_setting' => esc_attr(get_option('chatgpt_disclaimer_setting')),
+        'chatgpt_max_tokens_setting' => esc_attr(get_option('chatgpt_max_tokens_setting')),
+        'chatgpt_width_setting' => esc_attr(get_option('chatgpt_width_setting')),
     );
     wp_localize_script('chatbot-chatgpt-localize', 'chatbotSettings', $chatbot_settings);
 

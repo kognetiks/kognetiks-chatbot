@@ -5,16 +5,22 @@ jQuery(document).ready(function ($) {
     var submitButton = $('#chatbot-chatgpt-submit');
 
     // Set bot width with the default Narrow or from setting Wide - Ver 1.4.2
-    var chatgpt_width_setting = localStorage.getItem('chatbot_width_setting') || 'Narrow';
+    var chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
     localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
 
-    var chatGptChatBot;
+    var chatGptChatBot = $('#chatbot-chatgpt');
     if (chatgpt_width_setting === 'Wide') {
-        chatGptChatBot = $('#chatbot-chatgpt-wide-body');
+        chatGptChatBot.addClass('wide');
     } else {
-        chatGptChatBot = $('#chatbot-chatgpt');
+        chatGptChatBot.removeClass('wide');
     }
 
+    // Logging for Diagnostics - Ver 1.4.2
+    console.log(messageInput);
+    console.log(conversation);
+    console.log(submitButton);
+    console.log(chatgpt_width_setting);
+    console.log(chatGptChatBot);
 
     var chatGptOpenButton = $('#chatgpt-open-btn');
     // Use 'open' for an open chatbot or 'closed' for a closed chatbot - Ver 1.1.0
@@ -46,15 +52,29 @@ jQuery(document).ready(function ($) {
     function initializeChatbot() {
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
         var initialGreeting;
-    
+  
         if (isFirstTime) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
+
+            // Don't append the greeting if it's already in the conversation
+            console.log("initialGreeting" . initialGreeting);
+            if (conversation.text().includes(initialGreeting)) {
+                return;
+            }
+
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');
             // Save the conversation after the initial greeting is appended - Ver 1.2.0
             localStorage.setItem('chatgpt_conversation', conversation.html());
         } else {
             initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
+
+            // Don't append the greeting if it's already in the conversation
+            console.log("initialGreeting" . initialGreeting);
+            if (conversation.text().includes(initialGreeting)) {
+                return;
+            }
+            
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');
         }
@@ -105,7 +125,7 @@ jQuery(document).ready(function ($) {
 
     // Ver 1.2.4
     // conversation.scrollTop(conversation[0].scrollHeight);
-    conversation.scrollToBottom(conversation[0].scrollHeight);
+    conversation[0].scrollTop = conversation[0].scrollHeight;
 
     // Save the conversation locally between bot sessions - Ver 1.2.0
     localStorage.setItem('chatgpt_conversation', conversation.html());
@@ -192,11 +212,14 @@ jQuery(document).ready(function ($) {
             chatGptOpenButton.show();
             localStorage.setItem('chatGPTChatBotStatus', 'closed');
             // Clear the conversation when the chatbot is closed - Ver 1.2.0
-            localStorage.removeItem('chatgpt_conversation');
+            // Keep the conversation when the chatbot is closed - Ver 1.2.4
+            // localStorage.removeItem('chatgpt_conversation');
         } else {
             chatGptChatBot.show();
             chatGptOpenButton.hide();
             localStorage.setItem('chatGPTChatBotStatus', 'open');
+            loadConversation();
+            scrollToBottom();
         }
     }
 
@@ -226,15 +249,19 @@ jQuery(document).ready(function ($) {
             if (chatGptChatBot.is(':hidden')) {
                 chatGptChatBot.show();
                 chatGptOpenButton.hide();
+                loadConversation();
                 scrollToBottom();
             }
         }
     }
 
-
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
-        conversation.scrollTop(conversation[0].scrollHeight);
+        setTimeout(() => {
+            console.log("Scrolling to bottom");  // debug log
+            console.log("Scroll height: " + conversation[0].scrollHeight);  // debug log
+            conversation.scrollTop(conversation[0].scrollHeight);
+        }, 100);  // delay of 100 milliseconds    
     }
    
     // Load conversation from local storage if available - Ver 1.2.0
@@ -242,15 +269,18 @@ jQuery(document).ready(function ($) {
         var storedConversation = localStorage.getItem('chatgpt_conversation');
         if (storedConversation) {
             conversation.append(storedConversation);
+            // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
+            setTimeout(scrollToBottom, 0);
         } else {
             initializeChatbot();
         }
     }
 
-    // Load the conversation when the chatbot is shown on page load - Ver 1.2.0
-    loadConversation();
-    
     // Call the loadChatbotStatus function here - Ver 1.1.0
     loadChatbotStatus(); 
+
+    // Load the conversation when the chatbot is shown on page load - Ver 1.2.0
+    // Let the convesation stay persistent - Ver 1.4.2
+    // loadConversation();
 
 });
