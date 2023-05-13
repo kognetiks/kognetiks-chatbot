@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.4.1
+ * Version:     1.4.2
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -32,6 +32,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
+
+// Diagnostics On or Off - Ver 1.4.2
+update_option('chatgpt_diagnostics', 'Off');
 
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
@@ -97,6 +100,9 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_
 
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {
+    // Diagnostics = Ver 1.4.2
+    $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
+
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     $api_url = 'https://api.openai.com/v1/chat/completions';
 
@@ -137,15 +143,15 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
-    $diagnostics = "Off";
-
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
+        // Diagnostics - Ver 1.4.2
+        // if($chatgpt_diagnostics == 'On') {
+            // return 'MODEL: ' . $model . ' MAX TOKENS: ' . $max_tokens . " " . $response_body['choices'][0]['message']['content'];
+        // } else {
+            // return $response_body['choices'][0]['message']['content'];
+        // }     
         // Handle the response from the chat engine
-        if($diagnostics != 'On') {
-            return $response_body['choices'][0]['message']['content'];
-        } else {
-            return "MODEL: " . $model . " TOKENS: " . $max_tokens . " " . $response_body['choices'][0]['message']['content'];      
-        }
+        return $response_body['choices'][0]['message']['content'];
     } else {
         // Handle any errors that are returned from the chat engine
         return 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';

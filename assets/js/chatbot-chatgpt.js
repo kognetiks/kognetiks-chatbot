@@ -1,13 +1,15 @@
 jQuery(document).ready(function ($) {
- 
+
+    // Logging for Diagnostics - Ver 1.4.2
+    var chatgpt_diagnostics = localStorage.getItem('chatgpt_diagnostics') || 'Off';
+    localStorage.setItem('chatgpt_diagnostics', chatgpt_diagnostics); // Set if not set
+
     var messageInput = $('#chatbot-chatgpt-message');
     var conversation = $('#chatbot-chatgpt-conversation');
     var submitButton = $('#chatbot-chatgpt-submit');
 
     // Set bot width with the default Narrow or from setting Wide - Ver 1.4.2
-    // var chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
-    // localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
-    var chatgpt_width_setting = esc_attr(get_option('chatgpt_width_setting')) || 'Narrow';
+    var chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
 
     var chatGptChatBot = $('#chatbot-chatgpt');
     if (chatgpt_width_setting === 'Wide') {
@@ -16,12 +18,14 @@ jQuery(document).ready(function ($) {
         chatGptChatBot.removeClass('wide');
     }
 
-    // Logging for Diagnostics - Ver 1.4.2
-    console.log(messageInput);
-    console.log(conversation);
-    console.log(submitButton);
-    console.log(chatgpt_width_setting);
-    console.log(chatGptChatBot);
+    // Diagnostics = Ver 1.4.2
+    if (chatgpt_diagnostics === 'On') {
+        console.log(messageInput);
+        console.log(conversation);
+        console.log(submitButton);
+        console.log(chatGptChatBot);
+        console.log('chatgpt_width_setting: ' + chatgpt_width_setting);
+    }
 
     var chatGptOpenButton = $('#chatgpt-open-btn');
     // Use 'open' for an open chatbot or 'closed' for a closed chatbot - Ver 1.1.0
@@ -51,14 +55,19 @@ jQuery(document).ready(function ($) {
     conversation.append(chatbotContainer);
 
     function initializeChatbot() {
+        var chatgpt_diagnostics = localStorage.getItem('chatgpt_diagnostics') || 'Off';
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
         var initialGreeting;
   
         if (isFirstTime) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
 
+            // Logging for Diagnostics - Ver 1.4.2
+            if (chatgpt_diagnostics === 'On') {
+                console.log("initialGreeting" . initialGreeting);
+            }
+
             // Don't append the greeting if it's already in the conversation
-            console.log("initialGreeting" . initialGreeting);
             if (conversation.text().includes(initialGreeting)) {
                 return;
             }
@@ -67,11 +76,17 @@ jQuery(document).ready(function ($) {
             localStorage.setItem('chatgptChatbotOpened', 'true');
             // Save the conversation after the initial greeting is appended - Ver 1.2.0
             localStorage.setItem('chatgpt_conversation', conversation.html());
+
         } else {
+            
             initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
+            // Logging for Diagnostics - Ver 1.4.2
+            if (chatgpt_diagnostics === 'On') {
+                console.log("initialGreeting" . initialGreeting);
+            }
+
             // Don't append the greeting if it's already in the conversation
-            console.log("initialGreeting" . initialGreeting);
             if (conversation.text().includes(initialGreeting)) {
                 return;
             }
@@ -259,8 +274,11 @@ jQuery(document).ready(function ($) {
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
         setTimeout(() => {
-            console.log("Scrolling to bottom");  // debug log
-            console.log("Scroll height: " + conversation[0].scrollHeight);  // debug log
+            // Logging for Diagnostics - Ver 1.4.2
+            if (chatgpt_diagnostics === 'On') {
+                console.log("Scrolling to bottom");
+                console.log("Scroll height: " + conversation[0].scrollHeight);
+            }
             conversation.scrollTop(conversation[0].scrollHeight);
         }, 100);  // delay of 100 milliseconds    
     }

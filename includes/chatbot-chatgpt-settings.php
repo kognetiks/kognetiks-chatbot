@@ -308,7 +308,7 @@ function chatbot_chatgpt_support_section_callback($args) {
 	<h3>Description</h3>
     <p>Chatbot ChatGPT for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.</p>
     <p>ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner. It is designed to answer questions, provide suggestions, and engage in conversations with users. ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, ChatGPT can be used in various fields such as healthcare, education, finance, and many more.</p>
-    <p>Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo model brings it to life within your WordPress Website.</p>
+    <p>Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo and gpt-4 model brings it to life within your WordPress Website.</p>
     <p><b>Important Note:</b> This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.<p>
     <h3>Official Sites:</h3>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;"> 
@@ -319,6 +319,8 @@ function chatbot_chatgpt_support_section_callback($args) {
     <h3>Features</h3>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
     <li>Easy setup and integration with OpenAI&#8217;s ChatGPT API</li>
+    <li>Support for gpt-3.5-turbo</li>
+    <li>Support for gpt-4 (Learn how to access the gpt-4 API at <a href="https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4" rel="nofollow ugc" target="_blank">https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4</a></li>
     <li>Floating chatbot interface with customizable appearance</li>
     <li>User-friendly settings page for managing API key and other parameters</li>
     <li>Collapsible chatbot interface when not in use</li>
@@ -330,7 +332,7 @@ function chatbot_chatgpt_support_section_callback($args) {
     </ul>
     <h3>Getting Started</h3>
     <ol>
-    <li>Obtain your API key by signign up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc">https://platform.openai.com/account/api-keys</a>.</li>
+    <li>Obtain your API key by signign up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.</li>
     <li>Install and activate the Chatbot ChatGPT plugin.</li>
     <li>Navigate to the settings page (Settings &gt; API/Model) and enter your API key.</li>
     <li>Customize the chatbot appearance and other parameters as needed.</li>
