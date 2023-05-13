@@ -69,33 +69,50 @@ function chatbot_chatgpt_settings_page_html() {
     
         <script>
             jQuery(document).ready(function($) {
-                // Get the form element by its id
                 var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
 
-                // Add the event listener for the form submission
-                if (chatgptSettingsForm) {
-                    chatgptSettingsForm.addEventListener('submit', function() {
-                        // Get the input elements by their ids
-                        const chatgptNameInput = document.getElementById('chatgpt_bot_name');
-                        const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
-                        const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
-                        const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
-                        const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
-                        // New options for max tokens and width - Ver 1.4.2
-                        const chatgptMaxTokensSettingInput = document.getElementById('chatgpt_max_tokens_setting');
-                        const chatgptWidthSettingInput = document.getElementById('chatgpt_width_setting');
+                // Diagnostics - Ver 1.4.2
+                console.log('ENTER: settings.php');
 
-                        // Update the local storage with the input values
+                if (chatgptSettingsForm) {
+
+                    // Diagnostics - Ver 1.4.2
+                    console.log('HELP BEFORE!');
+                    console.log('FORM: ' + document.getElementById('chatgpt-settings-form'));
+                    
+                    chatgptSettingsForm.addEventListener('submit', function() {
+                        var chatgptNameInput = document.getElementById('chatgpt_bot_name');
+                        var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
+                        var chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
+                        var chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
+                        var chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
+                        var chatgptMaxTokensSettingInput = document.getElementById('chatgpt_max_tokens_setting');
+                        var chatgptWidthSettingInput = document.getElementById('chatgpt_width_setting');
+
                         localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
                         localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
                         localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
                         localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
                         localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
-                        // New options for max tokens and width - Ver 1.4.2
-                        localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
-                        localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.value);
+
+                        // Diagnostics - Ver 1.4.2
+                        console.log('HELP!');
+                        console.log('TOKENS: ' + chatgptMaxTokensSettingInput.options[chatgptMaxTokensSettingInput.selectedIndex].value);
+
+                        // Get the selected value of the select inputs
+                        if (chatgptMaxTokensSettingInput) {
+                            localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.options[chatgptMaxTokensSettingInput.selectedIndex].value);
+                        }
+
+                        if (chatgptWidthSettingInput) {
+                            localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.options[chatgptWidthSettingInput.selectedIndex].value);
+                        }
                     });
                 }
+
+                // Diagnostics - Ver 1.4.2
+                console.log('EXIT: settings.php');
+
             });
         </script>
 
@@ -166,6 +183,16 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_api_model',
         'chatbot_chatgpt_api_model_section'
     );
+    
+    // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
+    add_settings_field(
+        'chatgpt_max_tokens_setting',
+        'Maximum Tokens Setting',
+        'chatgpt_max_tokens_setting_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
 
     // Settings settings tab - Ver 1.3.0
     register_setting('chatbot_chatgpt_settings', 'chatgpt_bot_name');
@@ -232,15 +259,6 @@ function chatbot_chatgpt_settings_init() {
         'chatgpt_width_setting_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
-    );
-
-    // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
-    add_settings_field(
-        'chatgpt_max_tokens_setting',
-        'Maximum Tokens Setting',
-        'chatbot_chatgpt_max_tokens_callback',
-        'chatbot_chatgpt_api_model',
-        'chatbot_chatgpt_api_model_section'
     );
 
     // Premium settings tab - Ver 1.3.0
@@ -413,7 +431,7 @@ function chatgpt_disclaimer_setting_callback($args) {
 }
 
 // Max Tokens choice - Ver 1.4.2
-function chatbot_chatgpt_max_tokens_callback($args) {
+function chatgpt_max_tokens_setting_callback($args) {
     // Get the saved chatgpt_max_tokens_setting or default to 150
     $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', '150'));
     ?>

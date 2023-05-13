@@ -10,6 +10,9 @@ jQuery(document).ready(function ($) {
         var chatgptMaxTokensSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_max_tokens_setting) ? chatbotSettings.chatgpt_max_tokens_setting : '150';
         var chatgptWidthSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_width_setting) ? chatbotSettings.chatgpt_width_setting : 'Narrow';
 
+        // Diagnostics - Ver 1.4.2
+        console.log('ENTER: chatbot_chatgpt_localize');
+
         // Get the input elements
         var chatgptNameInput = document.getElementById('chatgpt_bot_name');
         var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
@@ -45,19 +48,19 @@ jQuery(document).ready(function ($) {
 
         if(chatgptDisclaimerSettingInput) {
             chatgptDisclaimerSettingInput.addEventListener('change', function() {
-                localStorage.setItem('chatgpt_disclaimer_setting', this.value);
+                localStorage.setItem('chatgpt_disclaimer_setting', this.options[this.selectedIndex].value);
             });
         }
 
         if(chatgptMaxTokensSettingInput) {
             chatgptMaxTokensSettingInput.addEventListener('change', function() {
-                localStorage.setItem('chatgpt_max_tokens_setting', this.value);
+                localStorage.setItem('chatgpt_max_tokens_setting', this.options[this.selectedIndex].value);
             });
         }
 
         if(chatgptWidthSettingInput) {
             chatgptWidthSettingInput.addEventListener('change', function() {
-                localStorage.setItem('chatgpt_width_setting', this.value);
+                localStorage.setItem('chatgpt_width_setting', this.options[this.selectedIndex].value);
             });
         }
 
@@ -108,15 +111,19 @@ jQuery(document).ready(function ($) {
                 }
 
                 if(chatgptMaxTokensSettingInput) {
-                    localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
+                    localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.options[chatgptMaxTokensSettingInput.selectedIndex].value);
                 }
 
                 if(chatgptWidthSettingInput) {
-                    localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.value);
+                    localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.options[chatgptWidthSettingInput.selectedIndex].value);
                 }
             });
         }
     }
 
     chatbot_chatgpt_localize();
+
+    // Diagnostics - Ver 1.4.2
+    console.log('EXIT: chatbot_chatgpt_localize');
+
 });

@@ -125,7 +125,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         'body' => json_encode($body),
         'method' => 'POST',
         'data_format' => 'body',
-        'timeout' => 30, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
+        'timeout' => 50, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
     $response = wp_remote_post($api_url, $args);
@@ -140,7 +140,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
         // Handle the response from the chat engine
-        return $response_body['choices'][0]['message']['content'];
+        return "MODEL: " . $model . " TOKENS: " . $max_tokens . " " . $response_body['choices'][0]['message']['content'];
     } else {
         // Handle any errors that are returned from the chat engine
         return 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';
