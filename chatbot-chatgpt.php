@@ -137,9 +137,15 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
+    $diagnostics = "Off";
+
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
         // Handle the response from the chat engine
-        return "MODEL: " . $model . " TOKENS: " . $max_tokens . " " . $response_body['choices'][0]['message']['content'];
+        if($diagnostics != 'On') {
+            return $response_body['choices'][0]['message']['content'];
+        } else {
+            return "MODEL: " . $model . " TOKENS: " . $max_tokens . " " . $response_body['choices'][0]['message']['content'];      
+        }
     } else {
         // Handle any errors that are returned from the chat engine
         return 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';
