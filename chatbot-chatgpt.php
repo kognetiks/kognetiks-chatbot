@@ -144,12 +144,6 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
-        // Diagnostics - Ver 1.4.2
-        // if($chatgpt_diagnostics == 'On') {
-            // return 'MODEL: ' . $model . ' MAX TOKENS: ' . $max_tokens . " " . $response_body['choices'][0]['message']['content'];
-        // } else {
-            // return $response_body['choices'][0]['message']['content'];
-        // }     
         // Handle the response from the chat engine
         return $response_body['choices'][0]['message']['content'];
     } else {

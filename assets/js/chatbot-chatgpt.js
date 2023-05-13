@@ -58,6 +58,8 @@ jQuery(document).ready(function ($) {
         var chatgpt_diagnostics = localStorage.getItem('chatgpt_diagnostics') || 'Off';
         var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
         var initialGreeting;
+        // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
+        localStorage.removeItem('chatgpt_conversation');
   
         if (isFirstTime) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
@@ -75,7 +77,7 @@ jQuery(document).ready(function ($) {
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatgptChatbotOpened', 'true');
             // Save the conversation after the initial greeting is appended - Ver 1.2.0
-            localStorage.setItem('chatgpt_conversation', conversation.html());
+            sessionStorage.setItem('chatgpt_conversation', conversation.html());
 
         } else {
             
@@ -144,7 +146,7 @@ jQuery(document).ready(function ($) {
     conversation[0].scrollTop = conversation[0].scrollHeight;
 
     // Save the conversation locally between bot sessions - Ver 1.2.0
-    localStorage.setItem('chatgpt_conversation', conversation.html());
+    sessionStorage.setItem('chatgpt_conversation', conversation.html());
 
     }
 
@@ -229,7 +231,7 @@ jQuery(document).ready(function ($) {
             localStorage.setItem('chatGPTChatBotStatus', 'closed');
             // Clear the conversation when the chatbot is closed - Ver 1.2.0
             // Keep the conversation when the chatbot is closed - Ver 1.2.4
-            // localStorage.removeItem('chatgpt_conversation');
+            // sessionStorage.removeItem('chatgpt_conversation');
         } else {
             chatGptChatBot.show();
             chatGptOpenButton.hide();
@@ -285,7 +287,7 @@ jQuery(document).ready(function ($) {
    
     // Load conversation from local storage if available - Ver 1.2.0
     function loadConversation() {
-        var storedConversation = localStorage.getItem('chatgpt_conversation');
+        var storedConversation = sessionStorage.getItem('chatgpt_conversation');
         if (storedConversation) {
             conversation.append(storedConversation);
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
@@ -299,7 +301,7 @@ jQuery(document).ready(function ($) {
     loadChatbotStatus(); 
 
     // Load the conversation when the chatbot is shown on page load - Ver 1.2.0
-    // Let the convesation stay persistent - Ver 1.4.2
+    // Let the convesation stay persistent in session storage for increased privacy - Ver 1.4.2
     // loadConversation();
 
 });
