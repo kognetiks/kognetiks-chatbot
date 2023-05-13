@@ -35,6 +35,11 @@
     z-index: 100;
 }
 
+/* Wide - Ver 1.4.2 */
+#chatbot-chatgpt.wide {
+    width: 500px;
+}
+
 #chatbot-chatgpt-header {
     background-color: #222;
     color: #fff;

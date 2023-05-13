@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.4.1
+ * Version:     1.4.2
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -33,6 +33,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 
+// Diagnostics On or Off - Ver 1.4.2
+update_option('chatgpt_diagnostics', 'Off');
+
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
     // Ensure the Dashicons font is properly enqueued - Ver 1.1.0
@@ -49,8 +52,10 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_subsequent_greeting' => esc_attr(get_option('chatgpt_subsequent_greeting')),
         'chatGPTChatBotStatus' => esc_attr(get_option('chatGPTChatBotStatus')),
         'chatgpt_disclaimer_setting' => esc_attr(get_option('chatgpt_disclaimer_setting')),
+        'chatgpt_max_tokens_setting' => esc_attr(get_option('chatgpt_max_tokens_setting')),
+        'chatgpt_width_setting' => esc_attr(get_option('chatgpt_width_setting')),
     );
-    wp_localize_script('chatbot-chatgpt-localize', 'chatbotSettings', $chatbot_settings);
+    wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
@@ -64,7 +69,9 @@ function chatbot_chatgpt_send_message() {
     // Get the save API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
     // Get the saved model from the settings or default to gpt-3.5-turbo
-    $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
+    $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    // Max tokens - Ver 1.4.2
+    $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
@@ -93,6 +100,9 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_
 
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {
+    // Diagnostics = Ver 1.4.2
+    $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
+
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     $api_url = 'https://api.openai.com/v1/chat/completions';
 
@@ -102,15 +112,16 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     );
 
     // Select the OpenAI Model
-    // $model = "gpt-3.5-turbo";
     // Get the saved model from the settings or default to "gpt-3.5-turbo"
-    $model = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
-    // console.log($model);
+    $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    // Max tokens - Ver 1.4.2
+    $max_tokens = intval(esc_attr(get_option('chatgpt_max_tokens_setting', '150')));
 
     $body = array(
-        'max_tokens' => 150,
         'model' => $model,
+        'max_tokens' => $max_tokens,
         'temperature' => 0.5,
+
         'messages' => array(array('role' => 'user', 'content' => $message)),
     );
 
@@ -119,7 +130,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         'body' => json_encode($body),
         'method' => 'POST',
         'data_format' => 'body',
-        'timeout' => 15, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
+        'timeout' => 50, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
     $response = wp_remote_post($api_url, $args);
@@ -146,8 +157,8 @@ function enqueue_greetings_script() {
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
     $greetings = array(
-        'initial_greeting' => get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?'),
-        'subsequent_greeting' => get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?'),
+        'initial_greeting' => esc_attr(get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?')),
+        'subsequent_greeting' => esc_attr(get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?')),
     );
 
     wp_localize_script('greetings', 'greetings_data', $greetings);

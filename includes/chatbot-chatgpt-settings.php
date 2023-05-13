@@ -67,31 +67,37 @@ function chatbot_chatgpt_settings_page_html() {
             });
         </script>
     
-        <script>
-            jQuery(document).ready(function($) {
-                // Get the form element by its id
-                var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
+    <script>
+    jQuery(document).ready(function($) {
+        var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
 
-                // Add the event listener for the form submission
-                if (chatgptSettingsForm) {
-                    chatgptSettingsForm.addEventListener('submit', function() {
-                        // Get the input elements by their ids
-                        const chatgptNameInput = document.getElementById('chatgpt_bot_name');
-                        const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
-                        const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
-                        const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
-                        const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
+        if (chatgptSettingsForm) {
 
-                        // Update the local storage with the input values
-                        localStorage.setItem('chatgpt_name', chatgptNameInput.value);
-                        localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
-                        localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
-                        localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
-                        localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
-                    });
-                }
+            chatgptSettingsForm.addEventListener('submit', function() {
+
+                // Get the input elements by their ids
+                const chatgptNameInput = document.getElementById('chatgpt_bot_name');
+                const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
+                const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
+                const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
+                const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
+                // New options for max tokens and width - Ver 1.4.2
+                const chatgptMaxTokensSettingInput = document.getElementById('chatgpt_max_tokens_setting');
+                const chatgptWidthSettingInput = document.getElementById('chatgpt_width_setting');
+
+                // Update the local storage with the input values, if inputs exist
+                if(chatgptNameInput) localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
+                if(chatgptInitialGreetingInput) localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
+                if(chatgptSubsequentGreetingInput) localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
+                if(chatgptStartStatusInput) localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
+                if(chatgptDisclaimerSettingInput) localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
+                if(chatgptMaxTokensSettingInput) localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
+                if(chatgptWidthSettingInput) localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.value);
             });
-        </script>
+        }
+    });
+</script>
+
 
         <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
@@ -135,6 +141,8 @@ function chatbot_chatgpt_settings_init() {
     // API/Model settings tab - Ver 1.3.0
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_api_key');
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_model_choice');
+    // Max Tokens setting options - Ver 1.4.2
+    register_setting('chatbot_chatgpt_api_model', 'chatgpt_max_tokens_setting');
 
     add_settings_section(
         'chatbot_chatgpt_api_model_section',
@@ -158,6 +166,16 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_api_model',
         'chatbot_chatgpt_api_model_section'
     );
+    
+    // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
+    add_settings_field(
+        'chatgpt_max_tokens_setting',
+        'Maximum Tokens Setting',
+        'chatgpt_max_tokens_setting_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
 
     // Settings settings tab - Ver 1.3.0
     register_setting('chatbot_chatgpt_settings', 'chatgpt_bot_name');
@@ -166,6 +184,8 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_settings', 'chatgpt_subsequent_greeting');
     // Option to remove the OpenAI disclaimer - Ver 1.4.1
     register_setting('chatbot_chatgpt_settings', 'chatgpt_disclaimer_setting');
+    // Option to select narrow or wide chatboat - Ver 1.4.2
+    register_setting('chatbot_chatgpt_settings', 'chatgpt_width_setting');
 
     add_settings_section(
         'chatbot_chatgpt_settings_section',
@@ -211,6 +231,15 @@ function chatbot_chatgpt_settings_init() {
         'chatgpt_disclaimer_setting',
         'Include "As an AI language model" disclaimer',
         'chatgpt_disclaimer_setting_callback',
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_settings_section'
+    );
+
+    // Option to change the width of the bot from narrow to wide - Ver 1.4.2
+    add_settings_field(
+        'chatgpt_width_setting',
+        'Chatbot Width Setting',
+        'chatgpt_width_setting_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
     );
@@ -279,7 +308,7 @@ function chatbot_chatgpt_support_section_callback($args) {
 	<h3>Description</h3>
     <p>Chatbot ChatGPT for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.</p>
     <p>ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner. It is designed to answer questions, provide suggestions, and engage in conversations with users. ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, ChatGPT can be used in various fields such as healthcare, education, finance, and many more.</p>
-    <p>Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo model brings it to life within your WordPress Website.</p>
+    <p>Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo and gpt-4 model brings it to life within your WordPress Website.</p>
     <p><b>Important Note:</b> This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.<p>
     <h3>Official Sites:</h3>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;"> 
@@ -290,6 +319,8 @@ function chatbot_chatgpt_support_section_callback($args) {
     <h3>Features</h3>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
     <li>Easy setup and integration with OpenAI&#8217;s ChatGPT API</li>
+    <li>Support for gpt-3.5-turbo</li>
+    <li>Support for gpt-4 (Learn how to access the gpt-4 API at <a href="https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4" rel="nofollow ugc" target="_blank">https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4</a></li>
     <li>Floating chatbot interface with customizable appearance</li>
     <li>User-friendly settings page for managing API key and other parameters</li>
     <li>Collapsible chatbot interface when not in use</li>
@@ -301,7 +332,7 @@ function chatbot_chatgpt_support_section_callback($args) {
     </ul>
     <h3>Getting Started</h3>
     <ol>
-    <li>Obtain your API key by signign up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc">https://platform.openai.com/account/api-keys</a>.</li>
+    <li>Obtain your API key by signign up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.</li>
     <li>Install and activate the Chatbot ChatGPT plugin.</li>
     <li>Navigate to the settings page (Settings &gt; API/Model) and enter your API key.</li>
     <li>Customize the chatbot appearance and other parameters as needed.</li>
@@ -322,7 +353,7 @@ function chatbot_chatgpt_support_section_callback($args) {
 
 // API key field callback
 function chatbot_chatgpt_api_key_callback($args) {
-    $api_key = get_option('chatgpt_api_key');
+    $api_key = esc_attr(get_option('chatgpt_api_key'));
     ?>
     <input type="text" id="chatgpt_api_key" name="chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text">
     <?php
@@ -331,12 +362,11 @@ function chatbot_chatgpt_api_key_callback($args) {
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
     // Get the saved chatgpt_model_choice value or default to "gpt-3.5-turbo"
-    $model_choice = get_option('chatgpt_model_choice', 'gpt-3.5-turbo');
+    $model_choice = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     ?>
     <select id="chatgpt_model_choice" name="chatgpt_model_choice">
-        <!-- Coming Soon in Ver 2.0.0
+        <!-- Allow for gpt-4 in Ver 1.4.2 -->
         <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
-        -->
         <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
     </select>
     <?php
@@ -344,51 +374,80 @@ function chatbot_chatgpt_model_choice_callback($args) {
 
 // Chatbot ChatGPT Name
 function chatbot_chatgpt_bot_name_callback($args) {
-    $bot_name = get_option('chatgpt_bot_name', 'Chatbot ChatGPT');
+    $bot_name = esc_attr(get_option('chatgpt_bot_name', 'Chatbot ChatGPT'));
     ?>
     <input type="text" id="chatgpt_bot_name" name="chatgpt_bot_name" value="<?php echo esc_attr( $bot_name ); ?>" class="regular-text">
     <?php
 }
 
 function chatbot_chatGPTChatBotStatus_callback($args) {
-    $start_status = get_option('chatGPTChatBotStatus', 'closed');
+    $start_status = esc_attr(get_option('chatGPTChatBotStatus', 'closed'));
     ?>
     <select id="chatGPTChatBotStatus" name="chatGPTChatBotStatus">
-        <option value="open" <?php selected( $start_status, 'open' ); ?>>Open</option>
-        <option value="closed" <?php selected( $start_status, 'closed' ); ?>>Closed</option>
+        <option value="open" <?php selected( $start_status, 'open' ); ?>><?php echo esc_html( 'Open' ); ?></option>
+        <option value="closed" <?php selected( $start_status, 'closed' ); ?>><?php echo esc_html( 'Closed' ); ?></option>
     </select>
     <?php
 }
 
 function chatbot_chatgpt_initial_greeting_callback($args) {
-    $initial_greeting = get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?');
+    $initial_greeting = esc_attr(get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?'));
     ?>
     <textarea id="chatgpt_initial_greeting" name="chatgpt_initial_greeting" rows="2" cols="50"><?php echo esc_textarea( $initial_greeting ); ?></textarea>
     <?php
 }
 
 function chatbot_chatgpt_subsequent_greeting_callback($args) {
-    $subsequent_greeting = get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?');
+    $subsequent_greeting = esc_attr(get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
     ?>
     <textarea id="chatgpt_subsequent_greeting" name="chatgpt_subsequent_greeting" rows="2" cols="50"><?php echo esc_textarea( $subsequent_greeting ); ?></textarea>
     <?php
 }
 
 // Option to remove OpenAI disclaimer - Ver 1.4.1
-function chatgpt_disclaimer_setting_callback() {
-    $chatgpt_disclaimer_setting = get_option('chatgpt_disclaimer_setting', 'Yes');
+function chatgpt_disclaimer_setting_callback($args) {
+    $chatgpt_disclaimer_setting = esc_attr(get_option('chatgpt_disclaimer_setting', 'Yes'));
     ?>
     <select id="chatgpt_disclaimer_setting" name="chatgpt_disclaimer_setting">
-        <option value="Yes" <?php selected( $chatgpt_disclaimer_setting, 'yes' ); ?>>Yes</option>
-        <option value="No" <?php selected( $chatgpt_disclaimer_setting, 'no' ); ?>>No</option>
+        <option value="Yes" <?php selected( $chatgpt_disclaimer_setting, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $chatgpt_disclaimer_setting, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
     </select>
     <?php    
 }
 
+// Max Tokens choice - Ver 1.4.2
+function chatgpt_max_tokens_setting_callback($args) {
+    // Get the saved chatgpt_max_tokens_setting or default to 150
+    $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', '150'));
+    ?>
+    <select id="chatgpt_max_tokens_setting" name="chatgpt_max_tokens_setting">
+        <option value="<?php echo esc_attr( '100' ); ?>" <?php selected( $max_tokens, '100' ); ?>><?php echo esc_html( '100' ); ?></option>
+        <option value="<?php echo esc_attr( '150' ); ?>" <?php selected( $max_tokens, '150' ); ?>><?php echo esc_html( '150' ); ?></option>
+        <option value="<?php echo esc_attr( '200' ); ?>" <?php selected( $max_tokens, '200' ); ?>><?php echo esc_html( '200' ); ?></option>
+        <option value="<?php echo esc_attr( '250' ); ?>" <?php selected( $max_tokens, '250' ); ?>><?php echo esc_html( '250' ); ?></option>
+        <option value="<?php echo esc_attr( '300' ); ?>" <?php selected( $max_tokens, '300' ); ?>><?php echo esc_html( '300' ); ?></option>
+        <option value="<?php echo esc_attr( '350' ); ?>" <?php selected( $max_tokens, '350' ); ?>><?php echo esc_html( '350' ); ?></option>
+        <option value="<?php echo esc_attr( '400' ); ?>" <?php selected( $max_tokens, '400' ); ?>><?php echo esc_html( '400' ); ?></option>
+        <option value="<?php echo esc_attr( '450' ); ?>" <?php selected( $max_tokens, '450' ); ?>><?php echo esc_html( '450' ); ?></option>
+        <option value="<?php echo esc_attr( '500' ); ?>" <?php selected( $max_tokens, '500' ); ?>><?php echo esc_html( '500' ); ?></option>
+    </select>
+    <?php
+}
+
+// Option for narrow or wide chatbot - Ver 1.4.2
+function chatgpt_width_setting_callback($args) {
+    $chatgpt_width = esc_attr(get_option('chatgpt_width_setting', 'Narrow'));
+    ?>
+    <select id="chatgpt_width_setting" name = "chatgpt_width_setting">
+        <option value="Narrow" <?php selected( $chatgpt_width, 'Narrow' ); ?>><?php echo esc_html( 'Narrow' ); ?></option>
+        <option value="Wide" <?php selected( $chatgpt_width, 'Wide' ); ?>><?php echo esc_html( 'Wide' ); ?></option>
+    </select>
+    <?php
+}
 
 // Premium Key - Ver 1.3.0
 function chatbot_chatgpt_premium_key_callback($args) {
-    $premium_key = get_option('chatgpt_premium_key');
+    $premium_key = esc_attr(get_option('chatgpt_premium_key'));
     ?>
     <input type="text" id="chatgpt_premium_key" name="chatgpt_premium_key" value="<?php echo esc_attr( $premium_key ); ?>" class="regular-text">
     <?php

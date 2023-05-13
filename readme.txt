@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
 Tested up to: 6.2
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -17,7 +17,7 @@ Chatbot ChatGPT for WordPress is a plugin that allows you to effortlessly integr
 
 ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner. It is designed to answer questions, provide suggestions, and engage in conversations with users. ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, ChatGPT can be used in various fields such as healthcare, education, finance, and many more.
 
-Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo model brings it to life within your WordPress Website.
+Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo or the gpt-4 model brings it to life within your WordPress Website.
 
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
 
@@ -26,6 +26,8 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 == Features ==
 
 * Easy setup and integration with OpenAI's ChatGPT API
+* Support for gpt-3.5-turbo
+* Support for gpt-4 (Learn how to access the gpt-4 API at [https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4](https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4))
 * Floating chatbot interface with customizable appearance
 * User-friendly settings page for managing API key and other parameters
 * Collapsible chatbot interface when not in use
@@ -71,9 +73,7 @@ The ChatGPT API currently supports English. However, you can configure the chatb
 
 = Which OpenAI model does the plugin use? =
 
-Currently the plugin uses the gpt-3.5-turbo model from OpenAI.  This is the same model used in the ChatGPT product.
-
-As soon as the API for GPT-4 is available for general use, you will be able to select from the latest available models.
+The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are the same models found in the ChatGPT product from OpenAI.
 
 == Screenshots ==
 
@@ -85,8 +85,14 @@ As soon as the API for GPT-4 is available for general use, you will be able to s
 6. Mobile Experience - Ask Chatbot ChatGTP any question
 7. Mobile Experience - Get a response from Chatbot ChatGPT
 8. Mobile Experience - Chatbot ChatGPT minimize (Lower Right)
+9. Chatbot ChatGPT shown in Wide mode
 
 == Changelog ==
+
+= 1.4.2 =
+* Added support for the GPT-4 API in settings - requires access to gpt-4 API, see [https://openai.com/waitlist/gpt-4-api](https://openai.com/waitlist/gpt-4-api)
+* Added support for max tokens (the maximum number of tokens to generate in the completion)
+* Added support for narrow or wide bot message modes (other options coming soon)
 
 = 1.4.1 = 
 * Updated start bot open or closed
