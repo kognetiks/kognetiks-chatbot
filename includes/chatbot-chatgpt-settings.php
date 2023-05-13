@@ -81,6 +81,7 @@ function chatbot_chatgpt_settings_page_html() {
                     console.log('FORM: ' + document.getElementById('chatgpt-settings-form'));
                     
                     chatgptSettingsForm.addEventListener('submit', function() {
+
                         var chatgptNameInput = document.getElementById('chatgpt_bot_name');
                         var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
                         var chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
@@ -92,21 +93,35 @@ function chatbot_chatgpt_settings_page_html() {
                         localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
                         localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
                         localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
-                        localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
-                        localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
+                        // localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
+                        // localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
 
                         // Diagnostics - Ver 1.4.2
                         console.log('HELP!');
                         console.log('TOKENS: ' + chatgptMaxTokensSettingInput.options[chatgptMaxTokensSettingInput.selectedIndex].value);
 
                         // Get the selected value of the select inputs
+
+                        if (chatGPTChatBotStatusInput) {
+                            localStorage.setItem('chatGPTChatBotStatus', chatGPTChatBotStatusInput.options[chatGPTChatBotStatusInput.selectedIndex].value);
+                        }
+
+                        if (chatgptDisclaimerSettingInput) {
+                            localStorage.setItem('chatgptDisclaimerSetting', chatgptDisclaimerSettingInput.options[chatgptDisclaimerSettingInput.selectedIndex].value);
+                        }
+
                         if (chatgptMaxTokensSettingInput) {
                             localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.options[chatgptMaxTokensSettingInput.selectedIndex].value);
                         }
 
-                        if (chatgptWidthSettingInput) {
-                            localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.options[chatgptWidthSettingInput.selectedIndex].value);
-                        }
+                        try {
+                            if (chatgptWidthSettingInput) {
+                                localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.options[chatgptWidthSettingInput.selectedIndex].value);
+                            }
+                        } catch (e) {
+                            console.error("An error occurred: ", e);
+                        }                        
+
                     });
                 }
 

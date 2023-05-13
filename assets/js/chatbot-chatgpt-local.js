@@ -42,7 +42,7 @@ jQuery(document).ready(function ($) {
         
         if(chatgptStartStatusInput) {
             chatgptStartStatusInput.addEventListener('change', function() {
-                localStorage.setItem('chatGPTChatBotStatus', this.value);
+                localStorage.setItem('chatGPTChatBotStatus', this.options[this.selectedIndex].value);
             });
         }
 
@@ -64,19 +64,10 @@ jQuery(document).ready(function ($) {
             });
         }
 
-        // // Set the variables in localStorage - Ver 1.4.1
-        // localStorage.setItem('chatgpt_bot_name', chatgptName);
-        // localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreeting);
-        // localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreeting);
-        // localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatus);
-        // localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSetting);
-        // // Set the variables in localStorage - Ver 1.4.2
-        // localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSetting);
-        // localStorage.setItem('chatgpt_width_setting', chatgptWidthSetting);
-
         // Update the localStorage values when the form is submitted - Ver 1.4.1
         // chatgpt-settings-form vs. your-form-id
         var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
+
         if (chatgptSettingsForm) {
             chatgptSettingsForm.addEventListener('submit', function(event) {
 
