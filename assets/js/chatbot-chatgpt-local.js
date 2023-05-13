@@ -10,9 +10,6 @@ jQuery(document).ready(function ($) {
         var chatgptMaxTokensSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_max_tokens_setting) ? chatbotSettings.chatgpt_max_tokens_setting : '150';
         var chatgptWidthSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_width_setting) ? chatbotSettings.chatgpt_width_setting : 'Narrow';
 
-        // Diagnostics - Ver 1.4.2
-        console.log('ENTER: chatbot_chatgpt_localize');
-
         // Get the input elements
         var chatgptNameInput = document.getElementById('chatgpt_bot_name');
         var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
@@ -102,19 +99,17 @@ jQuery(document).ready(function ($) {
                 }
 
                 if(chatgptMaxTokensSettingInput) {
-                    localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.options[chatgptMaxTokensSettingInput.selectedIndex].value);
+                    localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
                 }
 
                 if(chatgptWidthSettingInput) {
-                    localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.options[chatgptWidthSettingInput.selectedIndex].value);
+                    localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.value)
                 }
+
             });
         }
     }
 
     chatbot_chatgpt_localize();
-
-    // Diagnostics - Ver 1.4.2
-    console.log('EXIT: chatbot_chatgpt_localize');
 
 });

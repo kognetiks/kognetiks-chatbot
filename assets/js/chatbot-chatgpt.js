@@ -5,8 +5,9 @@ jQuery(document).ready(function ($) {
     var submitButton = $('#chatbot-chatgpt-submit');
 
     // Set bot width with the default Narrow or from setting Wide - Ver 1.4.2
-    var chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
-    localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
+    // var chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
+    // localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
+    var chatgpt_width_setting = esc_attr(get_option('chatgpt_width_setting')) || 'Narrow';
 
     var chatGptChatBot = $('#chatbot-chatgpt');
     if (chatgpt_width_setting === 'Wide') {

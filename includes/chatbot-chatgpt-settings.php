@@ -67,69 +67,37 @@ function chatbot_chatgpt_settings_page_html() {
             });
         </script>
     
-        <script>
-            jQuery(document).ready(function($) {
-                var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
+    <script>
+    jQuery(document).ready(function($) {
+        var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
 
-                // Diagnostics - Ver 1.4.2
-                console.log('ENTER: settings.php');
+        if (chatgptSettingsForm) {
 
-                if (chatgptSettingsForm) {
+            chatgptSettingsForm.addEventListener('submit', function() {
 
-                    // Diagnostics - Ver 1.4.2
-                    console.log('HELP BEFORE!');
-                    console.log('FORM: ' + document.getElementById('chatgpt-settings-form'));
-                    
-                    chatgptSettingsForm.addEventListener('submit', function() {
+                // Get the input elements by their ids
+                const chatgptNameInput = document.getElementById('chatgpt_bot_name');
+                const chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
+                const chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
+                const chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
+                const chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
+                // New options for max tokens and width - Ver 1.4.2
+                const chatgptMaxTokensSettingInput = document.getElementById('chatgpt_max_tokens_setting');
+                const chatgptWidthSettingInput = document.getElementById('chatgpt_width_setting');
 
-                        var chatgptNameInput = document.getElementById('chatgpt_bot_name');
-                        var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
-                        var chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
-                        var chatgptStartStatusInput = document.getElementById('chatGPTChatBotStatus');
-                        var chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
-                        var chatgptMaxTokensSettingInput = document.getElementById('chatgpt_max_tokens_setting');
-                        var chatgptWidthSettingInput = document.getElementById('chatgpt_width_setting');
-
-                        localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
-                        localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
-                        localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
-                        // localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
-                        // localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
-
-                        // Diagnostics - Ver 1.4.2
-                        console.log('HELP!');
-                        console.log('TOKENS: ' + chatgptMaxTokensSettingInput.options[chatgptMaxTokensSettingInput.selectedIndex].value);
-
-                        // Get the selected value of the select inputs
-
-                        if (chatGPTChatBotStatusInput) {
-                            localStorage.setItem('chatGPTChatBotStatus', chatGPTChatBotStatusInput.options[chatGPTChatBotStatusInput.selectedIndex].value);
-                        }
-
-                        if (chatgptDisclaimerSettingInput) {
-                            localStorage.setItem('chatgptDisclaimerSetting', chatgptDisclaimerSettingInput.options[chatgptDisclaimerSettingInput.selectedIndex].value);
-                        }
-
-                        if (chatgptMaxTokensSettingInput) {
-                            localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.options[chatgptMaxTokensSettingInput.selectedIndex].value);
-                        }
-
-                        try {
-                            if (chatgptWidthSettingInput) {
-                                localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.options[chatgptWidthSettingInput.selectedIndex].value);
-                            }
-                        } catch (e) {
-                            console.error("An error occurred: ", e);
-                        }                        
-
-                    });
-                }
-
-                // Diagnostics - Ver 1.4.2
-                console.log('EXIT: settings.php');
-
+                // Update the local storage with the input values, if inputs exist
+                if(chatgptNameInput) localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
+                if(chatgptInitialGreetingInput) localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
+                if(chatgptSubsequentGreetingInput) localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
+                if(chatgptStartStatusInput) localStorage.setItem('chatGPTChatBotStatus', chatgptStartStatusInput.value);
+                if(chatgptDisclaimerSettingInput) localStorage.setItem('chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
+                if(chatgptMaxTokensSettingInput) localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
+                if(chatgptWidthSettingInput) localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.value);
             });
-        </script>
+        }
+    });
+</script>
+
 
         <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
@@ -414,8 +382,8 @@ function chatbot_chatGPTChatBotStatus_callback($args) {
     $start_status = esc_attr(get_option('chatGPTChatBotStatus', 'closed'));
     ?>
     <select id="chatGPTChatBotStatus" name="chatGPTChatBotStatus">
-        <option value="open" <?php selected( $start_status, 'open' ); ?>>Open</option>
-        <option value="closed" <?php selected( $start_status, 'closed' ); ?>>Closed</option>
+        <option value="open" <?php selected( $start_status, 'open' ); ?>><?php echo esc_html( 'Open' ); ?></option>
+        <option value="closed" <?php selected( $start_status, 'closed' ); ?>><?php echo esc_html( 'Closed' ); ?></option>
     </select>
     <?php
 }
@@ -439,8 +407,8 @@ function chatgpt_disclaimer_setting_callback($args) {
     $chatgpt_disclaimer_setting = esc_attr(get_option('chatgpt_disclaimer_setting', 'Yes'));
     ?>
     <select id="chatgpt_disclaimer_setting" name="chatgpt_disclaimer_setting">
-        <option value="Yes" <?php selected( $chatgpt_disclaimer_setting, 'Yes' ); ?>>Yes</option>
-        <option value="No" <?php selected( $chatgpt_disclaimer_setting, 'No' ); ?>>No</option>
+        <option value="Yes" <?php selected( $chatgpt_disclaimer_setting, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $chatgpt_disclaimer_setting, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
     </select>
     <?php    
 }
@@ -466,11 +434,11 @@ function chatgpt_max_tokens_setting_callback($args) {
 
 // Option for narrow or wide chatbot - Ver 1.4.2
 function chatgpt_width_setting_callback($args) {
-    $chatgpt_width_setting = esc_attr(get_option('chatgpt_width_setting', 'Narrow'));
+    $chatgpt_width = esc_attr(get_option('chatgpt_width_setting', 'Narrow'));
     ?>
     <select id="chatgpt_width_setting" name = "chatgpt_width_setting">
-        <option value="Narrow" <?php selected( $chatgpt_width_setting, 'Narrow' ); ?>>Narrow</option>
-        <option value="Wide" <?php selected( $chatgpt_width_setting, 'Wide' ); ?>>Wide</option>
+        <option value="Narrow" <?php selected( $chatgpt_width, 'Narrow' ); ?>><?php echo esc_html( 'Narrow' ); ?></option>
+        <option value="Wide" <?php selected( $chatgpt_width, 'Wide' ); ?>><?php echo esc_html( 'Wide' ); ?></option>
     </select>
     <?php
 }

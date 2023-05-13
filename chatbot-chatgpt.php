@@ -52,7 +52,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_max_tokens_setting' => esc_attr(get_option('chatgpt_max_tokens_setting')),
         'chatgpt_width_setting' => esc_attr(get_option('chatgpt_width_setting')),
     );
-    wp_localize_script('chatbot-chatgpt-localize', 'chatbotSettings', $chatbot_settings);
+    wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
@@ -110,7 +110,6 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     // Max tokens - Ver 1.4.2
     $max_tokens = intval(esc_attr(get_option('chatgpt_max_tokens_setting', '150')));
-    // $max_tokens = 250;
 
     $body = array(
         'model' => $model,
