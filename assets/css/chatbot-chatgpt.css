@@ -22,10 +22,9 @@
 #chatbot-chatgpt {
     position: fixed;
     bottom: 10px;
-    right: 10px;
-    width: 300px;
-    height: 450px;
-    background-color: #f1f1f1;
+    right: 35px;
+    width: 350px;
+    height: 600px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
@@ -33,6 +32,7 @@
     flex-direction: column;
     /* Add z-index - Ver 1.2.1 */
     z-index: 100;
+    background-color: white;
 }
 
 /* Wide - Ver 1.4.2 */
@@ -43,7 +43,7 @@
 #chatbot-chatgpt-header {
     background-color: #222;
     color: #fff;
-    padding: 10px;
+    padding: 20px;
     font-size: 16px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
@@ -53,21 +53,30 @@
     flex-grow: 1;
     padding: 10px;
     overflow-y: auto;
+    background: white;
 }
 
 #chatbot-chatgpt-input {
     display: flex;
     padding: 10px;
+    background-color: white;
+    border-top: 2px solid #e3e6ec;
+    margin-left: 20px;
+    width: 83%;
 }
 
 #chatbot-chatgpt-message {
     flex-grow: 1;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
     border-radius: 3px;
     padding: 5px;
+    outline-width: 0px;
+    border: none;
+    font-family: sans-serif;
+    resize: none;
 }
 
-#chatbot-chatgpt-submit {
+/* #chatbot-chatgpt-submit {
     background-color: #222;
     color: #fff;
     border: none;
@@ -75,7 +84,7 @@
     padding: 6px 12px;
     margin-left: 5px;
     cursor: pointer;
-}
+} */
 
 /* CSS for append message */
 .chat-message {
@@ -83,6 +92,7 @@
     padding: 5px;
     max-width: 100%;
     word-wrap: break-word;
+    font-size: 15px;
 }
 
 .user-message {
@@ -91,11 +101,10 @@
 
 .user-text {
     display: inline-block;
-    background-color: #007bff;
+    background: linear-gradient(to right, #2446e1, #05b7fa);
     color: #ffffff;
     padding: 5px 10px;
     border-radius: 12px;
-    border-bottom-right-radius: 0;
     overflow-wrap: anywhere;
 }
 
@@ -105,12 +114,11 @@
 
 .bot-text {
     display: inline-block;
-    /* font-weight: bold; */
-    background-color: #5BC236;
-    color: #ffffff;
+    color: #000;
+    border: 1px solid #007bff;
     padding: 5px 10px;
     border-radius: 12px;
-    border-bottom-left-radius: 0;
+    font-size: 15px;
     overflow-wrap: anywhere;
 }
 
@@ -144,7 +152,7 @@
 }
 
 .chatbot-collapse-btn:hover {
-    background-color: #0257b3;    
+    background-color: #0257b3;
 }
 
 .chatbot-collapsed {
@@ -173,6 +181,7 @@
     bottom: 2%;
     right: 2%;
     background-color: #007bff;
+    color: white;
     border: none;
     cursor: pointer;
     padding: 15px;
@@ -194,18 +203,24 @@
 }
 
 .typing-indicator {
-    display: inline-flex; /* Changed from flex to inline-flex */
+    display: inline-flex;
+    /* Changed from flex to inline-flex */
     justify-content: flex-start;
-    background-color: #5BC236; /* Match the green background color */
-    border-radius: 12px; /* Match the border radius */
-    padding: 5px 10px; /* Match the padding */
-    border-bottom-left-radius: 0; /* Match the border-bottom-left-radius */
+    background-color: #5BC236;
+    /* Match the green background color */
+    border-radius: 12px;
+    /* Match the border radius */
+    padding: 5px 10px;
+    /* Match the padding */
+    border-bottom-left-radius: 0;
+    /* Match the border-bottom-left-radius */
 }
 
 .typing-dot {
     margin-right: 3px;
     animation: typing 1s infinite;
-    color: #ffffff; /* Match the white color of the dots */
+    color: #ffffff;
+    /* Match the white color of the dots */
 }
 
 .typing-dot:nth-child(2) {
@@ -220,10 +235,198 @@
     0% {
         opacity: 0;
     }
+
     50% {
         opacity: 1;
     }
+
     100% {
         opacity: 0;
     }
+}
+
+/* Customize CSS */
+
+.flex {
+    display: flex;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.justify-end {
+    justify-content: end;
+}
+
+.action-btn {
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.action-btn:hover {
+    background-color: #263ddf;
+    cursor: pointer;
+}
+
+.header-back {
+    /* background-color: #3a4eeb !important; */
+    background: linear-gradient(to right, #2446e1, #05b7fa);
+
+}
+
+.header-rounded {
+    border-top-left-radius: 15px !important;
+    border-top-right-radius: 15px !important;
+}
+
+.rounded-15 {
+    border-radius: 15px !important;
+}
+
+#chatgptTitle.title {
+    font-size: 22px !important;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.wave-size {
+    width: 30px;
+}
+
+.right-header {
+    gap: 10px
+}
+
+.com-log {
+  font-size: 11px;
+  color: #ccc;
+  font-weight: 700;
+}
+
+.logo {
+    padding: 10px;
+    margin-right: 40px;
+}
+
+.item-style {
+    display: flex;
+    gap: 10px;
+    padding: 10px 10px;
+    align-items: center;
+    color: #000;
+}
+
+.item-style:hover {
+    background-color: #F0F2F7;
+    cursor: pointer;
+    z-index: 12;
+}
+
+#chatbot-chatgpt-submit {
+    cursor: pointer;
+    position: absolute; 
+    border-radius:50%; 
+    width:50px; 
+    height: 50px; 
+    background: linear-gradient(to bottom, #2446e1, #05b7fa);
+    display:flex; 
+    align-items: center;
+    justify-content: center; 
+    right:-25px;
+}
+
+.state-display {
+    position: relative;
+}
+.state-back {
+    height:60px; 
+    width: 100%; 
+    position:absolute; 
+    z-index:-1;
+}
+
+.state-text{
+   color: #fff;
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   z-index:1; 
+   margin:20px
+}
+
+.state-badge {
+    background-color: #58b743;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+#action-option {
+    position: relative;
+}
+  
+#action-option:hover .tooltip-text {
+    visibility: visible;
+}
+  
+.tooltip-text {
+visibility: hidden;
+width: 90px;
+background-color: #fff;
+color: #000;
+font-size: 12px;
+text-align: center;
+border-radius: 6px;
+padding: 5px;
+position: absolute;
+z-index: 1;
+right: -50%;    
+transform: translateX(-50%);
+opacity: 1;
+transition: opacity 0.3s;
+}
+
+.tooltip-text::after {
+content: "";
+position: absolute;
+top: 100%;
+left: 50%;
+margin-left: -5px;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    /* width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+    background-color: #fff;
+    /* color of the track */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #dbdfe2;
+    border-radius: 5px;
+    /* color of the scroll thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+    cursor: pointer;
+    /* color of the scroll thumb on hover */
 }

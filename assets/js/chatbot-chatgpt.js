@@ -7,6 +7,7 @@ jQuery(document).ready(function ($) {
     var messageInput = $('#chatbot-chatgpt-message');
     var conversation = $('#chatbot-chatgpt-conversation');
     var submitButton = $('#chatbot-chatgpt-submit');
+    var optionbtn = $('#action-option'); 
 
     // Set bot width with the default Narrow or from setting Wide - Ver 1.4.2
     var chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
@@ -36,7 +37,8 @@ jQuery(document).ready(function ($) {
     chatGptOpenButton.show();
 
     var chatbotContainer = $('<div></div>').addClass('chatbot-container');
-    var chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
+    // var chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
+    var chatbotCollapseBtn = $('#collapse_action'); // Add a collapse button
     var chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
     // Support variable greetings based on setting - Ver 1.1.0
@@ -48,11 +50,11 @@ jQuery(document).ready(function ($) {
     var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
 
     // Append the collapse button and collapsed chatbot icon to the chatbot container
-    chatbotContainer.append(chatbotCollapseBtn);
-    chatbotContainer.append(chatbotCollapsed);
+    // chatbotContainer.append(chatbotCollapseBtn);
+    // chatbotContainer.append(chatbotCollapsed);
 
     // Add initial greeting to the chatbot
-    conversation.append(chatbotContainer);
+    // conversation.append(chatbotContainer);
 
     function initializeChatbot() {
         var chatgpt_diagnostics = localStorage.getItem('chatgpt_diagnostics') || 'Off';
@@ -104,13 +106,14 @@ jQuery(document).ready(function ($) {
     chatGptChatBot.append(chatbotHeader);
 
     // Fix for Ver 1.2.0
-    chatbotHeader.append(chatbotCollapseBtn);
+    // chatbotHeader.append(chatbotCollapseBtn);
     chatbotHeader.append(chatbotCollapsed);
 
     // Attach the click event listeners for the collapse button and collapsed chatbot icon
     chatbotCollapseBtn.on('click', toggleChatbot);
     chatbotCollapsed.on('click', toggleChatbot);
     chatGptOpenButton.on('click', toggleChatbot);
+    optionbtn.on('click', toggleChatOption);
 
     function appendMessage(message, sender, cssClass) {
     var messageElement = $('<div></div>').addClass('chat-message');
@@ -240,7 +243,17 @@ jQuery(document).ready(function ($) {
             scrollToBottom();
         }
     }
-
+    // Add the toggleChatOption() function - Ver 0.0.1
+    function toggleChatOption() {
+        var itemGroup = $('#item-group');
+        if (itemGroup.is(':visible')) {
+            itemGroup.hide();
+            $('.tooltip-text').html("Open options");
+        } else {
+            itemGroup.show();
+            $('.tooltip-text').html("Close options");
+        }
+    }
     // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0 and updated for Ver 1.4.1
     function loadChatbotStatus() {
         const chatGPTChatBotStatus = localStorage.getItem('chatGPTChatBotStatus');
