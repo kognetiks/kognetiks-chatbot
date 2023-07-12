@@ -323,6 +323,20 @@
     margin-right: 40px;
 }
 
+.item-style {
+    display: flex;
+    gap: 10px;
+    padding: 10px 10px;
+    align-items: center;
+    color: #000;
+}
+
+.item-style:hover {
+    background-color: #F0F2F7;
+    cursor: pointer;
+    z-index: 12;
+}
+
 #chatbot-chatgpt-submit {
     cursor: pointer;
     position: absolute; 
@@ -360,6 +374,39 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
+}
+
+#action-option {
+    position: relative;
+}
+  
+#action-option:hover .tooltip-text {
+    visibility: visible;
+}
+  
+.tooltip-text {
+visibility: hidden;
+width: 90px;
+background-color: #fff;
+color: #000;
+font-size: 12px;
+text-align: center;
+border-radius: 6px;
+padding: 5px;
+position: absolute;
+z-index: 1;
+right: -50%;    
+transform: translateX(-50%);
+opacity: 1;
+transition: opacity 0.3s;
+}
+
+.tooltip-text::after {
+content: "";
+position: absolute;
+top: 100%;
+left: 50%;
+margin-left: -5px;
 }
 
 ::-webkit-scrollbar {

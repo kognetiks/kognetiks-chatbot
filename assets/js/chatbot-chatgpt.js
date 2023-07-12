@@ -7,6 +7,7 @@ jQuery(document).ready(function ($) {
     var messageInput = $('#chatbot-chatgpt-message');
     var conversation = $('#chatbot-chatgpt-conversation');
     var submitButton = $('#chatbot-chatgpt-submit');
+    var optionbtn = $('#action-option'); 
 
     // Set bot width with the default Narrow or from setting Wide - Ver 1.4.2
     var chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
@@ -112,6 +113,7 @@ jQuery(document).ready(function ($) {
     chatbotCollapseBtn.on('click', toggleChatbot);
     chatbotCollapsed.on('click', toggleChatbot);
     chatGptOpenButton.on('click', toggleChatbot);
+    optionbtn.on('click', toggleChatOption);
 
     function appendMessage(message, sender, cssClass) {
     var messageElement = $('<div></div>').addClass('chat-message');
@@ -241,7 +243,17 @@ jQuery(document).ready(function ($) {
             scrollToBottom();
         }
     }
-
+    // Add the toggleChatOption() function - Ver 0.0.1
+    function toggleChatOption() {
+        var itemGroup = $('#item-group');
+        if (itemGroup.is(':visible')) {
+            itemGroup.hide();
+            $('.tooltip-text').html("Open options");
+        } else {
+            itemGroup.show();
+            $('.tooltip-text').html("Close options");
+        }
+    }
     // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0 and updated for Ver 1.4.1
     function loadChatbotStatus() {
         const chatGPTChatBotStatus = localStorage.getItem('chatGPTChatBotStatus');

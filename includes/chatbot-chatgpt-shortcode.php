@@ -19,8 +19,15 @@ function chatbot_chatgpt_shortcode() {
         <div id="chatbot-chatgpt-header" class="header-back header-rounded flex flex-row justify-between" >
             <div id="chatgptTitle" class="title"><span><?php echo $bot_name; ?></span><img src="<?php echo $icons_url . '/wave.png';?>" alt="Hi" class="wave-size" ></div>
             <div class="right-header flex items-center ">
-                <div class="action-btn">
+                <div class="action-btn" id="action-option">
                   <i class="fa fa-ellipsis-v"></i>
+                  <span class="tooltip-text">Open options</span>
+                </div>
+                <div style="position: absolute; background: white;top: 60px; right: 40px;  border-radius: 5px; padding: 5px; z-index: 11; box-shadow: rgba(0, 18, 46, 0.16) 0px 8px 36px 0px; display:none" id="item-group">
+                    <div style="display:flex;  flex-direction: column;" >
+                        <div class="item-style"> <i class="fa fa-bell-slash"></i> Turn off notifications </div>
+                        <div class="item-style"> <i class="fa fa-star" style="color: #ffe500;"></i> Rate this conversation </div>
+                    </div>
                 </div>
                 <div id="collapse_action" class="action-btn">
                   <i class="fa fa-chevron-down"></i> 
