@@ -8,10 +8,50 @@
  *
  */
 
+/* Avatar Settings - Ver 1.5.0 */
+.chatbot-avatar {
+    width: 60px;
+    height: 60px;
+    /* margin: -20px; */
+    /* margin: -10px -5px -10px -5px;  top, right, bottom, left */
+}
+
+/* Avatar Settings - Ver 1.5.0 */
+.chatbot-bubble {
+    background-color: #f0f0f0; /* Very light gray background */
+    color: #000; /* Black text */
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px;
+    font-size: 14px;
+    min-width: 150px; /* Minimum width of the bubble */
+    max-width: 300px; /* Maximum width of the bubble */
+    word-wrap: break-word;
+    position: absolute;
+    right: 80px; /* Adjust this value as needed */
+    /* top: -3px; Adjust this value as needed */
+    z-index: 100;
+    white-space: normal; /* This will allow the text to wrap and resize the bubble */
+    display: inline-block; /* This makes the width of the bubble adapt to its content, up to max-width */
+    font-family: sans-serif;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16); /* Faint shadow */
+}
+
+#chatgpt-open-btn.avatar-icon {
+    padding: 5px;
+}
+
+#chatgpt-open-btn.dashicon {
+    padding: 15px;
+}
 
 /* Reset font family for Dashicons */
-.chatbot-container .chatbot-collapse-btn.dashicons.dashicons-format-chat {
+#chatgpt-open-btn {
+    position: relative;
     font-family: dashicons;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Set font family to sans-serif for all text within the plugin */
@@ -175,7 +215,7 @@
     background-color: #007bff;
     border: none;
     cursor: pointer;
-    padding: 15px;
+    /* padding: 15px */
     float: right;
     box-shadow: 2px 4px 15px rgb(102, 92, 143);
     border-radius: 10%;

@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.4.2
+ * Version:     1.5.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -31,10 +31,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 
-// Diagnostics On or Off - Ver 1.4.2
-update_option('chatgpt_diagnostics', 'Off');
+// Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
+// update_option('chatgpt_diagnostics', 'Off');
 
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
@@ -42,19 +43,37 @@ function chatbot_chatgpt_enqueue_scripts() {
     wp_enqueue_style( 'dashicons' );
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
-
-    // Ver 1.4.1
-    // Enqueue the chatbot-chatgpt-local.js file
+    // Enqueue the chatbot-chatgpt-local.js file - Ver 1.4.1
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
-    $chatbot_settings = array(
-        'chatgpt_bot_name' => esc_attr(get_option('chatgpt_bot_name')),
-        'chatgpt_initial_greeting' => esc_attr(get_option('chatgpt_initial_greeting')),
-        'chatgpt_subsequent_greeting' => esc_attr(get_option('chatgpt_subsequent_greeting')),
-        'chatGPTChatBotStatus' => esc_attr(get_option('chatGPTChatBotStatus')),
-        'chatgpt_disclaimer_setting' => esc_attr(get_option('chatgpt_disclaimer_setting')),
-        'chatgpt_max_tokens_setting' => esc_attr(get_option('chatgpt_max_tokens_setting')),
-        'chatgpt_width_setting' => esc_attr(get_option('chatgpt_width_setting')),
+
+    // Revised for Ver 1.5.0 
+    $option_keys = array(
+        'chatgpt_bot_name',
+        'chatgpt_initial_greeting',
+        'chatgpt_subsequent_greeting',
+        'chatgptStartStatus',
+        'chatgptStartStatusNewVisitor',
+        'chatgpt_disclaimer_setting',
+        'chatgpt_max_tokens_setting',
+        'chatgpt_width_setting',
+        'chatgpt_diagnostics',
+        // Avatar Options - Ver 1.5.0
+        'chatgpt_avatar_icon_setting',
+        'chatgpt_avatar_icon_url_setting',
+        'chatgpt_custom_avatar_icon_setting',
+        'chatgpt_avatar_greeting_setting',
     );
+
+    $chatbot_settings = array();
+    foreach ($option_keys as $key) {
+        $chatbot_settings[$key] = esc_attr(get_option($key));
+    }
+
+    $chatbot_settings['iconBaseURL'] = plugins_url( 'assets/icons/', __FILE__ );
+    wp_localize_script('chatbot-chatgpt-js', 'plugin_vars', array(
+        'pluginUrl' => plugins_url('', __FILE__ ),
+    ));
+
     wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
