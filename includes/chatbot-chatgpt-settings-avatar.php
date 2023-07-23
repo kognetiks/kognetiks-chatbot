@@ -54,9 +54,9 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
     <input type="hidden" id="chatgpt_avatar_icon_setting" name="chatgpt_avatar_icon_setting" value="<?php echo esc_attr( $selectedIcon ); ?>">
     <table>
         <?php
-            $iconCount = 12;  // Update this number as you add more icons
-            $cols = 7;
-            $rows = 4;
+            $iconCount = 29;  // Update this number as you add more icons
+            $cols = 10;
+            $rows = 5;
             $iconIndex = 0;
 
             // $selectedIcon = esc_attr(get_option('chatgpt_avatar_icon_setting', 'icon-001.png'));
@@ -70,7 +70,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
                         $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
                         echo '<td  style="padding: 15px;">';
                         // change the id attribute of the image tag to replace '-' with '_'
-                        echo '<img src="' . plugins_url('../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:160px;height:160px;cursor:pointer;"/>';
+                        echo '<img src="' . plugins_url('../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:100px;height:100px;cursor:pointer;"/>';
                         echo '</td>';
                         $iconIndex++;
                     }

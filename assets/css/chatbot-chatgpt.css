@@ -42,7 +42,8 @@
 }
 
 #chatgpt-open-btn.dashicon {
-    padding: 15px;
+    /* Padding was increase from 15px to 25px after adding avatars - Ver 1.5.0 */
+    padding: 25px;
 }
 
 /* Reset font family for Dashicons */
@@ -215,7 +216,7 @@
     background-color: #007bff;
     border: none;
     cursor: pointer;
-    /* padding: 15px */
+    padding: 15px;
     float: right;
     box-shadow: 2px 4px 15px rgb(102, 92, 143);
     border-radius: 10%;
