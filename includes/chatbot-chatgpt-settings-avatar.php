@@ -41,13 +41,10 @@ function chatbot_chatgpt_avatar_greeting_callback($args) {
 
 // Avatar Icon settings section callback - Ver 1.5.0
 function chatbot_chatgpt_avatar_icon_callback($args) {
-    // Get the avatar option. If it's not set or is NULL, default to an empty string.
-    $selectedIcon = "";
-    $selectedIcon = esc_attr(get_option('chatgpt_avatar_icon_setting'));
-    // If it's not set or is NULL, default to an empty string.
-    // Belt and Suspenders
+    // Get the avatar option. If it's not set or is NULL, default to the first icon.
+    $selectedIcon = esc_attr(get_option('chatgpt_avatar_icon_setting', 'icon-001.png'));
     if ($selectedIcon === '') {
-        $selectedIcon = '';
+        $selectedIcon = 'icon-001.png';
     }
     ?>
     <p>Select your icon by clicking on an image to select it.  Don't forget to click 'Save Settings'.</p>
