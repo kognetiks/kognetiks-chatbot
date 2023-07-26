@@ -20,8 +20,12 @@ function chatbot_chatgpt_shortcode() {
         </div>
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
-            <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( 'Type your message...' ); ?>">
-            <button id="chatbot-chatgpt-submit">Send</button>
+        <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( 'Type your message ...' ); ?>"> -->
+        <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( 'Enter your message ...' ); ?>">
+            <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
+            <button id="chatbot-chatgpt-submit">
+                <img src="<?php echo plugins_url('../assets/icons/paper-airplane-icon.png', __FILE__); ?>" alt="Send">
+            </button>
         </div>
     </div>
     <button id="chatgpt-open-btn" style="display: none;">

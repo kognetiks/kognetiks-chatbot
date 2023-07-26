@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.4.2
+ * Version:     1.5.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -31,10 +31,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-registration.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setup.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 
-// Diagnostics On or Off - Ver 1.4.2
-update_option('chatgpt_diagnostics', 'Off');
+// Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
+// update_option('chatgpt_diagnostics', 'Off');
 
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
@@ -42,27 +49,53 @@ function chatbot_chatgpt_enqueue_scripts() {
     wp_enqueue_style( 'dashicons' );
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
-
-    // Ver 1.4.1
-    // Enqueue the chatbot-chatgpt-local.js file
+    // Enqueue the chatbot-chatgpt-local.js file - Ver 1.4.1
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
-    $chatbot_settings = array(
-        'chatgpt_bot_name' => esc_attr(get_option('chatgpt_bot_name')),
-        'chatgpt_initial_greeting' => esc_attr(get_option('chatgpt_initial_greeting')),
-        'chatgpt_subsequent_greeting' => esc_attr(get_option('chatgpt_subsequent_greeting')),
-        'chatGPTChatBotStatus' => esc_attr(get_option('chatGPTChatBotStatus')),
-        'chatgpt_disclaimer_setting' => esc_attr(get_option('chatgpt_disclaimer_setting')),
-        'chatgpt_max_tokens_setting' => esc_attr(get_option('chatgpt_max_tokens_setting')),
-        'chatgpt_width_setting' => esc_attr(get_option('chatgpt_width_setting')),
+
+    // Revised for Ver 1.5.0 
+    $option_keys = array(
+        'chatgpt_bot_name',
+        'chatgpt_initial_greeting',
+        'chatgpt_subsequent_greeting',
+        'chatgptStartStatus',
+        'chatgptStartStatusNewVisitor',
+        'chatgpt_disclaimer_setting',
+        'chatgpt_max_tokens_setting',
+        'chatgpt_width_setting',
+        'chatgpt_diagnostics',
+        // Avatar Options - Ver 1.5.0
+        'chatgpt_avatar_icon_setting',
+        'chatgpt_avatar_icon_url_setting',
+        'chatgpt_custom_avatar_icon_setting',
+        'chatgpt_avatar_greeting_setting',
     );
+
+    $chatbot_settings = array();
+    foreach ($option_keys as $key) {
+        $chatbot_settings[$key] = esc_attr(get_option($key));
+    }
+
+    $chatbot_settings['iconBaseURL'] = plugins_url( 'assets/icons/', __FILE__ );
+    wp_localize_script('chatbot-chatgpt-js', 'plugin_vars', array(
+        'pluginUrl' => plugins_url('', __FILE__ ),
+    ));
+
     wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
-        'api_key' => esc_attr(get_option('chatgpt_api_key')),
+        // 'api_key' => esc_attr(get_option('chatgpt_api_key')),
     ));
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
+
+
+// Settings and Deactivation Links - Ver - 1.5.0
+function enqueue_jquery_ui() {
+    wp_enqueue_style('wp-jquery-ui-dialog');
+    wp_enqueue_script('jquery-ui-dialog');
+}
+add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
@@ -87,16 +120,13 @@ function chatbot_chatgpt_send_message() {
     wp_send_json_success($response);
 }
 
-// Add link to chatgtp options - setting page
-function chatbot_chatgpt_plugin_action_links($links) {
-    $settings_link = '<a href="../wp-admin/options-general.php?page=chatbot-chatgpt">' . __('Settings', 'chatbot-chatgpt') . '</a>';
-    array_unshift($links, $settings_link);
-    return $links;
-}
-
 add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
+
+// Settings and Deactivation - Ver 1.5.0
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
+add_action('wp_ajax_chatbot_chatgpt_deactivation_feedback', 'chatbot_chatgpt_deactivation_feedback');
+add_action('admin_footer', 'chatbot_chatgpt_admin_footer');
 
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {

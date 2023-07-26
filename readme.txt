@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
 Tested up to: 6.2
-Stable tag: 1.4.2
+Stable tag: 1.5.0
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -18,6 +18,10 @@ Chatbot ChatGPT for WordPress is a plugin that allows you to effortlessly integr
 ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner. It is designed to answer questions, provide suggestions, and engage in conversations with users. ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, ChatGPT can be used in various fields such as healthcare, education, finance, and many more.
 
 Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo or the gpt-4 model brings it to life within your WordPress Website.
+
+The Chatbot ChatGPT plugin now features custom avatars (see new screenshots) to add a personalized touch to visitor interactions. Select an avatar that best suits the personality of your site! With this update, you can further customize the user experience, lending a unique identity to your Chatbot.
+
+To use the new Avatar feature, navigate to the plugin settings page, locate the 'Avatar' section, and select your desired avatar. Avatars can be an amazing way to enhance user engagement and give your Chatbot a touch of creativity and uniqueness. Enjoy!
 
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
 
@@ -46,6 +50,17 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 5. Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]
 
 Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI's ChatGPT API.
+
+== API Key Safety and Security ==
+
+Your API key serves as the confidential password providing access to your OpenAI account and the resources associated with it. If this key falls into the wrong hands, it can be misused in a variety of detrimental ways, including unauthorized usage, potential data leaks, and the improper application of AI models. It's crucial, therefore, to implement the following protective measures:
+
+1. Secure key storage: Ensure your API keys are stored in a safe and secure manner.
+2. Monitor and review usage: Frequently scrutinize and evaluate the usage of your API key. OpenAI provides handy usage data and records that can assist in detecting unusual activity. For insightful usage statistics, visit [https://platform.openai.com/account/usage](https://platform.openai.com/account/usage).
+3. Establish usage limits: Initially, implement a low hard limit to ensure that if the limit is reached at any point during the month, any further requests will be denied. You can set up both hard and soft limits at [https://platform.openai.com/account/billing/limits](https://platform.openai.com/account/billing/limits).
+4. Regular key rotation: Frequently changing your API keys can reduce the risk of misuse. If you observe any unexpected activity, it's important to immediately revoke your API keys. As a preventative measure, you might want to regularly revoke them to avert misuse. Manage your API keys at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
+
+Remember, wielding AI power requires immense responsibility — it's incumbent upon us all to ensure its careful and secure use.
 
 == Installation ==
 
@@ -86,8 +101,16 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 7. Mobile Experience - Get a response from Chatbot ChatGPT
 8. Mobile Experience - Chatbot ChatGPT minimize (Lower Right)
 9. Chatbot ChatGPT shown in Wide mode
+10. Optional custom Avatars to greet visitors with a configurable message
+11. Avatar greeting with message 
 
 == Changelog ==
+
+= 1.5.0 =
+* Added support for an avatar and avatar greetings
+* Added support the open chatbot for new visitor vs returning visitor
+* Added additional phrases to the add or removed default AI disclaimer
+* Added an option to turn on/off diagnostics for developer support
 
 = 1.4.2 =
 * Added support for the GPT-4 API in settings - requires access to gpt-4 API, see [https://openai.com/waitlist/gpt-4-api](https://openai.com/waitlist/gpt-4-api)
