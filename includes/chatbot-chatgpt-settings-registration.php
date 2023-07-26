@@ -191,13 +191,14 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_avatar_section'
     );
 
-    add_settings_field(
-        'chatgpt_custom_avatar_icon_setting',
-        'Custom Avatar URL',
-        'chatbot_chatgpt_custom_avatar_callback',
-        'chatbot_chatgpt_avatar',
-        'chatbot_chatgpt_avatar_section'
-    );
+    // Coming in Ver 2.0.0
+    // add_settings_field(
+    //     'chatgpt_custom_avatar_icon_setting',
+    //     'Custom Avatar URL',
+    //     'chatbot_chatgpt_custom_avatar_callback',
+    //     'chatbot_chatgpt_avatar',
+    //     'chatbot_chatgpt_avatar_section'
+    // );
 
     add_settings_field(
         'chatgpt_avatar_greeting_setting',

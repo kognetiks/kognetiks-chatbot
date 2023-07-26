@@ -84,7 +84,7 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
-        'api_key' => esc_attr(get_option('chatgpt_api_key')),
+        // 'api_key' => esc_attr(get_option('chatgpt_api_key')),
     ));
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');

@@ -189,7 +189,7 @@ function chatbot_chatgpt_deactivation_feedback() {
     $domain_name = str_replace('www.', '', $domain_name);
 
     // Prepare the email
-    $to = 'support@kognetiks.com';
+    $to = 'deactivation@kognetiks.com';
     $subject = '[Chatbot ChatGPT] Plugin Deactivation Feedback';
     $body = 'Reason for deactivation: ' . $reason . "\n" .
             'Other text: ' . $other_text . "\n" .

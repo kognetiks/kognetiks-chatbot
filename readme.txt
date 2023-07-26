@@ -19,6 +19,10 @@ ChatGPT is a conversational AI platform that uses natural language processing an
 
 Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo or the gpt-4 model brings it to life within your WordPress Website.
 
+The Chatbot ChatGPT plugin now features custom avatars (see new screenshots) to add a personalized touch to visitor interactions. Select an avatar that best suits the personality of your site! With this update, you can further customize the user experience, lending a unique identity to your Chatbot.
+
+To use the new Avatar feature, navigate to the plugin settings page, locate the 'Avatar' section, and select your desired avatar. Avatars can be an amazing way to enhance user engagement and give your Chatbot a touch of creativity and uniqueness. Enjoy!
+
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
 
 Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/)
@@ -97,14 +101,16 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 7. Mobile Experience - Get a response from Chatbot ChatGPT
 8. Mobile Experience - Chatbot ChatGPT minimize (Lower Right)
 9. Chatbot ChatGPT shown in Wide mode
+10. Optional custom Avatars to greet visitors with a configurable message
+11. Avatar greeting with message 
 
 == Changelog ==
 
 = 1.5.0 =
+* Added support for an avatar and avatar greetings
 * Added support the open chatbot for new visitor vs returning visitor
 * Added additional phrases to the add or removed default AI disclaimer
-* Added option to turn on/off diagnostics for developer support
-* Updated handling of the diagnostics on/off settings
+* Added an option to turn on/off diagnostics for developer support
 
 = 1.4.2 =
 * Added support for the GPT-4 API in settings - requires access to gpt-4 API, see [https://openai.com/waitlist/gpt-4-api](https://openai.com/waitlist/gpt-4-api)
