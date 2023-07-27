@@ -106,6 +106,9 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 
 == Changelog ==
 
+= 1.5.1 =
+* Corrected for conversation appending multiple times
+
 = 1.5.0 =
 * Added support for an avatar and avatar greetings
 * Added support the open chatbot for new visitor vs returning visitor
