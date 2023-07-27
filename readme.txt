@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
 Tested up to: 6.2
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -105,6 +105,9 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 11. Avatar greeting with message 
 
 == Changelog ==
+
+= 1.5.1 =
+* Corrected for conversation appending multiple times
 
 = 1.5.0 =
 * Added support for an avatar and avatar greetings

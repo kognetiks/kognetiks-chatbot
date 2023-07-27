@@ -16,10 +16,11 @@ jQuery(document).ready(function ($) {
 
     // Diagnostics = Ver 1.4.2
     if (chatbotSettings.chatgpt_diagnostics === 'On') {
-        console.log(messageInput);
-        console.log(conversation);
-        console.log(submitButton);
-        console.log(chatGptChatBot);
+        console.log('FUNCTION: chatbot-chatgpt.js');
+        console.log('messageInput: ' + messageInput);
+        console.log('conversation' + conversation);
+        console.log('submitButton: ' + submitButton);
+        console.log('chatGptChatBot: ' + chatGptChatBot);
         console.log('chatgpt_width_setting: ' + chatgpt_width_setting);
     }
 
@@ -91,7 +92,9 @@ jQuery(document).ready(function ($) {
 
             // Logging for Diagnostics - Ver 1.4.2
             if (chatbotSettings.chatgpt_diagnostics === 'On') {
-                console.log("initialGreeting" . initialGreeting);
+                console.log('FUNCTION: initializeChatbot at isFirstTime');
+                console.log("isFirstTime: " + isFirstTime);
+                console.log("initialGreeting: " + initialGreeting);
             }
 
             // Don't append the greeting if it's already in the conversation
@@ -118,7 +121,9 @@ jQuery(document).ready(function ($) {
 
             // Logging for Diagnostics - Ver 1.4.2
             if (chatbotSettings.chatgpt_diagnostics === 'On') {
-                console.log("initialGreeting" . initialGreeting);
+                console.log('FUNCTION: initializeChatbot at else');
+                console.log("isFirstTime: " + isFirstTime);
+                console.log("initialGreeting: " + initialGreeting);
             }
 
             // Don't append the greeting if it's already in the conversation
@@ -315,11 +320,6 @@ jQuery(document).ready(function ($) {
 
         // Diagnostics - Ver 1.5.0
         if (chatbotSettings.chatgpt_diagnostics === 'On') {
-            console.log('***** SHOW THE ICON HERE chatGptOpenButton *****');
-        }
-
-        // Diagnostics - Ver 1.5.0
-        if (chatbotSettings.chatgpt_diagnostics === 'On') {
             console.log('FUNCTION: loadChatbotStatus - AFTER DECISION');
             console.log('Diagnostics: ' + chatbotSettings.chatgpt_diagnostics);
             console.log('chatbotSettings for chatgtpStartStatus: ' + chatbotSettings.chatgptStartStatus);
@@ -328,30 +328,16 @@ jQuery(document).ready(function ($) {
             console.log('localStorage for chatgptStartStatusNewVisitor: ' + localStorage.getItem('chatgptStartStatusNewVisitor'));
         }
         
-        // If the chatbot status is not set in local storage, use chatgpt_start_status
-        if (chatgptStartStatus === null) {
-            if (chatgptStartStatus === 'closed') {
-                chatGptChatBot.hide();
-                chatGptOpenButton.show();
-            } else {
-                chatGptChatBot.show();
-                chatGptOpenButton.hide();
-                // Load the conversation when the chatbot is shown on page load
-                loadConversation();
-                scrollToBottom();
-            }
-        } else if (chatgptStartStatus === 'closed') {
-            if (chatGptChatBot.is(':visible')) {
-                chatGptChatBot.hide();
-                chatGptOpenButton.show();
-            }
-        } else if (chatgptStartStatus === 'open') {
-            if (chatGptChatBot.is(':hidden')) {
-                chatGptChatBot.show();
-                chatGptOpenButton.hide();
-                loadConversation();
-                scrollToBottom();
-            }
+        // If the chatbot status is not set in local storage, use chatgpt_start_status - Ver 1.5.1
+        if (chatgptStartStatus === 'closed') {
+            chatGptChatBot.hide();
+            chatGptOpenButton.show();
+        } else {
+            chatGptChatBot.show();
+            chatGptOpenButton.hide();
+            // Load the conversation if the chatbot is open n on page load
+            loadConversation();
+            scrollToBottom();
         }
     }
 
@@ -359,7 +345,7 @@ jQuery(document).ready(function ($) {
     function scrollToBottom() {
         setTimeout(() => {
             if (chatbotSettings.chatgpt_diagnostics === 'On') {
-                console.log("Scrolling to bottom");
+                console.log("FUNCTION: Scrolling to bottom");
                 console.log("Scroll height: " + conversation[0].scrollHeight);
             }
             conversation.scrollTop(conversation[0].scrollHeight);
@@ -369,11 +355,35 @@ jQuery(document).ready(function ($) {
     // Load conversation from local storage if available - Ver 1.2.0
     function loadConversation() {
         var storedConversation = sessionStorage.getItem('chatgpt_conversation');
+        localStorage.setItem('chatgptStartStatusNewVisitor', 'Closed');
+  
+        // Diagnostics - Ver 1.5.0
+        if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            console.log('FUNCTION: loadConversation');
+            console.log('Diagnostics: ' + chatbotSettings.chatgpt_diagnostics);
+            console.log('var chatgtpStartStatus: ' + chatbotSettings.chatgptStartStatus);
+            console.log('localStorage chatgptStartStatus: ' + localStorage.getItem('chatgptStartStatus'));
+            console.log('var chatgtpStartStatusNewVisitor: ' + chatbotSettings.chatgptStartStatusNewVisitor);
+            console.log('localStorage chatgptStartStatusNewVisitor: ' + localStorage.getItem('chatgptStartStatusNewVisitor'));
+            console.log('storedConversation: ' + storedConversation);
+        }
+
         if (storedConversation) {
-            conversation.append(storedConversation);
+            if (chatbotSettings.chatgpt_diagnostics === 'On') {
+                console.log('FUNCTION: loadConversation - IN THE IF STATEMENT');
+            }
+
+            // Check if current conversation is different from stored conversation
+            if (conversation.html() !== storedConversation) {
+                conversation.html(storedConversation);  // Set the conversation HTML to stored conversation
+            }
+
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
         } else {
+            if (chatbotSettings.chatgpt_diagnostics === 'On') {
+                console.log('FUNCTION: loadConversation - IN THE ELSE STATEMENT');
+            }
             initializeChatbot();
         }
     }
