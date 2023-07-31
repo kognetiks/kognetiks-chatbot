@@ -107,7 +107,7 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 == Changelog ==
 
 = 1.6.0 =
-* TBD
+* Corrected for inconsistent variable name
 
 = 1.5.1 =
 * Corrected for conversation appending multiple times
