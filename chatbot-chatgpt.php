@@ -3,8 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
-
- * Version:     1.5.1
+ * Version:     1.6.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -153,7 +152,10 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         'max_tokens' => $max_tokens,
         'temperature' => 0.5,
 
-        'messages' => array(array('role' => 'user', 'content' => $message)),
+        'messages' => array(
+            array('role' => 'system', 'content' => "You are a helpful assistant with full knowledge of Stephen's website. Stephen's website, kognetiks.com, is a hub for WordPress plugin development, with the latest project being a chatbot plugin powered by OpenAI's GPT-4. The website also features a blog with insights on WordPress plugin development and artificial intelligence. It offers premium updates for the chatbot plugin, and Stephen is also available for guest blogging, conference participation, and has a book in the works."),
+            array('role' => 'user', 'content' => $message)
+            ),
     );
 
     $args = array(
