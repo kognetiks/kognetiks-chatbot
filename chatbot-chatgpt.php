@@ -152,7 +152,10 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         'max_tokens' => $max_tokens,
         'temperature' => 0.5,
 
-        'messages' => array(array('role' => 'user', 'content' => $message)),
+        'messages' => array(
+            array('role' => 'system', 'content' => "You are a helpful assistant with full knowledge of Stephen's website. Stephen's website, kognetiks.com, is a hub for WordPress plugin development, with the latest project being a chatbot plugin powered by OpenAI's GPT-4. The website also features a blog with insights on WordPress plugin development and artificial intelligence. It offers premium updates for the chatbot plugin, and Stephen is also available for guest blogging, conference participation, and has a book in the works."),
+            array('role' => 'user', 'content' => $message)
+            ),
     );
 
     $args = array(
