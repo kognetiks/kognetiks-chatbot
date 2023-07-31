@@ -30,14 +30,16 @@ function chatbot_chatgpt_api_key_callback($args) {
     <?php
 }
 
+// Fix saving API key 1.5.2
 function sanitize_api_key($input) {
     // if input is '********', return the existing API key instead
     if ($input === '********') {
-        return get_option('your_api_key_option_name');
+        return get_option('chatgpt_api_key');
     }
     // otherwise, save the new API key
     return $input;
 }
+
 
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
