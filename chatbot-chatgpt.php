@@ -147,13 +147,13 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Max tokens - Ver 1.4.2
     $max_tokens = intval(esc_attr(get_option('chatgpt_max_tokens_setting', '150')));
 
+    // Added Role, System, Content Static Veriable - Ver 1.6.0
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
         'temperature' => 0.5,
-
         'messages' => array(
-            array('role' => 'system', 'content' => "You are a helpful assistant with full knowledge of Stephen's website. Stephen's website, kognetiks.com, is a hub for WordPress plugin development, with the latest project being a chatbot plugin powered by OpenAI's GPT-4. The website also features a blog with insights on WordPress plugin development and artificial intelligence. It offers premium updates for the chatbot plugin, and Stephen is also available for guest blogging, conference participation, and has a book in the works."),
+            array('role' => 'system', 'content' => "I am a versatile, friendly, and helpful assistant designed to support you in a variety of tasks. From answering questions to providing solutions, my goal is to make your life easier and more productive. I am powered by advanced artificial intelligence technology to ensure the accuracy and relevance of my responses. I can help you with diverse topics and strive to understand and adapt to your needs."),
             array('role' => 'user', 'content' => $message)
             ),
     );
