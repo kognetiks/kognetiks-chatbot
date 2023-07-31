@@ -40,6 +40,7 @@ function sanitize_api_key($input) {
     return $input;
 }
 
+
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
     // Get the saved chatgpt_model_choice value or default to "gpt-3.5-turbo"
