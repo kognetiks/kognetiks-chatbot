@@ -19,6 +19,8 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_model_choice');
     // Max Tokens setting options - Ver 1.4.2
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_max_tokens_setting');
+    // Covnersation Context - Ver 1.6.1
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context');
 
     add_settings_section(
         'chatbot_chatgpt_api_model_section',
@@ -48,6 +50,15 @@ function chatbot_chatgpt_settings_init() {
         'chatgpt_max_tokens_setting',
         'Maximum Tokens Setting',
         'chatgpt_max_tokens_setting_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
+    // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
+    add_settings_field(
+        'chatbot_chatgpt_conversation_context',
+        'Conversation Context',
+        'chatbot_chatgpt_conversation_context_callback',
         'chatbot_chatgpt_api_model',
         'chatbot_chatgpt_api_model_section'
     );

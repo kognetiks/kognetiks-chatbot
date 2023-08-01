@@ -105,6 +105,8 @@ function chatbot_chatgpt_send_message() {
     $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     // Max tokens - Ver 1.4.2
     $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
+    // Conversation Context - Ver 1.6.1
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'I am a versatile, friendly, and helpful assistant'));
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
@@ -147,16 +149,26 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Max tokens - Ver 1.4.2
     $max_tokens = intval(esc_attr(get_option('chatgpt_max_tokens_setting', '150')));
 
+    // Conversation Context - Ver 1.6.1
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'I am a versatile, friendly, and helpful assistant.'));
+
     // Added Role, System, Content Static Veriable - Ver 1.6.0
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
         'temperature' => 0.5,
         'messages' => array(
-            array('role' => 'system', 'content' => "I am a versatile, friendly, and helpful assistant designed to support you in a variety of tasks. From answering questions to providing solutions, my goal is to make your life easier and more productive. I am powered by advanced artificial intelligence technology to ensure the accuracy and relevance of my responses. I can help you with diverse topics and strive to understand and adapt to your needs."),
+            array('role' => 'system', 'content' => $context),
             array('role' => 'user', 'content' => $message)
             ),
     );
+
+
+    // Diagnostics - V 1.6.1
+    // if ($chatgpt_diagnostics === 'On') {
+    //     error_log(print_r('context:' . print_r($context, true), true));
+    //     error_log(print_r('message:' . print_r($message, true), true));
+    // }    
 
     $args = array(
         'headers' => $headers,
