@@ -219,6 +219,16 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_avatar_section'
     );
 
+    // Support settings tab - Ver 1.6.1
+    register_setting('chatbot_chatgpt_crawler', 'chatgpt_crawler_results');
+
+    add_settings_section(
+        'chatbot_chatgpt_crawler_section',
+        'Knowledge Navigator&trade;',
+        'chatbot_chatgpt_crawler_callback',
+        'chatbot_chatgpt_crawler'
+    );
+
 }
 
 add_action('admin_init', 'chatbot_chatgpt_settings_init');

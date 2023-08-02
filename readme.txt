@@ -23,6 +23,8 @@ The Chatbot ChatGPT plugin now features custom avatars (see new screenshots) to 
 
 To use the new Avatar feature, navigate to the plugin settings page, locate the 'Avatar' section, and select your desired avatar. Avatars can be an amazing way to enhance user engagement and give your Chatbot a touch of creativity and uniqueness. Enjoy!
 
+The Knowledge Navigator™ is an innovative component of our ChatGPT plugin designed to perform an in-depth analysis of your website. It initiates a comprehensive crawl through your website's pages, following internal links to thoroughly explore the depth and breadth of your site's content. As it navigates your site, it meticulously extracts keywords and phrases from each page, aggregating them into a detailed map of your site's information architecture. This data is then output to "results.csv" and "results.json" files, stored in a dedicated 'results' directory within the plugin's folder. The goal of the Knowledge Navigator™ is to help the ChatGPT plugin understand the content and structure of your website better, which in turn allows it to provide more accurate and contextually relevant responses to user inquiries. Ultimately, this empowers you to offer a more interactive and tailored user experience, fueled by the sophisticated AI capabilities of OpenAI's GPT API.
+
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
 
 Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/)
@@ -105,6 +107,9 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 11. Avatar greeting with message 
 
 == Changelog ==
+
+= 1.6.1 =
+* Added the Knowledge Navigator™ which is an innovative component of our plugin designed to perform an in-depth analysis of your website for better, more contextual relevant responses by the chatbot.
 
 = 1.6.0 =
 * Corrected for inconsistent variable name
