@@ -220,13 +220,21 @@ function chatbot_chatgpt_settings_init() {
     );
 
     // Support settings tab - Ver 1.6.1
-    register_setting('chatbot_chatgpt_crawler', 'chatgpt_crawler_results');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_knowledge_navigator');
 
     add_settings_section(
-        'chatbot_chatgpt_crawler_section',
+        'chatbot_chatgpt_knowledge_navigator_section',
         'Knowledge Navigator&trade;',
-        'chatbot_chatgpt_crawler_callback',
-        'chatbot_chatgpt_crawler'
+        'chatbot_chatgpt_knowledge_navigator_section_callback',
+        'chatbot_chatgpt_knowledge_navigator'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_knowledge_navigator',
+        'Run Knowledge Navigator&trade;',
+        'chatbot_chatgpt_knowledge_navigator_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_knowledge_navigator_section'
     );
 
 }

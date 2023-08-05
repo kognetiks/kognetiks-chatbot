@@ -35,6 +35,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-crawler.php'; // Crawler aka Knowlege Navigator(TM) - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-registration.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setup.php'; // Refactoring Settings - Ver 1.5.0
@@ -52,6 +53,26 @@ function chatbot_chatgpt_enqueue_scripts() {
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
     // Enqueue the chatbot-chatgpt-local.js file - Ver 1.4.1
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
+
+    // Defaults for Ver 1.6.1
+    $defaults = array(
+        'chatgpt_bot_name' => 'Chatbot ChatGPT',
+        'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
+        'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
+        'chatgptStartStatus' => 'closed',
+        'chatgptStartStatusNewVisitor' => 'closed',
+        'chatgpt_disclaimer_setting' => 'No',
+        'chatgpt_max_tokens_setting' => '150',
+        'chatgpt_width_setting' => 'Narrow',
+        'chatgpt_diagnostics' => 'Off',
+        'chatgpt_avatar_icon_setting' => 'icon-001.png',
+        'chatgpt_avatar_icon_url_setting' => '',
+        'chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
+        'chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
+        'chatgpt_model_choice' => 'gpt-3.5-turbo',
+        'chatgpt_max_tokens_setting' => 150,
+        'chatbot_chatgpt_conversation_context' => 'I am a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.',
+    );
 
     // Revised for Ver 1.5.0 
     $option_keys = array(
@@ -73,7 +94,8 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
-        $chatbot_settings[$key] = esc_attr(get_option($key));
+        $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
+        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
     }
 
     $chatbot_settings['iconBaseURL'] = plugins_url( 'assets/icons/', __FILE__ );
@@ -87,6 +109,23 @@ function chatbot_chatgpt_enqueue_scripts() {
         'ajax_url' => admin_url('admin-ajax.php'),
         // 'api_key' => esc_attr(get_option('chatgpt_api_key')),
     ));
+
+    // Update localStorage - Ver 1.6.1
+    echo "<script type=\"text/javascript\">
+    document.addEventListener('DOMContentLoaded', (event) => {
+        let chatbotSettings = " . json_encode($chatbot_settings) . ";
+
+        Object.keys(chatbotSettings).forEach((key) => {
+            if(!localStorage.getItem(key)) {
+                console.log('Setting ' + key + ' in localStorage');
+                localStorage.setItem(key, chatbotSettings[key]);
+            } else {
+                console.log(key + ' is already set in localStorage');
+            }
+        });
+    });
+    </script>";
+    
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
@@ -97,6 +136,15 @@ function enqueue_jquery_ui() {
     wp_enqueue_script('jquery-ui-dialog');
 }
 add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
+
+
+// Crawler aka Knowledge Navigator(TM) - V 1.6.1
+function enqueue_crawler_script() {
+    wp_enqueue_script('crawler-script', plugins_url('/assets/js/ajax-crawler.js', __FILE__), array('jquery'), '1.0', true);
+    wp_localize_script('crawler-script', 'ajax_object', array('ajaxurl' => admin_url('admin-ajax.php')));
+}
+add_action('wp_enqueue_scripts', 'enqueue_crawler_script');
+
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
@@ -130,6 +178,9 @@ add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
 add_action('wp_ajax_chatbot_chatgpt_deactivation_feedback', 'chatbot_chatgpt_deactivation_feedback');
 add_action('admin_footer', 'chatbot_chatgpt_admin_footer');
+
+// Crawler aka Knowledge Navigator(TM) - V 1.6.1
+// add_action('admin_post_run_scanner', 'chatbot_chatgpt_knowledge_navigator_callback');
 
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {
@@ -200,6 +251,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
 
 function enqueue_greetings_script() {
+
+    echo "<script>console.log('ENTERING enqueue_greetings_script');</script>"; 
+
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
     $greetings = array(
@@ -208,5 +262,8 @@ function enqueue_greetings_script() {
     );
 
     wp_localize_script('greetings', 'greetings_data', $greetings);
+
+    echo "<script>console.log('EXITING enqueue_greetings_script');</script>"; 
+
 }
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');

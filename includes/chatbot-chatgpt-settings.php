@@ -20,6 +20,8 @@ function chatbot_chatgpt_settings_page_html() {
         return;
     }
 
+    chatbot_chatgpt_localize();
+
     $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'api_model';
 
     if (isset($_GET['settings-updated'])) {
@@ -182,8 +184,8 @@ function chatbot_chatgpt_settings_page_html() {
                 settings_fields('chatbot_chatgpt_support');
                 do_settings_sections('chatbot_chatgpt_support');
             } elseif ($active_tab == 'crawler') {
-                settings_fields('chatbot_chatgpt_crawler');
-                do_settings_sections('chatbot_chatgpt_crawler');
+                settings_fields('chatbot_chatgpt_knowledge_navigator');
+                do_settings_sections('chatbot_chatgpt_knowledge_navigator');
             }
             submit_button('Save Settings');
             ?>
