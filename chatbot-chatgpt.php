@@ -215,11 +215,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
 
     // Diagnostics - V 1.6.1
-    if ($chatgpt_diagnostics === 'On') {
-        error_log(print_r('storedc:' . print_r($chatbot_chatgpt_kn_conversation_context, true), true));
-        error_log(print_r('context:' . print_r($context, true), true));
-        error_log(print_r('message:' . print_r($message, true), true));
-    }    
+    // if ($chatgpt_diagnostics === 'On') {
+    //     error_log(print_r('storedc:' . print_r($chatbot_chatgpt_kn_conversation_context, true), true));
+    //     error_log(print_r('context:' . print_r($context, true), true));
+    //     error_log(print_r('message:' . print_r($message, true), true));
+    // }    
 
     $args = array(
         'headers' => $headers,

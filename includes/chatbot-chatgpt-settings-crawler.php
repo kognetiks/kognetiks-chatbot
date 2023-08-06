@@ -33,13 +33,6 @@ if (!file_exists($results_dir_path)) {
 $results_csv_file = $results_dir_path . 'results.csv';
 $results_json_file = $results_dir_path . 'results.json';
 
-function validateUrl($url) {
-    if (!preg_match("~^(?:f|ht)tps?://~i", $url)) {
-        $url = "http://" . $url;
-    }
-    return filter_var($url, FILTER_VALIDATE_URL);
-}
-
 class WebCrawler {
     private $document;
     private $frequencyData = [];
@@ -152,15 +145,29 @@ class WebCrawler {
     
             $urls = $this->getLinks($domain);
             foreach ($urls as $url) {
+                $start_time = microtime(true);
+    
                 $crawler = new WebCrawler($url);
                 $crawler->crawl($depth + 1, $domain);
+    
+                $end_time = microtime(true);
+                $duration = $end_time - $start_time;
+    
+                // Added the adaptive delay. Multiply the duration by a factor to determine the delay.
+                // The value of the factor would depends on any specific requirements. In this case, the default chosen 2.
+                $adaptive_delay = $duration * 2;
+                
+                // Set a maximum limit to the delay to prevent it from being too long.
+                $max_delay = 5;
+                $adaptive_delay = min($adaptive_delay, $max_delay);
+                
+                sleep($adaptive_delay);
             }
         } catch (Exception $e) {
             // Log the exception and continue with the next URL
-            error_log("Crawl failed: " . $e->getMessage());
+            // error_log("Crawl failed: " . $e->getMessage());
         }
     }
-    
 
     public function getLinks($domain) {
         if (empty($this->document)) {
@@ -283,7 +290,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
           }
         $chatbot_chatgpt_kn_conversation_context .= " and more.";
         // Log the variable to debug.log
-        error_log("Chatbot context: " . $chatbot_chatgpt_kn_conversation_context);
+        // error_log("Chatbot context: " . $chatbot_chatgpt_kn_conversation_context);
 
         // Then store it for later use
         if (get_option('chatbot_chatgpt_kn_conversation_context') !== false) {
@@ -298,8 +305,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
         // Reset before reloading the page
         $run_scanner = 'No';
-        update_option('chatbot_chatgpt_knowledge_navigator', 'No');
-        
+        update_option('chatbot_chatgpt_knowledge_navigator', 'No');  
         
     }
  
@@ -333,7 +339,7 @@ function chatbot_chatgpt_kn_maximum_depth_callback($args) {
     ?>
     <select id="chatbot_chatgpt_kn_maximum_depth" name="chatbot_chatgpt_kn_maximum_depth">
         <?php
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 3; $i++) {
             echo '<option value="' . $i . '"' . selected($GLOBALS['max_depth'], $i, false) . '>' . $i . '</option>';
         }
         ?>
@@ -346,7 +352,7 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php
-        for ($i = 10; $i <= 500; $i += 10) {
+        for ($i = 25; $i <= 100; $i += 25) {
             echo '<option value="' . $i . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . $i . '</option>';
         }
         ?>
