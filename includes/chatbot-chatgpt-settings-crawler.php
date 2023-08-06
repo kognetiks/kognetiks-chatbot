@@ -16,28 +16,27 @@
  $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 10)); // Default to 10
  
  
- // Diagnostics = Ver 1.4.2
- $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
- 
- // Get the absolute path to the plugin directory
- $plugin_dir_path = plugin_dir_path(__FILE__);
- 
- // Create a "results" subdirectory if it doesn't exist
- $results_dir_path = $plugin_dir_path . 'results/';
- 
- if (!file_exists($results_dir_path)) {
-     mkdir($results_dir_path, 0755, true);
- }
- 
- // Specify the output files' paths
- $results_csv_file = $results_dir_path . 'results.csv';
- $results_json_file = $results_dir_path . 'results.json';
+// Get the absolute path to the plugin directory
+$plugin_dir_path = plugin_dir_path(__FILE__);
 
- function validateUrl($url) {
+// Go up one level to the parent directory
+$parent_dir_path = dirname($plugin_dir_path);
+
+// Create a "results" subdirectory in the parent directory if it doesn't exist
+$results_dir_path = $parent_dir_path . '/results/';
+
+if (!file_exists($results_dir_path)) {
+    mkdir($results_dir_path, 0755, true);
+}
+
+// Specify the output files' paths
+$results_csv_file = $results_dir_path . 'results.csv';
+$results_json_file = $results_dir_path . 'results.json';
+
+function validateUrl($url) {
     if (!preg_match("~^(?:f|ht)tps?://~i", $url)) {
         $url = "http://" . $url;
     }
-
     return filter_var($url, FILTER_VALIDATE_URL);
 }
 
@@ -67,11 +66,51 @@ class WebCrawler {
     }
     
     public function computeFrequency() {
-        $words = str_word_count(strtolower($this->document), 1);
+        // List of common stop words to be ignored
+        $stopWords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't", 'as', 'at'];
+        $stopWords = array_merge($stopWords, ['b', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by']);
+        $stopWords = array_merge($stopWords, ['c', 'can', "can't", 'cannot', 'could', "couldn't"]);
+        $stopWords = array_merge($stopWords, ['d', 'did', "didn't", 'do', 'does', "doesn't", 'doing', "don't", 'down', 'during']);
+        $stopWords = array_merge($stopWords, ['e', 'each']);
+        $stopWords = array_merge($stopWords, ['f', 'few', 'for', 'from', 'further']);
+        $stopWords = array_merge($stopWords, ['g']);
+        $stopWords = array_merge($stopWords, ['h', 'had', "hadn't", 'has', "hasn't", 'have', "haven't", 'having', 'he', "he'd", "he'll", "he's", 'her', 'here', "here's", 'hers', 'herself', 'him', 'himself', 'his', 'how', "how's"]);
+        $stopWords = array_merge($stopWords, ['i', "i'd", "i'll", "i'm", "i've", 'if', 'in', 'into', 'is', "isn't", 'it', "it's", 'its', 'itself']);
+        $stopWords = array_merge($stopWords, ['j', 'k']);
+        $stopWords = array_merge($stopWords, ['l', "let's"]);
+        $stopWords = array_merge($stopWords, ['m', 'me', 'more', 'most', "mustn't", 'my', 'myself']);
+        $stopWords = array_merge($stopWords, ['n', 'no', 'nor', 'not']);
+        $stopWords = array_merge($stopWords, ['o', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours' ,'ourselves', 'out', 'over', 'own']);
+        $stopWords = array_merge($stopWords, ['p', 'q']);
+        $stopWords = array_merge($stopWords, ['r', 're']);
+        $stopWords = array_merge($stopWords, ['s', 'same', "shan't", 'she', "she'd", "she'll", "she's", 'should', "shouldn't", 'so', 'some', 'such']);
+        $stopWords = array_merge($stopWords, ['t', 'than', 'that', "that's", 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', "there's", 'these', 'they', "they'd", "they'll", "they're", "they've", 'this', 'those', 'through', 'to', 'too']);
+        $stopWords = array_merge($stopWords, ['u', 'under', 'until', 'up']);
+        $stopWords = array_merge($stopWords, ['v', 'very']);
+        $stopWords = array_merge($stopWords, ['w', 'was', "wasn't", 'we', "we'd", "we'll", "we're", "we've", 'were', "weren't", 'what', "what's", 'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why', "why's", 'with', "won't", 'would', "wouldn't"]);
+        $stopWords = array_merge($stopWords, ['x']);
+        $stopWords = array_merge($stopWords, ['y', 'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves']);
+        $stopWords = array_merge($stopWords, ['z']);
+    
+        // Strip out script and style elements first
+        $this->document = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $this->document);
+        $this->document = preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', "", $this->document);
+    
+        // Strip HTML tags before computing frequencies
+        $documentWithoutTags = strip_tags($this->document);
+    
+        // Get words and convert to lower case
+        $words = str_word_count(strtolower($documentWithoutTags), 1);
+    
+        // Filter out stop words
+        $words = array_diff($words, $stopWords);
+    
+        // Compute frequencies
         $this->frequencyData = array_count_values($words);
         $this->totalWordCount = count($this->frequencyData);
     }
-
+    
+    
     public function computeTFIDF($term) {
         $tf = $this->frequencyData[$term] / $this->totalWordCount;
         $idf = $this->computeInverseDocumentFrequency($term);
@@ -102,6 +141,7 @@ class WebCrawler {
         unset($this->frequencyData[$word]);
     }
 
+ 
     public function crawl($depth = 0, $domain = '') {
         if ($depth > $GLOBALS['max_depth']) {
             return;
@@ -120,6 +160,7 @@ class WebCrawler {
             error_log("Crawl failed: " . $e->getMessage());
         }
     }
+    
 
     public function getLinks($domain) {
         if (empty($this->document)) {
@@ -150,6 +191,28 @@ class WebCrawler {
     }
 }
 
+function display_option_value_admin_notice() {
+    // Get the value from the option
+   
+    // Check if the settings have been updated
+    if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
+
+        $kn_results = get_option('chatbot_chatgpt_kn_results', 'No Results!');
+    
+        // If null or blank then exit
+        if (!$kn_results || trim($kn_results)==='') {
+            return;
+        }
+
+        // Display the admin notice
+        echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
+        update_option('chatbot_chatgpt_kn_results', '');
+    }
+}
+add_action('admin_notices', 'display_option_value_admin_notice');
+
+
+
 function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
@@ -164,6 +227,10 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
     }
 
     if($run_scanner === 'Yes'){
+
+        $result = "";
+        // Reset the results message
+        update_option('chatbot_chatgpt_kn_results', $result);
         // Run the crawl function
         $crawler = new WebCrawler($GLOBALS['start_url']);
         $crawler->crawl(0, $GLOBALS['domain']);
@@ -190,27 +257,62 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                 $crawler->removeWordFromFrequencyData($maxWord);
             }
         }
-    
-        var_dump($topWords);
+
+        // Diagnostics Only
+        // var_dump($topWords);
     
         // Store the results
         output_results($topWords);
-        $result = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
+
+        // Save the results message value into the option
+        $kn_results = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
+        if (get_option('chatbot_chatgpt_kn_results') !== false) {
+            // The option already exists, just update it.
+            update_option('chatbot_chatgpt_kn_results', $kn_results);
+        } else {
+            // The option hasn't been added yet. Add it with $autoload set to 'no'.
+            $deprecated = null;
+            $autoload = 'no';
+            add_option('chatbot_chatgpt_kn_results', $kn_results, $deprecated, $autoload);
+        }
+
+        // String together the $topWords
+        $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
+        foreach ($topWords as $word) {
+            $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
+          }
+        $chatbot_chatgpt_kn_conversation_context .= " and more.";
+        // Log the variable to debug.log
+        error_log("Chatbot context: " . $chatbot_chatgpt_kn_conversation_context);
+
+        // Then store it for later use
+        if (get_option('chatbot_chatgpt_kn_conversation_context') !== false) {
+            // The option already exists, just update it.
+            update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
+        } else {
+            // The option hasn't been added yet. Add it with $autoload set to 'no'.
+            $deprecated = null;
+            $autoload = 'no';
+            add_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context, $deprecated, $autoload);
+        }
+
         // Reset before reloading the page
         $run_scanner = 'No';
         update_option('chatbot_chatgpt_knowledge_navigator', 'No');
-
+        
+        
     }
  
     // DO NOT REMOVE
     ?>
 
     <div class="wrap">
-        <h1>Knowledge Navigator&trade;</h1>
-        <p>The <b>Knowledge Navigator&trade;</b> is an innovative component of our ChatGPT plugin designed to perform an in-depth analysis of your website. It initiates a comprehensive crawl through your website's pages, following internal links to thoroughly explore the depth and breadth of your site's content. As it navigates your site, it meticulously extracts keywords and phrases from each page, aggregating them into a detailed map of your site's information architecture. This data is then output to "results.csv" and "results.json" files, stored in a dedicated 'results' directory within the plugin's folder. The goal of the <b>Knowledge Navigator&trade;</b> is to help the chatbot plugin understand the content and structure of your website better, which in turn allows it to provide more accurate and contextually relevant responses to user inquiries. Ultimately, this empowers you to offer a more interactive and tailored user experience, fueled by the sophisticated AI capabilities of OpenAI's Large Language Model (LLM) API.</p>
-        <!-- <p>If you're ready, click '<b>Run Scanner</b>' to start the knowledge navigation of your site.</p> -->
-        <p>This may take a few minutes, when the process is complete you'll a confirmation message.</p>
+        <p>Introducing <b>Knowledge Navigator&trade;</b> - the smart explorer behind our ChatGPT plugin that's designed to delve into the core of your website. Like a digital archaeologist, it embarks on an all-encompassing journey through your site's pages, carefully following every internal link to get a holistic view of your content. The exciting part? It sifts through each page, extracting the essence of your content in the form of keywords and phrases, gradually building a meticulous, interactive map of your website's architecture. </p>
+        <p>What's the outcome? Detailed "results.csv" and "results.json" files are created, tucking away all this valuable information in a dedicated 'results' directory within the plugin's folder. The prime objective of <b>Knowledge Navigator&trade;</b> is to enable the ChatGPT plugin to have a crystal clear understanding of your website's context and content. The result? Your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.</p>
+        <p>And how does the <b>Knowledge Navigator&trade;</b> do all this? It employs a clever technique known as TF-IDF (Term Frequency-Inverse Document Frequency) to unearth the keywords that really matter. The keywords are ranked by their TF-IDF scores, where the score represents the keyword's relevance to your site. This score is a fine balance between the term's frequency on your site and its inverse document frequency (which is essentially the log of total instances divided by the number of documents containing the term). In simpler words, it's a sophisticated measure of how special a keyword is to your content.</p>
+        <h2>Knowledge Navigator&trade; Settings</h2>
         <p><b><i>When you're ready to scan you website, set the 'Run Knowledge Navigator&trade;' to 'Yes', then click 'Save Settings'</i></b></p>
+        <p>This may take a few minutes, when the process is complete you'll a confirmation message.</p>
     </div>
 
     <?php
@@ -244,7 +346,7 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php
-        for ($i = 10; $i <= 100; $i += 10) {
+        for ($i = 10; $i <= 500; $i += 10) {
             echo '<option value="' . $i . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . $i . '</option>';
         }
         ?>

@@ -1,3 +1,1 @@
-/vendor/
-/results/results.csv
-/results/results.json
+/results/*

@@ -223,6 +223,8 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_knowledge_navigator');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_depth');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_top_words');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_results');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_conversation_context');
 
     add_settings_section(
         'chatbot_chatgpt_knowledge_navigator_section',

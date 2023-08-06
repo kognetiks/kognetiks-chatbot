@@ -71,7 +71,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
         'chatgpt_model_choice' => 'gpt-3.5-turbo',
         'chatgpt_max_tokens_setting' => 150,
-        'chatbot_chatgpt_conversation_context' => 'I am a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.',
+        'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.',
     );
 
     // Revised for Ver 1.5.0 
@@ -146,8 +146,7 @@ function chatbot_chatgpt_send_message() {
     $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     // Max tokens - Ver 1.4.2
     $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
-    // Conversation Context - Ver 1.6.1
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'I am a versatile, friendly, and helpful assistant'));
+
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
@@ -194,7 +193,14 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $max_tokens = intval(esc_attr(get_option('chatgpt_max_tokens_setting', '150')));
 
     // Conversation Context - Ver 1.6.1
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'I am a versatile, friendly, and helpful assistant.'));
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant.'));
+
+    // Knowledge Navigator(TM) keyword append for context
+    $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
+
+    if(!empty($chatbot_chatgpt_kn_conversation_context)) {
+        $context = $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+    }
 
     // Added Role, System, Content Static Veriable - Ver 1.6.0
     $body = array(
@@ -209,10 +215,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
 
     // Diagnostics - V 1.6.1
-    // if ($chatgpt_diagnostics === 'On') {
-    //     error_log(print_r('context:' . print_r($context, true), true));
-    //     error_log(print_r('message:' . print_r($message, true), true));
-    // }    
+    if ($chatgpt_diagnostics === 'On') {
+        error_log(print_r('storedc:' . print_r($chatbot_chatgpt_kn_conversation_context, true), true));
+        error_log(print_r('context:' . print_r($context, true), true));
+        error_log(print_r('message:' . print_r($message, true), true));
+    }    
 
     $args = array(
         'headers' => $headers,
