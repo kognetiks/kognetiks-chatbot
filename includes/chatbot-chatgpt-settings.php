@@ -187,6 +187,7 @@ function chatbot_chatgpt_settings_page_html() {
                 settings_fields('chatbot_chatgpt_knowledge_navigator');
                 do_settings_sections('chatbot_chatgpt_knowledge_navigator');
             }
+
             submit_button('Save Settings');
             ?>
         </form>

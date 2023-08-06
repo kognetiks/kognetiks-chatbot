@@ -138,17 +138,9 @@ function enqueue_jquery_ui() {
 add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 
 
-// Crawler aka Knowledge Navigator(TM) - V 1.6.1
-function enqueue_crawler_script() {
-    wp_enqueue_script('crawler-script', plugins_url('/assets/js/ajax-crawler.js', __FILE__), array('jquery'), '1.0', true);
-    wp_localize_script('crawler-script', 'ajax_object', array('ajaxurl' => admin_url('admin-ajax.php')));
-}
-add_action('wp_enqueue_scripts', 'enqueue_crawler_script');
-
-
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
-    // Get the save API key
+    // Get the saved API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
     // Get the saved model from the settings or default to gpt-3.5-turbo
     $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
@@ -267,3 +259,4 @@ function enqueue_greetings_script() {
 
 }
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
+

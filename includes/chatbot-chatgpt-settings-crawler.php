@@ -9,21 +9,153 @@
  * @package chatbot-chatgpt
  */
  
-global $start_url, $domain, $visited, $keywords, $max_depth, $batch_size, $start_batch;
-$start_url = site_url();
-$domain = parse_url($start_url, PHP_URL_HOST);
-$visited = array();
-$keywords = array();
-$max_depth = 2; // Reduce the depth to 2
-$batch_size = 500; // Set a batch size
-$start_batch = get_option('start_batch', 0); // Get the starting point of the batch
+ global $start_url, $domain, $max_depth, $max_top_words, $results_csv_file, $results_json_file, $chatgpt_diagnostics, $plugin_dir_path, $results_dir_path;
+ $start_url = site_url();
+ $domain = parse_url($start_url, PHP_URL_HOST);
+ $max_depth = esc_attr(get_option('chatbot_chatgpt_kn_maximum_depth', 2)); // Default to 2
+ $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 10)); // Default to 10
+ 
+ 
+ // Diagnostics = Ver 1.4.2
+ $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
+ 
+ // Get the absolute path to the plugin directory
+ $plugin_dir_path = plugin_dir_path(__FILE__);
+ 
+ // Create a "results" subdirectory if it doesn't exist
+ $results_dir_path = $plugin_dir_path . 'results/';
+ 
+ if (!file_exists($results_dir_path)) {
+     mkdir($results_dir_path, 0755, true);
+ }
+ 
+ // Specify the output files' paths
+ $results_csv_file = $results_dir_path . 'results.csv';
+ $results_json_file = $results_dir_path . 'results.json';
+
+ function validateUrl($url) {
+    if (!preg_match("~^(?:f|ht)tps?://~i", $url)) {
+        $url = "http://" . $url;
+    }
+
+    return filter_var($url, FILTER_VALIDATE_URL);
+}
+
+class WebCrawler {
+    private $document;
+    private $frequencyData = [];
+    
+    public function __construct($url) {
+        // Check if URL starts with http:// or https://, if not add http:// as default
+        if (!preg_match("~^(?:f|ht)tps?://~i", $url)) {
+            $url = "http://" . $url;
+        }
+        
+        // Validate the URL before passing it to file_get_contents
+        if(filter_var($url, FILTER_VALIDATE_URL)) {
+            $this->document = @file_get_contents($url);
+            
+            // Check if the document is empty after fetching
+            if ($this->document === false) {
+                throw new Exception("Failed to fetch content from URL: $url");
+            } else if (empty($this->document)) {
+                throw new Exception("Content from URL is empty: $url");
+            }
+        } else {
+            throw new Exception('Invalid URL');
+        }
+    }
+    
+    public function computeFrequency() {
+        $words = str_word_count(strtolower($this->document), 1);
+        $this->frequencyData = array_count_values($words);
+        $this->totalWordCount = count($this->frequencyData);
+    }
+
+    public function computeTFIDF($term) {
+        $tf = $this->frequencyData[$term] / $this->totalWordCount;
+        $idf = $this->computeInverseDocumentFrequency($term);
+
+        return $tf * $idf;
+    }
+
+    private function computeTermFrequency($term) {
+        return $this->frequencyData[$term] / count($this->frequencyData);
+    }
+
+    private function computeInverseDocumentFrequency($term) {
+        $numDocumentsWithTerm = 0;
+        foreach ($this->frequencyData as $word => $frequency) {
+            if ($word === $term) {
+                $numDocumentsWithTerm++;
+            }
+        }
+        
+        return log(count($this->frequencyData) / ($numDocumentsWithTerm + 1));
+    }
+
+    public function getFrequencyData() {
+        return $this->frequencyData;
+    }
+
+    public function removeWordFromFrequencyData($word) {
+        unset($this->frequencyData[$word]);
+    }
+
+    public function crawl($depth = 0, $domain = '') {
+        if ($depth > $GLOBALS['max_depth']) {
+            return;
+        }
+    
+        try {
+            $this->computeFrequency();
+    
+            $urls = $this->getLinks($domain);
+            foreach ($urls as $url) {
+                $crawler = new WebCrawler($url);
+                $crawler->crawl($depth + 1, $domain);
+            }
+        } catch (Exception $e) {
+            // Log the exception and continue with the next URL
+            error_log("Crawl failed: " . $e->getMessage());
+        }
+    }
+
+    public function getLinks($domain) {
+        if (empty($this->document)) {
+            throw new Exception("Document is empty. Cannot parse HTML.");
+        }
+    
+        $dom = new DOMDocument();
+        @$dom->loadHTML($this->document);
+        $links = $dom->getElementsByTagName('a');
+    
+        $urls = [];
+        foreach ($links as $link){
+            $href = $link->getAttribute('href');
+            $rel = $link->getAttribute('rel');
+            
+            if (strpos($href, 'http') !== 0){
+                $href = rtrim($domain, '/') . '/' . ltrim($href, '/');
+            }
+    
+            // Simple check to only include http/https links
+            // More validation may be needed based on requirements
+            if (strpos($href, $domain) === 0 && strpos($rel, 'nofollow') === false){
+                $urls[] = $href;
+            }
+        }
+
+        return $urls;
+    }
+}
 
 function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
     // update_option('chatbot_chatgpt_knowledge_navigator', 'No');
 
-    global $crawl_logs;
+    global $topWords;
 
     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
 
@@ -31,23 +163,43 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         $run_scanner = 'No';
     }
 
-    if (isset($run_scanner)) {
-        echo "<p>\$run_scanner: " . $run_scanner . "</p>";
-    } else {
-        echo "<p>\$run_scanner: NOT SET</p>";
-    }
-
     if($run_scanner === 'Yes'){
-        // Run the crawl function and store the result
-        crawl($GLOBALS['start_url']);
-        output_results();
-        $result = 'Knowledge navigation completed! Check the results.csv file in the plugin directory.';
-        // print crawl logs
-        foreach ($crawl_logs as $log) {
-            echo "<p>" . $log . "</p>";
+        // Run the crawl function
+        $crawler = new WebCrawler($GLOBALS['start_url']);
+        $crawler->crawl(0, $GLOBALS['domain']);
+        // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
+        $crawler->computeFrequency();
+    
+        // Collect top N words with the highest TF-IDF scores.
+        $topWords = [];
+        for ($i = 0; $i < $GLOBALS['max_top_words']; $i++) {
+            $maxTFIDF = 0;
+            $maxWord = null;
+    
+            foreach ($crawler->getFrequencyData() as $word => $frequency) {
+                $tfidf = $crawler->computeTFIDF($word);
+    
+                if ($tfidf > $maxTFIDF) {
+                    $maxTFIDF = $tfidf;
+                    $maxWord = $word;
+                }
+            }
+    
+            if ($maxWord !== null) {
+                $topWords[$maxWord] = $maxTFIDF;
+                $crawler->removeWordFromFrequencyData($maxWord);
+            }
         }
+    
+        var_dump($topWords);
+    
+        // Store the results
+        output_results($topWords);
+        $result = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
+        // Reset before reloading the page
         $run_scanner = 'No';
         update_option('chatbot_chatgpt_knowledge_navigator', 'No');
+
     }
  
     // DO NOT REMOVE
@@ -74,127 +226,50 @@ function chatbot_chatgpt_knowledge_navigator_callback($args) {
     <?php
 }
 
-function is_subdomain_of($domain, $url){
-    $parsed = parse_url($url);
-    return $parsed['host'] == $domain || substr($parsed['host'], -strlen($domain)) === $domain;
+function chatbot_chatgpt_kn_maximum_depth_callback($args) {
+    $GLOBALS['max_depth'] = intval(get_option('chatbot_chatgpt_kn_maximum_depth', 2));
+    ?>
+    <select id="chatbot_chatgpt_kn_maximum_depth" name="chatbot_chatgpt_kn_maximum_depth">
+        <?php
+        for ($i = 1; $i <= 5; $i++) {
+            echo '<option value="' . $i . '"' . selected($GLOBALS['max_depth'], $i, false) . '>' . $i . '</option>';
+        }
+        ?>
+    </select>
+    <?php
 }
 
-function extract_links($body, $base_url){
-    $dom = new DOMDocument;
-    @$dom->loadHTML($body);
-    $links = array();
-    $a_tags = $dom->getElementsByTagName('a');
-    foreach($a_tags as $a){
-        $url = $a->getAttribute('href');
-        if(!parse_url($url, PHP_URL_HOST)){
-            $url = $base_url . $url;
+function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
+    $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 10));
+    ?>
+    <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
+        <?php
+        for ($i = 10; $i <= 100; $i += 10) {
+            echo '<option value="' . $i . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . $i . '</option>';
         }
-        if(is_subdomain_of($GLOBALS['domain'], $url)){
-            $links[] = $url;
-        }
-    }
-    return $links;
+        ?>
+    </select>
+    <?php
 }
 
-function extract_keywords($body, $url){
-    $dom = new DOMDocument;
-    @$dom->loadHTML($body);
-    $text = $dom->documentElement->textContent;
-    $words = preg_split('/\W+/', $text);
-    foreach($words as $word){
-
-        if (!isset($GLOBALS['keywords'][$word])) {
-            $GLOBALS['keywords'][$word] = array(
-                'count' => 0, 
-                'urls' => array()
-            );
-        }
-
-        // if (!isset($GLOBALS['keywords'][$word]) || !is_array($GLOBALS['keywords'][$word])) {
-        //     $GLOBALS['keywords'][$word] = array();
-        // }
-
-        $GLOBALS['keywords'][$word]['count'] += 1;
-        $GLOBALS['keywords'][$word]['urls'][] = $url;
-    }
-    preg_match_all('/"([^"]*)"/', $text, $matches);
-
-    foreach($matches[1] as $phrase){
-
-        if (!isset($GLOBALS['keywords'][$phrase])) {
-            $GLOBALS['keywords'][$phrase] = array(
-              'count' => 0,
-              'urls' => array() 
-            );
-        }
-
-        // if (!isset($GLOBALS['keywords'][$phrase]) || !is_array($GLOBALS['keywords'][$phrase])) {
-        //     $GLOBALS['keywords'][$phrase] = array(); 
-        // }    
-
-        $GLOBALS['keywords'][$phrase]['count'] += 1;
-        $GLOBALS['keywords'][$phrase]['urls'][] = $url;
-    }
-    // Maintain only top 100 keywords/phrases based on the count
-    uasort($GLOBALS['keywords'], function($a, $b) {
-        return $b['count'] <=> $a['count'];
-    });
-    $GLOBALS['keywords'] = array_slice($GLOBALS['keywords'], 0, 100, true);
-}
-
-
-// Adjust the output_results function to handle the new array structure
+// Save the results to a file
 function output_results(){
+    global $topWords;
+
+    // Open file in write mode ('w')
     $f = fopen($GLOBALS['results_csv_file'], 'w');
-    fputcsv($f, array('Keyword', 'Count', 'URL 1', 'URL 2', 'URL 3'));
-    foreach($GLOBALS['keywords'] as $kw => $data){
-      $url_columns = array_slice($data['urls'], 0, 3);   
-      $count = $data['count'];
-      fputcsv($f, array_merge(array($kw, $count), $url_columns));
+
+    // Write headers to CSV file
+    fputcsv($f, array('Word', 'TF-IDF'));
+
+    // Loop through $topWords and write each to CSV
+    foreach ($topWords as $word => $tfidf) {
+        fputcsv($f, array($word, $tfidf));
     }
+
+    // Close the file
     fclose($f);
-    file_put_contents($GLOBALS['results_json_file'], json_encode($GLOBALS['keywords'])); 
-  }
 
-function crawl($url, $depth=0){
-    global $crawl_logs, $visited, $batch_size, $start_batch;
-    if(in_array($url, $visited) || $depth > $GLOBALS['max_depth']){
-        return;
-    }
-    if(count($visited) >= ($start_batch + $batch_size)){
-        // If we've reached the batch size, stop the crawl
-        update_option('start_batch', $start_batch + $batch_size); // Update the start batch
-        return;
-    }
-    try{
-        $response = wp_remote_get($url);
-        if(wp_remote_retrieve_response_code($response) == 200){
-            $GLOBALS['visited'][] = $url;
-            $body = wp_remote_retrieve_body($response);
-            extract_keywords($body, $url);
-            $crawl_logs[] = "Crawled URL: " . $url;
-            echo "<p>" . $url . "</p>";
-            foreach(extract_links($body, $url) as $link){
-                if(!in_array($link, $visited)){
-                    crawl($link, $depth + 1);
-                }
-            }
-        }
-    }catch(Exception $e){
-        return;
-    }
+    // Write JSON to file
+    file_put_contents($GLOBALS['results_json_file'], json_encode($topWords));
 }
-
-// Get the absolute path to the plugin directory
-$plugin_dir_path = plugin_dir_path(__FILE__);
-
-// Create a "results" subdirectory if it doesn't exist
-$results_dir_path = $plugin_dir_path . 'results/';
-if (!file_exists($results_dir_path)) {
-    mkdir($results_dir_path, 0755, true);
-}
-
-// Specify the output files' paths
-$results_csv_file = $results_dir_path . 'results.csv';
-$results_json_file = $results_dir_path . 'results.json';
-

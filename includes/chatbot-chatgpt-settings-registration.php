@@ -221,12 +221,30 @@ function chatbot_chatgpt_settings_init() {
 
     // Support settings tab - Ver 1.6.1
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_knowledge_navigator');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_depth');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_top_words');
 
     add_settings_section(
         'chatbot_chatgpt_knowledge_navigator_section',
         'Knowledge Navigator&trade;',
         'chatbot_chatgpt_knowledge_navigator_section_callback',
         'chatbot_chatgpt_knowledge_navigator'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_maximum_depth',
+        'Maximum Depth',
+        'chatbot_chatgpt_kn_maximum_depth_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_knowledge_navigator_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_maximum_top_words',
+        'Maximum Top Words',
+        'chatbot_chatgpt_kn_maximum_top_words_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_knowledge_navigator_section'
     );
 
     add_settings_field(
