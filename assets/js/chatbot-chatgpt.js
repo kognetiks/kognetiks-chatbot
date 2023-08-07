@@ -86,6 +86,7 @@ jQuery(document).ready(function ($) {
         
         // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
         localStorage.removeItem('chatgpt_conversation');
+        localStoarge.removeItem('chatgpt_last_response');
   
         if (isFirstTime) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
@@ -114,6 +115,7 @@ jQuery(document).ready(function ($) {
             localStorage.setItem('chatgptChatbotOpened', 'true');
             // Save the conversation after the initial greeting is appended - Ver 1.2.0
             sessionStorage.setItem('chatgpt_conversation', conversation.html());
+            sessionStorage.setItem('chatgpt_last_response', '');
 
         } else {
             
@@ -185,6 +187,7 @@ jQuery(document).ready(function ($) {
 
     // Save the conversation locally between bot sessions - Ver 1.2.0
     sessionStorage.setItem('chatgpt_conversation', conversation.html());
+    sessionStorage.setItem('chatgpt_last_response', '');
 
     }
 
@@ -241,7 +244,12 @@ jQuery(document).ready(function ($) {
                                 break;
                             }
                         }
-                    }                    
+                    }
+                    // Save the last response - Ver 1.6.1
+                    // console.log('SUCCESS: ' + botResponse);
+                    sessionStorage.setItem('chatgpt_last_response', botResponse);
+                    // console.log('Retrieved from sessionStorage: ' + sessionStorage.getItem('chatgpt_last_response'));
+                    // Return the response
                     appendMessage(botResponse, 'bot');
                 } else {
                     appendMessage('Error: ' + response.data, 'error');
@@ -292,6 +300,7 @@ jQuery(document).ready(function ($) {
         if (nuclearOption === 'On') {
             console.log('***** NUCLEAR OPTION IS ON ***** ');
             sessionStorage.removeItem('chatgpt_conversation');
+            sessionStorage.removeItem('chatgpt_last_response');
         }
 
         // Diagnostics - Ver 1.5.0

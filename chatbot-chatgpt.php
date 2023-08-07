@@ -44,6 +44,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 // update_option('chatgpt_diagnostics', 'Off');
+$chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
 
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
@@ -140,11 +141,11 @@ add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
-    // Get the saved API key
+    // Retrieve the API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
-    // Get the saved model from the settings or default to gpt-3.5-turbo
+    // Retrieve the model from the settings or default to gpt-3.5-turbo
     $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // Max tokens - Ver 1.4.2
+    // Retrieve the Max tokens - Ver 1.4.2
     $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
 
     // Send only clean text via the API
@@ -175,8 +176,8 @@ add_action('admin_footer', 'chatbot_chatgpt_admin_footer');
 
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {
-    // Diagnostics = Ver 1.4.2
-    $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
+    // Diagnostics - Ver 1.6.1
+    global $chatgpt_diagnostics;
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -202,6 +203,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         $context = $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
     }
 
+    // TODO This is where the prior message should be added
+    // TODO Can I retrieve the chatgpt_last_response from sessionStorage here?
+
     // Added Role, System, Content Static Veriable - Ver 1.6.0
     $body = array(
         'model' => $model,
@@ -212,7 +216,6 @@ function chatbot_chatgpt_call_api($api_key, $message) {
             array('role' => 'user', 'content' => $message)
             ),
     );
-
 
     // Diagnostics - V 1.6.1
     // if ($chatgpt_diagnostics === 'On') {
@@ -250,8 +253,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
 
 function enqueue_greetings_script() {
+    global $chatgpt_diagnostics;
 
-    echo "<script>console.log('ENTERING enqueue_greetings_script');</script>"; 
+    if ($chatgpt_diagnostics === 'On') {
+        error_log(print_r('ENTERING enqueue_greetings_script', true));
+    }
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
@@ -262,8 +268,9 @@ function enqueue_greetings_script() {
 
     wp_localize_script('greetings', 'greetings_data', $greetings);
 
-    echo "<script>console.log('EXITING enqueue_greetings_script');</script>"; 
+    if ($chatgpt_diagnostics === 'On') {
+        error_log(print_r('EXITING enqueue_greetings_script', true));
+    }
 
 }
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
-

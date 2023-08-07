@@ -199,12 +199,14 @@ class WebCrawler {
 }
 
 function display_option_value_admin_notice() {
-    // Get the value from the option
-   
+
+    // TODO Results are displayed out synch, i.e., not after update
+
     // Check if the settings have been updated
     if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
 
-        $kn_results = get_option('chatbot_chatgpt_kn_results', 'No Results!');
+        // Get the value from the option
+        $kn_results = get_option('chatbot_chatgpt_kn_results', '');
     
         // If null or blank then exit
         if (!$kn_results || trim($kn_results)==='') {
@@ -240,7 +242,11 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         update_option('chatbot_chatgpt_kn_results', $result);
         // Run the crawl function
         $crawler = new WebCrawler($GLOBALS['start_url']);
+
+        // TODO >> WRAP THIS IN A FOR LOOP UNTIL THERE ARE NO MORE
         $crawler->crawl(0, $GLOBALS['domain']);
+        
+        
         // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
         $crawler->computeFrequency();
     
@@ -285,23 +291,14 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
         // String together the $topWords
         $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
-        foreach ($topWords as $word) {
+        foreach ($topWords as $word => $tfidf) {
             $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
           }
-        $chatbot_chatgpt_kn_conversation_context .= " and more.";
+        $chatbot_chatgpt_kn_conversation_context .= "and more.";
         // Log the variable to debug.log
         // error_log("Chatbot context: " . $chatbot_chatgpt_kn_conversation_context);
 
-        // Then store it for later use
-        if (get_option('chatbot_chatgpt_kn_conversation_context') !== false) {
-            // The option already exists, just update it.
-            update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
-        } else {
-            // The option hasn't been added yet. Add it with $autoload set to 'no'.
-            $deprecated = null;
-            $autoload = 'no';
-            add_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context, $deprecated, $autoload);
-        }
+
 
         // Reset before reloading the page
         $run_scanner = 'No';
@@ -352,7 +349,7 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php
-        for ($i = 25; $i <= 100; $i += 25) {
+        for ($i = 10; $i <= 100; $i += 10) {
             echo '<option value="' . $i . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . $i . '</option>';
         }
         ?>
