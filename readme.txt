@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
-Tested up to: 6.2.2
+Tested up to: 6.3
 Stable tag: 1.6.1
 Requires PHP: 7.3
 License: GPLv2 or later
@@ -13,23 +13,25 @@ Easily integrate OpenAI's ChatGPT API into your WordPress website with this powe
 
 == Description ==
 
-Chatbot ChatGPT for WordPress is a plugin that allows you to effortlessly integrate OpenAI's ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
+Introducing **Chatbot ChatGPT for WordPress** – Elevate Your User Experience with AI-Driven Personalized Support!
 
-ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner. It is designed to answer questions, provide suggestions, and engage in conversations with users. ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, ChatGPT can be used in various fields such as healthcare, education, finance, and many more.
+🔍 **Meet Knowledge Navigator™** – the heart of our ChatGPT plugin. It's like a digital explorer for your website, carefully unearthing your content's essence. This innovative component initiates an in-depth analysis of your site, following every link, and meticulously building an interactive map of your site's architecture. The result? A crystal clear understanding of your content that enables more accurate and contextually relevant responses.
 
-Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo or the gpt-4 model brings it to life within your WordPress Website.
+✨ **How Does It Work?** It employs a method known as TF-IDF (Term Frequency-Inverse Document Frequency) to rank keywords by relevance. This sophisticated measure highlights the unique keywords that define your content, all neatly tucked away in "results.csv" and "results.json" files within the plugin's folder.
 
-The Chatbot ChatGPT plugin now features custom avatars (see new screenshots) to add a personalized touch to visitor interactions. Select an avatar that best suits the personality of your site! With this update, you can further customize the user experience, lending a unique identity to your Chatbot.
+🎨 **Personalize with Custom Avatars!** Enhance user engagement with avatars that suit your site's personality. Navigate to the plugin settings, choose your avatar, and enjoy a unique touch of creativity. New screenshots available!
 
-To use the new Avatar feature, navigate to the plugin settings page, locate the 'Avatar' section, and select your desired avatar. Avatars can be an amazing way to enhance user engagement and give your Chatbot a touch of creativity and uniqueness. Enjoy!
+🤖 **Why Choose Chatbot ChatGPT?**
 
-The Knowledge Navigator™ is an innovative component of our ChatGPT plugin designed to perform an in-depth analysis of your website. It initiates a comprehensive crawl through your website's pages, following internal links to thoroughly explore the depth and breadth of your site's content. As it navigates your site, it meticulously extracts keywords and phrases from each page, aggregating them into a detailed map of your site's information architecture. This data is then output to "results.csv" and "results.json" files, stored in a dedicated 'results' directory within the plugin's folder. The goal of the Knowledge Navigator™ is to help the ChatGPT plugin understand the content and structure of your website better, which in turn allows it to provide more accurate and contextually relevant responses to user inquiries. Ultimately, this empowers you to offer a more interactive and tailored user experience, fueled by the sophisticated AI capabilities of OpenAI's GPT API.
+* Intuitive & Human-like Interactions: Powered by OpenAI's Large Language Model (LLM) API, ChatGPT uses natural language processing to engage with users in a conversational manner.
+* 24/7 Assistance: Automate customer service, reduce response times, and boost satisfaction across various fields, such as healthcare, education, finance, and more.
+* Easy Integration: Designed to work effortlessly with gpt-3.5-turbo or gpt-4 models, seamlessly bringing life to your WordPress website.
 
-Introducing Knowledge Navigator™ - the smart explorer behind our ChatGPT plugin that's designed to delve into the core of your website. Like a digital archaeologist, it embarks on an all-encompassing journey through your site's pages, carefully following every internal link to get a holistic view of your content. The exciting part? It sifts through each page, extracting the essence of your content in the form of keywords and phrases, gradually building a meticulous, interactive map of your website's architecture.
+**🚀 Join Us in the Revolution of Personalized User Experience!**
 
-What's the outcome? Detailed "results.csv" and "results.json" files are created, tucking away all this valuable information in a dedicated 'results' directory within the plugin's folder. The prime objective of <b>Knowledge Navigator&trade;</b> is to enable the ChatGPT plugin to have a crystal clear understanding of your website's context and content. The result? Your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.
+ChatGPT is more than a plugin; it's an asset to your site, crafting a truly bespoke experience for your visitors. Powered by advanced AI technology, ChatGPT is designed to offer a more interactive and tailored user experience.
 
-And how does the <b>Knowledge Navigator&trade;</b> do all this? It employs a clever technique known as TF-IDF (Term Frequency-Inverse Document Frequency) to unearth the keywords that really matter. The keywords are ranked by their TF-IDF scores, where the score represents the keyword's relevance to your site. This score is a fine balance between the term's frequency on your site and its inverse document frequency (which is essentially the log of total instances divided by the number of documents containing the term). In simpler words, it's a sophisticated measure of how special a keyword is to your content.
+Get Chatbot ChatGPT today, and redefine your WordPress website with intelligence, creativity, and a personal touch!
 
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
 
@@ -37,17 +39,29 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 
 == Features ==
 
-* Easy setup and integration with OpenAI's ChatGPT API
-* Support for gpt-3.5-turbo
-* Support for gpt-4 (Learn how to access the gpt-4 API at [https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4](https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4))
-* Floating chatbot interface with customizable appearance
-* User-friendly settings page for managing API key and other parameters
-* Collapsible chatbot interface when not in use
-* Initial greeting message for first-time users
-* Shortcode to embed the chatbot on any page or post
-* Setting to determine if chatbot should start opened or closed
-* Chatbot maintains state when navigating between pages
-* Chatbot name and initial and subsequent greetings are configurable
+🚀 **Experience the Power of Chatbot ChatGPT for WordPress – Features Designed for You!**
+
+🎉 **Effortless Integration**: Get started in minutes with an easy setup process, fully integrated with OpenAI's ChatGPT API.
+
+🚀 **Cutting-Edge Support**: Benefit from support for gpt-3.5-turbo and the next-gen gpt-4 (Learn how to access the gpt-4 API at [https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4](https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4)).
+
+💬 **Elegant Floating Chatbot Interface**: Customize the appearance for a sleek and engaging user experience.
+
+🔧 **Intuitive Settings Page**: Manage API key and other parameters with a user-friendly interface.
+
+🎈 **Smart Collapsible Design**: The chatbot smoothly collapses when not in use, maintaining an uncluttered look.
+
+👋 **Warm Greetings**: Craft an inviting experience with an initial greeting message for first-time visitors.
+
+📌 **Versatile Shortcode Integration**: Embed the chatbot anywhere – on pages or posts – with a simple shortcode.
+
+🎚 **Flexible Start Options**: Decide if the chatbot should begin open or closed, catering to your users' preferences.
+
+📜 **Intelligent Chatbot State Maintenance**: The chatbot remembers user interactions even when navigating between pages.
+
+📝 **Fully Configurable Chatbot Identity**: Customize the chatbot's name, initial greeting, and subsequent messages to align with your brand.
+
+🔍 **Knowledge Navigator™** – the heart of our ChatGPT plugin. It's like a digital explorer for your website.
 
 == Getting Started ==
 

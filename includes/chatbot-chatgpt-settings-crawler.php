@@ -36,6 +36,7 @@ $results_json_file = $results_dir_path . 'results.json';
 class WebCrawler {
     private $document;
     private $frequencyData = [];
+    private $visitedUrls = [];
     
     public function __construct($url) {
         // Check if URL starts with http:// or https://, if not add http:// as default
@@ -150,7 +151,19 @@ class WebCrawler {
     
             $urls = $this->getLinks($domain);
             foreach ($urls as $url) {
+
+                if (in_array($url, $this->visitedUrls)) {
+                    // Skip this URL as it has already been crawled
+                    continue;
+                }
+
+                // TODO Log the variables to debug.log
+                error_log("CRAWLING :" . $url);
+
                 $start_time = microtime(true);
+
+                // Mark this URL as visited
+                $this->visitedUrls[] = $url;
     
                 $crawler = new WebCrawler($url);
                 $crawler->crawl($depth + 1, $domain);
@@ -203,37 +216,98 @@ class WebCrawler {
     }
 }
 
-// function display_option_value_admin_notice() {
-
-//     // TODO Results are displayed out synch, i.e., not after update
-
-//     // Check if the settings have been updated
-//     if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
-
-//         // Get the value from the option
-//         $kn_results = get_option('chatbot_chatgpt_kn_results', '');
-    
-//         // If null or blank then exit
-//         if (!$kn_results || trim($kn_results)==='') {
-//             return;
-//         }
-
-//         // Display the admin notice
-//         echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
-//         update_option('chatbot_chatgpt_kn_results', '');
-//     }
-// }
-// add_action('admin_notices', 'display_option_value_admin_notice');
-
+// Notify outcomes - Ver 1.6.1
 function display_option_value_admin_notice() {
-    $kn_results = get_transient('chatbot_chatgpt_kn_results');
+    $kn_results = get_option('chatbot_chatgpt_kn_results');
 
     if ($kn_results) {
-        echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
-        delete_transient('chatbot_chatgpt_kn_results');
+        echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
     }
 }
 add_action('admin_notices', 'display_option_value_admin_notice');
+
+// Handle outcome notification dismissal - Ver 1.6.1
+function dismiss_chatgpt_notice() {
+    if (isset($_GET['dismiss_chatgpt_notice'])) {
+        delete_option('chatbot_chatgpt_kn_results');
+    }
+}
+add_action('admin_init', 'dismiss_chatgpt_notice');
+
+
+// Handle long running scripts with a schedule devent function - Ver 1.6.1
+function crawl_scheduled_event() {
+
+    global $topWords;
+
+    $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
+
+    if (!isset($run_scanner)) {
+        $run_scanner = 'No';
+    }
+
+    // Log the variables to debug.log
+    error_log("ENTERING crawl_scehedule_event_hook");
+
+    $result = "";
+    // Reset the results message
+    update_option('chatbot_chatgpt_kn_results', $result);
+
+    $crawler = new WebCrawler($GLOBALS['start_url']);
+    $crawler->crawl(0, $GLOBALS['domain']);
+
+    // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
+    $crawler->computeFrequency();
+
+    // Collect top N words with the highest TF-IDF scores.
+    $topWords = [];
+    for ($i = 0; $i < $GLOBALS['max_top_words']; $i++) {
+        $maxTFIDF = 0;
+        $maxWord = null;
+
+        foreach ($crawler->getFrequencyData() as $word => $frequency) {
+            $tfidf = $crawler->computeTFIDF($word);
+
+            if ($tfidf > $maxTFIDF) {
+                $maxTFIDF = $tfidf;
+                $maxWord = $word;
+            }
+        }
+
+        if ($maxWord !== null) {
+            $topWords[$maxWord] = $maxTFIDF;
+            $crawler->removeWordFromFrequencyData($maxWord);
+        }
+    }
+
+    // Diagnostics Only
+    // var_dump($topWords);
+
+    // Store the results
+    output_results($topWords);
+
+    // String together the $topWords
+    $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
+    foreach ($topWords as $word => $tfidf) {
+        $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
+        }
+    $chatbot_chatgpt_kn_conversation_context .= "and more.";
+    
+    // Save the results message value into the option
+    update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
+
+    // Save the results message value into the option
+    $kn_results = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
+    update_option('chatbot_chatgpt_kn_results', $kn_results);
+
+    // Notify outcome for up to 3 minutes
+    set_transient('chatbot_chatgpt_kn_results', $kn_results);
+
+    // Log the variables to debug.log
+    error_log("EXITING crawl_scehedule_event_hook");
+
+}
+add_action('crawl_scheduled_event_hook', 'crawl_scheduled_event');
 
 function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
@@ -257,74 +331,18 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         // error_log("domain: " . serialize($GLOBALS['domain']));
         // error_log("start_url: " . serialize($GLOBALS['start_url']));
 
-        $result = "";
-        // Reset the results message
-        update_option('chatbot_chatgpt_kn_results', $result);
-        // Run the crawl function
-        $crawler = new WebCrawler($GLOBALS['start_url']);
+        if (!wp_next_scheduled('crawl_scheduled_event_hook')) {
+            // Log the variables to debug.log
+            error_log("BEFORE crawl_scehedule_event_hook");
+            wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
+            // Log the variables to debug.log
+            error_log("AFTER crawl_scehedule_event_hook");
 
-        // TODO >> WRAP THIS IN A FOR LOOP UNTIL THERE ARE NO MORE
-        $crawler->crawl(0, $GLOBALS['domain']);
+            // Reset before reloading the page
+            $run_scanner = 'No';
+            update_option('chatbot_chatgpt_knowledge_navigator', 'No');  
 
-        // error_log("AFTER crawler");
-        
-        // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
-        $crawler->computeFrequency();
-    
-        // Collect top N words with the highest TF-IDF scores.
-        $topWords = [];
-        for ($i = 0; $i < $GLOBALS['max_top_words']; $i++) {
-            $maxTFIDF = 0;
-            $maxWord = null;
-    
-            foreach ($crawler->getFrequencyData() as $word => $frequency) {
-                $tfidf = $crawler->computeTFIDF($word);
-    
-                if ($tfidf > $maxTFIDF) {
-                    $maxTFIDF = $tfidf;
-                    $maxWord = $word;
-                }
-            }
-    
-            if ($maxWord !== null) {
-                $topWords[$maxWord] = $maxTFIDF;
-                $crawler->removeWordFromFrequencyData($maxWord);
-            }
         }
-
-        // Diagnostics Only
-        // var_dump($topWords);
-    
-        // Store the results
-        output_results($topWords);
-
-        // String together the $topWords
-        $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
-        foreach ($topWords as $word => $tfidf) {
-            $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
-          }
-        $chatbot_chatgpt_kn_conversation_context .= "and more.";
-        
-        // Save the results message value into the option
-        update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
-
-        // Save the results message value into the option
-        $kn_results = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
-        update_option('chatbot_chatgpt_kn_results', $kn_results);
-
-        // TODO COMMENT OUT ERROR_LOG MESSAGES
-        // Log the variables to debug.log
-        error_log("chatbot_chatgpt_kn_conversation_context: " . $chatbot_chatgpt_kn_conversation_context);
-        error_log("chatbot_chatgpt_kn_conversation_context - updated");
-        error_log("kchatbot_chatgpt_kn_results - option updated: " . $kn_results);
-
-        // Reset before reloading the page
-        $run_scanner = 'No';
-        update_option('chatbot_chatgpt_knowledge_navigator', 'No');  
-
-        // Notify outcome
-        set_transient('chatbot_chatgpt_kn_results', $kn_results, 60); // 60 seconds expiry
-        
     }
  
     // DO NOT REMOVE
@@ -341,6 +359,114 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     <?php
 }
+
+
+// function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
+
+//     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
+//     // update_option('chatbot_chatgpt_knowledge_navigator', 'No');
+
+//     global $topWords;
+
+//     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
+
+//     if (!isset($run_scanner)) {
+//         $run_scanner = 'No';
+//     }
+
+//     if($run_scanner === 'Yes'){
+
+//         // Log the variables to debug.log
+//         // error_log("chatbot_chatgpt_knowledge_navigator_section_callback: " . $run_scanner);
+//         // error_log("max_top_words: " . serialize($GLOBALS['max_top_words']));
+//         // error_log("max_depth: " . serialize($GLOBALS['max_depth']));
+//         // error_log("domain: " . serialize($GLOBALS['domain']));
+//         // error_log("start_url: " . serialize($GLOBALS['start_url']));
+
+//         $result = "";
+//         // Reset the results message
+//         update_option('chatbot_chatgpt_kn_results', $result);
+//         // Run the crawl function
+//         $crawler = new WebCrawler($GLOBALS['start_url']);
+
+//         // TODO >> WRAP THIS IN A FOR LOOP UNTIL THERE ARE NO MORE
+//         $crawler->crawl(0, $GLOBALS['domain']);
+
+//         // error_log("AFTER crawler");
+        
+//         // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
+//         $crawler->computeFrequency();
+    
+//         // Collect top N words with the highest TF-IDF scores.
+//         $topWords = [];
+//         for ($i = 0; $i < $GLOBALS['max_top_words']; $i++) {
+//             $maxTFIDF = 0;
+//             $maxWord = null;
+    
+//             foreach ($crawler->getFrequencyData() as $word => $frequency) {
+//                 $tfidf = $crawler->computeTFIDF($word);
+    
+//                 if ($tfidf > $maxTFIDF) {
+//                     $maxTFIDF = $tfidf;
+//                     $maxWord = $word;
+//                 }
+//             }
+    
+//             if ($maxWord !== null) {
+//                 $topWords[$maxWord] = $maxTFIDF;
+//                 $crawler->removeWordFromFrequencyData($maxWord);
+//             }
+//         }
+
+//         // Diagnostics Only
+//         // var_dump($topWords);
+    
+//         // Store the results
+//         output_results($topWords);
+
+//         // String together the $topWords
+//         $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
+//         foreach ($topWords as $word => $tfidf) {
+//             $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
+//           }
+//         $chatbot_chatgpt_kn_conversation_context .= "and more.";
+        
+//         // Save the results message value into the option
+//         update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
+
+//         // Save the results message value into the option
+//         $kn_results = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
+//         update_option('chatbot_chatgpt_kn_results', $kn_results);
+
+//         // TODO COMMENT OUT ERROR_LOG MESSAGES
+//         // Log the variables to debug.log
+//         error_log("chatbot_chatgpt_kn_conversation_context: " . $chatbot_chatgpt_kn_conversation_context);
+//         error_log("chatbot_chatgpt_kn_conversation_context - updated");
+//         error_log("kchatbot_chatgpt_kn_results - option updated: " . $kn_results);
+
+//         // Reset before reloading the page
+//         $run_scanner = 'No';
+//         update_option('chatbot_chatgpt_knowledge_navigator', 'No');  
+
+//         // Notify outcome
+//         set_transient('chatbot_chatgpt_kn_results', $kn_results, 60); // 60 seconds expiry
+        
+//     }
+ 
+//     // DO NOT REMOVE
+//     ? >
+
+//     <div class="wrap">
+//         <p>Introducing <b>Knowledge Navigator&trade;</b> - the smart explorer behind our ChatGPT plugin that's designed to delve into the core of your website. Like a digital archaeologist, it embarks on an all-encompassing journey through your site's pages, carefully following every internal link to get a holistic view of your content. The exciting part? It sifts through each page, extracting the essence of your content in the form of keywords and phrases, gradually building a meticulous, interactive map of your website's architecture. </p>
+//         <p>What's the outcome? Detailed "results.csv" and "results.json" files are created, tucking away all this valuable information in a dedicated 'results' directory within the plugin's folder. The prime objective of <b>Knowledge Navigator&trade;</b> is to enable the ChatGPT plugin to have a crystal clear understanding of your website's context and content. The result? Your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.</p>
+//         <p>And how does the <b>Knowledge Navigator&trade;</b> do all this? It employs a clever technique known as TF-IDF (Term Frequency-Inverse Document Frequency) to unearth the keywords that really matter. The keywords are ranked by their TF-IDF scores, where the score represents the keyword's relevance to your site. This score is a fine balance between the term's frequency on your site and its inverse document frequency (which is essentially the log of total instances divided by the number of documents containing the term). In simpler words, it's a sophisticated measure of how special a keyword is to your content.</p>
+//         <h2>Knowledge Navigator&trade; Settings</h2>
+//         <p><b><i>When you're ready to scan you website, set the 'Run Knowledge Navigator&trade;' to 'Yes', then click 'Save Settings'</i></b></p>
+//         <p>This may take a few minutes, when the process is complete you'll a confirmation message.</p>
+//     </div>
+
+//     <?php
+// }
 
 function chatbot_chatgpt_knowledge_navigator_callback($args) {
     $chatbot_chatgpt_knowledge_navigator = esc_attr(get_option('chatbot_chatgpt_knowledge_navigator', 'No'));

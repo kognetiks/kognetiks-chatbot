@@ -171,7 +171,7 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_
 add_action('wp_ajax_chatbot_chatgpt_deactivation_feedback', 'chatbot_chatgpt_deactivation_feedback');
 add_action('admin_footer', 'chatbot_chatgpt_admin_footer');
 
-// Crawler aka Knowledge Navigator(TM) - V 1.6.1
+// Crawler aka Knowledge Navigator(TM) - Ver 1.6.1
 // add_action('admin_post_run_scanner', 'chatbot_chatgpt_knowledge_navigator_callback');
 
 // Call the ChatGPT API
@@ -218,7 +218,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
             ),
     );
 
-    // Diagnostics - V 1.6.1
+    // Diagnostics - Ver 1.6.1
     if ($chatgpt_diagnostics === 'On') {
         error_log(print_r('storedc:' . print_r($chatbot_chatgpt_kn_conversation_context, true), true));
         error_log(print_r('context:' . print_r($context, true), true));
@@ -245,7 +245,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
         // Handle the response from the chat engine
-            // Diagnostics - V 1.6.1
+            // Diagnostics - Ver 1.6.1
             if ($chatgpt_diagnostics === 'On') {
                 error_log(print_r('$response_body:' . print_r($response_body['choices'][0]['message']['content'], true), true));
             }
