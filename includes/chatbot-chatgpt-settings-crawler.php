@@ -134,9 +134,14 @@ class WebCrawler {
         unset($this->frequencyData[$word]);
     }
 
- 
     public function crawl($depth = 0, $domain = '') {
-        if ($depth > $GLOBALS['max_depth']) {
+
+        // error_log("crawl: top of function");
+
+        $max_depth = isset($GLOBALS['max_depth']) ? (int) $GLOBALS['max_depth'] : 3;  // default to 3 if not set
+
+        if ($depth > $max_depth) {
+            // error_log("crawl: $depth > max_depth");
             return;
         }
     
@@ -198,29 +203,37 @@ class WebCrawler {
     }
 }
 
-function display_option_value_admin_notice() {
+// function display_option_value_admin_notice() {
 
-    // TODO Results are displayed out synch, i.e., not after update
+//     // TODO Results are displayed out synch, i.e., not after update
 
-    // Check if the settings have been updated
-    if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
+//     // Check if the settings have been updated
+//     if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
 
-        // Get the value from the option
-        $kn_results = get_option('chatbot_chatgpt_kn_results', '');
+//         // Get the value from the option
+//         $kn_results = get_option('chatbot_chatgpt_kn_results', '');
     
-        // If null or blank then exit
-        if (!$kn_results || trim($kn_results)==='') {
-            return;
-        }
+//         // If null or blank then exit
+//         if (!$kn_results || trim($kn_results)==='') {
+//             return;
+//         }
 
-        // Display the admin notice
+//         // Display the admin notice
+//         echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
+//         update_option('chatbot_chatgpt_kn_results', '');
+//     }
+// }
+// add_action('admin_notices', 'display_option_value_admin_notice');
+
+function display_option_value_admin_notice() {
+    $kn_results = get_transient('chatbot_chatgpt_kn_results');
+
+    if ($kn_results) {
         echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
-        update_option('chatbot_chatgpt_kn_results', '');
+        delete_transient('chatbot_chatgpt_kn_results');
     }
 }
 add_action('admin_notices', 'display_option_value_admin_notice');
-
-
 
 function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
@@ -237,6 +250,13 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     if($run_scanner === 'Yes'){
 
+        // Log the variables to debug.log
+        // error_log("chatbot_chatgpt_knowledge_navigator_section_callback: " . $run_scanner);
+        // error_log("max_top_words: " . serialize($GLOBALS['max_top_words']));
+        // error_log("max_depth: " . serialize($GLOBALS['max_depth']));
+        // error_log("domain: " . serialize($GLOBALS['domain']));
+        // error_log("start_url: " . serialize($GLOBALS['start_url']));
+
         $result = "";
         // Reset the results message
         update_option('chatbot_chatgpt_kn_results', $result);
@@ -245,7 +265,8 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
         // TODO >> WRAP THIS IN A FOR LOOP UNTIL THERE ARE NO MORE
         $crawler->crawl(0, $GLOBALS['domain']);
-        
+
+        // error_log("AFTER crawler");
         
         // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
         $crawler->computeFrequency();
@@ -277,32 +298,32 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         // Store the results
         output_results($topWords);
 
-        // Save the results message value into the option
-        $kn_results = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
-        if (get_option('chatbot_chatgpt_kn_results') !== false) {
-            // The option already exists, just update it.
-            update_option('chatbot_chatgpt_kn_results', $kn_results);
-        } else {
-            // The option hasn't been added yet. Add it with $autoload set to 'no'.
-            $deprecated = null;
-            $autoload = 'no';
-            add_option('chatbot_chatgpt_kn_results', $kn_results, $deprecated, $autoload);
-        }
-
         // String together the $topWords
         $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
         foreach ($topWords as $word => $tfidf) {
             $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
           }
         $chatbot_chatgpt_kn_conversation_context .= "and more.";
-        // Log the variable to debug.log
-        // error_log("Chatbot context: " . $chatbot_chatgpt_kn_conversation_context);
+        
+        // Save the results message value into the option
+        update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
 
+        // Save the results message value into the option
+        $kn_results = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
+        update_option('chatbot_chatgpt_kn_results', $kn_results);
 
+        // TODO COMMENT OUT ERROR_LOG MESSAGES
+        // Log the variables to debug.log
+        error_log("chatbot_chatgpt_kn_conversation_context: " . $chatbot_chatgpt_kn_conversation_context);
+        error_log("chatbot_chatgpt_kn_conversation_context - updated");
+        error_log("kchatbot_chatgpt_kn_results - option updated: " . $kn_results);
 
         // Reset before reloading the page
         $run_scanner = 'No';
         update_option('chatbot_chatgpt_knowledge_navigator', 'No');  
+
+        // Notify outcome
+        set_transient('chatbot_chatgpt_kn_results', $kn_results, 60); // 60 seconds expiry
         
     }
  

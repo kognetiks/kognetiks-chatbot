@@ -205,6 +205,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // TODO This is where the prior message should be added
     // TODO Can I retrieve the chatgpt_last_response from sessionStorage here?
+    // TODO https://chat.openai.com/c/3f73a6c1-1a7c-4711-a780-4804af91ad0b
 
     // Added Role, System, Content Static Veriable - Ver 1.6.0
     $body = array(
@@ -218,11 +219,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     );
 
     // Diagnostics - V 1.6.1
-    // if ($chatgpt_diagnostics === 'On') {
-    //     error_log(print_r('storedc:' . print_r($chatbot_chatgpt_kn_conversation_context, true), true));
-    //     error_log(print_r('context:' . print_r($context, true), true));
-    //     error_log(print_r('message:' . print_r($message, true), true));
-    // }    
+    if ($chatgpt_diagnostics === 'On') {
+        error_log(print_r('storedc:' . print_r($chatbot_chatgpt_kn_conversation_context, true), true));
+        error_log(print_r('context:' . print_r($context, true), true));
+        error_log(print_r('message:' . print_r($message, true), true));
+    }    
 
     $args = array(
         'headers' => $headers,
@@ -244,6 +245,15 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
         // Handle the response from the chat engine
+            // Diagnostics - V 1.6.1
+            if ($chatgpt_diagnostics === 'On') {
+                error_log(print_r('$response_body:' . print_r($response_body['choices'][0]['message']['content'], true), true));
+            }
+            // TODO Can I retrieve the chatgpt_last_response from sessionStorage here?
+            // TODO https://chat.openai.com/c/3f73a6c1-1a7c-4711-a780-4804af91ad0b
+            // TODO THIS APPROACH DOESN'T WORK
+            // echo "<script>storeChatGPTLastResponse('" . addslashes($response_body['choices'][0]['message']['content']) . "');</script>";
+
         return $response_body['choices'][0]['message']['content'];
     } else {
         // Handle any errors that are returned from the chat engine
@@ -255,9 +265,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 function enqueue_greetings_script() {
     global $chatgpt_diagnostics;
 
-    if ($chatgpt_diagnostics === 'On') {
-        error_log(print_r('ENTERING enqueue_greetings_script', true));
-    }
+    // if ($chatgpt_diagnostics === 'On') {
+    //     error_log(print_r('ENTERING enqueue_greetings_script', true));
+    // }
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
@@ -268,9 +278,9 @@ function enqueue_greetings_script() {
 
     wp_localize_script('greetings', 'greetings_data', $greetings);
 
-    if ($chatgpt_diagnostics === 'On') {
-        error_log(print_r('EXITING enqueue_greetings_script', true));
-    }
+    // if ($chatgpt_diagnostics === 'On') {
+    //     error_log(print_r('EXITING enqueue_greetings_script', true));
+    // }
 
 }
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');

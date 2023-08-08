@@ -17,11 +17,6 @@ jQuery(document).ready(function ($) {
     // Diagnostics = Ver 1.4.2
     if (chatbotSettings.chatgpt_diagnostics === 'On') {
         console.log('FUNCTION: chatbot-chatgpt.js');
-        console.log('messageInput: ' + messageInput);
-        console.log('conversation' + conversation);
-        console.log('submitButton: ' + submitButton);
-        console.log('chatGptChatBot: ' + chatGptChatBot);
-        console.log('chatgpt_width_setting: ' + chatgpt_width_setting);
     }
 
     var chatGptOpenButton = $('#chatgpt-open-btn');
@@ -86,7 +81,7 @@ jQuery(document).ready(function ($) {
         
         // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
         localStorage.removeItem('chatgpt_conversation');
-        localStoarge.removeItem('chatgpt_last_response');
+        localStorage.removeItem('chatgpt_last_response');
   
         if (isFirstTime) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
@@ -94,8 +89,6 @@ jQuery(document).ready(function ($) {
             // Logging for Diagnostics - Ver 1.4.2
             if (chatbotSettings.chatgpt_diagnostics === 'On') {
                 console.log('FUNCTION: initializeChatbot at isFirstTime');
-                console.log("isFirstTime: " + isFirstTime);
-                console.log("initialGreeting: " + initialGreeting);
             }
 
             // Don't append the greeting if it's already in the conversation
@@ -124,8 +117,6 @@ jQuery(document).ready(function ($) {
             // Logging for Diagnostics - Ver 1.4.2
             if (chatbotSettings.chatgpt_diagnostics === 'On') {
                 console.log('FUNCTION: initializeChatbot at else');
-                console.log("isFirstTime: " + isFirstTime);
-                console.log("initialGreeting: " + initialGreeting);
             }
 
             // Don't append the greeting if it's already in the conversation
@@ -306,11 +297,6 @@ jQuery(document).ready(function ($) {
         // Diagnostics - Ver 1.5.0
         if (chatbotSettings.chatgpt_diagnostics === 'On') {
             console.log('FUNCTION: loadChatbotStatus - BEFORE DECISION');
-            console.log('Diagnostics: ' + chatbotSettings.chatgpt_diagnostics);
-            console.log('chatbotSettings for chatgtpStartStatus: ' + chatbotSettings.chatgptStartStatus);
-            console.log('localStorage for chatgptStartStatus: ' + localStorage.getItem('chatgptStartStatus'));
-            console.log('chatbotSettings for chatgtpStartStatusNewVisitor: ' + chatbotSettings.chatgptStartStatusNewVisitor);
-            console.log('localStorage for chatgptStartStatusNewVisitor: ' + localStorage.getItem('chatgptStartStatusNewVisitor'));
         }
 
         // Decide what to do for a new visitor - Ver 1.5.0
@@ -330,11 +316,6 @@ jQuery(document).ready(function ($) {
         // Diagnostics - Ver 1.5.0
         if (chatbotSettings.chatgpt_diagnostics === 'On') {
             console.log('FUNCTION: loadChatbotStatus - AFTER DECISION');
-            console.log('Diagnostics: ' + chatbotSettings.chatgpt_diagnostics);
-            console.log('chatbotSettings for chatgtpStartStatus: ' + chatbotSettings.chatgptStartStatus);
-            console.log('localStorage for chatgptStartStatus: ' + localStorage.getItem('chatgptStartStatus'));
-            console.log('chatbotSettings for chatgtpStartStatusNewVisitor: ' + chatbotSettings.chatgptStartStatusNewVisitor);
-            console.log('localStorage for chatgptStartStatusNewVisitor: ' + localStorage.getItem('chatgptStartStatusNewVisitor'));
         }
         
         // If the chatbot status is not set in local storage, use chatgpt_start_status - Ver 1.5.1
@@ -355,7 +336,6 @@ jQuery(document).ready(function ($) {
         setTimeout(() => {
             if (chatbotSettings.chatgpt_diagnostics === 'On') {
                 console.log("FUNCTION: Scrolling to bottom");
-                console.log("Scroll height: " + conversation[0].scrollHeight);
             }
             conversation.scrollTop(conversation[0].scrollHeight);
         }, 100);  // delay of 100 milliseconds    
@@ -369,12 +349,6 @@ jQuery(document).ready(function ($) {
         // Diagnostics - Ver 1.5.0
         if (chatbotSettings.chatgpt_diagnostics === 'On') {
             console.log('FUNCTION: loadConversation');
-            console.log('Diagnostics: ' + chatbotSettings.chatgpt_diagnostics);
-            console.log('var chatgtpStartStatus: ' + chatbotSettings.chatgptStartStatus);
-            console.log('localStorage chatgptStartStatus: ' + localStorage.getItem('chatgptStartStatus'));
-            console.log('var chatgtpStartStatusNewVisitor: ' + chatbotSettings.chatgptStartStatusNewVisitor);
-            console.log('localStorage chatgptStartStatusNewVisitor: ' + localStorage.getItem('chatgptStartStatusNewVisitor'));
-            console.log('storedConversation: ' + storedConversation);
         }
 
         if (storedConversation) {
