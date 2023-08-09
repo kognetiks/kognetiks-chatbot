@@ -81,7 +81,8 @@ jQuery(document).ready(function ($) {
         
         // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
         localStorage.removeItem('chatgpt_conversation');
-        localStorage.removeItem('chatgpt_last_response');
+        // TODO Removed in Ver 1.6.1
+        // localStorage.removeItem('chatgpt_last_response');
   
         if (isFirstTime) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
@@ -108,7 +109,42 @@ jQuery(document).ready(function ($) {
             localStorage.setItem('chatgptChatbotOpened', 'true');
             // Save the conversation after the initial greeting is appended - Ver 1.2.0
             sessionStorage.setItem('chatgpt_conversation', conversation.html());
-            sessionStorage.setItem('chatgpt_last_response', '');
+            // TODO Removed in Ver 1.6.1
+            // sessionStorage.setItem('chatgpt_last_response', '');
+            // Handle oversized conversations if that happens
+            // try {
+            //     sessionStorage.setItem('chatgpt_conversation', conversation.html());
+            //     sessionStorage.setItem('chatgpt_last_response', '');
+            // } catch (e) {
+            //     if (e instanceof DOMException && e.code === 22) { // Code 22 is typically QuotaExceededError
+            //         let trimmedConversation = conversation.html();
+            
+            //         // Trim the conversation by removing a portion from the beginning.
+            //         // Adjust the trimming logic based on the structure of your HTML content.
+            //         while (trimmedConversation.length > 0) {
+            //             // Example: Remove 10% of the content from the beginning
+            //             trimmedConversation = trimmedConversation.slice(Math.floor(trimmedConversation.length * 0.1));
+            
+            //             try {
+            //                 sessionStorage.setItem('chatgpt_conversation', trimmedConversation);
+            //                 break; // Exit the loop if the operation is successful
+            //             } catch (e) {
+            //                 if (!(e instanceof DOMException && e.code === 22)) {
+            //                     console.error("An unexpected error occurred while trimming:", e);
+            //                     break;
+            //                 }
+            //                 // Continue looping to trim more if still exceeding quota
+            //             }
+            //         }
+            
+            //         if (trimmedConversation.length === 0) {
+            //             console.error("Unable to store conversation due to size limitations.");
+            //         }
+            //     } else {
+            //         // Handle other possible exceptions
+            //         console.error("An unexpected error occurred:", e);
+            //     }
+            // }            
 
         } else {
             
@@ -178,7 +214,8 @@ jQuery(document).ready(function ($) {
 
     // Save the conversation locally between bot sessions - Ver 1.2.0
     sessionStorage.setItem('chatgpt_conversation', conversation.html());
-    sessionStorage.setItem('chatgpt_last_response', '');
+    // TODO Removed in Ver 1.6.1
+    // sessionStorage.setItem('chatgpt_last_response', '');
 
     }
 
@@ -238,7 +275,8 @@ jQuery(document).ready(function ($) {
                     }
                     // Save the last response - Ver 1.6.1
                     // console.log('SUCCESS: ' + botResponse);
-                    sessionStorage.setItem('chatgpt_last_response', botResponse);
+                    // TODO Removed in Ver 1.6.1
+                    // sessionStorage.setItem('chatgpt_last_response', botResponse);
                     // console.log('Retrieved from sessionStorage: ' + sessionStorage.getItem('chatgpt_last_response'));
                     // Return the response
                     appendMessage(botResponse, 'bot');
@@ -287,10 +325,12 @@ jQuery(document).ready(function ($) {
 
         // Nuclear option to clear session conversation - Ver 1.5.0
         // Do not use unless alsolutely needed
+        // TODO Comment this code out
         nuclearOption = 'Off';
         if (nuclearOption === 'On') {
             console.log('***** NUCLEAR OPTION IS ON ***** ');
             sessionStorage.removeItem('chatgpt_conversation');
+            // TODO Removed in Ver 1.6.1
             sessionStorage.removeItem('chatgpt_last_response');
         }
 

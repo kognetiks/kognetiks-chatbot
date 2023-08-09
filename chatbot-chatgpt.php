@@ -194,18 +194,31 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $max_tokens = intval(esc_attr(get_option('chatgpt_max_tokens_setting', '150')));
 
     // Conversation Context - Ver 1.6.1
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant.'));
+    $context = "";
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.'));
+    $chatgpt_last_response = "";
+    $chatgpt_last_response = get_transient('chatgpt_last_response');
+    // Diagnostics - Ver 1.6.1
+    error_log('*************************************************************************');
+    error_log('BEFORE GET TRANSIENT');
+    if ($chatgpt_last_response !== false) {
+        error_log('GET TRANSIENT $chatgpt_last_response: ' . print_r($chatgpt_last_response, true));
+    } else {
+        error_log('GET TRANSIENT $chatgpt_last_response: Transient does not exist or has expired');
+    }
+    error_log('AFTER GET TRANSIENT');
+    error_log('*************************************************************************');
 
     // Knowledge Navigator(TM) keyword append for context
     $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
 
-    if(!empty($chatbot_chatgpt_kn_conversation_context)) {
-        $context = $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-    }
+    // TODO Append prior message, then context, then Knowledge Navigator(TM) - Ver 1.6.1
+    $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
-    // TODO This is where the prior message should be added
-    // TODO Can I retrieve the chatgpt_last_response from sessionStorage here?
-    // TODO https://chat.openai.com/c/3f73a6c1-1a7c-4711-a780-4804af91ad0b
+    // Diagnostics - Ver 1.6.1
+    error_log('*************************************************************************');
+    error_log('$context: ' . print_r($context, true));
+    error_log('*************************************************************************');
 
     // Added Role, System, Content Static Veriable - Ver 1.6.0
     $body = array(
@@ -220,9 +233,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Diagnostics - Ver 1.6.1
     if ($chatgpt_diagnostics === 'On') {
-        error_log(print_r('storedc:' . print_r($chatbot_chatgpt_kn_conversation_context, true), true));
-        error_log(print_r('context:' . print_r($context, true), true));
-        error_log(print_r('message:' . print_r($message, true), true));
+        error_log('storedc: ' . print_r($chatbot_chatgpt_kn_conversation_context, true));
+        error_log('context: ' . print_r($context, true));
+        error_log('message: ' . print_r($message, true));        
     }    
 
     $args = array(
@@ -245,15 +258,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
         // Handle the response from the chat engine
-            // Diagnostics - Ver 1.6.1
-            if ($chatgpt_diagnostics === 'On') {
-                error_log(print_r('$response_body:' . print_r($response_body['choices'][0]['message']['content'], true), true));
-            }
-            // TODO Can I retrieve the chatgpt_last_response from sessionStorage here?
-            // TODO https://chat.openai.com/c/3f73a6c1-1a7c-4711-a780-4804af91ad0b
-            // TODO THIS APPROACH DOESN'T WORK
-            // echo "<script>storeChatGPTLastResponse('" . addslashes($response_body['choices'][0]['message']['content']) . "');</script>";
-
+        // Diagnostics - Ver 1.6.1
+        if ($chatgpt_diagnostics === 'On') {
+            error_log('$response_body: ' . print_r($response_body['choices'][0]['message']['content'], true));
+        }
+        // TODO Store the chatgpt_last_response in a transient
+        set_transient('chatgpt_last_response', $response_body['choices'][0]['message']['content'], HOUR_IN_SECONDS);
         return $response_body['choices'][0]['message']['content'];
     } else {
         // Handle any errors that are returned from the chat engine
@@ -266,7 +276,7 @@ function enqueue_greetings_script() {
     global $chatgpt_diagnostics;
 
     // if ($chatgpt_diagnostics === 'On') {
-    //     error_log(print_r('ENTERING enqueue_greetings_script', true));
+    //     error_log('ENTERING enqueue_greetings_script');
     // }
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
@@ -279,7 +289,7 @@ function enqueue_greetings_script() {
     wp_localize_script('greetings', 'greetings_data', $greetings);
 
     // if ($chatgpt_diagnostics === 'On') {
-    //     error_log(print_r('EXITING enqueue_greetings_script', true));
+    //     error_log('EXITING enqueue_greetings_script');
     // }
 
 }
