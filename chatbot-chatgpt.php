@@ -46,6 +46,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php
 // update_option('chatgpt_diagnostics', 'Off');
 $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
 
+// Context History - Ver 1.6.1
+$context_history = [];
+
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
     // Ensure the Dashicons font is properly enqueued - Ver 1.1.0
@@ -174,6 +177,56 @@ add_action('admin_footer', 'chatbot_chatgpt_admin_footer');
 // Crawler aka Knowledge Navigator(TM) - Ver 1.6.1
 // add_action('admin_post_run_scanner', 'chatbot_chatgpt_knowledge_navigator_callback');
 
+
+// Function to add a new message and response, keeping only the last five - Ver 1.6.1
+function addEntry($transient_name, $newEntry) {
+    $context_history = get_transient($transient_name);
+    if (!$context_history) {
+        $context_history = [];
+    }
+
+    // Determine the total length of all existing entries
+    $totalLength = 0;
+    foreach ($context_history as $entry) {
+        if (is_string($entry)) {
+            $totalLength += strlen($entry);
+        } elseif (is_array($entry)) {
+            $totalLength += strlen(json_encode($entry)); // Convert to string if an array
+        }
+    }
+
+    // Define thresholds for the number of entries to keep
+    $maxEntries = 30; // Default maximum number of entries
+    if ($totalLength > 5000) { // Higher threshold
+        $maxEntries = 20;
+    }
+    if ($totalLength > 10000) { // Lower threshold
+        $maxEntries = 10;
+    }
+
+    while (count($context_history) >= $maxEntries) {
+        array_shift($context_history); // Remove the oldest element
+    }
+
+    if (is_array($newEntry)) {
+        $newEntry = json_encode($newEntry); // Convert the array to a string
+    }
+
+    array_push($context_history, $newEntry); // Append the new element
+    set_transient($transient_name, $context_history); // Update the transient
+}
+
+
+// Function to return message and response - Ver 1.6.1
+function concatenateHistory($transient_name) {
+    $context_history = get_transient($transient_name);
+    if (!$context_history) {
+        return ''; // Return an empty string if the transient does not exist
+    }
+    return implode(' ', $context_history); // Concatenate the array values into a single string
+}
+
+
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {
     // Diagnostics - Ver 1.6.1
@@ -196,18 +249,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Conversation Context - Ver 1.6.1
     $context = "";
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.'));
-    $chatgpt_last_response = "";
-    $chatgpt_last_response = get_transient('chatgpt_last_response');
+ 
+    // Context History - Ver 1.6.1
+     $chatgpt_last_response = concatenateHistory('context_history');
     // Diagnostics - Ver 1.6.1
-    error_log('*************************************************************************');
-    error_log('BEFORE GET TRANSIENT');
-    if ($chatgpt_last_response !== false) {
-        error_log('GET TRANSIENT $chatgpt_last_response: ' . print_r($chatgpt_last_response, true));
-    } else {
-        error_log('GET TRANSIENT $chatgpt_last_response: Transient does not exist or has expired');
-    }
-    error_log('AFTER GET TRANSIENT');
-    error_log('*************************************************************************');
+    // error_log('context_history' . print_r($chatgpt_last_response, true));
 
     // Knowledge Navigator(TM) keyword append for context
     $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
@@ -216,9 +262,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     // Diagnostics - Ver 1.6.1
-    error_log('*************************************************************************');
-    error_log('$context: ' . print_r($context, true));
-    error_log('*************************************************************************');
+    // error_log('$context: ' . print_r($context, true));
 
     // Added Role, System, Content Static Veriable - Ver 1.6.0
     $body = array(
@@ -231,12 +275,13 @@ function chatbot_chatgpt_call_api($api_key, $message) {
             ),
     );
 
+    // Context History - Ver 1.6.1
+    addEntry('context_history', $message);
+
     // Diagnostics - Ver 1.6.1
-    if ($chatgpt_diagnostics === 'On') {
-        error_log('storedc: ' . print_r($chatbot_chatgpt_kn_conversation_context, true));
-        error_log('context: ' . print_r($context, true));
-        error_log('message: ' . print_r($message, true));        
-    }    
+    // error_log('storedc: ' . print_r($chatbot_chatgpt_kn_conversation_context, true));
+    // error_log('context: ' . print_r($context, true));
+    // error_log('message: ' . print_r($message, true));  
 
     $args = array(
         'headers' => $headers,
@@ -259,11 +304,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
         // Handle the response from the chat engine
         // Diagnostics - Ver 1.6.1
-        if ($chatgpt_diagnostics === 'On') {
-            error_log('$response_body: ' . print_r($response_body['choices'][0]['message']['content'], true));
-        }
-        // TODO Store the chatgpt_last_response in a transient
-        set_transient('chatgpt_last_response', $response_body['choices'][0]['message']['content'], HOUR_IN_SECONDS);
+        // error_log('$response_body: ' . print_r($response_body['choices'][0]['message']['content'], true));
+        // Context History - Ver 1.6.1
+        addEntry('context_history', $response_body['choices'][0]['message']['content']);
         return $response_body['choices'][0]['message']['content'];
     } else {
         // Handle any errors that are returned from the chat engine
@@ -275,9 +318,8 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 function enqueue_greetings_script() {
     global $chatgpt_diagnostics;
 
-    // if ($chatgpt_diagnostics === 'On') {
-    //     error_log('ENTERING enqueue_greetings_script');
-    // }
+    // Diagnostics - Ver 1.6.1
+    // error_log('ENTERING enqueue_greetings_script');
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
@@ -288,9 +330,8 @@ function enqueue_greetings_script() {
 
     wp_localize_script('greetings', 'greetings_data', $greetings);
 
-    // if ($chatgpt_diagnostics === 'On') {
-    //     error_log('EXITING enqueue_greetings_script');
-    // }
+    // Diagnostics - Ver 1.6.1
+    // error_log('EXITING enqueue_greetings_script');
 
 }
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');

@@ -246,7 +246,7 @@ function crawl_scheduled_event() {
         $run_scanner = 'No';
     }
 
-    // Log the variables to debug.log
+    // TODO Log the variables to debug.log
     error_log("ENTERING crawl_scehedule_event_hook");
 
     $result = "";
@@ -303,7 +303,7 @@ function crawl_scheduled_event() {
     // Notify outcome for up to 3 minutes
     set_transient('chatbot_chatgpt_kn_results', $kn_results);
 
-    // Log the variables to debug.log
+    // TODO Log the variables to debug.log
     error_log("EXITING crawl_scehedule_event_hook");
 
 }
@@ -332,10 +332,10 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         // error_log("start_url: " . serialize($GLOBALS['start_url']));
 
         if (!wp_next_scheduled('crawl_scheduled_event_hook')) {
-            // Log the variables to debug.log
+            // TODO Log the variables to debug.log
             error_log("BEFORE crawl_scehedule_event_hook");
             wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
-            // Log the variables to debug.log
+            // TODO Log the variables to debug.log
             error_log("AFTER crawl_scehedule_event_hook");
 
             // Reset before reloading the page
