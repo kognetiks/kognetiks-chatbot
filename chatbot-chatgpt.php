@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-crawler.php'; // Crawler aka Knowlege Navigator(TM) - Ver 1.6.1
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-crawler.php'; // Crawler aka Knowlege Navigator - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0
@@ -121,10 +121,10 @@ function chatbot_chatgpt_enqueue_scripts() {
 
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
-                console.log('Setting ' + key + ' in localStorage');
+                // console.log('Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
-                console.log(key + ' is already set in localStorage');
+                // console.log(key + ' is already set in localStorage');
             }
         });
     });
@@ -174,7 +174,7 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_
 add_action('wp_ajax_chatbot_chatgpt_deactivation_feedback', 'chatbot_chatgpt_deactivation_feedback');
 add_action('admin_footer', 'chatbot_chatgpt_admin_footer');
 
-// Crawler aka Knowledge Navigator(TM) - Ver 1.6.1
+// Crawler aka Knowledge Navigator - Ver 1.6.1
 function chatbot_chatgpt_kn_status_activation() {
     add_option('chatbot_chatgpt_kn_status', 'Never Run');
 }
@@ -262,10 +262,10 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Diagnostics - Ver 1.6.1
     // error_log('context_history' . print_r($chatgpt_last_response, true));
 
-    // Knowledge Navigator(TM) keyword append for context
+    // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
 
-    // Append prior message, then context, then Knowledge Navigator(TM) - Ver 1.6.1
+    // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
     $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     // Diagnostics - Ver 1.6.1

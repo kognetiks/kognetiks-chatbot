@@ -1,6 +1,6 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Crawler aka Knowledge Navigator(TM)
+ * Chatbot ChatGPT for WordPress - Settings - Crawler aka Knowledge Navigator
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
  * It allows users to configure the API key and other parameters
@@ -13,7 +13,7 @@ global $start_url, $domain, $max_depth, $max_top_words, $results_csv_file, $resu
 $start_url = site_url();
 $domain = parse_url($start_url, PHP_URL_HOST);
 $max_depth = esc_attr(get_option('chatbot_chatgpt_kn_maximum_depth', 2)); // Default to 2
-$max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 10)); // Default to 10
+$max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)); // Default to 25
 // $no_of_links_crawled = 0; // Default to 0 
 // update_option('no_of_links_crawled', $no_of_links_crawled);
  
@@ -87,15 +87,33 @@ class WebCrawler {
         $stopWords = array_merge($stopWords, ['y', 'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves']);
         $stopWords = array_merge($stopWords, ['z']);
     
-        // Strip out script and style elements first
-        $this->document = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $this->document);
-        $this->document = preg_replace('/<style\b[^>]*>(.*?)<\/style>/is', "", $this->document);
-    
-        // Strip HTML tags before computing frequencies
-        $documentWithoutTags = strip_tags($this->document);
-    
+        // Upgraded the above - Ver 1.6.1
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true); // Suppress HTML parsing errors
+        $dom->loadHTML($this->document);
+        
+        // Remove script and style elements
+        foreach ($dom->getElementsByTagName('script') as $script) {
+            $script->parentNode->removeChild($script);
+        }
+        foreach ($dom->getElementsByTagName('style') as $style) {
+            $style->parentNode->removeChild($style);
+        }
+        
+        // Extract text content only from specific tags
+        $textContent = '';
+        foreach (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'a'] as $tagName) {
+            $elements = $dom->getElementsByTagName($tagName);
+            foreach ($elements as $element) {
+                $textContent .= ' ' . $element->textContent;
+            }
+        }
+        
+        // Replace all non-word characters with a space
+        $documentWithoutTags = preg_replace('/\W+/', ' ', $textContent);
+        
         // Get words and convert to lower case
-        $words = str_word_count(strtolower($documentWithoutTags), 1);
+        $words = str_word_count(strtolower($documentWithoutTags), 1);    
     
         // Filter out stop words
         $words = array_diff($words, $stopWords);
@@ -392,15 +410,16 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
     ?>
 
     <div class="wrap">
-        <p>Introducing <b>Knowledge Navigator&trade;</b> - the smart explorer behind our ChatGPT plugin that's designed to delve into the core of your website. Like a digital archaeologist, it embarks on an all-encompassing journey through your site's pages, carefully following every internal link to get a holistic view of your content. The exciting part? It sifts through each page, extracting the essence of your content in the form of keywords and phrases, gradually building a meticulous, interactive map of your website's architecture. </p>
-        <p>What's the outcome? Detailed "results.csv" and "results.json" files are created, tucking away all this valuable information in a dedicated 'results' directory within the plugin's folder. The prime objective of <b>Knowledge Navigator&trade;</b> is to enable the ChatGPT plugin to have a crystal clear understanding of your website's context and content. The result? Your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.</p>
-        <p>And how does the <b>Knowledge Navigator&trade;</b> do all this? It employs a clever technique known as TF-IDF (Term Frequency-Inverse Document Frequency) to unearth the keywords that really matter. The keywords are ranked by their TF-IDF scores, where the score represents the keyword's relevance to your site. This score is a fine balance between the term's frequency on your site and its inverse document frequency (which is essentially the log of total instances divided by the number of documents containing the term). In simpler words, it's a sophisticated measure of how special a keyword is to your content.</p>
-        <h2>Knowledge Navigator&trade; Settings</h2>
-        <p><b><i>When you're ready to scan you website, set the 'Run Knowledge Navigator&trade;' to 'Yes', then click 'Save Settings'.  Refresh the page to determine the progress and status.</i></b></p>
-        <p>Runtimes for the <b>Knowledge Navigator&trade;</b> can increase exponentially.  It is suggested to start with a maximum depth of 2 and maximum number of top words at 50.</p>
+        <p>Introducing <b>Knowledge Navigator</b> - the smart explorer behind our ChatGPT plugin that's designed to delve into the core of your website. Like a digital archaeologist, it embarks on an all-encompassing journey through your site's pages, carefully following every internal link to get a holistic view of your content. The exciting part? It sifts through each page, extracting the essence of your content in the form of keywords and phrases, gradually building a meticulous, interactive map of your website's architecture. </p>
+        <p>What's the outcome? Detailed "results.csv" and "results.json" files are created, tucking away all this valuable information in a dedicated 'results' directory within the plugin's folder. The prime objective of <b>Knowledge Navigator</b> is to enable the ChatGPT plugin to have a crystal clear understanding of your website's context and content. The result? Your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.</p>
+        <p>And how does the <b>Knowledge Navigator</b> do all this? It employs a clever technique known as TF-IDF (Term Frequency-Inverse Document Frequency) to unearth the keywords that really matter. The keywords are ranked by their TF-IDF scores, where the score represents the keyword's relevance to your site. This score is a fine balance between the term's frequency on your site and its inverse document frequency (which is essentially the log of total instances divided by the number of documents containing the term). In simpler words, it's a sophisticated measure of how special a keyword is to your content.</p>
+        <h2>Knowledge Navigator Settings</h2>
+        <p><b><i>When you're ready to scan you website, set the 'Run Knowledge Navigator' to 'Yes', then click 'Save Settings'.</i></b></p>
+        <p>Runtimes for the <b>Knowledge Navigator</b> can increase exponentially.  It is suggested to start with a maximum depth of 2 and maximum number of top words at 50.</p>
         <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
-            <p><b>Knowledge Navigator&trade;</b> Status: <?php echo get_option('chatbot_chatgpt_kn_status', 'In Process'); ?> - Links Crawled: <?php echo get_option('no_of_links_crawled', 0); ?></p>
+            <p><b>Knowledge Navigator</b> Status: <?php echo get_option('chatbot_chatgpt_kn_status', 'In Process'); ?> - Links Crawled: <?php echo get_option('no_of_links_crawled', 0); ?></p>
         </div>
+        <p>Refresh this page to determine the progress and status of Knowledge Navigation!</p>
     </div>
 
     <?php
@@ -430,7 +449,7 @@ function chatbot_chatgpt_kn_maximum_depth_callback($args) {
 }
 
 function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
-    $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 10));
+    $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 25));
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php

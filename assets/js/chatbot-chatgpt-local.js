@@ -2,7 +2,7 @@ jQuery(document).ready(function ($) {
     
     function chatbot_chatgpt_localize() {
 
-        console.log('ENTERING chatbot_chatgpt_localize');
+        // console.log('ENTERING chatbot_chatgpt_localize');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         var chatgptName = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_bot_name) ? chatbotSettings.chatgpt_bot_name : 'Chatbot ChatGPT';
@@ -24,10 +24,10 @@ jQuery(document).ready(function ($) {
     
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
-                console.log('Setting ' + key + ' in localStorage');
+                // console.log('Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
-                console.log(key + ' is already set in localStorage');
+                // console.log(key + ' is already set in localStorage');
             }
         });
 
@@ -197,7 +197,7 @@ jQuery(document).ready(function ($) {
             });
         }
 
-        console.log('EXITING chatbot_chatgpt_localize');
+        // console.log('EXITING chatbot_chatgpt_localize');
         
     }
 

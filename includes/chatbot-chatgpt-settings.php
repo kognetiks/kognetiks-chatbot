@@ -160,8 +160,8 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatar</a>
             <!-- Coming Soon in Ver 2.0.0 -->
             <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->
-            <!-- Knowledge Navigator(TM) - Ver 1.6.1 -->
-            <a href="?page=chatbot-chatgpt&tab=crawler" class="nav-tab <?php echo $active_tab == 'crawler' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator&trade;</a>
+            <!-- Knowledge Navigator - Ver 1.6.1 -->
+            <a href="?page=chatbot-chatgpt&tab=crawler" class="nav-tab <?php echo $active_tab == 'crawler' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
         </h2>
 

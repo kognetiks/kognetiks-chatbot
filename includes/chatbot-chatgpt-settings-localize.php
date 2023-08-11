@@ -61,10 +61,10 @@ function chatbot_chatgpt_localize(){
 
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
-                console.log('Setting ' + key + ' in localStorage');
+                // console.log('Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
-                console.log(key + ' is already set in localStorage');
+                // console.log(key + ' is already set in localStorage');
             }
         });
     });

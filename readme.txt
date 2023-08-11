@@ -15,7 +15,7 @@ Easily integrate OpenAI's ChatGPT API into your WordPress website with this powe
 
 Introducing **Chatbot ChatGPT for WordPress** – Elevate Your User Experience with AI-Driven Personalized Support!
 
-🔍 **Meet Knowledge Navigator™** – the heart of our ChatGPT plugin. It's like a digital explorer for your website, carefully unearthing your content's essence. This innovative component initiates an in-depth analysis of your site, following every link, and meticulously building an interactive map of your site's architecture. The result? A crystal clear understanding of your content that enables more accurate and contextually relevant responses.
+🔍 **Meet Knowledge Navigator** – the heart of our ChatGPT plugin. It's like a digital explorer for your website, carefully unearthing your content's essence. This innovative component initiates an in-depth analysis of your site, following every link, and meticulously building an interactive map of your site's architecture. The result? A crystal clear understanding of your content that enables more accurate and contextually relevant responses.
 
 ✨ **How Does It Work?** It employs a method known as TF-IDF (Term Frequency-Inverse Document Frequency) to rank keywords by relevance. This sophisticated measure highlights the unique keywords that define your content, all neatly tucked away in "results.csv" and "results.json" files within the plugin's folder.
 
@@ -61,7 +61,7 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 
 📝 **Fully Configurable Chatbot Identity**: Customize the chatbot's name, initial greeting, and subsequent messages to align with your brand.
 
-🔍 **Knowledge Navigator™** – the heart of our ChatGPT plugin. It's like a digital explorer for your website.
+🔍 **Knowledge Navigator** – the heart of our ChatGPT plugin. It's like a digital explorer for your website.
 
 == Getting Started ==
 
@@ -129,7 +129,7 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 == Changelog ==
 
 = 1.6.1 =
-* Added the Knowledge Navigator™ which is an innovative component of our plugin designed to perform an in-depth analysis of your website for better, more contextual relevant responses by the chatbot.
+* Added the Knowledge Navigator which is an innovative component of our plugin designed to perform an in-depth analysis of your website for better, more contextual relevant responses by the chatbot.
 
 = 1.6.0 =
 * Corrected for inconsistent variable name

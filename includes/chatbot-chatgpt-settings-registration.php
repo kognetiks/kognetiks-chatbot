@@ -228,7 +228,7 @@ function chatbot_chatgpt_settings_init() {
 
     add_settings_section(
         'chatbot_chatgpt_knowledge_navigator_section',
-        'Knowledge Navigator&trade;',
+        'Knowledge Navigator',
         'chatbot_chatgpt_knowledge_navigator_section_callback',
         'chatbot_chatgpt_knowledge_navigator'
     );
@@ -251,7 +251,7 @@ function chatbot_chatgpt_settings_init() {
 
     add_settings_field(
         'chatbot_chatgpt_knowledge_navigator',
-        'Run Knowledge Navigator&trade;',
+        'Run Knowledge Navigator',
         'chatbot_chatgpt_knowledge_navigator_callback',
         'chatbot_chatgpt_knowledge_navigator',
         'chatbot_chatgpt_knowledge_navigator_section'
