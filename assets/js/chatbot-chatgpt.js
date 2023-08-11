@@ -281,13 +281,13 @@ jQuery(document).ready(function ($) {
         // Nuclear option to clear session conversation - Ver 1.5.0
         // Do not use unless alsolutely needed
         // TODO Comment this code out
-        nuclearOption = 'Off';
-        if (nuclearOption === 'On') {
-            console.log('***** NUCLEAR OPTION IS ON ***** ');
-            sessionStorage.removeItem('chatgpt_conversation');
-            // Removed in Ver 1.6.1
-            sessionStorage.removeItem('chatgpt_last_response');
-        }
+        // nuclearOption = 'Off';
+        // if (nuclearOption === 'On') {
+        //     console.log('***** NUCLEAR OPTION IS ON ***** ');
+        //     sessionStorage.removeItem('chatgpt_conversation');
+        //     // Removed in Ver 1.6.1
+        //     sessionStorage.removeItem('chatgpt_last_response');
+        // }
 
         // Diagnostics - Ver 1.5.0
         if (chatbotSettings.chatgpt_diagnostics === 'On') {

@@ -160,7 +160,7 @@ class WebCrawler {
                 }
 
                 // TODO Log the variables to debug.log
-                error_log("CRAWLING :" . $url);
+                // error_log("CRAWLING :" . $url);
 
                 // The second parameter is the default value if the option is not set.
                 $kn_crawler_status = get_option('chatbot_chatgpt_kn_status', 'In Process');
@@ -271,7 +271,7 @@ function crawl_scheduled_event() {
     }
 
     // TODO Log the variables to debug.log
-    error_log("ENTERING crawl_scehedule_event_hook");
+    // error_log("ENTERING crawl_scehedule_event_hook");
     update_option('chatbot_chatgpt_crawler_status', 'In Process');
 
     $result = "";
@@ -329,7 +329,7 @@ function crawl_scheduled_event() {
     set_transient('chatbot_chatgpt_kn_results', $kn_results);
 
     // TODO Log the variables to debug.log
-    error_log("EXITING crawl_scehedule_event_hook");
+    // error_log("EXITING crawl_scehedule_event_hook");
 
     // Get the current date and time.
     $date_time_completed = date("Y-m-d H:i:s");
@@ -369,14 +369,17 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
             // RESET THE NO OF LINKS CRAWLED HERE
             update_option('no_of_links_crawled', 0);
+            
             // RESET THE STATUS MESSAGE
             update_option('chatbot_chatgpt_kn_status', 'In Process');
 
             // TODO Log the variables to debug.log
-            error_log("BEFORE crawl_scehedule_event_hook");
+            // error_log("BEFORE crawl_scehedule_event_hook");
+
             wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
+
             // TODO Log the variables to debug.log
-            error_log("AFTER crawl_scehedule_event_hook");
+            // error_log("AFTER crawl_scehedule_event_hook");
 
             // Reset before reloading the page
             $run_scanner = 'No';
