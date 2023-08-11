@@ -175,8 +175,15 @@ add_action('wp_ajax_chatbot_chatgpt_deactivation_feedback', 'chatbot_chatgpt_dea
 add_action('admin_footer', 'chatbot_chatgpt_admin_footer');
 
 // Crawler aka Knowledge Navigator(TM) - Ver 1.6.1
-// add_action('admin_post_run_scanner', 'chatbot_chatgpt_knowledge_navigator_callback');
+function chatbot_chatgpt_kn_status_activation() {
+    add_option('chatbot_chatgpt_kn_status', 'Never Run');
+}
+register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
 
+function chatbot_chatgpt_kn_status_deactivation() {
+    delete_option('chatbot_chatgpt_kn_status');
+}
+register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
 function addEntry($transient_name, $newEntry) {
@@ -258,7 +265,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Knowledge Navigator(TM) keyword append for context
     $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
 
-    // TODO Append prior message, then context, then Knowledge Navigator(TM) - Ver 1.6.1
+    // Append prior message, then context, then Knowledge Navigator(TM) - Ver 1.6.1
     $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     // Diagnostics - Ver 1.6.1

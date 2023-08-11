@@ -9,12 +9,13 @@
  * @package chatbot-chatgpt
  */
  
- global $start_url, $domain, $max_depth, $max_top_words, $results_csv_file, $results_json_file, $chatgpt_diagnostics, $plugin_dir_path, $results_dir_path;
- $start_url = site_url();
- $domain = parse_url($start_url, PHP_URL_HOST);
- $max_depth = esc_attr(get_option('chatbot_chatgpt_kn_maximum_depth', 2)); // Default to 2
- $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 10)); // Default to 10
- 
+global $start_url, $domain, $max_depth, $max_top_words, $results_csv_file, $results_json_file, $chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $no_of_links_crawled;
+$start_url = site_url();
+$domain = parse_url($start_url, PHP_URL_HOST);
+$max_depth = esc_attr(get_option('chatbot_chatgpt_kn_maximum_depth', 2)); // Default to 2
+$max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 10)); // Default to 10
+// $no_of_links_crawled = 0; // Default to 0 
+// update_option('no_of_links_crawled', $no_of_links_crawled);
  
 // Get the absolute path to the plugin directory
 $plugin_dir_path = plugin_dir_path(__FILE__);
@@ -104,7 +105,6 @@ class WebCrawler {
         $this->totalWordCount = count($this->frequencyData);
     }
     
-    
     public function computeTFIDF($term) {
         $tf = $this->frequencyData[$term] / $this->totalWordCount;
         $idf = $this->computeInverseDocumentFrequency($term);
@@ -138,6 +138,8 @@ class WebCrawler {
     public function crawl($depth = 0, $domain = '') {
 
         // error_log("crawl: top of function");
+        // $no_of_links_crawled = 0;
+        // update_option('no_of_links_crawled', $no_of_links_crawled);
 
         $max_depth = isset($GLOBALS['max_depth']) ? (int) $GLOBALS['max_depth'] : 3;  // default to 3 if not set
 
@@ -160,6 +162,18 @@ class WebCrawler {
                 // TODO Log the variables to debug.log
                 error_log("CRAWLING :" . $url);
 
+                // The second parameter is the default value if the option is not set.
+                $kn_crawler_status = get_option('chatbot_chatgpt_kn_status', 'In Process');
+
+                // Increment the number of links crawled.
+                $no_of_links_crawled = get_option('no_of_links_crawled', 0);
+                $no_of_links_crawled += 1;
+                update_option('no_of_links_crawled', $no_of_links_crawled);
+
+                // Get the current status without appending the number of links crawled.
+                $kn_crawler_status = get_option('chatbot_chatgpt_kn_status', 'In Process');
+                update_option('chatbot_chatgpt_kn_status', $kn_crawler_status);
+
                 $start_time = microtime(true);
 
                 // Mark this URL as visited
@@ -173,7 +187,7 @@ class WebCrawler {
     
                 // Added the adaptive delay. Multiply the duration by a factor to determine the delay.
                 // The value of the factor would depends on any specific requirements. In this case, the default chosen 2.
-                $adaptive_delay = $duration * 2;
+                $adaptive_delay = (int)($duration * 2);
                 
                 // Set a maximum limit to the delay to prevent it from being too long.
                 $max_delay = 5;
@@ -220,9 +234,16 @@ class WebCrawler {
 function display_option_value_admin_notice() {
     $kn_results = get_option('chatbot_chatgpt_kn_results');
 
+    // Dismissable notice - Ver 1.6.1
     if ($kn_results) {
-        echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+        echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
     }
+    
+    // Dismissable notice - Ver 1.6.1
+    // if ($kn_results) {
+    //     echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
+    // }
+
 }
 add_action('admin_notices', 'display_option_value_admin_notice');
 
@@ -242,12 +263,16 @@ function crawl_scheduled_event() {
 
     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
 
+    // The second parameter is the default value if the option is not set.
+   update_option('chatbot_chatgpt_kn_status', 'In Process');
+
     if (!isset($run_scanner)) {
         $run_scanner = 'No';
     }
 
     // TODO Log the variables to debug.log
     error_log("ENTERING crawl_scehedule_event_hook");
+    update_option('chatbot_chatgpt_crawler_status', 'In Process');
 
     $result = "";
     // Reset the results message
@@ -280,7 +305,7 @@ function crawl_scheduled_event() {
         }
     }
 
-    // Diagnostics Only
+    // TODO Diagnostics - Ver 1.6.1
     // var_dump($topWords);
 
     // Store the results
@@ -305,6 +330,15 @@ function crawl_scheduled_event() {
 
     // TODO Log the variables to debug.log
     error_log("EXITING crawl_scehedule_event_hook");
+
+    // Get the current date and time.
+    $date_time_completed = date("Y-m-d H:i:s");
+
+    // Concatenate the status message with the date and time.
+    $status_message = 'Completed on ' . $date_time_completed;
+
+    // Update the option with the new status message.
+    update_option('chatbot_chatgpt_kn_status', $status_message);
 
 }
 add_action('crawl_scheduled_event_hook', 'crawl_scheduled_event');
@@ -332,6 +366,12 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         // error_log("start_url: " . serialize($GLOBALS['start_url']));
 
         if (!wp_next_scheduled('crawl_scheduled_event_hook')) {
+
+            // RESET THE NO OF LINKS CRAWLED HERE
+            update_option('no_of_links_crawled', 0);
+            // RESET THE STATUS MESSAGE
+            update_option('chatbot_chatgpt_kn_status', 'In Process');
+
             // TODO Log the variables to debug.log
             error_log("BEFORE crawl_scehedule_event_hook");
             wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
@@ -353,8 +393,11 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         <p>What's the outcome? Detailed "results.csv" and "results.json" files are created, tucking away all this valuable information in a dedicated 'results' directory within the plugin's folder. The prime objective of <b>Knowledge Navigator&trade;</b> is to enable the ChatGPT plugin to have a crystal clear understanding of your website's context and content. The result? Your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.</p>
         <p>And how does the <b>Knowledge Navigator&trade;</b> do all this? It employs a clever technique known as TF-IDF (Term Frequency-Inverse Document Frequency) to unearth the keywords that really matter. The keywords are ranked by their TF-IDF scores, where the score represents the keyword's relevance to your site. This score is a fine balance between the term's frequency on your site and its inverse document frequency (which is essentially the log of total instances divided by the number of documents containing the term). In simpler words, it's a sophisticated measure of how special a keyword is to your content.</p>
         <h2>Knowledge Navigator&trade; Settings</h2>
-        <p><b><i>When you're ready to scan you website, set the 'Run Knowledge Navigator&trade;' to 'Yes', then click 'Save Settings'</i></b></p>
-        <p>This may take a few minutes, when the process is complete you'll a confirmation message. Reload the page and watch for a status update.</p>
+        <p><b><i>When you're ready to scan you website, set the 'Run Knowledge Navigator&trade;' to 'Yes', then click 'Save Settings'.  Refresh the page to determine the progress and status.</i></b></p>
+        <p>Runtimes for the <b>Knowledge Navigator&trade;</b> can increase exponentially.  It is suggested to start with a maximum depth of 2 and maximum number of top words at 50.</p>
+        <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
+            <p><b>Knowledge Navigator&trade;</b> Status: <?php echo get_option('chatbot_chatgpt_kn_status', 'In Process'); ?> - Links Crawled: <?php echo get_option('no_of_links_crawled', 0); ?></p>
+        </div>
     </div>
 
     <?php
@@ -375,7 +418,7 @@ function chatbot_chatgpt_kn_maximum_depth_callback($args) {
     ?>
     <select id="chatbot_chatgpt_kn_maximum_depth" name="chatbot_chatgpt_kn_maximum_depth">
         <?php
-        for ($i = 1; $i <= 3; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             echo '<option value="' . $i . '"' . selected($GLOBALS['max_depth'], $i, false) . '>' . $i . '</option>';
         }
         ?>
@@ -388,7 +431,7 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php
-        for ($i = 25; $i <= 250; $i += 25) {
+        for ($i = 25; $i <= 500; $i += 25) {
             echo '<option value="' . $i . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . $i . '</option>';
         }
         ?>
