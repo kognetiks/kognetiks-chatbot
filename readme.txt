@@ -27,7 +27,7 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your User Experience w
 * 24/7 Assistance: Automate customer service, reduce response times, and boost satisfaction across various fields, such as healthcare, education, finance, and more.
 * Easy Integration: Designed to work effortlessly with gpt-3.5-turbo or gpt-4 models, seamlessly bringing life to your WordPress website.
 
-**🚀 Join Us in the Revolution of Personalized User Experience!**
+🚀 **Join Us in the Revolution of Personalized User Experience!**
 
 ChatGPT is more than a plugin; it's an asset to your site, crafting a truly bespoke experience for your visitors. Powered by advanced AI technology, ChatGPT is designed to offer a more interactive and tailored user experience.
 
@@ -124,7 +124,11 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 8. Mobile Experience - Chatbot ChatGPT minimize (Lower Right)
 9. Chatbot ChatGPT shown in Wide mode
 10. Optional custom Avatars to greet visitors with a configurable message
-11. Avatar greeting with message 
+11. Avatar greeting with message
+12. Knowledge Navigator Settings
+13. Chatbot ChatGPT response after running Knowledge Navigator
+14. Chatbot ChatGPT is now more context responsive after running Knowledge Navigator
+15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
 
 == Changelog ==
 
