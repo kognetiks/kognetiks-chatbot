@@ -82,6 +82,7 @@ function chatgpt_width_setting_callback($args) {
 
 // Diagnostics On/Off - Ver 1.5.0
 function chatgpt_diagnostics_setting_callback($args) {
+    global $chatgpt_diagnostics;
     $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
     ?>
     <select id="chatgpt_diagnostics_setting" name = "chatgpt_diagnostics">

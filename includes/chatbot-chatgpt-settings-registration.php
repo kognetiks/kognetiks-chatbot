@@ -19,6 +19,8 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_model_choice');
     // Max Tokens setting options - Ver 1.4.2
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_max_tokens_setting');
+    // Covnersation Context - Ver 1.6.1
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context');
 
     add_settings_section(
         'chatbot_chatgpt_api_model_section',
@@ -48,6 +50,15 @@ function chatbot_chatgpt_settings_init() {
         'chatgpt_max_tokens_setting',
         'Maximum Tokens Setting',
         'chatgpt_max_tokens_setting_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
+    // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
+    add_settings_field(
+        'chatbot_chatgpt_conversation_context',
+        'Conversation Context',
+        'chatbot_chatgpt_conversation_context_callback',
         'chatbot_chatgpt_api_model',
         'chatbot_chatgpt_api_model_section'
     );
@@ -206,6 +217,44 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_avatar_greeting_callback',
         'chatbot_chatgpt_avatar',
         'chatbot_chatgpt_avatar_section'
+    );
+
+    // Support settings tab - Ver 1.6.1
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_knowledge_navigator');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_depth');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_top_words');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_results');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_conversation_context');
+
+    add_settings_section(
+        'chatbot_chatgpt_knowledge_navigator_section',
+        'Knowledge Navigator',
+        'chatbot_chatgpt_knowledge_navigator_section_callback',
+        'chatbot_chatgpt_knowledge_navigator'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_maximum_depth',
+        'Maximum Depth',
+        'chatbot_chatgpt_kn_maximum_depth_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_knowledge_navigator_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_maximum_top_words',
+        'Maximum Top Words',
+        'chatbot_chatgpt_kn_maximum_top_words_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_knowledge_navigator_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_knowledge_navigator',
+        'Run Knowledge Navigator',
+        'chatbot_chatgpt_knowledge_navigator_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_knowledge_navigator_section'
     );
 
 }

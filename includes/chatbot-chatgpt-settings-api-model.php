@@ -20,6 +20,7 @@ function chatbot_chatgpt_api_model_section_callback($args) {
     <?php
 }
 
+
 // API key field callback
 function chatbot_chatgpt_api_key_callback($args) {
     $api_key = esc_attr(get_option('chatgpt_api_key'));
@@ -30,10 +31,10 @@ function chatbot_chatgpt_api_key_callback($args) {
     <?php
 }
 
-// Fix sanitation - Ver 1.6.0
+// Fix sanitation - Ver 1.6.0 and Ver 1.6.1
 function sanitize_api_key($input) {
-    // if input is '********', return the existing API key instead
-    if ($input === '********') {
+    // if input is '********', a series of '*', or blank, return the existing API key instead
+    if (preg_match('/^\*+$|^$/', $input)) {
         return get_option('chatgpt_api_key');
     }
     // otherwise, save the new API key
@@ -58,18 +59,35 @@ function chatbot_chatgpt_model_choice_callback($args) {
 function chatgpt_max_tokens_setting_callback($args) {
     // Get the saved chatgpt_max_tokens_setting or default to 150
     $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', '150'));
+    // Allow for a range of tokens between 100 and 1000 in 50 step increments - Ver 1.6.1
     ?>
     <select id="chatgpt_max_tokens_setting" name="chatgpt_max_tokens_setting">
-        <option value="<?php echo esc_attr( '100' ); ?>" <?php selected( $max_tokens, '100' ); ?>><?php echo esc_html( '100' ); ?></option>
-        <option value="<?php echo esc_attr( '150' ); ?>" <?php selected( $max_tokens, '150' ); ?>><?php echo esc_html( '150' ); ?></option>
-        <option value="<?php echo esc_attr( '200' ); ?>" <?php selected( $max_tokens, '200' ); ?>><?php echo esc_html( '200' ); ?></option>
-        <option value="<?php echo esc_attr( '250' ); ?>" <?php selected( $max_tokens, '250' ); ?>><?php echo esc_html( '250' ); ?></option>
-        <option value="<?php echo esc_attr( '300' ); ?>" <?php selected( $max_tokens, '300' ); ?>><?php echo esc_html( '300' ); ?></option>
-        <option value="<?php echo esc_attr( '350' ); ?>" <?php selected( $max_tokens, '350' ); ?>><?php echo esc_html( '350' ); ?></option>
-        <option value="<?php echo esc_attr( '400' ); ?>" <?php selected( $max_tokens, '400' ); ?>><?php echo esc_html( '400' ); ?></option>
-        <option value="<?php echo esc_attr( '450' ); ?>" <?php selected( $max_tokens, '450' ); ?>><?php echo esc_html( '450' ); ?></option>
-        <option value="<?php echo esc_attr( '500' ); ?>" <?php selected( $max_tokens, '500' ); ?>><?php echo esc_html( '500' ); ?></option>
+        <?php
+        for ($i=100; $i<=1000; $i+=50) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
     </select>
     <?php
 }
+
+// Conversation Context - Ver 1.6.1
+function chatbot_chatgpt_conversation_context_callback($args) {
+    // Get the value of the setting we've registered with register_setting()
+    $chatbot_chatgpt_conversation_context = get_option('chatbot_chatgpt_conversation_context');
+
+    // Check if the option has been set, if not, use a default value
+    if (empty($chatbot_chatgpt_conversation_context)) {
+        $chatbot_chatgpt_conversation_context = "You are a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.";
+        // Save the default value into the option
+        update_option('chatbot_chatgpt_conversation_context', $chatbot_chatgpt_conversation_context);
+    }
+
+    ?>
+    <!-- Define the textarea field. -->
+    <textarea id='chatbot_chatgpt_conversation_context' name='chatbot_chatgpt_conversation_context' rows='5' cols='50' maxlength='2500'><?php echo esc_html(stripslashes($chatbot_chatgpt_conversation_context)); ?></textarea>
+    <?php
+}
+
+
 

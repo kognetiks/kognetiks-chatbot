@@ -1,6 +1,9 @@
 jQuery(document).ready(function ($) {
     
     function chatbot_chatgpt_localize() {
+
+        // console.log('ENTERING chatbot_chatgpt_localize');
+
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         var chatgptName = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_bot_name) ? chatbotSettings.chatgpt_bot_name : 'Chatbot ChatGPT';
         var chatgptInitialGreeting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.initial_greeting) ? chatbotSettings.initial_greeting : 'Hello! How can I help you today?';
@@ -16,6 +19,17 @@ jQuery(document).ready(function ($) {
         var chatgptAvatarIconURLSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_avatar_icon_url_setting) ? chatbotSettings.chatgpt_avatar_icon_url_setting : 'icon-001.png';
         var chatgptCustomAvatarIconSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_custom_avatar_icon_setting) ? chatbotSettings.chatgpt_custom_avatar_icon_setting : 'icon-001.png';
         var chatgptAvatarGreetingSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_avatar_greeting_setting) ? chatbotSettings.chatgpt_avatar_greeting_setting : 'Great to see you today! How can I help you?';
+
+        let chatbotSettings = " . json_encode($chatbot_settings) . ";
+    
+        Object.keys(chatbotSettings).forEach((key) => {
+            if(!localStorage.getItem(key)) {
+                // console.log('Setting ' + key + ' in localStorage');
+                localStorage.setItem(key, chatbotSettings[key]);
+            } else {
+                // console.log(key + ' is already set in localStorage');
+            }
+        });
 
         // Get the input elements
         var chatgptNameInput = document.getElementById('chatgpt_bot_name');
@@ -182,6 +196,9 @@ jQuery(document).ready(function ($) {
 
             });
         }
+
+        // console.log('EXITING chatbot_chatgpt_localize');
+        
     }
 
     chatbot_chatgpt_localize();
