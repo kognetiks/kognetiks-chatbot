@@ -394,8 +394,28 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
             // TODO Log the variables to debug.log
             // error_log("BEFORE crawl_scehedule_event_hook");
 
-            wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
+            // WP Cron Scheduler - VER 1.6.1
+            // wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
 
+            // WP Cron Scheduler - VER 1.6.2
+            // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
+            // $timestamp = time() + 3600; // 1 hour from now
+            // $interval = 'daily'; // The recurrence interval (could also be 'hourly', 'twicedaily', etc.)
+            // $hook = 'crawl_scheduled_event_hook';
+            // $args = array('argument_1', 'argument_2');
+            // wp_schedule_event($timestamp, $interval, $hook, $args);
+
+            // WP Cron Scheduler - VER 1.6.2
+            // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
+            // A standard system cron job runs at specified intervals regardless of the 
+            // website's activity or traffic, but WordPress cron jobs are triggered by visits
+            //  to your site.
+            $timestamp = time(); // run it now
+            $interval = 'daily'; // The recurrence interval (could also be 'hourly', 'twicedaily', 'daily' or custom schedule)
+            // $interval = 'weekly'; // The custom recurrence interval - see function at bottom
+            $hook = 'crawl_scheduled_event_hook';
+            wp_schedule_event($timestamp, $interval, $hook);
+            
             // TODO Log the variables to debug.log
             // error_log("AFTER crawl_scehedule_event_hook");
 
@@ -482,3 +502,17 @@ function output_results(){
     // Write JSON to file
     file_put_contents($GLOBALS['results_json_file'], json_encode($topWords));
 }
+
+// Custom Schedules - Ver 1.6.2
+// https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
+// A standard system cron job runs at specified intervals regardless of the 
+// website's activity or traffic, but WordPress cron jobs are triggered by visits
+//  to your site.
+function chatbot_chatgpt_custom_cron_schedule($schedules) {
+    $schedules['weekly'] = array(
+        'interval' => 604800, // Number of seconds in a week
+        'display'  => __('Every Week'),
+    );
+    return $schedules;
+}
+add_filter('cron_schedules', 'chatbot_chatgpt_custom_cron_schedule');

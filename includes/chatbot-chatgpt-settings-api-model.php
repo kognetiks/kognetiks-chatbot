@@ -78,7 +78,7 @@ function chatbot_chatgpt_conversation_context_callback($args) {
 
     // Check if the option has been set, if not, use a default value
     if (empty($chatbot_chatgpt_conversation_context)) {
-        $chatbot_chatgpt_conversation_context = "You are a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.";
+        $chatbot_chatgpt_conversation_context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.";
         // Save the default value into the option
         update_option('chatbot_chatgpt_conversation_context', $chatbot_chatgpt_conversation_context);
     }

@@ -29,7 +29,7 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experie
 
 🚀 **Join Us in the Revolution of Personalized User Experience!**
 
-ChatGPT is more than a plugin; it's an asset to your site, crafting a truly bespoke experience for your visitors. Powered by advanced AI technology, ChatGPT is designed to offer a more interactive and tailored user experience.
+ChatGPT is more than a plugin; it's an asset to your site, crafting a truly bespoke experience for your visitors. Powered by advanced AI technology, ChatGPT is designed to offer a more interactive and tailored visitor experience.
 
 Get Chatbot ChatGPT today, and redefine your WordPress website with intelligence, creativity, and a personal touch!
 
@@ -43,7 +43,7 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 
 🎉 **Effortless Integration**: Get started in minutes with an easy setup process, fully integrated with OpenAI's ChatGPT API.
 
-🚀 **Cutting-Edge Support**: Benefit from support for gpt-3.5-turbo and the next-gen gpt-4 (Learn how to access the gpt-4 API at [https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4](https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4)).
+🚀 **Cutting-Edge Support**: Benefit from support for gpt-3.5-turbo and the next-gen gpt-4 from OpenAI.
 
 💬 **Elegant Floating Chatbot Interface**: Customize the appearance for a sleek and engaging user experience.
 
