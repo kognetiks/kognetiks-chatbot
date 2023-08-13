@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
 Tested up to: 6.3
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -13,7 +13,7 @@ Easily integrate OpenAI's ChatGPT API into your WordPress website with this powe
 
 == Description ==
 
-Introducing **Chatbot ChatGPT for WordPress** – Elevate Your User Experience with AI-Driven Personalized Support!
+Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experience with AI-Driven Personalized Support!
 
 🔍 **Meet Knowledge Navigator** – the heart of our ChatGPT plugin. It's like a digital explorer for your website, carefully unearthing your content's essence. This innovative component initiates an in-depth analysis of your site, following every link, and meticulously building an interactive map of your site's architecture. The result? A crystal clear understanding of your content that enables more accurate and contextually relevant responses.
 
