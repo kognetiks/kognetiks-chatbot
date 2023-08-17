@@ -180,8 +180,10 @@ function chatbot_chatgpt_kn_status_activation() {
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
 
+// TODO Clean Up in Aisle 4
 function chatbot_chatgpt_kn_status_deactivation() {
     delete_option('chatbot_chatgpt_kn_status');
+    wp_clear_scheduled_hook('crawl_scheduled_event_hook'); 
 }
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
