@@ -162,6 +162,7 @@ function chatbot_chatgpt_settings_page_html() {
             <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->
             <!-- Knowledge Navigator - Ver 1.6.1 -->
             <a href="?page=chatbot-chatgpt&tab=crawler" class="nav-tab <?php echo $active_tab == 'crawler' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
+            <a href="?page=chatbot-chatgpt&tab=crawler_results" class="nav-tab <?php echo $active_tab == 'tf-idf' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator Results</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
         </h2>
 
@@ -187,6 +188,9 @@ function chatbot_chatgpt_settings_page_html() {
             } elseif ($active_tab == 'crawler') {
                 settings_fields('chatbot_chatgpt_knowledge_navigator');
                 do_settings_sections('chatbot_chatgpt_knowledge_navigator');
+            } elseif ($active_tab == 'crawler_resutls') {
+                settings_fields('crawler_resutls');
+                do_settings_sections('crawler_resutls');
             }
 
             submit_button('Save Settings');

@@ -156,8 +156,8 @@ class WebCrawler {
     public function crawl($depth = 0, $domain = '') {
 
         // error_log("crawl: top of function");
-        // $no_of_links_crawled = 0;
-        // update_option('no_of_links_crawled', $no_of_links_crawled);
+        $no_of_links_crawled = 0;
+        update_option('no_of_links_crawled', $no_of_links_crawled);
 
         $max_depth = isset($GLOBALS['max_depth']) ? (int) $GLOBALS['max_depth'] : 3;  // default to 3 if not set
 
@@ -248,30 +248,61 @@ class WebCrawler {
     }
 }
 
-// Notify outcomes - Ver 1.6.1
+// TODO REMOVE // Notify outcomes - Ver 1.6.1
+// function display_option_value_admin_notice() {
+//     $kn_results = get_option('chatbot_chatgpt_kn_results');
+
+//     // Dismissable notice - Ver 1.6.1
+//     if ($kn_results) {
+//         echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+//     }
+    
+//     // Dismissable notice - Ver 1.6.1
+//     // if ($kn_results) {
+//     //     echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
+//     // }
+
+// }
+// add_action('admin_notices', 'display_option_value_admin_notice');
+
+// TODO REMOVE // Handle outcome notification dismissal - Ver 1.6.1
+// function dismiss_chatgpt_notice() {
+//     if (isset($_GET['dismiss_chatgpt_notice'])) {
+//         delete_option('chatbot_chatgpt_kn_results');
+//     }
+// }
+// add_action('admin_init', 'dismiss_chatgpt_notice');
+
+
+//Notify outcomes - Ver 1.6.2
 function display_option_value_admin_notice() {
     $kn_results = get_option('chatbot_chatgpt_kn_results');
 
-    // Dismissable notice - Ver 1.6.1
-    if ($kn_results) {
-        echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+    // Check if notice is already dismissed
+    if ($kn_results && !get_option('chatbot_chatgpt_notice_dismissed')) {
+        $dismiss_url = wp_nonce_url(
+            add_query_arg('dismiss_chatgpt_notice', '1'),
+            'dismiss_chatgpt_notice',
+            '_chatgpt_dismiss_nonce'
+        );
+        echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
     }
-    
-    // Dismissable notice - Ver 1.6.1
-    // if ($kn_results) {
-    //     echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
-    // }
-
 }
 add_action('admin_notices', 'display_option_value_admin_notice');
 
-// Handle outcome notification dismissal - Ver 1.6.1
-function dismiss_chatgpt_notice() {
-    if (isset($_GET['dismiss_chatgpt_notice'])) {
-        delete_option('chatbot_chatgpt_kn_results');
+
+//Notify dismissal - Ver 1.6.2
+function handle_dismiss_chatgpt_notice() {
+    if (isset($_GET['dismiss_chatgpt_notice']) && check_admin_referer('dismiss_chatgpt_notice', '_chatgpt_dismiss_nonce')) {
+        // Mark the notice as dismissed
+        update_option('chatbot_chatgpt_notice_dismissed', true);
+
+        // Redirect to the desired page without the dismiss parameter
+        wp_redirect(remove_query_arg('dismiss_chatgpt_notice'));
+        exit;
     }
 }
-add_action('admin_init', 'dismiss_chatgpt_notice');
+add_action('admin_init', 'handle_dismiss_chatgpt_notice');
 
 
 // Handle long running scripts with a schedule devent function - Ver 1.6.1
