@@ -34,6 +34,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php'
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-crawler.php'; // Crawler aka Knowlege Navigator - Ver 1.6.1
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-kn-analysis.php'; // Crawler aka Knowlege Navigator Analysis- Ver 1.6.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0

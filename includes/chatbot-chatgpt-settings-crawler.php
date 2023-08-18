@@ -156,8 +156,10 @@ class WebCrawler {
     public function crawl($depth = 0, $domain = '') {
 
         // error_log("crawl: top of function");
-        $no_of_links_crawled = 0;
-        update_option('no_of_links_crawled', $no_of_links_crawled);
+        if ($depth === 0) {
+            $no_of_links_crawled = 0;
+            update_option('no_of_links_crawled', $no_of_links_crawled);
+        }
 
         $max_depth = isset($GLOBALS['max_depth']) ? (int) $GLOBALS['max_depth'] : 3;  // default to 3 if not set
 
@@ -185,8 +187,10 @@ class WebCrawler {
 
                 // Increment the number of links crawled.
                 $no_of_links_crawled = get_option('no_of_links_crawled', 0);
+                $no_of_links_crawled = (int) $no_of_links_crawled; // Cast to integer
                 $no_of_links_crawled += 1;
                 update_option('no_of_links_crawled', $no_of_links_crawled);
+                // error_log('count' . $no_of_links_crawled);
 
                 // Get the current status without appending the number of links crawled.
                 $kn_crawler_status = get_option('chatbot_chatgpt_kn_status', 'In Process');

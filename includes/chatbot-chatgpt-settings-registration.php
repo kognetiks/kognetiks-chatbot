@@ -258,7 +258,7 @@ function chatbot_chatgpt_settings_init() {
     );
 
     // Knowledge Navigator Analysis settings tab - Ver 1.6.1
-    register_setting('chatbot_chatgpt_kn_analysis', 'chatbot_chatgpt_kn_analysis');
+    register_setting('chatbot_chatgpt_kn_analysis', 'chatbot_chatgpt_kn_analysis_output');
 
     add_settings_section(
         'chatbot_chatgpt_kn_analysis_section',
@@ -268,9 +268,9 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatbot_chatgpt_kn_analysis',
-        'SOME PARAMETER',
-        'chatbot_chatgpt_kn_analysis_callback',
+        'chatbot_chatgpt_kn_analysis_output',
+        'Output Format',
+        'chatbot_chatgpt_kn_analysis_output_callback',
         'chatbot_chatgpt_kn_analysis',
         'chatbot_chatgpt_kn_analysis_section'
     );

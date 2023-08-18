@@ -10,20 +10,36 @@
  */
 
 
-// Premium settings section callback - Ver 1.3.0
-function chatbot_chatgpt_tf_idf_section_callback($args) {
+// Knowledge Navigator Analysis section callback - Ver 1.6.2
+function chatbot_chatgpt_kn_analysis_section_callback($args) {
     ?>
-    <p>TF-IDF Analysis.</p>
+    <p>Knowledge Navigator Analysis</p>
+    <?php
     if (is_admin()) {
-            $header .= " ";
-            $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=download_analyzer_download_csv')) . '">Download Data as CSV</a>';
-        }
+        $header = " ";
+        $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_kn_analysis_download_csv')) . '">Download Data</a>';
+        echo $header;
+    }
+}
+
+
+// Knowledge Navigator Analysis section callback - Ver 1.6.2
+function chatbot_chatgpt_kn_analysis_output_callback($args) {
+    // Get the saved chatbot_chatgpt_kn_analysis_choice value or default to "CSV"
+    $output_choice = esc_attr(get_option('chatbot_chatgpt_kn_analysis_output', 'CSV'));
+    error_log('chatbot_chatgpt_kn_analysis_output');
+    error_log($output_choice);
+    ?>
+    <select id="chatbot_chatgpt_kn_analysis_output" name="chatbot_chatgpt_kn_analysis_output">
+        <option value="<?php echo esc_attr( 'CSV' ); ?>" <?php selected( $output_choice, 'CSV' ); ?>><?php echo esc_html( 'CSV' ); ?></option>
+        <option value="<?php echo esc_attr( 'XLSX' ); ?>" <?php selected( $output_choice, 'XLSX' ); ?>><?php echo esc_html( 'XLSX' ); ?></option>
+    </select>
     <?php
 }
 
 
 // Download the TF-IDF data
-function chatbot_chatgpt_tf_idf_download_csv() {
+function chatbot_chatgpt_kn_analysis_download_csv() {
     // Get the absolute path to the plugin directory
     $plugin_dir_path = plugin_dir_path(__FILE__);
 
