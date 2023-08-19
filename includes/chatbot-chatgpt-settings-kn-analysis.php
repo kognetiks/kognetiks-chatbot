@@ -13,7 +13,7 @@
 // Knowledge Navigator Analysis section callback - Ver 1.6.2
 function chatbot_chatgpt_kn_analysis_section_callback($args) {
     ?>
-    <p>Knowledge Navigator Analysis</p>
+    <p>Use the 'Download Data' button to retrieve the Knowledge Navigator results.</p>
     <?php
     if (is_admin()) {
         $header = " ";
@@ -32,7 +32,6 @@ function chatbot_chatgpt_kn_analysis_output_callback($args) {
     ?>
     <select id="chatbot_chatgpt_kn_analysis_output" name="chatbot_chatgpt_kn_analysis_output">
         <option value="<?php echo esc_attr( 'CSV' ); ?>" <?php selected( $output_choice, 'CSV' ); ?>><?php echo esc_html( 'CSV' ); ?></option>
-        <option value="<?php echo esc_attr( 'XLSX' ); ?>" <?php selected( $output_choice, 'XLSX' ); ?>><?php echo esc_html( 'XLSX' ); ?></option>
     </select>
     <?php
 }
@@ -66,8 +65,8 @@ function chatbot_chatgpt_kn_analysis_download_csv() {
 
     // Set headers and echo the file content for download
     header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=tf_idf_download_data.csv');
+    header('Content-Disposition: attachment;filename=Knowledge Navigator Results.csv');
     echo $csv_data;
     exit;
 }
-add_action('admin_post_download_analyzer_download_csv', 'chatbot_chatgpt_tf_idf_download_csv');
+add_action('admin_post_chatbot_chatgpt_kn_analysis_download_csv', 'chatbot_chatgpt_kn_analysis_download_csv');

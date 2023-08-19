@@ -410,7 +410,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         $run_scanner = 'No';
     }
 
-    if (in_array($run_scanner, ['Now', 'Hourly', 'Twice Daily', 'Weekly'])) {
+    if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Cancel'])) {
 
         // Log the variables to debug.log
         // error_log("chatbot_chatgpt_knowledge_navigator_section_callback: " . $run_scanner);
@@ -424,54 +424,60 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         wp_clear_scheduled_hook('crawl_scheduled_event_hook'); // Clear before rescheduling
         // error_log('AFTER wp_clear_scheduled_hook');
 
-        if (!wp_next_scheduled('crawl_scheduled_event_hook')) {
-
-            // RESET THE NO OF LINKS CRAWLED HERE
-            update_option('no_of_links_crawled', 0);
-            
-            // RESET THE STATUS MESSAGE
-            update_option('chatbot_chatgpt_kn_status', 'In Process');
-
-            // Log action to debug.log
-            // error_log("BEFORE crawl_scehedule_event_hook");
-
-            // TODO WP Cron Scheduler - VER 1.6.2
-            // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
-            // A standard system cron job runs at specified intervals regardless of the 
-            // website's activity or traffic, but WordPress cron jobs are triggered by visits
-            // to your site.
-            // https://wpshout.com/wp_schedule_event-examples/
-            // wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
-
-            // TODO
-            // TODO Change the name from crawl_scheduled_event_hook to knowledge_navigator_scan_event and knowledge_navigator_scan_event_hook
-            // TODO
-
-            $interval_mapping = [
-                'Now' => 10, // For immediate execution, just delay by 10 seconds
-                'Hourly' => 'hourly',
-                'Twice Daily' => 'twicedaily',
-                'Weekly' => 'weekly' // assuming you've defined a custom 'weekly' schedule
-            ];
-
-            if (in_array($run_scanner, array_keys($interval_mapping))) {
-                $timestamp = time() + 10; // Always run 10 seconds from now
-                $interval = $interval_mapping[$run_scanner];
-                $hook = 'crawl_scheduled_event_hook';
-                if ($run_scanner === 'Now') {
-                    wp_schedule_single_event($timestamp, $hook); // Schedule a one-time event if 'Now' is selected
-                } else {
-                    wp_schedule_event($timestamp, $interval, $hook); // Schedule a recurring event for other intervals
-                }
-            }
-            
-            // TODO Log action to debug.log
-            // error_log("AFTER crawl_scehedule_event_hook");
-
-            // Reset before reloading the page
+        if ($run_scanner === 'Cancel') {
             $run_scanner = 'No';
-            update_option('chatbot_chatgpt_knowledge_navigator', 'No');  
+            update_option('chatbot_chatgpt_knowledge_navigator', 'No');
+        } else {
+            if (!wp_next_scheduled('crawl_scheduled_event_hook')) {
 
+                // RESET THE NO OF LINKS CRAWLED HERE
+                update_option('no_of_links_crawled', 0);
+                
+                // RESET THE STATUS MESSAGE
+                update_option('chatbot_chatgpt_kn_status', 'In Process');
+
+                // Log action to debug.log
+                // error_log("BEFORE crawl_scehedule_event_hook");
+
+                // TODO WP Cron Scheduler - VER 1.6.2
+                // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
+                // A standard system cron job runs at specified intervals regardless of the 
+                // website's activity or traffic, but WordPress cron jobs are triggered by visits
+                // to your site.
+                // https://wpshout.com/wp_schedule_event-examples/
+                // wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
+
+                // TODO
+                // TODO Change the name from crawl_scheduled_event_hook to knowledge_navigator_scan_event and knowledge_navigator_scan_event_hook
+                // TODO
+
+                $interval_mapping = [
+                    'Now' => 10, // For immediate execution, just delay by 10 seconds
+                    'Hourly' => 'hourly',
+                    'Twice Daily' => 'twicedaily',
+                    'Daily' => 'daily',
+                    'Weekly' => 'weekly' // assuming you've defined a custom 'weekly' schedule
+                ];
+
+                if (in_array($run_scanner, array_keys($interval_mapping))) {
+                    $timestamp = time() + 10; // Always run 10 seconds from now
+                    $interval = $interval_mapping[$run_scanner];
+                    $hook = 'crawl_scheduled_event_hook';
+                    if ($run_scanner === 'Now') {
+                        wp_schedule_single_event($timestamp, $hook); // Schedule a one-time event if 'Now' is selected
+                    } else {
+                        wp_schedule_event($timestamp, $interval, $hook); // Schedule a recurring event for other intervals
+                    }
+                }
+                
+                // TODO Log action to debug.log
+                // error_log("AFTER crawl_scehedule_event_hook");
+
+                // Reset before reloading the page
+                $run_scanner = 'No';
+                update_option('chatbot_chatgpt_knowledge_navigator', 'No');
+
+            }
         }
     }
  
@@ -503,7 +509,9 @@ function chatbot_chatgpt_knowledge_navigator_callback($args) {
         <option value="Now" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Now'); ?>><?php echo esc_html('Now'); ?></option>
         <option value="Hourly" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Hourly'); ?>><?php echo esc_html('Hourly'); ?></option>
         <option value="Twice Daily" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Twice Daily'); ?>><?php echo esc_html('Twice Daily'); ?></option>
+        <option value="Daily" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Daily'); ?>><?php echo esc_html('Daily'); ?></option>
         <option value="Weekly" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Weekly'); ?>><?php echo esc_html('Weekly'); ?></option>
+        <option value="Cancel" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Cancel'); ?>><?php echo esc_html('Cancel'); ?></option>
     </select>
     <?php
 }
