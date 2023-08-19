@@ -252,61 +252,34 @@ class WebCrawler {
     }
 }
 
-// TODO REMOVE // Notify outcomes - Ver 1.6.1
-// function display_option_value_admin_notice() {
-//     $kn_results = get_option('chatbot_chatgpt_kn_results');
-
-//     // Dismissable notice - Ver 1.6.1
-//     if ($kn_results) {
-//         echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
-//     }
-    
-//     // Dismissable notice - Ver 1.6.1
-//     // if ($kn_results) {
-//     //     echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
-//     // }
-
-// }
-// add_action('admin_notices', 'display_option_value_admin_notice');
-
-// TODO REMOVE // Handle outcome notification dismissal - Ver 1.6.1
-// function dismiss_chatgpt_notice() {
-//     if (isset($_GET['dismiss_chatgpt_notice'])) {
-//         delete_option('chatbot_chatgpt_kn_results');
-//     }
-// }
-// add_action('admin_init', 'dismiss_chatgpt_notice');
-
-
-//Notify outcomes - Ver 1.6.2
+// Notify outcomes - Ver 1.6.1
 function display_option_value_admin_notice() {
     $kn_results = get_option('chatbot_chatgpt_kn_results');
 
-    // Check if notice is already dismissed
-    if ($kn_results && !get_option('chatbot_chatgpt_notice_dismissed')) {
+    // Dismissable notice - Ver 1.6.1
+    if ($kn_results) {
+        // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+        // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+        // Check if notice is already dismissed
         $dismiss_url = wp_nonce_url(
             add_query_arg('dismiss_chatgpt_notice', '1'),
             'dismiss_chatgpt_notice',
             '_chatgpt_dismiss_nonce'
         );
-        echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
     }
+    
 }
 add_action('admin_notices', 'display_option_value_admin_notice');
 
 
-//Notify dismissal - Ver 1.6.2
-function handle_dismiss_chatgpt_notice() {
-    if (isset($_GET['dismiss_chatgpt_notice']) && check_admin_referer('dismiss_chatgpt_notice', '_chatgpt_dismiss_nonce')) {
-        // Mark the notice as dismissed
-        update_option('chatbot_chatgpt_notice_dismissed', true);
-
-        // Redirect to the desired page without the dismiss parameter
-        wp_redirect(remove_query_arg('dismiss_chatgpt_notice'));
-        exit;
+// Handle outcome notification dismissal - Ver 1.6.1
+function dismiss_chatgpt_notice() {
+    if (isset($_GET['dismiss_chatgpt_notice'])) {
+        delete_option('chatbot_chatgpt_kn_results');
     }
 }
-add_action('admin_init', 'handle_dismiss_chatgpt_notice');
+add_action('admin_init', 'dismiss_chatgpt_notice');
 
 
 // Handle long running scripts with a schedule devent function - Ver 1.6.1
@@ -375,7 +348,7 @@ function crawl_scheduled_event() {
     update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
 
     // Save the results message value into the option
-    $kn_results = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
+    $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';
     update_option('chatbot_chatgpt_kn_results', $kn_results);
 
     // Notify outcome for up to 3 minutes
@@ -564,16 +537,16 @@ function output_results(){
     file_put_contents($GLOBALS['results_json_file'], json_encode($topWords));
 }
 
+// TODO DELETE BEFORE FINALIZING
 // Custom Schedules - Ver 1.6.2
-// https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
 // A standard system cron job runs at specified intervals regardless of the 
 // website's activity or traffic, but WordPress cron jobs are triggered by visits
-//  to your site.
-function chatbot_chatgpt_custom_cron_schedule($schedules) {
-    $schedules['weekly'] = array(
-        'interval' => 604800, // Number of seconds in a week
-        'display'  => __('Every Week'),
-    );
-    return $schedules;
-}
-add_filter('cron_schedules', 'chatbot_chatgpt_custom_cron_schedule');
+// to your site.
+// function chatbot_chatgpt_custom_cron_schedule($schedules) {
+//     $schedules['weekly'] = array(
+//         'interval' => 604800, // Number of seconds in a week
+//         'display'  => __('Every Week'),
+//     );
+//     return $schedules;
+// }
+// add_filter('cron_schedules', 'chatbot_chatgpt_custom_cron_schedule');

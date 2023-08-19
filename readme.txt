@@ -91,6 +91,8 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 3. Go to the 'Settings > Chatbot ChatGPT' page and enter your OpenAI API key.
 4. Customize the chatbot appearance and other parameters as needed.
 5. Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]
+6. After installation, go to the 'Settings > Chatbot ChatGPT' page then click the 'Knowledge Navigator' tab and run a scan of your site.
+7. Select hourly, daily, or weekly to run the Knowledge Navigator periodically to remain current about your content.
 
 == Frequently Asked Questions ==
 
@@ -131,6 +133,10 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
 
 == Changelog ==
+
+= 1.6.2 =
+* Added cron scheduling for the Knowledge Navigator to refresh the knowledge baes hourly, daily, and weekly, as well as to cancel schedule.
+* Added Knowledge Navigator Analysis to facilitate downloading results as a CSV file for insights into Knowledge base.
 
 = 1.6.1 =
 * Added the Knowledge Navigator which is an innovative component of our plugin designed to perform an in-depth analysis of your website for better, more contextual relevant responses by the chatbot.
