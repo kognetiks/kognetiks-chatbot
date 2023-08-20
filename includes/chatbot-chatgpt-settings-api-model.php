@@ -23,22 +23,10 @@ function chatbot_chatgpt_api_model_section_callback($args) {
 
 // API key field callback
 function chatbot_chatgpt_api_key_callback($args) {
-    $api_key = esc_attr(get_option('chatgpt_api_key'));
+    $api_key = get_option('chatgpt_api_key');
     ?>
-    <!-- <input type="text" id="chatgpt_api_key" name="chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"> -->
-    <!-- Obfuscate the API key - Ver 1.5.0 -->
-    <input type="password" id="chatgpt_api_key" name="chatgpt_api_key"  value="<?php echo empty($api_key) ? '' : '********'; ?>">
+    <input type="text" id="chatgpt_api_key" name="chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text">
     <?php
-}
-
-// Fix sanitation - Ver 1.6.0 and Ver 1.6.1
-function sanitize_api_key($input) {
-    // if input is '********', a series of '*', or blank, return the existing API key instead
-    if (preg_match('/^\*+$|^$/', $input)) {
-        return get_option('chatgpt_api_key');
-    }
-    // otherwise, save the new API key
-    return $input;
 }
 
 
