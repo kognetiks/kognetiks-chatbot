@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.6.1
+ * Version:     1.6.2
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -34,6 +34,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php'
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-crawler.php'; // Crawler aka Knowlege Navigator - Ver 1.6.1
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-kn-analysis.php'; // Crawler aka Knowlege Navigator Analysis- Ver 1.6.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0
@@ -75,7 +76,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
         'chatgpt_model_choice' => 'gpt-3.5-turbo',
         'chatgpt_max_tokens_setting' => 150,
-        'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.',
+        'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
     );
 
     // Revised for Ver 1.5.0 
@@ -180,8 +181,10 @@ function chatbot_chatgpt_kn_status_activation() {
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
 
+// TODO Clean Up in Aisle 4
 function chatbot_chatgpt_kn_status_deactivation() {
     delete_option('chatbot_chatgpt_kn_status');
+    wp_clear_scheduled_hook('crawl_scheduled_event_hook'); 
 }
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
@@ -255,7 +258,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Conversation Context - Ver 1.6.1
     $context = "";
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.'));
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
  
     // Context History - Ver 1.6.1
      $chatgpt_last_response = concatenateHistory('context_history');

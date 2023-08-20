@@ -156,8 +156,10 @@ class WebCrawler {
     public function crawl($depth = 0, $domain = '') {
 
         // error_log("crawl: top of function");
-        // $no_of_links_crawled = 0;
-        // update_option('no_of_links_crawled', $no_of_links_crawled);
+        if ($depth === 0) {
+            $no_of_links_crawled = 0;
+            update_option('no_of_links_crawled', $no_of_links_crawled);
+        }
 
         $max_depth = isset($GLOBALS['max_depth']) ? (int) $GLOBALS['max_depth'] : 3;  // default to 3 if not set
 
@@ -185,8 +187,10 @@ class WebCrawler {
 
                 // Increment the number of links crawled.
                 $no_of_links_crawled = get_option('no_of_links_crawled', 0);
+                $no_of_links_crawled = (int) $no_of_links_crawled; // Cast to integer
                 $no_of_links_crawled += 1;
                 update_option('no_of_links_crawled', $no_of_links_crawled);
+                // error_log('count' . $no_of_links_crawled);
 
                 // Get the current status without appending the number of links crawled.
                 $kn_crawler_status = get_option('chatbot_chatgpt_kn_status', 'In Process');
@@ -254,16 +258,20 @@ function display_option_value_admin_notice() {
 
     // Dismissable notice - Ver 1.6.1
     if ($kn_results) {
-        echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+        // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+        // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+        // Check if notice is already dismissed
+        $dismiss_url = wp_nonce_url(
+            add_query_arg('dismiss_chatgpt_notice', '1'),
+            'dismiss_chatgpt_notice',
+            '_chatgpt_dismiss_nonce'
+        );
+            echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
     }
     
-    // Dismissable notice - Ver 1.6.1
-    // if ($kn_results) {
-    //     echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . '</p></div>';
-    // }
-
 }
 add_action('admin_notices', 'display_option_value_admin_notice');
+
 
 // Handle outcome notification dismissal - Ver 1.6.1
 function dismiss_chatgpt_notice() {
@@ -340,7 +348,7 @@ function crawl_scheduled_event() {
     update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
 
     // Save the results message value into the option
-    $kn_results = 'Knowledge Navigation completed! Check the results.csv file in the plugin directory.';
+    $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';
     update_option('chatbot_chatgpt_kn_results', $kn_results);
 
     // Notify outcome for up to 3 minutes
@@ -368,13 +376,14 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     global $topWords;
 
+    // Must be one of: Now, Hourly, Twice Daily, Weekly
     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
 
     if (!isset($run_scanner)) {
         $run_scanner = 'No';
     }
 
-    if($run_scanner === 'Yes'){
+    if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Cancel'])) {
 
         // Log the variables to debug.log
         // error_log("chatbot_chatgpt_knowledge_navigator_section_callback: " . $run_scanner);
@@ -383,26 +392,65 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         // error_log("domain: " . serialize($GLOBALS['domain']));
         // error_log("start_url: " . serialize($GLOBALS['start_url']));
 
-        if (!wp_next_scheduled('crawl_scheduled_event_hook')) {
+        // WP Cron Scheduler - VER 1.6.2
+        // error_log('BEFORE wp_clear_scheduled_hook');
+        wp_clear_scheduled_hook('crawl_scheduled_event_hook'); // Clear before rescheduling
+        // error_log('AFTER wp_clear_scheduled_hook');
 
-            // RESET THE NO OF LINKS CRAWLED HERE
-            update_option('no_of_links_crawled', 0);
-            
-            // RESET THE STATUS MESSAGE
-            update_option('chatbot_chatgpt_kn_status', 'In Process');
-
-            // TODO Log the variables to debug.log
-            // error_log("BEFORE crawl_scehedule_event_hook");
-
-            wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
-
-            // TODO Log the variables to debug.log
-            // error_log("AFTER crawl_scehedule_event_hook");
-
-            // Reset before reloading the page
+        if ($run_scanner === 'Cancel') {
             $run_scanner = 'No';
-            update_option('chatbot_chatgpt_knowledge_navigator', 'No');  
+            update_option('chatbot_chatgpt_knowledge_navigator', 'No');
+        } else {
+            if (!wp_next_scheduled('crawl_scheduled_event_hook')) {
 
+                // RESET THE NO OF LINKS CRAWLED HERE
+                update_option('no_of_links_crawled', 0);
+                
+                // RESET THE STATUS MESSAGE
+                update_option('chatbot_chatgpt_kn_status', 'In Process');
+
+                // Log action to debug.log
+                // error_log("BEFORE crawl_scehedule_event_hook");
+
+                // TODO WP Cron Scheduler - VER 1.6.2
+                // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
+                // A standard system cron job runs at specified intervals regardless of the 
+                // website's activity or traffic, but WordPress cron jobs are triggered by visits
+                // to your site.
+                // https://wpshout.com/wp_schedule_event-examples/
+                // wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
+
+                // TODO
+                // TODO Change the name from crawl_scheduled_event_hook to knowledge_navigator_scan_event and knowledge_navigator_scan_event_hook
+                // TODO
+
+                $interval_mapping = [
+                    'Now' => 10, // For immediate execution, just delay by 10 seconds
+                    'Hourly' => 'hourly',
+                    'Twice Daily' => 'twicedaily',
+                    'Daily' => 'daily',
+                    'Weekly' => 'weekly' // assuming you've defined a custom 'weekly' schedule
+                ];
+
+                if (in_array($run_scanner, array_keys($interval_mapping))) {
+                    $timestamp = time() + 10; // Always run 10 seconds from now
+                    $interval = $interval_mapping[$run_scanner];
+                    $hook = 'crawl_scheduled_event_hook';
+                    if ($run_scanner === 'Now') {
+                        wp_schedule_single_event($timestamp, $hook); // Schedule a one-time event if 'Now' is selected
+                    } else {
+                        wp_schedule_event($timestamp, $interval, $hook); // Schedule a recurring event for other intervals
+                    }
+                }
+                
+                // TODO Log action to debug.log
+                // error_log("AFTER crawl_scehedule_event_hook");
+
+                // Reset before reloading the page
+                $run_scanner = 'No';
+                update_option('chatbot_chatgpt_knowledge_navigator', 'No');
+
+            }
         }
     }
  
@@ -425,12 +473,18 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
     <?php
 }
 
+// Select Frequency of Crawl - Ver 1.6.2
 function chatbot_chatgpt_knowledge_navigator_callback($args) {
     $chatbot_chatgpt_knowledge_navigator = esc_attr(get_option('chatbot_chatgpt_knowledge_navigator', 'No'));
     ?>
     <select id="chatbot_chatgpt_knowledge_navigator" name="chatbot_chatgpt_knowledge_navigator">
-        <option value="No" <?php selected( $chatbot_chatgpt_knowledge_navigator, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
-        <option value="Yes" <?php selected( $chatbot_chatgpt_knowledge_navigator, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected($chatbot_chatgpt_knowledge_navigator, 'No'); ?>><?php echo esc_html('No'); ?></option>
+        <option value="Now" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Now'); ?>><?php echo esc_html('Now'); ?></option>
+        <option value="Hourly" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Hourly'); ?>><?php echo esc_html('Hourly'); ?></option>
+        <option value="Twice Daily" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Twice Daily'); ?>><?php echo esc_html('Twice Daily'); ?></option>
+        <option value="Daily" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Daily'); ?>><?php echo esc_html('Daily'); ?></option>
+        <option value="Weekly" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Weekly'); ?>><?php echo esc_html('Weekly'); ?></option>
+        <option value="Cancel" <?php selected($chatbot_chatgpt_knowledge_navigator, 'Cancel'); ?>><?php echo esc_html('Cancel'); ?></option>
     </select>
     <?php
 }
@@ -482,3 +536,17 @@ function output_results(){
     // Write JSON to file
     file_put_contents($GLOBALS['results_json_file'], json_encode($topWords));
 }
+
+// TODO DELETE BEFORE FINALIZING
+// Custom Schedules - Ver 1.6.2
+// A standard system cron job runs at specified intervals regardless of the 
+// website's activity or traffic, but WordPress cron jobs are triggered by visits
+// to your site.
+// function chatbot_chatgpt_custom_cron_schedule($schedules) {
+//     $schedules['weekly'] = array(
+//         'interval' => 604800, // Number of seconds in a week
+//         'display'  => __('Every Week'),
+//     );
+//     return $schedules;
+// }
+// add_filter('cron_schedules', 'chatbot_chatgpt_custom_cron_schedule');

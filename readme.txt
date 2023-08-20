@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
 Tested up to: 6.3
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -13,7 +13,7 @@ Easily integrate OpenAI's ChatGPT API into your WordPress website with this powe
 
 == Description ==
 
-Introducing **Chatbot ChatGPT for WordPress** – Elevate Your User Experience with AI-Driven Personalized Support!
+Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experience with AI-Driven Personalized Support!
 
 🔍 **Meet Knowledge Navigator** – the heart of our ChatGPT plugin. It's like a digital explorer for your website, carefully unearthing your content's essence. This innovative component initiates an in-depth analysis of your site, following every link, and meticulously building an interactive map of your site's architecture. The result? A crystal clear understanding of your content that enables more accurate and contextually relevant responses.
 
@@ -29,7 +29,7 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your User Experience w
 
 🚀 **Join Us in the Revolution of Personalized User Experience!**
 
-ChatGPT is more than a plugin; it's an asset to your site, crafting a truly bespoke experience for your visitors. Powered by advanced AI technology, ChatGPT is designed to offer a more interactive and tailored user experience.
+ChatGPT is more than a plugin; it's an asset to your site, crafting a truly bespoke experience for your visitors. Powered by advanced AI technology, ChatGPT is designed to offer a more interactive and tailored visitor experience.
 
 Get Chatbot ChatGPT today, and redefine your WordPress website with intelligence, creativity, and a personal touch!
 
@@ -43,7 +43,7 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 
 🎉 **Effortless Integration**: Get started in minutes with an easy setup process, fully integrated with OpenAI's ChatGPT API.
 
-🚀 **Cutting-Edge Support**: Benefit from support for gpt-3.5-turbo and the next-gen gpt-4 (Learn how to access the gpt-4 API at [https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4](https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4)).
+🚀 **Cutting-Edge Support**: Benefit from support for gpt-3.5-turbo and the next-gen gpt-4 from OpenAI.
 
 💬 **Elegant Floating Chatbot Interface**: Customize the appearance for a sleek and engaging user experience.
 
@@ -91,6 +91,8 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 3. Go to the 'Settings > Chatbot ChatGPT' page and enter your OpenAI API key.
 4. Customize the chatbot appearance and other parameters as needed.
 5. Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]
+6. After installation, go to the 'Settings > Chatbot ChatGPT' page then click the 'Knowledge Navigator' tab and run a scan of your site.
+7. Select hourly, daily, or weekly to run the Knowledge Navigator periodically to remain current about your content.
 
 == Frequently Asked Questions ==
 
@@ -131,6 +133,10 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
 
 == Changelog ==
+
+= 1.6.2 =
+* Added cron scheduling for the Knowledge Navigator to refresh the knowledge baes hourly, daily, and weekly, as well as to cancel schedule.
+* Added Knowledge Navigator Analysis to facilitate downloading results as a CSV file for insights into Knowledge base.
 
 = 1.6.1 =
 * Added the Knowledge Navigator which is an innovative component of our plugin designed to perform an in-depth analysis of your website for better, more contextual relevant responses by the chatbot.

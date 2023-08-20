@@ -27,7 +27,7 @@ function chatbot_chatgpt_localize(){
         'chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
         'chatgpt_model_choice' => 'gpt-3.5-turbo',
         'chatgpt_max_tokens_setting' => 150,
-        'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support you in a variety of tasks.',
+        'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
     );
 
     // Revised for Ver 1.5.0 
