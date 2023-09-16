@@ -9,6 +9,9 @@
  * @package chatbot-chatgpt
  */
 
+ // TODO If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
 
 // Knowledge Navigator Analysis section callback - Ver 1.6.2
 function chatbot_chatgpt_kn_analysis_section_callback($args) {
@@ -27,8 +30,8 @@ function chatbot_chatgpt_kn_analysis_section_callback($args) {
 function chatbot_chatgpt_kn_analysis_output_callback($args) {
     // Get the saved chatbot_chatgpt_kn_analysis_choice value or default to "CSV"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_kn_analysis_output', 'CSV'));
-    error_log('chatbot_chatgpt_kn_analysis_output');
-    error_log($output_choice);
+    // error_log('chatbot_chatgpt_kn_analysis_output');
+    // error_log($output_choice);
     ?>
     <select id="chatbot_chatgpt_kn_analysis_output" name="chatbot_chatgpt_kn_analysis_output">
         <option value="<?php echo esc_attr( 'CSV' ); ?>" <?php selected( $output_choice, 'CSV' ); ?>><?php echo esc_html( 'CSV' ); ?></option>

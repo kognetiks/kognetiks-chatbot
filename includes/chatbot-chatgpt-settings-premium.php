@@ -9,6 +9,10 @@
  * @package chatbot-chatgpt
  */
 
+// TODO If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
 // Premium settings section callback - Ver 1.3.0
 function chatbot_chatgpt_premium_section_callback($args) {
     ?>

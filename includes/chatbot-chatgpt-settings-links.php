@@ -9,6 +9,9 @@
  * @package chatbot-chatgpt
  */
 
+// TODO If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
 
 // Add link to chatgtp options
 function chatbot_chatgpt_plugin_action_links($links) {

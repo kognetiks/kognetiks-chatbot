@@ -29,22 +29,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
+// Declare Globals here - Ver 1.6.3
+global $wpdb;  // Declare the global $wpdb object
+
 // Include necessary files
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-crawler.php'; // Crawler aka Knowlege Navigator - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-kn-analysis.php'; // Crawler aka Knowlege Navigator Analysis- Ver 1.6.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-notices.php'; // Notices - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-registration.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-reporting.php'; // Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setup.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 // update_option('chatgpt_diagnostics', 'Off');
+global $chatgpt_diagnostics;
 $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
 
 // Context History - Ver 1.6.1
@@ -242,6 +250,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Diagnostics - Ver 1.6.1
     global $chatgpt_diagnostics;
 
+    // Reporting - Ver 1.6.3
+    global $wpdb;
+
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     $api_url = 'https://api.openai.com/v1/chat/completions';
 
@@ -310,6 +321,34 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
+
+    // Interaction Tracking - Ver 1.6.3
+
+    // Check version and create table if necessary
+    chatbot_chatgpt_check_version();
+
+    // Get current date and table name
+    $today = current_time('Y-m-d');
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
+
+    // Check if today's date already exists in the table
+    $existing_count = $wpdb->get_var($wpdb->prepare("SELECT count FROM $table_name WHERE date = %s", $today));
+
+    if ($existing_count !== null) {
+        // If exists, increment the counter
+        $wpdb->query($wpdb->prepare("UPDATE $table_name SET count = count + 1 WHERE date = %s", $today));
+    } else {
+        // If not, insert a new row with the date and set count as 1
+        $wpdb->insert(
+            $table_name,
+            array(
+                'date' => $today,
+                'count' => 1
+            ),
+            array('%s', '%d')
+        );
+    }
+
 
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
         // Handle the response from the chat engine

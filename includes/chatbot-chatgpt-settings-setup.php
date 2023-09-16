@@ -9,7 +9,11 @@
  * @package chatbot-chatgpt
  */
 
- // Settings section callback - Ver 1.3.0
+// TODO If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
+// Settings section callback - Ver 1.3.0
 function chatbot_chatgpt_settings_section_callback($args) {
     ?>
     <p>Configure settings for the Chatbot ChatGPT plugin, including the bot name, start status, and greetings.</p>

@@ -8,7 +8,11 @@
  *
  * @package chatbot-chatgpt
  */
- 
+
+ // TODO If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
 global $start_url, $domain, $max_depth, $max_top_words, $results_csv_file, $results_json_file, $chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $no_of_links_crawled;
 $start_url = site_url();
 $domain = parse_url($start_url, PHP_URL_HOST);
@@ -252,34 +256,35 @@ class WebCrawler {
     }
 }
 
-// Notify outcomes - Ver 1.6.1
-function display_option_value_admin_notice() {
-    $kn_results = get_option('chatbot_chatgpt_kn_results');
+// TODO DELETE AFTER TESTING // MOVED TO NOTICES.PHP - Ver 1.6.3
+// // Notify outcomes - Ver 1.6.1
+// function display_option_value_admin_notice() {
+//     $kn_results = get_option('chatbot_chatgpt_kn_results');
 
-    // Dismissable notice - Ver 1.6.1
-    if ($kn_results) {
-        // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
-        // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
-        // Check if notice is already dismissed
-        $dismiss_url = wp_nonce_url(
-            add_query_arg('dismiss_chatgpt_notice', '1'),
-            'dismiss_chatgpt_notice',
-            '_chatgpt_dismiss_nonce'
-        );
-            echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
-    }
+//     // Dismissable notice - Ver 1.6.1
+//     if ($kn_results) {
+//         // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+//         // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
+//         // Check if notice is already dismissed
+//         $dismiss_url = wp_nonce_url(
+//             add_query_arg('dismiss_chatgpt_notice', '1'),
+//             'dismiss_chatgpt_notice',
+//             '_chatgpt_dismiss_nonce'
+//         );
+//             echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
+//     }
     
-}
-add_action('admin_notices', 'display_option_value_admin_notice');
+// }
+// add_action('admin_notices', 'display_option_value_admin_notice');
 
 
-// Handle outcome notification dismissal - Ver 1.6.1
-function dismiss_chatgpt_notice() {
-    if (isset($_GET['dismiss_chatgpt_notice'])) {
-        delete_option('chatbot_chatgpt_kn_results');
-    }
-}
-add_action('admin_init', 'dismiss_chatgpt_notice');
+// // Handle outcome notification dismissal - Ver 1.6.1
+// function dismiss_chatgpt_notice() {
+//     if (isset($_GET['dismiss_chatgpt_notice'])) {
+//         delete_option('chatbot_chatgpt_kn_results');
+//     }
+// }
+// add_action('admin_init', 'dismiss_chatgpt_notice');
 
 
 // Handle long running scripts with a schedule devent function - Ver 1.6.1
@@ -400,6 +405,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         if ($run_scanner === 'Cancel') {
             $run_scanner = 'No';
             update_option('chatbot_chatgpt_knowledge_navigator', 'No');
+            update_option('chatbot_chatgpt_scan_interval', 'No Schedule');
         } else {
             if (!wp_next_scheduled('crawl_scheduled_event_hook')) {
 
@@ -446,10 +452,16 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                 // TODO Log action to debug.log
                 // error_log("AFTER crawl_scehedule_event_hook");
 
+                // Log scan interval - Ver 1.6.3
+                if ($interval === 'Now') {
+                    update_option('chatbot_chatgpt_scan_interval', 'No Schedule');
+                } else {
+                    update_option('chatbot_chatgpt_scan_interval', $run_scanner);
+                }
+
                 // Reset before reloading the page
                 $run_scanner = 'No';
                 update_option('chatbot_chatgpt_knowledge_navigator', 'No');
-
             }
         }
     }
@@ -465,7 +477,9 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         <p><b><i>When you're ready to scan you website, set the 'Run Knowledge Navigator' to 'Yes', then click 'Save Settings'.</i></b></p>
         <p>Runtimes for the <b>Knowledge Navigator</b> can increase exponentially.  It is suggested to start with a maximum depth of 2 and maximum number of top words at 50.</p>
         <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
-            <p><b>Knowledge Navigator</b> Status: <?php echo get_option('chatbot_chatgpt_kn_status', 'In Process'); ?> - Links Crawled: <?php echo get_option('no_of_links_crawled', 0); ?></p>
+            <p><b>Knowledge Navigator</b></p>
+            <p><b>Schedule: </b><?php echo esc_attr(get_option('chatbot_chatgpt_scan_interval', 'No Schedule')); ?></p>
+            <p><b>Status: </b><?php echo esc_attr(get_option('chatbot_chatgpt_kn_status', 'In Process')); ?> - Links Crawled: <?php echo esc_attr(get_option('no_of_links_crawled', 0)); ?></p>
         </div>
         <p>Refresh this page to determine the progress and status of Knowledge Navigation!</p>
     </div>

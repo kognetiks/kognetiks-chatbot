@@ -9,7 +9,11 @@
  * @package chatbot-chatgpt
  */
 
- // Register settings
+// TODO If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
+// Register settings
 function chatbot_chatgpt_settings_init() {
 
     // API/Model settings tab - Ver 1.3.0
@@ -273,6 +277,24 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_kn_analysis_output_callback',
         'chatbot_chatgpt_kn_analysis',
         'chatbot_chatgpt_kn_analysis_section'
+    );
+
+    // Reporting settings tab - Ver 1.6.1
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_reporting_period');
+
+    add_settings_section(
+        'chatbot_chatgpt_reporting_section',
+        'Reporting',
+        'chatbot_chatgpt_reporting_section_callback',
+        'chatbot_chatgpt_reporting'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_reporting_period',
+        'Reporting Period',
+        'chatbot_chatgpt_reporting_period_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_section'
     );
 
 }

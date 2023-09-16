@@ -9,6 +9,10 @@
  * @package chatbot-chatgpt
  */
 
+// TODO If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
 function chatbot_chatgpt_settings_page() {
     add_options_page('Chatbot ChatGPT Settings', 'Chatbot ChatGPT', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
 }
@@ -163,6 +167,7 @@ function chatbot_chatgpt_settings_page_html() {
             <!-- Knowledge Navigator - Ver 1.6.1 -->
             <a href="?page=chatbot-chatgpt&tab=crawler" class="nav-tab <?php echo $active_tab == 'crawler' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
             <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator Analysis</a>
+            <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
         </h2>
 
@@ -191,6 +196,9 @@ function chatbot_chatgpt_settings_page_html() {
             } elseif ($active_tab == 'kn_analysis') {
                 settings_fields('chatbot_chatgpt_kn_analysis');
                 do_settings_sections('chatbot_chatgpt_kn_analysis');
+            } elseif ($active_tab == 'reporting') {
+                settings_fields('chatbot_chatgpt_reporting');
+                do_settings_sections('chatbot_chatgpt_reporting');
             }
 
             submit_button('Save Settings');
@@ -202,4 +210,3 @@ function chatbot_chatgpt_settings_page_html() {
     </html>
     <?php
 }
-

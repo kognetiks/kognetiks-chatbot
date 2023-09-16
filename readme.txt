@@ -135,7 +135,7 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 == Changelog ==
 
 = 1.6.3 =
-* Various minor fixes
+* Added some basic reporting
 
 = 1.6.2 =
 * Added cron scheduling for the Knowledge Navigator to refresh the knowledge baes hourly, daily, and weekly, as well as to cancel schedule.

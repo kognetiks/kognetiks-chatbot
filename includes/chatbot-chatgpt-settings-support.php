@@ -9,7 +9,11 @@
  * @package chatbot-chatgpt
  */
 
- // Support settings section callback - Ver 1.3.0
+// TODO If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
+// Support settings section callback - Ver 1.3.0
 function chatbot_chatgpt_support_section_callback($args) {
     ?>
     <div>

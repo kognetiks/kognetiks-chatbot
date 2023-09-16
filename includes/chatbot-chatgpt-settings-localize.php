@@ -9,6 +9,10 @@
  * @package chatbot-chatgpt
  */
 
+// TODO If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
 function chatbot_chatgpt_localize(){
 
     $defaults = array(
@@ -70,4 +74,4 @@ function chatbot_chatgpt_localize(){
     });
     </script>";
 
- }
+}
