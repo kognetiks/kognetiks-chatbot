@@ -33,6 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $wpdb;  // Declare the global $wpdb object
 
 // Include necessary files
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-crawler.php'; // Database Management for Crawler - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0

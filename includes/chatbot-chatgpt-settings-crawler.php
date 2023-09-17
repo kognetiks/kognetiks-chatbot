@@ -42,6 +42,11 @@ class WebCrawler {
     private $document;
     private $frequencyData = [];
     private $visitedUrls = [];
+
+    // TF-IDF by page - Ver 1.6.3
+    private $webpageData = []; // To store URL, title, and top word based on TF-IDF
+    private $title;
+    private $topWord;
     
     public function __construct($url) {
         // Check if URL starts with http:// or https://, if not add http:// as default
@@ -157,7 +162,11 @@ class WebCrawler {
         unset($this->frequencyData[$word]);
     }
 
-    public function crawl($depth = 0, $domain = '') {
+    public function crawl($depth = 0, $domain = '', &$visitedUrls = []) {
+
+        // TODO - MOVED TO SCHEDULER
+        // Make sure the results table exists before proceeding - Ver 1.6.3
+        // $this->createTableIfNotExists();
 
         // error_log("crawl: top of function");
         if ($depth === 0) {
@@ -176,15 +185,22 @@ class WebCrawler {
             $this->computeFrequency();
     
             $urls = $this->getLinks($domain);
+
+            // TODO COMMENT THIS OUT BEFORE PRODUCTION
+            error_log ("DOMAIN: " . $domain);
+            error_log("URLS: " . print_r($urls, true));
+
             foreach ($urls as $url) {
 
                 if (in_array($url, $this->visitedUrls)) {
                     // Skip this URL as it has already been crawled
+                    // TODO COMMENT OUT ERROR_LOG
+                    error_log ("SKIPPING: " . $url);
                     continue;
                 }
 
                 // TODO Log the variables to debug.log
-                // error_log("CRAWLING :" . $url);
+                error_log("CRAWLING: " . $url);
 
                 // The second parameter is the default value if the option is not set.
                 $kn_crawler_status = get_option('chatbot_chatgpt_kn_status', 'In Process');
@@ -204,10 +220,44 @@ class WebCrawler {
 
                 // Mark this URL as visited
                 $this->visitedUrls[] = $url;
+                // TODO REMOVE BEFORE PRODUCTION
+                error_log("CRAWLED: " . $url);
     
                 $crawler = new WebCrawler($url);
-                $crawler->crawl($depth + 1, $domain);
-    
+                $crawler->crawl($depth + 1, $domain, $visitedUrls);
+
+                // Clear webpage data array - Ver 1.6.3
+                $this->webpageData = [];
+
+                // TF-IDF by page - Ver 1.6.3
+                $title = $this->extractTitle();
+                $this->computeAllTFIDF();
+
+                // Extract the page name from the URL - Ver 1.6.3
+                $pageName = basename(parse_url($url, PHP_URL_PATH));
+                // TODO COMMENT OUT ERROR_LOG
+                error_log("Page Name: $pageName");
+
+                // Store the URL, title, and top word based on TF-IDF - Ver 1.6.3
+
+                if (isset($pageName) && $pageName !== '') {
+                    $topWord = $this->getTopWordByTFIDF();
+                    // TODO COMMENT OUT ERROR_LOG
+                    error_log("URL: " . $url);
+                    error_log("Page Name: " . $pageName);
+                    error_log("Top Word: " . $topWord);
+                    
+                    $this->webpageData[] = [
+                        'url' => isset($url) ? $url : '',
+                        'title' => $pageName,
+                        // 'title' => $title,
+                        'topWord' => $topWord
+                    ];
+                }
+
+                // TD-IDF by page - Ver 1.6.3
+                $this->storeWebpageDataToDb();
+                                
                 $end_time = microtime(true);
                 $duration = $end_time - $start_time;
     
@@ -222,8 +272,8 @@ class WebCrawler {
                 sleep($adaptive_delay);
             }
         } catch (Exception $e) {
-            // Log the exception and continue with the next URL
-            // error_log("Crawl failed: " . $e->getMessage());
+            // TODO Log the exception and continue with the next URL
+            error_log("Crawl failed: " . $e->getMessage());
         }
     }
 
@@ -241,53 +291,133 @@ class WebCrawler {
             $href = $link->getAttribute('href');
             $rel = $link->getAttribute('rel');
             
+            // Skip JavaScript and fragment URLs
+            if (strpos($href, '#') !== false || strpos($href, 'javascript:') !== false) {
+                continue;
+            }
+    
             if (strpos($href, 'http') !== 0){
+                if (substr($href, 0, 3) === '../') {
+                    $href = substr($href, 3);
+                }
                 $href = rtrim($domain, '/') . '/' . ltrim($href, '/');
             }
     
-            // Simple check to only include http/https links
-            // More validation may be needed based on requirements
             if (strpos($href, $domain) === 0 && strpos($rel, 'nofollow') === false){
                 $urls[] = $href;
             }
         }
-
+    
         return $urls;
     }
+    
+    // TODO REPLACED WITH CODE ABOVE
+    // public function getLinks($domain) {
+    //     if (empty($this->document)) {
+    //         throw new Exception("Document is empty. Cannot parse HTML.");
+    //     }
+    
+    //     $dom = new DOMDocument();
+    //     @$dom->loadHTML($this->document);
+    //     $links = $dom->getElementsByTagName('a');
+    
+    //     $urls = [];
+    //     foreach ($links as $link){
+    //         $href = $link->getAttribute('href');
+    //         $rel = $link->getAttribute('rel');
+            
+    //         if (strpos($href, 'http') !== 0){
+    //             if (substr($href, 0, 3) === '../') {
+    //                 $href = substr($href, 3);
+    //             }
+    //             $href = rtrim($domain, '/') . '/' . ltrim($href, '/');
+    //         }
+    
+    //         // Simple check to only include http/https links
+    //         // More validation may be needed based on requirements
+    //         if (strpos($href, $domain) === 0 && strpos($rel, 'nofollow') === false){
+    //             $urls[] = $href;
+    //         }
+    //     }
+
+    //     return $urls;
+    // }
+
+    // TODO MOVED TO db-crawler.php
+    // Database Management - drop the table if it exists, then add it if it doesn't exist - Ver 1.6.3
+    // public function createTableIfNotExists() {
+    //     global $wpdb;
+    //     $charset_collate = $wpdb->get_charset_collate();
+    //     $table_name = $wpdb->prefix . 'chatbot_chatgpt_webpage_data';
+    
+    //     // Drop table if it exists
+    //     $wpdb->query("DROP TABLE IF EXISTS $table_name");
+
+    //     // Create the table
+    //     $sql = "CREATE TABLE $table_name (
+    //         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    //         url TEXT NOT NULL,
+    //         title TEXT,
+    //         top_word TEXT
+    //     ) $charset_collate;";
+    
+    //     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    //     dbDelta($sql);
+    // }
+    
+    // TF-IDF by page - Ver 1.6 3
+    public function storeWebpageDataToDb() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'chatbot_chatgpt_webpage_data';
+        
+        foreach ($this->webpageData as $webpage) {
+            if(isset($webpage['url']) && isset($webpage['title']) && isset($webpage['topWord'])) {
+                $wpdb->insert( 
+                    $table_name, 
+                    array( 
+                        'url' => $webpage['url'], 
+                        'title' => $webpage['title'], 
+                        'top_word' => $webpage['topWord'] 
+                    )
+                );
+            }
+        }
+    }
+ 
+    // TF-IDF by page - Ver 1.6.3
+    private function extractTitle() {
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($this->document);
+
+        $titleTags = $dom->getElementsByTagName('title');
+        
+        if ($titleTags->length > 0) {
+            return $titleTags->item(0)->textContent;
+        } else {
+            return null;
+        }
+    }
+
+    // TF-IDF by page - Ver 1.6.3
+    public function computeAllTFIDF() {
+        $this->tfidfScores = [];
+        foreach($this->frequencyData as $term => $frequency) {
+            $this->tfidfScores[$term] = $this->computeTFIDF($term);
+        }
+    }
+
+    // TF-IDF by page - Ver 1.6.3
+    public function getTopWordByTFIDF() {
+        arsort($this->tfidfScores); // Sort the TF-IDF scores in descending order
+        $keys = array_keys($this->tfidfScores);
+        return $keys[0]; // Return the top word
+    }
+
 }
 
-// TODO DELETE AFTER TESTING // MOVED TO NOTICES.PHP - Ver 1.6.3
-// // Notify outcomes - Ver 1.6.1
-// function display_option_value_admin_notice() {
-//     $kn_results = get_option('chatbot_chatgpt_kn_results');
 
-//     // Dismissable notice - Ver 1.6.1
-//     if ($kn_results) {
-//         // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&tab=crawler&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
-//         // TODO echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="?page=chatbot-chatgpt&dismiss_chatgpt_notice=1">Dismiss</a></p></div>';
-//         // Check if notice is already dismissed
-//         $dismiss_url = wp_nonce_url(
-//             add_query_arg('dismiss_chatgpt_notice', '1'),
-//             'dismiss_chatgpt_notice',
-//             '_chatgpt_dismiss_nonce'
-//         );
-//             echo '<div class="notice notice-success is-dismissible"><p>Knowledge Navigator Outcome: ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
-//     }
-    
-// }
-// add_action('admin_notices', 'display_option_value_admin_notice');
-
-
-// // Handle outcome notification dismissal - Ver 1.6.1
-// function dismiss_chatgpt_notice() {
-//     if (isset($_GET['dismiss_chatgpt_notice'])) {
-//         delete_option('chatbot_chatgpt_kn_results');
-//     }
-// }
-// add_action('admin_init', 'dismiss_chatgpt_notice');
-
-
-// Handle long running scripts with a schedule devent function - Ver 1.6.1
+// Handle long running scripts with a scheduled event function - Ver 1.6.1
 function crawl_scheduled_event() {
 
     global $topWords;
@@ -308,6 +438,10 @@ function crawl_scheduled_event() {
     $result = "";
     // Reset the results message
     update_option('chatbot_chatgpt_kn_results', $result);
+
+    // TODO - MOVED TO SCHEDULER
+    // Make sure the results table exists before proceeding - Ver 1.6.3
+    createTableIfNotExists();
 
     $crawler = new WebCrawler($GLOBALS['start_url']);
     $crawler->crawl(0, $GLOBALS['domain']);
@@ -390,12 +524,12 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Cancel'])) {
 
-        // Log the variables to debug.log
-        // error_log("chatbot_chatgpt_knowledge_navigator_section_callback: " . $run_scanner);
-        // error_log("max_top_words: " . serialize($GLOBALS['max_top_words']));
-        // error_log("max_depth: " . serialize($GLOBALS['max_depth']));
-        // error_log("domain: " . serialize($GLOBALS['domain']));
-        // error_log("start_url: " . serialize($GLOBALS['start_url']));
+        // TODO Log the variables to debug.log
+        error_log("chatbot_chatgpt_knowledge_navigator_section_callback: " . $run_scanner);
+        error_log("max_top_words: " . serialize($GLOBALS['max_top_words']));
+        error_log("max_depth: " . serialize($GLOBALS['max_depth']));
+        error_log("domain: " . serialize($GLOBALS['domain']));
+        error_log("start_url: " . serialize($GLOBALS['start_url']));
 
         // WP Cron Scheduler - VER 1.6.2
         // error_log('BEFORE wp_clear_scheduled_hook');
