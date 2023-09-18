@@ -119,12 +119,10 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
 // Chatbot ChatGPT Charts - Ver 1.6.3
 function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
-    chatbot_chatgpt_kn_acquire();
-
-    // TODO Comment out
     // Check is GD Library is installed - Ver 1.6.3
     if (extension_loaded('gd')) {
-        echo '<p>ALERT: GD Library is installed and loaded!</p>';
+        // TODO Comment out
+        // echo '<p>ALERT: GD Library is installed and loaded!</p>';
     } else {
         echo '<p>ALERT: GD Library is not installed! No chart will be displayed.</p>';
         return;

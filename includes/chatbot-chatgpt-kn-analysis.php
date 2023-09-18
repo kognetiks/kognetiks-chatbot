@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - TF-IDF Analyzer
+ * Chatbot ChatGPT for WordPress - Knowledge Navigator - TF-IDF Analyzer
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot ChatGPT Knowlege Navigator analysis.
  * 
  * 
  *

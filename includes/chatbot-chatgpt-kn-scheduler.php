@@ -1,10 +1,10 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Scheduler for Crawler - Ver 1.6.3
+ * Chatbot ChatGPT for WordPress - Knowledge Navigator - Scheduler - Ver 1.6.3
  *
- * This file contains the code for table actions for reporting
- * to display the Chatbot ChatGPT on the website.
- *
+ * This is the file that schedules the Knowledge Navigator.
+ * Scheduled can be now, daily, weekly, etc.
+ * 
  * @package chatbot-chatgpt
  */
 
@@ -38,50 +38,49 @@ function crawl_scheduled_event() {
 
     // TODO - MOVED TO SCHEDULER
     // Make sure the results table exists before proceeding - Ver 1.6.3
-    createTableIfNotExists();
+    dbKNStore();
 
-    $crawler = new WebCrawler($GLOBALS['start_url']);
-    $crawler->crawl(0, $GLOBALS['domain']);
+    // TODO - THE OLD WAY OF DOING THIS
 
-    // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
-    $crawler->computeFrequency();
+    // $crawler = new WebCrawler($GLOBALS['start_url']);
+    // $crawler->crawl(0, $GLOBALS['domain']);
 
-    // Collect top N words with the highest TF-IDF scores.
-    $topWords = [];
-    for ($i = 0; $i < $GLOBALS['max_top_words']; $i++) {
-        $maxTFIDF = 0;
-        $maxWord = null;
+    // // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
+    // $crawler->computeFrequency();
 
-        foreach ($crawler->getFrequencyData() as $word => $frequency) {
-            $tfidf = $crawler->computeTFIDF($word);
+    // // Collect top N words with the highest TF-IDF scores.
+    // $topWords = [];
+    // for ($i = 0; $i < $GLOBALS['max_top_words']; $i++) {
+    //     $maxTFIDF = 0;
+    //     $maxWord = null;
 
-            if ($tfidf > $maxTFIDF) {
-                $maxTFIDF = $tfidf;
-                $maxWord = $word;
-            }
-        }
+    //     foreach ($crawler->getFrequencyData() as $word => $frequency) {
+    //         $tfidf = $crawler->computeTFIDF($word);
 
-        if ($maxWord !== null) {
-            $topWords[$maxWord] = $maxTFIDF;
-            $crawler->removeWordFromFrequencyData($maxWord);
-        }
-    }
+    //         if ($tfidf > $maxTFIDF) {
+    //             $maxTFIDF = $tfidf;
+    //             $maxWord = $word;
+    //         }
+    //     }
 
-    // TODO Diagnostics - Ver 1.6.1
-    // var_dump($topWords);
+    //     if ($maxWord !== null) {
+    //         $topWords[$maxWord] = $maxTFIDF;
+    //         $crawler->removeWordFromFrequencyData($maxWord);
+    //     }
+    // }
 
-    // Store the results
-    output_results($topWords);
+    // // Store the results
+    // output_results($topWords);
 
-    // String together the $topWords
-    $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
-    foreach ($topWords as $word => $tfidf) {
-        $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
-        }
-    $chatbot_chatgpt_kn_conversation_context .= "and more.";
-    
-    // Save the results message value into the option
-    update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
+    // // String together the $topWords
+    // $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
+    // foreach ($topWords as $word => $tfidf) {
+    //     $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
+    //     }
+    // $chatbot_chatgpt_kn_conversation_context .= "and more.";
+
+    // Call the kn-acquire.php script
+    chatbot_chatgpt_kn_acquire();
 
     // Save the results message value into the option
     $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';

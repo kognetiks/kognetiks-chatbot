@@ -1,10 +1,10 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Crawler aka Knowledge Navigator
+ * Chatbot ChatGPT for WordPress - Knowledge Navigator - Settings
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * These are all the options for the Knowledge Navigator.
+ * 
  *
  * @package chatbot-chatgpt
  */
@@ -475,41 +475,3 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     </select>
     <?php
 }
-
-// Save the results to a file
-function output_results() {
-    // TODO COMMENT OUT LATER
-    error_log("FUNCTION - output_results");
-
-    // Generate the directory path
-    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
-
-    // Create the directory if it doesn't exist
-    if (!file_exists($results_dir_path) && !mkdir($results_dir_path, 0755, true)) {
-        error_log('Failed to create results directory.');
-        return;
-    }
-
-    // Define output files' paths
-    $results_csv_file = $results_dir_path . 'results.csv';
-    $results_json_file = $results_dir_path . 'results.json';
-
-    global $topWords;
-
-    // Write CSV
-    if ($f = fopen($results_csv_file, 'w')) {
-        fputcsv($f, ['Word', 'TF-IDF']);
-        foreach ($topWords as $word => $tfidf) {
-            fputcsv($f, [$word, $tfidf]);
-        }
-        fclose($f);
-    } else {
-        error_log('Failed to open CSV file for writing.');
-    }
-
-    // Write JSON
-    if (!file_put_contents($results_json_file, json_encode($topWords))) {
-        error_log('Failed to write JSON file.');
-    }
-}
-
