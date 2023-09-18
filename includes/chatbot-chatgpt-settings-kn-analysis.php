@@ -30,8 +30,7 @@ function chatbot_chatgpt_kn_analysis_section_callback($args) {
 function chatbot_chatgpt_kn_analysis_output_callback($args) {
     // Get the saved chatbot_chatgpt_kn_analysis_choice value or default to "CSV"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_kn_analysis_output', 'CSV'));
-    // error_log('chatbot_chatgpt_kn_analysis_output');
-    // error_log($output_choice);
+    // error_log('chatbot_chatgpt_kn_analysis_output' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_kn_analysis_output" name="chatbot_chatgpt_kn_analysis_output">
         <option value="<?php echo esc_attr( 'CSV' ); ?>" <?php selected( $output_choice, 'CSV' ); ?>><?php echo esc_html( 'CSV' ); ?></option>
@@ -42,31 +41,26 @@ function chatbot_chatgpt_kn_analysis_output_callback($args) {
 
 // Download the TF-IDF data
 function chatbot_chatgpt_kn_analysis_download_csv() {
-    // Get the absolute path to the plugin directory
-    $plugin_dir_path = plugin_dir_path(__FILE__);
+    // Generate the results directory path
+    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
 
-    // Go up one level to the parent directory
-    $parent_dir_path = dirname($plugin_dir_path);
-
-    // Create a "results" subdirectory in the parent directory if it doesn't exist
-    $results_dir_path = $parent_dir_path . '/results/';
-
-    // Specify the output files' paths
+    // Specify the output file's path
     $results_csv_file = $results_dir_path . 'results.csv';
 
-    // Check if the file exists
+    // Exit early if the file doesn't exist
     if (!file_exists($results_csv_file)) {
-        wp_die("File not found!");
+        wp_die('File not found!');
     }
 
     // Read the file
     $csv_data = file_get_contents($results_csv_file);
 
+    // Exit early if reading fails
     if ($csv_data === false) {
-        wp_die("Error reading file.");
+        wp_die('Error reading file.');
     }
 
-    // Set headers and echo the file content for download
+    // Deliver the file for download
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment;filename=Knowledge Navigator Results.csv');
     echo $csv_data;

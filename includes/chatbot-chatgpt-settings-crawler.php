@@ -13,7 +13,7 @@
 if ( ! defined( 'WPINC' ) )
 die;
 
-global $start_url, $domain, $max_depth, $max_top_words, $results_csv_file, $results_json_file, $chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $no_of_links_crawled;
+global $topwords, $words, $start_url, $domain, $max_depth, $max_top_words, $chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $no_of_links_crawled;
 $start_url = site_url();
 $domain = parse_url($start_url, PHP_URL_HOST);
 $max_depth = esc_attr(get_option('chatbot_chatgpt_kn_maximum_depth', 2)); // Default to 2
@@ -21,34 +21,19 @@ $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)
 // $no_of_links_crawled = 0; // Default to 0 
 // update_option('no_of_links_crawled', $no_of_links_crawled);
  
-// Get the absolute path to the plugin directory
-$plugin_dir_path = plugin_dir_path(__FILE__);
-
-// Go up one level to the parent directory
-$parent_dir_path = dirname($plugin_dir_path);
-
-// Create a "results" subdirectory in the parent directory if it doesn't exist
-$results_dir_path = $parent_dir_path . '/results/';
-
-if (!file_exists($results_dir_path)) {
-    mkdir($results_dir_path, 0755, true);
-}
-
-// Specify the output files' paths
-$results_csv_file = $results_dir_path . 'results.csv';
-$results_json_file = $results_dir_path . 'results.json';
-
 class WebCrawler {
     private $document;
     private $frequencyData = [];
     private $visitedUrls = [];
+    private $pagefrequenceyData = [];
+    private $pagetotalWordCount = 0;
+    private $totalWordCount = 0;
 
-    // TF-IDF by page - Ver 1.6.3
-    private $webpageData = []; // To store URL, title, and top word based on TF-IDF
-    private $title;
-    private $topWord;
-    
     public function __construct($url) {
+
+        // TODO COMMENT OUT LATER
+        error_log ("FUNCTION - __construct");
+
         // Check if URL starts with http:// or https://, if not add http:// as default
         if (!preg_match("~^(?:f|ht)tps?://~i", $url)) {
             $url = "http://" . $url;
@@ -70,6 +55,10 @@ class WebCrawler {
     }
     
     public function computeFrequency() {
+
+        // TODO COMMENT OUT LATER
+        error_log ("FUNCTION - computeFrequency");
+
         // List of common stop words to be ignored
         $stopWords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't", 'as', 'at'];
         $stopWords = array_merge($stopWords, ['b', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by']);
@@ -95,11 +84,21 @@ class WebCrawler {
         $stopWords = array_merge($stopWords, ['x']);
         $stopWords = array_merge($stopWords, ['y', 'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves']);
         $stopWords = array_merge($stopWords, ['z']);
-    
+       
         // Upgraded the above - Ver 1.6.1
+
+        // TODO DANGER DANGER DANGER
+        $user_id = 1; // assuming the admin user ID is 1
+        wp_set_current_user( $user_id );
+        wp_set_auth_cookie( $user_id );
+
         $dom = new DOMDocument;
         libxml_use_internal_errors(true); // Suppress HTML parsing errors
         $dom->loadHTML($this->document);
+        // error_log('$dom: ' . print_r($dom, true));
+
+        // TODO DANGER DANGER DANGER
+        wp_set_current_user(0);  // set the user back to anonymous
         
         // Remove script and style elements
         foreach ($dom->getElementsByTagName('script') as $script) {
@@ -126,13 +125,24 @@ class WebCrawler {
     
         // Filter out stop words
         $words = array_diff($words, $stopWords);
+
+        error_log('$words: ' . print_r($words, true));
+
+        // TODO PAGE WORD COUNTS - XXX
+        $this->pagefrequenceyData;
+        $this->pagetotalWordCount;
+        // TODO PAGE TOP WORD COMPUTER - XXX
     
         // Compute frequencies
-        $this->frequencyData = array_count_values($words);
-        $this->totalWordCount = count($this->frequencyData);
+        $this->frequencyData = array_merge(array_count_values($words));
+        $this->totalWordCount = $this->totalWordCount + count($this->frequencyData);
     }
     
     public function computeTFIDF($term) {
+
+        // TODO COMMENT OUT LATER
+        error_log ("FUNCTION - computeTFIDF");
+
         $tf = $this->frequencyData[$term] / $this->totalWordCount;
         $idf = $this->computeInverseDocumentFrequency($term);
 
@@ -140,10 +150,18 @@ class WebCrawler {
     }
 
     private function computeTermFrequency($term) {
+
+        // TODO COMMENT OUT LATER
+        error_log ("FUNCTION - computeTermFrequency");
+
         return $this->frequencyData[$term] / count($this->frequencyData);
     }
 
     private function computeInverseDocumentFrequency($term) {
+
+        // TODO COMMENT OUT LATER
+        error_log ("FUNCTION - computeInverseDocumentFrequency");
+
         $numDocumentsWithTerm = 0;
         foreach ($this->frequencyData as $word => $frequency) {
             if ($word === $term) {
@@ -155,18 +173,25 @@ class WebCrawler {
     }
 
     public function getFrequencyData() {
+
+        // TODO COMMENT OUT LATER
+        error_log ("FUNCTION - getFrequencyData");
+
         return $this->frequencyData;
     }
 
     public function removeWordFromFrequencyData($word) {
+
+        // TODO COMMENT OUT LATER
+        error_log ("FUNCTION - removeWordFromFrequencyData");
+
         unset($this->frequencyData[$word]);
     }
 
     public function crawl($depth = 0, $domain = '', &$visitedUrls = []) {
 
-        // TODO - MOVED TO SCHEDULER
-        // Make sure the results table exists before proceeding - Ver 1.6.3
-        // $this->createTableIfNotExists();
+        // TODO COMMENT OUT LATER
+        error_log ("FUNCTION - crawl");
 
         // error_log("crawl: top of function");
         if ($depth === 0) {
@@ -220,44 +245,13 @@ class WebCrawler {
 
                 // Mark this URL as visited
                 $this->visitedUrls[] = $url;
-                // TODO REMOVE BEFORE PRODUCTION
-                error_log("CRAWLED: " . $url);
-    
+
                 $crawler = new WebCrawler($url);
                 $crawler->crawl($depth + 1, $domain, $visitedUrls);
 
-                // Clear webpage data array - Ver 1.6.3
-                $this->webpageData = [];
-
-                // TF-IDF by page - Ver 1.6.3
-                $title = $this->extractTitle();
-                $this->computeAllTFIDF();
-
-                // Extract the page name from the URL - Ver 1.6.3
-                $pageName = basename(parse_url($url, PHP_URL_PATH));
-                // TODO COMMENT OUT ERROR_LOG
-                error_log("Page Name: $pageName");
-
-                // Store the URL, title, and top word based on TF-IDF - Ver 1.6.3
-
-                if (isset($pageName) && $pageName !== '') {
-                    $topWord = $this->getTopWordByTFIDF();
-                    // TODO COMMENT OUT ERROR_LOG
-                    error_log("URL: " . $url);
-                    error_log("Page Name: " . $pageName);
-                    error_log("Top Word: " . $topWord);
-                    
-                    $this->webpageData[] = [
-                        'url' => isset($url) ? $url : '',
-                        'title' => $pageName,
-                        // 'title' => $title,
-                        'topWord' => $topWord
-                    ];
-                }
-
-                // TD-IDF by page - Ver 1.6.3
-                $this->storeWebpageDataToDb();
-                                
+                // TODO REMOVE BEFORE PRODUCTION
+                error_log("CRAWLED: " . $url);
+    
                 $end_time = microtime(true);
                 $duration = $end_time - $start_time;
     
@@ -272,12 +266,16 @@ class WebCrawler {
                 sleep($adaptive_delay);
             }
         } catch (Exception $e) {
-            // TODO Log the exception and continue with the next URL
-            error_log("Crawl failed: " . $e->getMessage());
+            // Log the exception and continue with the next URL
+            // error_log("Crawl failed: " . $e->getMessage());
         }
     }
 
     public function getLinks($domain) {
+
+        // TODO COMMENT OUT LATER
+        error_log ("FUNCTION - getLinks");
+
         if (empty($this->document)) {
             throw new Exception("Document is empty. Cannot parse HTML.");
         }
@@ -310,205 +308,16 @@ class WebCrawler {
     
         return $urls;
     }
-    
-    // TODO REPLACED WITH CODE ABOVE
-    // public function getLinks($domain) {
-    //     if (empty($this->document)) {
-    //         throw new Exception("Document is empty. Cannot parse HTML.");
-    //     }
-    
-    //     $dom = new DOMDocument();
-    //     @$dom->loadHTML($this->document);
-    //     $links = $dom->getElementsByTagName('a');
-    
-    //     $urls = [];
-    //     foreach ($links as $link){
-    //         $href = $link->getAttribute('href');
-    //         $rel = $link->getAttribute('rel');
-            
-    //         if (strpos($href, 'http') !== 0){
-    //             if (substr($href, 0, 3) === '../') {
-    //                 $href = substr($href, 3);
-    //             }
-    //             $href = rtrim($domain, '/') . '/' . ltrim($href, '/');
-    //         }
-    
-    //         // Simple check to only include http/https links
-    //         // More validation may be needed based on requirements
-    //         if (strpos($href, $domain) === 0 && strpos($rel, 'nofollow') === false){
-    //             $urls[] = $href;
-    //         }
-    //     }
-
-    //     return $urls;
-    // }
-
-    // TODO MOVED TO db-crawler.php
-    // Database Management - drop the table if it exists, then add it if it doesn't exist - Ver 1.6.3
-    // public function createTableIfNotExists() {
-    //     global $wpdb;
-    //     $charset_collate = $wpdb->get_charset_collate();
-    //     $table_name = $wpdb->prefix . 'chatbot_chatgpt_webpage_data';
-    
-    //     // Drop table if it exists
-    //     $wpdb->query("DROP TABLE IF EXISTS $table_name");
-
-    //     // Create the table
-    //     $sql = "CREATE TABLE $table_name (
-    //         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    //         url TEXT NOT NULL,
-    //         title TEXT,
-    //         top_word TEXT
-    //     ) $charset_collate;";
-    
-    //     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    //     dbDelta($sql);
-    // }
-    
-    // TF-IDF by page - Ver 1.6 3
-    public function storeWebpageDataToDb() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'chatbot_chatgpt_webpage_data';
-        
-        foreach ($this->webpageData as $webpage) {
-            if(isset($webpage['url']) && isset($webpage['title']) && isset($webpage['topWord'])) {
-                $wpdb->insert( 
-                    $table_name, 
-                    array( 
-                        'url' => $webpage['url'], 
-                        'title' => $webpage['title'], 
-                        'top_word' => $webpage['topWord'] 
-                    )
-                );
-            }
-        }
-    }
- 
-    // TF-IDF by page - Ver 1.6.3
-    private function extractTitle() {
-        $dom = new DOMDocument;
-        libxml_use_internal_errors(true);
-        $dom->loadHTML($this->document);
-
-        $titleTags = $dom->getElementsByTagName('title');
-        
-        if ($titleTags->length > 0) {
-            return $titleTags->item(0)->textContent;
-        } else {
-            return null;
-        }
-    }
-
-    // TF-IDF by page - Ver 1.6.3
-    public function computeAllTFIDF() {
-        $this->tfidfScores = [];
-        foreach($this->frequencyData as $term => $frequency) {
-            $this->tfidfScores[$term] = $this->computeTFIDF($term);
-        }
-    }
-
-    // TF-IDF by page - Ver 1.6.3
-    public function getTopWordByTFIDF() {
-        arsort($this->tfidfScores); // Sort the TF-IDF scores in descending order
-        $keys = array_keys($this->tfidfScores);
-        return $keys[0]; // Return the top word
-    }
 
 }
 
+// TODO CODE MOVED TO SCHEDULER
 
-// Handle long running scripts with a scheduled event function - Ver 1.6.1
-function crawl_scheduled_event() {
-
-    global $topWords;
-
-    $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
-
-    // The second parameter is the default value if the option is not set.
-   update_option('chatbot_chatgpt_kn_status', 'In Process');
-
-    if (!isset($run_scanner)) {
-        $run_scanner = 'No';
-    }
-
-    // TODO Log the variables to debug.log
-    // error_log("ENTERING crawl_scehedule_event_hook");
-    update_option('chatbot_chatgpt_crawler_status', 'In Process');
-
-    $result = "";
-    // Reset the results message
-    update_option('chatbot_chatgpt_kn_results', $result);
-
-    // TODO - MOVED TO SCHEDULER
-    // Make sure the results table exists before proceeding - Ver 1.6.3
-    createTableIfNotExists();
-
-    $crawler = new WebCrawler($GLOBALS['start_url']);
-    $crawler->crawl(0, $GLOBALS['domain']);
-
-    // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
-    $crawler->computeFrequency();
-
-    // Collect top N words with the highest TF-IDF scores.
-    $topWords = [];
-    for ($i = 0; $i < $GLOBALS['max_top_words']; $i++) {
-        $maxTFIDF = 0;
-        $maxWord = null;
-
-        foreach ($crawler->getFrequencyData() as $word => $frequency) {
-            $tfidf = $crawler->computeTFIDF($word);
-
-            if ($tfidf > $maxTFIDF) {
-                $maxTFIDF = $tfidf;
-                $maxWord = $word;
-            }
-        }
-
-        if ($maxWord !== null) {
-            $topWords[$maxWord] = $maxTFIDF;
-            $crawler->removeWordFromFrequencyData($maxWord);
-        }
-    }
-
-    // TODO Diagnostics - Ver 1.6.1
-    // var_dump($topWords);
-
-    // Store the results
-    output_results($topWords);
-
-    // String together the $topWords
-    $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
-    foreach ($topWords as $word => $tfidf) {
-        $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
-        }
-    $chatbot_chatgpt_kn_conversation_context .= "and more.";
-    
-    // Save the results message value into the option
-    update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
-
-    // Save the results message value into the option
-    $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';
-    update_option('chatbot_chatgpt_kn_results', $kn_results);
-
-    // Notify outcome for up to 3 minutes
-    set_transient('chatbot_chatgpt_kn_results', $kn_results);
-
-    // TODO Log the variables to debug.log
-    // error_log("EXITING crawl_scehedule_event_hook");
-
-    // Get the current date and time.
-    $date_time_completed = date("Y-m-d H:i:s");
-
-    // Concatenate the status message with the date and time.
-    $status_message = 'Completed on ' . $date_time_completed;
-
-    // Update the option with the new status message.
-    update_option('chatbot_chatgpt_kn_status', $status_message);
-
-}
-add_action('crawl_scheduled_event_hook', 'crawl_scheduled_event');
 
 function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
+
+    // TODO COMMENT OUT LATER
+    error_log ("FUNCTION - chatbot_chatgpt_knowledge_navigator_section_callback");
 
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
     // update_option('chatbot_chatgpt_knowledge_navigator', 'No');
@@ -651,6 +460,10 @@ function chatbot_chatgpt_kn_maximum_depth_callback($args) {
 }
 
 function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
+
+    // TODO COMMENT OUT LATER
+    error_log ("FUNCTION - chatbot_chatgpt_kn_maximum_top_words_callback");
+
     $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 25));
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
@@ -664,37 +477,39 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
 }
 
 // Save the results to a file
-function output_results(){
-    global $topWords;
+function output_results() {
+    // TODO COMMENT OUT LATER
+    error_log("FUNCTION - output_results");
 
-    // Open file in write mode ('w')
-    $f = fopen($GLOBALS['results_csv_file'], 'w');
+    // Generate the directory path
+    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
 
-    // Write headers to CSV file
-    fputcsv($f, array('Word', 'TF-IDF'));
-
-    // Loop through $topWords and write each to CSV
-    foreach ($topWords as $word => $tfidf) {
-        fputcsv($f, array($word, $tfidf));
+    // Create the directory if it doesn't exist
+    if (!file_exists($results_dir_path) && !mkdir($results_dir_path, 0755, true)) {
+        error_log('Failed to create results directory.');
+        return;
     }
 
-    // Close the file
-    fclose($f);
+    // Define output files' paths
+    $results_csv_file = $results_dir_path . 'results.csv';
+    $results_json_file = $results_dir_path . 'results.json';
 
-    // Write JSON to file
-    file_put_contents($GLOBALS['results_json_file'], json_encode($topWords));
+    global $topWords;
+
+    // Write CSV
+    if ($f = fopen($results_csv_file, 'w')) {
+        fputcsv($f, ['Word', 'TF-IDF']);
+        foreach ($topWords as $word => $tfidf) {
+            fputcsv($f, [$word, $tfidf]);
+        }
+        fclose($f);
+    } else {
+        error_log('Failed to open CSV file for writing.');
+    }
+
+    // Write JSON
+    if (!file_put_contents($results_json_file, json_encode($topWords))) {
+        error_log('Failed to write JSON file.');
+    }
 }
 
-// TODO DELETE BEFORE FINALIZING
-// Custom Schedules - Ver 1.6.2
-// A standard system cron job runs at specified intervals regardless of the 
-// website's activity or traffic, but WordPress cron jobs are triggered by visits
-// to your site.
-// function chatbot_chatgpt_custom_cron_schedule($schedules) {
-//     $schedules['weekly'] = array(
-//         'interval' => 604800, // Number of seconds in a week
-//         'display'  => __('Every Week'),
-//     );
-//     return $schedules;
-// }
-// add_filter('cron_schedules', 'chatbot_chatgpt_custom_cron_schedule');

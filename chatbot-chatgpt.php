@@ -32,9 +32,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Declare Globals here - Ver 1.6.3
 global $wpdb;  // Declare the global $wpdb object
 
+// TODO REMOVE OR KEEP
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-kn-acquire.php'; // Database Management for Crawler - Ver 1.6.3
+
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-crawler.php'; // Database Management for Crawler - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-scheduler.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
