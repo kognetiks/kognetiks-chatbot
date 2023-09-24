@@ -8,7 +8,7 @@
  * @package chatbot-chatgpt
  */
 
-// TODO If this file is called directly, abort.
+// If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) )
 	die;
 
@@ -28,7 +28,7 @@ function crawl_scheduled_event() {
         $run_scanner = 'No';
     }
 
-    // TODO Log the variables to debug.log
+    // DIAG Diagnostic - Ver 1.6.3
     // error_log("ENTERING crawl_scehedule_event_hook");
     update_option('chatbot_chatgpt_crawler_status', 'In Process');
 
@@ -36,48 +36,8 @@ function crawl_scheduled_event() {
     // Reset the results message
     update_option('chatbot_chatgpt_kn_results', $result);
 
-    // TODO - MOVED TO SCHEDULER
     // Make sure the results table exists before proceeding - Ver 1.6.3
     dbKNStore();
-
-    // TODO - THE OLD WAY OF DOING THIS
-
-    // $crawler = new WebCrawler($GLOBALS['start_url']);
-    // $crawler->crawl(0, $GLOBALS['domain']);
-
-    // // Computer the TF-IDF (Term Frequency-Inverse Document Frequency)
-    // $crawler->computeFrequency();
-
-    // // Collect top N words with the highest TF-IDF scores.
-    // $topWords = [];
-    // for ($i = 0; $i < $GLOBALS['max_top_words']; $i++) {
-    //     $maxTFIDF = 0;
-    //     $maxWord = null;
-
-    //     foreach ($crawler->getFrequencyData() as $word => $frequency) {
-    //         $tfidf = $crawler->computeTFIDF($word);
-
-    //         if ($tfidf > $maxTFIDF) {
-    //             $maxTFIDF = $tfidf;
-    //             $maxWord = $word;
-    //         }
-    //     }
-
-    //     if ($maxWord !== null) {
-    //         $topWords[$maxWord] = $maxTFIDF;
-    //         $crawler->removeWordFromFrequencyData($maxWord);
-    //     }
-    // }
-
-    // // Store the results
-    // output_results($topWords);
-
-    // // String together the $topWords
-    // $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
-    // foreach ($topWords as $word => $tfidf) {
-    //     $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
-    //     }
-    // $chatbot_chatgpt_kn_conversation_context .= "and more.";
 
     // Call the kn-acquire.php script
     chatbot_chatgpt_kn_acquire();
@@ -89,7 +49,7 @@ function crawl_scheduled_event() {
     // Notify outcome for up to 3 minutes
     set_transient('chatbot_chatgpt_kn_results', $kn_results);
 
-    // TODO Log the variables to debug.log
+    // DIAG Diagnostic - Ver 1.6.3
     // error_log("EXITING crawl_scehedule_event_hook");
 
     // Get the current date and time.

@@ -9,7 +9,7 @@
  * @package chatbot-chatgpt
  */
 
-// TODO If this file is called directly, abort.
+// If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) )
 die;
 
@@ -121,7 +121,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     // Check is GD Library is installed - Ver 1.6.3
     if (extension_loaded('gd')) {
-        // TODO Comment out
+        // DIAG Diagnostic - Ver 1.6.3
         // echo '<p>ALERT: GD Library is installed and loaded!</p>';
     } else {
         echo '<p>ALERT: GD Library is not installed! No chart will be displayed.</p>';

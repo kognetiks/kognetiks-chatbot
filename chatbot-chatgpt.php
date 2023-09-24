@@ -194,7 +194,7 @@ function chatbot_chatgpt_kn_status_activation() {
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
 
-// TODO Clean Up in Aisle 4
+// Clean Up in Aisle 4
 function chatbot_chatgpt_kn_status_deactivation() {
     delete_option('chatbot_chatgpt_kn_status');
     wp_clear_scheduled_hook('crawl_scheduled_event_hook'); 
@@ -327,43 +327,92 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
-    // Interaction Tracking - Ver 1.6.3
-
-    // Check version and create table if necessary
-    chatbot_chatgpt_check_version();
-
-    // Get current date and table name
-    $today = current_time('Y-m-d');
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
-
-    // Check if today's date already exists in the table
-    $existing_count = $wpdb->get_var($wpdb->prepare("SELECT count FROM $table_name WHERE date = %s", $today));
-
-    if ($existing_count !== null) {
-        // If exists, increment the counter
-        $wpdb->query($wpdb->prepare("UPDATE $table_name SET count = count + 1 WHERE date = %s", $today));
-    } else {
-        // If not, insert a new row with the date and set count as 1
-        $wpdb->insert(
-            $table_name,
-            array(
-                'date' => $today,
-                'count' => 1
-            ),
-            array('%s', '%d')
-        );
+    // Retrieve links to the highest scoring documents - Ver 1.6.3
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
+    $words = explode(" ", $message);
+    $match_found = false;
+    $highest_score = 0;
+    $highest_score_word = "";
+    $highest_score_url = "";
+    foreach ($words as $word) {
+        // Strip off any trailing punctuation
+        $word = rtrim($word, ".,;:!?");
+        // Check for plural
+        if (substr($word, -1) == "s") {
+            $word_singular = substr($word, 0, -1);
+            $words[] = $word_singular;
+        }
+        // Find the highest score for the word
+        $result = $wpdb->get_row($wpdb->prepare("SELECT score, url FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT 1", $word));
+        if ($result !== null && $result->score > $highest_score) {
+            $highest_score = $result->score;
+            $highest_score_word = $word;
+            $highest_score_url = $result->url;
+        }
     }
 
+    if (!isset($response_body['content'])) {
+        $response_body['content'] = "";
+    }
+
+    // IDEA Append message and link if found to ['choices'][0]['message']['urls']
+    if ($highest_score > 0) {
+        // Return the URL with the highest score
+        $match_found = true;
+
+        // Array of alternative learning status messages
+        $learningMessages = [
+            " Also know that I'm still learning, but more information could be found ",
+            " Please be aware that I'm in the process of learning, but more information could be found ",
+            " Just a heads up, I'm continuously improving, in the meantime check ",
+            " Keep in mind that I'm still learning the ropes, but don't hesitate to check out ",
+            " I'm in a state of constant learning, for now check out ",
+            " Remember, I'm on a learning journey, so you can revisit anytime you'd like. However, you might try ",
+            " I'm in the learning phase, so your patience is appreciated. However you might find help "
+        ];
+
+        $response_body['choices'][0]['message']['urls'] = $highest_score_url;
+        $response_body['choices'][0]['message']['content'] .= $learningMessages[array_rand($learningMessages)];
+        $response_body['choices'][0]['message']['content'] .= "[URL: " . $highest_score_url . "]";
+    } else {
+        // If no match is found, return a generic response
+        $match_found = false;
+
+        // Array of error response options
+        $errorResponses = [
+            "It seems there was an issue with the OpenAI API. Let's try again later.",
+            "Unfortunately, we encountered a problem with the OpenAI API. Please give it another shot in a little while.",
+            "I apologize, but it appears there's a hiccup with the OpenAI API at the moment. We can attempt this again later.",
+            "The OpenAI API seems to be experiencing difficulties right now. We can come back to this when it's resolved.",
+            "I'm sorry, but it seems like there's an error from the OpenAI API's side. Please retry in a bit.",
+            "There might be a temporary issue with the OpenAI API. Please try your request again in a little while.",
+            "The OpenAI API encountered an error, but don't worry, it happens. Let's give it another shot later.",
+            "It looks like there's a technical problem with the OpenAI API. Feel free to try again when it's working smoothly."
+        ];
+
+        $response_body['choices'][0]['message']['content'] .= $errorResponses[array_rand($errorResponses)];
+    }
+
+    // TODO error_log for $score, $match_found, $highest_score, $highest_score_url - Diagnostic - Ver 1.6.3
+    error_log('$match_found: ' . print_r($match_found, true));
+    error_log('$highest_score: ' . print_r($highest_score, true));
+    error_log('$highest_score_word: ' . print_r($highest_score_word, true));
+    error_log('$highest_score_url: ' . print_r($highest_score_url, true));
+    error_log('$response_body: ' . print_r($response_body, true));
+    
+    // Interaction Tracking - Ver 1.6.3
+    update_interaction_tracking();
 
     if (isset($response_body['choices']) && !empty($response_body['choices'])) {
         // Handle the response from the chat engine
-        // Diagnostics - Ver 1.6.1
-        // error_log('$response_body: ' . print_r($response_body['choices'][0]['message']['content'], true));
         // Context History - Ver 1.6.1
         addEntry('context_history', $response_body['choices'][0]['message']['content']);
         return $response_body['choices'][0]['message']['content'];
     } else {
         // Handle any errors that are returned from the chat engine
+        //
+        // IDEA USE ALTERNATE MODEL TO GENERATE A RESPONSE HERE
+        //
         return 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 }

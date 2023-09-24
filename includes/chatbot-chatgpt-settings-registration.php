@@ -9,7 +9,7 @@
  * @package chatbot-chatgpt
  */
 
-// TODO If this file is called directly, abort.
+// If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) )
 die;
 
@@ -225,7 +225,6 @@ function chatbot_chatgpt_settings_init() {
 
     // Knowledge Navigator settings tab - Ver 1.6.1
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_knowledge_navigator');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_depth');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_top_words');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_results');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_conversation_context');
@@ -238,14 +237,6 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatbot_chatgpt_kn_maximum_depth',
-        'Maximum Depth',
-        'chatbot_chatgpt_kn_maximum_depth_callback',
-        'chatbot_chatgpt_knowledge_navigator',
-        'chatbot_chatgpt_knowledge_navigator_section'
-    );
-
-    add_settings_field(
         'chatbot_chatgpt_kn_maximum_top_words',
         'Maximum Top Words',
         'chatbot_chatgpt_kn_maximum_top_words_callback',
@@ -255,7 +246,7 @@ function chatbot_chatgpt_settings_init() {
 
     add_settings_field(
         'chatbot_chatgpt_knowledge_navigator',
-        'Run Knowledge Navigator',
+        'Run Schedule',
         'chatbot_chatgpt_knowledge_navigator_callback',
         'chatbot_chatgpt_knowledge_navigator',
         'chatbot_chatgpt_knowledge_navigator_section'

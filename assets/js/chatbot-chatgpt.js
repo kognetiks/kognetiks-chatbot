@@ -15,9 +15,9 @@ jQuery(document).ready(function ($) {
     }
 
     // Diagnostics = Ver 1.4.2
-    if (chatbotSettings.chatgpt_diagnostics === 'On') {
-        // console.log('FUNCTION: chatbot-chatgpt.js');
-    }
+    // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+    //     // console.log('FUNCTION: chatbot-chatgpt.js');
+    // }
 
     var chatGptOpenButton = $('#chatgpt-open-btn');
     // Use 'open' for an open chatbot or 'closed' for a closed chatbot - Ver 1.1.0
@@ -123,8 +123,12 @@ jQuery(document).ready(function ($) {
             }
 
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
-            localStorage.setItem('chatgptChatbotOpened', 'true')
+            localStorage.setItem('chatgptChatbotOpened', 'true');
+
         }
+
+        return;
+
     }
 
 
@@ -142,8 +146,10 @@ jQuery(document).ready(function ($) {
     chatGptOpenButton.on('click', toggleChatbot);
 
     function appendMessage(message, sender, cssClass) {
+
         var messageElement = $('<div></div>').addClass('chat-message');
-        var textElement = $('<span></span>').text(message);
+        // Use HTML for the so that links are clickable - Ver 1.6.3
+        var textElement = $('<span></span>').html(message);
 
         // Add initial greetings if first time
         if (cssClass) {
@@ -222,9 +228,12 @@ jQuery(document).ready(function ($) {
                     // Revision to how disclaimers are handled - Ver 1.5.0
                     if (localStorage.getItem('chatgpt_disclaimer_setting') === 'No') {
                         const prefixes = [
+                            "As an AI, ",
                             "As an AI language model, ",
                             "I am an AI language model and ",
-                            "As an artificial intelligence, "
+                            "As an artificial intelligence, ",
+                            "As an AI developed by OpenAI, ",
+                            "As an artificial intelligence developed by OpenAI, "
                         ];
                         for (let prefix of prefixes) {
                             if (botResponse.startsWith(prefix)) {
@@ -232,6 +241,22 @@ jQuery(document).ready(function ($) {
                                 break;
                             }
                         }
+                    }
+                    // IDEA Check for a URL
+                    if (botResponse.includes('[URL: ')) {
+                        console.log("URL found in bot response");
+                        let urlRegex = /\[URL: (.*?)\]/g;
+                        let link = botResponse.match(urlRegex)[0].replace('[URL: ', '').replace(']', '');
+                        let linkElement = document.createElement('a');
+                        linkElement.href = link;
+                        linkElement.textContent = 'here';
+                        let text = botResponse.replace(urlRegex, '');
+                        let textElement = document.createElement('span');
+                        textElement.textContent = text;
+                        botResponse = document.createElement('div');
+                        botResponse.appendChild(textElement);
+                        botResponse.appendChild(linkElement);
+                        botResponse = botResponse.outerHTML;
                     }
                     // Return the response
                     appendMessage(botResponse, 'bot');
@@ -280,7 +305,7 @@ jQuery(document).ready(function ($) {
 
         // Nuclear option to clear session conversation - Ver 1.5.0
         // Do not use unless alsolutely needed
-        // TODO Comment this code out
+        // DIAG Diagnostics - Ver 1.5.0
         // nuclearOption = 'Off';
         // if (nuclearOption === 'On') {
         //     console.log('***** NUCLEAR OPTION IS ON ***** ');
@@ -289,7 +314,7 @@ jQuery(document).ready(function ($) {
         //     sessionStorage.removeItem('chatgpt_last_response');
         // }
 
-        // Diagnostics - Ver 1.5.0
+        // DIAG Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - BEFORE DECISION');
         // }
@@ -320,7 +345,7 @@ jQuery(document).ready(function ($) {
         } else {
             chatGptChatBot.show();
             chatGptOpenButton.hide();
-            // Load the conversation if the chatbot is open n on page load
+            // Load the conversation if the chatbot is open on page load
             loadConversation();
             scrollToBottom();
         }

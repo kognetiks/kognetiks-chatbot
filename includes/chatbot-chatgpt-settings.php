@@ -9,7 +9,7 @@
  * @package chatbot-chatgpt
  */
 
-// TODO If this file is called directly, abort.
+// If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) )
 die;
 
@@ -183,7 +183,7 @@ function chatbot_chatgpt_settings_page_html() {
             } elseif ($active_tab == 'avatar') {
                 settings_fields('chatbot_chatgpt_avatar');
                 do_settings_sections('chatbot_chatgpt_avatar');
-            // TODO Coming Soon in Ver 2.0.0
+            // IDEA Coming Soon in Ver 2.0.0
             // } elseif ($active_tab == 'premium') {
             //     settings_fields('chatbot_chatgpt_premium');
             //     do_settings_sections('chatbot_chatgpt_premium');

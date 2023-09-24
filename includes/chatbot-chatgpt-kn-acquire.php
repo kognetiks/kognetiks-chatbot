@@ -9,7 +9,7 @@
  * @package chatbot-chatgpt
  */
 
-// TODO If this file is called directly, abort.
+// If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) )
 die;
 
@@ -26,8 +26,19 @@ function chatbot_chatgpt_kn_acquire() {
     global $topWords;
     global $max_top_words;
 
+    $url = '';
+    $words = [];
+    $no_of_items_analyzed = 0;
+    update_option('no_of_items_analyzed', $no_of_items_analyzed);
+
+    // Reset the $no_of_items_analyzed to zero
+    $no_of_items_analyzed = 0;
+
     // Initialize the $topWords array
     $topWords = [];
+
+    // Reset the chatbot_chatgpt_knowledge_base table
+    dbKNStore();
     
     // Generate directory path
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
@@ -66,47 +77,122 @@ function chatbot_chatgpt_kn_acquire() {
 
     // Query WordPress database for post content
     $results = $wpdb->get_results(
-        "SELECT post_content FROM {$wpdb->prefix}posts WHERE post_type='post' AND post_status='publish'", 
+        "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE post_type='post' AND post_status='publish'", 
         ARRAY_A
     );
 
     // Loop through query results
     foreach ($results as $result) {
+        // DIAG Diagnostic - Ver 1.6.3
+        // foreach($result as $key => $value) {
+        //     error_log("Key: $key, Value: $value");
+        // }        
         $output_str = '';
         $output_str .= json_encode($result['post_content']) . "\n";
         // Call kn_acquire_just_the_words with $output_str and return $words
         $words = kn_acquire_just_the_words($output_str);
+        // Construct the URL for the post
+        $url = get_permalink($result['ID']);
+        // Construct the Title for the post
+        $title = get_the_title($result['ID']);
+        // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
+        foreach ($words as $word => $score) {
+            $wpdb->insert(
+                $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
+                array(
+                    'url' => $url,
+                    'title' => $title,
+                    'word' => $word,
+                    'score' => $score
+                )
+            );
+        }
+        // Log the URL and the $words array
+        error_log($url . "\n", 3, $log_file_posts);
         error_log(print_r($words, true) . "\n", 3, $log_file_posts);
+        // Increment the number of items analyzed by one
+        $no_of_items_analyzed++;
+        update_option('no_of_items_analyzed', $no_of_items_analyzed);
     }
 
     // Query WordPress database for page content
     $results = $wpdb->get_results(
-        "SELECT post_content FROM {$wpdb->prefix}posts WHERE post_type='page' AND post_status='publish'", 
+        "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE post_type='page' AND post_status='publish'", 
         ARRAY_A
     );
 
     // Loop through query results
     foreach ($results as $result) {
+        // DIAG Diagnostic - Ver 1.6.3
+        // foreach($result as $key => $value) {
+        //     error_log("Key: $key, Value: $value");
+        // }        
         $output_str = '';
         $output_str .= json_encode($result['post_content']) . "\n";
         // Call kn_acquire_just_the_words with $output_str and return $words
         $words = kn_acquire_just_the_words($output_str);
+        // Construct the URL for the page
+        $url = get_permalink($result['ID']);
+        // Construct the Title for the post
+        $title = get_the_title($result['ID']);
+        // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
+        foreach ($words as $word => $score) {
+            $wpdb->insert(
+                $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
+                array(
+                    'url' => $url,
+                    'title' => $title,
+                    'word' => $word,
+                    'score' => $score
+                )
+            );
+        }
+        // Log the URL and the $words array
+        error_log($url . "\n", 3, $log_file_pages);
         error_log(print_r($words, true) . "\n", 3, $log_file_pages);
+        // Increment the number of items analyzed by one
+        $no_of_items_analyzed++;
+        update_option('no_of_items_analyzed', $no_of_items_analyzed);
     }
 
     // Query WordPress database for comment content
     $results = $wpdb->get_results(
-        "SELECT comment_content FROM {$wpdb->prefix}comments WHERE comment_approved='1'", 
+        "SELECT comment_post_ID, comment_content FROM {$wpdb->prefix}comments WHERE comment_approved='1'", 
         ARRAY_A
     );
 
     // Loop through query results
     foreach ($results as $result) {
+        // DIAG Diagnostic - Ver 1.6.3
+        // foreach($result as $key => $value) {
+        //     error_log("Key: $key, Value: $value");
+        // }        
         $output_str = '';
         $output_str .= json_encode($result['comment_content']) . "\n";
         // Call kn_acquire_just_the_words with $output_str and return $words
         $words = kn_acquire_just_the_words($output_str);
+        // Construct the URL for the comments
+        $url = get_permalink($result['ID']);
+        // Construct the Title for the post
+        $title = 'Comment';
+        // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
+        foreach ($words as $word => $score) {
+            $wpdb->insert(
+                $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
+                array(
+                    'url' => $url,
+                    'title' => $title,
+                    'word' => $word,
+                    'score' => $score
+                )
+            );
+        }
+        // Log the URL and the $words array
+        error_log($url . "\n", 3, $log_file_comments);
         error_log(print_r($words, true) . "\n", 3, $log_file_comments);
+        // Increment the number of items analyzed by one
+        $no_of_items_analyzed++;
+        update_option('no_of_items_analyzed', $no_of_items_analyzed);
     }
 
     // Now computer the TF-IDF for the $topWords array
@@ -140,8 +226,8 @@ function kn_acquire_just_the_words( $content ) {
     global $topWords;
     global $totalWordCount;
     
-    // TODO COMMENT OUT LATER
-    error_log ("FUNCTION - kn_acquire_just_the_words");
+    // DIAG Diagnostic - Ver 1.6.3
+    // error_log ("FUNCTION - kn_acquire_just_the_words");
 
     // List of common stop words to be ignored
     $stopWords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't", 'as', 'at'];
@@ -217,6 +303,14 @@ function kn_acquire_just_the_words( $content ) {
 
     // Update the totalWordCount with the sum of the $words array
     $totalWordCount = $totalWordCount + array_sum($words);
+
+    // Before computer the TF-IDF for the $words array, trim the $words array to the top 10 words
+    $words = array_slice($words, 0, 10);
+
+    // Computer the TF-IDF for the $words array
+    foreach ($words as $word => $count) {
+        $words[$word] = computeTFIDF($word);
+    } 
     
     return $words;
 
@@ -255,61 +349,4 @@ function computeInverseDocumentFrequency($term) {
     
     return log(count($topWords) / ($numDocumentsWithTerm + 1));
 
-}
-
-// Store the top words for context
-function store_top_words() {
-
-    global $topWords;
-
-    // String together the $topWords
-    $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
-    foreach ($topWords as $word => $tfidf) {
-        $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
-        }
-    $chatbot_chatgpt_kn_conversation_context .= "and more.";
-    
-    // Save the results message value into the option
-    update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
-
-    return;
-
-}
-
-// Save the results to a file
-function output_results() {
-
-    global $topWords;
-
-    // TODO COMMENT OUT LATER
-    error_log("FUNCTION - output_results");
-
-    // Generate the directory path
-    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
-
-    // Create the directory if it doesn't exist
-    if (!file_exists($results_dir_path) && !mkdir($results_dir_path, 0755, true)) {
-        error_log('Failed to create results directory.');
-        return;
-    }
-
-    // Define output files' paths
-    $results_csv_file = $results_dir_path . 'results.csv';
-    $results_json_file = $results_dir_path . 'results.json';
-
-    // Write CSV
-    if ($f = fopen($results_csv_file, 'w')) {
-        fputcsv($f, ['Word', 'TF-IDF']);
-        foreach ($topWords as $word => $tfidf) {
-            fputcsv($f, [$word, $tfidf]);
-        }
-        fclose($f);
-    } else {
-        error_log('Failed to open CSV file for writing.');
-    }
-
-    // Write JSON
-    if (!file_put_contents($results_json_file, json_encode($topWords))) {
-        error_log('Failed to write JSON file.');
-    }
 }
