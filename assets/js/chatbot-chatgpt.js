@@ -14,9 +14,9 @@ jQuery(document).ready(function ($) {
         chatGptChatBot.removeClass('wide');
     }
 
-    // Diagnostics = Ver 1.4.2
+    // DIAG - Diagnostics = Ver 1.4.2
     // if (chatbotSettings.chatgpt_diagnostics === 'On') {
-    //     // console.log('FUNCTION: chatbot-chatgpt.js');
+    //     console.log('FUNCTION: chatbot-chatgpt.js');
     // }
 
     var chatGptOpenButton = $('#chatgpt-open-btn');
@@ -85,7 +85,7 @@ jQuery(document).ready(function ($) {
         if (isFirstTime) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
 
-            // Logging for Diagnostics - Ver 1.4.2
+            // DIAG - Logging for Diagnostics - Ver 1.4.2
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at isFirstTime');
             // }
@@ -112,7 +112,7 @@ jQuery(document).ready(function ($) {
             
             initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
-            // Logging for Diagnostics - Ver 1.4.2
+            // DIAG - Logging for Diagnostics - Ver 1.4.2
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at else');
             // }
@@ -244,7 +244,8 @@ jQuery(document).ready(function ($) {
                     }
                     // IDEA Check for a URL
                     if (botResponse.includes('[URL: ')) {
-                        console.log("URL found in bot response");
+                        // DIAG - Diagnostics - Ver 1.6.3
+                        // console.log("URL found in bot response");
                         let urlRegex = /\[URL: (.*?)\]/g;
                         let link = botResponse.match(urlRegex)[0].replace('[URL: ', '').replace(']', '');
                         let linkElement = document.createElement('a');
@@ -305,7 +306,7 @@ jQuery(document).ready(function ($) {
 
         // Nuclear option to clear session conversation - Ver 1.5.0
         // Do not use unless alsolutely needed
-        // DIAG Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 1.5.0
         // nuclearOption = 'Off';
         // if (nuclearOption === 'On') {
         //     console.log('***** NUCLEAR OPTION IS ON ***** ');
@@ -314,7 +315,7 @@ jQuery(document).ready(function ($) {
         //     sessionStorage.removeItem('chatgpt_last_response');
         // }
 
-        // DIAG Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - BEFORE DECISION');
         // }
@@ -333,7 +334,7 @@ jQuery(document).ready(function ($) {
             }
         };
 
-        // Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - AFTER DECISION');
         // }
@@ -354,6 +355,7 @@ jQuery(document).ready(function ($) {
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
         setTimeout(() => {
+            // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log("FUNCTION: Scrolling to bottom");
             // }
@@ -366,12 +368,13 @@ jQuery(document).ready(function ($) {
         var storedConversation = sessionStorage.getItem('chatgpt_conversation');
         localStorage.setItem('chatgptStartStatusNewVisitor', 'Closed');
   
-        // Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadConversation');
         // }
 
         if (storedConversation) {
+            // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: loadConversation - IN THE IF STATEMENT');
             // }
@@ -384,6 +387,7 @@ jQuery(document).ready(function ($) {
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
         } else {
+            // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: loadConversation - IN THE ELSE STATEMENT');
             // }

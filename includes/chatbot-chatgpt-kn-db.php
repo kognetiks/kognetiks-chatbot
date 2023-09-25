@@ -112,7 +112,7 @@ function output_results() {
 
     global $topWords;
 
-    // DIAG Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostic - Ver 1.6.3
     // error_log("FUNCTION - output_results");
 
     // Generate the directory path

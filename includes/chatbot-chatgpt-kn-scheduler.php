@@ -28,7 +28,7 @@ function crawl_scheduled_event() {
         $run_scanner = 'No';
     }
 
-    // DIAG Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostic - Ver 1.6.3
     // error_log("ENTERING crawl_scehedule_event_hook");
     update_option('chatbot_chatgpt_crawler_status', 'In Process');
 
@@ -49,7 +49,7 @@ function crawl_scheduled_event() {
     // Notify outcome for up to 3 minutes
     set_transient('chatbot_chatgpt_kn_results', $kn_results);
 
-    // DIAG Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostic - Ver 1.6.3
     // error_log("EXITING crawl_scehedule_event_hook");
 
     // Get the current date and time.

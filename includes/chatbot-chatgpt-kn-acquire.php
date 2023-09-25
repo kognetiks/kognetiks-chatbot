@@ -48,7 +48,7 @@ function chatbot_chatgpt_kn_acquire() {
         mkdir($results_dir_path, 0755, true);
     }
 
-    // Log directory path for debugging
+    // DIAG - Log directory path for debugging
     error_log("Directory path: " . $results_dir_path);
 
     // Prepare log file for posts
@@ -83,7 +83,7 @@ function chatbot_chatgpt_kn_acquire() {
 
     // Loop through query results
     foreach ($results as $result) {
-        // DIAG Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
         //     error_log("Key: $key, Value: $value");
         // }        
@@ -123,7 +123,7 @@ function chatbot_chatgpt_kn_acquire() {
 
     // Loop through query results
     foreach ($results as $result) {
-        // DIAG Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
         //     error_log("Key: $key, Value: $value");
         // }        
@@ -163,7 +163,7 @@ function chatbot_chatgpt_kn_acquire() {
 
     // Loop through query results
     foreach ($results as $result) {
-        // DIAG Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
         //     error_log("Key: $key, Value: $value");
         // }        
@@ -200,8 +200,8 @@ function chatbot_chatgpt_kn_acquire() {
         $topWords[$word] = computeTFIDF($word);
     }
 
-    // Error log $max_top_words
-    error_log("Max Top Words: " . $max_top_words);
+    // DIAG - Error log $max_top_words
+    // error_log("Max Top Words: " . $max_top_words);
 
     // slice off the top max_top_words
     $topWords = array_slice($topWords, 0, $max_top_words);
@@ -226,7 +226,7 @@ function kn_acquire_just_the_words( $content ) {
     global $topWords;
     global $totalWordCount;
     
-    // DIAG Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostic - Ver 1.6.3
     // error_log ("FUNCTION - kn_acquire_just_the_words");
 
     // List of common stop words to be ignored

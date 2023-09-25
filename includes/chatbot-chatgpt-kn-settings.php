@@ -21,7 +21,7 @@ $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)
 
 function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
-    // DIAG Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostic - Ver 1.6.3
     // error_log ("FUNCTION - chatbot_chatgpt_knowledge_navigator_section_callback");
 
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
@@ -38,7 +38,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Cancel'])) {
 
-        // DIAG Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostic - Ver 1.6.3
         // error_log("chatbot_chatgpt_knowledge_navigator_section_callback: " . $run_scanner);
         // error_log("max_top_words: " . serialize($GLOBALS['max_top_words']));
         // error_log("domain: " . serialize($GLOBALS['domain']));
@@ -68,7 +68,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                 // Log action to debug.log
                 // error_log("BEFORE crawl_scehedule_event_hook");
 
-                // TODO WP Cron Scheduler - VER 1.6.2
+                // IDEA WP Cron Scheduler - VER 1.6.2
                 // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
                 // A standard system cron job runs at specified intervals regardless of the 
                 // website's activity or traffic, but WordPress cron jobs are triggered by visits
@@ -99,7 +99,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                     }
                 }
                 
-                // TODO Log action to debug.log
+                // DIAG - Log action to debug.log
                 // error_log("AFTER crawl_scehedule_event_hook");
 
                 // Log scan interval - Ver 1.6.3
@@ -155,7 +155,7 @@ function chatbot_chatgpt_knowledge_navigator_callback($args) {
 
 function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
 
-    // DIAG Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostic - Ver 1.6.3
     // error_log ("FUNCTION - chatbot_chatgpt_kn_maximum_top_words_callback");
 
     $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 25));

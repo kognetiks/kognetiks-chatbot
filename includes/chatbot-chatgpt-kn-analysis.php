@@ -30,6 +30,7 @@ function chatbot_chatgpt_kn_analysis_section_callback($args) {
 function chatbot_chatgpt_kn_analysis_output_callback($args) {
     // Get the saved chatbot_chatgpt_kn_analysis_choice value or default to "CSV"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_kn_analysis_output', 'CSV'));
+    // DIAG - Log the output choice
     // error_log('chatbot_chatgpt_kn_analysis_output' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_kn_analysis_output" name="chatbot_chatgpt_kn_analysis_output">

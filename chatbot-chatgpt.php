@@ -135,9 +135,11 @@ function chatbot_chatgpt_enqueue_scripts() {
 
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
+                // DIAG - Log the key and value
                 // console.log('Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
+                // DIAG - Log the key and value
                 // console.log(key + ' is already set in localStorage');
             }
         });
@@ -393,12 +395,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         $response_body['choices'][0]['message']['content'] .= $errorResponses[array_rand($errorResponses)];
     }
 
-    // TODO error_log for $score, $match_found, $highest_score, $highest_score_url - Diagnostic - Ver 1.6.3
-    error_log('$match_found: ' . print_r($match_found, true));
-    error_log('$highest_score: ' . print_r($highest_score, true));
-    error_log('$highest_score_word: ' . print_r($highest_score_word, true));
-    error_log('$highest_score_url: ' . print_r($highest_score_url, true));
-    error_log('$response_body: ' . print_r($response_body, true));
+    // DIAG - error_log for $score, $match_found, $highest_score, $highest_score_url - Diagnostic - Ver 1.6.3
+    // error_log('$match_found: ' . print_r($match_found, true));
+    // error_log('$highest_score: ' . print_r($highest_score, true));
+    // error_log('$highest_score_word: ' . print_r($highest_score_word, true));
+    // error_log('$highest_score_url: ' . print_r($highest_score_url, true));
+    // error_log('$response_body: ' . print_r($response_body, true));
     
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();

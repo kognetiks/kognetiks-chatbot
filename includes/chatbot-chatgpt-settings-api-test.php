@@ -67,7 +67,8 @@ die;
         $error_message = isset($response_body['error']['message']) ? $response_body['error']['message'] : 'No additional information.';
         $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
         update_option('chatbot_chatgpt_api_status', $updated_status);
-        error_log('chatbot_chatgpt_api_status: ' . $updated_status);
+        // DIAG - Log the updated status
+        // error_log('chatbot_chatgpt_api_status: ' . $updated_status);
         return;
     }
 
@@ -76,7 +77,8 @@ die;
         
         // You may need to fetch the updated option to ensure you're logging the new value.
         $updated_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
-        error_log('chatbot_chatgpt_api_status: ' . $updated_status);
+        // DIAG - Log the updated status
+        // error_log('chatbot_chatgpt_api_status: ' . $updated_status);
         
         return;
     } else {
@@ -84,7 +86,8 @@ die;
         
         // You may need to fetch the updated option to ensure you're logging the new value.
         $updated_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
-        error_log('chatbot_chatgpt_api_status: ' . $updated_status);
+        // DIAG - Log the updated status
+        // error_log('chatbot_chatgpt_api_status: ' . $updated_status);
         
         return;
     }
@@ -105,11 +108,11 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
         // Call your test function
         $test_result = test_chatgpt_api($api_key);
 
-        // Set the option that your admin_notice function uses to display messages
+        // DIAG - Set the option in the admin_notice function uses to display messages
         // error_log('$test_result' . $test_result);
         // update_option('chatbot_chatgpt_api_status', $test_result);
 
-        // You could directly call display_option_value_admin_notice() here, but
+        // I could directly call display_option_value_admin_notice() here, but
         // that's generally not a good practice unless absolutely necessary
         // display_option_value_admin_notice();
     }

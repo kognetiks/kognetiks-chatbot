@@ -27,8 +27,9 @@ function chatbot_chatgpt_reporting_section_callback($args) {
 function chatbot_chatgpt_reporting_period_callback($args) {
     // Get the saved chatbot_chatgpt_reporting_period value or default to "Daily"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_reporting_period', 'Daily'));
-    error_log('chatbot_chatgpt_reporting_period');
-    error_log($output_choice);
+    // DIAG - Log the output choice
+    // error_log('chatbot_chatgpt_reporting_period');
+    // error_log($output_choice);
     ?>
     <select id="chatbot_chatgpt_reporting_period" name="chatbot_chatgpt_reporting_period">
         <option value="<?php echo esc_attr( 'Daily' ); ?>" <?php selected( $output_choice, 'Daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
@@ -121,7 +122,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     // Check is GD Library is installed - Ver 1.6.3
     if (extension_loaded('gd')) {
-        // DIAG Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostic - Ver 1.6.3
         // echo '<p>ALERT: GD Library is installed and loaded!</p>';
     } else {
         echo '<p>ALERT: GD Library is not installed! No chart will be displayed.</p>';
