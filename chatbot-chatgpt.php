@@ -420,11 +420,22 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         if (!isset($response_body['choices'][0]['message']['content'])) {
             $response_body['choices'][0]['message']['content'] = '';
         }
-        $response_body['choices'][0]['message']['content'] .= $errorResponses[array_rand($errorResponses)];
+        // Only append $errorResponses if there is no response from the engine
+        if (empty($response_body['choices'][0]['message']['content'])) {
+            $response_body['choices'][0]['message']['content'] .= $errorResponses[array_rand($errorResponses)];
+        }
     }
 
     // Find bolded text in $response_body['choices'][0]['message']['content'] and replace with <b> tags - Ver 1.6.3
-    $response_body['choices'][0]['message']['content'] = preg_replace('/\*\*(.*?)\*\*/', '<b>$1</b>', $response_body['choices'][0]['message']['content']);
+    // $response_body['choices'][0]['message']['content'] = preg_replace('/\*\*(.*?)\*\*/', '<b>$1</b>', $response_body['choices'][0]['message']['content']);
+
+    // Find <strong></strong> in $response_body['choices'][0]['message']['content'] and replace with <b> tags - Ver 1.6.3
+    // $response_body['choices'][0]['message']['content'] = preg_replace('/<strong>(.*?)<\/strong>/', '<b>$1</b>', $response_body['choices'][0]['message']['content']);
+    
+    // Strip out any <strong></strong> tags in $response_body['choices'][0]['message']['content'] - Ver 1.6.3
+    $response_body['choices'][0]['message']['content'] = preg_replace('/<strong>(.*?)<\/strong>/', '$1', $response_body['choices'][0]['message']['content']);
+    // Strip out any <b></b> tags in $response_body['choices'][0]['message']['content'] - Ver 1.6.3
+    $response_body['choices'][0]['message']['content'] = preg_replace('/<b>(.*?)<\/b>/', '$1', $response_body['choices'][0]['message']['content']);
 
     // DIAG - error_log for $score, $match_found, $highest_score, $highest_score_url - Diagnostic - Ver 1.6.3
     // error_log('$match_found: ' . print_r($match_found, true));
@@ -450,7 +461,8 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
         // IDEA Return one of the $errorResponses - Ver 1.6.3
         // IDEA Belt and Suspenders - We shouldn't be here unless something went really wrong up above this point
-        return $errorResponses[array_rand($errorResponses)];
+        // return $errorResponses[array_rand($errorResponses)];
+        return;
     }
 }
 
