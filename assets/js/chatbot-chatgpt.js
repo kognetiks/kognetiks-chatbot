@@ -259,6 +259,10 @@ jQuery(document).ready(function ($) {
                         botResponse.appendChild(linkElement);
                         botResponse = botResponse.outerHTML;
                     }
+
+                    // IDEA Check for double asterisks suggesting a "bold" response
+                    // TODO Add a class to the bot-text span to make the text bold
+
                     // Return the response
                     appendMessage(botResponse, 'bot');
                 } else {

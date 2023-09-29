@@ -49,7 +49,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
         // WP Cron Scheduler - VER 1.6.2
         // error_log('BEFORE wp_clear_scheduled_hook');
-        wp_clear_scheduled_hook('crawl_scheduled_event_hook'); // Clear before rescheduling
+        wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear before rescheduling
         // error_log('AFTER wp_clear_scheduled_hook');
 
         if ($run_scanner === 'Cancel') {
@@ -57,7 +57,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
             update_option('chatbot_chatgpt_knowledge_navigator', 'No');
             update_option('chatbot_chatgpt_scan_interval', 'No Schedule');
         } else {
-            if (!wp_next_scheduled('crawl_scheduled_event_hook')) {
+            if (!wp_next_scheduled('knowledge_navigator_scan_hook')) {
 
                 // RESET THE NO OF LINKS CRAWLED HERE
                 update_option('no_of_items_analyzed', 0);
@@ -74,11 +74,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                 // website's activity or traffic, but WordPress cron jobs are triggered by visits
                 // to your site.
                 // https://wpshout.com/wp_schedule_event-examples/
-                // wp_schedule_single_event(time(), 'crawl_scheduled_event_hook');
-
-                // TODO
-                // TODO Change the name from crawl_scheduled_event_hook to knowledge_navigator_scan_event and knowledge_navigator_scan_event_hook
-                // TODO
+                // wp_schedule_single_event(time(), 'knowledge_navigator_scan_hook');
 
                 $interval_mapping = [
                     'Now' => 10, // For immediate execution, just delay by 10 seconds
@@ -91,7 +87,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                 if (in_array($run_scanner, array_keys($interval_mapping))) {
                     $timestamp = time() + 10; // Always run 10 seconds from now
                     $interval = $interval_mapping[$run_scanner];
-                    $hook = 'crawl_scheduled_event_hook';
+                    $hook = 'knowledge_navigator_scan_hook';
                     if ($run_scanner === 'Now') {
                         wp_schedule_single_event($timestamp, $hook); // Schedule a one-time event if 'Now' is selected
                     } else {
@@ -162,7 +158,7 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php
-        for ($i = 25; $i <= 500; $i += 25) {
+        for ($i = 100; $i <= 2000; $i += 100) {
             echo '<option value="' . $i . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . $i . '</option>';
         }
         ?>

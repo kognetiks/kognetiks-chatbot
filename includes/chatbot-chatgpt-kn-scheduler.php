@@ -15,9 +15,12 @@ if ( ! defined( 'WPINC' ) )
 global $topWords;
 
 // Handle long running scripts with a scheduled event function - Ver 1.6.1
-function crawl_scheduled_event() {
+function knowledge_navigator_scan() {
 
     global $topWords;
+
+    // DIAG - Diagnostic - Ver 1.6.3
+    // error_log("ENTERING knowledge_navigator_scan");
 
     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
 
@@ -27,10 +30,6 @@ function crawl_scheduled_event() {
     if (!isset($run_scanner)) {
         $run_scanner = 'No';
     }
-
-    // DIAG - Diagnostic - Ver 1.6.3
-    // error_log("ENTERING crawl_scehedule_event_hook");
-    update_option('chatbot_chatgpt_crawler_status', 'In Process');
 
     $result = "";
     // Reset the results message
@@ -49,9 +48,6 @@ function crawl_scheduled_event() {
     // Notify outcome for up to 3 minutes
     set_transient('chatbot_chatgpt_kn_results', $kn_results);
 
-    // DIAG - Diagnostic - Ver 1.6.3
-    // error_log("EXITING crawl_scehedule_event_hook");
-
     // Get the current date and time.
     $date_time_completed = date("Y-m-d H:i:s");
 
@@ -61,6 +57,9 @@ function crawl_scheduled_event() {
     // Update the option with the new status message.
     update_option('chatbot_chatgpt_kn_status', $status_message);
 
+    // DIAG - Diagnostic - Ver 1.6.3
+    // error_log("EXITING knowledge_navigator_scan");
+
 }
-add_action('crawl_scheduled_event_hook', 'crawl_scheduled_event');
+add_action('knowledge_navigator_scan_hook', 'knowledge_navigator_scan');
 

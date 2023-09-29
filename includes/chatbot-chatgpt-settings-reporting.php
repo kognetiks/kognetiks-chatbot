@@ -33,7 +33,7 @@ function chatbot_chatgpt_reporting_period_callback($args) {
     ?>
     <select id="chatbot_chatgpt_reporting_period" name="chatbot_chatgpt_reporting_period">
         <option value="<?php echo esc_attr( 'Daily' ); ?>" <?php selected( $output_choice, 'Daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
-        <option value="<?php echo esc_attr( 'Weekly' ); ?>" <?php selected( $output_choice, 'Weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
+        <!-- <option value="<?php echo esc_attr( 'Weekly' ); ?>" <?php selected( $output_choice, 'Weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option> -->
         <option value="<?php echo esc_attr( 'Monthly' ); ?>" <?php selected( $output_choice, 'Monthly' ); ?>><?php echo esc_html( 'Monthly' ); ?></option>
         <option value="<?php echo esc_attr( 'Yearly' ); ?>" <?php selected( $output_choice, 'Yearly' ); ?>><?php echo esc_html( 'Yearly' ); ?></option>
     </select>
@@ -57,7 +57,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
     imagefill($image, 0, 0, $white);
 
     // Add title
-    $title = "Visitors";
+    $title = "Visitor Interactions";
     $font = 5;
     $title_x = ($width - imagefontwidth($font) * strlen($title)) / 2;
     $title_y = 5;
@@ -70,7 +70,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
     // Offset for the chart
     $offset_x = 25;
     $offset_y = 25;
-    $top_padding = 20;
+    $top_padding = 5;
 
     // Bottom line
     imageline($image, 0, $height - $offset_y, $width, $height - $offset_y, $black);
@@ -79,8 +79,9 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
     $font_size = 2;
 
     // Draw bars
+    $chart_title_height = 30; // adjust this to the height of your chart title
     for ($i = 0; $i < $bar_count; $i++) {
-        $bar_height = (int)(($data[$i] * ($height - $offset_y - $top_padding)) / max($data));
+        $bar_height = (int)(($data[$i] * ($height - $offset_y - $top_padding - $chart_title_height)) / max($data));
         $x1 = $i * $bar_width * 2 + $offset_x;
         $y1 = $height - $bar_height - $offset_y + $top_padding;
         $x2 = ($i * $bar_width * 2) + $bar_width + $offset_x;
@@ -129,6 +130,9 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         return;
     }
 
+    // Retrieve the reporting period
+    $reporting_period = get_option('chatbot_chatgpt_reporting_period');
+
     // Parsing shortcode attributes
     $a = shortcode_atts( array(
         'name' => 'visitorsChart_' . rand(100, 999),
@@ -140,7 +144,23 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
         
-        $results = $wpdb->get_results("SELECT date, count FROM $table_name");
+        // Get the reporting period from the options
+        $reporting_period = get_option('chatbot_chatgpt_reporting_period');
+        
+        // Calculate the start date and group by clause based on the reporting period
+        if($reporting_period === 'Daily') {
+            $start_date = date('Y-m-d', strtotime("-7 days"));
+            $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
+        } elseif($reporting_period === 'Monthly') {
+            $start_date = date('Y-m-01', strtotime("-3 months"));
+            $group_by = "DATE_FORMAT(date, '%Y-%m')";
+        } else {
+            $start_date = date('Y-01-01', strtotime("-3 years"));
+            $group_by = "DATE_FORMAT(date, '%Y')";
+        }
+        
+        // Modify the SQL query to group the results based on the reporting period
+        $results = $wpdb->get_results("SELECT $group_by AS date, SUM(count) AS count FROM $table_name WHERE date >= '$start_date' GROUP BY $group_by");
 
         if(!empty($results)) {
             $labels = [];

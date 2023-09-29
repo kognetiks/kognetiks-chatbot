@@ -16,6 +16,8 @@ die;
 // Test OpenAI Model for any errors - Ver 1.6.3
  function test_chatgpt_api($api_key) {
 
+    // FIXME - ADD AN OPTION TO USE WITHOUT OPENAI API KEY?
+
     // Reset Status and Error
     update_option('chatbot_chatgpt_api_status','API Error Type: Status Unknown');
 
@@ -57,6 +59,8 @@ die;
     }
 
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
+    // DIAG - Log the response body
+    // error_log('response_body: ' . print_r($response_body, true));
 
     // Check for API-specific errors
     //
@@ -66,54 +70,49 @@ die;
         $error_type = isset($response_body['error']['type']) ? $response_body['error']['type'] : 'Unknown';
         $error_message = isset($response_body['error']['message']) ? $response_body['error']['message'] : 'No additional information.';
         $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-        update_option('chatbot_chatgpt_api_status', $updated_status);
-        // DIAG - Log the updated status
-        // error_log('chatbot_chatgpt_api_status: ' . $updated_status);
-        return;
+    } elseif (isset($response_body['choices']) && !empty($response_body['choices'])) {
+        $updated_status = 'Success: Connection to ChatGPT API was successful!';
+    } else {
+        $updated_status = 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 
-    if (isset($response_body['choices']) && !empty($response_body['choices'])) {
-        update_option('chatbot_chatgpt_api_status', 'Success: Connection to ChatGPT API was successful!');
-        
-        // You may need to fetch the updated option to ensure you're logging the new value.
-        $updated_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
-        // DIAG - Log the updated status
-        // error_log('chatbot_chatgpt_api_status: ' . $updated_status);
-        
-        return;
-    } else {
-        update_option('chatbot_chatgpt_api_status', 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.');
-        
-        // You may need to fetch the updated option to ensure you're logging the new value.
-        $updated_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
-        // DIAG - Log the updated status
-        // error_log('chatbot_chatgpt_api_status: ' . $updated_status);
-        
-        return;
-    }
+    update_option('chatbot_chatgpt_api_status', $updated_status);
+    $updated_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
+    // error_log('chatbot_chatgpt_api_status: ' . $updated_status);
 
 }
-
-// Hook into the updated_option action
-add_action('updated_option', 'chatgpt_option_updated', 10, 3);
 
 
 // This function is executed whenever any option is updated
 function chatgpt_option_updated($option_name, $old_value, $new_value) {
+
+    // DIAG - Log Function Call
+    // error_log('chatgpt_option_updated() called');
+
+    // FIXME Retrieve the current value of the chatbot_chatgpt_api_status option
+    // $chatbot_chatgpt_api_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
+    // DIAG - Log the current value of the chatbot_chatgpt_api_status option
+    // error_log('chatbot_chatgpt_api_status: ' . $chatbot_chatgpt_api_status);
+    
     // Check if the option updated is related to your plugin settings
+    // if ($option_name === 'chatgpt_model_choice' || $option_name === 'chatgpt_api_key' || empty($chatbot_chatgpt_api_status)) {
     if ($option_name === 'chatgpt_model_choice' || $option_name === 'chatgpt_api_key') {
-        // Fetch the API key from the options
-        $api_key = get_option('chatgpt_api_key', 'NOT SET');
+                    $api_key = get_option('chatgpt_api_key', 'NOT SET');
 
         // Call your test function
         $test_result = test_chatgpt_api($api_key);
+        // DIAG - Log the test result
+        // error_log('test_result: ' . $test_result);        
 
         // DIAG - Set the option in the admin_notice function uses to display messages
         // error_log('$test_result' . $test_result);
-        // update_option('chatbot_chatgpt_api_status', $test_result);
+        update_option('chatbot_chatgpt_api_status', $test_result);
 
         // I could directly call display_option_value_admin_notice() here, but
         // that's generally not a good practice unless absolutely necessary
         // display_option_value_admin_notice();
     }
 }
+
+// Hook into the updated_option action
+add_action('updated_option', 'chatgpt_option_updated', 10, 3);

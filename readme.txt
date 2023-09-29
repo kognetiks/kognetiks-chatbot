@@ -17,6 +17,8 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experie
 
 🔍 **Meet Knowledge Navigator** – the heart of our ChatGPT plugin. It's like a digital explorer for your website, carefully unearthing your content's essence. This innovative component initiates an in-depth analysis of your site, following every link, and meticulously building an interactive map of your site's architecture. The result? A crystal clear understanding of your content that enables more accurate and contextually relevant responses.
 
+🚀 The latest release of **Knowledge Navigator** now has a deeper understanding of your site extracting additional relevance and offering direct links to site content.
+
 ✨ **How Does It Work?** It employs a method known as TF-IDF (Term Frequency-Inverse Document Frequency) to rank keywords by relevance. This sophisticated measure highlights the unique keywords that define your content, all neatly tucked away in "results.csv" and "results.json" files within the plugin's folder.
 
 🎨 **Personalize with Custom Avatars!** Enhance user engagement with avatars that suit your site's personality. Navigate to the plugin settings, choose your avatar, and enjoy a unique touch of creativity. New screenshots available!
@@ -135,8 +137,8 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 == Changelog ==
 
 = 1.6.3 =
-* Added reporting module
-* Added api status test
+* Updated Knowledge Navigator acquisition of site content
+* Added reporting of chatbot interactions to the Knowledge Navigator
 
 = 1.6.2 =
 * Added cron scheduling for the Knowledge Navigator to refresh the knowledge baes hourly, daily, and weekly, as well as to cancel schedule.

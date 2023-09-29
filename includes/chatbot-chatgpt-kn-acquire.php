@@ -14,12 +14,12 @@ if ( ! defined( 'WPINC' ) )
 die;
 
 global $max_top_words, $chatgpt_diagnostics, $frequencyData, $totalWordCount;
-$max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)); // Default to 25
+$max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 100)); // Default to 100
 $topWords = [];
 $frequencyData = [];
 $totalWordCount = 0;
 
-// TODO Dump Post Data to an log file
+// Output Knowledge Navigator Data to log files for pages, posts and comments - Ver 1.6.3
 function chatbot_chatgpt_kn_acquire() {
 
     global $wpdb;
@@ -49,7 +49,7 @@ function chatbot_chatgpt_kn_acquire() {
     }
 
     // DIAG - Log directory path for debugging
-    error_log("Directory path: " . $results_dir_path);
+    // error_log("Directory path: " . $results_dir_path);
 
     // Prepare log file for posts
     $log_file_posts = $results_dir_path . 'results-posts.log';
@@ -230,30 +230,30 @@ function kn_acquire_just_the_words( $content ) {
     // error_log ("FUNCTION - kn_acquire_just_the_words");
 
     // List of common stop words to be ignored
-    $stopWords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't", 'as', 'at'];
-    $stopWords = array_merge($stopWords, ['b', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by']);
-    $stopWords = array_merge($stopWords, ['c', 'can', "can't", 'cannot', 'could', "couldn't"]);
-    $stopWords = array_merge($stopWords, ['d', 'did', "didn't", 'do', 'does', "doesn't", 'doing', "don't", 'down', 'during']);
-    $stopWords = array_merge($stopWords, ['e', 'each']);
-    $stopWords = array_merge($stopWords, ['f', 'few', 'for', 'from', 'further']);
-    $stopWords = array_merge($stopWords, ['g']);
-    $stopWords = array_merge($stopWords, ['h', 'had', "hadn't", 'has', "hasn't", 'have', "haven't", 'having', 'he', "he'd", "he'll", "he's", 'her', 'here', "here's", 'hers', 'herself', 'him', 'himself', 'his', 'how', "how's"]);
-    $stopWords = array_merge($stopWords, ['i', "i'd", "i'll", "i'm", "i've", 'if', 'in', 'into', 'is', "isn't", 'it', "it's", 'its', 'itself']);
-    $stopWords = array_merge($stopWords, ['j', 'k']);
-    $stopWords = array_merge($stopWords, ['l', "let's"]);
-    $stopWords = array_merge($stopWords, ['m', 'me', 'more', 'most', "mustn't", 'my', 'myself']);
-    $stopWords = array_merge($stopWords, ['n', 'no', 'nor', 'not']);
-    $stopWords = array_merge($stopWords, ['o', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours' ,'ourselves', 'out', 'over', 'own']);
-    $stopWords = array_merge($stopWords, ['p', 'q']);
-    $stopWords = array_merge($stopWords, ['r', 're']);
-    $stopWords = array_merge($stopWords, ['s', 'same', "shan't", 'she', "she'd", "she'll", "she's", 'should', "shouldn't", 'so', 'some', 'such']);
-    $stopWords = array_merge($stopWords, ['t', 'than', 'that', "that's", 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', "there's", 'these', 'they', "they'd", "they'll", "they're", "they've", 'this', 'those', 'through', 'to', 'too']);
-    $stopWords = array_merge($stopWords, ['u', 'under', 'until', 'up']);
-    $stopWords = array_merge($stopWords, ['v', 'very']);
-    $stopWords = array_merge($stopWords, ['w', 'was', "wasn't", 'we', "we'd", "we'll", "we're", "we've", 'were', "weren't", 'what', "what's", 'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why', "why's", 'with', "won't", 'would', "wouldn't"]);
-    $stopWords = array_merge($stopWords, ['x']);
-    $stopWords = array_merge($stopWords, ['y', 'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves']);
-    $stopWords = array_merge($stopWords, ['z']);
+    $stopWords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at"];
+    $stopWords = array_merge($stopWords, ["b", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by"]);
+    $stopWords = array_merge($stopWords, ["c", "can", "can't", "cannot", "could", "couldn't"]);
+    $stopWords = array_merge($stopWords, ["d", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during"]);
+    $stopWords = array_merge($stopWords, ["e", "each"]);
+    $stopWords = array_merge($stopWords, ["f", "few", "for", "from", "further"]);
+    $stopWords = array_merge($stopWords, ["g"]);
+    $stopWords = array_merge($stopWords, ["h", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's"]);
+    $stopWords = array_merge($stopWords, ["i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself"]);
+    $stopWords = array_merge($stopWords, ["j", "k"]);
+    $stopWords = array_merge($stopWords, ["l", "let's"]);
+    $stopWords = array_merge($stopWords, ["m", "me", "more", "most", "mustn't", "my", "myself"]);
+    $stopWords = array_merge($stopWords, ["n", "no", "nor", "not"]);
+    $stopWords = array_merge($stopWords, ["o", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours" ,"ourselves", "out", "over", "own"]);
+    $stopWords = array_merge($stopWords, ["p", "q"]);
+    $stopWords = array_merge($stopWords, ["r", "re"]);
+    $stopWords = array_merge($stopWords, ["s", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such"]);
+    $stopWords = array_merge($stopWords, ["t", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too"]);
+    $stopWords = array_merge($stopWords, ["u", "under", "until", "up"]);
+    $stopWords = array_merge($stopWords, ["v", "very"]);
+    $stopWords = array_merge($stopWords, ["w", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't"]);
+    $stopWords = array_merge($stopWords, ["x"]);
+    $stopWords = array_merge($stopWords, ["y", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"]);
+    $stopWords = array_merge($stopWords, ["z"]);
      
     $dom = new DOMDocument();
     @$dom->loadHTML($content);

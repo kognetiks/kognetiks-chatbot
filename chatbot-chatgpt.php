@@ -63,6 +63,31 @@ $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
 // Context History - Ver 1.6.1
 $context_history = [];
 
+// Declare the $learningMessages array as global
+global $learningMessages;
+$learningMessages = [
+    " Also know that I'm still learning, but more information could be found ",
+    " Please be aware that I'm in the process of learning, but more information could be found ",
+    " Just a heads up, I'm continuously improving, in the meantime check ",
+    " Keep in mind that I'm still learning the ropes, but don't hesitate to check out ",
+    " I'm in a state of constant learning, for now check out ",
+    " Remember, I'm on a learning journey, so you can revisit anytime you'd like. However, you might try ",
+    " I'm in the learning phase, so your patience is appreciated. However you might find help "
+];
+
+// Declare the $errorResponses array as global
+global $errorResponses;
+$errorResponses = [
+    " It seems there may have been an issue with the OpenAI API. Let's try again later.",
+    " Unfortunately, we might have encountered a problem with the OpenAI API. Please give it another shot in a little while.",
+    " I apologize, but it appears there's a hiccup with the OpenAI API at the moment. We can attempt this again later.",
+    " The OpenAI API seems to be experiencing difficulties right now. We can come back to this when it's resolved.",
+    " I'm sorry, but it seems like there's an error from the OpenAI API's side. Please retry in a bit.",
+    " There might be a temporary issue with the OpenAI API. Please try your request again in a little while.",
+    " The OpenAI API encountered an error, but don't worry, it happens. Let's give it another shot later.",
+    " It looks like there could be a technical problem with the OpenAI API. Feel free to try again in a bit to see if things are working smoothly."
+];
+
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
     // Ensure the Dashicons font is properly enqueued - Ver 1.1.0
@@ -170,10 +195,11 @@ function chatbot_chatgpt_send_message() {
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
+    // FIXME - ADD THIS BACK IN AFTER DECIDING WHAT TO DO ABOUT MISSING OR BAD API KEYS
     // Check API key and message
-    if (!$api_key || !$message) {
-        wp_send_json_error('Invalid API key or message');
-    }
+    // if (!$api_key || !$message) {
+    //     wp_send_json_error('Invalid API key or message');
+    // }
 
     // Send message to ChatGPT API
     $response = chatbot_chatgpt_call_api($api_key, $message);
@@ -193,13 +219,23 @@ add_action('admin_footer', 'chatbot_chatgpt_admin_footer');
 // Crawler aka Knowledge Navigator - Ver 1.6.1
 function chatbot_chatgpt_kn_status_activation() {
     add_option('chatbot_chatgpt_kn_status', 'Never Run');
+    // clear any old scheduled runs
+    if (wp_next_scheduled('crawl_scheduled_event_hook')) {
+        // error_log('BEFORE wp_clear_scheduled_hook -  crawl_scheduled_event_hook');
+        wp_clear_scheduled_hook('crawl_scheduled_event_hook');
+    }
+    // clear the 'knowledge_navigator_scan_hook' hook on plugin activation - Ver 1.6.3
+    if (wp_next_scheduled('knowledge_navigator_scan_hook')) {
+        // error_log('BEFORE wp_clear_scheduled_hook -  knowledge_navigator_scan_hook');
+        wp_clear_scheduled_hook('knowledge_navigator_scan_hookk'); // Clear scheduled runs
+    }
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
 
 // Clean Up in Aisle 4
 function chatbot_chatgpt_kn_status_deactivation() {
     delete_option('chatbot_chatgpt_kn_status');
-    wp_clear_scheduled_hook('crawl_scheduled_event_hook'); 
+    wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); 
 }
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
@@ -256,6 +292,8 @@ function concatenateHistory($transient_name) {
 function chatbot_chatgpt_call_api($api_key, $message) {
     // Diagnostics - Ver 1.6.1
     global $chatgpt_diagnostics;
+    global $learningMessages;
+    global $errorResponses;
 
     // Reporting - Ver 1.6.3
     global $wpdb;
@@ -282,7 +320,16 @@ function chatbot_chatgpt_call_api($api_key, $message) {
      $chatgpt_last_response = concatenateHistory('context_history');
     // Diagnostics - Ver 1.6.1
     // error_log('context_history' . print_r($chatgpt_last_response, true));
+    
+    // IDEA Strip any href links and text from the $chatgpt_last_response
+    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
 
+    // IDEA Strip any $learningMessages from the $chatgpt_last_response
+    $chatgpt_last_response = str_replace($learningMessages, '', $chatgpt_last_response);
+
+    // IDEA Strip any $errorResponses from the $chatgpt_last_response
+    $chatgpt_last_response = str_replace($errorResponses, '', $chatgpt_last_response);
+    
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
 
@@ -361,39 +408,23 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     if ($highest_score > 0) {
         // Return the URL with the highest score
         $match_found = true;
-
-        // Array of alternative learning status messages
-        $learningMessages = [
-            " Also know that I'm still learning, but more information could be found ",
-            " Please be aware that I'm in the process of learning, but more information could be found ",
-            " Just a heads up, I'm continuously improving, in the meantime check ",
-            " Keep in mind that I'm still learning the ropes, but don't hesitate to check out ",
-            " I'm in a state of constant learning, for now check out ",
-            " Remember, I'm on a learning journey, so you can revisit anytime you'd like. However, you might try ",
-            " I'm in the learning phase, so your patience is appreciated. However you might find help "
-        ];
-
         $response_body['choices'][0]['message']['urls'] = $highest_score_url;
+        if (!isset($response_body['choices'][0]['message']['content'])) {
+            $response_body['choices'][0]['message']['content'] = '';
+        }
         $response_body['choices'][0]['message']['content'] .= $learningMessages[array_rand($learningMessages)];
         $response_body['choices'][0]['message']['content'] .= "[URL: " . $highest_score_url . "]";
     } else {
         // If no match is found, return a generic response
         $match_found = false;
-
-        // Array of error response options
-        $errorResponses = [
-            "It seems there was an issue with the OpenAI API. Let's try again later.",
-            "Unfortunately, we encountered a problem with the OpenAI API. Please give it another shot in a little while.",
-            "I apologize, but it appears there's a hiccup with the OpenAI API at the moment. We can attempt this again later.",
-            "The OpenAI API seems to be experiencing difficulties right now. We can come back to this when it's resolved.",
-            "I'm sorry, but it seems like there's an error from the OpenAI API's side. Please retry in a bit.",
-            "There might be a temporary issue with the OpenAI API. Please try your request again in a little while.",
-            "The OpenAI API encountered an error, but don't worry, it happens. Let's give it another shot later.",
-            "It looks like there's a technical problem with the OpenAI API. Feel free to try again when it's working smoothly."
-        ];
-
+        if (!isset($response_body['choices'][0]['message']['content'])) {
+            $response_body['choices'][0]['message']['content'] = '';
+        }
         $response_body['choices'][0]['message']['content'] .= $errorResponses[array_rand($errorResponses)];
     }
+
+    // Find bolded text in $response_body['choices'][0]['message']['content'] and replace with <b> tags - Ver 1.6.3
+    $response_body['choices'][0]['message']['content'] = preg_replace('/\*\*(.*?)\*\*/', '<b>$1</b>', $response_body['choices'][0]['message']['content']);
 
     // DIAG - error_log for $score, $match_found, $highest_score, $highest_score_url - Diagnostic - Ver 1.6.3
     // error_log('$match_found: ' . print_r($match_found, true));
@@ -415,7 +446,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         //
         // IDEA USE ALTERNATE MODEL TO GENERATE A RESPONSE HERE
         //
-        return 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';
+        // return 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';
+
+        // IDEA Return one of the $errorResponses - Ver 1.6.3
+        // IDEA Belt and Suspenders - We shouldn't be here unless something went really wrong up above this point
+        return $errorResponses[array_rand($errorResponses)];
     }
 }
 
