@@ -32,6 +32,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Declare Globals here - Ver 1.6.3
 global $wpdb;  // Declare the global $wpdb object
 
+// Include necessary files
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
+
 // Include necessary files - Knowledge Navigator
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire.php'; // Knowledge Navigator Acquistion - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-analysis.php'; // Knowlege Navigator Analysis- Ver 1.6.2
@@ -62,31 +65,6 @@ $chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
 
 // Context History - Ver 1.6.1
 $context_history = [];
-
-// Declare the $learningMessages array as global
-global $learningMessages;
-$learningMessages = [
-    " Also know that I'm still learning, but more information could be found ",
-    " Please be aware that I'm in the process of learning, but more information could be found ",
-    " Just a heads up, I'm continuously improving, in the meantime check ",
-    " Keep in mind that I'm still learning the ropes, but don't hesitate to check out ",
-    " I'm in a state of constant learning, for now check out ",
-    " Remember, I'm on a learning journey, so you can revisit anytime you'd like. However, you might try ",
-    " I'm in the learning phase, so your patience is appreciated. However you might find help "
-];
-
-// Declare the $errorResponses array as global
-global $errorResponses;
-$errorResponses = [
-    " It seems there may have been an issue with the OpenAI API. Let's try again later.",
-    " Unfortunately, we might have encountered a problem with the OpenAI API. Please give it another shot in a little while.",
-    " I apologize, but it appears there's a hiccup with the OpenAI API at the moment. We can attempt this again later.",
-    " The OpenAI API seems to be experiencing difficulties right now. We can come back to this when it's resolved.",
-    " I'm sorry, but it seems like there's an error from the OpenAI API's side. Please retry in a bit.",
-    " There might be a temporary issue with the OpenAI API. Please try your request again in a little while.",
-    " The OpenAI API encountered an error, but don't worry, it happens. Let's give it another shot later.",
-    " It looks like there could be a technical problem with the OpenAI API. Feel free to try again in a bit to see if things are working smoothly."
-];
 
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {

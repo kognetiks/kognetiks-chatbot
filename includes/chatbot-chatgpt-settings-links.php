@@ -24,9 +24,14 @@ function chatbot_chatgpt_plugin_action_links($links) {
 add_action('wp_ajax_chatbot_chatgpt_create_nonce', 'chatbot_chatgpt_create_nonce');
 
 function chatbot_chatgpt_create_nonce() {
-    $nonce = wp_create_nonce('deactivate-plugin_' . $_POST['plugin_file']);
-    echo $nonce;
-    wp_die();
+    // $nonce = wp_create_nonce('deactivate-plugin_' . $_POST['plugin_file']);
+    // echo $nonce;
+    // wp_die();
+    // Revised to address cross-site scripting vulnerability - Ver 1.6.5
+    function chatbot_chatgpt_create_nonce() {
+        $nonce = wp_create_nonce('deactivate-plugin_' . $_POST['plugin_file']);
+        wp_send_json($nonce);
+    }
 }
 
 

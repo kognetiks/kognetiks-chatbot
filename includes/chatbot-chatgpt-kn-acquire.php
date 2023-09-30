@@ -222,39 +222,14 @@ add_action( 'chatbot_chatgpt_kn_acquire', 'chatbot_chatgpt_kn_acquire' );
 
 function kn_acquire_just_the_words( $content ) {
 
+    global $stopWords;
     global $max_top_words;
     global $topWords;
     global $totalWordCount;
     
     // DIAG - Diagnostic - Ver 1.6.3
     // error_log ("FUNCTION - kn_acquire_just_the_words");
-
-    // List of common stop words to be ignored
-    $stopWords = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at"];
-    $stopWords = array_merge($stopWords, ["b", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by"]);
-    $stopWords = array_merge($stopWords, ["c", "can", "can't", "cannot", "could", "couldn't"]);
-    $stopWords = array_merge($stopWords, ["d", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during"]);
-    $stopWords = array_merge($stopWords, ["e", "each"]);
-    $stopWords = array_merge($stopWords, ["f", "few", "for", "from", "further"]);
-    $stopWords = array_merge($stopWords, ["g"]);
-    $stopWords = array_merge($stopWords, ["h", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's"]);
-    $stopWords = array_merge($stopWords, ["i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself"]);
-    $stopWords = array_merge($stopWords, ["j", "k"]);
-    $stopWords = array_merge($stopWords, ["l", "let's"]);
-    $stopWords = array_merge($stopWords, ["m", "me", "more", "most", "mustn't", "my", "myself"]);
-    $stopWords = array_merge($stopWords, ["n", "no", "nor", "not"]);
-    $stopWords = array_merge($stopWords, ["o", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours" ,"ourselves", "out", "over", "own"]);
-    $stopWords = array_merge($stopWords, ["p", "q"]);
-    $stopWords = array_merge($stopWords, ["r", "re"]);
-    $stopWords = array_merge($stopWords, ["s", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such"]);
-    $stopWords = array_merge($stopWords, ["t", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too"]);
-    $stopWords = array_merge($stopWords, ["u", "under", "until", "up"]);
-    $stopWords = array_merge($stopWords, ["v", "very"]);
-    $stopWords = array_merge($stopWords, ["w", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't"]);
-    $stopWords = array_merge($stopWords, ["x"]);
-    $stopWords = array_merge($stopWords, ["y", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"]);
-    $stopWords = array_merge($stopWords, ["z"]);
-     
+  
     $dom = new DOMDocument();
     @$dom->loadHTML($content);
 
@@ -265,18 +240,44 @@ function kn_acquire_just_the_words( $content ) {
     foreach ($dom->getElementsByTagName('style') as $style) {
         $style->parentNode->removeChild($style);
     }
-    
-    // Extract text content only from specific tags
+
+    // Set $textContent to an empty string
     $textContent = '';
+
+    // Extract text content from specific tags
     foreach (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'a'] as $tagName) {
         $elements = $dom->getElementsByTagName($tagName);
         foreach ($elements as $element) {
-            $textContent .= ' ' . $element->textContent;
+            $textContent .= $element->textContent . ' ';
         }
     }
-    
+    // error_log("Text Content - After tags extraction: \n" . $textContent);
+
+    // Handle New Line and Carriage Return characters
+    // Belt
+    $textContent = preg_replace('/\r?\n/', ' ', $textContent);
+    // Suspenders
+    $textContent = preg_replace('/\r?\n/u', ' ', $textContent);
+    // And Braces
+    $textContent = str_replace("\\r\\n", ' ', $textContent);
+    error_log("\nText Content - After handling New Line and Carriage Return characters: \n" . $textContent);
+
+    // Remove Comments
+    $textContent = preg_replace('/<!--(.*?)-->/', ' ', $textContent);
+    // error_log("Text Content - After removing comments: \n" . $textContent);
+
+
+    // Remove URLs
+    $textContent = preg_replace('!https?://\S+!', ' ', $textContent);
+    // error_log("Text Content - After removing URLs: \n" . $textContent);
+
+    // Replace new line characters with a space
+    $textContent = str_replace("\n", ' ', $textContent);
+    // error_log("Text Content - After replacing new line characters: \n" . $textContent);
+        
     // Replace all non-word characters with a space
     $contentWithoutTags = preg_replace('/\W+/', ' ', $textContent);
+    // error_log("Text Content - After replacing all non-word characters with a space: \n" . $textContent);
     
     // Get words and convert to lower case
     $words = str_word_count(strtolower($contentWithoutTags), 1);    

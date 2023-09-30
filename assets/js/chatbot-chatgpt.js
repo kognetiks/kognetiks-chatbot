@@ -46,12 +46,23 @@ jQuery(document).ready(function ($) {
     
         // Get the stored greeting message. If it's not set, default to a custom value.
         var avatarGreeting = localStorage.getItem('chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
+
+        // Revised to address cross-site scripting - Ver 1.6.4
+        // // Create a bubble with the greeting message
+        // var bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
     
-        // Create a bubble with the greeting message
-        var bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
-    
+        // // Append the avatar and the bubble to the button and apply the class for the avatar icon
+        // chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
+
+        // Sanitize the avatarGreeting variable
+        var sanitizedGreeting = $('<div>').text(avatarGreeting).html();
+
+        // Create a bubble with the sanitized greeting message
+        var bubble = $('<div>').html(sanitizedGreeting).addClass('chatbot-bubble');
+
         // Append the avatar and the bubble to the button and apply the class for the avatar icon
         chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
+
     } else {
         // If no avatar is selected or the selected avatar is 'icon-000.png', use the dashicon
         // Remove the avatar-icon class (if it was previously added) and add the dashicon class
@@ -246,8 +257,17 @@ jQuery(document).ready(function ($) {
                     if (botResponse.includes('[URL: ')) {
                         // DIAG - Diagnostics - Ver 1.6.3
                         // console.log("URL found in bot response");
+                        // let urlRegex = /\[URL: (.*?)\]/g;
+                        // let link = botResponse.match(urlRegex)[0].replace('[URL: ', '').replace(']', '');
+
+                        let link = '';
                         let urlRegex = /\[URL: (.*?)\]/g;
-                        let link = botResponse.match(urlRegex)[0].replace('[URL: ', '').replace(']', '');
+                        let match = botResponse.match(urlRegex);
+                        if (match && match.length > 0) {
+                            link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
+                            console.log(link);
+                        }
+
                         let linkElement = document.createElement('a');
                         linkElement.href = link;
                         linkElement.textContent = 'here';
