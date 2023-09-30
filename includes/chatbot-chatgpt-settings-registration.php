@@ -9,7 +9,11 @@
  * @package chatbot-chatgpt
  */
 
- // Register settings
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
+// Register settings
 function chatbot_chatgpt_settings_init() {
 
     // API/Model settings tab - Ver 1.3.0
@@ -221,7 +225,6 @@ function chatbot_chatgpt_settings_init() {
 
     // Knowledge Navigator settings tab - Ver 1.6.1
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_knowledge_navigator');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_depth');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_top_words');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_results');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_conversation_context');
@@ -234,14 +237,6 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatbot_chatgpt_kn_maximum_depth',
-        'Maximum Depth',
-        'chatbot_chatgpt_kn_maximum_depth_callback',
-        'chatbot_chatgpt_knowledge_navigator',
-        'chatbot_chatgpt_knowledge_navigator_section'
-    );
-
-    add_settings_field(
         'chatbot_chatgpt_kn_maximum_top_words',
         'Maximum Top Words',
         'chatbot_chatgpt_kn_maximum_top_words_callback',
@@ -251,7 +246,7 @@ function chatbot_chatgpt_settings_init() {
 
     add_settings_field(
         'chatbot_chatgpt_knowledge_navigator',
-        'Run Knowledge Navigator',
+        'Run Schedule',
         'chatbot_chatgpt_knowledge_navigator_callback',
         'chatbot_chatgpt_knowledge_navigator',
         'chatbot_chatgpt_knowledge_navigator_section'
@@ -273,6 +268,24 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_kn_analysis_output_callback',
         'chatbot_chatgpt_kn_analysis',
         'chatbot_chatgpt_kn_analysis_section'
+    );
+
+    // Reporting settings tab - Ver 1.6.1
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_reporting_period');
+
+    add_settings_section(
+        'chatbot_chatgpt_reporting_section',
+        'Reporting',
+        'chatbot_chatgpt_reporting_section_callback',
+        'chatbot_chatgpt_reporting'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_reporting_period',
+        'Reporting Period',
+        'chatbot_chatgpt_reporting_period_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_section'
     );
 
 }

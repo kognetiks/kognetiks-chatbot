@@ -8,6 +8,10 @@
  * @package chatbot-chatgpt
  */
 
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+	die;
+
 function chatbot_chatgpt_shortcode() {
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
@@ -34,4 +38,5 @@ function chatbot_chatgpt_shortcode() {
     <?php
     return ob_get_clean();
 }
+
 add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');

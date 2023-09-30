@@ -9,6 +9,9 @@
  * @package chatbot-chatgpt
  */
 
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
 
 // Add link to chatgtp options
 function chatbot_chatgpt_plugin_action_links($links) {
@@ -47,10 +50,12 @@ function chatbot_chatgpt_admin_footer() {
     ?>
     <script type="text/javascript">
         jQuery(document).ready(function($) {
+            // DIAG - Log the document ready status
             // console.log("Document ready");
             var modal;
 
             $('a.chatbot-settings').click(function(e) {
+                // DIAG - Log the settings link clicked status
                 // console.log("Settings link clicked");
             });
 
@@ -130,12 +135,14 @@ function chatbot_chatgpt_admin_footer() {
             // Handle click on the deactivation link
             $('a[href*="plugins.php?action=deactivate&plugin=chatbot-chatgpt"]').click(function(e) {
                 e.preventDefault();
+                // DIAG - Log the deactivation link clicked status
                 // console.log("Deactivation link clicked");
                 modal.dialog('open');
             });
 
             // Handle click on deactivation button
             $(document).on('click', '#submit-deactivation', function() {
+                // DIAG - Log the submit deactivation button clicked status
                 // console.log("Submit and Deactivate clicked");
                 data.reason = $('input[name="reason"]:checked').val();
                 data.other_text = $('#other-text').val();
@@ -153,7 +160,8 @@ function chatbot_chatgpt_admin_footer() {
                 });
               });
 
-            $(document).on('click', '#just-deactivate', function() {    
+            $(document).on('click', '#just-deactivate', function() { 
+                // DIAG - Log the just deactivation button clicked status   
                 // console.log("Just Deactivate clicked");
 
                 $.post(ajaxurl, {
@@ -168,6 +176,7 @@ function chatbot_chatgpt_admin_footer() {
 
             // Handle click on cancel deactivation button
             $(document).on('click', '#cancel-deactivation', function() {
+                // DIAG - Log the cancel deactivation button clicked status
                 // console.log("Cancel Deactivation clicked");
                 // Redirect to the settings page for the plugin after deactivation
                 location.href = 'plugins.php';
@@ -178,7 +187,7 @@ function chatbot_chatgpt_admin_footer() {
 }
 
 function chatbot_chatgpt_deactivation_feedback() {
-    // Process the feedback data
+    // DIAG - Process the feedback data
     // error_log("Email Ready");
     $reason = sanitize_text_field($_POST['reason']);
     $other_text = sanitize_text_field($_POST['other_text']);
@@ -210,13 +219,17 @@ function chatbot_chatgpt_deactivation_feedback() {
 
     // Send the email
     if (wp_mail($to, $subject, strip_tags($body), $headers)) {
+        // DIAG - Log the email sent status
         // error_log("Email Sent Successfully");
     } else {
+        // DIAG - Log the email failed status
         // error_log("Email Failed to Send");
     }
 
+    // DIAG - Log the email body
     // error_log("Email Done");
 
     // wp_die();
     die();
+
   }

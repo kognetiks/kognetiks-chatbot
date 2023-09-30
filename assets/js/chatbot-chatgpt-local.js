@@ -24,9 +24,11 @@ jQuery(document).ready(function ($) {
     
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
+                // DIAG - Log the key and value
                 // console.log('Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
+                // DIAG - Log the key and value
                 // console.log(key + ' is already set in localStorage');
             }
         });
@@ -197,6 +199,7 @@ jQuery(document).ready(function ($) {
             });
         }
 
+        // DIAG - Log exiting the function
         // console.log('EXITING chatbot_chatgpt_localize');
         
     }

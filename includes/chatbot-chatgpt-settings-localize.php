@@ -9,6 +9,10 @@
  * @package chatbot-chatgpt
  */
 
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
 function chatbot_chatgpt_localize(){
 
     $defaults = array(
@@ -61,13 +65,15 @@ function chatbot_chatgpt_localize(){
 
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
+                // DIAG - Log key and value
                 // console.log('Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
+                // DIAG - Log key and value
                 // console.log(key + ' is already set in localStorage');
             }
         });
     });
     </script>";
 
- }
+}

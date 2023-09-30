@@ -9,7 +9,11 @@
  * @package chatbot-chatgpt
  */
 
- // API/Model settings section callback - Ver 1.3.0
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) )
+die;
+
+// API/Model settings section callback - Ver 1.3.0
 function chatbot_chatgpt_api_model_section_callback($args) {
     ?>
     <p>Configure settings for the Chatbot ChatGPT plugin by adding your API key and selection the GPT model of your choice.</p>
@@ -76,6 +80,3 @@ function chatbot_chatgpt_conversation_context_callback($args) {
     <textarea id='chatbot_chatgpt_conversation_context' name='chatbot_chatgpt_conversation_context' rows='5' cols='50' maxlength='2500'><?php echo esc_html(stripslashes($chatbot_chatgpt_conversation_context)); ?></textarea>
     <?php
 }
-
-
-

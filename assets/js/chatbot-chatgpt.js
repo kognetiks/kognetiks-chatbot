@@ -14,10 +14,10 @@ jQuery(document).ready(function ($) {
         chatGptChatBot.removeClass('wide');
     }
 
-    // Diagnostics = Ver 1.4.2
-    if (chatbotSettings.chatgpt_diagnostics === 'On') {
-        // console.log('FUNCTION: chatbot-chatgpt.js');
-    }
+    // DIAG - Diagnostics = Ver 1.4.2
+    // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+    //     console.log('FUNCTION: chatbot-chatgpt.js');
+    // }
 
     var chatGptOpenButton = $('#chatgpt-open-btn');
     // Use 'open' for an open chatbot or 'closed' for a closed chatbot - Ver 1.1.0
@@ -85,7 +85,7 @@ jQuery(document).ready(function ($) {
         if (isFirstTime) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
 
-            // Logging for Diagnostics - Ver 1.4.2
+            // DIAG - Logging for Diagnostics - Ver 1.4.2
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at isFirstTime');
             // }
@@ -112,7 +112,7 @@ jQuery(document).ready(function ($) {
             
             initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
-            // Logging for Diagnostics - Ver 1.4.2
+            // DIAG - Logging for Diagnostics - Ver 1.4.2
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at else');
             // }
@@ -123,8 +123,12 @@ jQuery(document).ready(function ($) {
             }
 
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
-            localStorage.setItem('chatgptChatbotOpened', 'true')
+            localStorage.setItem('chatgptChatbotOpened', 'true');
+
         }
+
+        return;
+
     }
 
 
@@ -142,8 +146,10 @@ jQuery(document).ready(function ($) {
     chatGptOpenButton.on('click', toggleChatbot);
 
     function appendMessage(message, sender, cssClass) {
+
         var messageElement = $('<div></div>').addClass('chat-message');
-        var textElement = $('<span></span>').text(message);
+        // Use HTML for the so that links are clickable - Ver 1.6.3
+        var textElement = $('<span></span>').html(message);
 
         // Add initial greetings if first time
         if (cssClass) {
@@ -222,9 +228,12 @@ jQuery(document).ready(function ($) {
                     // Revision to how disclaimers are handled - Ver 1.5.0
                     if (localStorage.getItem('chatgpt_disclaimer_setting') === 'No') {
                         const prefixes = [
+                            "As an AI, ",
                             "As an AI language model, ",
                             "I am an AI language model and ",
-                            "As an artificial intelligence, "
+                            "As an artificial intelligence, ",
+                            "As an AI developed by OpenAI, ",
+                            "As an artificial intelligence developed by OpenAI, "
                         ];
                         for (let prefix of prefixes) {
                             if (botResponse.startsWith(prefix)) {
@@ -233,6 +242,27 @@ jQuery(document).ready(function ($) {
                             }
                         }
                     }
+                    // IDEA Check for a URL
+                    if (botResponse.includes('[URL: ')) {
+                        // DIAG - Diagnostics - Ver 1.6.3
+                        // console.log("URL found in bot response");
+                        let urlRegex = /\[URL: (.*?)\]/g;
+                        let link = botResponse.match(urlRegex)[0].replace('[URL: ', '').replace(']', '');
+                        let linkElement = document.createElement('a');
+                        linkElement.href = link;
+                        linkElement.textContent = 'here';
+                        let text = botResponse.replace(urlRegex, '');
+                        let textElement = document.createElement('span');
+                        textElement.textContent = text;
+                        botResponse = document.createElement('div');
+                        botResponse.appendChild(textElement);
+                        botResponse.appendChild(linkElement);
+                        botResponse = botResponse.outerHTML;
+                    }
+
+                    // IDEA Check for double asterisks suggesting a "bold" response
+                    // TODO Add a class to the bot-text span to make the text bold
+
                     // Return the response
                     appendMessage(botResponse, 'bot');
                 } else {
@@ -280,7 +310,7 @@ jQuery(document).ready(function ($) {
 
         // Nuclear option to clear session conversation - Ver 1.5.0
         // Do not use unless alsolutely needed
-        // TODO Comment this code out
+        // DIAG - Diagnostics - Ver 1.5.0
         // nuclearOption = 'Off';
         // if (nuclearOption === 'On') {
         //     console.log('***** NUCLEAR OPTION IS ON ***** ');
@@ -289,7 +319,7 @@ jQuery(document).ready(function ($) {
         //     sessionStorage.removeItem('chatgpt_last_response');
         // }
 
-        // Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - BEFORE DECISION');
         // }
@@ -308,7 +338,7 @@ jQuery(document).ready(function ($) {
             }
         };
 
-        // Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - AFTER DECISION');
         // }
@@ -320,7 +350,7 @@ jQuery(document).ready(function ($) {
         } else {
             chatGptChatBot.show();
             chatGptOpenButton.hide();
-            // Load the conversation if the chatbot is open n on page load
+            // Load the conversation if the chatbot is open on page load
             loadConversation();
             scrollToBottom();
         }
@@ -329,6 +359,7 @@ jQuery(document).ready(function ($) {
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
         setTimeout(() => {
+            // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log("FUNCTION: Scrolling to bottom");
             // }
@@ -341,12 +372,13 @@ jQuery(document).ready(function ($) {
         var storedConversation = sessionStorage.getItem('chatgpt_conversation');
         localStorage.setItem('chatgptStartStatusNewVisitor', 'Closed');
   
-        // Diagnostics - Ver 1.5.0
+        // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadConversation');
         // }
 
         if (storedConversation) {
+            // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: loadConversation - IN THE IF STATEMENT');
             // }
@@ -359,6 +391,7 @@ jQuery(document).ready(function ($) {
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
         } else {
+            // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: loadConversation - IN THE ELSE STATEMENT');
             // }
