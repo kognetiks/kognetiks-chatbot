@@ -241,7 +241,7 @@ function kn_acquire_just_the_words( $content ) {
         $style->parentNode->removeChild($style);
     }
 
-    // Set $textContent to an empty string
+    // Updated sequence of processing to remove extraneous contents bofore TF-IDF - Ver 1.6.5
     $textContent = '';
 
     // Extract text content from specific tags
@@ -251,7 +251,6 @@ function kn_acquire_just_the_words( $content ) {
             $textContent .= $element->textContent . ' ';
         }
     }
-    // error_log("Text Content - After tags extraction: \n" . $textContent);
 
     // Handle New Line and Carriage Return characters
     // Belt
@@ -260,24 +259,18 @@ function kn_acquire_just_the_words( $content ) {
     $textContent = preg_replace('/\r?\n/u', ' ', $textContent);
     // And Braces
     $textContent = str_replace("\\r\\n", ' ', $textContent);
-    error_log("\nText Content - After handling New Line and Carriage Return characters: \n" . $textContent);
 
     // Remove Comments
     $textContent = preg_replace('/<!--(.*?)-->/', ' ', $textContent);
-    // error_log("Text Content - After removing comments: \n" . $textContent);
-
 
     // Remove URLs
     $textContent = preg_replace('!https?://\S+!', ' ', $textContent);
-    // error_log("Text Content - After removing URLs: \n" . $textContent);
 
     // Replace new line characters with a space
     $textContent = str_replace("\n", ' ', $textContent);
-    // error_log("Text Content - After replacing new line characters: \n" . $textContent);
         
     // Replace all non-word characters with a space
     $contentWithoutTags = preg_replace('/\W+/', ' ', $textContent);
-    // error_log("Text Content - After replacing all non-word characters with a space: \n" . $textContent);
     
     // Get words and convert to lower case
     $words = str_word_count(strtolower($contentWithoutTags), 1);    
