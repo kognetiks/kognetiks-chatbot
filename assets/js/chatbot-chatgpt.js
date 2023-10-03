@@ -15,7 +15,7 @@ jQuery(document).ready(function ($) {
     }
 
     // DIAG - Diagnostics = Ver 1.4.2
-    // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+    // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
     //     console.log('FUNCTION: chatbot-chatgpt.js');
     // }
 
@@ -97,7 +97,7 @@ jQuery(document).ready(function ($) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
 
             // DIAG - Logging for Diagnostics - Ver 1.4.2
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at isFirstTime');
             // }
 
@@ -124,7 +124,7 @@ jQuery(document).ready(function ($) {
             initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
             // DIAG - Logging for Diagnostics - Ver 1.4.2
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at else');
             // }
 
@@ -340,7 +340,7 @@ jQuery(document).ready(function ($) {
         // }
 
         // DIAG - Diagnostics - Ver 1.5.0
-        // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+        // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - BEFORE DECISION');
         // }
 
@@ -359,7 +359,7 @@ jQuery(document).ready(function ($) {
         };
 
         // DIAG - Diagnostics - Ver 1.5.0
-        // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+        // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - AFTER DECISION');
         // }
         
@@ -380,7 +380,7 @@ jQuery(document).ready(function ($) {
     function scrollToBottom() {
         setTimeout(() => {
             // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log("FUNCTION: Scrolling to bottom");
             // }
             conversation.scrollTop(conversation[0].scrollHeight);
@@ -393,13 +393,13 @@ jQuery(document).ready(function ($) {
         localStorage.setItem('chatgptStartStatusNewVisitor', 'Closed');
   
         // DIAG - Diagnostics - Ver 1.5.0
-        // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+        // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadConversation');
         // }
 
         if (storedConversation) {
             // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: loadConversation - IN THE IF STATEMENT');
             // }
 
@@ -412,7 +412,7 @@ jQuery(document).ready(function ($) {
             setTimeout(scrollToBottom, 0);
         } else {
             // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: loadConversation - IN THE ELSE STATEMENT');
             // }
             initializeChatbot();

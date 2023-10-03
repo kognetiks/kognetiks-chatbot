@@ -24,7 +24,7 @@ function chatbot_chatgpt_localize(){
         'chatgpt_disclaimer_setting' => 'No',
         'chatgpt_max_tokens_setting' => '150',
         'chatgpt_width_setting' => 'Narrow',
-        'chatgpt_diagnostics' => 'Off',
+        'chatbot_chatgpt_diagnostics' => 'Off',
         'chatgpt_avatar_icon_setting' => 'icon-001.png',
         'chatgpt_avatar_icon_url_setting' => '',
         'chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
@@ -44,7 +44,7 @@ function chatbot_chatgpt_localize(){
         'chatgpt_disclaimer_setting',
         'chatgpt_max_tokens_setting',
         'chatgpt_width_setting',
-        'chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics',
         // Avatar Options - Ver 1.5.0
         'chatgpt_avatar_icon_setting',
         'chatgpt_avatar_icon_url_setting',

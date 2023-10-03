@@ -111,7 +111,7 @@ function chatbot_chatgpt_settings_page_html() {
                         if(chatgptMaxTokensSettingInput) localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
                         if(chatgptWidthSettingInput) localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.value);
                         // New options for diagnostics on/off - Ver 1.5.0
-                        if(chatgptDiagnosticsSettingInput) localStorage.setItem('chatgpt_diagnostics', chatgptDiagnosticsSettingInput.value);
+                        if(chatgptDiagnosticsSettingInput) localStorage.setItem('chatbot_chatgpt_diagnostics', chatgptDiagnosticsSettingInput.value);
                         // Avatar Settings - Ver 1.5.0
                         if(chatgptAvatarIconSettingInput) localStorage.setItem('chatgpt_avatar_icon_setting', chatgptAvatarIconSettingInput.value);
                         if(chatgptCustomAvatarIconSettingInput) localStorage.setItem('chatgpt_custom_avatar_icon_setting', chatgptCustomAvatarIconSettingInput.value);
@@ -169,6 +169,7 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator Analysis</a>
             <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
+            <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Diagnostics</a>
         </h2>
 
         <!-- Updated id - Ver 1.4.1 -->
@@ -199,6 +200,10 @@ function chatbot_chatgpt_settings_page_html() {
             } elseif ($active_tab == 'reporting') {
                 settings_fields('chatbot_chatgpt_reporting');
                 do_settings_sections('chatbot_chatgpt_reporting');
+            // TODO REMOVED BEFORE PRODUCTION - Ver 1.6.5
+            } elseif ($active_tab == 'diagnostics') {
+                settings_fields('chatbot_chatgpt_diagnostics');
+                do_settings_sections('chatbot_chatgpt_diagnostics');
             }
 
             submit_button('Save Settings');

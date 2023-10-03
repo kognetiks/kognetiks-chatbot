@@ -98,7 +98,7 @@ jQuery(document).ready(function ($) {
 
         if(chatgptDiagnosticsSettingInput) {
             chatgptDiagnosticsSettingInput.addEventListener('change', function() {
-                localStorage.setItem('chatgpt_diagnostics', this.options[this.selectedIndex].value);
+                localStorage.setItem('chatbot_chatgpt_diagnostics', this.options[this.selectedIndex].value);
             });
         }
 
@@ -178,7 +178,7 @@ jQuery(document).ready(function ($) {
                 }
 
                 if(chatgptDiagnosticsSettingInput) {
-                    localStorage.setItem('chatgpt_diagnostics', chatgptDiagnosticsSettingInput.value)
+                    localStorage.setItem('chatbot_chatgpt_diagnostics', chatgptDiagnosticsSettingInput.value)
                 }
 
                 // Avatar Settings - Ver 1.5.0

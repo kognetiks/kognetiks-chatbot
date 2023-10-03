@@ -79,7 +79,7 @@ function chatbot_chatgpt_settings_init() {
     // Option to select narrow or wide chatboat - Ver 1.4.2
     register_setting('chatbot_chatgpt_settings', 'chatgpt_width_setting');
     // Option to set diagnotics on/off - Ver 1.5.0
-    register_setting('chatbot_chatgpt_settings', 'chatgpt_diagnostics');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_diagnostics');
 
     add_settings_section(
         'chatbot_chatgpt_settings_section',
@@ -146,13 +146,32 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_settings_section'
     );
 
+    // Diagnostics settings tab - Ver 1.6.5
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
+
+    add_settings_section(
+        'chatbot_chatgpt_diagnostics_section',
+        'Diagnostics Settings',
+        'chatbot_chatgpt_diagnostics_section_callback',
+        'chatbot_chatgpt_diagnostics'
+    );
+
     // Option to set diagnostics on/off - Ver 1.5.0
     add_settings_field(
-        'chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics',
         'Chatbot Diagnostics',
-        'chatgpt_diagnostics_setting_callback',
-        'chatbot_chatgpt_settings',
-        'chatbot_chatgpt_settings_section'
+        'chatbot_chatgpt_diagnostics_setting_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to check API status - Ver 1.6.5
+    add_settings_field(
+        'chatbot_chatgpt_api_test',
+        'API Test',
+        'chatbot_chatgpt_api_test_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
     );
     
     // Premium settings tab - Ver 1.3.0
