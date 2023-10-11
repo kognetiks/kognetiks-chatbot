@@ -137,7 +137,8 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 == Changelog ==
 
 = 1.6.5 =
-* Minor Updates
+* Minor updates to the Knowledge Navigator for better handling of site content
+* Added a new option to check API key validity - See Settings > Diagnostics
 
 = 1.6.4 =
 * Minor Updates

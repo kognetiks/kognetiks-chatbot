@@ -277,6 +277,7 @@ jQuery(document).ready(function ($) {
                         botResponse = document.createElement('div');
                         botResponse.appendChild(textElement);
                         botResponse.appendChild(linkElement);
+                        botResponse.innerHTML += '.';
                         botResponse = botResponse.outerHTML;
                     }
 

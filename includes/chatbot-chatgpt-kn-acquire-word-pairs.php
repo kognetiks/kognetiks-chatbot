@@ -75,10 +75,24 @@ function kn_acquire_word_pairs( $content ) {
     // Filter out stop words
     $words = array_diff($words, $stopWords);
 
+    // Remove s at end of any words - Ver 1.6.5 - 2023 10 11
+    $words = array_map(function($word) {
+        return rtrim($word, 's');
+    }, $words);
+
     // Filter out any $words that are equal to a blank space
     $words = array_filter($words, function($word) {
         return $word !== ' ';
     });
+    
+    // Filter out any $words that are equal to a null - Ver 1.6.5 - 2023 10 11
+    $words = array_filter($words, function($word) {
+        return $word !== '';
+    });
+
+    // Initialize the arrays
+    $wordPairs = array();
+    $wordCounts = array_count_values($wordPairs);
 
     // Generate word pairs
     $wordKeys = array_keys($words);  // Get the keys of the words

@@ -75,10 +75,25 @@ $textContent = str_replace("\n", ' ', $textContent);
 $contentWithoutTags = preg_replace('/\W+/', ' ', $textContent);
 
 // Get words and convert to lower case
-$words = str_word_count(strtolower($contentWithoutTags), 1);    
+$words = str_word_count(strtolower($contentWithoutTags), 1);
 
 // Filter out stop words
 $words = array_diff($words, $stopWords);
+
+// Remove s at end of any words - Ver 1.6.5 - 2023 10 11
+$words = array_map(function($word) {
+    return rtrim($word, 's');
+}, $words);
+
+// Filter out any $words that are equal to a blank space
+$words = array_filter($words, function($word) {
+    return $word !== ' ';
+});
+
+// Filter out any $words that are equal to a null - Ver 1.6.5 - 2023 10 11
+$words = array_filter($words, function($word) {
+    return $word !== '';
+});
 
 // Compute the TF-IDF for the $words array, and return the max top words
 $words = array_count_values($words);

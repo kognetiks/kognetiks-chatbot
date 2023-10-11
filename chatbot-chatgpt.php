@@ -377,11 +377,14 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         $word = rtrim($word, ".,;:!?");
     
         // Check for plural
-        if (substr($word, -1) == "s") {
-            $word_singular = substr($word, 0, -1);
-            $words[] = $word_singular;
-        }
-    
+        // if (substr($word, -1) == "s") {
+        //     $word_singular = substr($word, 0, -1);
+        //     $words[] = $word_singular;
+        // }
+   
+        // Remove s at end of any words - Ver 1.6.5 - 2023 10 11
+        $word = rtrim($word, 's');
+
         // Count the number of $words
         $word_count = count($words);
     
