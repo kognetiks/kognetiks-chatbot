@@ -99,6 +99,12 @@ function chatbot_chatgpt_settings_page_html() {
                         let chatgptAvatarIconSettingInput = document.getElementById('chatgpt_avatar_icon_setting');
                         let chatgptCustomAvatarIconSettingInput = document.getElementById('chatgpt_custom_avatar_icon_setting');
                         let chatgptAvatarGreetingSettingInput = document.getElementById('chatgpt_avatar_greeting_setting');
+                        // Custom Buttons - Ver 1.6.5
+                        let chatgptEnableCustomButtonsInput = document.getElementById('chatbot_chatgpt_enable_custom_buttons');
+                        let chatgptCustomButtonName1Input = document.getElementById('chatbot_chatgpt_custom_button_name_1');
+                        let chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
+                        let chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
+                        let chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
 
                         // Update the local storage with the input values, if inputs exist
                         if(chatgptNameInput) localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
@@ -116,6 +122,12 @@ function chatbot_chatgpt_settings_page_html() {
                         if(chatgptAvatarIconSettingInput) localStorage.setItem('chatgpt_avatar_icon_setting', chatgptAvatarIconSettingInput.value);
                         if(chatgptCustomAvatarIconSettingInput) localStorage.setItem('chatgpt_custom_avatar_icon_setting', chatgptCustomAvatarIconSettingInput.value);
                         if(chatgptAvatarGreetingSettingInput) localStorage.setItem('chatgpt_avatar_greeting_setting', chatgptAvatarGreetingSettingInput.value);
+                        // Custom Buttons - Ver 1.6.5
+                        if(chatgptEnableCustomButtonsInput) localStorage.setItem('chatbot_chatgpt_enable_custom_buttons', chatgptEnableCustomButtonsInput.value);
+                        if(chatgptCustomButtonName1Input) localStorage.setItem('chatbot_chatgpt_custom_button_name_1', chatgptCustomButtonName1Input.value);
+                        if(chatgptCustomButtonURL1Input) localStorage.setItem('chatbot_chatgpt_custom_button_url_1', chatgptCustomButtonURL1Input.value);
+                        if(chatgptCustomButtonName2Input) localStorage.setItem('chatbot_chatgpt_custom_button_name_2', chatgptCustomButtonName2Input.value);
+                        if(chatgptCustomButtonURL2Input) localStorage.setItem('chatbot_chatgpt_custom_button_url_2', chatgptCustomButtonURL2Input.value);
                     });
                 }
             });
@@ -160,6 +172,8 @@ function chatbot_chatgpt_settings_page_html() {
         <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
             <a href="?page=chatbot-chatgpt&tab=settings" class="nav-tab <?php echo $active_tab == 'settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
+            <!-- Custom Buttons - Ver 1.6.5 -->
+            <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Custom Buttons</a>
             <!-- Avatar Settings - Ver 1.5.0 -->
             <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatar</a>
             <!-- Coming Soon in Ver 2.0.0 -->
@@ -204,6 +218,9 @@ function chatbot_chatgpt_settings_page_html() {
             } elseif ($active_tab == 'diagnostics') {
                 settings_fields('chatbot_chatgpt_diagnostics');
                 do_settings_sections('chatbot_chatgpt_diagnostics');
+            } elseif ($active_tab == 'custom_buttons') {
+                settings_fields('chatbot_chatgpt_custom_buttons');
+                do_settings_sections('chatbot_chatgpt_custom_buttons');
             }
 
             submit_button('Save Settings');

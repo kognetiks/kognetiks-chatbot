@@ -80,8 +80,11 @@ function chatbot_chatgpt_kn_acquire() {
     }
 
     // Query WordPress database for post content
+    // Added support for Echo Knowlege Base (EKB) post_type - Ver 1.6.5
+    // https://wordpress.org/support/topic/great-with-minor-code-edits/
+    // https://wordpress.org/support/topic/add-pages-and-knowledge-base-to-search/
     $results = $wpdb->get_results(
-        "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE post_type='post' AND post_status='publish'", 
+        "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE (post_type='post' OR post_type='epkb_post_type_1') AND post_status='publish'", 
         ARRAY_A
     );
 

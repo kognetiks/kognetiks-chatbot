@@ -74,6 +74,7 @@
     flex-direction: column;
     /* Add z-index - Ver 1.2.1 */
     z-index: 100;
+    padding-bottom: 10px;
 }
 
 /* Wide - Ver 1.4.2 */
@@ -228,6 +229,10 @@
     background-color: #0257b3;
 }
 
+#chatboat-chatgpt-custom-buttons {
+    text-align: center;
+}
+
 #chatgptTitle.title {
     color: white;
     font-size: 30px;
@@ -267,4 +272,31 @@
     100% {
         opacity: 0;
     }
+}
+
+/* CSS for the custom buttons */
+.chatbot-chatgpt-custom-button-class {
+    background-color: #3B82F6;
+    color: #ffffff;
+    /* font-weight: bold; */
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-radius: 0.25rem;
+    text-decoration: none; /* Remove underline */
+  }
+
+.chatbot-chatgpt-custom-button-class:hover {
+    background-color: #1E3A8A;
+}
+
+.chatbot-chatgpt-custom-button-class a {
+    color: inherit; /* Use the text color of the parent button */
+    text-decoration: none !important; /* Remove underline */
+}
+
+.chatbot-chatgpt-custom-button-class a:hover {
+    color: inherit; /* Use the text color of the parent button */
+    text-decoration: none !important; /* Remove underline */
 }

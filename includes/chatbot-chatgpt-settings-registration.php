@@ -307,6 +307,60 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_reporting_section'
     );
 
+    // Custom Buttons settings tab - Ver 1.6.5
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_enable_custom_buttons');
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_name_1');
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_url_1');
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_name_2');
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_url_2');
+
+    add_settings_section(
+        'chatbot_chatgpt_custom_button_section',
+        'Custom Buttons',
+        'chatbot_chatgpt_custom_button_section_callback',
+        'chatbot_chatgpt_custom_buttons'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_enable_custom_buttons',
+        'Custom Buttons (On/Off)',
+        'chatbot_chatgpt_enable_custom_buttons_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_button_name_1',
+        'Custom Button 1 Name',
+        'chatbot_chatgpt_custom_button_name_1_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_button_url_1',
+        'Custom Button 1 Link',
+        'chatbot_chatgpt_custom_button_link_1_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_button_name_2',
+        'Custom Button 2 Name',
+        'chatbot_chatgpt_custom_button_name_2_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_button_url_2',
+        'Custom Button 2 Link',
+        'chatbot_chatgpt_custom_button_link_2_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
+    );
+
 }
 
 add_action('admin_init', 'chatbot_chatgpt_settings_init');

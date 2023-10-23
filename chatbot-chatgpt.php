@@ -50,6 +50,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php'
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-buttons.php'; // Refactoring Settings - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-diagnostics.php'; // Refactoring Settings - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
@@ -65,6 +66,10 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php
 // update_option('chatbot_chatgpt_diagnostics', 'Off');
 global $chatbot_chatgpt_diagnostics;
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
+
+// Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
+global $chatbot_chatgpt_enable_custom_buttons;
+$chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
 // Context History - Ver 1.6.1
 $context_history = [];
@@ -96,6 +101,11 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_model_choice' => 'gpt-3.5-turbo',
         'chatgpt_max_tokens_setting' => 150,
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
+        'chatbot_chatgpt_enable_custom_buttons' => 'Off',
+        'chatbot_chatgpt_custom_button_name_1' => '',
+        'chatbot_chatgpt_custom_button_url_1' => '',
+        'chatbot_chatgpt_custom_button_name_2' => '',
+        'chatbot_chatgpt_custom_button_url_2' => '',
     );
 
     // Revised for Ver 1.5.0 
@@ -114,6 +124,12 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_avatar_icon_url_setting',
         'chatgpt_custom_avatar_icon_setting',
         'chatgpt_avatar_greeting_setting',
+        'chatbot_chatgpt_enable_custom_buttons',
+        'chatbot_chatgpt_custom_button_name_1',
+        'chatbot_chatgpt_custom_button_url_1',
+        'chatbot_chatgpt_custom_button_name_2',
+        'chatbot_chatgpt_custom_button_url_2',
+
     );
 
     $chatbot_settings = array();

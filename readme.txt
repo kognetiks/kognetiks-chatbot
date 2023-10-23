@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
-Tested up to: 6.3
+Tested up to: 6.3.2
 Stable tag: 1.6.5
 Requires PHP: 7.3
 License: GPLv2 or later
@@ -139,6 +139,7 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 = 1.6.5 =
 * Minor updates to the Knowledge Navigator for better handling of site content
 * Added a new option to check API key validity - See Settings > Diagnostics
+* Added support for Echo Knowlege Base (EKB) post_type - Ver 1.6.5
 
 = 1.6.4 =
 * Minor Updates

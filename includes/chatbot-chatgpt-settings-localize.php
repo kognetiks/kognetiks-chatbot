@@ -32,6 +32,11 @@ function chatbot_chatgpt_localize(){
         'chatgpt_model_choice' => 'gpt-3.5-turbo',
         'chatgpt_max_tokens_setting' => 150,
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
+        'chatbot_chatgpt_enable_custom_buttons' => 'Off',
+        'chatbot_chatgpt_custom_button_name_1' => '',
+        'chatbot_chatgpt_custom_button_url_1' => '',
+        'chatbot_chatgpt_custom_button_name_2' => '',
+        'chatbot_chatgpt_custom_button_url_2' => '',
     );
 
     // Revised for Ver 1.5.0 
@@ -45,11 +50,15 @@ function chatbot_chatgpt_localize(){
         'chatgpt_max_tokens_setting',
         'chatgpt_width_setting',
         'chatbot_chatgpt_diagnostics',
-        // Avatar Options - Ver 1.5.0
         'chatgpt_avatar_icon_setting',
         'chatgpt_avatar_icon_url_setting',
         'chatgpt_custom_avatar_icon_setting',
         'chatgpt_avatar_greeting_setting',
+        'chatbot_chatgpt_enable_custom_buttons',
+        'chatbot_chatgpt_custom_button_name_1',
+        'chatbot_chatgpt_custom_button_url_1',
+        'chatbot_chatgpt_custom_button_name_2',
+        'chatbot_chatgpt_custom_button_url_2',
     );
 
     $chatbot_settings = array();

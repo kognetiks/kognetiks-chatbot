@@ -2,6 +2,8 @@ jQuery(document).ready(function ($) {
     
     function chatbot_chatgpt_localize() {
 
+        // let chatbotSettings = " . json_encode($chatbot_settings) . ";
+    
         // console.log('ENTERING chatbot_chatgpt_localize');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
@@ -15,10 +17,16 @@ jQuery(document).ready(function ($) {
         var chatgptWidthSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_width_setting) ? chatbotSettings.chatgpt_width_setting : 'Narrow';
         var chatgptDiagnosticsSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_diagnotics) ? chatbotSettings.chatgpt_diagnotics : 'Off';
         // Avatar Setting - Ver 1.5.0
-        var chatgptAvatarIconSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_avatar_icon_setting) ? chatbotSettings.chatgpt_avatar_icon_setting : 'icon-001.png';
-        var chatgptAvatarIconURLSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_avatar_icon_url_setting) ? chatbotSettings.chatgpt_avatar_icon_url_setting : 'icon-001.png';
-        var chatgptCustomAvatarIconSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_custom_avatar_icon_setting) ? chatbotSettings.chatgpt_custom_avatar_icon_setting : 'icon-001.png';
-        var chatgptAvatarGreetingSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_avatar_greeting_setting) ? chatbotSettings.chatgpt_avatar_greeting_setting : 'Great to see you today! How can I help you?';
+        var chatgptAvatarIconSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_avatar_icon_setting) ? chatbotSettings.chatgpt_avatar_icon_setting : 'icon-001.png';
+        var chatgptAvatarIconURLSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_avatar_icon_url_setting) ? chatbotSettings.chatgpt_avatar_icon_url_setting : 'icon-001.png';
+        var chatgptCustomAvatarIconSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_custom_avatar_icon_setting) ? chatbotSettings.chatgpt_custom_avatar_icon_setting : 'icon-001.png';
+        var chatgptAvatarGreetingSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_avatar_greeting_setting) ? chatbotSettings.chatgpt_avatar_greeting_setting : 'Great to see you today! How can I help you?';
+        // Custom Buttons - Ver 1.6.5
+        var chatgptEnableCustomButtonsInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_enable_custom_buttons) ? chatbotSettings.chatbot_chatgpt_enable_custom_buttons : 'Off';
+        var chatgptCustomButtonName1Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_1) ? chatbotSettings.chatbot_chatgpt_custom_button_name_1 : '';
+        var chatgptCustomButtonURL1Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_1) ? chatbotSettings.chatbot_chatgpt_custom_button_url_1 : '';
+        var chatgptCustomButtonName2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_2) ? chatbotSettings.chatbot_chatgpt_custom_button_name_2 : '';
+        var chatgptCustomButtonURL2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_2) ? chatbotSettings.chatbot_chatgpt_custom_button_url_2 : '';
 
         let chatbotSettings = " . json_encode($chatbot_settings) . ";
     
@@ -47,6 +55,11 @@ jQuery(document).ready(function ($) {
         var chatgptAvatarIconSettingInput = document.getElementById('chatgpt_avatar_icon_setting');
         var chatgptCustomAvatarIconSettingInput = document.getElementById('chatgpt_custom_avatar_icon_setting');
         var chatgptAvatarGreetingSettingInput = document.getElementById('chatgpt_avatar_greeting_setting');
+        var chatgptEnableCustomButtonsInput = document.getElementById('chatbot_chatgpt_enable_custom_buttons');
+        var chatgptCustomButtonName1Input = document.getElementById('chatbot_chatgpt_custom_button_name_1');
+        var chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
+        var chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
+        var chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
 
         if(chatgptNameInput) {
             chatgptNameInput.addEventListener('change', function() {
@@ -102,6 +115,36 @@ jQuery(document).ready(function ($) {
             });
         }
 
+        if(chatgptEnableCustomButtonsInput) {
+            chatgptEnableCustomButtonsInput.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_enable_custom_buttons', this.options[this.selectedIndex].value);
+            });
+        }
+        
+        if(chatgptCustomButtonName1Input) {
+            chatgptCustomButtonName1Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_1', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonURL1Input) {
+            chatgptCustomButtonURL1Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_1', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonName2Input) {
+            chatgptCustomButtonName2Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_2', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonURL2Input) {
+            chatgptCustomButtonURL2Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_2', this.value);
+            });
+        }
+        
         // Avatar Settings - Ver 1.5.0
         if(document.getElementById('chatgpt_avatar_icon_setting')) {
             document.getElementById('chatgpt_avatar_icon_setting').addEventListener('change', function() {
@@ -119,7 +162,43 @@ jQuery(document).ready(function ($) {
             document.getElementById('chatgpt_avatar_greeting_setting').addEventListener('change', function() {
                 localStorage.setItem('chatgpt_avatar_greeting_setting', this.value);
             });
-        }        
+        }
+
+        if(document.getElementById('chatbot_chatgpt_diagnostics')) {
+            document.getElementById('chatbot_chatgpt_diagnostics').addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_diagnostics', this.value);
+            });
+        }
+
+        if(document.getElementById('chatbot_chatgpt_enable_custom_buttons')) {
+            document.getElementById('chatbot_chatgpt_enable_custom_buttons').addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_enable_custom_buttons', this.value);
+            });
+        }
+
+        if(document.getElementById('chatbot_chatgpt_custom_button_name_1')) {
+            document.getElementById('chatbot_chatgpt_custom_button_name_1').addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_1', this.value);
+            });
+        }
+
+        if(document.getElementById('chatbot_chatgpt_custom_button_url_1')) {
+            document.getElementById('chatbot_chatgpt_custom_button_url_1').addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_1', this.value);
+            });
+        }
+
+        if(document.getElementById('chatbot_chatgpt_custom_button_name_2')) {
+            document.getElementById('chatbot_chatgpt_custom_button_name_2').addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_2', this.value);
+            });
+        }
+
+        if(document.getElementById('chatbot_chatgpt_custom_button_url_2')) {
+            document.getElementById('chatbot_chatgpt_custom_button_url_2').addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_2', this.value);
+            });
+        }
 
         // Update the localStorage values when the form is submitted - Ver 1.4.1
         // chatgpt-settings-form vs. your-form-id
@@ -144,6 +223,12 @@ jQuery(document).ready(function ($) {
                 var chatgptAvatarIconSettingInput = document.getElementById('chatgpt_avatar_icon_setting');
                 var chatgptCustomAvatarIconSettingInput = document.getElementById('chatgpt_custom_avatar_icon_setting');
                 var chatgptAvatarGreetingSettingInput = document.getElementById('chatgpt_avatar_greeting_setting');
+                // Custom Buttons - Ver 1.6.5
+                var chatgptEnableCustomButtonsInput = document.getElementById('chatbot_chatgpt_enable_custom_buttons');
+                var chatgptCustomButtonName1Input = document.getElementById('chatbot_chatgpt_custom_button_name_1');
+                var chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
+                var chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
+                var chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
 
                 if(chatgptNameInput) {
                     localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
@@ -194,6 +279,27 @@ jQuery(document).ready(function ($) {
                 // Avatar Settings - Ver 1.5.0
                 if(chatgptAvatarGreetingSettingInput) {
                     localStorage.setItem('chatgpt_avatar_greeting_setting', chatgptAvatarGreetingSettingInput.value);
+                }
+
+                // Custom Buttons
+                if(chatgptEnableCustomButtonsInput) {
+                    localStorage.setItem('chatbot_chatgpt_enable_custom_buttons', chatgptEnableCustomButtonsInput.value);
+                }
+
+                if(chatgptCustomButtonName1Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_name_1', chatgptCustomButtonName1Input.value);
+                }
+
+                if(chatgptCustomButtonURL1Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_url_1', chatgptCustomButtonURL1Input.value);
+                }
+
+                if(chatgptCustomButtonName2Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_name_2', chatgptCustomButtonName2Input.value);
+                }
+
+                if(chatgptCustomButtonURL2Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_url_2', chatgptCustomButtonURL2Input.value);
                 }
 
             });
