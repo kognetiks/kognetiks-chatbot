@@ -23,6 +23,8 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experie
 
 🎨 **Personalize with Custom Avatars!** Enhance user engagement with avatars that suit your site's personality. Navigate to the plugin settings, choose your avatar, and enjoy a unique touch of creativity. New screenshots available!
 
+🚀 Now you can drive traffic to specific pages with customizable buttons offering direct links to your site content.  For example, you could link directly to a contact form or email address.
+
 🤖 **Why Choose Chatbot ChatGPT?**
 
 * Intuitive & Human-like Interactions: Powered by OpenAI's Large Language Model (LLM) API, ChatGPT uses natural language processing to engage with users in a conversational manner.
@@ -137,9 +139,11 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 == Changelog ==
 
 = 1.6.5 =
-* Minor updates to the Knowledge Navigator for better handling of site content
-* Added a new option to check API key validity - See Settings > Diagnostics
+* Added option for two user configurable buttons at the bottom of the chat bot - See Settings - Custom
+* User configurable buttons can direct chatters to contact forms, email, or other pages
+* Added a new option to check API key validity - See Settings > Diagnostics & Notices
 * Added support for Echo Knowlege Base (EKB) post_type - Ver 1.6.5
+* Minor updates to the Knowledge Navigator for better handling of site content
 
 = 1.6.4 =
 * Minor Updates

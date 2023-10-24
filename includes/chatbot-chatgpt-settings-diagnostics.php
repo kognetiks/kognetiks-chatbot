@@ -41,3 +41,15 @@ function chatbot_chatgpt_diagnostics_setting_callback($args) {
     </select>
     <?php
 }
+
+// Suppress Notices On/Off - Ver 1.6.5
+function chatbot_chatgpt_suppress_notices_callback($args) {
+    global $chatbot_chatgpt_suppress_notices;
+    $chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppress_notices', 'Off'));
+    ?>
+    <select id="chatgpt_suppress_notices_setting" name = "chatbot_chatgpt_suppress_notices">
+        <option value="On" <?php selected( $chatbot_chatgpt_suppress_notices, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
+        <option value="Off" <?php selected( $chatbot_chatgpt_suppress_notices, 'Off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
+    </select>
+    <?php
+}

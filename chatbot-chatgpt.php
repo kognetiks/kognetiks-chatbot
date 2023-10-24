@@ -71,6 +71,10 @@ $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics'
 global $chatbot_chatgpt_enable_custom_buttons;
 $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
+// Suppress Notices on/off setting can be found on the Settings tab - Ver 1.6.5
+global $chatbot_chatgpt_suppress_notices;
+$chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppress_notices', 'Off'));
+
 // Context History - Ver 1.6.1
 $context_history = [];
 

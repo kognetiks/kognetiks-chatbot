@@ -148,6 +148,8 @@ function chatbot_chatgpt_settings_init() {
 
     // Diagnostics settings tab - Ver 1.6.5
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
+    // Suppress Notices and Warnings
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
 
     add_settings_section(
         'chatbot_chatgpt_diagnostics_section',
@@ -170,6 +172,15 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_api_test',
         'API Test',
         'chatbot_chatgpt_api_test_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to suppress notices and warnings - Ver 1.6.5
+    add_settings_field(
+        'chatbot_chatgpt_suppress_notices',
+        'Suppress Notices and Warnings',
+        'chatbot_chatgpt_suppress_notices_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
     );

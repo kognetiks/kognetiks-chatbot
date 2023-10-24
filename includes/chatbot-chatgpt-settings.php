@@ -170,20 +170,20 @@ function chatbot_chatgpt_settings_page_html() {
         </script>
 
         <h2 class="nav-tab-wrapper">
-            <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
             <a href="?page=chatbot-chatgpt&tab=settings" class="nav-tab <?php echo $active_tab == 'settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
+            <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
+            <!-- Avatar Settings - Ver 1.5.0 -->
+            <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatar Selection</a>
             <!-- Custom Buttons - Ver 1.6.5 -->
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Custom Buttons</a>
-            <!-- Avatar Settings - Ver 1.5.0 -->
-            <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatar</a>
-            <!-- Coming Soon in Ver 2.0.0 -->
-            <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->
             <!-- Knowledge Navigator - Ver 1.6.1 -->
-            <a href="?page=chatbot-chatgpt&tab=crawler" class="nav-tab <?php echo $active_tab == 'crawler' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
+            <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
             <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator Analysis</a>
             <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
+            <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Diagnostics & Notices</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
-            <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Diagnostics</a>
+            <!-- Coming Soon in Ver 2.0.0 -->
+            <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->
         </h2>
 
         <!-- Updated id - Ver 1.4.1 -->
@@ -205,7 +205,7 @@ function chatbot_chatgpt_settings_page_html() {
             } elseif ($active_tab == 'support') {
                 settings_fields('chatbot_chatgpt_support');
                 do_settings_sections('chatbot_chatgpt_support');
-            } elseif ($active_tab == 'crawler') {
+            } elseif ($active_tab == 'kn_acquire') {
                 settings_fields('chatbot_chatgpt_knowledge_navigator');
                 do_settings_sections('chatbot_chatgpt_knowledge_navigator');
             } elseif ($active_tab == 'kn_analysis') {
