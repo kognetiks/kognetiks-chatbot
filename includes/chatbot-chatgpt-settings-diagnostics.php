@@ -17,6 +17,7 @@ die;
 function chatbot_chatgpt_diagnostics_section_callback($args) {
     ?>
     <p>The Diagnostics tab checks the API status and turns on/off console and error logging.</p>
+    <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices.</p>
     <?php
 }
 
@@ -50,6 +51,18 @@ function chatbot_chatgpt_suppress_notices_callback($args) {
     <select id="chatgpt_suppress_notices_setting" name = "chatbot_chatgpt_suppress_notices">
         <option value="On" <?php selected( $chatbot_chatgpt_suppress_notices, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
         <option value="Off" <?php selected( $chatbot_chatgpt_suppress_notices, 'Off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
+    </select>
+    <?php
+}
+
+// Suppress Attribution On/Off - Ver 1.6.5
+function chatbot_chatgpt_suppress_attribution_callback($args) {
+    global $chatbot_chatgpt_suppress_attribution;
+    $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+    ?>
+    <select id="chatgpt_suppress_attribution_setting" name = "chatbot_chatgpt_suppress_attribution">
+        <option value="On" <?php selected( $chatbot_chatgpt_suppress_attribution, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
+        <option value="Off" <?php selected( $chatbot_chatgpt_suppress_attribution, 'Off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
     </select>
     <?php
 }

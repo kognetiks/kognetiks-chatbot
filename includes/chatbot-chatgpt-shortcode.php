@@ -39,9 +39,9 @@ function chatbot_chatgpt_shortcode() {
         <!-- Custom buttons - Ver 1.6.5 -->
         <?php
         $chatbot_chatgpt_enable_custom_buttons = 'Off'; // 'On' or 'Off'
-        $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons'));
-        // TODO - Remove these error_log statements - Ver 1.6.5
-        error_log('chatbot_chatgpt_enable_custom_buttons: ' . $chatbot_chatgpt_enable_custom_buttons);
+        $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
+        // DIAG - Remove these error_log statements - Ver 1.6.5
+        // error_log('chatbot_chatgpt_enable_custom_buttons: ' . $chatbot_chatgpt_enable_custom_buttons);
         if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
             ?>
             <div id="chatboat-chatgpt-custom-buttons" style="text-align: center;">
@@ -54,11 +54,11 @@ function chatbot_chatgpt_shortcode() {
                 $chatbot_chatgpt_custom_button_url_1 = get_option('chatbot_chatgpt_custom_button_url_1');
                 $chatbot_chatgpt_custom_button_name_2 = get_option('chatbot_chatgpt_custom_button_name_2');
                 $chatbot_chatgpt_custom_button_url_2 = get_option('chatbot_chatgpt_custom_button_url_2');
-                // TODO - Remove these error_log statements - Ver 1.6.5
-                error_log('chatbot_chatgpt_custom_button_name_1: ' . $chatbot_chatgpt_custom_button_name_1);
-                error_log('chatbot_chatgpt_custom_button_url_1: ' . $chatbot_chatgpt_custom_button_url_1);
-                error_log('chatbot_chatgpt_custom_button_name_2: ' . $chatbot_chatgpt_custom_button_name_2);
-                error_log('chatbot_chatgpt_custom_button_url_2: ' . $chatbot_chatgpt_custom_button_url_2);
+                // DIAG - Remove these error_log statements - Ver 1.6.5
+                // error_log('chatbot_chatgpt_custom_button_name_1: ' . $chatbot_chatgpt_custom_button_name_1);
+                // error_log('chatbot_chatgpt_custom_button_url_1: ' . $chatbot_chatgpt_custom_button_url_1);
+                // error_log('chatbot_chatgpt_custom_button_name_2: ' . $chatbot_chatgpt_custom_button_name_2);
+                // error_log('chatbot_chatgpt_custom_button_url_2: ' . $chatbot_chatgpt_custom_button_url_2);
                 if (!empty($chatbot_chatgpt_custom_button_name_1) && !empty($chatbot_chatgpt_custom_button_url_1)) {
                     ?>
                     <button class="chatbot-chatgpt-custom-button-class">
@@ -77,10 +77,18 @@ function chatbot_chatgpt_shortcode() {
             </div>
             <?php
         }
+        $chatbot_chatgpt_suppress_attribution = 'Off'; // 'On' or 'Off'
+        $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+        // DIAG - Remove these error_log statements - Ver 1.6.5
+        // error_log('chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);
+        if ($chatbot_chatgpt_suppress_attribution == 'Off') {
+            ?>
+            <div style="text-align: center;">
+                <a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" style="text-decoration:none; font-size: 10px;"><?php echo esc_html('Chatbot & Knowledge Navigator by Kognetiks'); ?></a>
+            </div>
+            <?php
+        }
         ?>
-        <div style="text-align: center;">
-            <a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" style="text-decoration:none; font-size: 10px;"><?php echo esc_html('Chatbot & Knowledge Navigator by Kognetiks'); ?></a>
-        </div>
     </div>
     <button id="chatgpt-open-btn" style="display: none;">
     <i class="dashicons dashicons-format-chat"></i>

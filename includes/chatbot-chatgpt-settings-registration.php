@@ -150,21 +150,13 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
     // Suppress Notices and Warnings
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
 
     add_settings_section(
         'chatbot_chatgpt_diagnostics_section',
         'Diagnostics Settings',
         'chatbot_chatgpt_diagnostics_section_callback',
         'chatbot_chatgpt_diagnostics'
-    );
-
-    // Option to set diagnostics on/off - Ver 1.5.0
-    add_settings_field(
-        'chatbot_chatgpt_diagnostics',
-        'Chatbot Diagnostics',
-        'chatbot_chatgpt_diagnostics_setting_callback',
-        'chatbot_chatgpt_diagnostics',
-        'chatbot_chatgpt_diagnostics_section'
     );
 
     // Option to check API status - Ver 1.6.5
@@ -176,11 +168,29 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_diagnostics_section'
     );
 
+    // Option to set diagnostics on/off - Ver 1.5.0
+    add_settings_field(
+        'chatbot_chatgpt_diagnostics',
+        'Chatbot Diagnostics',
+        'chatbot_chatgpt_diagnostics_setting_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
     // Option to suppress notices and warnings - Ver 1.6.5
     add_settings_field(
         'chatbot_chatgpt_suppress_notices',
         'Suppress Notices and Warnings',
         'chatbot_chatgpt_suppress_notices_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to suppress attribution - Ver 1.6.5
+    add_settings_field(
+        'chatbot_chatgpt_suppress_attribution',
+        'Suppress Attribution',
+        'chatbot_chatgpt_suppress_attribution_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
     );

@@ -75,6 +75,10 @@ $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_en
 global $chatbot_chatgpt_suppress_notices;
 $chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppress_notices', 'Off'));
 
+// Suppress Attribution on/off setting can be found on the Settings tab - Ver 1.6.5
+global $chatbot_chatgpt_suppress_attribution;
+$chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+
 // Context History - Ver 1.6.1
 $context_history = [];
 
@@ -320,7 +324,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
  
     // Context History - Ver 1.6.1
      $chatgpt_last_response = concatenateHistory('context_history');
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('context_history' . print_r($chatgpt_last_response, true));
     
     // IDEA Strip any href links and text from the $chatgpt_last_response
@@ -338,7 +342,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
     $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('$context: ' . print_r($context, true));
 
     // Added Role, System, Content Static Veriable - Ver 1.6.0
@@ -355,7 +359,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Context History - Ver 1.6.1
     addEntry('context_history', $message);
 
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('storedc: ' . print_r($chatbot_chatgpt_kn_conversation_context, true));
     // error_log('context: ' . print_r($context, true));
     // error_log('message: ' . print_r($message, true));  
@@ -388,8 +392,8 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Strip out $stopWords
     $words = array_diff($words, $stopWords);
-    // TODO Error_log for $words - Ver 1.6.5
-    error_log('$words: ' . print_r($words, true));
+    // DIAG Error_log for $words - Ver 1.6.5
+    // error_log('$words: ' . print_r($words, true));
 
     // Loop through each word in the message
     foreach ($words as $key => $word) {
@@ -435,10 +439,10 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         $response_body['content'] = "";
     }
 
-    // TODO Diagnostic - Ver 1.6.5
-    error_log('$highest_score: ' . print_r($highest_score, true));
-    error_log('$highest_score_word: ' . print_r($highest_score_word, true));
-    error_log('$highest_score_url: ' . print_r($highest_score_url, true));
+    // DIAG Diagnostic - Ver 1.6.5
+    // error_log('$highest_score: ' . print_r($highest_score, true));
+    // error_log('$highest_score_word: ' . print_r($highest_score_word, true));
+    // error_log('$highest_score_url: ' . print_r($highest_score_url, true));
 
     // IDEA Append message and link if found to ['choices'][0]['message']['urls']
     if ($highest_score > 0) {
@@ -506,7 +510,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 function enqueue_greetings_script() {
     global $chatbot_chatgpt_diagnostics;
 
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('ENTERING enqueue_greetings_script');
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
@@ -518,7 +522,7 @@ function enqueue_greetings_script() {
 
     wp_localize_script('greetings', 'greetings_data', $greetings);
 
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('EXITING enqueue_greetings_script');
 
 }
