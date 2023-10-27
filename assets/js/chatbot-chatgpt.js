@@ -54,6 +54,10 @@ jQuery(document).ready(function ($) {
         // // Append the avatar and the bubble to the button and apply the class for the avatar icon
         // chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
 
+        // IDEA - Add option to suppress avatar greeting in setting options page
+        // IDEA - If blank greeting, don't show the bubble
+        // IDEA - Add option to suppress avatar greeting if clicked on
+
         // Sanitize the avatarGreeting variable
         var sanitizedGreeting = $('<div>').text(avatarGreeting).html();
 
