@@ -79,7 +79,7 @@ function chatbot_chatgpt_settings_init() {
     // Option to select narrow or wide chatboat - Ver 1.4.2
     register_setting('chatbot_chatgpt_settings', 'chatgpt_width_setting');
     // Option to set diagnotics on/off - Ver 1.5.0
-    register_setting('chatbot_chatgpt_settings', 'chatgpt_diagnostics');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_diagnostics');
 
     add_settings_section(
         'chatbot_chatgpt_settings_section',
@@ -146,13 +146,53 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_settings_section'
     );
 
+    // Diagnostics settings tab - Ver 1.6.5
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
+    // Suppress Notices and Warnings
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
+
+    add_settings_section(
+        'chatbot_chatgpt_diagnostics_section',
+        'Diagnostics Settings',
+        'chatbot_chatgpt_diagnostics_section_callback',
+        'chatbot_chatgpt_diagnostics'
+    );
+
+    // Option to check API status - Ver 1.6.5
+    add_settings_field(
+        'chatbot_chatgpt_api_test',
+        'API Test',
+        'chatbot_chatgpt_api_test_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
     // Option to set diagnostics on/off - Ver 1.5.0
     add_settings_field(
-        'chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics',
         'Chatbot Diagnostics',
-        'chatgpt_diagnostics_setting_callback',
-        'chatbot_chatgpt_settings',
-        'chatbot_chatgpt_settings_section'
+        'chatbot_chatgpt_diagnostics_setting_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to suppress notices and warnings - Ver 1.6.5
+    add_settings_field(
+        'chatbot_chatgpt_suppress_notices',
+        'Suppress Notices and Warnings',
+        'chatbot_chatgpt_suppress_notices_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to suppress attribution - Ver 1.6.5
+    add_settings_field(
+        'chatbot_chatgpt_suppress_attribution',
+        'Suppress Attribution',
+        'chatbot_chatgpt_suppress_attribution_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
     );
     
     // Premium settings tab - Ver 1.3.0
@@ -286,6 +326,60 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_reporting_period_callback',
         'chatbot_chatgpt_reporting',
         'chatbot_chatgpt_reporting_section'
+    );
+
+    // Custom Buttons settings tab - Ver 1.6.5
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_enable_custom_buttons');
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_name_1');
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_url_1');
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_name_2');
+    register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_url_2');
+
+    add_settings_section(
+        'chatbot_chatgpt_custom_button_section',
+        'Custom Buttons',
+        'chatbot_chatgpt_custom_button_section_callback',
+        'chatbot_chatgpt_custom_buttons'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_enable_custom_buttons',
+        'Custom Buttons (On/Off)',
+        'chatbot_chatgpt_enable_custom_buttons_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_button_name_1',
+        'Custom Button 1 Name',
+        'chatbot_chatgpt_custom_button_name_1_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_button_url_1',
+        'Custom Button 1 Link',
+        'chatbot_chatgpt_custom_button_link_1_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_button_name_2',
+        'Custom Button 2 Name',
+        'chatbot_chatgpt_custom_button_name_2_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_button_url_2',
+        'Custom Button 2 Link',
+        'chatbot_chatgpt_custom_button_link_2_callback',
+        'chatbot_chatgpt_custom_buttons',
+        'chatbot_chatgpt_custom_button_section'
     );
 
 }

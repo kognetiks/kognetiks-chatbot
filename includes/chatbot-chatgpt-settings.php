@@ -26,7 +26,7 @@ function chatbot_chatgpt_settings_page_html() {
 
     chatbot_chatgpt_localize();
 
-    $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'api_model';
+    $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'bot_settings';
 
     if (isset($_GET['settings-updated'])) {
         add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
@@ -99,6 +99,12 @@ function chatbot_chatgpt_settings_page_html() {
                         let chatgptAvatarIconSettingInput = document.getElementById('chatgpt_avatar_icon_setting');
                         let chatgptCustomAvatarIconSettingInput = document.getElementById('chatgpt_custom_avatar_icon_setting');
                         let chatgptAvatarGreetingSettingInput = document.getElementById('chatgpt_avatar_greeting_setting');
+                        // Custom Buttons - Ver 1.6.5
+                        let chatgptEnableCustomButtonsInput = document.getElementById('chatbot_chatgpt_enable_custom_buttons');
+                        let chatgptCustomButtonName1Input = document.getElementById('chatbot_chatgpt_custom_button_name_1');
+                        let chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
+                        let chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
+                        let chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
 
                         // Update the local storage with the input values, if inputs exist
                         if(chatgptNameInput) localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
@@ -111,11 +117,17 @@ function chatbot_chatgpt_settings_page_html() {
                         if(chatgptMaxTokensSettingInput) localStorage.setItem('chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
                         if(chatgptWidthSettingInput) localStorage.setItem('chatgpt_width_setting', chatgptWidthSettingInput.value);
                         // New options for diagnostics on/off - Ver 1.5.0
-                        if(chatgptDiagnosticsSettingInput) localStorage.setItem('chatgpt_diagnostics', chatgptDiagnosticsSettingInput.value);
+                        if(chatgptDiagnosticsSettingInput) localStorage.setItem('chatbot_chatgpt_diagnostics', chatgptDiagnosticsSettingInput.value);
                         // Avatar Settings - Ver 1.5.0
                         if(chatgptAvatarIconSettingInput) localStorage.setItem('chatgpt_avatar_icon_setting', chatgptAvatarIconSettingInput.value);
                         if(chatgptCustomAvatarIconSettingInput) localStorage.setItem('chatgpt_custom_avatar_icon_setting', chatgptCustomAvatarIconSettingInput.value);
                         if(chatgptAvatarGreetingSettingInput) localStorage.setItem('chatgpt_avatar_greeting_setting', chatgptAvatarGreetingSettingInput.value);
+                        // Custom Buttons - Ver 1.6.5
+                        if(chatgptEnableCustomButtonsInput) localStorage.setItem('chatbot_chatgpt_enable_custom_buttons', chatgptEnableCustomButtonsInput.value);
+                        if(chatgptCustomButtonName1Input) localStorage.setItem('chatbot_chatgpt_custom_button_name_1', chatgptCustomButtonName1Input.value);
+                        if(chatgptCustomButtonURL1Input) localStorage.setItem('chatbot_chatgpt_custom_button_url_1', chatgptCustomButtonURL1Input.value);
+                        if(chatgptCustomButtonName2Input) localStorage.setItem('chatbot_chatgpt_custom_button_name_2', chatgptCustomButtonName2Input.value);
+                        if(chatgptCustomButtonURL2Input) localStorage.setItem('chatbot_chatgpt_custom_button_url_2', chatgptCustomButtonURL2Input.value);
                     });
                 }
             });
@@ -158,48 +170,63 @@ function chatbot_chatgpt_settings_page_html() {
         </script>
 
         <h2 class="nav-tab-wrapper">
+            <a href="?page=chatbot-chatgpt&tab=bot_settings" class="nav-tab <?php echo $active_tab == 'bot_settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
-            <a href="?page=chatbot-chatgpt&tab=settings" class="nav-tab <?php echo $active_tab == 'settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
-            <!-- Avatar Settings - Ver 1.5.0 -->
-            <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatar</a>
-            <!-- Coming Soon in Ver 2.0.0 -->
-            <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->
-            <!-- Knowledge Navigator - Ver 1.6.1 -->
-            <a href="?page=chatbot-chatgpt&tab=crawler" class="nav-tab <?php echo $active_tab == 'crawler' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
+            <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatar Selection</a>
+            <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Custom Buttons</a>
+            <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
             <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator Analysis</a>
             <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
+            <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Diagnostics & Notices</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
+            <!-- Coming Soon in Ver 2.0.0 -->
+            <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->
         </h2>
 
         <!-- Updated id - Ver 1.4.1 -->
         <form id="chatgpt-settings-form" action="options.php" method="post">
             <?php
-            if ($active_tab == 'settings') {
+            if ($active_tab == 'bot_settings') {
                 settings_fields('chatbot_chatgpt_settings');
                 do_settings_sections('chatbot_chatgpt_settings');
+
             } elseif ($active_tab == 'api_model') {
                 settings_fields('chatbot_chatgpt_api_model');
                 do_settings_sections('chatbot_chatgpt_api_model');
+
             } elseif ($active_tab == 'avatar') {
                 settings_fields('chatbot_chatgpt_avatar');
                 do_settings_sections('chatbot_chatgpt_avatar');
+
+            } elseif ($active_tab == 'custom_buttons') {
+                settings_fields('chatbot_chatgpt_custom_buttons');
+                do_settings_sections('chatbot_chatgpt_custom_buttons');
+
+            } elseif ($active_tab == 'kn_acquire') {
+                settings_fields('chatbot_chatgpt_knowledge_navigator');
+                do_settings_sections('chatbot_chatgpt_knowledge_navigator');
+
+            } elseif ($active_tab == 'kn_analysis') {
+                settings_fields('chatbot_chatgpt_kn_analysis');
+                do_settings_sections('chatbot_chatgpt_kn_analysis');
+
+            } elseif ($active_tab == 'reporting') {
+                settings_fields('chatbot_chatgpt_reporting');
+                do_settings_sections('chatbot_chatgpt_reporting');
+
+            } elseif ($active_tab == 'diagnostics') {
+                settings_fields('chatbot_chatgpt_diagnostics');
+                do_settings_sections('chatbot_chatgpt_diagnostics');
+
             // IDEA Coming Soon in Ver 2.0.0
             // } elseif ($active_tab == 'premium') {
             //     settings_fields('chatbot_chatgpt_premium');
             //     do_settings_sections('chatbot_chatgpt_premium');
+
             } elseif ($active_tab == 'support') {
                 settings_fields('chatbot_chatgpt_support');
-                do_settings_sections('chatbot_chatgpt_support');
-            } elseif ($active_tab == 'crawler') {
-                settings_fields('chatbot_chatgpt_knowledge_navigator');
-                do_settings_sections('chatbot_chatgpt_knowledge_navigator');
-            } elseif ($active_tab == 'kn_analysis') {
-                settings_fields('chatbot_chatgpt_kn_analysis');
-                do_settings_sections('chatbot_chatgpt_kn_analysis');
-            } elseif ($active_tab == 'reporting') {
-                settings_fields('chatbot_chatgpt_reporting');
-                do_settings_sections('chatbot_chatgpt_reporting');
-            }
+                do_settings_sections('chatbot_chatgpt_support');            
+        }
 
             submit_button('Save Settings');
             ?>

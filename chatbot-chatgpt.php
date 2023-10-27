@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.6.4
+ * Version:     1.6.5
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -32,8 +32,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Declare Globals here - Ver 1.6.3
 global $wpdb;  // Declare the global $wpdb object
 
+// Include necessary files
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
+
 // Include necessary files - Knowledge Navigator
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire.php'; // Knowledge Navigator Acquistion - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-words.php'; // Knowledge Navigator Acquistion - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-word-pairs.php'; // Knowledge Navigator Acquistion - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-analysis.php'; // Knowlege Navigator Analysis- Ver 1.6.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
@@ -45,6 +50,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php'
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-buttons.php'; // Refactoring Settings - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-diagnostics.php'; // Refactoring Settings - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-notices.php'; // Notices - Ver 1.6.3
@@ -56,37 +63,24 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-supp
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
-// update_option('chatgpt_diagnostics', 'Off');
-global $chatgpt_diagnostics;
-$chatgpt_diagnostics = esc_attr(get_option('chatgpt_diagnostics', 'Off'));
+// update_option('chatbot_chatgpt_diagnostics', 'Off');
+global $chatbot_chatgpt_diagnostics;
+$chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
+
+// Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
+global $chatbot_chatgpt_enable_custom_buttons;
+$chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
+
+// Suppress Notices on/off setting can be found on the Settings tab - Ver 1.6.5
+global $chatbot_chatgpt_suppress_notices;
+$chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppress_notices', 'Off'));
+
+// Suppress Attribution on/off setting can be found on the Settings tab - Ver 1.6.5
+global $chatbot_chatgpt_suppress_attribution;
+$chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
 
 // Context History - Ver 1.6.1
 $context_history = [];
-
-// Declare the $learningMessages array as global
-global $learningMessages;
-$learningMessages = [
-    " Also know that I'm still learning, but more information could be found ",
-    " Please be aware that I'm in the process of learning, but more information could be found ",
-    " Just a heads up, I'm continuously improving, in the meantime check ",
-    " Keep in mind that I'm still learning the ropes, but don't hesitate to check out ",
-    " I'm in a state of constant learning, for now check out ",
-    " Remember, I'm on a learning journey, so you can revisit anytime you'd like. However, you might try ",
-    " I'm in the learning phase, so your patience is appreciated. However you might find help "
-];
-
-// Declare the $errorResponses array as global
-global $errorResponses;
-$errorResponses = [
-    " It seems there may have been an issue with the OpenAI API. Let's try again later.",
-    " Unfortunately, we might have encountered a problem with the OpenAI API. Please give it another shot in a little while.",
-    " I apologize, but it appears there's a hiccup with the OpenAI API at the moment. We can attempt this again later.",
-    " The OpenAI API seems to be experiencing difficulties right now. We can come back to this when it's resolved.",
-    " I'm sorry, but it seems like there's an error from the OpenAI API's side. Please retry in a bit.",
-    " There might be a temporary issue with the OpenAI API. Please try your request again in a little while.",
-    " The OpenAI API encountered an error, but don't worry, it happens. Let's give it another shot later.",
-    " It looks like there could be a technical problem with the OpenAI API. Feel free to try again in a bit to see if things are working smoothly."
-];
 
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
@@ -107,7 +101,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_disclaimer_setting' => 'No',
         'chatgpt_max_tokens_setting' => '150',
         'chatgpt_width_setting' => 'Narrow',
-        'chatgpt_diagnostics' => 'Off',
+        'chatbot_chatgpt_diagnostics' => 'Off',
         'chatgpt_avatar_icon_setting' => 'icon-001.png',
         'chatgpt_avatar_icon_url_setting' => '',
         'chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
@@ -115,6 +109,11 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_model_choice' => 'gpt-3.5-turbo',
         'chatgpt_max_tokens_setting' => 150,
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
+        'chatbot_chatgpt_enable_custom_buttons' => 'Off',
+        'chatbot_chatgpt_custom_button_name_1' => '',
+        'chatbot_chatgpt_custom_button_url_1' => '',
+        'chatbot_chatgpt_custom_button_name_2' => '',
+        'chatbot_chatgpt_custom_button_url_2' => '',
     );
 
     // Revised for Ver 1.5.0 
@@ -127,12 +126,18 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_disclaimer_setting',
         'chatgpt_max_tokens_setting',
         'chatgpt_width_setting',
-        'chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics',
         // Avatar Options - Ver 1.5.0
         'chatgpt_avatar_icon_setting',
         'chatgpt_avatar_icon_url_setting',
         'chatgpt_custom_avatar_icon_setting',
         'chatgpt_avatar_greeting_setting',
+        'chatbot_chatgpt_enable_custom_buttons',
+        'chatbot_chatgpt_custom_button_name_1',
+        'chatbot_chatgpt_custom_button_url_1',
+        'chatbot_chatgpt_custom_button_name_2',
+        'chatbot_chatgpt_custom_button_url_2',
+
     );
 
     $chatbot_settings = array();
@@ -227,7 +232,7 @@ function chatbot_chatgpt_kn_status_activation() {
     // clear the 'knowledge_navigator_scan_hook' hook on plugin activation - Ver 1.6.3
     if (wp_next_scheduled('knowledge_navigator_scan_hook')) {
         // error_log('BEFORE wp_clear_scheduled_hook -  knowledge_navigator_scan_hook');
-        wp_clear_scheduled_hook('knowledge_navigator_scan_hookk'); // Clear scheduled runs
+        wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear scheduled runs
     }
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
@@ -291,9 +296,10 @@ function concatenateHistory($transient_name) {
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {
     // Diagnostics - Ver 1.6.1
-    global $chatgpt_diagnostics;
+    global $chatbot_chatgpt_diagnostics;
     global $learningMessages;
     global $errorResponses;
+    global  $stopWords;
 
     // Reporting - Ver 1.6.3
     global $wpdb;
@@ -318,7 +324,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
  
     // Context History - Ver 1.6.1
      $chatgpt_last_response = concatenateHistory('context_history');
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('context_history' . print_r($chatgpt_last_response, true));
     
     // IDEA Strip any href links and text from the $chatgpt_last_response
@@ -336,7 +342,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
     $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('$context: ' . print_r($context, true));
 
     // Added Role, System, Content Static Veriable - Ver 1.6.0
@@ -353,7 +359,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Context History - Ver 1.6.1
     addEntry('context_history', $message);
 
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('storedc: ' . print_r($chatbot_chatgpt_kn_conversation_context, true));
     // error_log('context: ' . print_r($context, true));
     // error_log('message: ' . print_r($message, true));  
@@ -383,14 +389,43 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $highest_score = 0;
     $highest_score_word = "";
     $highest_score_url = "";
-    foreach ($words as $word) {
+
+    // Strip out $stopWords
+    $words = array_diff($words, $stopWords);
+    // DIAG Error_log for $words - Ver 1.6.5
+    // error_log('$words: ' . print_r($words, true));
+
+    // Loop through each word in the message
+    foreach ($words as $key => $word) {
         // Strip off any trailing punctuation
         $word = rtrim($word, ".,;:!?");
+    
         // Check for plural
-        if (substr($word, -1) == "s") {
-            $word_singular = substr($word, 0, -1);
-            $words[] = $word_singular;
+        // if (substr($word, -1) == "s") {
+        //     $word_singular = substr($word, 0, -1);
+        //     $words[] = $word_singular;
+        // }
+   
+        // Remove s at end of any words - Ver 1.6.5 - 2023 10 11
+        $word = rtrim($word, 's');
+
+        // Count the number of $words
+        $word_count = count($words);
+    
+        // Check if the key exists before accessing it
+        if (isset($words[$key + 1])) {
+            // Create the word pair
+            $word_pair = $word . " " . $words[$key + 1];
+    
+            // Find the highest score for the word pair
+            $result = $wpdb->get_row($wpdb->prepare("SELECT score, url FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT 1", $word_pair));
+            if ($result !== null && $result->score > $highest_score) {
+                $highest_score = $result->score;
+                $highest_score_word = $word_pair;
+                $highest_score_url = $result->url;
+            }
         }
+    
         // Find the highest score for the word
         $result = $wpdb->get_row($wpdb->prepare("SELECT score, url FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT 1", $word));
         if ($result !== null && $result->score > $highest_score) {
@@ -403,6 +438,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     if (!isset($response_body['content'])) {
         $response_body['content'] = "";
     }
+
+    // DIAG Diagnostic - Ver 1.6.5
+    // error_log('$highest_score: ' . print_r($highest_score, true));
+    // error_log('$highest_score_word: ' . print_r($highest_score_word, true));
+    // error_log('$highest_score_url: ' . print_r($highest_score_url, true));
 
     // IDEA Append message and link if found to ['choices'][0]['message']['urls']
     if ($highest_score > 0) {
@@ -468,9 +508,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
 
 function enqueue_greetings_script() {
-    global $chatgpt_diagnostics;
+    global $chatbot_chatgpt_diagnostics;
 
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('ENTERING enqueue_greetings_script');
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
@@ -482,7 +522,7 @@ function enqueue_greetings_script() {
 
     wp_localize_script('greetings', 'greetings_data', $greetings);
 
-    // Diagnostics - Ver 1.6.1
+    // DIAG Diagnostics - Ver 1.6.1
     // error_log('EXITING enqueue_greetings_script');
 
 }

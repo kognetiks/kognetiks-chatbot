@@ -13,7 +13,7 @@
 if ( ! defined( 'WPINC' ) )
 die;
 
-global $topwords, $words, $start_url, $domain, $max_top_words, $chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $no_of_items_analyzed;
+global $topwords, $words, $start_url, $domain, $max_top_words, $chatbot_chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $no_of_items_analyzed;
 $start_url = site_url();
 $domain = parse_url($start_url, PHP_URL_HOST);
 $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)); // Default to 25

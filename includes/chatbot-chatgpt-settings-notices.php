@@ -16,6 +16,15 @@ die;
 // Notify outcomes - Ver 1.6.3
 function display_option_value_admin_notice() {
 
+
+    // Suppress Notices On/Off - Ver 1.6.5
+    global $chatbot_chatgpt_suppress_notices;
+    $chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppress_notices', 'Off'));
+
+    if ($chatbot_chatgpt_suppress_notices == 'On') {
+        return;
+    }
+
     $kn_results = get_option('chatbot_chatgpt_kn_results');
     if ($kn_results) {
         // Check if notice is already dismissed

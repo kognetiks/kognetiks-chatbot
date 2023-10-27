@@ -97,7 +97,7 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
     // Check if the option updated is related to your plugin settings
     // if ($option_name === 'chatgpt_model_choice' || $option_name === 'chatgpt_api_key' || empty($chatbot_chatgpt_api_status)) {
     if ($option_name === 'chatgpt_model_choice' || $option_name === 'chatgpt_api_key') {
-                    $api_key = get_option('chatgpt_api_key', 'NOT SET');
+        $api_key = get_option('chatgpt_api_key', 'NOT SET');
 
         // Call your test function
         $test_result = test_chatgpt_api($api_key);

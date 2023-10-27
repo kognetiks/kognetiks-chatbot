@@ -15,7 +15,7 @@ jQuery(document).ready(function ($) {
     }
 
     // DIAG - Diagnostics = Ver 1.4.2
-    // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+    // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
     //     console.log('FUNCTION: chatbot-chatgpt.js');
     // }
 
@@ -46,12 +46,27 @@ jQuery(document).ready(function ($) {
     
         // Get the stored greeting message. If it's not set, default to a custom value.
         var avatarGreeting = localStorage.getItem('chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
+
+        // Revised to address cross-site scripting - Ver 1.6.4
+        // // Create a bubble with the greeting message
+        // var bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
     
-        // Create a bubble with the greeting message
-        var bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
-    
+        // // Append the avatar and the bubble to the button and apply the class for the avatar icon
+        // chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
+
+        // IDEA - Add option to suppress avatar greeting in setting options page
+        // IDEA - If blank greeting, don't show the bubble
+        // IDEA - Add option to suppress avatar greeting if clicked on
+
+        // Sanitize the avatarGreeting variable
+        var sanitizedGreeting = $('<div>').text(avatarGreeting).html();
+
+        // Create a bubble with the sanitized greeting message
+        var bubble = $('<div>').html(sanitizedGreeting).addClass('chatbot-bubble');
+
         // Append the avatar and the bubble to the button and apply the class for the avatar icon
         chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
+
     } else {
         // If no avatar is selected or the selected avatar is 'icon-000.png', use the dashicon
         // Remove the avatar-icon class (if it was previously added) and add the dashicon class
@@ -86,7 +101,7 @@ jQuery(document).ready(function ($) {
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
 
             // DIAG - Logging for Diagnostics - Ver 1.4.2
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at isFirstTime');
             // }
 
@@ -113,7 +128,7 @@ jQuery(document).ready(function ($) {
             initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
             // DIAG - Logging for Diagnostics - Ver 1.4.2
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at else');
             // }
 
@@ -246,8 +261,17 @@ jQuery(document).ready(function ($) {
                     if (botResponse.includes('[URL: ')) {
                         // DIAG - Diagnostics - Ver 1.6.3
                         // console.log("URL found in bot response");
+                        // let urlRegex = /\[URL: (.*?)\]/g;
+                        // let link = botResponse.match(urlRegex)[0].replace('[URL: ', '').replace(']', '');
+
+                        let link = '';
                         let urlRegex = /\[URL: (.*?)\]/g;
-                        let link = botResponse.match(urlRegex)[0].replace('[URL: ', '').replace(']', '');
+                        let match = botResponse.match(urlRegex);
+                        if (match && match.length > 0) {
+                            link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
+                            console.log(link);
+                        }
+
                         let linkElement = document.createElement('a');
                         linkElement.href = link;
                         linkElement.textContent = 'here';
@@ -257,6 +281,7 @@ jQuery(document).ready(function ($) {
                         botResponse = document.createElement('div');
                         botResponse.appendChild(textElement);
                         botResponse.appendChild(linkElement);
+                        botResponse.innerHTML += '.';
                         botResponse = botResponse.outerHTML;
                     }
 
@@ -320,7 +345,7 @@ jQuery(document).ready(function ($) {
         // }
 
         // DIAG - Diagnostics - Ver 1.5.0
-        // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+        // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - BEFORE DECISION');
         // }
 
@@ -339,7 +364,7 @@ jQuery(document).ready(function ($) {
         };
 
         // DIAG - Diagnostics - Ver 1.5.0
-        // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+        // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - AFTER DECISION');
         // }
         
@@ -360,7 +385,7 @@ jQuery(document).ready(function ($) {
     function scrollToBottom() {
         setTimeout(() => {
             // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log("FUNCTION: Scrolling to bottom");
             // }
             conversation.scrollTop(conversation[0].scrollHeight);
@@ -373,13 +398,13 @@ jQuery(document).ready(function ($) {
         localStorage.setItem('chatgptStartStatusNewVisitor', 'Closed');
   
         // DIAG - Diagnostics - Ver 1.5.0
-        // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+        // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadConversation');
         // }
 
         if (storedConversation) {
             // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: loadConversation - IN THE IF STATEMENT');
             // }
 
@@ -392,7 +417,7 @@ jQuery(document).ready(function ($) {
             setTimeout(scrollToBottom, 0);
         } else {
             // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatgpt_diagnostics === 'On') {
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: loadConversation - IN THE ELSE STATEMENT');
             // }
             initializeChatbot();

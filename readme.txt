@@ -3,8 +3,8 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
-Tested up to: 6.3
-Stable tag: 1.6.4
+Tested up to: 6.3.2
+Stable tag: 1.6.5
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -22,6 +22,8 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experie
 ✨ **How Does It Work?** It employs a method known as TF-IDF (Term Frequency-Inverse Document Frequency) to rank keywords by relevance. This sophisticated measure highlights the unique keywords that define your content, all neatly tucked away in "results.csv" and "results.json" files within the plugin's folder.
 
 🎨 **Personalize with Custom Avatars!** Enhance user engagement with avatars that suit your site's personality. Navigate to the plugin settings, choose your avatar, and enjoy a unique touch of creativity. New screenshots available!
+
+🚀 Now you can drive traffic to specific pages with customizable buttons offering direct links to your site content.  For example, you could link directly to a contact form or email address.
 
 🤖 **Why Choose Chatbot ChatGPT?**
 
@@ -135,6 +137,13 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
 
 == Changelog ==
+
+= 1.6.5 =
+* Added option for two user configurable buttons at the bottom of the chat bot - See Settings - Custom
+* User configurable buttons can direct chatters to contact forms, email, or other pages
+* Added a new option to check API key validity - See Settings > Diagnostics & Notices
+* Added support for Echo Knowlege Base (EKB) post_type - Ver 1.6.5
+* Minor updates to the Knowledge Navigator for better handling of site content
 
 = 1.6.4 =
 * Minor Updates
