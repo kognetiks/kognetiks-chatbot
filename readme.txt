@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.0
 Tested up to: 6.3.2
-Stable tag: 1.6.5
+Stable tag: 1.6.6
 Requires PHP: 7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -137,6 +137,9 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
 
 == Changelog ==
+
+= 1.6.6 =
+* TBD
 
 = 1.6.5 =
 * Added option for two user configurable buttons at the bottom of the chat bot - See Settings - Custom
