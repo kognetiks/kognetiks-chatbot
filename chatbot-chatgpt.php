@@ -94,6 +94,8 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Defaults for Ver 1.6.1
     $defaults = array(
         'chatgpt_bot_name' => 'Chatbot ChatGPT',
+        // TODO IDEA - Add a setting to fix or randomize the bot prompt
+        'chatgpt_chatbot_bot_prompt' => 'Enter your message ...',
         'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatgptStartStatus' => 'closed',
@@ -119,6 +121,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Revised for Ver 1.5.0 
     $option_keys = array(
         'chatgpt_bot_name',
+        'chatgpt_chatbot_bot_prompt', // Added in Ver 1.6.6
         'chatgpt_initial_greeting',
         'chatgpt_subsequent_greeting',
         'chatgptStartStatus',

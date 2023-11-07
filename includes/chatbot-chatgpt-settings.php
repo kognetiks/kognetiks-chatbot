@@ -85,6 +85,7 @@ function chatbot_chatgpt_settings_page_html() {
                         // Changed const to var - Ver 1.5.0
                         // Get the input elements by their ids
                         var chatgptNameInput = document.getElementById('chatgpt_bot_name');
+                        var chatgpt_chatbot_bot_promptInput = document.getElementById('chatgpt_chatbot_bot_prompt');
                         var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
                         var chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
                         var chatgptStartStatusInput = document.getElementById('chatgptStartStatus');
@@ -108,6 +109,7 @@ function chatbot_chatgpt_settings_page_html() {
 
                         // Update the local storage with the input values, if inputs exist
                         if(chatgptNameInput) localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
+                        if(chatgpt_chatbot_bot_promptInput) localStorage.setItem('chatgpt_chatbot_bot_prompt', chatgpt_chatbot_bot_promptInput.value
                         if(chatgptInitialGreetingInput) localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
                         if(chatgptSubsequentGreetingInput) localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
                         if(chatgptStartStatusInput) localStorage.setItem('chatgptStartStatus', chatgptStartStatusInput.value);

@@ -66,3 +66,21 @@ $errorResponses = [
     " The OpenAI API encountered an error, but don't worry, it happens. Let's give it another shot later.",
     " It looks like there could be a technical problem with the OpenAI API. Feel free to try again in a bit to see if things are working smoothly."
 ];
+
+// Declare the $chatbot_chatgpt_bot_prompt as global - Ver 1.6.6
+global $chatgpt_chatbot_bot_prompt;
+$chatgpt_chatbot_bot_prompt = [
+    "Enter your message ...",
+    "Ask me a question ...",
+    "I'm listening ...",
+    "I'm here to help ...",
+    "Please share your thoughts ...",
+    "Feel free to ask me anything ...",
+    "Go ahead and ask away ...",
+    "What are you thinking ...",
+    "Any thoughts to share ...",
+    "Any specific questions ...",
+    "What are you pondering ...",
+    "What's on your mind ...",
+    "What would you like to talk about ..."
+];

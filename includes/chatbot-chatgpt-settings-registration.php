@@ -72,6 +72,8 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_settings', 'chatgpt_bot_name');
     register_setting('chatbot_chatgpt_settings', 'chatgptStartStatus');
     register_setting('chatbot_chatgpt_settings', 'chatgptStartStatusNewVisitor');
+    // Added in Ver 1.6.6
+    register_setting('chatbot_chatgpt_settings', 'chatgpt_chatbot_bot_prompt');
     register_setting('chatbot_chatgpt_settings', 'chatgpt_initial_greeting');
     register_setting('chatbot_chatgpt_settings', 'chatgpt_subsequent_greeting');
     // Option to remove the OpenAI disclaimer - Ver 1.4.1
@@ -108,6 +110,14 @@ function chatbot_chatgpt_settings_init() {
         'chatgptStartStatusNewVisitor',
         'Start Status New Visitor',
         'chatbot_chatgptStartStatusNewVisitor_callback',
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_settings_section'
+    );
+
+        add_settings_field(
+        'chatgpt_chatbot_bot_prompt',
+        'Chatbot Prompt',
+        'chatbot_chatgpt_bot_prompt_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
     );

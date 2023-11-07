@@ -33,13 +33,17 @@ function chatbot_chatgpt_api_key_callback($args) {
     <?php
 }
 
-
+// OpenAI Models
+// https://platform.openai.com/docs/models
+// TODO EXPAND THE LIST OF MODELS
+// https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
     // Get the saved chatgpt_model_choice value or default to "gpt-3.5-turbo"
     $model_choice = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     ?>
     <select id="chatgpt_model_choice" name="chatgpt_model_choice">
+        <option value="<?php echo esc_attr( 'gpt-4-1106-preview' ); ?>" <?php selected( $model_choice, 'gpt-4-1106-preview' ); ?>><?php echo esc_html( 'gpt-4-1106-preview' ); ?></option>
         <!-- Allow for gpt-4 in Ver 1.4.2 -->
         <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
         <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>

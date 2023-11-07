@@ -133,7 +133,7 @@ function chatbot_chatgpt_kn_acquire() {
             );
         }
 
-        // Log the URL and the $words array
+        // TODO Log the URL and the $words array
         error_log($url . "\n", 3, $log_file_posts);
         error_log(print_r($words, true) . "\n", 3, $log_file_posts);
 
@@ -196,9 +196,13 @@ function chatbot_chatgpt_kn_acquire() {
             );
         }
 
-        // Log the URL and the $words array
+        // TODO Log the URL and the $words array
         error_log($url . "\n", 3, $log_file_pages);
         error_log(print_r($words, true) . "\n", 3, $log_file_pages);
+
+        error_log($url . "\n", 3, $log_file_pages);
+        error_log(print_r($word_pairs, true) . "\n", 3, $log_file_pages);
+        
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;
         update_option('no_of_items_analyzed', $no_of_items_analyzed);
@@ -255,9 +259,13 @@ function chatbot_chatgpt_kn_acquire() {
             );
         }
 
-        // Log the URL and the $words array
+        // TODO Log the URL and the $words array
         error_log($url . "\n", 3, $log_file_comments);
         error_log(print_r($words, true) . "\n", 3, $log_file_comments);
+
+        error_log($url . "\n", 3, $log_file_comments);
+        error_log(print_r($word_pairs, true) . "\n", 3, $log_file_comments);
+        
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;
         update_option('no_of_items_analyzed', $no_of_items_analyzed);
