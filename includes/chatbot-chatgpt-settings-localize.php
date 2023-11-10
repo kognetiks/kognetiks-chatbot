@@ -74,7 +74,7 @@ function chatbot_chatgpt_localize(){
     // Update localStorage - Ver 1.6.1
     echo "<script type=\"text/javascript\">
     document.addEventListener('DOMContentLoaded', (event) => {
-        // FIXME - WORKING
+        // Encode the chatbot settings array into JSON format for use in JavaScript
         let chatbotSettings = " . json_encode($chatbot_settings) . ";
 
         Object.keys(chatbotSettings).forEach((key) => {

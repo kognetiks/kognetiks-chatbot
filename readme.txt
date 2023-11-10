@@ -5,7 +5,7 @@ Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4
 Stable tag: 1.6.6
-Requires PHP: 7.3
+Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,7 +29,13 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experie
 
 * Intuitive & Human-like Interactions: Powered by OpenAI's Large Language Model (LLM) API, ChatGPT uses natural language processing to engage with users in a conversational manner.
 * 24/7 Assistance: Automate customer service, reduce response times, and boost satisfaction across various fields, such as healthcare, education, finance, and more.
-* Easy Integration: Designed to work effortlessly with gpt-3.5-turbo or gpt-4 models, seamlessly bringing life to your WordPress website.
+* Easy Integration: Designed to work effortlessly with OpenAI API seamlessly bringing life to your WordPress website.
+
+✨ **OpenAI Models Supported**
+
+✨ GPT-3.5 (gpt-3.5-turbo)
+✨ GPT-4 (gpt-4 models
+✨ **GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)** 
 
 🚀 **Join Us in the Revolution of Personalized User Experience!**
 
@@ -147,7 +153,7 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 == Changelog ==
 
 = 1.6.6 =
-* Expanded the list of OpenAI models supported - See Settings - API/Model ('gpt-4-1106-preview' with training data up to April 2023)
+* Expanded the list of OpenAI models supported - See Settings - API/Model now supports GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)
 * Added a new option to customize the chatbot's message prompt - See Settings, then Settings
 
 = 1.6.5 =

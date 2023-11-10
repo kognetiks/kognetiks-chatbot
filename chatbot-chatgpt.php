@@ -161,19 +161,19 @@ function chatbot_chatgpt_enqueue_scripts() {
         // 'api_key' => esc_attr(get_option('chatgpt_api_key')),
     ));
 
-    // FIXME - NEEDED?
+    // Populate the chatbot settings array with values from the database, using default values where necessary
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
-        error_log('chatbot-chatgpt Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // error_log('chatbot-chatgpt Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Update localStorage - Ver 1.6.1
     echo "<script type=\"text/javascript\">
     document.addEventListener('DOMContentLoaded', (event) => {
-        // FIXME - WORKING
+        // Encode the chatbot settings array into JSON format for use in JavaScript
         let chatbotSettings = " . json_encode($chatbot_settings) . ";
 
         Object.keys(chatbotSettings).forEach((key) => {
