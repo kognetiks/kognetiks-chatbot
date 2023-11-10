@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.6.5
+ * Version:     1.6.6
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -94,6 +94,8 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Defaults for Ver 1.6.1
     $defaults = array(
         'chatgpt_bot_name' => 'Chatbot ChatGPT',
+        // TODO IDEA - Add a setting to fix or randomize the bot prompt
+        'chatgpt_chatbot_bot_prompt' => 'Enter your message ...',
         'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatgptStartStatus' => 'closed',
@@ -119,6 +121,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Revised for Ver 1.5.0 
     $option_keys = array(
         'chatgpt_bot_name',
+        'chatgpt_chatbot_bot_prompt', // Added in Ver 1.6.6
         'chatgpt_initial_greeting',
         'chatgpt_subsequent_greeting',
         'chatgptStartStatus',
@@ -158,9 +161,19 @@ function chatbot_chatgpt_enqueue_scripts() {
         // 'api_key' => esc_attr(get_option('chatgpt_api_key')),
     ));
 
+    // Populate the chatbot settings array with values from the database, using default values where necessary
+    $chatbot_settings = array();
+    foreach ($option_keys as $key) {
+        $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
+        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+        // DIAG - Log key and value
+        // error_log('chatbot-chatgpt Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+    }
+
     // Update localStorage - Ver 1.6.1
     echo "<script type=\"text/javascript\">
     document.addEventListener('DOMContentLoaded', (event) => {
+        // Encode the chatbot settings array into JSON format for use in JavaScript
         let chatbotSettings = " . json_encode($chatbot_settings) . ";
 
         Object.keys(chatbotSettings).forEach((key) => {
@@ -261,6 +274,7 @@ function addEntry($transient_name, $newEntry) {
         }
     }
 
+    // IDEA - How will the new threading option from OpenAI change how this works?
     // Define thresholds for the number of entries to keep
     $maxEntries = 30; // Default maximum number of entries
     if ($totalLength > 5000) { // Higher threshold
@@ -381,6 +395,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
+    if (isset($response_body['message'])) {
+        $response_body['message'] = trim($response_body['message']);
+        if (substr($response_body['message'], -1) !== '.') {
+            $response_body['message'] .= '.';
+        }
+    }
 
     // Retrieve links to the highest scoring documents - Ver 1.6.3
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';

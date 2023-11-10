@@ -2,12 +2,15 @@ jQuery(document).ready(function ($) {
     
     function chatbot_chatgpt_localize() {
 
+        // Replaced with this statement - Ver 1.6.6 - 2023 11 10
+        // FIXME - WORKING - Ver 1.6.6
         // let chatbotSettings = " . json_encode($chatbot_settings) . ";
     
         // console.log('ENTERING chatbot_chatgpt_localize');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         var chatgptName = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_bot_name) ? chatbotSettings.chatgpt_bot_name : 'Chatbot ChatGPT';
+        var chatgpt_chatbot_bot_prompt = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_chatbot_bot_prompt) ? chatbotSettings.chatgpt_chatbot_bot_prompt : 'Enter your message ...';
         var chatgptInitialGreeting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.initial_greeting) ? chatbotSettings.initial_greeting : 'Hello! How can I help you today?';
         var chatgptSubsequentGreeting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_subsequent_greeting) ? chatbotSettings.chatgpt_subsequent_greeting : 'Hello again! How can I help you?';
         var chatgptStartStatus = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgptStartStatus) ? chatbotSettings.chatgptStartStatus : 'closed';
@@ -28,7 +31,9 @@ jQuery(document).ready(function ($) {
         var chatgptCustomButtonName2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_2) ? chatbotSettings.chatbot_chatgpt_custom_button_name_2 : '';
         var chatgptCustomButtonURL2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_2) ? chatbotSettings.chatbot_chatgpt_custom_button_url_2 : '';
 
-        let chatbotSettings = " . json_encode($chatbot_settings) . ";
+        // THIS STATEMENT WAS ALREADY REMOVED - Ver 1.6.6 - 2023 11 10
+        // FIXME - WORKING - Ver 1.6.6
+        // let chatbotSettings = " . json_encode($chatbot_settings) . ";
     
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
@@ -43,6 +48,7 @@ jQuery(document).ready(function ($) {
 
         // Get the input elements
         var chatgptNameInput = document.getElementById('chatgpt_bot_name');
+        var chatgpt_chatbot_bot_prompt = document.getElementById('chatgpt_chatbot_bot_prompt');
         var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
         var chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
         var chatgptStartStatusInput = document.getElementById('chatgptStartStatus');
@@ -64,6 +70,12 @@ jQuery(document).ready(function ($) {
         if(chatgptNameInput) {
             chatgptNameInput.addEventListener('change', function() {
                 localStorage.setItem('chatgpt_bot_name', this.value);
+            });
+        }
+
+        if(chatgpt_chatbot_bot_prompt) {
+            chatgpt_chatbot_bot_prompt.addEventListener('change', function() {
+                localStorage.setItem('chatgpt_chatbot_bot_prompt', this.value);
             });
         }
 
@@ -211,6 +223,7 @@ jQuery(document).ready(function ($) {
 
                 // Changed const to var - Ver 1.5.0
                 var chatgptNameInput = document.getElementById('chatgpt_bot_name');
+                var chatgpt_chatbot_bot_prompt = document.getElementById('chatgpt_chatbot_bot_prompt');
                 var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
                 var chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
                 var chatgptStartStatusInput = document.getElementById('chatgptStartStatus');
@@ -232,6 +245,10 @@ jQuery(document).ready(function ($) {
 
                 if(chatgptNameInput) {
                     localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
+                }
+
+                if(chatgpt_chatbot_bot_prompt) {
+                    localStorage.setItem('chatgpt_chatbot_bot_prompt', chatgpt_chatbot_bot_prompt.value);
                 }
 
                 if(chatgptInitialGreetingInput) {

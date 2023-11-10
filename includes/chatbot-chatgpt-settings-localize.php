@@ -17,6 +17,7 @@ function chatbot_chatgpt_localize(){
 
     $defaults = array(
         'chatgpt_bot_name' => 'Chatbot ChatGPT',
+        'chatgpt_chatbot_bot_prompt' => 'Enter your message ...',
         'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatgptStartStatus' => 'closed',
@@ -36,12 +37,13 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_custom_button_name_1' => '',
         'chatbot_chatgpt_custom_button_url_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',
-        'chatbot_chatgpt_custom_button_url_2' => '',
+        'chatbot_chatgpt_custom_button_url_2' => ''
     );
 
     // Revised for Ver 1.5.0 
     $option_keys = array(
         'chatgpt_bot_name',
+        'chatgpt_chatbot_bot_prompt',
         'chatgpt_initial_greeting',
         'chatgpt_subsequent_greeting',
         'chatgptStartStatus',
@@ -58,18 +60,21 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_custom_button_name_1',
         'chatbot_chatgpt_custom_button_url_1',
         'chatbot_chatgpt_custom_button_name_2',
-        'chatbot_chatgpt_custom_button_url_2',
+        'chatbot_chatgpt_custom_button_url_2'
     );
 
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+        // DIAG - Log key and value
+        // error_log('chatbot-chatgpt-settings-localize Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Update localStorage - Ver 1.6.1
     echo "<script type=\"text/javascript\">
     document.addEventListener('DOMContentLoaded', (event) => {
+        // Encode the chatbot settings array into JSON format for use in JavaScript
         let chatbotSettings = " . json_encode($chatbot_settings) . ";
 
         Object.keys(chatbotSettings).forEach((key) => {

@@ -19,7 +19,33 @@ function chatbot_chatgpt_diagnostics_section_callback($args) {
     <p>The Diagnostics tab checks the API status and set options for diagostics and notices.</p>
     <p>You can turn on/off console and error logging (as of Version 1.6.5 most if now commented out).</p>
     <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
+    <h2>System and Plugin Information</h2>
     <?php
+    // Get PHP version
+    $php_version = phpversion();
+
+    // Get WordPress version
+    global $wp_version;
+
+    echo '<p>PHP Version: <b>' . $php_version . '</b><br>';
+    echo 'WordPress Version: <b>' . $wp_version . '</b><br>';
+    // echo 'Chatbot ChatGPT Version: <b>' . esc_attr(get_option('chatbot_chatgpt_plugin_version')) . '</b></p>';
+    echo 'Chatbot ChatGPT Version: <b>' . get_plugin_version() . '</b></p>';
+    echo '<h2>API Status and Other Settings</h2>';
+}
+
+// Return the version of the plugin
+function get_plugin_version() {
+    if (!function_exists('get_plugin_data')) {
+        require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+    }
+
+    $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . '../chatbot-chatgpt.php');
+    $plugin_version = $plugin_data['Version'];
+    // Set the plugin version in the database
+    update_option('chatbot_chatgpt_plugin_version', $plugin_version);
+
+    return $plugin_version;
 }
 
 // Call the api-test.php file to test the API

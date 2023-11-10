@@ -81,6 +81,7 @@ jQuery(document).ready(function ($) {
     localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
     // Handle disclaimer - Ver 1.4.1
     var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
+    var chatgpt_chatbot_bot_prompt = localStorage.getItem('chatgpt_chatbot_bot_prompt') || 'Enter your message ...';
 
     // Append the collapse button and collapsed chatbot icon to the chatbot container
     chatbotContainer.append(chatbotCollapseBtn);
@@ -163,7 +164,7 @@ jQuery(document).ready(function ($) {
     function appendMessage(message, sender, cssClass) {
 
         var messageElement = $('<div></div>').addClass('chat-message');
-        // Use HTML for the so that links are clickable - Ver 1.6.3
+        // Use HTML for the response so that links are clickable - Ver 1.6.3
         var textElement = $('<span></span>').html(message);
 
         // Add initial greetings if first time
@@ -269,7 +270,8 @@ jQuery(document).ready(function ($) {
                         let match = botResponse.match(urlRegex);
                         if (match && match.length > 0) {
                             link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
-                            console.log(link);
+                            // DAIG - Diagnostics - Ver 1.6.3
+                            // console.log(link);
                         }
 
                         let linkElement = document.createElement('a');
@@ -308,7 +310,7 @@ jQuery(document).ready(function ($) {
     messageInput.on('keydown', function (e) {
         if (e.keyCode === 13) {
             e.preventDefault();
-            submitButton.click();
+            submitButton.trigger('click');
         }
     });
 

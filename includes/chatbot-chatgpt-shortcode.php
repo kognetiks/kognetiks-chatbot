@@ -16,6 +16,7 @@ function chatbot_chatgpt_shortcode() {
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
     $bot_name = esc_attr(get_option('chatgpt_bot_name', 'Chatbot ChatGPT'));
+    $chatgpt_chatbot_bot_prompt = esc_attr(get_option('chatgpt_chatbot_bot_prompt', 'Enter your message ...'));
 
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
     // global $chatbot_chatgpt_enable_custom_buttons;
@@ -23,14 +24,15 @@ function chatbot_chatgpt_shortcode() {
 
     ob_start();
     ?>
-    <div id="chatbot-chatgpt" style="display: none;">
+    <!-- Romoved styling as I believe this may cause problems with some themes Ver 1.6.6 -->
+    <!-- <div id="chatbot-chatgpt" style="display: none;"> -->
+    <div id="chatbot-chatgpt">
         <div id="chatbot-chatgpt-header">
             <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
         </div>
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
-        <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( 'Type your message ...' ); ?>"> -->
-        <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( 'Enter your message ...' ); ?>">
+        <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
             <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
             <button id="chatbot-chatgpt-submit">
                 <img src="<?php echo plugins_url('../assets/icons/paper-airplane-icon.png', __FILE__); ?>" alt="Send">

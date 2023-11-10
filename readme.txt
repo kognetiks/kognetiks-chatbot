@@ -2,10 +2,10 @@
 Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
-Requires at least: 5.0
-Tested up to: 6.3.2
-Stable tag: 1.6.5
-Requires PHP: 7.3
+Requires at least: 5.5
+Tested up to: 6.4
+Stable tag: 1.6.6
+Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,7 +29,13 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experie
 
 * Intuitive & Human-like Interactions: Powered by OpenAI's Large Language Model (LLM) API, ChatGPT uses natural language processing to engage with users in a conversational manner.
 * 24/7 Assistance: Automate customer service, reduce response times, and boost satisfaction across various fields, such as healthcare, education, finance, and more.
-* Easy Integration: Designed to work effortlessly with gpt-3.5-turbo or gpt-4 models, seamlessly bringing life to your WordPress website.
+* Easy Integration: Designed to work effortlessly with OpenAI API seamlessly bringing life to your WordPress website.
+
+✨ **OpenAI Models Supported**
+
+✨ GPT-3.5 (gpt-3.5-turbo)
+✨ GPT-4 (gpt-4 models
+✨ **GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)** 
 
 🚀 **Join Us in the Revolution of Personalized User Experience!**
 
@@ -47,7 +53,7 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 
 🎉 **Effortless Integration**: Get started in minutes with an easy setup process, fully integrated with OpenAI's ChatGPT API.
 
-🚀 **Cutting-Edge Support**: Benefit from support for gpt-3.5-turbo and the next-gen gpt-4 from OpenAI.
+🚀 **Cutting-Edge Support**: Benefit from support for gpt-3.5-turbo and the next-gen gpt-4 from OpenAI.  Now with an expanded list of OpenAI models supported, including the latest GPT-4 Turbo ('gpt-4-1106-preview') featuring improved instruction following, JSON mode, reproducibility outputs, parallel function calling and more.
 
 💬 **Elegant Floating Chatbot Interface**: Customize the appearance for a sleek and engaging user experience.
 
@@ -76,6 +82,12 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 5. Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]
 
 Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI's ChatGPT API.
+
+== Plugin Support and FAQs ==
+
+💬 Looking for **plugin support**, please visit [https://kognetiks.com/wordpress-plugins/plugin-support/](https://kognetiks.com/wordpress-plugins/plugin-support/).
+
+📜 For **frequently asked questions**, please visit [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
 
 == API Key Safety and Security ==
 
@@ -118,6 +130,8 @@ The ChatGPT API currently supports English. However, you can configure the chatb
 
 The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are the same models found in the ChatGPT product from OpenAI.
 
+The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-1106-preview' featuring improved instruction following based on training data up to April 2023.
+
 == Screenshots ==
 
 1. Inital Chatbot ChatGPT display
@@ -138,8 +152,12 @@ The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are t
 
 == Changelog ==
 
+= 1.6.6 =
+* Expanded the list of OpenAI models supported - See Settings - API/Model now supports GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)
+* Added a new option to customize the chatbot's message prompt - See Settings, then Settings
+
 = 1.6.5 =
-* Added option for two user configurable buttons at the bottom of the chat bot - See Settings - Custom
+* Added option for two user configurable buttons at the bottom of the chat bot - See Settings - Custom Buttons
 * User configurable buttons can direct chatters to contact forms, email, or other pages
 * Added a new option to check API key validity - See Settings > Diagnostics & Notices
 * Added support for Echo Knowlege Base (EKB) post_type - Ver 1.6.5

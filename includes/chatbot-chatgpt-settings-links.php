@@ -58,7 +58,7 @@ function chatbot_chatgpt_admin_footer() {
             // console.log("Document ready");
             var modal;
 
-            $('a.chatbot-settings').click(function(e) {
+            $('a.chatbot-settings').on('click', function(e) {
                 // DIAG - Log the settings link clicked status
                 // console.log("Settings link clicked");
             });
@@ -137,7 +137,7 @@ function chatbot_chatgpt_admin_footer() {
             $('a[href*="plugins.php?action=deactivate&plugin=chatbot-chatgpt"]').addClass('chatbot-deactivate-link');
           
             // Handle click on the deactivation link
-            $('a[href*="plugins.php?action=deactivate&plugin=chatbot-chatgpt"]').click(function(e) {
+            $('a[href*="plugins.php?action=deactivate&plugin=chatbot-chatgpt"]').on('click',function(e) {
                 e.preventDefault();
                 // DIAG - Log the deactivation link clicked status
                 // console.log("Deactivation link clicked");
