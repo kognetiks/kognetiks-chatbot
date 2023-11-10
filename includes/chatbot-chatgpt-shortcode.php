@@ -24,14 +24,14 @@ function chatbot_chatgpt_shortcode() {
 
     ob_start();
     ?>
-    <div id="chatbot-chatgpt" style="display: none;">
+    <!-- Romoved styling as I believe this may cause problems with some themes Ver 1.6.6 -->
+    <!-- <div id="chatbot-chatgpt" style="display: none;"> -->
+    <div id="chatbot-chatgpt">
         <div id="chatbot-chatgpt-header">
             <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
         </div>
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
-        <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( 'Type your message ...' ); ?>"> -->
-        <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( 'Enter your message ...' ); ?>"> -->
         <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
             <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
             <button id="chatbot-chatgpt-submit">

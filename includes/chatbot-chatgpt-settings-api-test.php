@@ -79,7 +79,9 @@ die;
     update_option('chatbot_chatgpt_api_status', $updated_status);
     $updated_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
     // TODO - Monitor the chatbot_chatgpt_api_status option for changes
-    error_log('chatbot_chatgpt_api_status: ' . $updated_status);
+    if('On' === get_option('chatbot_chatgpt_diagnostics')) {
+        error_log('chatbot_chatgpt_api_status: ' . esc_html($updated_status));
+    }
 
 }
 

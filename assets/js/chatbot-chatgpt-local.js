@@ -2,7 +2,9 @@ jQuery(document).ready(function ($) {
     
     function chatbot_chatgpt_localize() {
 
-        let chatbotSettings = " . json_encode($chatbot_settings) . ";
+        // Replaced with this statement - Ver 1.6.6 - 2023 11 10
+        // FIXME - WORKING - Ver 1.6.6
+        // let chatbotSettings = " . json_encode($chatbot_settings) . ";
     
         // console.log('ENTERING chatbot_chatgpt_localize');
 
@@ -29,6 +31,8 @@ jQuery(document).ready(function ($) {
         var chatgptCustomButtonName2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_2) ? chatbotSettings.chatbot_chatgpt_custom_button_name_2 : '';
         var chatgptCustomButtonURL2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_2) ? chatbotSettings.chatbot_chatgpt_custom_button_url_2 : '';
 
+        // THIS STATEMENT WAS ALREADY REMOVED - Ver 1.6.6 - 2023 11 10
+        // FIXME - WORKING - Ver 1.6.6
         // let chatbotSettings = " . json_encode($chatbot_settings) . ";
     
         Object.keys(chatbotSettings).forEach((key) => {

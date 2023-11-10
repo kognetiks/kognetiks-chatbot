@@ -164,7 +164,7 @@ jQuery(document).ready(function ($) {
     function appendMessage(message, sender, cssClass) {
 
         var messageElement = $('<div></div>').addClass('chat-message');
-        // Use HTML for the so that links are clickable - Ver 1.6.3
+        // Use HTML for the response so that links are clickable - Ver 1.6.3
         var textElement = $('<span></span>').html(message);
 
         // Add initial greetings if first time
@@ -270,7 +270,8 @@ jQuery(document).ready(function ($) {
                         let match = botResponse.match(urlRegex);
                         if (match && match.length > 0) {
                             link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
-                            console.log(link);
+                            // DAIG - Diagnostics - Ver 1.6.3
+                            // console.log(link);
                         }
 
                         let linkElement = document.createElement('a');

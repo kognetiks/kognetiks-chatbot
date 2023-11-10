@@ -37,7 +37,7 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_custom_button_name_1' => '',
         'chatbot_chatgpt_custom_button_url_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',
-        'chatbot_chatgpt_custom_button_url_2' => '',
+        'chatbot_chatgpt_custom_button_url_2' => ''
     );
 
     // Revised for Ver 1.5.0 
@@ -60,18 +60,21 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_custom_button_name_1',
         'chatbot_chatgpt_custom_button_url_1',
         'chatbot_chatgpt_custom_button_name_2',
-        'chatbot_chatgpt_custom_button_url_2',
+        'chatbot_chatgpt_custom_button_url_2'
     );
 
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+        // DIAG - Log key and value
+        // error_log('chatbot-chatgpt-settings-localize Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Update localStorage - Ver 1.6.1
     echo "<script type=\"text/javascript\">
     document.addEventListener('DOMContentLoaded', (event) => {
+        // FIXME - WORKING
         let chatbotSettings = " . json_encode($chatbot_settings) . ";
 
         Object.keys(chatbotSettings).forEach((key) => {

@@ -161,9 +161,19 @@ function chatbot_chatgpt_enqueue_scripts() {
         // 'api_key' => esc_attr(get_option('chatgpt_api_key')),
     ));
 
+    // FIXME - NEEDED?
+    $chatbot_settings = array();
+    foreach ($option_keys as $key) {
+        $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
+        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+        // DIAG - Log key and value
+        error_log('chatbot-chatgpt Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+    }
+
     // Update localStorage - Ver 1.6.1
     echo "<script type=\"text/javascript\">
     document.addEventListener('DOMContentLoaded', (event) => {
+        // FIXME - WORKING
         let chatbotSettings = " . json_encode($chatbot_settings) . ";
 
         Object.keys(chatbotSettings).forEach((key) => {
@@ -264,6 +274,7 @@ function addEntry($transient_name, $newEntry) {
         }
     }
 
+    // IDEA - How will the new threading option from OpenAI change how this works?
     // Define thresholds for the number of entries to keep
     $maxEntries = 30; // Default maximum number of entries
     if ($totalLength > 5000) { // Higher threshold
@@ -384,6 +395,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
+    if (isset($response_body['message'])) {
+        $response_body['message'] = trim($response_body['message']);
+        if (substr($response_body['message'], -1) !== '.') {
+            $response_body['message'] .= '.';
+        }
+    }
 
     // Retrieve links to the highest scoring documents - Ver 1.6.3
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
