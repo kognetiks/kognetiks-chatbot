@@ -98,20 +98,40 @@
 }
 
 #chatbot-chatgpt-input {
+    /* display: flex;
+    padding: 10px; */
+    /* Ver 1.6.6 Elementor */
     display: flex;
-    padding: 10px;
-}
+    padding: 20px;
+    flex-direction: row;
+    max-width: 70%;}
 
 #chatbot-chatgpt-message {
+    /* flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px; */
+    /* Ver 1.6.6 Elementor */
     flex-grow: 1;
     border: 1px solid #ccc;
     border-radius: 3px;
-    padding: 5px;
+    padding: 2px 5px;
+    box-sizing: border-box;
+    color: #333;
+    /* height: 80%; */
 }
 
 #chatbot-chatgpt-submit {
     /* background-color: #222; */
     /* background-color: white; */
+    /* background-color: #f1f1f1;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 6px 12px;
+    margin-left: 5px;
+    cursor: pointer; */
+    /* Ver 1.6.6 Elementor */
     background-color: #f1f1f1;
     color: #fff;
     border: none;
@@ -119,11 +139,15 @@
     padding: 6px 12px;
     margin-left: 5px;
     cursor: pointer;
+    flex: 0 0 auto;
+    filter: none;
+    box-shadow: none;
 }
 
 #chatbot-chatgpt-submit img {
     /* background-color: white; */
     background-color: #f1f1f1;
+    box-shadow: none; /* Ver 1.6.6 Elementor */
 }
 
 /* CSS for append message */

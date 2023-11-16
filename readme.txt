@@ -34,8 +34,8 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experie
 ✨ **OpenAI Models Supported**
 
 ✨ GPT-3.5 (gpt-3.5-turbo)
-✨ GPT-4 (gpt-4 models
-✨ **GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)** 
+✨ GPT-4 (gpt-4 models)
+✨ **GPT-4 Turbo ('gpt-4-1106-preview' training data up to April 2023)** 
 
 🚀 **Join Us in the Revolution of Personalized User Experience!**
 
@@ -151,6 +151,9 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
 
 == Changelog ==
+
+= 1.6.7 =
+* TBD
 
 = 1.6.6 =
 * Expanded the list of OpenAI models supported - See Settings - API/Model now supports GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)

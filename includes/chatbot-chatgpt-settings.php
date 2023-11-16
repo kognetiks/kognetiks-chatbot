@@ -51,7 +51,7 @@ function chatbot_chatgpt_settings_page_html() {
                 const chatgptStartStatusNewVisitorInput = document.getElementById('chatgptStartStatusNewVisitor');
                 const reminderCount = localStorage.getItem('reminderCount') || 0;
 
-                if (reminderCount < 5) {
+                if (reminderCount % 25 === 0 && reminderCount <= 200) {
                     const messageBox = document.createElement('div');
                     messageBox.id = 'rateReviewMessageBox';
                     messageBox.innerHTML = `
@@ -70,6 +70,12 @@ function chatbot_chatgpt_settings_page_html() {
                         messageBox.style.display = 'none';
                         localStorage.setItem('reminderCount', parseInt(reminderCount, 10) + 1);
                     });
+                } else {
+                    let reminderCount = +localStorage.getItem('reminderCount') || 0;
+                    if (reminderCount < 200) {
+                        reminderCount++;
+                        localStorage.setItem('reminderCount', reminderCount);
+                    }
                 }
             });
         </script>
