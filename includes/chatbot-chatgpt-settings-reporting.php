@@ -150,7 +150,8 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         // Calculate the start date and group by clause based on the reporting period
         if($reporting_period === 'Daily') {
             $start_date = date('Y-m-d', strtotime("-7 days"));
-            $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
+            // $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
+            $group_by = "DATE_FORMAT(date, '%m-%d')";
         } elseif($reporting_period === 'Monthly') {
             $start_date = date('Y-m-01', strtotime("-3 months"));
             $group_by = "DATE_FORMAT(date, '%Y-%m')";

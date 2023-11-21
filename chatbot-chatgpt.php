@@ -227,6 +227,14 @@ function chatbot_chatgpt_send_message() {
 
     // Decide which API to call based settings - Ver 1.6.7
     $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id'));
+    $custom_gpt_assistant_id = esc_attr(get_option('chatbot_chatgpt_custom_gpt_assistant_id'));
+
+    // Check if the Custom GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
+    if (empty($custom_gpt_assistant_id) || $custom_gpt_assistant_id === "Please provide the Customer GPT Assistant Id.") {
+        // Override the $use_assistant_id and set it to 'No'
+        $use_assistant_id = 'No';
+    }
+
     if ($use_assistant_id === 'Yes') {
         // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message);

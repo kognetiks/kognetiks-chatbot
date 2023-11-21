@@ -24,7 +24,8 @@ function chatbot_chatgpt_api_model_section_callback($args) {
     <p><b>CustomGTPs</b></p>
     <p><i>If you have developed a Custom GPT Assistant, you will need the id of the assistant.</p>
     <p>Enter your Custom GPT Assistant Id instead of ChatGPT.  Set the 'Use Custom GPT Assistant ID' to 'Yes'.</p>
-    <p>Otherwise, you can leave the Custom GPT Assistant ID field blank and set the usage to 'No'.</i></p>
+    <p>Otherwise, you can leave the Custom GPT Assistant ID field blank and set the usage to 'No'.</p>
+    <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</i></p>
     <?php
 }
 
@@ -46,13 +47,20 @@ function chatbot_chatgpt_use_custom_gpt_assistant_id_callback($args) {
         <option value="No" <?php selected( $use_assistant_id, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
     </select>
     <?php
+    if ($use_assistant_id == 'No') {
+        update_option('chatbot_chatgpt_assistant_id', '');
+    }
 }
 
 // CustomGPT Assistant Id field callback - Ver 1.6.7
 function chatbot_chatgpt_assistant_id_callback($args) {
-    $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', 'Pleae provide the Custom GPT Assistant id.'));
+    $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', 'Please provide the Custom GPT Assistant Id.'));
+    $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id', 'No'));
+    if ($use_assistant_id == 'Yes' && ($assistant_id == 'Please provide the Custom GPT Assistant Id.' or empty($assistant_id))) {
+        $assistant_id = 'Please provide the Custom GPT Assistant Id.';
+    }
     // Set default value if empty
-    $assistant_id = empty($assistant_id) ? 'Pleae provide the Custom GPT Assistant id.': $assistant_id;
+    // $assistant_id = empty($assistant_id) ? 'Please provide the Custom GPT Assistant Id.': $assistant_id;
     ?>
     <input type="text" id="chatbot_chatgpt_assistant_id" name="chatbot_chatgpt_assistant_id" value="<?php echo esc_attr( $assistant_id ); ?>" class="regular-text">
     <?php
