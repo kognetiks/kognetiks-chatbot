@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Notices
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It handles the notices and other parameters.
+ * 
  *
  * @package chatbot-chatgpt
  */
@@ -34,7 +34,7 @@ function display_option_value_admin_notice() {
             '_chatgpt_dismiss_nonce'
         );
             echo '<div class="notice notice-success is-dismissible"><p><b>Knowledge Navigator Outcome:</b> ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
-            // error_log('Knowledge Navigator Outcome: ' . $kn_results);
+            // error_log( 'Chatbot ChatGPT: Knowledge Navigator Outcome: ' . $kn_results);
     }
 
     // FIXME - NOT CURRENTLY WORKING WITH API-TEST.PHP
@@ -57,7 +57,7 @@ function display_option_value_admin_notice() {
             '_chatgpt_dismiss_nonce'
         );
             echo '<div class="notice notice-success is-dismissible"><p>Please visit the <b>Knowledge Navigator</b> settings, select a <b>Run Schedule</b>, then <b>Save Settings</b>. <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
-            // error_log('API Status: ' . $kn_status);
+            // error_log( 'Chatbot ChatGPT: API Status: ' . $kn_status);
     }
 
 }

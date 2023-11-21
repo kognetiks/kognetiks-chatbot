@@ -3,7 +3,7 @@
  * Chatbot ChatGPT for WordPress - Settings - Diagnostics
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
+ * It allows users to configure the reporting and other parameters
  * required to access the ChatGPT API from their own account.
  *
  * @package chatbot-chatgpt

@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Localize
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It localizes the settings and other parameters.
+ * 
  *
  * @package chatbot-chatgpt
  */
@@ -68,7 +68,7 @@ function chatbot_chatgpt_localize(){
         $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
-        // error_log('chatbot-chatgpt-settings-localize Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // error_log( 'Chatbot ChatGPT: chatbot-chatgpt-settings-localize Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Update localStorage - Ver 1.6.1
@@ -79,11 +79,11 @@ function chatbot_chatgpt_localize(){
 
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
-                // DIAG - Log key and value
+                // DIAG - Log the key and value
                 // console.log('Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
-                // DIAG - Log key and value
+                // DIAG - Log the key and value
                 // console.log(key + ' is already set in localStorage');
             }
         });

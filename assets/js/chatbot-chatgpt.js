@@ -21,7 +21,9 @@ jQuery(document).ready(function ($) {
 
     var chatGptOpenButton = $('#chatgpt-open-btn');
     // Use 'open' for an open chatbot or 'closed' for a closed chatbot - Ver 1.1.0
-    var chatgpt_start_status = 'closed';
+    // var chatgpt_start_status = 'closed';
+    // Updated - Ver 1.6.7
+    var chatgpt_start_status = localStorage.getItem('chatgptStartStatus') || 'closed';
     
     // Initially hide the chatbot - Ver 1.1.0
     chatGptChatBot.hide();

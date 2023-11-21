@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Settings - Reporting Page
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It handles the reporting settings and other parameters.
+ *
  *
  * @package chatbot-chatgpt
  */
@@ -28,7 +28,7 @@ function chatbot_chatgpt_reporting_period_callback($args) {
     // Get the saved chatbot_chatgpt_reporting_period value or default to "Daily"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_reporting_period', 'Daily'));
     // DIAG - Log the output choice
-    // error_log('chatbot_chatgpt_reporting_period');
+    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_reporting_period');
     // error_log($output_choice);
     ?>
     <select id="chatbot_chatgpt_reporting_period" name="chatbot_chatgpt_reporting_period">

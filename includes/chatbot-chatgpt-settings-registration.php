@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Registration
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It handles the registration of settings and other parameters.
+ * 
  *
  * @package chatbot-chatgpt
  */
@@ -20,6 +20,8 @@ function chatbot_chatgpt_settings_init() {
     // register_setting('chatbot_chatgpt_api_model', 'chatgpt_api_key');
     // Obfuscate the API key in settings registration - Ver 1.5.0
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_api_key', 'sanitize_api_key');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_assistant_id'); // Ver 1.6.7
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_model_choice');
     // Max Tokens setting options - Ver 1.4.2
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_max_tokens_setting');
@@ -37,6 +39,24 @@ function chatbot_chatgpt_settings_init() {
         'chatgpt_api_key',
         'ChatGPT API Key',
         'chatbot_chatgpt_api_key_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
+    // Use Custom GPT Assistant Id (Yes or No) - Ver 1.6.7
+    add_settings_field(
+        'chatbot_chatgpt_use_custom_gpt_assistant_id',
+        'Use Custom GPT Assistant Id',
+        'chatbot_chatgpt_use_custom_gpt_assistant_id_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
+    // CustomGPT Assistant Id - Ver 1.6.7
+    add_settings_field(
+        'chatbot_chatgpt_assistant_id',
+        'Custom GPT Assistant Id',
+        'chatbot_chatgpt_assistant_id_callback',
         'chatbot_chatgpt_api_model',
         'chatbot_chatgpt_api_model_section'
     );
@@ -247,6 +267,15 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_avatar'
     );
 
+    // Avatar Greeting
+    add_settings_field(
+        'chatgpt_avatar_greeting_setting',
+        'Avatar Greeting',
+        'chatbot_chatgpt_avatar_greeting_callback',
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_section'
+    );
+    
     // Register new fields in the "chatbot_chatgpt_avatar_section" section, inside the "chatbot_chatgpt_avatar" page
     add_settings_field(
         'chatgpt_avatar_icon_setting',
@@ -264,14 +293,6 @@ function chatbot_chatgpt_settings_init() {
     //     'chatbot_chatgpt_avatar',
     //     'chatbot_chatgpt_avatar_section'
     // );
-
-    add_settings_field(
-        'chatgpt_avatar_greeting_setting',
-        'Avatar Greeting',
-        'chatbot_chatgpt_avatar_greeting_callback',
-        'chatbot_chatgpt_avatar',
-        'chatbot_chatgpt_avatar_section'
-    );
 
     // Knowledge Navigator settings tab - Ver 1.6.1
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_knowledge_navigator');

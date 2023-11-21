@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Settings - Avatar Page
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It allows users to configure the select avatar of choice and other parameters.
+ * 
  *
  * @package chatbot-chatgpt
  */
