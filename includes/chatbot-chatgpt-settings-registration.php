@@ -258,6 +258,7 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_avatar', 'chatgpt_avatar_icon_url_setting');
     register_setting('chatbot_chatgpt_avatar', 'chatgpt_custom_avatar_icon_setting');
     register_setting('chatbot_chatgpt_avatar', 'chatgpt_avatar_greeting_setting');
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_set');
 
     // Register a new section in the "chatbot_chatgpt" page
     add_settings_section(
@@ -272,6 +273,15 @@ function chatbot_chatgpt_settings_init() {
         'chatgpt_avatar_greeting_setting',
         'Avatar Greeting',
         'chatbot_chatgpt_avatar_greeting_callback',
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_section'
+    );
+
+    // Avatar Icon Set
+    add_settings_field(
+        'chatbot_chatgpt_avatar_icon_set',
+        'Avatar Icon Set',
+        'chatbot_chatgpt_avatar_icon_set_callback',
         'chatbot_chatgpt_avatar',
         'chatbot_chatgpt_avatar_section'
     );
