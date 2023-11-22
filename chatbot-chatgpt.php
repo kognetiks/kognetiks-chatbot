@@ -209,6 +209,8 @@ add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 function chatbot_chatgpt_send_message() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
+    // Retrieve the Use Custom GPT Assistant Id
+    $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id'));
     // Retrieve the Assistant ID
     $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
     // Retrieve the model from the settings or default to gpt-3.5-turbo
@@ -225,21 +227,19 @@ function chatbot_chatgpt_send_message() {
         wp_send_json_error('Invalid API key or message');
     }
 
-    // Decide which API to call based settings - Ver 1.6.7
-    $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id'));
-    $custom_gpt_assistant_id = esc_attr(get_option('chatbot_chatgpt_custom_gpt_assistant_id'));
-
     // Check if the Custom GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
-    if (empty($custom_gpt_assistant_id) || $custom_gpt_assistant_id === "Please provide the Customer GPT Assistant Id.") {
+    if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
         // Override the $use_assistant_id and set it to 'No'
         $use_assistant_id = 'No';
+        // DIAG - Log the response
+        // error_log('Chatbot ChatGPT: chatbot-chatgpt.php $use_assistant_id override ' . print_r($use_assistant_id, true));
     }
 
-    if ($use_assistant_id === 'Yes') {
+    if ($use_assistant_id == 'Yes') {
         // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message);
         // DIAG - Log the response
-        // error_log( 'Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_send_message - $response: ' . print_r($response, true));
+        // error_log('Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_custom_gpt_call_api - $response: ' . print_r($response, true));
         // Return response
         ob_clean(); // Clean (erase) the output buffer
         wp_send_json_success($response);
@@ -247,7 +247,7 @@ function chatbot_chatgpt_send_message() {
         // Send message to ChatGPT API
         $response = chatbot_chatgpt_call_api($api_key, $message);
         // DIAG - Log the response
-       //  error_log('chatbot-chatgpt.php - chatbot_chatgpt_send_message - $response: ' . print_r($response, true));
+        // error_log('Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_call_api - $response: ' . print_r($response, true));
         // Return response
         wp_send_json_success($response);
     }
