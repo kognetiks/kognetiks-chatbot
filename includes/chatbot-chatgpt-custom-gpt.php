@@ -57,7 +57,7 @@ function addAMessage($threadId, $prompt, $api_key) {
 
 // Step 4: Run the Assistant
 function runTheAssistant($threadId, $assistantId, $api_key) {
-    $url = "https://api.openai.com/v1/threads/".$threadId."/runs";
+    $url = "https://api.openai.com/v1/threads/" . $threadId . "/runs";
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -67,20 +67,31 @@ function runTheAssistant($threadId, $assistantId, $api_key) {
         "assistant_id" => $assistantId
     );
 
-    $response = file_get_contents($url, false, stream_context_create(array(
+    $context = stream_context_create(array(
         'http' => array(
             'method' => 'POST',
             'header' => $headers,
-            'content' => json_encode($data)
+            'content' => json_encode($data),
+            'ignore_errors' => true // This allows the function to proceed even if there's an HTTP error
         )
-    )));
+    ));
 
+    $response = file_get_contents($url, false, $context);
+
+    // Check for false response
     if ($response === FALSE) {
-        // DIAG - Handle error here
-        // error_log ("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 4");
-        $status = "failed";
-        exit;
+        // Handle the error, for example:
+        // error_log("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 4: Unable to fetch response");
+        return "Error: Unable to fetch response.";
     }
+
+    // Check HTTP response code
+    if (http_response_code() != 200) {
+        // Handle the error, for example:
+        // error_log("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 4: HTTP response code " . http_response_code());
+        return "Error: HTTP response code " . http_response_code();
+    }
+
     return json_decode($response, true);
 }
 
@@ -235,7 +246,17 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message) {
     // Step 4: Run the Assistant
     // error_log ('Chatbot ChatGPT: Step 4: Run the Assistant');
     $assistants_response = runTheAssistant($threadId, $assistantId, $api_key);
-    $runId = $assistants_response["id"];
+
+    // Check if the response is not an array or is a string indicating an error
+    if (!is_array($assistants_response) || is_string($assistants_response)) {
+        return "Error: Invalid response format or error occurred.";
+    }
+    // Check if the 'id' key exists in the response
+    if (isset($assistants_response["id"])) {
+        $runId = $assistants_response["id"];
+    } else {
+        return "Error: 'id' key not found in response.";
+    }
     // DIAG - Print the response
     // error_log (print_r($assistants_response, true));
 

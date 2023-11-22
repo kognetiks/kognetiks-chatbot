@@ -293,7 +293,9 @@ jQuery(document).ready(function ($) {
             },
             error: function () {
                 removeTypingIndicator();
-                appendMessage('Error: Unable to send message', 'error');
+                // Console log the error - Ver 1.6.7
+                // console.log('Error: Unable to send message');
+                appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
             },
             complete: function () {
                 removeTypingIndicator();

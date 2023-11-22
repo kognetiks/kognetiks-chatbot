@@ -242,7 +242,13 @@ function chatbot_chatgpt_send_message() {
         // error_log('Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_custom_gpt_call_api - $response: ' . print_r($response, true));
         // Return response
         ob_clean(); // Clean (erase) the output buffer
-        wp_send_json_success($response);
+        if (substr($response, 0, 6) === 'Error:' || substr($response, 0, 7) === 'Failed:') {
+            // wp_send_json_error($response);
+            wp_send_json_error('Oops! Something went wrong on our end. Please try again later.');
+        } else {
+            wp_send_json_success($response);
+        }
+        // wp_send_json_success($response);
     } else {
         // Send message to ChatGPT API
         $response = chatbot_chatgpt_call_api($api_key, $message);
