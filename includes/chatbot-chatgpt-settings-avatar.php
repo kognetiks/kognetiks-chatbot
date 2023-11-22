@@ -15,7 +15,19 @@ die;
 
 // Custom Avatar Icon - Ver 1.5.0
 function chatbot_chatgpt_avatar_section_callback($args) {
-    echo '<p>Configure your avatar settings below:</p>';
+    echo '<div>
+        <p>Choose an avatar that best represents you and your brand.  You can change your avatar at any time.</p>
+        <p>To customize your avatar, follow these simple steps:</p>
+        <ol>
+            <li>Select an Icon Set: Choose from the available themes - Original, Chinese New Year, Christmas, Fall, Halloween, Spring, Summer, Thanksgiving, or Winter.</li>
+            <li>Then click on the \'Save Settings\' button to change the icon set.</li>
+            <li>Pick an Avatar: Once icon set has reloaded, browse through the available avatars within that theme.</li>
+            <li>Confirm Your Selection: Click on your preferred avatar to select it (it will have a red box).</li>
+            <li>Save Your Settings: Click on the \'Save Settings\' button to save your avatar selection.</li>
+        </ol>
+        <p>It\'s ok you don\'t want an Avatar.  Just select the \'None\' option among the originals.</p>
+        <p><b><i>Don\'t forget to click \'Save Settings\' to save your changes.</i><b></p>
+    </div>';
 }
  
 // Custom Avatar Icon - Ver 1.5.0

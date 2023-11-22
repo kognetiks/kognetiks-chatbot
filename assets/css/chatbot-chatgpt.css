@@ -8,6 +8,11 @@
  *
  */
 
+ /* CSS for the chatbot - Ver 1.6.7 */
+#chatbot {
+    display: none !important;
+}
+
 /* Avatar Settings - Ver 1.5.0 */
 .chatbot-avatar {
     width: 60px;
