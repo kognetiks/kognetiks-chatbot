@@ -8,11 +8,6 @@
  *
  */
 
- /* CSS for the chatbot - Ver 1.6.7 */
-/* #chatbot-chatgpt {
-    display: none !important;
-} */
-
 /* Avatar Settings - Ver 1.5.0 */
 .chatbot-avatar {
     width: 60px;
@@ -67,12 +62,22 @@
 
 /* CSS for the chatbot interface */
 #chatbot-chatgpt {
-    /* display: none; */
+    /* display: none !important; */
+
+    transition: width 0.5s ease, height 0.5s ease;
+
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+
     position: fixed;
     bottom: 10px;
     right: 10px;
-    width: 300px;
-    height: 450px;
+
+    /* MOVED TO .JS FILE IN TWO PLACES*/
+    /* width: 300px;
+    height: 450px; */
+
     background-color: #f1f1f1;
     border: 1px solid #ccc;
     border-radius: 5px;

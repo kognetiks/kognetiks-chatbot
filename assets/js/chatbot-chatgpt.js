@@ -4,7 +4,8 @@ jQuery(document).ready(function ($) {
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
     //     console.log('FUNCTION: chatbot-chatgpt.js');
     // }
- 
+    
+    // $('#chatbot-chatgpt').hide();
     var chatGptChatBot = $('#chatbot-chatgpt').hide();
 
     messageInput = $('#chatbot-chatgpt-message');
@@ -33,14 +34,24 @@ jQuery(document).ready(function ($) {
     if (chatgpt_width_setting === 'Wide') {
         chatGptChatBot.addClass('wide');
     } else {
-        chatGptChatBot.removeClass('wide').css('display', 'none');
+        // chatGptChatBot.removeClass('wide').css('display', 'none');
+        chatGptChatBot.removeClass('wide');
     }
 
     // Initially hide the chatbot
     if (chatgptStartStatus === 'closed') {
+        // chatGptChatBot = document.querySelector('#chatbot-chatgpt');
+        // chatGptChatBot.style.setProperty('display', 'none', 'important');
         chatGptChatBot.hide();
         chatGptOpenButton.show();
     } else {
+        // chatGptChatBot = document.querySelector('#chatbot-chatgpt');
+        // chatGptChatBot.style.setProperty('display', 'block', 'important');
+        $('#chatbot-chatgpt').css({
+            width: '300px', // or your desired width
+            height: '450px', // or your desired height
+            overflow: 'visible'
+        });
         chatGptChatBot.show();
         chatGptOpenButton.hide();
     }
@@ -318,6 +329,11 @@ jQuery(document).ready(function ($) {
             chatGptOpenButton.show();
             localStorage.setItem('chatgptStartStatus', 'closed');
         } else {
+            $('#chatbot-chatgpt').css({
+                width: '300px', // or your desired width
+                height: '450px', // or your desired height
+                overflow: 'visible'
+            });
             chatGptChatBot.show();
             chatGptOpenButton.hide();
             localStorage.setItem('chatgptStartStatus', 'open');
