@@ -112,6 +112,9 @@
 #chatbot-chatgpt-input {
     display: flex;
     padding: 10px;
+    align-content: stretch;
+    justify-content: center;
+    align-items: baseline;
 }
 
 #chatbot-chatgpt-message {
