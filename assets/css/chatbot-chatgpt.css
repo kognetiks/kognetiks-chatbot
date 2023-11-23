@@ -228,6 +228,7 @@
     float: right;
     box-shadow: 2px 4px 15px rgb(102, 92, 143);
     border-radius: 10%;
+    width: 80px;
     z-index: 100;
 }
 

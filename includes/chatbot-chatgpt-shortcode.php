@@ -92,7 +92,7 @@ function chatbot_chatgpt_shortcode() {
         }
         ?>
     </div>
-    <button id="chatgpt-open-btn" style="width: 80px; display: none;">
+    <button id="chatgpt-open-btn" style="display: none;">
     <i class="dashicons dashicons-format-chat"></i>
     </button>
     <?php
