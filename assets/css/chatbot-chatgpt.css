@@ -14,6 +14,15 @@
     height: 60px;
 }
 
+#chatgpt-open-btn.avatar-icon {
+    padding: 5px;
+}
+
+/* Padding for Avatars - Ver 1.5.0 */
+#chatgpt-open-btn.dashicon {
+    padding: 25px;
+}
+
 /* Avatar Settings - Ver 1.5.0 */
 .chatbot-bubble {
     background-color: #f0f0f0;
@@ -32,15 +41,6 @@
     display: inline-block;
     font-family: sans-serif;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
-}
-
-#chatgpt-open-btn.avatar-icon {
-    padding: 5px;
-}
-
-/* Padding for Avatars - Ver 1.5.0 */
-#chatgpt-open-btn.dashicon {
-    padding: 25px;
 }
 
 /* Set font family to sans-serif for all text within the plugin */
@@ -208,14 +208,6 @@
     float: right;
 }
 
-/* Reset font family for Dashicons */
-/* #chatgpt-open-btn {
-    position: relative;
-    font-family: dashicons;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-} */
 
 /* #chatgpt-open-btn {
     position: fixed;
@@ -232,23 +224,35 @@
     z-index: 100;
 } */
 
+/* Reset font family for Dashicons */
+#chatgpt-open-btn-dashicon {
+    position: relative;
+    font-family: dashicons;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 20px;
+    width: 20px;
+}
+
 #chatgpt-open-btn {
-    position: fixed; /* from the second block */
-    bottom: 2%; /* from the second block */
-    right: 2%; /* from the second block */
-    background-color: #007bff; /* from the second block */
-    border: none; /* from the second block */
-    cursor: pointer; /* from the second block */
-    padding: 15px; /* from the second block */
-    float: right; /* from the second block */
-    box-shadow: 2px 4px 15px rgb(102, 92, 143); /* from the second block */
-    border-radius: 10%; /* from the second block */
-    width: 80px; /* from the second block */
-    z-index: 100; /* from the second block */
-    font-family: dashicons; /* from the first block */
-    display: flex; /* from the first block */
-    justify-content: center; /* from the first block */
-    align-items: center; /* from the first block */
+    transition: width 0.5s ease, height 0.5s ease;
+    position: fixed;
+    bottom: 2%;
+    right: 2%;
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+    padding: 15px;
+    float: right;
+    box-shadow: 2px 4px 15px rgb(102, 92, 143);
+    border-radius: 10%;
+    width: 80px;
+    z-index: 100;
+    font-family: dashicons; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
 }
 
 #chatgpt-open-btn:hover {
