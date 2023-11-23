@@ -101,6 +101,9 @@
     font-size: 16px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+    display: flex;
+    align-items: center; /* Vertical centering */
+    justify-content: space-between; /* Horizontal centering */
 }
 
 #chatbot-chatgpt-conversation {
@@ -193,10 +196,22 @@
 
 /* Collapse chatbot upon user request */
 .chatbot-collapse-btn {
-    position: absolute;
+    /* position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
+    top: -1.5%;
+    right: 2%;
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    padding: 15px;
+    border-radius: 10%; */
+    
+    position: absolute;
+    display: flex;
+    align-items: center;
     top: 1.5%;
     right: 2%;
     background-color: #007bff;
@@ -205,6 +220,12 @@
     text-align: center;
     padding: 15px;
     border-radius: 10%;
+    flex-direction: column-reverse;
+    align-content: center;
+    justify-content: center;
+    /* vertical-align: middle; */
+    flex-wrap: nowrap;
+
 }
 
 .chatbot-collapse-btn:hover {
