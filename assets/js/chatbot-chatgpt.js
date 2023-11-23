@@ -5,7 +5,6 @@ jQuery(document).ready(function ($) {
     //     console.log('FUNCTION: chatbot-chatgpt.js');
     // }
     
-    // $('#chatbot-chatgpt').hide();
     var chatGptChatBot = $('#chatbot-chatgpt').hide();
 
     messageInput = $('#chatbot-chatgpt-message');
@@ -20,6 +19,7 @@ jQuery(document).ready(function ($) {
     subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
     chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
     chatgpt_chatbot_bot_prompt = localStorage.getItem('chatgpt_chatbot_bot_prompt') || 'Enter your message ...';
+    chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
 
     localStorage.setItem('chatgptStartStatus', chatgptStartStatus);
     localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
@@ -28,6 +28,7 @@ jQuery(document).ready(function ($) {
     localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
     localStorage.setItem('chatgpt_disclaimer_setting', chatgpt_disclaimer_setting);
     localStorage.setItem('chatgpt_chatbot_bot_prompt', chatgpt_chatbot_bot_prompt);
+    localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
 
     pluginUrl = plugin_vars.pluginUrl;
 
@@ -47,11 +48,17 @@ jQuery(document).ready(function ($) {
     } else {
         // chatGptChatBot = document.querySelector('#chatbot-chatgpt');
         // chatGptChatBot.style.setProperty('display', 'block', 'important');
-        $('#chatbot-chatgpt').css({
-            width: '300px', // or your desired width
-            height: '450px', // or your desired height
-            overflow: 'visible'
-        });
+        if (chatgpt_width_setting === 'Wide') {
+            $('#chatbot-chatgpt').css({
+                width: '500px', // or your desired width
+                height: '450px', // or your desired height
+                overflow: 'visible'});
+            } else {
+            $('#chatbot-chatgpt').css({
+                width: '300px', // or your desired width
+                height: '450px', // or your desired height
+                overflow: 'visible'});
+            }
         chatGptChatBot.show();
         chatGptOpenButton.hide();
     }
@@ -329,11 +336,17 @@ jQuery(document).ready(function ($) {
             chatGptOpenButton.show();
             localStorage.setItem('chatgptStartStatus', 'closed');
         } else {
-            $('#chatbot-chatgpt').css({
-                width: '300px', // or your desired width
-                height: '450px', // or your desired height
-                overflow: 'visible'
-            });
+            if (chatgpt_width_setting === 'Wide') {
+                $('#chatbot-chatgpt').css({
+                    width: '500px', // or your desired width
+                    height: '450px', // or your desired height
+                    overflow: 'visible'});
+                } else {
+                $('#chatbot-chatgpt').css({
+                    width: '300px', // or your desired width
+                    height: '450px', // or your desired height
+                    overflow: 'visible'});
+            }
             chatGptChatBot.show();
             chatGptOpenButton.hide();
             localStorage.setItem('chatgptStartStatus', 'open');
