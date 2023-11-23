@@ -97,7 +97,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
             }
 
             // $selectedIcon = esc_attr(get_option('chatgpt_avatar_icon_setting', 'icon-001.png'));
-            
+            $iconName = "";
             for($i = 0; $i < $rows; $i++) {
                 echo '<tr>';
                 for($j = 0; $j < $cols; $j++) {
