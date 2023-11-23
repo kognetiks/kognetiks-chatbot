@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Settings - Premium Page
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It handles the premium settings and other parameters.
+ * 
  *
  * @package chatbot-chatgpt
  */

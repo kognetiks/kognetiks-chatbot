@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Settings Page
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It allows users to configure the bot name, start status, and greetings.
+ * 
  *
  * @package chatbot-chatgpt
  */
@@ -51,7 +51,7 @@ function chatbot_chatgpt_settings_page_html() {
                 const chatgptStartStatusNewVisitorInput = document.getElementById('chatgptStartStatusNewVisitor');
                 const reminderCount = localStorage.getItem('reminderCount') || 0;
 
-                if (reminderCount < 5) {
+                if (reminderCount % 25 === 0 && reminderCount <= 200) {
                     const messageBox = document.createElement('div');
                     messageBox.id = 'rateReviewMessageBox';
                     messageBox.innerHTML = `
@@ -70,6 +70,12 @@ function chatbot_chatgpt_settings_page_html() {
                         messageBox.style.display = 'none';
                         localStorage.setItem('reminderCount', parseInt(reminderCount, 10) + 1);
                     });
+                } else {
+                    let reminderCount = +localStorage.getItem('reminderCount') || 0;
+                    if (reminderCount < 200) {
+                        reminderCount++;
+                        localStorage.setItem('reminderCount', reminderCount);
+                    }
                 }
             });
         </script>
@@ -109,7 +115,7 @@ function chatbot_chatgpt_settings_page_html() {
 
                         // Update the local storage with the input values, if inputs exist
                         if(chatgptNameInput) localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
-                        if(chatgpt_chatbot_bot_promptInput) localStorage.setItem('chatgpt_chatbot_bot_prompt', chatgpt_chatbot_bot_promptInput.value
+                        if(chatgpt_chatbot_bot_promptInput) localStorage.setItem('chatgpt_chatbot_bot_prompt', chatgpt_chatbot_bot_promptInput.value);
                         if(chatgptInitialGreetingInput) localStorage.setItem('chatgpt_initial_greeting', chatgptInitialGreetingInput.value);
                         if(chatgptSubsequentGreetingInput) localStorage.setItem('chatgpt_subsequent_greeting', chatgptSubsequentGreetingInput.value);
                         if(chatgptStartStatusInput) localStorage.setItem('chatgptStartStatus', chatgptStartStatusInput.value);

@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.6.6
+ * Version:     1.6.7
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -35,6 +35,9 @@ global $wpdb;  // Declare the global $wpdb object
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
 
+// Include necessary files - Custom GPT Assistants - Ver 1.6.7
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-custom-gpt.php'; // Custom GPT Assistants - Ver 1.6.7
+
 // Include necessary files - Knowledge Navigator
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire.php'; // Knowledge Navigator Acquistion - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-words.php'; // Knowledge Navigator Acquistion - Ver 1.6.5
@@ -59,8 +62,10 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-prem
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-registration.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-reporting.php'; // Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setup.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-skins.php'; // Adpative Skins - Ver 1.6.7
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 // update_option('chatbot_chatgpt_diagnostics', 'Off');
@@ -95,7 +100,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     $defaults = array(
         'chatgpt_bot_name' => 'Chatbot ChatGPT',
         // TODO IDEA - Add a setting to fix or randomize the bot prompt
-        'chatgpt_chatbot_bot_prompt' => 'Enter your message ...',
+        'chatgpt_chatbot_bot_prompt' => 'Enter your question ...',
         'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatgptStartStatus' => 'closed',
@@ -158,7 +163,6 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
-        // 'api_key' => esc_attr(get_option('chatgpt_api_key')),
     ));
 
     // Populate the chatbot settings array with values from the database, using default values where necessary
@@ -167,7 +171,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
-        // error_log('chatbot-chatgpt Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // error_log( 'Chatbot ChatGPT: chatbot-chatgpt Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Update localStorage - Ver 1.6.1
@@ -205,6 +209,10 @@ add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 function chatbot_chatgpt_send_message() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
+    // Retrieve the Use Custom GPT Assistant Id
+    $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id'));
+    // Retrieve the Assistant ID
+    $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
     // Retrieve the model from the settings or default to gpt-3.5-turbo
     $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     // Retrieve the Max tokens - Ver 1.4.2
@@ -215,15 +223,43 @@ function chatbot_chatgpt_send_message() {
 
     // FIXME - ADD THIS BACK IN AFTER DECIDING WHAT TO DO ABOUT MISSING OR BAD API KEYS
     // Check API key and message
-    // if (!$api_key || !$message) {
-    //     wp_send_json_error('Invalid API key or message');
-    // }
+    if (!$api_key || !$message) {
+        wp_send_json_error('Invalid API key or message');
+    }
 
-    // Send message to ChatGPT API
-    $response = chatbot_chatgpt_call_api($api_key, $message);
+    // Check if the Custom GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
+    if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
+        // Override the $use_assistant_id and set it to 'No'
+        $use_assistant_id = 'No';
+        // DIAG - Log the response
+        // error_log('Chatbot ChatGPT: chatbot-chatgpt.php $use_assistant_id override ' . print_r($use_assistant_id, true));
+    }
 
-    // Return response
-    wp_send_json_success($response);
+    if ($use_assistant_id == 'Yes') {
+        // Send message to Custom GPT API - Ver 1.6.7
+        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message);
+        // DIAG - Log the response
+        // error_log('Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_custom_gpt_call_api - $response: ' . print_r($response, true));
+        // Return response
+        ob_clean(); // Clean (erase) the output buffer
+        if (substr($response, 0, 6) === 'Error:' || substr($response, 0, 7) === 'Failed:') {
+            // wp_send_json_error($response);
+            wp_send_json_error('Oops! Something went wrong on our end. Please try again later.');
+        } else {
+            wp_send_json_success($response);
+        }
+        // wp_send_json_success($response);
+    } else {
+        // Send message to ChatGPT API
+        $response = chatbot_chatgpt_call_api($api_key, $message);
+        // DIAG - Log the response
+        // error_log('Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_call_api - $response: ' . print_r($response, true));
+        // Return response
+        wp_send_json_success($response);
+    }
+
+    wp_send_json_error('Oops, I fell through the cracks!');
+
 }
 
 add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
@@ -239,12 +275,12 @@ function chatbot_chatgpt_kn_status_activation() {
     add_option('chatbot_chatgpt_kn_status', 'Never Run');
     // clear any old scheduled runs
     if (wp_next_scheduled('crawl_scheduled_event_hook')) {
-        // error_log('BEFORE wp_clear_scheduled_hook -  crawl_scheduled_event_hook');
+        // error_log( 'Chatbot ChatGPT: BEFORE wp_clear_scheduled_hook -  crawl_scheduled_event_hook');
         wp_clear_scheduled_hook('crawl_scheduled_event_hook');
     }
     // clear the 'knowledge_navigator_scan_hook' hook on plugin activation - Ver 1.6.3
     if (wp_next_scheduled('knowledge_navigator_scan_hook')) {
-        // error_log('BEFORE wp_clear_scheduled_hook -  knowledge_navigator_scan_hook');
+        // error_log( 'Chatbot ChatGPT: BEFORE wp_clear_scheduled_hook -  knowledge_navigator_scan_hook');
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear scheduled runs
     }
 }
@@ -313,7 +349,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     global $chatbot_chatgpt_diagnostics;
     global $learningMessages;
     global $errorResponses;
-    global  $stopWords;
+    global $stopWords;
 
     // Reporting - Ver 1.6.3
     global $wpdb;
@@ -339,7 +375,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Context History - Ver 1.6.1
      $chatgpt_last_response = concatenateHistory('context_history');
     // DIAG Diagnostics - Ver 1.6.1
-    // error_log('context_history' . print_r($chatgpt_last_response, true));
+    // error_log( 'Chatbot ChatGPT: context_history' . print_r($chatgpt_last_response, true));
     
     // IDEA Strip any href links and text from the $chatgpt_last_response
     $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
@@ -357,7 +393,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     // DIAG Diagnostics - Ver 1.6.1
-    // error_log('$context: ' . print_r($context, true));
+    // error_log( 'Chatbot ChatGPT: $context: ' . print_r($context, true));
 
     // Added Role, System, Content Static Veriable - Ver 1.6.0
     $body = array(
@@ -374,9 +410,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     addEntry('context_history', $message);
 
     // DIAG Diagnostics - Ver 1.6.1
-    // error_log('storedc: ' . print_r($chatbot_chatgpt_kn_conversation_context, true));
-    // error_log('context: ' . print_r($context, true));
-    // error_log('message: ' . print_r($message, true));  
+    // error_log( 'Chatbot ChatGPT: storedc: ' . print_r($chatbot_chatgpt_kn_conversation_context, true));
+    // error_log( 'Chatbot ChatGPT: context: ' . print_r($context, true));
+    // error_log( 'Chatbot ChatGPT: message: ' . print_r($message, true));  
 
     $args = array(
         'headers' => $headers,
@@ -387,6 +423,8 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     );
 
     $response = wp_remote_post($api_url, $args);
+    // DIAG Diagnostics - Ver 1.6.7
+    // error_log( 'Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_call_api - $response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -413,7 +451,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Strip out $stopWords
     $words = array_diff($words, $stopWords);
     // DIAG Error_log for $words - Ver 1.6.5
-    // error_log('$words: ' . print_r($words, true));
+    // error_log( 'Chatbot ChatGPT: $words: ' . print_r($words, true));
 
     // Loop through each word in the message
     foreach ($words as $key => $word) {
@@ -439,19 +477,33 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     
             // Find the highest score for the word pair
             $result = $wpdb->get_row($wpdb->prepare("SELECT score, url FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT 1", $word_pair));
-            if ($result !== null && $result->score > $highest_score) {
-                $highest_score = $result->score;
-                $highest_score_word = $word_pair;
-                $highest_score_url = $result->url;
+            // Exit if there is an error
+            if (!$wpdb->last_error) {
+                if ($result !== null && $result->score > $highest_score) {
+                    $highest_score = $result->score;
+                    $highest_score_word = $word_pair;
+                    $highest_score_url = $result->url;
+                }
+                // Add your success handling code here
+            } else {
+                // Handle error here
+                $highest_score = 0;
             }
         }
     
         // Find the highest score for the word
         $result = $wpdb->get_row($wpdb->prepare("SELECT score, url FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT 1", $word));
-        if ($result !== null && $result->score > $highest_score) {
-            $highest_score = $result->score;
-            $highest_score_word = $word;
-            $highest_score_url = $result->url;
+        // Exit if there is an error
+        if (!$wpdb->last_error) {
+            if ($result !== null && $result->score > $highest_score) {
+                $highest_score = $result->score;
+                $highest_score_word = $word;
+                $highest_score_url = $result->url;
+            }
+            // Add your success handling code here
+        } else {
+            // Handle error here
+            $highest_score = 0;
         }
     }
 
@@ -460,9 +512,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     }
 
     // DIAG Diagnostic - Ver 1.6.5
-    // error_log('$highest_score: ' . print_r($highest_score, true));
-    // error_log('$highest_score_word: ' . print_r($highest_score_word, true));
-    // error_log('$highest_score_url: ' . print_r($highest_score_url, true));
+    // error_log( 'Chatbot ChatGPT: $highest_score: ' . print_r($highest_score, true));
+    // error_log( 'Chatbot ChatGPT: $highest_score_word: ' . print_r($highest_score_word, true));
+    // error_log( 'Chatbot ChatGPT: $highest_score_url: ' . print_r($highest_score_url, true));
 
     // IDEA Append message and link if found to ['choices'][0]['message']['urls']
     if ($highest_score > 0) {
@@ -498,11 +550,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $response_body['choices'][0]['message']['content'] = preg_replace('/<b>(.*?)<\/b>/', '$1', $response_body['choices'][0]['message']['content']);
 
     // DIAG - error_log for $score, $match_found, $highest_score, $highest_score_url - Diagnostic - Ver 1.6.3
-    // error_log('$match_found: ' . print_r($match_found, true));
-    // error_log('$highest_score: ' . print_r($highest_score, true));
-    // error_log('$highest_score_word: ' . print_r($highest_score_word, true));
-    // error_log('$highest_score_url: ' . print_r($highest_score_url, true));
-    // error_log('$response_body: ' . print_r($response_body, true));
+    // error_log( 'Chatbot ChatGPT: $match_found: ' . print_r($match_found, true));
+    // error_log( 'Chatbot ChatGPT: $highest_score: ' . print_r($highest_score, true));
+    // error_log( 'Chatbot ChatGPT: $highest_score_word: ' . print_r($highest_score_word, true));
+    // error_log( 'Chatbot ChatGPT: $highest_score_url: ' . print_r($highest_score_url, true));
+    // error_log( 'Chatbot ChatGPT: $response_body: ' . print_r($response_body, true));
     
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();
@@ -531,7 +583,7 @@ function enqueue_greetings_script() {
     global $chatbot_chatgpt_diagnostics;
 
     // DIAG Diagnostics - Ver 1.6.1
-    // error_log('ENTERING enqueue_greetings_script');
+    // error_log( 'Chatbot ChatGPT: ENTERING enqueue_greetings_script');
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
@@ -543,7 +595,7 @@ function enqueue_greetings_script() {
     wp_localize_script('greetings', 'greetings_data', $greetings);
 
     // DIAG Diagnostics - Ver 1.6.1
-    // error_log('EXITING enqueue_greetings_script');
+    // error_log( 'Chatbot ChatGPT: EXITING enqueue_greetings_script');
 
 }
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');

@@ -3,7 +3,7 @@
  * Chatbot ChatGPT for WordPress - Settings - Diagnostics
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
+ * It allows users to configure the reporting and other parameters
  * required to access the ChatGPT API from their own account.
  *
  * @package chatbot-chatgpt
@@ -17,7 +17,7 @@ die;
 function chatbot_chatgpt_diagnostics_section_callback($args) {
     ?>
     <p>The Diagnostics tab checks the API status and set options for diagostics and notices.</p>
-    <p>You can turn on/off console and error logging (as of Version 1.6.5 most if now commented out).</p>
+    <p>You can turn on/off console and error logging (as of Version 1.6.5 most is now commented out).</p>
     <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
     <h2>System and Plugin Information</h2>
     <?php

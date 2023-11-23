@@ -1,51 +1,84 @@
 jQuery(document).ready(function ($) {
 
-    var messageInput = $('#chatbot-chatgpt-message');
-    var conversation = $('#chatbot-chatgpt-conversation');
-    var submitButton = $('#chatbot-chatgpt-submit');
-
-    // Set bot width with the default Narrow or from setting Wide - Ver 1.4.2
-    var chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
-
-    var chatGptChatBot = $('#chatbot-chatgpt');
-    if (chatgpt_width_setting === 'Wide') {
-        chatGptChatBot.addClass('wide');
-    } else {
-        chatGptChatBot.removeClass('wide');
-    }
-
     // DIAG - Diagnostics = Ver 1.4.2
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
     //     console.log('FUNCTION: chatbot-chatgpt.js');
     // }
-
-    var chatGptOpenButton = $('#chatgpt-open-btn');
-    // Use 'open' for an open chatbot or 'closed' for a closed chatbot - Ver 1.1.0
-    var chatgpt_start_status = 'closed';
     
-    // Initially hide the chatbot - Ver 1.1.0
-    chatGptChatBot.hide();
-    chatGptOpenButton.show();
+    var chatGptChatBot = $('#chatbot-chatgpt').hide();
 
-    var chatbotContainer = $('<div></div>').addClass('chatbot-container');
-    var chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
-    var chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
+    messageInput = $('#chatbot-chatgpt-message');
+    var conversation = $('#chatbot-chatgpt-conversation');
+    submitButton = $('#chatbot-chatgpt-submit');
+    chatGptOpenButton = $('#chatgpt-open-btn');
 
-    // Avatar file locations - Ver 1.5.0
-    var pluginUrl = plugin_vars.pluginUrl;
+    chatgptStartStatus = localStorage.getItem('chatgptStartStatus') || 'closed';
+    chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
+    chatgptStartStatusNewVisitor = localStorage.getItem('chatgptStartStatusNewVisitor') || 'closed';
+    initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
+    subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
+    chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
+    chatgpt_chatbot_bot_prompt = localStorage.getItem('chatgpt_chatbot_bot_prompt') || 'Enter your question ...';
+    chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
+
+    localStorage.setItem('chatgptStartStatus', chatgptStartStatus);
+    localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
+    localStorage.setItem('chatgptStartStatusNewVisitor', chatgptStartStatusNewVisitor);
+    localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
+    localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
+    localStorage.setItem('chatgpt_disclaimer_setting', chatgpt_disclaimer_setting);
+    localStorage.setItem('chatgpt_chatbot_bot_prompt', chatgpt_chatbot_bot_prompt);
+    localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
+
+    pluginUrl = plugin_vars.pluginUrl;
+
+    if (chatgpt_width_setting === 'Wide') {
+        chatGptChatBot.addClass('wide');
+    } else {
+        // chatGptChatBot.removeClass('wide').css('display', 'none');
+        chatGptChatBot.removeClass('wide');
+    }
+
+    // Initially hide the chatbot
+    if (chatgptStartStatus === 'closed') {
+        // chatGptChatBot = document.querySelector('#chatbot-chatgpt');
+        // chatGptChatBot.style.setProperty('display', 'none', 'important');
+        chatGptChatBot.hide();
+        chatGptOpenButton.show();
+    } else {
+        // chatGptChatBot = document.querySelector('#chatbot-chatgpt');
+        // chatGptChatBot.style.setProperty('display', 'block', 'important');
+        if (chatgpt_width_setting === 'Wide') {
+            $('#chatbot-chatgpt').css({
+                width: '500px', // or your desired width
+                height: '450px', // or your desired height
+                overflow: 'visible'});
+            } else {
+            $('#chatbot-chatgpt').css({
+                width: '300px', // or your desired width
+                height: '450px', // or your desired height
+                overflow: 'visible'});
+            }
+        chatGptChatBot.show();
+        chatGptOpenButton.hide();
+    }
+
+    chatbotContainer = $('<div></div>').addClass('chatbot-container');
+    chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
+    chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
     // Avatar and Custom Message - Ver 1.5.0
-    var selectedAvatar = localStorage.getItem('chatgpt_avatar_icon_setting');
+    selectedAvatar = localStorage.getItem('chatgpt_avatar_icon_setting');
     
     if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
         // Construct the path to the avatar
-        var avatarPath = pluginUrl + '/assets/icons/' + selectedAvatar;
+        avatarPath = pluginUrl + '/assets/icons/' + selectedAvatar;
         
         // If an avatar is selected and it's not 'icon-000.png', use the avatar
-        var avatarImg = $('<img>').attr('id', 'chatgpt_avatar_icon_setting').attr('class', 'chatbot-avatar').attr('src', avatarPath);
+        avatarImg = $('<img>').attr('id', 'chatgpt_avatar_icon_setting').attr('class', 'chatbot-avatar').attr('src', avatarPath);
     
         // Get the stored greeting message. If it's not set, default to a custom value.
-        var avatarGreeting = localStorage.getItem('chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
+        avatarGreeting = localStorage.getItem('chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
 
         // Revised to address cross-site scripting - Ver 1.6.4
         // // Create a bubble with the greeting message
@@ -59,10 +92,10 @@ jQuery(document).ready(function ($) {
         // IDEA - Add option to suppress avatar greeting if clicked on
 
         // Sanitize the avatarGreeting variable
-        var sanitizedGreeting = $('<div>').text(avatarGreeting).html();
+        sanitizedGreeting = $('<div>').text(avatarGreeting).html();
 
         // Create a bubble with the sanitized greeting message
-        var bubble = $('<div>').html(sanitizedGreeting).addClass('chatbot-bubble');
+        bubble = $('<div>').html(sanitizedGreeting).addClass('chatbot-bubble');
 
         // Append the avatar and the bubble to the button and apply the class for the avatar icon
         chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
@@ -73,18 +106,10 @@ jQuery(document).ready(function ($) {
         chatGptOpenButton.empty().removeClass('avatar-icon').addClass('dashicons dashicons-format-chat dashicon');
     }
     
-    
-    // Support variable greetings based on setting - Ver 1.1.0
-    var initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
-    localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
-    var subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
-    localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
-    // Handle disclaimer - Ver 1.4.1
-    var chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
-    var chatgpt_chatbot_bot_prompt = localStorage.getItem('chatgpt_chatbot_bot_prompt') || 'Enter your message ...';
-
     // Append the collapse button and collapsed chatbot icon to the chatbot container
-    chatbotContainer.append(chatbotCollapseBtn);
+    // chatbotContainer.append(chatbotCollapseBtn);
+    $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
+    // $('#chatgptTitle').append(chatbotCollapseBtn);
     chatbotContainer.append(chatbotCollapsed);
 
     // Add initial greeting to the chatbot
@@ -92,27 +117,24 @@ jQuery(document).ready(function ($) {
 
     function initializeChatbot() {
 
-        var isFirstTime = !localStorage.getItem('chatgptChatbotOpened');
-        var initialGreeting;
-        
+        isFirstTime = !localStorage.getItem('chatgptChatbotOpened') || false;
+
         // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
         localStorage.removeItem('chatgpt_conversation');
 
         if (isFirstTime) {
-            initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
-
-            // DIAG - Logging for Diagnostics - Ver 1.4.2
+            // DIAG - Logging for Diagnostics
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at isFirstTime');
             // }
+            initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
 
             // Don't append the greeting if it's already in the conversation
             if (conversation.text().includes(initialGreeting)) {
                 return;
             }
 
-            // Get the last message in the conversation - Ver 1.5.0
-            var lastMessage = conversation.children().last().text();
+            lastMessage = conversation.children().last().text();
 
             // Don't append the subseqent greeting if it's already in the converation - Ver 1.5.0
             if (lastMessage === subsequentGreeting) {
@@ -125,13 +147,11 @@ jQuery(document).ready(function ($) {
             sessionStorage.setItem('chatgpt_conversation', conversation.html());           
 
         } else {
-            
-            initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
-
             // DIAG - Logging for Diagnostics - Ver 1.4.2
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('FUNCTION: initializeChatbot at else');
             // }
+            initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
             // Don't append the greeting if it's already in the conversation
             if (conversation.text().includes(initialGreeting)) {
@@ -147,13 +167,14 @@ jQuery(document).ready(function ($) {
 
     }
 
-
     // Add chatbot header, body, and other elements - Ver 1.1.0
-    var chatbotHeader = $('<div></div>').addClass('chatbot-header');
+    chatbotHeader = $('<div></div>').addClass('chatbot-header');
     chatGptChatBot.append(chatbotHeader);
 
     // Fix for Ver 1.2.0
-    chatbotHeader.append(chatbotCollapseBtn);
+    // chatbotHeader.append(chatbotCollapseBtn);
+    $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
+    // $('#chatgptTitle').append(chatbotCollapseBtn);
     chatbotHeader.append(chatbotCollapsed);
 
     // Attach the click event listeners for the collapse button and collapsed chatbot icon
@@ -163,9 +184,9 @@ jQuery(document).ready(function ($) {
 
     function appendMessage(message, sender, cssClass) {
 
-        var messageElement = $('<div></div>').addClass('chat-message');
+        messageElement = $('<div></div>').addClass('chat-message');
         // Use HTML for the response so that links are clickable - Ver 1.6.3
-        var textElement = $('<span></span>').html(message);
+        textElement = $('<span></span>').html(message);
 
         // Add initial greetings if first time
         if (cssClass) {
@@ -188,12 +209,11 @@ jQuery(document).ready(function ($) {
 
         // Add space between user input and bot response
         if (sender === 'user' || sender === 'bot') {
-            var spaceElement = $('<div></div>').addClass('message-space');
+            spaceElement = $('<div></div>').addClass('message-space');
             conversation.append(spaceElement);
         }
 
         // Ver 1.2.4
-        // conversation.scrollTop(conversation[0].scrollHeight);
         conversation[0].scrollTop = conversation[0].scrollHeight;
 
         // Save the conversation locally between bot sessions - Ver 1.2.0
@@ -202,10 +222,10 @@ jQuery(document).ready(function ($) {
     }
 
     function showTypingIndicator() {
-        var typingIndicator = $('<div></div>').addClass('typing-indicator');
-        var dot1 = $('<span>.</span>').addClass('typing-dot');
-        var dot2 = $('<span>.</span>').addClass('typing-dot');
-        var dot3 = $('<span>.</span>').addClass('typing-dot');
+        typingIndicator = $('<div></div>').addClass('typing-indicator');
+        dot1 = $('<span>.</span>').addClass('typing-dot');
+        dot2 = $('<span>.</span>').addClass('typing-dot');
+        dot3 = $('<span>.</span>').addClass('typing-dot');
         
         typingIndicator.append(dot1, dot2, dot3);
         conversation.append(typingIndicator);
@@ -217,7 +237,7 @@ jQuery(document).ready(function ($) {
     }
 
     submitButton.on('click', function () {
-        var message = messageInput.val().trim();
+        message = messageInput.val().trim();
 
         if (!message) {
             return;
@@ -240,7 +260,7 @@ jQuery(document).ready(function ($) {
             success: function (response) {
                 removeTypingIndicator();
                 if (response.success) {
-                    let botResponse = response.data;
+                    botResponse = response.data;
                     // Revision to how disclaimers are handled - Ver 1.5.0
                     if (localStorage.getItem('chatgpt_disclaimer_setting') === 'No') {
                         const prefixes = [
@@ -262,23 +282,20 @@ jQuery(document).ready(function ($) {
                     if (botResponse.includes('[URL: ')) {
                         // DIAG - Diagnostics - Ver 1.6.3
                         // console.log("URL found in bot response");
-                        // let urlRegex = /\[URL: (.*?)\]/g;
-                        // let link = botResponse.match(urlRegex)[0].replace('[URL: ', '').replace(']', '');
-
-                        let link = '';
-                        let urlRegex = /\[URL: (.*?)\]/g;
-                        let match = botResponse.match(urlRegex);
+                        link = '';
+                        urlRegex = /\[URL: (.*?)\]/g;
+                        match = botResponse.match(urlRegex);
                         if (match && match.length > 0) {
                             link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
                             // DAIG - Diagnostics - Ver 1.6.3
                             // console.log(link);
                         }
 
-                        let linkElement = document.createElement('a');
+                        linkElement = document.createElement('a');
                         linkElement.href = link;
                         linkElement.textContent = 'here';
-                        let text = botResponse.replace(urlRegex, '');
-                        let textElement = document.createElement('span');
+                        text = botResponse.replace(urlRegex, '');
+                        textElement = document.createElement('span');
                         textElement.textContent = text;
                         botResponse = document.createElement('div');
                         botResponse.appendChild(textElement);
@@ -287,8 +304,10 @@ jQuery(document).ready(function ($) {
                         botResponse = botResponse.outerHTML;
                     }
 
-                    // IDEA Check for double asterisks suggesting a "bold" response
-                    // TODO Add a class to the bot-text span to make the text bold
+                    // Check for double asterisks suggesting a "bold" response
+                    // Check for linefeeds suggesting paragraphs response
+                    botResponse = botResponse.replace(/\n/g, "<br>");
+                    botResponse = botResponse.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
 
                     // Return the response
                     appendMessage(botResponse, 'bot');
@@ -298,7 +317,9 @@ jQuery(document).ready(function ($) {
             },
             error: function () {
                 removeTypingIndicator();
-                appendMessage('Error: Unable to send message', 'error');
+                // Console log the error - Ver 1.6.7
+                // console.log('Error: Unable to send message');
+                appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
             },
             complete: function () {
                 removeTypingIndicator();
@@ -321,6 +342,17 @@ jQuery(document).ready(function ($) {
             chatGptOpenButton.show();
             localStorage.setItem('chatgptStartStatus', 'closed');
         } else {
+            if (chatgpt_width_setting === 'Wide') {
+                $('#chatbot-chatgpt').css({
+                    width: '500px', // or your desired width
+                    height: '450px', // or your desired height
+                    overflow: 'visible'});
+                } else {
+                $('#chatbot-chatgpt').css({
+                    width: '300px', // or your desired width
+                    height: '450px', // or your desired height
+                    overflow: 'visible'});
+            }
             chatGptChatBot.show();
             chatGptOpenButton.hide();
             localStorage.setItem('chatgptStartStatus', 'open');
@@ -331,9 +363,8 @@ jQuery(document).ready(function ($) {
 
     // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0 and updated for Ver 1.4.1
     function loadChatbotStatus() {
-        let chatgptStartStatus = localStorage.getItem('chatgptStartStatus');
-        // let chatgptStartStatus = chatbotSettings.chatgptStartStatus;
-        let chatgptStartStatusNewVisitor = localStorage.getItem('chatgptStartStatusNewVisitor');
+        chatgptStartStatus = localStorage.getItem('chatgptStartStatus');
+        chatgptStartStatusNewVisitor = localStorage.getItem('chatgptStartStatusNewVisitor');
 
         // Nuclear option to clear session conversation - Ver 1.5.0
         // Do not use unless alsolutely needed
@@ -363,14 +394,14 @@ jQuery(document).ready(function ($) {
                 chatgptStartStatusNewVisitor = 'closed';
                 localStorage.setItem('chatgptStartStatusNewVisitor', 'closed');
             }
-        };
+        }
 
         // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         //     console.log('FUNCTION: loadChatbotStatus - AFTER DECISION');
         // }
         
-        // If the chatbot status is not set in local storage, use chatgpt_start_status - Ver 1.5.1
+        // If the chatbot status is not set in local storage, use chatgptStartStatus - Ver 1.5.1
         if (chatgptStartStatus === 'closed') {
             chatGptChatBot.hide();
             chatGptOpenButton.show();
@@ -381,6 +412,7 @@ jQuery(document).ready(function ($) {
             loadConversation();
             scrollToBottom();
         }
+
     }
 
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
@@ -391,13 +423,14 @@ jQuery(document).ready(function ($) {
             //     console.log("FUNCTION: Scrolling to bottom");
             // }
             conversation.scrollTop(conversation[0].scrollHeight);
-        }, 100);  // delay of 100 milliseconds    
+        }, 100);  // delay of 100 milliseconds  
+
     }
    
     // Load conversation from local storage if available - Ver 1.2.0
     function loadConversation() {
-        var storedConversation = sessionStorage.getItem('chatgpt_conversation');
-        localStorage.setItem('chatgptStartStatusNewVisitor', 'Closed');
+        storedConversation = sessionStorage.getItem('chatgpt_conversation');
+        localStorage.setItem('chatgptStartStatusNewVisitor', 'closed');
   
         // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
@@ -424,6 +457,7 @@ jQuery(document).ready(function ($) {
             // }
             initializeChatbot();
         }
+
     }
 
     // Call the loadChatbotStatus function here - Ver 1.1.0

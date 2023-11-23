@@ -48,9 +48,9 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         update_option('no_of_items_analyzed', $no_of_items_analyzed);
 
         // WP Cron Scheduler - VER 1.6.2
-        // error_log('BEFORE wp_clear_scheduled_hook');
+        // error_log( 'Chatbot ChatGPT: BEFORE wp_clear_scheduled_hook');
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear before rescheduling
-        // error_log('AFTER wp_clear_scheduled_hook');
+        // error_log( 'Chatbot ChatGPT: AFTER wp_clear_scheduled_hook');
 
         if ($run_scanner === 'Cancel') {
             $run_scanner = 'No';

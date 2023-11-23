@@ -1,10 +1,10 @@
 === Chatbot ChatGPT for WordPress ===
 Contributors: Kognetiks
-Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat
+Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assistants, custom GPTs
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4
-Stable tag: 1.6.6
+Stable tag: 1.6.7
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -12,6 +12,12 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Easily integrate OpenAI's ChatGPT API into your WordPress website with this powerful, AI-driven chatbot plugin for personalized support and engagement.
 
 == Description ==
+
+Introducing **Integration for Custom GPT Assistants** with the **Chatbot ChatGPT for WordPress**
+
+The Chatbot ChatGPT for WordPress introduces an innovative feature: the integration of OpenAI's Custom GPT Assistants. You tailor these custom Assistants which are versions of GPT models designed to enhance website interactions and provide a more dynamic user experience. You can equip them with specialized knowledge and functionalities, allowing them to perform a variety of tasks such as answering FAQs, handling bookings, and offering personalized recommendations. With this feature, website owners can easily embed these Assistants into WordPress sites, using the Chatbot ChatGPT plugin. This integration not only elevates customer service but also offers a unique, interactive experience that aligns with the website's theme and content. The Assistants' ability to adapt and learn from interactions ensures continuous improvement in performance, making them an invaluable assetfor businesses aiming to enhance their online presence and engagement.
+
+Learn more about enabling this Custom GPT Assistants at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
 Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experience with AI-Driven Personalized Support!
 
@@ -34,8 +40,8 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experie
 ✨ **OpenAI Models Supported**
 
 ✨ GPT-3.5 (gpt-3.5-turbo)
-✨ GPT-4 (gpt-4 models
-✨ **GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)** 
+✨ GPT-4 (gpt-4 models)
+✨ **GPT-4 Turbo ('gpt-4-1106-preview' training data up to April 2023)** 
 
 🚀 **Join Us in the Revolution of Personalized User Experience!**
 
@@ -151,6 +157,14 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
 
 == Changelog ==
+
+= 1.6.7 =
+* The Chatbot ChatGPT for WordPress now supports Custom GPTs developed in the OpenAI Playground
+* See [https://platform.openai.com/docs/assistants/overview](https://platform.openai.com/docs/assistants/overview) to learn more about Assisstants 
+* Added an expanded selection of seasonal avatars celebrating Chinese New Year, Christmas, Fall, Halloween, Spring, Summer, Thanksgiving, and Winter.
+* Enhanced CSS adaptation to improve compatibility across different themes
+* Improved formatting of responses from the chatbot for clearer and more user-friendly communication.
+* Minor updates to the Reporting (formatting and fonts)
 
 = 1.6.6 =
 * Expanded the list of OpenAI models supported - See Settings - API/Model now supports GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)

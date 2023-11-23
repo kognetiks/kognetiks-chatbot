@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Settings Links
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It allows users to configure the settings links and other parameters
+ * 
  *
  * @package chatbot-chatgpt
  */

@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Settings - Avatar Page
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It allows users to configure the select avatar of choice and other parameters.
+ * 
  *
  * @package chatbot-chatgpt
  */
@@ -15,16 +15,36 @@ die;
 
 // Custom Avatar Icon - Ver 1.5.0
 function chatbot_chatgpt_avatar_section_callback($args) {
-    echo '<p>Configure your avatar settings below:</p>';
+    echo '<div>
+        <p>Choose an avatar that best represents you and your brand.  You can change your avatar at any time.</p>
+        <p>It\'s ok you don\'t want an Avatar.  Just select the \'None\' option among the originals.</p>
+        <p><b><i>Don\'t forget to click \'Save Settings\' to save your changes.</i><b></p>
+    </div>';
 }
  
 // Custom Avatar Icon - Ver 1.5.0
 function chatbot_chatgpt_custom_avatar_callback($args) {
     // Get the avatar option. If it's not set or is NULL, default to custom value.
-    $custom_avatar_icon = "";
     $custom_avatar_icon = esc_attr(get_option('chatgpt_custom_avatar_icon_setting', 'icon-001.png'));
     ?>
     <input type="text" id="chatgpt_custom_avatar_icon_setting" name="chatgpt_custom_avatar_icon_setting" value="<?php echo esc_attr( $custom_avatar_icon ); ?>" class="regular-text">
+    <?php
+}
+
+// Avatar Icon Set - Ver 1.6.7
+function chatbot_chatgpt_avatar_icon_set_callback($args) {
+    // Get the avatar set option. If it's not set or is NULL, default to custom value.
+    $avatar_icon_set = esc_attr(get_option('chatbot_chatgpt_avatar_icon_set', 'Original'));
+    ?>
+    <select id="chatbot_chatgpt_avatar_icon_set" name="chatbot_chatgpt_avatar_icon_set">
+        <?php
+        $options = array("Original", "Chinese New Year", "Christmas", "Fall", "Halloween", "Spring", "Summer", "Thanksgiving", "Winter");
+        foreach ($options as $option) {
+            $selected = ($avatar_icon_set == $option) ? 'selected' : '';
+            echo "<option value=\"$option\" $selected>$option</option>";
+        }
+        ?>
+    </select>
     <?php
 }
 
@@ -55,30 +75,41 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
     <input type="hidden" id="chatgpt_avatar_icon_setting" name="chatgpt_avatar_icon_setting" value="<?php echo esc_attr( $selectedIcon ); ?>">
     <table>
         <?php
-            $iconCount = 29;  // Update this number as you add more icons
+            $iconSets = [
+                "Icon" => 30,
+                "Chinese" => 10,
+                "Christmas" => 10,
+                "Fall" => 10,
+                "Halloween" => 10,
+                "Spring" => 10,
+                "Summer" => 10,
+                "Thanksgiving" => 10,
+                "Winter" => 10
+            ];
             $cols = 10;
-            $rows = 5;
-            $iconIndex = 0;
+            $selectedIcon = esc_attr(get_option('chatgpt_avatar_icon_setting', 'icon-001.png'));
 
-            // $selectedIcon = esc_attr(get_option('chatgpt_avatar_icon_setting', 'icon-001.png'));
-            
-            for($i = 0; $i < $rows; $i++) {
-                echo '<tr>';
-                for($j = 0; $j < $cols; $j++) {
-                    if ($iconIndex <= $iconCount) {
-                        $iconName = sprintf("icon-%03d.png", $iconIndex);
-                        $selected = ""; 
-                        $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
-                        echo '<td  style="padding: 15px;">';
-                        // change the id attribute of the image tag to replace '-' with '_'
-                        echo '<img src="' . plugins_url('../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:100px;height:100px;cursor:pointer;"/>';
-                        echo '</td>';
-                        $iconIndex++;
+            foreach ($iconSets as $setName => $iconCount) {
+                $rows = ceil($iconCount / $cols);
+                $iconIndex = 0;
+
+                for ($i = 0; $i < $rows; $i++) {
+                    echo '<tr>';
+                    for ($j = 0; $j < $cols; $j++) {
+                        if ($iconIndex < $iconCount) {
+                            $iconName = sprintf(strtolower(str_replace(' ', '-', $setName)) . "-%03d.png", $iconIndex);
+                            $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
+                            echo '<td style="padding: 15px;">';
+                            echo '<img src="' . plugins_url('../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:100px;height:100px;cursor:pointer;"/>';
+                            echo '</td>';
+                            $iconIndex++;
+                        }
                     }
+                    echo '</tr>';
                 }
-                echo '</tr>';
             }
         ?>
     </table>
+
     <?php
 }

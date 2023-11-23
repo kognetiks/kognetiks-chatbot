@@ -12,14 +12,21 @@
 .chatbot-avatar {
     width: 60px;
     height: 60px;
-    /* margin: -20px; */
-    /* margin: -10px -5px -10px -5px;  top, right, bottom, left */
+}
+
+#chatgpt-open-btn.avatar-icon {
+    padding: 5px;
+}
+
+/* Padding for Avatars - Ver 1.5.0 */
+#chatgpt-open-btn.dashicon {
+    padding: 25px;
 }
 
 /* Avatar Settings - Ver 1.5.0 */
 .chatbot-bubble {
-    background-color: #f0f0f0; /* Very light gray background */
-    color: #000; /* Black text */
+    background-color: #f0f0f0;
+    color: #000;
     border-radius: 5px;
     padding: 10px;
     margin: 10px;
@@ -28,31 +35,12 @@
     max-width: 300px; /* Maximum width of the bubble */
     word-wrap: break-word;
     position: absolute;
-    right: 80px; /* Adjust this value as needed */
-    /* top: -3px; Adjust this value as needed */
+    right: 80px;
     z-index: 100;
-    white-space: normal; /* This will allow the text to wrap and resize the bubble */
-    display: inline-block; /* This makes the width of the bubble adapt to its content, up to max-width */
+    white-space: normal;
+    display: inline-block;
     font-family: sans-serif;
-    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16); /* Faint shadow */
-}
-
-#chatgpt-open-btn.avatar-icon {
-    padding: 5px;
-}
-
-#chatgpt-open-btn.dashicon {
-    /* Padding was increase from 15px to 25px after adding avatars - Ver 1.5.0 */
-    padding: 25px;
-}
-
-/* Reset font family for Dashicons */
-#chatgpt-open-btn {
-    position: relative;
-    font-family: dashicons;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
 }
 
 /* Set font family to sans-serif for all text within the plugin */
@@ -60,19 +48,21 @@
     font-family: sans-serif;
 }
 
+/* CSS for the chatbot interface */
 #chatbot-chatgpt {
+    transition: width 0.5s ease, height 0.5s ease;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
     position: fixed;
     bottom: 10px;
     right: 10px;
-    width: 300px;
-    height: 450px;
     background-color: #f1f1f1;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    /* Add z-index - Ver 1.2.1 */
     z-index: 100;
     padding-bottom: 10px;
 }
@@ -89,6 +79,9 @@
     font-size: 16px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 #chatbot-chatgpt-conversation {
@@ -100,6 +93,9 @@
 #chatbot-chatgpt-input {
     display: flex;
     padding: 10px;
+    align-content: stretch;
+    justify-content: center;
+    align-items: center;
 }
 
 #chatbot-chatgpt-message {
@@ -110,8 +106,6 @@
 }
 
 #chatbot-chatgpt-submit {
-    /* background-color: #222; */
-    /* background-color: white; */
     background-color: #f1f1f1;
     color: #fff;
     border: none;
@@ -122,7 +116,6 @@
 }
 
 #chatbot-chatgpt-submit img {
-    /* background-color: white; */
     background-color: #f1f1f1;
 }
 
@@ -136,6 +129,8 @@
 
 .user-message {
     text-align: right;
+    font: inherit;
+    font-family: inherit;
 }
 
 .user-text {
@@ -146,6 +141,8 @@
     border-radius: 12px;
     border-bottom-right-radius: 0;
     overflow-wrap: anywhere;
+    font: inherit;
+    font-family: inherit;
 }
 
 .bot-message {
@@ -161,6 +158,8 @@
     border-radius: 12px;
     border-bottom-left-radius: 0;
     overflow-wrap: anywhere;
+    font: inherit;
+    font-family: inherit;
 }
 
 .error-message {
@@ -170,26 +169,27 @@
 .error-text {
     color: red;
     font-weight: bold;
+    font: inherit;
+    font-family: inherit;
 }
 
 .message-space {
     height: 10px;
 }
 
-/* Collapse chatbot upon user request */
 .chatbot-collapse-btn {
-    position: absolute;
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-    top: 1.5%;
-    right: 2%;
     background-color: #007bff;
     border: none;
     cursor: pointer;
     text-align: center;
     padding: 15px;
     border-radius: 10%;
+    justify-content: center;
+    flex-wrap: nowrap;
+    margin-top: 0px
 }
 
 .chatbot-collapse-btn:hover {
@@ -205,7 +205,6 @@
     display: none;
 }
 
-/* Show the chatbot open button in the lower right corner of the window */
 #chatbot-open-btn {
     position: fixed;
     bottom: 5%;
@@ -217,7 +216,8 @@
     float: right;
 }
 
-#chatgpt-open-btn {
+
+/* #chatgpt-open-btn {
     position: fixed;
     bottom: 2%;
     right: 2%;
@@ -228,8 +228,39 @@
     float: right;
     box-shadow: 2px 4px 15px rgb(102, 92, 143);
     border-radius: 10%;
-    /* Add z-index - Ver 1.2.1 */
+    width: 80px;
     z-index: 100;
+} */
+
+/* Reset font family for Dashicons */
+#chatgpt-open-btn-dashicon {
+    position: relative;
+    font-family: dashicons;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 20px;
+    width: 20px;
+}
+
+#chatgpt-open-btn {
+    transition: width 0.5s ease, height 0.5s ease;
+    position: fixed;
+    bottom: 2%;
+    right: 2%;
+    background-color: #007bff;
+    border: none;
+    cursor: pointer;
+    padding: 15px;
+    float: right;
+    box-shadow: 2px 4px 15px rgb(102, 92, 143);
+    border-radius: 10%;
+    width: 80px;
+    z-index: 100;
+    font-family: dashicons; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
 }
 
 #chatgpt-open-btn:hover {
@@ -242,23 +273,23 @@
 
 #chatgptTitle.title {
     color: white;
-    font-size: 30px;
-    /* font-weight: 300; */
+    font-size: inherit;
+    font-family: inherit;
 }
 
 .typing-indicator {
-    display: inline-flex; /* Changed from flex to inline-flex */
+    display: inline-flex;
     justify-content: flex-start;
-    background-color: #5BC236; /* Match the green background color */
-    border-radius: 12px; /* Match the border radius */
-    padding: 5px 10px; /* Match the padding */
-    border-bottom-left-radius: 0; /* Match the border-bottom-left-radius */
+    background-color: #5BC236;
+    border-radius: 12px;
+    padding: 5px 10px;
+    border-bottom-left-radius: 0;
 }
 
 .typing-dot {
     margin-right: 3px;
     animation: typing 1s infinite;
-    color: #ffffff; /* Match the white color of the dots */
+    color: #ffffff;
 }
 
 .typing-dot:nth-child(2) {
@@ -281,7 +312,6 @@
     }
 }
 
-/* CSS for the custom buttons */
 .chatbot-chatgpt-custom-button-class {
     background-color: #3B82F6;
     color: #ffffff;
@@ -291,7 +321,7 @@
     padding-left: 1rem;
     padding-right: 1rem;
     border-radius: 0.25rem;
-    text-decoration: none; /* Remove underline */
+    text-decoration: none;
   }
 
 .chatbot-chatgpt-custom-button-class:hover {
@@ -299,11 +329,11 @@
 }
 
 .chatbot-chatgpt-custom-button-class a {
-    color: inherit; /* Use the text color of the parent button */
-    text-decoration: none !important; /* Remove underline */
+    color: inherit;
+    text-decoration: none !important;
 }
 
 .chatbot-chatgpt-custom-button-class a:hover {
-    color: inherit; /* Use the text color of the parent button */
-    text-decoration: none !important; /* Remove underline */
+    color: inherit;
+    text-decoration: none !important;
 }

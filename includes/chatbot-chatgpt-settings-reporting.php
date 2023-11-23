@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Settings - Reporting Page
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It allows users to configure the API key and other parameters
- * required to access the ChatGPT API from their own account.
+ * It handles the reporting settings and other parameters.
+ *
  *
  * @package chatbot-chatgpt
  */
@@ -28,7 +28,7 @@ function chatbot_chatgpt_reporting_period_callback($args) {
     // Get the saved chatbot_chatgpt_reporting_period value or default to "Daily"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_reporting_period', 'Daily'));
     // DIAG - Log the output choice
-    // error_log('chatbot_chatgpt_reporting_period');
+    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_reporting_period');
     // error_log($output_choice);
     ?>
     <select id="chatbot_chatgpt_reporting_period" name="chatbot_chatgpt_reporting_period">
@@ -65,7 +65,8 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
 
     // Calculate number of bars and bar width
     $bar_count = count($data);
-    $bar_width = (int)($width / ($bar_count * 2));
+    // $bar_width = (int)($width / ($bar_count * 2));
+    $bar_width = round($width / ($bar_count * 2));
 
     // Offset for the chart
     $offset_x = 25;
@@ -76,7 +77,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
     imageline($image, 0, $height - $offset_y, $width, $height - $offset_y, $black);
 
     // Font size for data and labels
-    $font_size = 2;
+    $font_size = 8;
 
     // Draw bars
     $chart_title_height = 30; // adjust this to the height of your chart title
@@ -96,15 +97,32 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
         $data_value_y = $y1 - 15;
         $data_value_y = $data_value_y < 0 ? 0 : $data_value_y;
 
-        imagestring($image, $font_size, $data_value_x, $data_value_y, $data[$i], $black);
+        // Draw a bar
+        imagefilledrectangle($image, $x1, $y1, $x2, $y2, $light_blue);
 
-        $label_x = $center_x - (imagefontwidth($font_size) * strlen($labels[$i]) / 2);
-        $label_y = $height - $offset_y + 5;
+        // Draw data and labels
+        $center_x = round($x1 + ($bar_width / 2));
 
-        imagestring($image, $font_size, $label_x, $label_y, $labels[$i], $black);
+        $data_value_x = $center_x - (imagefontwidth(round($font_size)) * strlen($data[$i]) / 2);
+        $label_x = $center_x - (imagefontwidth(round($font_size)) * strlen($labels[$i]) / 2);
 
-        // Draw a solid black line at the bottom of the bar
-        imageline($image, $x1, $y2, $x2, $y2, $black);
+        $data_value_y = $y1 - 5; // Moves the counts up or down
+        $data_value_y = $data_value_y < 0 ? 0 : $data_value_y;
+
+        // Fix: Explicitly cast to int
+        $data_value_x = (int)($data_value_x);
+        $data_value_y = (int)($data_value_y);
+
+        // https://fonts.google.com/specimen/Roboto - Ver 1.6.7
+        $fontFile = plugin_dir_path(__FILE__) . '../assets/fonts/roboto/Roboto-Black.ttf'; // Replace this with the path to your font file
+
+        imagettftext($image, $font_size, 0, $data_value_x, $data_value_y, $black, $fontFile, $data[$i]);
+
+        $label_x = $center_x - ($font_size * strlen($labels[$i]) / 2) + 7; // Moves the dates left or right
+        $label_y = $height - $offset_y + 15; // Moves the dates up or down
+
+        imagettftext($image, $font_size, 0, $label_x, $label_y, $black, $fontFile, $labels[$i]);
+
     }
 
     // Save the image
@@ -150,7 +168,8 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         // Calculate the start date and group by clause based on the reporting period
         if($reporting_period === 'Daily') {
             $start_date = date('Y-m-d', strtotime("-7 days"));
-            $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
+            // $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
+            $group_by = "DATE_FORMAT(date, '%m-%d')";
         } elseif($reporting_period === 'Monthly') {
             $start_date = date('Y-m-01', strtotime("-3 months"));
             $group_by = "DATE_FORMAT(date, '%Y-%m')";
