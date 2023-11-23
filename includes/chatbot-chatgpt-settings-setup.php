@@ -50,7 +50,7 @@ function chatbot_chatgptStartStatusNewVisitor_callback($args) {
 
 // Added in Ver 1.6.6
 function chatbot_chatgpt_bot_prompt_callback($args) {
-    $chatgpt_chatbot_bot_prompt = esc_attr(get_option('chatgpt_chatbot_bot_prompt', 'Enter your message ...'));
+    $chatgpt_chatbot_bot_prompt = esc_attr(get_option('chatgpt_chatbot_bot_prompt', 'Enter your question ...'));
     ?>
     <input type="text" id="chatgpt_chatbot_bot_prompt" name="chatgpt_chatbot_bot_prompt" value="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>" class="regular-text">
     <?php

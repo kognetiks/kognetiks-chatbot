@@ -17,7 +17,7 @@ function chatbot_chatgpt_localize(){
 
     $defaults = array(
         'chatgpt_bot_name' => 'Chatbot ChatGPT',
-        'chatgpt_chatbot_bot_prompt' => 'Enter your message ...',
+        'chatgpt_chatbot_bot_prompt' => 'Enter your question ...',
         'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatgptStartStatus' => 'closed',

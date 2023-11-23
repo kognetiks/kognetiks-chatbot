@@ -10,7 +10,7 @@ jQuery(document).ready(function ($) {
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         var chatgptName = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_bot_name) ? chatbotSettings.chatgpt_bot_name : 'Chatbot ChatGPT';
-        var chatgpt_chatbot_bot_prompt = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_chatbot_bot_prompt) ? chatbotSettings.chatgpt_chatbot_bot_prompt : 'Enter your message ...';
+        var chatgpt_chatbot_bot_prompt = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_chatbot_bot_prompt) ? chatbotSettings.chatgpt_chatbot_bot_prompt : 'Enter your question ...';
         var chatgptInitialGreeting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.initial_greeting) ? chatbotSettings.initial_greeting : 'Hello! How can I help you today?';
         var chatgptSubsequentGreeting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_subsequent_greeting) ? chatbotSettings.chatgpt_subsequent_greeting : 'Hello again! How can I help you?';
         var chatgptStartStatus = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgptStartStatus) ? chatbotSettings.chatgptStartStatus : 'closed';

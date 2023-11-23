@@ -129,6 +129,8 @@
 
 .user-message {
     text-align: right;
+    font: inherit;
+    font-family: inherit;
 }
 
 .user-text {
@@ -139,6 +141,8 @@
     border-radius: 12px;
     border-bottom-right-radius: 0;
     overflow-wrap: anywhere;
+    font: inherit;
+    font-family: inherit;
 }
 
 .bot-message {
@@ -154,6 +158,8 @@
     border-radius: 12px;
     border-bottom-left-radius: 0;
     overflow-wrap: anywhere;
+    font: inherit;
+    font-family: inherit;
 }
 
 .error-message {
@@ -163,6 +169,8 @@
 .error-text {
     color: red;
     font-weight: bold;
+    font: inherit;
+    font-family: inherit;
 }
 
 .message-space {
@@ -266,6 +274,7 @@
 #chatgptTitle.title {
     color: white;
     font-size: inherit;
+    font-family: inherit;
 }
 
 .typing-indicator {

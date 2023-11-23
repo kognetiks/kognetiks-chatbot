@@ -18,7 +18,7 @@ jQuery(document).ready(function ($) {
     initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
     subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
     chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
-    chatgpt_chatbot_bot_prompt = localStorage.getItem('chatgpt_chatbot_bot_prompt') || 'Enter your message ...';
+    chatgpt_chatbot_bot_prompt = localStorage.getItem('chatgpt_chatbot_bot_prompt') || 'Enter your question ...';
     chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
 
     localStorage.setItem('chatgptStartStatus', chatgptStartStatus);
@@ -304,8 +304,10 @@ jQuery(document).ready(function ($) {
                         botResponse = botResponse.outerHTML;
                     }
 
-                    // IDEA Check for double asterisks suggesting a "bold" response
-                    // TODO Add a class to the bot-text span to make the text bold
+                    // Check for double asterisks suggesting a "bold" response
+                    // Check for linefeeds suggesting paragraphs response
+                    botResponse = botResponse.replace(/\n/g, "<br>");
+                    botResponse = botResponse.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
 
                     // Return the response
                     appendMessage(botResponse, 'bot');

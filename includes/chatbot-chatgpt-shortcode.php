@@ -16,7 +16,7 @@ function chatbot_chatgpt_shortcode() {
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
     $bot_name = esc_attr(get_option('chatgpt_bot_name', 'Chatbot ChatGPT'));
-    $chatgpt_chatbot_bot_prompt = esc_attr(get_option('chatgpt_chatbot_bot_prompt', 'Enter your message ...'));
+    $chatgpt_chatbot_bot_prompt = esc_attr(get_option('chatgpt_chatbot_bot_prompt', 'Enter your question ...'));
 
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
     // global $chatbot_chatgpt_enable_custom_buttons;
