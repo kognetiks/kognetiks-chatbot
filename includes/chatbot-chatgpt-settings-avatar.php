@@ -17,14 +17,6 @@ die;
 function chatbot_chatgpt_avatar_section_callback($args) {
     echo '<div>
         <p>Choose an avatar that best represents you and your brand.  You can change your avatar at any time.</p>
-        <p>To customize your avatar, follow these simple steps:</p>
-        <ol>
-            <li>Select an Icon Set: Choose from the available themes - Original, Chinese New Year, Christmas, Fall, Halloween, Spring, Summer, Thanksgiving, or Winter.</li>
-            <li>Then click on the \'Save Settings\' button to change the icon set.</li>
-            <li>Pick an Avatar: Once icon set has reloaded, browse through the available avatars within that theme.</li>
-            <li>Confirm Your Selection: Click on your preferred avatar to select it (it will have a red box).</li>
-            <li>Save Your Settings: Click on the \'Save Settings\' button to save your avatar selection.</li>
-        </ol>
         <p>It\'s ok you don\'t want an Avatar.  Just select the \'None\' option among the originals.</p>
         <p><b><i>Don\'t forget to click \'Save Settings\' to save your changes.</i><b></p>
     </div>';
@@ -83,56 +75,41 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
     <input type="hidden" id="chatgpt_avatar_icon_setting" name="chatgpt_avatar_icon_setting" value="<?php echo esc_attr( $selectedIcon ); ?>">
     <table>
         <?php
-            if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set', 'Original')) == "Original") {
-                $iconCount = 29;
-                $cols = 10;
-                $rows = 5;
-                $iconIndex = 0;
-    
-            } else {
-                $iconCount = 10;
-                $cols = 10;
-                $rows = 1;
-                $iconIndex = 0;
-            }
+            $iconSets = [
+                "Icon" => 30,
+                "Chinese" => 10,
+                "Christmas" => 10,
+                "Fall" => 10,
+                "Halloween" => 10,
+                "Spring" => 10,
+                "Summer" => 10,
+                "Thanksgiving" => 10,
+                "Winter" => 10
+            ];
+            $cols = 10;
+            $selectedIcon = esc_attr(get_option('chatgpt_avatar_icon_setting', 'icon-001.png'));
 
-            // $selectedIcon = esc_attr(get_option('chatgpt_avatar_icon_setting', 'icon-001.png'));
-            $iconName = "";
-            for($i = 0; $i < $rows; $i++) {
-                echo '<tr>';
-                for($j = 0; $j < $cols; $j++) {
-                    if ($iconIndex <= $iconCount) {
-                        if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set')) == "Original") {
-                            $iconName = sprintf("icon-%03d.png", $iconIndex);
-                        } else if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set')) == "Chinese New Year") {
-                            $iconName = sprintf("chinese-%03d.png", $iconIndex);
-                        } else if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set')) == "Christmas") {
-                            $iconName = sprintf("christmas-%03d.png", $iconIndex);
-                        } else if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set')) == "Fall") {
-                            $iconName = sprintf("fall-%03d.png", $iconIndex);
-                        } else if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set')) == "Halloween") {
-                            $iconName = sprintf("halloween-%03d.png", $iconIndex);
-                        } else if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set')) == "Spring") {
-                            $iconName = sprintf("spring-%03d.png", $iconIndex);
-                        } else if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set')) == "Summer") {
-                            $iconName = sprintf("summer-%03d.png", $iconIndex);
-                        } else if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set')) == "Thanksgiving") {
-                            $iconName = sprintf("thanksgiving-%03d.png", $iconIndex);
-                        } else if (esc_attr(get_option('chatbot_chatgpt_avatar_icon_set')) == "Winter") {
-                            $iconName = sprintf("winter-%03d.png", $iconIndex);
+            foreach ($iconSets as $setName => $iconCount) {
+                $rows = ceil($iconCount / $cols);
+                $iconIndex = 0;
+
+                for ($i = 0; $i < $rows; $i++) {
+                    echo '<tr>';
+                    for ($j = 0; $j < $cols; $j++) {
+                        if ($iconIndex < $iconCount) {
+                            $iconName = sprintf(strtolower(str_replace(' ', '-', $setName)) . "-%03d.png", $iconIndex);
+                            $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
+                            echo '<td style="padding: 15px;">';
+                            echo '<img src="' . plugins_url('../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:100px;height:100px;cursor:pointer;"/>';
+                            echo '</td>';
+                            $iconIndex++;
                         }
-                        $selected = ""; 
-                        $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
-                        echo '<td  style="padding: 15px;">';
-                        // change the id attribute of the image tag to replace '-' with '_'
-                        echo '<img src="' . plugins_url('../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:100px;height:100px;cursor:pointer;"/>';
-                        echo '</td>';
-                        $iconIndex++;
                     }
+                    echo '</tr>';
                 }
-                echo '</tr>';
             }
         ?>
     </table>
+
     <?php
 }

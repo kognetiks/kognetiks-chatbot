@@ -162,6 +162,7 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 * The Chatbot ChatGPT for WordPress now supports Custom GPTs developed in the OpenAI Playground
 * See [https://platform.openai.com/docs/assistants/overview](https://platform.openai.com/docs/assistants/overview) to learn more about Assisstants 
 * Added an expanded selection of seasonal avatars celebrating Chinese New Year, Christmas, Fall, Halloween, Spring, Summer, Thanksgiving, and Winter.
+* Enhanced CSS adaptation to improve compatibility across different themes
 
 = 1.6.6 =
 * Expanded the list of OpenAI models supported - See Settings - API/Model now supports GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)

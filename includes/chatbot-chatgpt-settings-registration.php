@@ -278,13 +278,13 @@ function chatbot_chatgpt_settings_init() {
     );
 
     // Avatar Icon Set
-    add_settings_field(
-        'chatbot_chatgpt_avatar_icon_set',
-        'Avatar Icon Set',
-        'chatbot_chatgpt_avatar_icon_set_callback',
-        'chatbot_chatgpt_avatar',
-        'chatbot_chatgpt_avatar_section'
-    );
+    // add_settings_field(
+    //     'chatbot_chatgpt_avatar_icon_set',
+    //     'Avatar Icon Set',
+    //     'chatbot_chatgpt_avatar_icon_set_callback',
+    //     'chatbot_chatgpt_avatar',
+    //     'chatbot_chatgpt_avatar_section'
+    // );
     
     // Register new fields in the "chatbot_chatgpt_avatar_section" section, inside the "chatbot_chatgpt_avatar" page
     add_settings_field(
