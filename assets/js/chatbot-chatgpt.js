@@ -107,7 +107,8 @@ jQuery(document).ready(function ($) {
     }
     
     // Append the collapse button and collapsed chatbot icon to the chatbot container
-    chatbotContainer.append(chatbotCollapseBtn);
+    // chatbotContainer.append(chatbotCollapseBtn);
+    $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
     chatbotContainer.append(chatbotCollapsed);
 
     // Add initial greeting to the chatbot
@@ -170,7 +171,8 @@ jQuery(document).ready(function ($) {
     chatGptChatBot.append(chatbotHeader);
 
     // Fix for Ver 1.2.0
-    chatbotHeader.append(chatbotCollapseBtn);
+    // chatbotHeader.append(chatbotCollapseBtn);
+    $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
     chatbotHeader.append(chatbotCollapsed);
 
     // Attach the click event listeners for the collapse button and collapsed chatbot icon
