@@ -477,6 +477,10 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     
             // Find the highest score for the word pair
             $result = $wpdb->get_row($wpdb->prepare("SELECT score, url FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT 1", $word_pair));
+            // Exit if there is an error
+            if ($wpdb->last_error) {
+                return;
+            }
             if ($result !== null && $result->score > $highest_score) {
                 $highest_score = $result->score;
                 $highest_score_word = $word_pair;
@@ -486,6 +490,10 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     
         // Find the highest score for the word
         $result = $wpdb->get_row($wpdb->prepare("SELECT score, url FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT 1", $word));
+        // Exit if there is an error
+        if ($wpdb->last_error) {
+            return;
+        }
         if ($result !== null && $result->score > $highest_score) {
             $highest_score = $result->score;
             $highest_score_word = $word;

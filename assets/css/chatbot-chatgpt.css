@@ -95,7 +95,7 @@
     padding: 10px;
     align-content: stretch;
     justify-content: center;
-    align-items: baseline;
+    align-items: center;
 }
 
 #chatbot-chatgpt-message {
