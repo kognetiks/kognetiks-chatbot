@@ -102,8 +102,8 @@
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     display: flex;
-    align-items: center; /* Vertical centering */
-    justify-content: space-between; /* Horizontal centering */
+    align-items: center;
+    justify-content: space-between;
 }
 
 #chatbot-chatgpt-conversation {
@@ -196,53 +196,18 @@
 
 /* Collapse chatbot upon user request */
 .chatbot-collapse-btn {
-    /* position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    top: -1.5%;
-    right: 2%;
-    background-color: #007bff;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-    padding: 15px;
-    border-radius: 10%; */
-    
-    /* position: absolute;
-    display: flex;
-    align-items: center;
-    top: 1.5%;
-    right: 2%;
-    background-color: #007bff;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-    padding: 15px;
-    border-radius: 10%;
-    flex-direction: column-reverse;
-    align-content: center;
-    justify-content: center;
-    /* vertical-align: middle; */
-    flex-wrap: nowrap; */
 
-    position: absolute;
+    position: relative;
     display: flex;
     align-items: center;
-    /* top: 1.5%;
-    right: 2%; */
     background-color: #007bff;
     border: none;
     cursor: pointer;
     text-align: center;
     padding: 15px;
     border-radius: 10%;
-    flex-direction: column-reverse;
-    align-content: center;
     justify-content: center;
-    /* vertical-align: middle; */
     flex-wrap: nowrap;
-
 }
 
 .chatbot-collapse-btn:hover {
@@ -295,9 +260,7 @@
 
 #chatgptTitle.title {
     color: white;
-    /* font-size: 30px; */
-    /* font-weight: 300; */
-    font-size: inherit;
+    font-size: inherit; /* Inherits the font-size from the #chatbot-chatgpt-header */
 }
 
 .typing-indicator {
