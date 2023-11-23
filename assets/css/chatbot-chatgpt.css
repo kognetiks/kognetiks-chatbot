@@ -278,8 +278,9 @@
 
 #chatgptTitle.title {
     color: white;
-    font-size: 30px;
+    /* font-size: 30px; */
     /* font-weight: 300; */
+    font-size: inherit;
 }
 
 .typing-indicator {
