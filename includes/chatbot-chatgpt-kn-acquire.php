@@ -53,7 +53,7 @@ function chatbot_chatgpt_kn_acquire() {
     }
 
     // DIAG - Log directory path for debugging
-    // error_log("Directory path: " . $results_dir_path);
+    error_log("Directory path: " . $results_dir_path);
 
     // Prepare log file for posts
     $log_file_posts = $results_dir_path . 'results-posts.log';
@@ -277,7 +277,7 @@ function chatbot_chatgpt_kn_acquire() {
     }
 
     // DIAG - Error log $max_top_words
-    // error_log("Max Top Words: " . $max_top_words);
+    error_log("Max Top Words: " . $max_top_words);
 
     // slice off the top max_top_words
     $topWords = array_slice($topWords, 0, $max_top_words);

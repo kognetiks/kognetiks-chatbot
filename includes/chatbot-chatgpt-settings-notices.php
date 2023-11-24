@@ -34,7 +34,7 @@ function display_option_value_admin_notice() {
             '_chatgpt_dismiss_nonce'
         );
             echo '<div class="notice notice-success is-dismissible"><p><b>Knowledge Navigator Outcome:</b> ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
-            // error_log( 'Chatbot ChatGPT: Knowledge Navigator Outcome: ' . $kn_results);
+            error_log( 'Chatbot ChatGPT: Knowledge Navigator Outcome: ' . $kn_results);
     }
 
     // FIXME - NOT CURRENTLY WORKING WITH API-TEST.PHP
@@ -57,7 +57,7 @@ function display_option_value_admin_notice() {
             '_chatgpt_dismiss_nonce'
         );
             echo '<div class="notice notice-success is-dismissible"><p>Please visit the <b>Knowledge Navigator</b> settings, select a <b>Run Schedule</b>, then <b>Save Settings</b>. <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
-            // error_log( 'Chatbot ChatGPT: API Status: ' . $kn_status);
+            error_log( 'Chatbot ChatGPT: API Status: ' . $kn_status);
     }
 
 }

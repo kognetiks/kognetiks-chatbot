@@ -30,7 +30,7 @@ global $topWords;
 global $totalWordCount;
 
 // DIAG - Diagnostic - Ver 1.6.3
-// error_log ("FUNCTION - kn_acquire_just_the_words");
+error_log ("FUNCTION - kn_acquire_just_the_words");
 
 $dom = new DOMDocument();
 @$dom->loadHTML($content);

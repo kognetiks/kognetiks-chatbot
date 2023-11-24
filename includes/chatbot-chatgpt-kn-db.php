@@ -113,7 +113,7 @@ function output_results() {
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
-    // error_log("FUNCTION - output_results");
+    error_log("FUNCTION - output_results");
 
     // Generate the directory path
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';

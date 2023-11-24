@@ -68,7 +68,7 @@ function chatbot_chatgpt_localize(){
         $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
-        // error_log( 'Chatbot ChatGPT: chatbot-chatgpt-settings-localize Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        error_log( 'Chatbot ChatGPT: chatbot-chatgpt-settings-localize Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Update localStorage - Ver 1.6.1

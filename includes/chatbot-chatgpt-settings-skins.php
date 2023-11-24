@@ -18,7 +18,7 @@ die;
 // function chatbot_chatgpt_skins_enqueue_styles() {
 
 //     // DIAG - Diagnostics
-//     // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_skins_enqueue_styles()');
+//     error_log( 'Chatbot ChatGPT: chatbot_chatgpt_skins_enqueue_styles()');
     
 //     $primary_color = get_theme_mod('primary_color', '#000000'); // Default to black if not set
 
@@ -32,7 +32,7 @@ die;
 //     wp_add_inline_style('chatbot-chatgpt', $custom_css);
 
 //     // DIAG - Diagnostics
-//     // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_skins_enqueue_styles(): ' . $custom_css);
+//     error_log( 'Chatbot ChatGPT: chatbot_chatgpt_skins_enqueue_styles(): ' . $custom_css);
 
 // }
 // add_action('wp_enqueue_scripts', 'chatbot_chatgpt_skins_enqueue_styles');
