@@ -67,6 +67,11 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-supp
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
 
+add_action('init', 'my_custom_buffer_start');
+function my_custom_buffer_start() {
+    ob_start();
+}
+
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 // update_option('chatbot_chatgpt_diagnostics', 'Off');
 global $chatbot_chatgpt_diagnostics;
@@ -237,11 +242,15 @@ function chatbot_chatgpt_send_message() {
 
     if ($use_assistant_id == 'Yes') {
         // Send message to Custom GPT API - Ver 1.6.7
+        // DIAG - Log the action
+        // error_log('Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_custom_gpt_call_api');
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message);
         // DIAG - Log the response
         // error_log('Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_custom_gpt_call_api - $response: ' . print_r($response, true));
         // Return response
-        ob_clean(); // Clean (erase) the output buffer
+        // if (ob_get_level() > 0) {
+            ob_clean(); // Clean (erase) the output buffer
+        // }
         if (substr($response, 0, 6) === 'Error:' || substr($response, 0, 7) === 'Failed:') {
             // wp_send_json_error($response);
             wp_send_json_error('Oops! Something went wrong on our end. Please try again later.');

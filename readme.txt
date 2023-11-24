@@ -158,6 +158,9 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 
 == Changelog ==
 
+= 1.6.8 =
+* Added output buffering.
+
 = 1.6.7 =
 * The Chatbot ChatGPT for WordPress now supports Custom GPTs developed in the OpenAI Playground
 * See [https://platform.openai.com/docs/assistants/overview](https://platform.openai.com/docs/assistants/overview) to learn more about Assisstants 
