@@ -259,6 +259,7 @@ jQuery(document).ready(function ($) {
             },
             success: function (response) {
                 removeTypingIndicator();
+                // console.log('Chatbot ChatGPT: success: ' + JSON.stringify(response));
                 if (response.success) {
                     botResponse = response.data;
                     // Revision to how disclaimers are handled - Ver 1.5.0
@@ -318,6 +319,7 @@ jQuery(document).ready(function ($) {
             error: function () {
                 removeTypingIndicator();
                 // Console log the error - Ver 1.6.7
+                // console.log('Chatbot ChatGPT: error: ' + response);
                 // console.log('Error: Unable to send message');
                 appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
             },

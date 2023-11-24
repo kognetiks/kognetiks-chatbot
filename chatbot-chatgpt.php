@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.6.7
+ * Version:     1.6.8
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -66,6 +66,11 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-skin
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
+
+add_action('init', 'my_custom_buffer_start');
+function my_custom_buffer_start() {
+    ob_start();
+}
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 // update_option('chatbot_chatgpt_diagnostics', 'Off');
@@ -237,11 +242,15 @@ function chatbot_chatgpt_send_message() {
 
     if ($use_assistant_id == 'Yes') {
         // Send message to Custom GPT API - Ver 1.6.7
+        // DIAG - Log the action
+        // error_log('Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_custom_gpt_call_api');
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message);
         // DIAG - Log the response
         // error_log('Chatbot ChatGPT: chatbot-chatgpt.php - chatbot_chatgpt_custom_gpt_call_api - $response: ' . print_r($response, true));
         // Return response
-        ob_clean(); // Clean (erase) the output buffer
+        // if (ob_get_level() > 0) {
+            ob_clean(); // Clean (erase) the output buffer
+        // }
         if (substr($response, 0, 6) === 'Error:' || substr($response, 0, 7) === 'Failed:') {
             // wp_send_json_error($response);
             wp_send_json_error('Oops! Something went wrong on our end. Please try again later.');

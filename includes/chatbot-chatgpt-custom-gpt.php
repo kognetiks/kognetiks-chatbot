@@ -120,7 +120,7 @@ function getTheRunsStatus($threadId, $runId, $api_key) {
         } else {
             // Handle error here
             $status = "failed";
-            // error_log ("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 57");
+            // error_log ("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 5");
             exit;
         }
 
