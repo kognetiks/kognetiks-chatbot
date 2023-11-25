@@ -20,7 +20,7 @@ function knowledge_navigator_scan() {
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
-    error_log("ENTERING knowledge_navigator_scan");
+    // error_log("ENTERING knowledge_navigator_scan");
 
     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
 
@@ -58,7 +58,7 @@ function knowledge_navigator_scan() {
     update_option('chatbot_chatgpt_kn_status', $status_message);
 
     // DIAG - Diagnostic - Ver 1.6.3
-    error_log("EXITING knowledge_navigator_scan");
+    // error_log("EXITING knowledge_navigator_scan");
 
 }
 add_action('knowledge_navigator_scan_hook', 'knowledge_navigator_scan');

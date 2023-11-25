@@ -60,7 +60,7 @@ die;
 
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
     // DIAG - Log the response body
-    error_log( 'Chatbot ChatGPT: response_body: ' . print_r($response_body, true));
+    chatbot_chatgpt_back_trace('Chatbot ChatGPT: response_body: ' . print_r($response_body, true));
 
     // Check for API-specific errors
     //
@@ -79,9 +79,7 @@ die;
     update_option('chatbot_chatgpt_api_status', $updated_status);
     $updated_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
     // TODO - Monitor the chatbot_chatgpt_api_status option for changes
-    if('On' === get_option('chatbot_chatgpt_diagnostics')) {
-        error_log('chatbot_chatgpt_api_status: ' . esc_html($updated_status));
-    }
+    chatbot_chatgpt_back_trace('chatbot_chatgpt_api_status: ' . esc_html($updated_status));
 
 }
 
@@ -91,12 +89,12 @@ die;
 function chatgpt_option_updated($option_name, $old_value, $new_value) {
 
     // DIAG - Log Function Call
-    error_log( 'Chatbot ChatGPT: chatgpt_option_updated() called');
+    chatbot_chatgpt_back_trace();
 
     // FIXME Retrieve the current value of the chatbot_chatgpt_api_status option
-    // $chatbot_chatgpt_api_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
+    $chatbot_chatgpt_api_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
     // DIAG - Log the current value of the chatbot_chatgpt_api_status option
-    error_log( 'Chatbot ChatGPT: chatbot_chatgpt_api_status: ' . $chatbot_chatgpt_api_status);
+    chatbot_chatgpt_back_trace($chatbot_chatgpt_api_status);
     
     // Check if the option updated is related to your plugin settings
     // if ($option_name === 'chatgpt_model_choice' || $option_name === 'chatgpt_api_key' || empty($chatbot_chatgpt_api_status)) {
@@ -106,10 +104,9 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
         // Call your test function
         $test_result = test_chatgpt_api($api_key);
         // DIAG - Log the test result
-        error_log( 'Chatbot ChatGPT: test_result: ' . $test_result);        
+        chatbot_chatgpt_back_trace('test_result - ' . $test_result);        
 
         // DIAG - Set the option in the admin_notice function uses to display messages
-        error_log( 'Chatbot ChatGPT: $test_result' . $test_result);
         update_option('chatbot_chatgpt_api_status', $test_result);
 
         // I could directly call display_option_value_admin_notice() here, but

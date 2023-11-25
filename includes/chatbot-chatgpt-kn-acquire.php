@@ -53,7 +53,7 @@ function chatbot_chatgpt_kn_acquire() {
     }
 
     // DIAG - Log directory path for debugging
-    error_log("Directory path: " . $results_dir_path);
+    // error_log("Directory path: " . $results_dir_path);
 
     // Prepare log file for posts
     $log_file_posts = $results_dir_path . 'results-posts.log';
@@ -91,9 +91,9 @@ function chatbot_chatgpt_kn_acquire() {
     // Loop through query results
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
-        // foreach($result as $key => $value) {
-        //     error_log("Key: $key, Value: $value");
-        // }        
+        foreach($result as $key => $value) {
+            chatbot_chatgpt_back_trace("Key: $key, Value: $value");
+        }        
         $output_str = '';
         $output_str .= json_encode($result['post_content']) . "\n";
 
@@ -134,11 +134,11 @@ function chatbot_chatgpt_kn_acquire() {
         }
 
         // TODO Log the URL and the $words array
-        error_log($url . "\n", 3, $log_file_posts);
-        error_log(print_r($words, true) . "\n", 3, $log_file_posts);
+        // error_log($url . "\n", 3, $log_file_posts);
+        // error_log(print_r($words, true) . "\n", 3, $log_file_posts);
 
-        error_log($url . "\n", 3, $log_file_posts);
-        error_log(print_r($word_pairs, true) . "\n", 3, $log_file_posts);
+        // error_log($url . "\n", 3, $log_file_posts);
+        // error_log(print_r($word_pairs, true) . "\n", 3, $log_file_posts);
 
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;
@@ -154,9 +154,9 @@ function chatbot_chatgpt_kn_acquire() {
     // Loop through query results
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
-        // foreach($result as $key => $value) {
-        //     error_log("Key: $key, Value: $value");
-        // }        
+        foreach($result as $key => $value) {
+            chatbot_chatgpt_back_trace("Key: $key, Value: $value");
+        }
         $output_str = '';
         $output_str .= json_encode($result['post_content']) . "\n";
 
@@ -197,11 +197,11 @@ function chatbot_chatgpt_kn_acquire() {
         }
 
         // TODO Log the URL and the $words array
-        error_log($url . "\n", 3, $log_file_pages);
-        error_log(print_r($words, true) . "\n", 3, $log_file_pages);
+        // error_log($url . "\n", 3, $log_file_pages);
+        // error_log(print_r($words, true) . "\n", 3, $log_file_pages);
 
-        error_log($url . "\n", 3, $log_file_pages);
-        error_log(print_r($word_pairs, true) . "\n", 3, $log_file_pages);
+        // error_log($url . "\n", 3, $log_file_pages);
+        // error_log(print_r($word_pairs, true) . "\n", 3, $log_file_pages);
         
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;
@@ -217,9 +217,9 @@ function chatbot_chatgpt_kn_acquire() {
     // Loop through query results
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
-        // foreach($result as $key => $value) {
-        //     error_log("Key: $key, Value: $value");
-        // }        
+        foreach($result as $key => $value) {
+            chatbot_chatgpt_back_trace("Key: $key, Value: $value");
+        }        
         $output_str = '';
         $output_str .= json_encode($result['comment_content']) . "\n";
 
@@ -260,11 +260,11 @@ function chatbot_chatgpt_kn_acquire() {
         }
 
         // TODO Log the URL and the $words array
-        error_log($url . "\n", 3, $log_file_comments);
-        error_log(print_r($words, true) . "\n", 3, $log_file_comments);
+        // error_log($url . "\n", 3, $log_file_comments);
+        // error_log(print_r($words, true) . "\n", 3, $log_file_comments);
 
-        error_log($url . "\n", 3, $log_file_comments);
-        error_log(print_r($word_pairs, true) . "\n", 3, $log_file_comments);
+        // error_log($url . "\n", 3, $log_file_comments);
+        // error_log(print_r($word_pairs, true) . "\n", 3, $log_file_comments);
         
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;
@@ -277,7 +277,7 @@ function chatbot_chatgpt_kn_acquire() {
     }
 
     // DIAG - Error log $max_top_words
-    error_log("Max Top Words: " . $max_top_words);
+    // error_log("Max Top Words: " . $max_top_words);
 
     // slice off the top max_top_words
     $topWords = array_slice($topWords, 0, $max_top_words);

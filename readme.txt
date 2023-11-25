@@ -158,6 +158,9 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 
 == Changelog ==
 
+= 1.6.9 =
+* Added enhanced error logging when Diagnostics is On
+
 = 1.6.8 =
 * Added output buffering.
 

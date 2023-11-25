@@ -93,3 +93,32 @@ function chatbot_chatgpt_suppress_attribution_callback($args) {
     </select>
     <?php
 }
+
+// Enhanced Error Logging if Diagnostic Mode is On - Ver 1.6.9
+// Call this function using chatbot_chatgpt_back_trace($message); where $message is the error message
+function chatbot_chatgpt_back_trace($message = "No message") {
+
+    // Check if diagnostics is On
+    $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
+    if ('On' !== $chatbot_chatgpt_diagnostics) {
+        return;
+    }
+
+    $backtrace = debug_backtrace();
+    // $caller = array_shift($backtrace);
+    $caller = $backtrace[1]; // Get the second element from the backtrace array
+
+    $file = basename($caller['file']); // Gets the file name
+    $function = $caller['function']; // Gets the function name
+    $line = $caller['line']; // Gets the line number
+
+    if ($message === null) {
+        $message = "No message";
+    }
+
+    // IDEA - Add option for a tag to prepend to the message
+    // Message Type: Indicating whether the log is an error, warning, notice, or success message.
+    // Prefix the message with [ERROR], [WARNING], [NOTICE], or [SUCCESS].
+    // error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [". print_r($message, true) . "]");
+
+}
