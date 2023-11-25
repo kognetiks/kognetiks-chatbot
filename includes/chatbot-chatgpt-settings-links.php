@@ -192,7 +192,7 @@ function chatbot_chatgpt_admin_footer() {
 
 function chatbot_chatgpt_deactivation_feedback() {
     // DIAG - Process the feedback data
-    // error_log("Email Ready");
+    // chatbot_chatgpt_back_trace( "NOTICE", "Email Ready");
     $reason = sanitize_text_field($_POST['reason']);
     $other_text = sanitize_text_field($_POST['other_text']);
     $user_email = sanitize_email($_POST['email']);
@@ -224,14 +224,14 @@ function chatbot_chatgpt_deactivation_feedback() {
     // Send the email
     if (wp_mail($to, $subject, strip_tags($body), $headers)) {
         // DIAG - Log the email sent status
-        // error_log("Email Sent Successfully");
+        // chatbot_chatgpt_back_trace( "NOTICE", "Email Sent Successfully");
     } else {
         // DIAG - Log the email failed status
-        // error_log("Email Failed to Send");
+        // chatbot_chatgpt_back_trace( "NOTICE", "Email Failed to Send");
     }
 
     // DIAG - Log the email body
-    // error_log("Email Done");
+    // chatbot_chatgpt_back_trace( "NOTICE", "Email Done");
 
     // wp_die();
     die();

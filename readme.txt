@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4
-Stable tag: 1.6.8
+Stable tag: 1.6.9
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -15,7 +15,7 @@ Easily integrate OpenAI's ChatGPT API into your WordPress website with this powe
 
 Introducing **Integration for Custom GPT Assistants** with the **Chatbot ChatGPT for WordPress**
 
-The Chatbot ChatGPT for WordPress introduces an innovative feature: the integration of OpenAI's Custom GPT Assistants. You tailor these custom Assistants which are versions of GPT models designed to enhance website interactions and provide a more dynamic user experience. You can equip them with specialized knowledge and functionalities, allowing them to perform a variety of tasks such as answering FAQs, handling bookings, and offering personalized recommendations. With this feature, website owners can easily embed these Assistants into WordPress sites, using the Chatbot ChatGPT plugin. This integration not only elevates customer service but also offers a unique, interactive experience that aligns with the website's theme and content. The Assistants' ability to adapt and learn from interactions ensures continuous improvement in performance, making them an invaluable assetfor businesses aiming to enhance their online presence and engagement.
+The Chatbot ChatGPT for WordPress introduces an innovative feature: the integration of OpenAI's Custom GPT Assistants. You tailor these custom Assistants which are versions of GPT models designed to enhance website interactions and provide a more dynamic user experience. You can equip them with specialized knowledge and functionalities, allowing them to perform a variety of tasks such as answering FAQs, handling bookings, and offering personalized recommendations. With this feature, website owners can easily embed these Assistants into WordPress sites, using the Chatbot ChatGPT plugin. This integration not only elevates customer service but also offers a unique, interactive experience that aligns with the website's theme and content. The Assistants' ability to adapt and learn from interactions ensures continuous improvement in performance, making them an invaluable asset for businesses aiming to enhance their online presence and engagement.
 
 Learn more about enabling this Custom GPT Assistants at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
@@ -158,34 +158,38 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 
 == Changelog ==
 
+= 1.6.9 =
+* Added additional installation and support information for using Custom GPT Assistants.
+* Added enhanced diagnostic and error logging for developers.
+
 = 1.6.8 =
 * Added output buffering.
 
 = 1.6.7 =
-* The Chatbot ChatGPT for WordPress now supports Custom GPTs developed in the OpenAI Playground
-* See [https://platform.openai.com/docs/assistants/overview](https://platform.openai.com/docs/assistants/overview) to learn more about Assisstants 
+* The Chatbot ChatGPT for WordPress now supports Custom GPTs developed in the OpenAI Playground.
+* See [https://platform.openai.com/docs/assistants/overview](https://platform.openai.com/docs/assistants/overview) to learn more about Assisstants.
 * Added an expanded selection of seasonal avatars celebrating Chinese New Year, Christmas, Fall, Halloween, Spring, Summer, Thanksgiving, and Winter.
-* Enhanced CSS adaptation to improve compatibility across different themes
+* Enhanced CSS adaptation to improve compatibility across different themes.
 * Improved formatting of responses from the chatbot for clearer and more user-friendly communication.
-* Minor updates to the Reporting (formatting and fonts)
+* Minor updates to the Reporting (formatting and fonts).
 
 = 1.6.6 =
-* Expanded the list of OpenAI models supported - See Settings - API/Model now supports GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023)
-* Added a new option to customize the chatbot's message prompt - See Settings, then Settings
+* Expanded the list of OpenAI models supported - See Settings - API/Model now supports GPT-4 Turbo ('gpt-4-1106-preview' with training data up to April 2023).
+* Added a new option to customize the chatbot's message prompt - See Settings, then Settings.
 
 = 1.6.5 =
-* Added option for two user configurable buttons at the bottom of the chat bot - See Settings - Custom Buttons
-* User configurable buttons can direct chatters to contact forms, email, or other pages
-* Added a new option to check API key validity - See Settings > Diagnostics & Notices
-* Added support for Echo Knowlege Base (EKB) post_type - Ver 1.6.5
-* Minor updates to the Knowledge Navigator for better handling of site content
+* Added option for two user configurable buttons at the bottom of the chat bot - See Settings - Custom Buttons.
+* User configurable buttons can direct chatters to contact forms, email, or other pages.
+* Added a new option to check API key validity - See Settings > Diagnostics & Notices.
+* Added support for Echo Knowlege Base (EKB) post_type - Ver 1.6.5.
+* Minor updates to the Knowledge Navigator for better handling of site content.
 
 = 1.6.4 =
 * Minor Updates
 
 = 1.6.3 =
-* Updated Knowledge Navigator acquisition of site content
-* Added reporting of chatbot interactions to the Knowledge Navigator
+* Updated Knowledge Navigator acquisition of site content.
+* Added reporting of chatbot interactions to the Knowledge Navigator.
 
 = 1.6.2 =
 * Added cron scheduling for the Knowledge Navigator to refresh the knowledge baes hourly, daily, and weekly, as well as to cancel schedule.
@@ -195,32 +199,32 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 * Added the Knowledge Navigator which is an innovative component of our plugin designed to perform an in-depth analysis of your website for better, more contextual relevant responses by the chatbot.
 
 = 1.6.0 =
-* Corrected for inconsistent variable name
+* Corrected for inconsistent variable name.
 
 = 1.5.1 =
-* Corrected for conversation appending multiple times
+* Corrected for conversation appending multiple times.
 
 = 1.5.0 =
-* Added support for an avatar and avatar greetings
-* Added support the open chatbot for new visitor vs returning visitor
-* Added additional phrases to the add or removed default AI disclaimer
-* Added an option to turn on/off diagnostics for developer support
+* Added support for an avatar and avatar greetings.
+* Added support the open chatbot for new visitor vs returning visitor.
+* Added additional phrases to the add or removed default AI disclaimer.
+* Added an option to turn on/off diagnostics for developer support.
 
 = 1.4.2 =
-* Added support for the GPT-4 API in settings - requires access to gpt-4 API, see [https://openai.com/waitlist/gpt-4-api](https://openai.com/waitlist/gpt-4-api)
-* Added support for max tokens (the maximum number of tokens to generate in the completion)
-* Added support for narrow or wide bot message modes (other options coming soon)
+* Added support for the GPT-4 API in settings - requires access to gpt-4 API, see [https://openai.com/waitlist/gpt-4-api](https://openai.com/waitlist/gpt-4-api).
+* Added support for max tokens (the maximum number of tokens to generate in the completion).
+* Added support for narrow or wide bot message modes (other options coming soon).
 
 = 1.4.1 = 
-* Updated start bot open or closed
-* Add or remove default AI disclaimer
+* Updated start bot open or closed.
+* Add or remove default AI disclaimer.
 
 = 1.4.0 =
-* SVN Update Error - 1.2.0 did not update to 1.3.0
+* SVN Update Error - 1.2.0 did not update to 1.3.0.
 
 = 1.3.0 =
-* Updated Setting Page adding tabs for API/Model, Greetings, and Support
-* Updated directory assets
+* Updated Setting Page adding tabs for API/Model, Greetings, and Support.
+* Updated directory assets.
 
 = 1.2.0 =
 * Removed initial styling on bot to ensure it renders at the appropriate time.

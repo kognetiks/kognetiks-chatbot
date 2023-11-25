@@ -1,6 +1,6 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Custom GPT - Ver 1.6.7
+ * Chatbot ChatGPT for WordPress - Custom GPT - Ver 1.6.9
  *
  * This file contains the code for table actions for reporting
  * to display the Chatbot ChatGPT on the website.
@@ -81,14 +81,14 @@ function runTheAssistant($threadId, $assistantId, $api_key) {
     // Check for false response
     if ($response === FALSE) {
         // Handle the error, for example:
-        // error_log("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 4: Unable to fetch response");
+        // chatbot_chatgpt_back_trace( "NOTICE", "Error unable to fetch response");
         return "Error: Unable to fetch response.";
     }
 
     // Check HTTP response code
     if (http_response_code() != 200) {
         // Handle the error, for example:
-        // error_log("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 4: HTTP response code " . http_response_code());
+        // chatbot_chatgpt_back_trace( "NOTICE", "HTTP response code " . http_response_code());
         return "Error: HTTP response code " . http_response_code();
     }
 
@@ -120,11 +120,11 @@ function getTheRunsStatus($threadId, $runId, $api_key) {
         } else {
             // Handle error here
             $status = "failed";
-            // error_log ("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 5");
+            // chatbot_chatgpt_back_trace( "NOTICE", "Error - Custom GPT Assistant - Step 5");
             exit;
         }
 
-        print_r($responseArray);
+        // chatbot_chatgpt_back_trace( "NOTICE", $responseArray);
         
         if ($status != "completed") {
             // Sleep for 5 seconds before polling again
@@ -177,7 +177,7 @@ function getTheStepsStatus($threadId, $runId, $api_key) {
         } else {
             // DIAG - Handle error here
             $status = "failed";
-            // error_log ("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 7.");
+            // chatbot_chatgpt_back_trace( "NOTICE", "Chatbot ChatGPT: Error - Custom GPT Assistant - Step 7.");
             exit;
         }
 
@@ -196,7 +196,6 @@ function getTheStepsStatus($threadId, $runId, $api_key) {
         }
     }
 }
-
 
 // Step 8: Get the Message
 function getTheMessage($threadId, $api_key) {
@@ -221,65 +220,70 @@ function getTheMessage($threadId, $api_key) {
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message) {
 
     // Get the authorization token and assistant ID
-    // $api_key = esc_attr(get_option('chatgpt_api_key'));
     $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
 
     // Step 1: Create an Assistant
-    // error_log ('Chatbot ChatGPT: Step 1: Create an Assistant');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Step 1: Create an Assistant');
     $assistants_response = createAnAssistant($api_key);
     // DIAG - Print the response
-    // error_log (print_r($assistants_response, true));
+    // chatbot_chatgpt_back_trace( "NOTICE", $assistants_response);
 
     // Step 2: Get The Thread ID
-    // error_log ('Chatbot ChatGPT: Step 2: Get The Thread ID');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Step 2: Get The Thread ID');
     $threadId = $assistants_response["id"];
     // DIAG - Print the threadId
-    // error_log ($threadId);
+    // chatbot_chatgpt_back_trace( "NOTICE", '$threadId ' . $threadId);
 
     // Step 3: Add a Message to a Thread
-    // error_log ('Chatbot ChatGPT: Step 3: Add a Message to a Thread');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Step 3: Add a Message to a Thread');
     $prompt = $message;
     $assistants_response = addAMessage($threadId, $prompt, $api_key);
     // DIAG - Print the response
-    // error_log (print_r($assistants_response, true));
+    // chatbot_chatgpt_back_trace( "NOTICE", $assistants_response);
 
     // Step 4: Run the Assistant
-    // error_log ('Chatbot ChatGPT: Step 4: Run the Assistant');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Step 4: Run the Assistant');
     $assistants_response = runTheAssistant($threadId, $assistantId, $api_key);
 
     // Check if the response is not an array or is a string indicating an error
     if (!is_array($assistants_response) || is_string($assistants_response)) {
+        // chatbot_chatgpt_back_trace( "NOTICE", 'Error: Invalid response format or error occurred.');
         return "Error: Invalid response format or error occurred.";
     }
     // Check if the 'id' key exists in the response
     if (isset($assistants_response["id"])) {
         $runId = $assistants_response["id"];
     } else {
+        // chatbot_chatgpt_back_trace( "NOTICE", 'Error: \'$runId\' key not found in response.');
         return "Error: 'id' key not found in response.";
     }
     // DIAG - Print the response
-    // error_log (print_r($assistants_response, true));
+    // chatbot_chatgpt_back_trace( "NOTICE", $assistants_response);
 
     // Step 5: Get the Run's Status
-    // error_log ('Chatbot ChatGPT: Step 5: Get the Run\'s Status');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Step 5: Get the Run\'s Status');
     getTheRunsStatus($threadId, $runId, $api_key);
 
     // Step 6: Get the Run's Steps
-    // error_log ('Chatbot ChatGPT: Step 6: Get the Run\'s Steps');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Step 6: Get the Run\'s Steps');
     $assistants_response = getTheRunsSteps($threadId, $runId, $api_key);
     // DIAG - Print the response
-    // error_log(print_r($assistants_response, true));
+    // chatbot_chatgpt_back_trace( "NOTICE", $assistants_response);
 
     // Step 7: Get the Step's Status
-    // error_log ('Chatbot ChatGPT: Step 7: Get the Step\'s Status');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Step 7: Get the Step\'s Status');
     getTheStepsStatus($threadId, $runId, $api_key);
 
     // Step 8: Get the Message
-    // error_log ('Chatbot ChatGPT: Step 8: Get the Message');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Step 8: Get the Message');
     $assistants_response = getTheMessage($threadId, $api_key);
     // DIAG - Print the response
-    // error_log(print_r($assistants_response, true));
+    // chatbot_chatgpt_back_trace( "NOTICE", '$assistants_response: ' . $assistants_response);
 
+    // Interaction Tracking - Ver 1.6.3
+    update_interaction_tracking();
+
+    // FIXME - REMOVE THIS EXAMPLE >>> $response_body['choices'][0]['message']['content'];
     return $assistants_response["data"][0]["content"][0]["text"]["value"];
 
 }

@@ -30,7 +30,7 @@ global $topWords;
 global $totalWordCount;
 
 // DIAG - Diagnostic - Ver 1.6.3
-// error_log ("FUNCTION - kn_acquire_just_the_words");
+// chatbot_chatgpt_back_trace( "NOTICE", "FUNCTION - kn_acquire_just_the_words");
 
 $dom = new DOMDocument();
 @$dom->loadHTML($content);

@@ -18,16 +18,16 @@ die;
 function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 
     // DIAG - Log the upgrade.
-    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_upgrade_completed() - Started' );
-    // error_log( 'Chatbot ChatGPT: $upgrader_object: ' . print_r( $upgrader_object, true ) );
-    // error_log( 'Chatbot ChatGPT: $options: ' . print_r( $options, true ) );
+    // chatbot_chatgpt_back_trace( "NOTICE", 'STARTED: chatbot_chatgpt_upgrade_completed');
+    // chatbot_chatgpt_back_trace( "NOTICE", "$upgrader_object: " . print_r( $upgrader_object, true ));
+    // chatbot_chatgpt_back_trace( "NOTICE", ['message' => '$options: ', 'options' => $options]);
 
     // Check if our plugin was updated
     if (is_array($options) && isset($options['action']) && isset($options['type']) && $options['action'] == 'update' && $options['type'] == 'plugin' ) {
         foreach($options['plugins'] as $plugin) {
             if ($plugin == plugin_basename(__FILE__)) {
                 // DIAG - Log the action.
-                // error_log( 'Chatbot ChatGPT: Plugin Upgraded' );
+                // chatbot_chatgpt_back_trace( "NOTICE", 'Plugin Upgraded' );
                 // Our plugin was updated. Run the upgrade function.
                 chatbot_chatgpt_upgrade();
             }
@@ -35,7 +35,7 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
     }
 
     // DIAG - Log the upgrade.
-    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_upgrade_completed() - Completed' );
+    // chatbot_chatgpt_back_trace( "NOTICE", 'COMPLETED: chatbot_chatgpt_upgrade_completed');
 
     return;
 
@@ -47,16 +47,16 @@ add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10,
 function chatbot_chatgpt_upgrade_activation_deactivation($upgrader_object, $options) {
 
     // DIAG - Log the upgrade.
-    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_upgrade_activation_deactivation() - Started' );
-    // error_log( 'Chatbot ChatGPT: $upgrader_object: ' . print_r( $upgrader_object, true ) );
-    // error_log( 'Chatbot ChatGPT: $options: ' . print_r( $options, true ) );
+    // chatbot_chatgpt_back_trace( "NOTICE", 'STARTED: chatbot_chatgpt_upgrade_activation_deactivation');
+    // chatbot_chatgpt_back_trace( "NOTICE", "$upgrader_object: " . print_r( $upgrader_object, true ));
+    // chatbot_chatgpt_back_trace( "NOTICE", ['message' => '$options: ', 'options' => $options]);
 
     // Check if our plugin was activated
     if (is_array($options) && isset($options['action']) && isset($options['type']) && $options['action'] == 'activate' && $options['type'] == 'plugin' ) {
         foreach($options['plugins'] as $plugin) {
             if ($plugin == plugin_basename(__FILE__)) {
                 // DIAG - Log the action.
-                // error_log( 'Chatbot ChatGPT: Plugin Activation' );
+                // chatbot_chatgpt_back_trace( "NOTICE", 'Plugin Activation');
                 // Our plugin was activated. Run the upgrade function.
                 chatbot_chatgpt_upgrade();
             }
@@ -68,7 +68,7 @@ function chatbot_chatgpt_upgrade_activation_deactivation($upgrader_object, $opti
         foreach($options['plugins'] as $plugin) {
             if ($plugin == plugin_basename(__FILE__)) {
                 // DIAG - Log the action.
-                // error_log( 'Chatbot ChatGPT: Plugin Deactivation' );
+                // chatbot_chatgpt_back_trace( "NOTICE", 'Plugin Deactivation');
                 // Our plugin was deactivated.
                 // TODO - Add code to run when plugin is deactivated.
             }
@@ -76,7 +76,7 @@ function chatbot_chatgpt_upgrade_activation_deactivation($upgrader_object, $opti
     }
     
     // DIAG - Log the upgrade.
-    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_upgrade_activation_deactivation() - Completed' );
+    // chatbot_chatgpt_back_trace( "NOTICE", 'COMPLETED: chatbot_chatgpt_upgrade_activation_deactinvation');
 
     return;
 
@@ -88,7 +88,7 @@ register_activation_hook(__FILE__, 'chatbot_chatgpt_upgrade_activation_deactivat
 function chatbot_chatgpt_upgrade() {
 
     // DIAG - Log the upgrade.
-    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_upgrade() - Started' );
+    // chatbot_chatgpt_back_trace( "NOTICE", 'chatbot_chatgpt_upgrade');
 
     // Get the current version of the plugin.
     $version = get_option( 'chatbot_chatgpt_plugin_version' );
@@ -111,12 +111,12 @@ function chatbot_chatgpt_upgrade() {
         if ( version_compare( $version, '1.6.7', '<' ) ) {
             chatbot_chatgpt_upgrade_167();
             // DIAG - Log the currrent plugin version.
-            // error_log( 'Chatbot ChatGPT: Current version is ' . $version );
+            // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Current version is ' . $version );
         }
     }
 
     // DIAG - Log the upgrade.
-    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_upgrade() - Completed' );
+    chatbot_chatgpt_back_trace('SUCCESS', 'chatbot_chatgpt_upgrade completed' );
 
     return;
 }
@@ -126,7 +126,7 @@ function chatbot_chatgpt_upgrade() {
 function chatbot_chatgpt_upgrade_167() {
 
     // DIAG - Log the upgrade.
-    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_upgrade_167() - Started' );
+    // chatbot_chatgpt_back_trace( "NOTICE", 'STARTED chatbot_chatgpt_upgrade_167');
 
     // Determine if option chatbot_chatgpt_crawler_status is in the options table.
     // If it is then remove it.
@@ -159,7 +159,7 @@ function chatbot_chatgpt_upgrade_167() {
     }
 
     // DIAG - Log the upgrade.
-    // error_log( 'Chatbot ChatGPT: chatbot_chatgpt_upgrade_167() - Completed' );
+    // chatbot_chatgpt_back_trace( "NOTICE", 'COMPLETED chatbot_chatgpt_upgrade_167');
 
     return;
 
