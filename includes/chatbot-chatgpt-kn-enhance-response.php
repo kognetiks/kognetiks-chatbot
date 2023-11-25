@@ -105,7 +105,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // if (!isset($enhanced_response)) {
         //     $enhanced_response = '';
         // }
-        $enhanced_response .= $learningMessages[array_rand($learningMessages)];
+        $enhanced_response .= "\n\n" . $learningMessages[array_rand($learningMessages)];
         $enhanced_response .= "[URL: " . $highest_score_url . "]";
     } else {
         // If no match is found, return a generic response
