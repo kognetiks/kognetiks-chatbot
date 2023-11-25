@@ -43,7 +43,7 @@ function chatbot_chatgpt_shortcode() {
         $chatbot_chatgpt_enable_custom_buttons = 'Off'; // 'On' or 'Off'
         $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
         // DIAG - Diagnostics - Ver 1.6.5
-        chatbot_chatgpt_back_trace('$chatbot_chatgpt_enable_custom_buttons: ' . $chatbot_chatgpt_enable_custom_buttons);
+        chatbot_chatgpt_back_trace( "", '$chatbot_chatgpt_enable_custom_buttons: ' . $chatbot_chatgpt_enable_custom_buttons);
         if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
             ?>
             <div id="chatboat-chatgpt-custom-buttons" style="text-align: center;">
@@ -57,10 +57,10 @@ function chatbot_chatgpt_shortcode() {
                 $chatbot_chatgpt_custom_button_name_2 = get_option('chatbot_chatgpt_custom_button_name_2');
                 $chatbot_chatgpt_custom_button_url_2 = get_option('chatbot_chatgpt_custom_button_url_2');
                 // DIAG - Diagnostics - Ver 1.6.5
-                chatbot_chatgpt_back_trace('chatbot_chatgpt_custom_button_name_1: ' . $chatbot_chatgpt_custom_button_name_1);
-                chatbot_chatgpt_back_trace('chatbot_chatgpt_custom_button_url_1: ' . $chatbot_chatgpt_custom_button_url_1);
-                chatbot_chatgpt_back_trace('chatbot_chatgpt_custom_button_name_2: ' . $chatbot_chatgpt_custom_button_name_2);
-                chatbot_chatgpt_back_trace('chatbot_chatgpt_custom_button_url_2: ' . $chatbot_chatgpt_custom_button_url_2);
+                chatbot_chatgpt_back_trace( "", 'chatbot_chatgpt_custom_button_name_1: ' . $chatbot_chatgpt_custom_button_name_1);
+                chatbot_chatgpt_back_trace( "", 'chatbot_chatgpt_custom_button_url_1: ' . $chatbot_chatgpt_custom_button_url_1);
+                chatbot_chatgpt_back_trace( "", 'chatbot_chatgpt_custom_button_name_2: ' . $chatbot_chatgpt_custom_button_name_2);
+                chatbot_chatgpt_back_trace( "", 'chatbot_chatgpt_custom_button_url_2: ' . $chatbot_chatgpt_custom_button_url_2);
                 if (!empty($chatbot_chatgpt_custom_button_name_1) && !empty($chatbot_chatgpt_custom_button_url_1)) {
                     ?>
                     <button class="chatbot-chatgpt-custom-button-class">
@@ -82,7 +82,7 @@ function chatbot_chatgpt_shortcode() {
         $chatbot_chatgpt_suppress_attribution = 'Off'; // 'On' or 'Off'
         $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
         // DIAG - Diagnostics - Ver 1.6.5
-        chatbot_chatgpt_back_trace('chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);
+        chatbot_chatgpt_back_trace( "", 'chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);
         if ($chatbot_chatgpt_suppress_attribution == 'Off') {
             ?>
             <div style="text-align: center;">

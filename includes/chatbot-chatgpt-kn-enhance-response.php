@@ -93,9 +93,9 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     }
 
     // DIAG Diagnostic - Ver 1.6.5
-    chatbot_chatgpt_back_trace('$highest_score: ' . $highest_score);
-    chatbot_chatgpt_back_trace('$highest_score_word: ' . $highest_score_word);
-    chatbot_chatgpt_back_trace('Chatbot ChatGPT: $highest_score_url: ' . $highest_score_url);
+    chatbot_chatgpt_back_trace( "", '$highest_score: ' . $highest_score);
+    chatbot_chatgpt_back_trace( "", '$highest_score_word: ' . $highest_score_word);
+    chatbot_chatgpt_back_trace( "", 'Chatbot ChatGPT: $highest_score_url: ' . $highest_score_url);
 
     // IDEA Append message and link if found to ['choices'][0]['message']['urls']
     if ($highest_score > 0) {
@@ -125,11 +125,11 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $enhanced_response = preg_replace('/<b>(.*?)<\/b>/', '$1', $enhanced_response);
 
     // DIAG - Diagnostic - Ver 1.6.3
-    chatbot_chatgpt_back_trace('$match_found: ' . $match_found);
-    chatbot_chatgpt_back_trace('$highest_score: ' . $highest_score);
-    chatbot_chatgpt_back_trace('$highest_score_word: ' . $highest_score_word);
-    chatbot_chatgpt_back_trace('$highest_score_url: ' . $highest_score_url);
-    chatbot_chatgpt_back_trace('$enhanced_response: ' . $enhanced_response);
+    chatbot_chatgpt_back_trace( "", '$match_found: ' . $match_found);
+    chatbot_chatgpt_back_trace( "", '$highest_score: ' . $highest_score);
+    chatbot_chatgpt_back_trace( "", '$highest_score_word: ' . $highest_score_word);
+    chatbot_chatgpt_back_trace( "", '$highest_score_url: ' . $highest_score_url);
+    chatbot_chatgpt_back_trace( "", '$enhanced_response: ' . $enhanced_response);
 
 	// Interaction Tracking - Ver 1.6.3
 	update_interaction_tracking();

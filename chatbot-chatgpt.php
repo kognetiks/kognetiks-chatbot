@@ -178,7 +178,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Diagnostics
-        chatbot_chatgpt_back_trace('chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        chatbot_chatgpt_back_trace( "", 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Update localStorage - Ver 1.6.1
@@ -238,18 +238,18 @@ function chatbot_chatgpt_send_message() {
         // Override the $use_assistant_id and set it to 'No'
         $use_assistant_id = 'No';
         // DIAG - Diagnostics
-        chatbot_chatgpt_back_trace('$use_assistant_id override ' . $use_assistant_id);
+        chatbot_chatgpt_back_trace( "", '$use_assistant_id override ' . $use_assistant_id);
     }
 
     // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7
     if ($use_assistant_id == 'Yes') {
-        // chatbot_chatgpt_back_trace('Using Custom GPT Assistant Id: ' . $use_assistant_id);
+        // chatbot_chatgpt_back_trace( "", 'Using Custom GPT Assistant Id: ' . $use_assistant_id);
         // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message);
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace($response);
+        // chatbot_chatgpt_back_trace( "", $response);
         // Clean (erase) the output buffer - Ver 1.6.8
         ob_clean();
         if (substr($response, 0, 6) === 'Error:' || substr($response, 0, 7) === 'Failed:') {
@@ -260,15 +260,15 @@ function chatbot_chatgpt_send_message() {
             wp_send_json_success($response);
         }
     } else {
-        // chatbot_chatgpt_back_trace('Using ChatGPT API: ' . $use_assistant_id);
+        // chatbot_chatgpt_back_trace( "", 'Using ChatGPT API: ' . $use_assistant_id);
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_api($api_key, $message);
-        // error_log('BEFORE CALL TO ENHANCE TFIDF $response: ' . print_r($response, true));
+        // DIAG - Diagnostics
+        chatbot_chatgpt_back_trace('NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace($response);
-
+        chatbot_chatgpt_back_trace('NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);
         // Return response
         wp_send_json_success($response);
     }
@@ -360,7 +360,7 @@ function enqueue_greetings_script() {
     global $chatbot_chatgpt_diagnostics;
 
     // DIAG - Diagnostics - Ver 1.6.1
-    chatbot_chatgpt_back_trace();
+    chatbot_chatgpt_back_trace( "", );
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 

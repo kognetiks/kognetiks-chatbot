@@ -56,11 +56,13 @@ die;
 
     if (is_wp_error($response)) {
         return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your OpenAI account for additional information.';
+              // DIAG - Log the response body
+            chatbot_chatgpt_back_trace( "ERROR", $response->get_error_message());
     }
 
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
     // DIAG - Log the response body
-    chatbot_chatgpt_back_trace('Chatbot ChatGPT: response_body: ' . print_r($response_body, true));
+    chatbot_chatgpt_back_trace( "NOTICE", $response_body);
 
     // Check for API-specific errors
     //
@@ -72,14 +74,16 @@ die;
         $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
     } elseif (isset($response_body['choices']) && !empty($response_body['choices'])) {
         $updated_status = 'Success: Connection to ChatGPT API was successful!';
+        chatbot_chatgpt_back_trace( "SUCCESS", 'chatbot_chatgpt_api_status' . $updated_status);
     } else {
         $updated_status = 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';
+        chatbot_chatgpt_back_trace( "ERROR", $updated_status);
     }
 
     update_option('chatbot_chatgpt_api_status', $updated_status);
     $updated_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
     // TODO - Monitor the chatbot_chatgpt_api_status option for changes
-    chatbot_chatgpt_back_trace('chatbot_chatgpt_api_status: ' . esc_html($updated_status));
+    chatbot_chatgpt_back_trace( "WARNING", 'chatbot_chatgpt_api_status: ' . esc_html($updated_status));
 
 }
 
@@ -88,13 +92,20 @@ die;
 // This function is executed whenever any option is updated
 function chatgpt_option_updated($option_name, $old_value, $new_value) {
 
+    // Check if the "Diagnostics" tab is active
+    if ($option_name !== 'chatgpt_model_chorice') {
+        return;
+    } elseif ($option_name !== 'chatgpt_api_key') {
+        return;
+    }
+
     // DIAG - Log Function Call
-    chatbot_chatgpt_back_trace();
+    chatbot_chatgpt_back_trace("NOTICE","");
 
     // FIXME Retrieve the current value of the chatbot_chatgpt_api_status option
     $chatbot_chatgpt_api_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
     // DIAG - Log the current value of the chatbot_chatgpt_api_status option
-    chatbot_chatgpt_back_trace($chatbot_chatgpt_api_status);
+    chatbot_chatgpt_back_trace( "NOTICE", $chatbot_chatgpt_api_status);
     
     // Check if the option updated is related to your plugin settings
     // if ($option_name === 'chatgpt_model_choice' || $option_name === 'chatgpt_api_key' || empty($chatbot_chatgpt_api_status)) {
@@ -104,7 +115,7 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
         // Call your test function
         $test_result = test_chatgpt_api($api_key);
         // DIAG - Log the test result
-        chatbot_chatgpt_back_trace('test_result - ' . $test_result);        
+        chatbot_chatgpt_back_trace( "WARNING", '$test_result' . $test_result);        
 
         // DIAG - Set the option in the admin_notice function uses to display messages
         update_option('chatbot_chatgpt_api_status', $test_result);
@@ -112,6 +123,7 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
         // I could directly call display_option_value_admin_notice() here, but
         // that's generally not a good practice unless absolutely necessary
         // display_option_value_admin_notice();
+
     }
 }
 
