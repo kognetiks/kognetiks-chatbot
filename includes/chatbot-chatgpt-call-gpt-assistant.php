@@ -177,7 +177,7 @@ function getTheStepsStatus($threadId, $runId, $api_key) {
         } else {
             // DIAG - Handle error here
             $status = "failed";
-            error_log ("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 7.");
+            chatbot_chatgpt_back_trace("Chatbot ChatGPT: Error - Custom GPT Assistant - Step 7.");
             exit;
         }
 

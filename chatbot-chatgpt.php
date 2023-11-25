@@ -243,14 +243,13 @@ function chatbot_chatgpt_send_message() {
 
     // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7
     if ($use_assistant_id == 'Yes') {
-        error_log ('Using Custom GPT Assistant Id: ' . $use_assistant_id);
+        // chatbot_chatgpt_back_trace('Using Custom GPT Assistant Id: ' . $use_assistant_id);
         // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message);
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace($response);
-        // error_log('$response: ' . print_r($response, true));
         // Clean (erase) the output buffer - Ver 1.6.8
         ob_clean();
         if (substr($response, 0, 6) === 'Error:' || substr($response, 0, 7) === 'Failed:') {
@@ -261,7 +260,7 @@ function chatbot_chatgpt_send_message() {
             wp_send_json_success($response);
         }
     } else {
-        error_log ('Using ChatGPT API' . $use_assistant_id);
+        // chatbot_chatgpt_back_trace('Using ChatGPT API: ' . $use_assistant_id);
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_api($api_key, $message);
         // error_log('BEFORE CALL TO ENHANCE TFIDF $response: ' . print_r($response, true));
@@ -269,7 +268,7 @@ function chatbot_chatgpt_send_message() {
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace($response);
-        // error_log('$response: ' . print_r($response, true));
+
         // Return response
         wp_send_json_success($response);
     }

@@ -22,7 +22,7 @@ $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)
 function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     // DIAG - Diagnostic - Ver 1.6.3
-    error_log ("FUNCTION - chatbot_chatgpt_knowledge_navigator_section_callback");
+    chatbot_chatgpt_back_trace("FUNCTION - chatbot_chatgpt_knowledge_navigator_section_callback");
 
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
     // update_option('chatbot_chatgpt_knowledge_navigator', 'No');
@@ -152,7 +152,7 @@ function chatbot_chatgpt_knowledge_navigator_callback($args) {
 function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
 
     // DIAG - Diagnostic - Ver 1.6.3
-    error_log ("FUNCTION - chatbot_chatgpt_kn_maximum_top_words_callback");
+    chatbot_chatgpt_back_trace("FUNCTION - chatbot_chatgpt_kn_maximum_top_words_callback");
 
     $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 25));
     ?>
