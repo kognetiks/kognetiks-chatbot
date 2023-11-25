@@ -113,14 +113,14 @@ function output_results() {
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
-    chatbot_chatgpt_back_trace('NOTICE', 'ENTER: output_results()');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'ENTER: output_results()');
 
     // Generate the directory path
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
 
     // Create the directory if it doesn't exist
     if (!file_exists($results_dir_path) && !mkdir($results_dir_path, 0755, true)) {
-        chatbot_chatgpt_back_trace('ERROR', 'Failed to create results directory.');
+        // chatbot_chatgpt_back_trace( "ERROR", 'Failed to create results directory.');
         return;
     }
 
@@ -136,12 +136,12 @@ function output_results() {
         }
         fclose($f);
     } else {
-        chatbot_chatgpt_back_trace('ERROR', 'Failed to open CSV file for writing.');
+        // chatbot_chatgpt_back_trace( "ERROR", 'Failed to open CSV file for writing.');
     }
 
     // Write JSON
     if (!file_put_contents($results_json_file, json_encode($topWords))) {
-        chatbot_chatgpt_back_trace('ERROR', 'Failed to write JSON file.');
+        // chatbot_chatgpt_back_trace( "ERROR", 'Failed to write JSON file.');
     }
 
     return;

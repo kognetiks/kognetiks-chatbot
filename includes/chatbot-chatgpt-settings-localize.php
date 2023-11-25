@@ -68,7 +68,7 @@ function chatbot_chatgpt_localize(){
         $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
-        chatbot_chatgpt_back_trace( "", 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // chatbot_chatgpt_back_trace( "NOTICE", 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Update localStorage - Ver 1.6.1

@@ -44,7 +44,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Context History - Ver 1.6.1
      $chatgpt_last_response = concatenateHistory('context_history');
     // DIAG Diagnostics - Ver 1.6.1
-    chatbot_chatgpt_back_trace( "", '$chatgpt_last_response: ' . $chatgpt_last_response);
+    // chatbot_chatgpt_back_trace( "NOTICE", '$chatgpt_last_response: ' . $chatgpt_last_response);
     
     // IDEA Strip any href links and text from the $chatgpt_last_response
     $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
@@ -62,7 +62,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     // DIAG Diagnostics - Ver 1.6.1
-    chatbot_chatgpt_back_trace( "", '$context: ' . $context);
+    // chatbot_chatgpt_back_trace( "NOTICE", '$context: ' . $context);
 
     // Added Role, System, Content Static Veriable - Ver 1.6.0
     $body = array(
@@ -79,9 +79,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     addEntry('context_history', $message);
 
     // DIAG Diagnostics - Ver 1.6.1
-    chatbot_chatgpt_back_trace( "", 'storedc: ' . $chatbot_chatgpt_kn_conversation_context);
-    chatbot_chatgpt_back_trace( "", 'context: ' . $context);
-    chatbot_chatgpt_back_trace( "", 'message: ' . $message);  
+    // chatbot_chatgpt_back_trace( "NOTICE", 'storedc: ' . $chatbot_chatgpt_kn_conversation_context);
+    // chatbot_chatgpt_back_trace( "NOTICE", 'context: ' . $context);
+    // chatbot_chatgpt_back_trace( "NOTICE", 'message: ' . $message);  
 
     $args = array(
         'headers' => $headers,
@@ -93,7 +93,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     $response = wp_remote_post($api_url, $args);
     // DIAG - Diagnostics - Ver 1.6.7
-    chatbot_chatgpt_back_trace( "", $response);
+    // chatbot_chatgpt_back_trace( "NOTICE", $response);
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {

@@ -20,7 +20,7 @@ function knowledge_navigator_scan() {
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
-    chatbot_chatgpt_back_trace('NOTICE', 'ENTERING knowledge_navigator_scan()');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'ENTERING knowledge_navigator_scan()');
     
     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
 
@@ -58,7 +58,7 @@ function knowledge_navigator_scan() {
     update_option('chatbot_chatgpt_kn_status', $status_message);
 
     // DIAG - Diagnostic - Ver 1.6.3
-    chatbot_chatgpt_back_trace('NOTICE', 'EXITING knowledge_navigator_scan()');
+    // chatbot_chatgpt_back_trace( "NOTICE", 'EXITING knowledge_navigator_scan()');
 
 }
 add_action('knowledge_navigator_scan_hook', 'knowledge_navigator_scan');

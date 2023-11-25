@@ -28,7 +28,7 @@ function chatbot_chatgpt_reporting_period_callback($args) {
     // Get the saved chatbot_chatgpt_reporting_period value or default to "Daily"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_reporting_period', 'Daily'));
     // DIAG - Log the output choice
-    chatbot_chatgpt_back_trace( "", 'chatbot_chatgpt_reporting_period' . $output_choice);
+    // chatbot_chatgpt_back_trace( "NOTICE", 'chatbot_chatgpt_reporting_period' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_reporting_period" name="chatbot_chatgpt_reporting_period">
         <option value="<?php echo esc_attr( 'Daily' ); ?>" <?php selected( $output_choice, 'Daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
