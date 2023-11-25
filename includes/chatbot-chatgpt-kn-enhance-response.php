@@ -21,7 +21,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     global $learningMessages;
     global $errorResponses;
     global $stopWords;
-	$enhance_response = "";
+	$enhanced_response = "";
 
     // Retrieve links to the highest scoring documents - Ver 1.6.3
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
