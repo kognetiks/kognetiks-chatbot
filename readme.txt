@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4
-Stable tag: 1.6.9
+Stable tag: 1.7.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -157,6 +157,9 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
 
 == Changelog ==
+
+= 1.7.0 =
+* Corrected logic error to chatbot's response when no enhanced response was available.
 
 = 1.6.9 =
 * Added additional installation and support information for using Custom GPT Assistants.

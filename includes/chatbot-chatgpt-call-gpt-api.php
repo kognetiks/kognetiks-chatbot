@@ -12,7 +12,7 @@
 if ( ! defined( 'WPINC' ) )
 	die;
 
-    // Call the ChatGPT API
+// Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {
     // Diagnostics - Ver 1.6.1
     global $chatbot_chatgpt_diagnostics;
