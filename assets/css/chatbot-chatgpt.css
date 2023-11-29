@@ -275,6 +275,7 @@
     color: white;
     font-size: inherit;
     font-family: inherit;
+    flex-grow: 1;
 }
 
 .typing-indicator {

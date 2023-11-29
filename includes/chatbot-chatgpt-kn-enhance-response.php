@@ -110,13 +110,14 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     } else {
         // If no match is found, return a generic response
         $match_found = false;
-        if (!isset($enhanced_response)) {
-            $enhanced_response = '';
-        }
+        $enhanced_response = '';
+        // if (!isset($enhanced_response)) {
+        //     $enhanced_response = '';
+        // }
         // Only append $errorResponses if there is no response from the engine
-        if (empty($enhanced_response)) {
-            $enhanced_response .= $errorResponses[array_rand($errorResponses)];
-        }
+        // if (empty($enhanced_response)) {
+        //     $enhanced_response .= $errorResponses[array_rand($errorResponses)];
+        // }
     }
    
     // Strip out any <strong></strong> tags in $response_body['choices'][0]['message']['content'] - Ver 1.6.3

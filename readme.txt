@@ -159,6 +159,7 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 == Changelog ==
 
 = 1.7.0 =
+* Corrected logic error to chatbot's response when no enhanced response was available.
 
 = 1.6.9 =
 * Added additional installation and support information for using Custom GPT Assistants.
