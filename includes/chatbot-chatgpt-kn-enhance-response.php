@@ -105,7 +105,19 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // if (!isset($enhanced_response)) {
         //     $enhanced_response = '';
         // }
-        $enhanced_response .= "\n\n" . $learningMessages[array_rand($learningMessages)];
+
+        // Support for None, Random, or Custom Learnings Messages - Ver 1.7.1
+        $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
+        $chatbot_chatgpt_custom_learnings_message = esc_attr(get_option('chatbot_chatgpt_custom_learnings_message', 'More information may be found here ...'));
+        if ('None' === $chatbot_chatgpt_suppress_learnings) {
+            $enhanced_response .= "\n\n" . "Also look" . " ";
+        } elseif ('Random' === $chatbot_chatgpt_suppress_learnings) {
+            $enhanced_response .= "\n\n" . $learningMessages[array_rand($learningMessages)];
+        } elseif ('Custom' === $chatbot_chatgpt_suppress_learnings) {
+            $enhanced_response .= "\n\n" . $chatbot_chatgpt_custom_learnings_message . " ";
+        } else {
+            $enhanced_response .= "\n\n" . $learningMessages[array_rand($learningMessages)];
+        }
         $enhanced_response .= "[URL: " . $highest_score_url . "]";
     } else {
         // If no match is found, return a generic response

@@ -159,7 +159,7 @@ The plugin now support (as of Novmember 2023) the latest OpenAI model 'gpt-4-110
 == Changelog ==
 
 = 1.7.1 =
-
+* Added option to have none, random or custom learnings messages.
 
 = 1.7.0 =
 * Corrected logic error to chatbot's response when no enhanced response was available.

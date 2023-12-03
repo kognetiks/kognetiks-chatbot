@@ -91,6 +91,10 @@ $chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppres
 global $chatbot_chatgpt_suppress_attribution;
 $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
 
+// Suppress Learnings Message - Ver 1.7.1
+global $chatbot_chatgpt_suppress_learnings;
+$chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
+
 // Context History - Ver 1.6.1
 $context_history = [];
 
