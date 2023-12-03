@@ -283,6 +283,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message) {
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();
 
+    // Remove citations from the response
+    $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
+
     // FIXME - REMOVE THIS EXAMPLE >>> $response_body['choices'][0]['message']['content'];
     return $assistants_response["data"][0]["content"][0]["text"]["value"];
 
