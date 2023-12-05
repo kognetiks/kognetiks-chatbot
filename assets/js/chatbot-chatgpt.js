@@ -37,6 +37,18 @@ jQuery(document).ready(function ($) {
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
     //     console.log('Chatbot ChatGPT: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
     // }
+
+    // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
+    // var site-header = document.querySelector("#site-header");
+    // var site-footer = document.querySelector("#site-footer");
+
+    // if(header && footer) {
+    //     var headerBottom = site-header.getBoundingClientRect().bottom;
+    //     var footerTop = site-footer.getBoundingClientRect().top;
+
+    //     var visible-distance = footerTop - headerBottom;
+    //     console.log("Distance: " + distance + "px");
+    // }
     
     if (chatbot_chatgpt_display_style === 'embedded') {
         // Apply configurations for embedded style
@@ -44,6 +56,9 @@ jQuery(document).ready(function ($) {
         // Other configurations specific to embedded style
         chatgptStartStatus = 'open'; // Force the chatbot to open if embedded
         chatgptStartStatusNewVisitor = 'open'; // Force the chatbot to open if embedded
+        localStorage.setItem('chatgptStartStatus', chatgptStartStatus);
+        localStorage.setItem('chatgptStartStatusNewVisitor', chatgptStartStatusNewVisitor);
+        chatGptChatBot.addClass('embedded-style').removeClass('floating-style');
     } else {
         // Apply configurations for floating style
         $('#chatbot-chatgpt').addClass('floating-style').removeClass('embedded-style');

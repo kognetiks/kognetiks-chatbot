@@ -51,6 +51,20 @@
 /* CSS for the chatbot interface */
 #chatbot-chatgpt {
     transition: width 0.5s ease, height 0.5s ease;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    /* background-color: #f1f1f1; */
+    /* border: 1px solid #ccc; */
+    /* border-radius: 5px; */
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); */
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    padding-bottom: 10px;
 }
 
 /* Support for a floating version of the chatbot - Ver 1.7.1 */
@@ -73,16 +87,26 @@
 
 /* Support for an embedded version of the chatbot - Ver 1.7.1 */
 .embedded-style {
-    width: 100%; /* Full width of the container */
-    margin: 10px 0; /* Adjust as needed */
+    height: 50vh !important; /* Adjust as needed */
+    width: 90vw !important; /* Adjust as needed */
+    overflow: hidden;
+    position: relative !important; /* Keeps bot in the same position */
+    /* bottom: 10%; */
+    margin: 10px auto; /* Centers horizontally and gives margin at top and bottom */
     padding: 10px; /* Adds padding inside the chatbot */
     box-shadow: none; /* Removes any floating shadows */
+    left: 0;
+    right: 0;
     /* Other styling as needed */
 }
 
 /* Wide - Ver 1.4.2 */
 #chatbot-chatgpt.wide {
     width: 500px;
+}
+
+#chatbot-chatgpt.embedded-width {
+    width: 90%;
 }
 
 #chatbot-chatgpt-header {
@@ -112,12 +136,12 @@
     align-items: center;
 }
 
-
 #chatbot-chatgpt-message {
     flex-grow: 1;
     border: 1px solid black;
     border-radius: 3px;
     background: ghostwhite;
+    text-wrap: wrap !important;
 }
 
 #chatbot-chatgpt-message:focus {
