@@ -54,7 +54,7 @@ function chatbot_chatgpt_support_section_callback($args) {
         <li>Install and activate the Chatbot ChatGPT plugin.</li>
         <li>Navigate to the settings page (Settings &gt; API/Model) and enter your API key.</li>
         <li>Customize the chatbot appearance and other parameters as needed.</li>
-    <li>Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]</li>
+    <li>Add the chatbot to any page or post using the provided shortcode: &#91;chatbot_chatgpt&#93;</li>
     </ol>
     <p>Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI&#8217;s ChatGPT API.</p>
     <h2>Installation</h2>
@@ -63,7 +63,10 @@ function chatbot_chatgpt_support_section_callback($args) {
         <li>Activate the plugin through the &#8216;Plugins&#8217; menu in WordPress.</li>
         <li>Go to the &#8216;Settings &gt; Chatbot ChatGPT&#8217; page and enter your OpenAI API key.</li>
         <li>Customize the chatbot appearance and other parameters as needed.</li>
-        <li>Add the chatbot to any page or post using the provided shortcode: [chatbot_chatgpt]</li>
+        <li>Add the chatbot to any page or post using the provided shortcode: &#91;chatbot_chatgpt&#93;</li>
+        <li>* <b>Chatbot ChatGPT</b> now support either an embedded chatbot or floating chatbot.</li>
+        <li>* Use <b>&#91;chatbot_chatgpt&#93;</b> or &#91;chatbot_chatgpt style="floating"&#93; to display the chatbot as a floating chatbot.</li>
+        <li>* Use <b>&#91;chatbot_chatgpt style="embedded"&#93;</b> to display the chatbot as an embedded chatbot.</li>
         <li>By default, the chatbot will appear in the lower right corner of the page. This is adjustable in the .css file but not recommended for the causal site builders.</li>
         </ol>
     <h2>ChatGPT and Custom GPT Assistants</h2>
