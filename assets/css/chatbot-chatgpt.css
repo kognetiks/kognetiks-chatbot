@@ -136,12 +136,12 @@
     align-items: center;
 }
 
+
 #chatbot-chatgpt-message {
     flex-grow: 1;
     border: 1px solid black;
     border-radius: 3px;
     background: ghostwhite;
-    text-wrap: wrap !important;
 }
 
 #chatbot-chatgpt-message:focus {
