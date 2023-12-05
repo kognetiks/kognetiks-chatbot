@@ -13,7 +13,8 @@ jQuery(document).ready(function ($) {
         var chatgpt_chatbot_bot_prompt = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_chatbot_bot_prompt) ? chatbotSettings.chatgpt_chatbot_bot_prompt : 'Enter your question ...';
         var chatgptInitialGreeting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.initial_greeting) ? chatbotSettings.initial_greeting : 'Hello! How can I help you today?';
         var chatgptSubsequentGreeting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_subsequent_greeting) ? chatbotSettings.chatgpt_subsequent_greeting : 'Hello again! How can I help you?';
-        var chatgptStartStatus = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgptStartStatus) ? chatbotSettings.chatgptStartStatus : 'closed';
+        var chatbot_chatgpt_display_style = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_display_style) ? chatbotSettings.chatbot_chatgpt_display_style : 'Chat';
+        var chatgptStartStatus = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_display_style) ? chatbotSettings.chatbot_chatgpt_display_style : 'floating';
         var chatgptStartStatusNewVisitor = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgptStartStatusNewVisitor) ? chatbotSettings.chatgptStartStatusNewVisitor : 'closed';
         var chatgptDisclaimerSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_disclaimer_setting) ? chatbotSettings.chatgpt_disclaimer_setting : 'Yes';
         var chatgptMaxTokensSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_max_tokens_setting) ? chatbotSettings.chatgpt_max_tokens_setting : '150';
@@ -51,6 +52,7 @@ jQuery(document).ready(function ($) {
         var chatgpt_chatbot_bot_prompt = document.getElementById('chatgpt_chatbot_bot_prompt');
         var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
         var chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
+        var chatbot_chatgpt_display_style = document.getElementById('chatbot_chatgpt_display_style');
         var chatgptStartStatusInput = document.getElementById('chatgptStartStatus');
         var chatgptStartStatusNewVisitorInput = document.getElementById('chatgptStartStatusNewVisitor');
         var chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');

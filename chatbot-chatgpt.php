@@ -114,6 +114,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_chatbot_bot_prompt' => 'Enter your question ...',
         'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
+        'chatbot_chatgpt_display_style' => 'floating',
         'chatgptStartStatus' => 'closed',
         'chatgptStartStatusNewVisitor' => 'closed',
         'chatgpt_disclaimer_setting' => 'No',
@@ -140,6 +141,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_chatbot_bot_prompt', // Added in Ver 1.6.6
         'chatgpt_initial_greeting',
         'chatgpt_subsequent_greeting',
+        'chatbot_chatgpt_display_style',
         'chatgptStartStatus',
         'chatgptStartStatusNewVisitor',
         'chatgpt_disclaimer_setting',
