@@ -180,12 +180,12 @@ function chatbot_chatgpt_settings_page_html() {
         <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=bot_settings" class="nav-tab <?php echo $active_tab == 'bot_settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
-            <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatar Selection</a>
-            <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Custom Buttons</a>
+            <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatars</a>
+            <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
             <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
-            <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator Analysis</a>
+            <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Analysis</a>
             <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
-            <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Diagnostics & Notices</a>
+            <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Messages</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
             <!-- Coming Soon in Ver 2.0.0 -->
             <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->

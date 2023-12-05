@@ -181,6 +181,8 @@ function chatbot_chatgpt_settings_init() {
     // Suppress Notices and Warnings
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_learnings');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_learnings_message');
 
     add_settings_section(
         'chatbot_chatgpt_diagnostics_section',
@@ -212,6 +214,24 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_suppress_notices',
         'Suppress Notices and Warnings',
         'chatbot_chatgpt_suppress_notices_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to suppress learnings messages - Ver 1.7.1
+    add_settings_field(
+        'chatbot_chatgpt_suppress_learnings',
+        'Suppress Learnings Messages',
+        'chatbot_chatgpt_suppress_learnings_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to set custom learnings message - Ver 1.7.1
+    add_settings_field(
+        'chatbot_chatgpt_custom_learnings_message',
+        'Custom Learnings Message',
+        'chatbot_chatgpt_custom_learnings_message_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
     );

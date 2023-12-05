@@ -4,16 +4,17 @@ jQuery(document).ready(function ($) {
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
     //     console.log('FUNCTION: chatbot-chatgpt.js');
     // }
-    
+
     var chatGptChatBot = $('#chatbot-chatgpt').hide();
 
     messageInput = $('#chatbot-chatgpt-message');
+    
     var conversation = $('#chatbot-chatgpt-conversation');
+
     submitButton = $('#chatbot-chatgpt-submit');
     chatGptOpenButton = $('#chatgpt-open-btn');
 
     chatgptStartStatus = localStorage.getItem('chatgptStartStatus') || 'closed';
-    chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
     chatgptStartStatusNewVisitor = localStorage.getItem('chatgptStartStatusNewVisitor') || 'closed';
     initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
     subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
@@ -22,7 +23,6 @@ jQuery(document).ready(function ($) {
     chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
 
     localStorage.setItem('chatgptStartStatus', chatgptStartStatus);
-    localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
     localStorage.setItem('chatgptStartStatusNewVisitor', chatgptStartStatusNewVisitor);
     localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
     localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
@@ -32,13 +32,45 @@ jQuery(document).ready(function ($) {
 
     pluginUrl = plugin_vars.pluginUrl;
 
-    if (chatgpt_width_setting === 'Wide') {
-        chatGptChatBot.addClass('wide');
-    } else {
-        // chatGptChatBot.removeClass('wide').css('display', 'none');
-        chatGptChatBot.removeClass('wide');
-    }
+    // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
+    chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
+    // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
+    //     console.log('Chatbot ChatGPT: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+    // }
 
+    // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
+    // var site-header = document.querySelector("#site-header");
+    // var site-footer = document.querySelector("#site-footer");
+
+    // if(header && footer) {
+    //     var headerBottom = site-header.getBoundingClientRect().bottom;
+    //     var footerTop = site-footer.getBoundingClientRect().top;
+
+    //     var visible-distance = footerTop - headerBottom;
+    //     console.log("Distance: " + distance + "px");
+    // }
+    
+    if (chatbot_chatgpt_display_style === 'embedded') {
+        // Apply configurations for embedded style
+        $('#chatbot-chatgpt').addClass('embedded-style').removeClass('floating-style');
+        // Other configurations specific to embedded style
+        chatgptStartStatus = 'open'; // Force the chatbot to open if embedded
+        chatgptStartStatusNewVisitor = 'open'; // Force the chatbot to open if embedded
+        localStorage.setItem('chatgptStartStatus', chatgptStartStatus);
+        localStorage.setItem('chatgptStartStatusNewVisitor', chatgptStartStatusNewVisitor);
+        chatGptChatBot.addClass('embedded-style').removeClass('floating-style');
+    } else {
+        // Apply configurations for floating style
+        $('#chatbot-chatgpt').addClass('floating-style').removeClass('embedded-style');
+        // Other configurations specific to floating style
+        if (chatgpt_width_setting === 'Wide') {
+            chatGptChatBot.addClass('wide');
+        } else {
+            // chatGptChatBot.removeClass('wide').css('display', 'none');
+            chatGptChatBot.removeClass('wide');
+        }
+    }
+    
     // Initially hide the chatbot
     if (chatgptStartStatus === 'closed') {
         // chatGptChatBot = document.querySelector('#chatbot-chatgpt');
@@ -48,19 +80,27 @@ jQuery(document).ready(function ($) {
     } else {
         // chatGptChatBot = document.querySelector('#chatbot-chatgpt');
         // chatGptChatBot.style.setProperty('display', 'block', 'important');
-        if (chatgpt_width_setting === 'Wide') {
-            $('#chatbot-chatgpt').css({
-                width: '500px', // or your desired width
-                height: '450px', // or your desired height
-                overflow: 'visible'});
+        if (chatbot_chatgpt_display_style === 'floating') {
+            if (chatgpt_width_setting === 'Wide') {
+                $('#chatbot-chatgpt').css({
+                    width: '500px', // or your desired width
+                    height: '450px', // or your desired height
+                    overflow: 'visible'});
+                } else {
+                $('#chatbot-chatgpt').css({
+                    width: '300px', // or your desired width
+                    height: '450px', // or your desired height
+                    overflow: 'visible'});
+                }
+                chatGptChatBot.show();
+                chatGptOpenButton.hide();
             } else {
-            $('#chatbot-chatgpt').css({
-                width: '300px', // or your desired width
-                height: '450px', // or your desired height
-                overflow: 'visible'});
+                $('#chatbot-chatgpt').css({
+                    width: '100%', // or your desired width
+                    // height: '450px', // or your desired height
+                    height: '100%',
+                    overflow: 'visible'});
             }
-        chatGptChatBot.show();
-        chatGptOpenButton.hide();
     }
 
     chatbotContainer = $('<div></div>').addClass('chatbot-container');
@@ -107,9 +147,7 @@ jQuery(document).ready(function ($) {
     }
     
     // Append the collapse button and collapsed chatbot icon to the chatbot container
-    // chatbotContainer.append(chatbotCollapseBtn);
     $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
-    // $('#chatgptTitle').append(chatbotCollapseBtn);
     chatbotContainer.append(chatbotCollapsed);
 
     // Add initial greeting to the chatbot
@@ -167,20 +205,27 @@ jQuery(document).ready(function ($) {
 
     }
 
-    // Add chatbot header, body, and other elements - Ver 1.1.0
-    chatbotHeader = $('<div></div>').addClass('chatbot-header');
-    chatGptChatBot.append(chatbotHeader);
+    if (chatbot_chatgpt_display_style === 'floating') {
 
-    // Fix for Ver 1.2.0
-    // chatbotHeader.append(chatbotCollapseBtn);
-    $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
-    // $('#chatgptTitle').append(chatbotCollapseBtn);
-    chatbotHeader.append(chatbotCollapsed);
+        // Add chatbot header, body, and other elements
+        chatbotHeader = $('<div></div>').addClass('chatbot-header');
+        chatGptChatBot.append(chatbotHeader);
 
-    // Attach the click event listeners for the collapse button and collapsed chatbot icon
-    chatbotCollapseBtn.on('click', toggleChatbot);
-    chatbotCollapsed.on('click', toggleChatbot);
-    chatGptOpenButton.on('click', toggleChatbot);
+        // Add the chatbot button to the header
+        $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
+        chatbotHeader.append(chatbotCollapsed);
+
+        // Attach the click event listeners for the collapse button and collapsed chatbot icon
+        chatbotCollapseBtn.on('click', toggleChatbot);
+        chatbotCollapsed.on('click', toggleChatbot);
+        chatGptOpenButton.on('click', toggleChatbot);
+
+    } else {
+
+        // Embedded style - Do not add the collapse button and collapsed chatbot icon
+        chatbotHeader = $('<div></div>');
+
+    }
 
     function appendMessage(message, sender, cssClass) {
 
@@ -215,6 +260,8 @@ jQuery(document).ready(function ($) {
 
         // Ver 1.2.4
         conversation[0].scrollTop = conversation[0].scrollHeight;
+        // Scroll to bottom if embedded - Ver 1.7.1
+        // window.scrollTo(0, document.body.scrollHeight);
 
         // Save the conversation locally between bot sessions - Ver 1.2.0
         sessionStorage.setItem('chatgpt_conversation', conversation.html());
@@ -344,17 +391,35 @@ jQuery(document).ready(function ($) {
             chatGptOpenButton.show();
             localStorage.setItem('chatgptStartStatus', 'closed');
         } else {
-            if (chatgpt_width_setting === 'Wide') {
-                $('#chatbot-chatgpt').css({
-                    width: '500px', // or your desired width
-                    height: '450px', // or your desired height
-                    overflow: 'visible'});
+            // if (chatgpt_width_setting === 'Wide') {
+            //     $('#chatbot-chatgpt').css({
+            //         width: '500px', // or your desired width
+            //         height: '450px', // or your desired height
+            //         overflow: 'visible'});
+            //     } else {
+            //     $('#chatbot-chatgpt').css({
+            //         width: '300px', // or your desired width
+            //         height: '450px', // or your desired height
+            //         overflow: 'visible'});
+            // }
+            if (chatbot_chatgpt_display_style === 'floating') {
+                if (chatgpt_width_setting === 'Wide') {
+                    $('#chatbot-chatgpt').css({
+                        width: '500px', // or your desired width
+                        height: '450px', // or your desired height
+                        overflow: 'visible'});
+                    } else {
+                    $('#chatbot-chatgpt').css({
+                        width: '300px', // or your desired width
+                        height: '450px', // or your desired height
+                        overflow: 'visible'});
+                    }
                 } else {
-                $('#chatbot-chatgpt').css({
-                    width: '300px', // or your desired width
-                    height: '450px', // or your desired height
-                    overflow: 'visible'});
-            }
+                    $('#chatbot-chatgpt').css({
+                        width: '100%', // or your desired width
+                        // height: '450px', // or your desired height
+                        overflow: 'visible'});
+                }
             chatGptChatBot.show();
             chatGptOpenButton.hide();
             localStorage.setItem('chatgptStartStatus', 'open');

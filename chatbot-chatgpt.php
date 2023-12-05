@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.7.0
+ * Version:     1.7.1
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -91,6 +91,10 @@ $chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppres
 global $chatbot_chatgpt_suppress_attribution;
 $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
 
+// Suppress Learnings Message - Ver 1.7.1
+global $chatbot_chatgpt_suppress_learnings;
+$chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
+
 // Context History - Ver 1.6.1
 $context_history = [];
 
@@ -110,6 +114,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_chatbot_bot_prompt' => 'Enter your question ...',
         'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
+        'chatbot_chatgpt_display_style' => 'floating',
         'chatgptStartStatus' => 'closed',
         'chatgptStartStatusNewVisitor' => 'closed',
         'chatgpt_disclaimer_setting' => 'No',
@@ -136,6 +141,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_chatbot_bot_prompt', // Added in Ver 1.6.6
         'chatgpt_initial_greeting',
         'chatgpt_subsequent_greeting',
+        'chatbot_chatgpt_display_style',
         'chatgptStartStatus',
         'chatgptStartStatusNewVisitor',
         'chatgpt_disclaimer_setting',

@@ -86,6 +86,28 @@ function chatbot_chatgpt_suppress_notices_callback($args) {
     <?php
 }
 
+// Suppress Learnings Message - Ver 1.7.1
+function chatbot_chatgpt_suppress_learnings_callback($args) {
+    global $chatbot_chatgpt_suppress_learnings;
+    $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
+    ?>
+    <select id="chatgpt_suppress_learnings_setting" name = "chatbot_chatgpt_suppress_learnings">
+        <option value="None" <?php selected( $chatbot_chatgpt_suppress_learnings, 'None' ); ?>><?php echo esc_html( 'None' ); ?></option>
+        <option value="Random" <?php selected( $chatbot_chatgpt_suppress_learnings, 'Random' ); ?>><?php echo esc_html( 'Random' ); ?></option>
+        <option value="Custom" <?php selected( $chatbot_chatgpt_suppress_learnings, 'Custom' ); ?>><?php echo esc_html( 'Custom' ); ?></option>
+    </select>
+    <?php
+}
+
+// Suppress Learnings Message - Ver 1.7.1
+function chatbot_chatgpt_custom_learnings_message_callback($args) {
+    global $chatbot_chatgpt_custom_learnings_message;
+    $chatbot_chatgpt_custom_learnings_message = esc_attr(get_option('chatbot_chatgpt_custom_learnings_message', 'More information may be found here ...'));
+    ?>
+    <input type="text" style="width: 50%;" id="chatbot_chatgpt_custom_learnings_message" name = "chatbot_chatgpt_custom_learnings_message" value="<?php echo esc_attr( $chatbot_chatgpt_custom_learnings_message ); ?>">
+    <?php
+}
+
 // Suppress Attribution On/Off - Ver 1.6.5
 function chatbot_chatgpt_suppress_attribution_callback($args) {
     global $chatbot_chatgpt_suppress_attribution;
