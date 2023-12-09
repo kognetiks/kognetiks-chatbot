@@ -45,7 +45,7 @@ Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experie
 
 🚀 **Join Us in the Revolution of Personalized User Experience!**
 
-ChatGPT is more than a plugin; it's an asset to your site, crafting a truly bespoke experience for your visitors. Powered by advanced AI technology, ChatGPT is designed to offer a more interactive and tailored visitor experience.
+Chatbot ChatGPT is more than a plugin; it's an asset to your site, crafting a truly bespoke experience for your visitors. Powered by advanced AI technology, Chatbot ChatGPT is designed to offer a more interactive and tailored visitor experience.
 
 Get Chatbot ChatGPT today, and redefine your WordPress website with intelligence, creativity, and a personal touch!
 
@@ -61,9 +61,9 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 
 🚀 **Cutting-Edge Support**: Benefit from support for gpt-3.5-turbo and the next-gen gpt-4 from OpenAI.  Now with an expanded list of OpenAI models supported, including the latest GPT-4 Turbo ('gpt-4-1106-preview') featuring improved instruction following, JSON mode, reproducibility outputs, parallel function calling and more.
 
-💬 **Elegant Floating Chatbot Interface**: Offers a sleek and engaging user experience using shortcode [chatbot_chatgpt style="floating"]
+💬 **Elegant Floating Chatbot Interface**: Offers a sleek and engaging user experience using shortcode [chatbot_chatgpt style=floating]
 
-💬 **Embedded Chatbot Interface**: Offers a sleek and engaging user experience using the shortcode [chatbot_chatgpt style="embedded"]
+💬 **Embedded Chatbot Interface**: Offers a sleek and engaging user experience using the shortcode [chatbot_chatgpt style=embedded]
 
 🔧 **Intuitive Settings Page**: Manage API key and other parameters with a user-friendly interface.
 
@@ -87,8 +87,8 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 2. Install and activate the Chatbot ChatGPT plugin.
 3. Navigate to the settings page (Settings > API/Model) and enter your API key.
 4. Customize the chatbot appearance and other parameters as needed.
-5. For a floating chatbot add the shortcode to your theme's footer: [chatbot_chatgpt] or [chatbot_chatgpt style="floating"]
-6. For an embedded chatbot on any page add the shortcode: [chatbot_chatgpt style="embedded"]
+5. For a floating chatbot add the shortcode to your theme's footer: [chatbot_chatgpt] or [chatbot_chatgpt style=floating]
+6. For an embedded chatbot on any page add the shortcode: [chatbot_chatgpt style=embedded]
 
 Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI's ChatGPT API.
 
@@ -115,7 +115,7 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Go to the 'Settings > Chatbot ChatGPT' page and enter your OpenAI API key.
 4. Customize the chatbot appearance and other parameters as needed.
-5. Add the chatbot to any page, theme footer or sidebar using the provided shortcode: [chatbot_chatgpt] or [chatbot_chatgpt style="floating"] or [chatbot_chatgpt style="embedded"]
+5. Add the chatbot to any page, theme footer or sidebar using the provided shortcode: [chatbot_chatgpt] or [chatbot_chatgpt style=floating] or [chatbot_chatgpt style=embedded]
 6. After installation, go to the 'Settings > Chatbot ChatGPT' page then click the 'Knowledge Navigator' tab and run a scan of your site.
 7. Select hourly, daily, or weekly to run the Knowledge Navigator periodically to remain current about your content.
 
@@ -164,8 +164,8 @@ The plugin now support (as of November 2023) the latest OpenAI model 'gpt-4-1106
 = 1.7.1 =
 * Added option to have none, random or custom learnings messages.
 * Added support for an embedded chatbot or floating chatbot.
-* Use [chatbot_chatgpt] or [chatbot_chatgpt style="floating"] to display the chatbot as a floating chatbot.
-* Use [chatbot_chatgpt style="embedded"] to display the chatbot as an embedded chatbot.
+* Use [chatbot_chatgpt] or [chatbot_chatgpt style=floating] to display the chatbot as a floating chatbot.
+* Use [chatbot_chatgpt style=embedded] to display the chatbot as an embedded chatbot.
 
 = 1.7.0 =
 * Corrected logic error to chatbot's response when no enhanced response was available.
