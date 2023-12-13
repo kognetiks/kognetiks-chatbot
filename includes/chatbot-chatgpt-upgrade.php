@@ -116,7 +116,7 @@ function chatbot_chatgpt_upgrade() {
     }
 
     // DIAG - Log the upgrade.
-    chatbot_chatgpt_back_trace('SUCCESS', 'chatbot_chatgpt_upgrade completed' );
+    // chatbot_chatgpt_back_trace('SUCCESS', 'chatbot_chatgpt_upgrade completed' );
 
     return;
 }

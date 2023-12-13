@@ -17,7 +17,7 @@ die;
 function chatbot_chatgpt_diagnostics_section_callback($args) {
     ?>
     <p>The Diagnostics tab checks the API status and set options for diagostics and notices.</p>
-    <p>You can turn on/off console and error logging (as of Version 1.6.5 most is now commented out).</p>
+    <p>You can turn on/off console and error logging (as of Version 1.6.5 most are now commented out).</p>
     <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
     <h2>System and Plugin Information</h2>
     <?php
@@ -122,7 +122,7 @@ function chatbot_chatgpt_suppress_attribution_callback($args) {
 
 // Enhanced Error Logging if Diagnostic Mode is On - Ver 1.6.9
 // Call this function using chatbot_chatgpt_back_trace( 'NOTICE', $message);
-function chatbot_chatgpt_back_trace($message_type = "NOTICE",$message = "No message") {
+function chatbot_chatgpt_back_trace($message_type = "NOTICE", $message = "No message") {
 
     // Check if diagnostics is On
     $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'ERROR'));

@@ -49,6 +49,7 @@ function chatbot_chatgpt_use_custom_gpt_assistant_id_callback($args) {
     <?php
     if ($use_assistant_id == 'No') {
         update_option('chatbot_chatgpt_assistant_id', '');
+        update_option('chatbot_chatgpt_assistant_id_alternate', '');
     }
 }
 
@@ -65,6 +66,21 @@ function chatbot_chatgpt_assistant_id_callback($args) {
     <input type="text" id="chatbot_chatgpt_assistant_id" name="chatbot_chatgpt_assistant_id" value="<?php echo esc_attr( $assistant_id ); ?>" class="regular-text">
     <?php
 }
+
+// CustomGPT Assistant Id field callback - Ver 1.6.7
+function chatbot_chatgpt_assistant_id_alternate_callback($args) {
+    $assistant_id_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate', 'Please provide the Alternate Custom GPT Assistant Id.'));
+    $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id', 'No'));
+    if ($use_assistant_id == 'Yes' && ($assistant_id_alternate == 'Please provide the Custom GPT Assistant Id.' or empty($assistant_id_alternate))) {
+        $assistant_id_alternate = 'Please provide the Alternate Custom GPT Assistant Id, if any.';
+    }
+    // Set default value if empty
+    // $assistant_id = empty($assistant_id) ? 'Please provide the Custom GPT Assistant Id.': $assistant_id;
+    ?>
+    <input type="text" id="chatbot_chatgpt_assistant_id_alternate" name="chatbot_chatgpt_assistant_id_alternate" value="<?php echo esc_attr( $assistant_id_alternate ); ?>" class="regular-text">
+    <?php
+}
+
 
 // OpenAI Models
 // https://platform.openai.com/docs/models

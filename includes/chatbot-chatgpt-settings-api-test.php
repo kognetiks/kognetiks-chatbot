@@ -100,7 +100,7 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
     }
 
     // DIAG - Log Function Call
-    chatbot_chatgpt_back_trace("NOTICE", "chatgpt_option_updated() called");
+    // chatbot_chatgpt_back_trace("NOTICE", "chatgpt_option_updated() called");
 
     // FIXME Retrieve the current value of the chatbot_chatgpt_api_status option
     $chatbot_chatgpt_api_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');

@@ -219,8 +219,37 @@ function getTheMessage($threadId, $api_key) {
 // CustomerGPT - Assistants - Ver 1.7.7
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message) {
 
+    
     // Get the authorization token and assistant ID
-    $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
+    // $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
+    // Retrieve the Assistant Alias from localStorage- Ver 1.7.2
+    // FIXME = Start the session at the beginning of the script - IS THIS THE RIGHT PLACE FOR THIS?
+    session_start();
+    if (!isset($_SESSION['chatbot_chatgpt_assistant_alias'])) {
+        $_SESSION['chatbot_chatgpt_assistant_alias'] = 'primary';
+    }
+    $chatbot_chatgpt_assistant_alias = $_SESSION['chatbot_chatgpt_assistant_alias'];
+    // DIAG - Diagnostics - Ver 1.7.2
+    chatbot_chatgpt_back_trace( "NOTICE", '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    if ($chatbot_chatgpt_assistant_alias === 'primary') {
+        // Retrieve the Assistant ID
+        $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
+        // DIAG - Diagnostics - Ver 1.7.2
+        chatbot_chatgpt_back_trace( "NOTICE", '$assistantId: ' . $assistantId);
+    } elseif ($chatbot_chatgpt_assistant_alias === 'alternate') {
+        // Fetch the Assistant Id Alternate based on Alias - Ver 1.7.2
+        $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
+        // DIAG - Diagnostics - Ver 1.7.2
+        chatbot_chatgpt_back_trace( "NOTICE", '$assistantId: ' . $assistantId);
+    } else {
+        return "Error: Assistant ID Missing.";
+        // DIAG - Diagnostics - Ver 1.7.2
+        chatbot_chatgpt_back_trace( "ERROR", 'Assistant ID is missing.');
+    }
+
+    // DIAG - Diagnostics
+    chatbot_chatgpt_back_trace( "NOTICE", 'Using Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
+    chatbot_chatgpt_back_trace( "NOTICE", 'Using Assistant ID: ' . $assistantId);
 
     // Step 1: Create an Assistant
     // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: Step 1: Create an Assistant');

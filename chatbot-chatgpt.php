@@ -115,6 +115,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatbot_chatgpt_display_style' => 'floating',
+        'chatbot_chatgpt_assistant_alias' => 'primary',
         'chatgptStartStatus' => 'closed',
         'chatgptStartStatusNewVisitor' => 'closed',
         'chatgpt_disclaimer_setting' => 'No',
@@ -142,6 +143,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_initial_greeting',
         'chatgpt_subsequent_greeting',
         'chatbot_chatgpt_display_style',
+        'chatbot_chatgpt_assistant_alias',
         'chatgptStartStatus',
         'chatgptStartStatusNewVisitor',
         'chatgpt_disclaimer_setting',
@@ -226,6 +228,8 @@ function chatbot_chatgpt_send_message() {
     $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id'));
     // Retrieve the Assistant ID
     $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
+    // Retrieve the Assistant ID Alternate
+    $assistant_id_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
     // Retrieve the model from the settings or default to gpt-3.5-turbo
     $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     // Retrieve the Max tokens - Ver 1.4.2

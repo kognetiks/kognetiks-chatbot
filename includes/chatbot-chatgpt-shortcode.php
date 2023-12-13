@@ -14,23 +14,36 @@ if ( ! defined( 'WPINC' ) )
 
 function chatbot_chatgpt_shortcode($atts) {
 
+    // EXAMPLE - Shortcode Attributes
+    // [chatbot_chatgpt style="floating"]
+    // [chatbot_chatgpt style="embedded"]
+    // [chatbot_chatgpt style="floating" assistant="primary"]
+    // [chatbot_chatgpt style="embedded" assistant="alternate"]
+
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
         'style' => 'floating', // Default value
+        'assistant' => 'primary' // Default value
     );
 
     // Combine user attributes with default attributes
     $atts = shortcode_atts($chatbot_chatgpt_default_atts, $atts, 'chatbot_chatgpt');
 
-    // Use the 'style' attribute in your shortcode output
-    $chatbot_chatgpt_display_style = $atts['style'];
-    // echo "<p>" . $chatbot_chatgpt_display_style . "</p>";
-    // Set local stoarge to the style
+    // Sanitize the 'style' attribute to ensure it contains safe data
+    $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
+    $chatbot_chatgpt_assistant_alias = sanitize_text_field($atts['assistant']);
+
+    // Escaping the output before rendering to HTML
     ?>
     <script>
         localStorage.setItem('chatbot_chatgpt_display_style', '<?php echo $chatbot_chatgpt_display_style; ?>');
+        localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $chatbot_chatgpt_assistant_alias; ?>')
     </script>
     <?php
+
+    // DIAG = Diagnostics - Ver 1.7.2
+    chatbot_chatgpt_back_trace( "NOTICE", 'style: ' . $chatbot_chatgpt_display_style);
+    chatbot_chatgpt_back_trace( "NOTICE", 'assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0

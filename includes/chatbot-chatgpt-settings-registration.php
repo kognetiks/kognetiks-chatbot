@@ -22,11 +22,10 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_api_key', 'sanitize_api_key');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_assistant_id'); // Ver 1.6.7
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
     register_setting('chatbot_chatgpt_api_model', 'chatgpt_model_choice');
-    // Max Tokens setting options - Ver 1.4.2
-    register_setting('chatbot_chatgpt_api_model', 'chatgpt_max_tokens_setting');
-    // Covnersation Context - Ver 1.6.1
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context');
+    register_setting('chatbot_chatgpt_api_model', 'chatgpt_max_tokens_setting'); // Max Tokens setting options - Ver 1.4.2
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context'); // Covnersation Context - Ver 1.6.1
 
     add_settings_section(
         'chatbot_chatgpt_api_model_section',
@@ -55,8 +54,17 @@ function chatbot_chatgpt_settings_init() {
     // CustomGPT Assistant Id - Ver 1.6.7
     add_settings_field(
         'chatbot_chatgpt_assistant_id',
-        'Custom GPT Assistant Id',
+        'Primary GPT Assistant Id',
         'chatbot_chatgpt_assistant_id_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
+    // CustomGPT Assistant Id Alternate - Ver 1.7.2
+    add_settings_field(
+        'chatbot_chatgpt_assistant_id_alternate',
+        'Alternate GPT Assistant Id',
+        'chatbot_chatgpt_assistant_id_alternate_callback',
         'chatbot_chatgpt_api_model',
         'chatbot_chatgpt_api_model_section'
     );
