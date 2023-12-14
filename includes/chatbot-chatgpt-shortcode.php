@@ -15,10 +15,11 @@ if ( ! defined( 'WPINC' ) )
 function chatbot_chatgpt_shortcode($atts) {
 
     // EXAMPLE - Shortcode Attributes
-    // [chatbot_chatgpt style="floating"]
-    // [chatbot_chatgpt style="embedded"]
-    // [chatbot_chatgpt style="floating" assistant="primary"]
-    // [chatbot_chatgpt style="embedded" assistant="alternate"]
+    // [chatbot_chatgpt] - Default values, floating style, uses OpenAI's ChatGPT
+    // [chatbot_chatgpt style="floating"] - Floating style, uses OpenAI's ChatGPT
+    // [chatbot_chatgpt style="embedded"] - Embedded style, uses OpenAI's ChatGPT
+    // [chatbot_chatgpt style="floating" assistant="primary"] - Floating style, Custom GPT Assistant as set in Primary setting
+    // [chatbot_chatgpt style="embedded" assistant="alternate"] - Embedded style, Custom GPT Assistant as set in Alternate setting
 
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
@@ -33,13 +34,17 @@ function chatbot_chatgpt_shortcode($atts) {
     $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
     $chatbot_chatgpt_assistant_alias = sanitize_text_field($atts['assistant']);
 
-    // Escaping the output before rendering to HTML
+    // Set local stoarge to the style
     ?>
     <script>
         localStorage.setItem('chatbot_chatgpt_display_style', '<?php echo $chatbot_chatgpt_display_style; ?>');
-        localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $chatbot_chatgpt_assistant_alias; ?>')
+        localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $chatbot_chatgpt_assistant_alias; ?>');
     </script>
     <?php
+
+    // Store the style and the assistant value - Ver 1.7.2
+    set_transient('chatbot_chatgpt_display_style', $chatbot_chatgpt_display_style, 60*60); // Store for 1 hour, adjust as needed
+    set_transient('chatbot_chatgpt_assistant_alias', $chatbot_chatgpt_assistant_alias, 60*60); // Store for 1 hour, adjust as needed
 
     // DIAG = Diagnostics - Ver 1.7.2
     chatbot_chatgpt_back_trace( "NOTICE", 'style: ' . $chatbot_chatgpt_display_style);

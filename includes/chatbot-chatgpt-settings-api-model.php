@@ -21,11 +21,12 @@ function chatbot_chatgpt_api_model_section_callback($args) {
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" taget="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <p>Enter your ChatGPT API key below and select the OpenAI model of your choice.</p>
     <p>As soon as the API for GPT-4 is available for general use, you will be able to select from the latest available models.</p>
-    <h2>CustomGTPs</h2>
+    <h2>Custom GTPs</h2>
     <p><i>If you have developed a Custom GPT Assistant, you will need the id of the assistant.</p>
     <p>Enter your Custom GPT Assistant Id instead of ChatGPT.  Set the 'Use Custom GPT Assistant ID' to 'Yes'.</p>
     <p>Otherwise, you can leave the Custom GPT Assistant ID field blank and set the usage to 'No'.</p>
     <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</i></p>
+    <p>See <a href="?page=chatbot-chatgpt&tab=support">Support</a> for more details on using multiple custom GPT assistants.</p>
     <?php
 }
 

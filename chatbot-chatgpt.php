@@ -98,6 +98,11 @@ $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppr
 // Context History - Ver 1.6.1
 $context_history = [];
 
+function chatbot_chatgpt_enqueue_admin_scripts() {
+    wp_enqueue_script('chatbot_chatgpt_admin', plugins_url('assets/js/chatbot-chatgpt-admin.js', __FILE__), array('jquery'), '1.0.0', true);
+}
+add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
+
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
     // Ensure the Dashicons font is properly enqueued - Ver 1.1.0

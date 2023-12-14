@@ -222,15 +222,12 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message) {
     
     // Get the authorization token and assistant ID
     // $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
+
     // Retrieve the Assistant Alias from localStorage- Ver 1.7.2
-    // FIXME = Start the session at the beginning of the script - IS THIS THE RIGHT PLACE FOR THIS?
-    session_start();
-    if (!isset($_SESSION['chatbot_chatgpt_assistant_alias'])) {
-        $_SESSION['chatbot_chatgpt_assistant_alias'] = 'primary';
-    }
-    $chatbot_chatgpt_assistant_alias = $_SESSION['chatbot_chatgpt_assistant_alias'];
+    $chatbot_chatgpt_assistant_alias = get_transient('chatbot_chatgpt_assistant_alias');  
     // DIAG - Diagnostics - Ver 1.7.2
-    chatbot_chatgpt_back_trace( "NOTICE", '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    chatbot_chatgpt_back_trace( "NOTICE", '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);    
+
     if ($chatbot_chatgpt_assistant_alias === 'primary') {
         // Retrieve the Assistant ID
         $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
@@ -315,7 +312,6 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message) {
     // Remove citations from the response
     $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
 
-    // FIXME - REMOVE THIS EXAMPLE >>> $response_body['choices'][0]['message']['content'];
     return $assistants_response["data"][0]["content"][0]["text"]["value"];
 
 }
