@@ -144,7 +144,7 @@ The ChatGPT API currently supports English. However, you can configure the chatb
 
 The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are the same models found in the ChatGPT product from OpenAI.
 
-The plugin now support (as of November 2023) the latest OpenAI model 'gpt-4-1106-preview' featuring improved instruction following based on training data up to April 2023.
+The plugin now support (as of November 2023) the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-preview')** featuring improved instruction following based on training data up to April 2023.
 
 == Screenshots ==
 
@@ -165,6 +165,13 @@ The plugin now support (as of November 2023) the latest OpenAI model 'gpt-4-1106
 15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
 
 == Changelog ==
+
+= 1.7.2 =
+* Improved Custom GPI Assistance
+* Use [chatbot_chatgpt style=floating assistant=primary] to display the chatbot as floating using your primary assistant.
+* Use [chatbot_chatgpt style=embedded assistant=primary] to display the chatbot as embedded using your primary assistant.
+* Use [chatbot_chatgpt style=floating assistant=alternate] to display the chatbot as floating using your alternate assistant.
+* Use [chatbot_chatgpt style=embedded assistant=alternate] to display the chatbot as embedded using your alternate assistant.
 
 = 1.7.1 =
 * Added option to have none, random or custom learnings messages.

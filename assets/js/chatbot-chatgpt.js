@@ -296,12 +296,17 @@ jQuery(document).ready(function ($) {
         messageInput.val('');
         appendMessage(message, 'user');
 
+        var user_id = php_vars.user_id;
+        var page_id = php_vars.page_id;
+
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
             data: {
                 action: 'chatbot_chatgpt_send_message',
                 message: message,
+                user_id: user_id, // pass the user ID here
+                page_id: page_id, // pass the page ID here
             },
             beforeSend: function () {
                 showTypingIndicator();

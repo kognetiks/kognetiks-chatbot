@@ -113,6 +113,15 @@ function chatbot_chatgpt_enqueue_scripts() {
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
     // Enqueue the chatbot-chatgpt-local.js file - Ver 1.4.1
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
+  
+    // Localize the data for user id and page id
+    $user_id = get_current_user_id();
+    $page_id = get_the_ID();
+    $script_data_array = array(
+        'user_id' => $user_id,
+        'page_id' => $page_id
+    );
+    wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
 
     // Defaults for Ver 1.6.1
     $defaults = array(
@@ -233,6 +242,12 @@ function chatbot_chatgpt_send_message() {
     $api_key = esc_attr(get_option('chatgpt_api_key'));
     // Retrieve the Use Custom GPT Assistant Id
     $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    // FIXME - If gpt-4-turbo is selected, set the API model to gpt-4-1106-preview, i.e., the API name for the model
+    if ($model == 'gpt-4-turbo') {
+        $model = 'gpt-4-1106-preview';
+    }
+    // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$model: ' . $model);
     // Retrieve the Max tokens - Ver 1.4.2
     $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
     // Send only clean text via the API
@@ -245,7 +260,12 @@ function chatbot_chatgpt_send_message() {
     }
 
     // Check the transient for the Assistant ID - Ver 1.7.2
-    $chatbot_settings = get_chatbot_chatgpt_transients();
+    $user_id = intval($_POST['user_id']);
+    $page_id = intval($_POST['page_id']); 
+    // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+    $chatbot_settings = get_chatbot_chatgpt_transients($user_id, $page_id);
     $display_style = $chatbot_settings['display_style'];
     $chatbot_chatgpt_assistant_alias = $chatbot_settings['assistant_alias'];
 
@@ -254,6 +274,7 @@ function chatbot_chatgpt_send_message() {
     // $chatbot_chatgpt_assistant_alias == 'primary';
     // $chatbot_chatgpt_assistant_alias == 'alternate';
   
+    $assistant_id = '';
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
         $use_assistant_id = 'No';
@@ -276,13 +297,12 @@ function chatbot_chatgpt_send_message() {
     } else {
         // Override the $use_assistant_id and set it to 'No'
         $use_assistant_id = 'No';
-        $assistant_id = '';
     }
 
     // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
-        chatbot_chatgpt_back_trace( 'NOTICE', 'Using Custom GPT Assistant Id: ' . $use_assistant_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Custom GPT Assistant Id: ' . $use_assistant_id);
         // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id);
         // Use TF-IDF to enhance response
@@ -300,8 +320,8 @@ function chatbot_chatgpt_send_message() {
         }
     } else {
         // DIAG - Diagnostics
-        chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT API: ' . $use_assistant_id);
-        chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT API: ' . $use_assistant_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_api($api_key, $message);
         // DIAG - Diagnostics

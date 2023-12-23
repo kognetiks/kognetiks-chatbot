@@ -20,15 +20,15 @@ if ( ! defined( 'WPINC' ) )
 function set_chatbot_chatgpt_transients($t_chatbot_chatgpt_display_style, $t_chatbot_chatgpt_assistant_alias) {
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', '$t_chatbot_chatgpt_display_style ' . $t_chatbot_chatgpt_display_style);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$t_chatbot_chatgpt_assistant_alias ' . $t_chatbot_chatgpt_assistant_alias);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$t_chatbot_chatgpt_display_style ' . $t_chatbot_chatgpt_display_style);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$t_chatbot_chatgpt_assistant_alias ' . $t_chatbot_chatgpt_assistant_alias);
 
     $user_id = get_current_user_id(); // Get current user ID
     $page_id = get_the_ID(); // Get current page ID
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
 
     // Create unique keys for transients
     $style_transient_key = 'chatbot_style_' . $user_id . '_' . $page_id;
@@ -46,14 +46,15 @@ function set_chatbot_chatgpt_transients($t_chatbot_chatgpt_display_style, $t_cha
 // $assistant_alias = $chatbot_settings['assistant_alias'];
 
 // Get the transients
-function get_chatbot_chatgpt_transients() {
+function get_chatbot_chatgpt_transients($user_id, $page_id) {
 
-    $user_id = get_current_user_id(); // Get current user ID
-    $page_id = get_the_ID(); // Get current page ID
+    // Pass the $user_id and $page_id values from the shortcode
+    // $user_id = get_current_user_id(); // Get current user ID
+    // $page_id = get_the_ID(); // Get current page ID
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
 
     // Construct the unique keys
     $style_transient_key = 'chatbot_style_' . $user_id . '_' . $page_id;
@@ -64,8 +65,8 @@ function get_chatbot_chatgpt_transients() {
     $t_chatbot_chatgpt_assistant_alias = get_transient($assistant_transient_key);
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', '$t_chatbot_chatgpt_display_style ' . $t_chatbot_chatgpt_display_style);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$t_chatbot_chatgpt_assistant_alias ' . $t_chatbot_chatgpt_assistant_alias);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$t_chatbot_chatgpt_display_style ' . $t_chatbot_chatgpt_display_style);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$t_chatbot_chatgpt_assistant_alias ' . $t_chatbot_chatgpt_assistant_alias);
 
     // Return the values, also handle the case where the transient might have expired
     return array(

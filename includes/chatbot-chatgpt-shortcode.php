@@ -37,8 +37,8 @@ function chatbot_chatgpt_shortcode($atts) {
     $chatbot_chatgpt_assistant_alias = sanitize_text_field($atts['assistant']);
 
     // DIAG - Diagnostics - Ver 1.7.2
-    chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
     echo "
@@ -63,6 +63,8 @@ function chatbot_chatgpt_shortcode($atts) {
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
+        // Store the style and the assistant value - Ver 1.7.2
+        set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -87,6 +89,8 @@ function chatbot_chatgpt_shortcode($atts) {
         return ob_get_clean();
     } else {
         // Code for bot style ('floating' is the default style)
+        // Store the style and the assistant value - Ver 1.7.2
+        set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
         ob_start();
         ?>
         <!-- Romoved styling as I believe this may cause problems with some themes Ver 1.6.6 -->

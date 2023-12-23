@@ -223,7 +223,7 @@ function getTheMessage($threadId, $api_key) {
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId) {
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Using Assistant ID: ' . $assistantId);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Assistant ID: ' . $assistantId);
 
     // Step 1: Create an Assistant
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 1: Create an Assistant');
