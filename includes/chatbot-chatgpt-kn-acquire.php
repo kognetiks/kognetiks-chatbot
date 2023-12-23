@@ -53,7 +53,7 @@ function chatbot_chatgpt_kn_acquire() {
     }
 
     // DIAG - Log directory path for debugging
-    // chatbot_chatgpt_back_trace( "NOTICE", "Directory path: " . $results_dir_path);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Directory path: ' . $results_dir_path);
 
     // Prepare log file for posts
     $log_file_posts = $results_dir_path . 'results-posts.log';
@@ -91,9 +91,9 @@ function chatbot_chatgpt_kn_acquire() {
     // Loop through query results
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
-        foreach($result as $key => $value) {
-            // chatbot_chatgpt_back_trace( "NOTICE", "Key: $key, Value: $value");
-        }        
+        // foreach($result as $key => $value) {
+        //     chatbot_chatgpt_back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        // }        
         $output_str = '';
         $output_str .= json_encode($result['post_content']) . "\n";
 
@@ -155,7 +155,7 @@ function chatbot_chatgpt_kn_acquire() {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         foreach($result as $key => $value) {
-            // chatbot_chatgpt_back_trace( "NOTICE", "Key: $key, Value: $value");
+            // chatbot_chatgpt_back_trace( 'NOTICE', "Key: $key, Value: $value");
         }
         $output_str = '';
         $output_str .= json_encode($result['post_content']) . "\n";
@@ -218,7 +218,7 @@ function chatbot_chatgpt_kn_acquire() {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         foreach($result as $key => $value) {
-            // chatbot_chatgpt_back_trace( "NOTICE", "Key: $key, Value: $value");
+            // chatbot_chatgpt_back_trace( 'NOTICE', "Key: $key, Value: $value");
         }        
         $output_str = '';
         $output_str .= json_encode($result['comment_content']) . "\n";
@@ -277,7 +277,7 @@ function chatbot_chatgpt_kn_acquire() {
     }
 
     // DIAG - Error log $max_top_words
-    // chatbot_chatgpt_back_trace( "NOTICE", "$max_top_words: " . $max_top_words);
+    // chatbot_chatgpt_back_trace( 'NOTICE', "$max_top_words: " . $max_top_words);
 
     // slice off the top max_top_words
     $topWords = array_slice($topWords, 0, $max_top_words);

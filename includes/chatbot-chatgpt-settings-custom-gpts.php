@@ -17,7 +17,7 @@ die;
 function chatbot_chatgpt_custom_gpts_section_callback($args) {
     ?>
     <p>Configure settings for your custom GPT Assistans by adding your below.</p>
-    <p>If you have developed a Custom GPT Assistant, you will need the id of the assistant - is starts with "asst_".</p>
+    <p>If you have developed a Custom GPT Assistant, you will need the id of the assistant - is usually starts with "asst_".</p>
     <p>Enter your Custom GPT Assistant Id instead of ChatGPT.  Set the 'Use Custom GPT Assistant ID' to 'Yes'.</p>
     <p>Otherwise, you can leave the Custom GPT Assistant ID field blank and set the usage to 'No'.</p>
     <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</p>

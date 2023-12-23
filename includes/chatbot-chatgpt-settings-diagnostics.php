@@ -29,7 +29,6 @@ function chatbot_chatgpt_diagnostics_section_callback($args) {
 
     echo '<p>PHP Version: <b>' . $php_version . '</b><br>';
     echo 'WordPress Version: <b>' . $wp_version . '</b><br>';
-    // echo 'Chatbot ChatGPT Version: <b>' . esc_attr(get_option('chatbot_chatgpt_plugin_version')) . '</b></p>';
     echo 'Chatbot ChatGPT Version: <b>' . get_plugin_version() . '</b></p>';
     echo '<h2>API Status and Other Settings</h2>';
 }
@@ -122,6 +121,11 @@ function chatbot_chatgpt_suppress_attribution_callback($args) {
 
 // Enhanced Error Logging if Diagnostic Mode is On - Ver 1.6.9
 // Call this function using chatbot_chatgpt_back_trace( 'NOTICE', $message);
+// [ERROR], [WARNING], [NOTICE], or [SUCCESS]
+// chatbot_chatgpt_back_trace( 'ERROR', 'Some message');
+// chatbot_chatgpt_back_trace( 'WARNING', 'Some message');
+// chatbot_chatgpt_back_trace( 'NOTICE', 'Some message');
+// chatbot_chatgpt_back_trace( 'SUCCESS', 'Some message');
 function chatbot_chatgpt_back_trace($message_type = "NOTICE", $message = "No message") {
 
     // Check if diagnostics is On

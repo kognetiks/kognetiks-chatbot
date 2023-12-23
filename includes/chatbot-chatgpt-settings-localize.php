@@ -68,7 +68,7 @@ function chatbot_chatgpt_localize(){
         $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
-        // chatbot_chatgpt_back_trace( "NOTICE", 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Update localStorage - Ver 1.6.1
@@ -80,11 +80,11 @@ function chatbot_chatgpt_localize(){
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
                 // DIAG - Log the key and value
-                // console.log('Setting ' + key + ' in localStorage');
+                // console.log('Chatbot ChatGPT: NOTICE: Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
                 // DIAG - Log the key and value
-                // console.log(key + ' is already set in localStorage');
+                // console.log('Chatbot ChatGPT: NOTICE: ' + key + ' is already set in localStorage');
             }
         });
     });

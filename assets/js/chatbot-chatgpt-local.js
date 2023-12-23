@@ -6,7 +6,7 @@ jQuery(document).ready(function ($) {
         // FIXME - WORKING - Ver 1.6.6
         // let chatbotSettings = " . json_encode($chatbot_settings) . ";
     
-        // console.log('ENTERING chatbot_chatgpt_localize');
+        // console.log('Chatbot ChatGPT: NOTICE: Entering chatbot_chatgpt_localize');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         var chatgptName = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_bot_name) ? chatbotSettings.chatgpt_bot_name : 'Chatbot ChatGPT';
@@ -40,11 +40,11 @@ jQuery(document).ready(function ($) {
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
                 // DIAG - Log the key and value
-                // console.log('Setting ' + key + ' in localStorage');
+                // console.log('Chatbot ChatGPT: NOTICE: Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
                 // DIAG - Log the key and value
-                // console.log(key + ' is already set in localStorage');
+                // console.log('Chatbot ChatGPT: NOTICE: ' key + ' is already set in localStorage');
             }
         });
 
@@ -327,7 +327,7 @@ jQuery(document).ready(function ($) {
         }
 
         // DIAG - Log exiting the function
-        // console.log('EXITING chatbot_chatgpt_localize');
+        // console.log('Chatbot ChatGPT: NOTICE: Exiting chatbot_chatgpt_localize');
         
     }
 
