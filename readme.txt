@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assistants, custom GPTs
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.4
+Tested up to: 6.4.2
 Stable tag: 1.7.2
 Requires PHP: 7.0
 License: GPLv2 or later
@@ -17,9 +17,13 @@ Introducing **Integration for Custom GPT Assistants** with the **Chatbot ChatGPT
 
 The Chatbot ChatGPT for WordPress introduces an innovative feature: the integration of OpenAI's Custom GPT Assistants. You tailor these custom Assistants which are versions of GPT models designed to enhance website interactions and provide a more dynamic user experience. You can equip them with specialized knowledge and functionalities, allowing them to perform a variety of tasks such as answering FAQs, handling bookings, and offering personalized recommendations. With this feature, website owners can easily embed these Assistants into WordPress sites, using the Chatbot ChatGPT plugin. This integration not only elevates customer service but also offers a unique, interactive experience that aligns with the website's theme and content. The Assistants' ability to adapt and learn from interactions ensures continuous improvement in performance, making them an invaluable asset for businesses aiming to enhance their online presence and engagement.
 
+🤖 **Support for multiple Custom GPT Assistants** – You can now create and use both a primary or alternate Custom GPT Assistants with the Chatbot ChatGPT plugin. This feature allows you to create and use multiple Assistants for different purposes, such as customer support, booking, and more. You can also use multiple Assistants to provide a more personalized experience for your visitors. For example, you can create an Assistant for your blog and another for your online store. This way, you can provide a more personalized experience for your visitors.
+
 Learn more about enabling this Custom GPT Assistants at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
-Introducing **Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experience with AI-Driven Personalized Support!
+🤖 **Embedded or floating Chatbot ChatGPT** – You can now display the Chatbot ChatGPT as an embedded chatbot or floating chatbot.  The embedded chatbot is displayed on any page using the shortcode [chatbot_chatgpt style=embedded].  The floating chatbot is displayed on any page using the shortcode [chatbot_chatgpt style=floating]. 
+
+**Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experience with AI-Driven Personalized Support!
 
 🔍 **Meet Knowledge Navigator** – the heart of our ChatGPT plugin. It's like a digital explorer for your website, carefully unearthing your content's essence. This innovative component initiates an in-depth analysis of your site, following every link, and meticulously building an interactive map of your site's architecture. The result? A crystal-clear understanding of your content that enables more accurate and contextually relevant responses.
 
@@ -89,6 +93,7 @@ Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbo
 4. Customize the chatbot appearance and other parameters as needed.
 5. For a floating chatbot add the shortcode to your theme's footer: [chatbot_chatgpt] or [chatbot_chatgpt style=floating]
 6. For an embedded chatbot on any page add the shortcode: [chatbot_chatgpt style=embedded]
+7. Use [chatbot_chatpgt style=floating|embedded assistant=primary|secondary] to display the chatbot as a floating chatbot or embedded chatbot with a primary or secondary assistant.
 
 Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI's ChatGPT API.
 

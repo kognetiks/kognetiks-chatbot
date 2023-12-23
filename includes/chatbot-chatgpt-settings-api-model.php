@@ -21,7 +21,7 @@ function chatbot_chatgpt_api_model_section_callback($args) {
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" taget="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <p>Enter your ChatGPT API key below and select the OpenAI model of your choice.</p>
     <p>As soon as the API for GPT-4 is available for general use, you will be able to select from the latest available models.</p>
-    <h2>Custom GTPs</h2>
+    <h2>Custom GPTs</h2>
     <p><i>If you have developed a Custom GPT Assistant, you will need the id of the assistant.</p>
     <p>Enter your Custom GPT Assistant Id instead of ChatGPT.  Set the 'Use Custom GPT Assistant ID' to 'Yes'.</p>
     <p>Otherwise, you can leave the Custom GPT Assistant ID field blank and set the usage to 'No'.</p>
@@ -38,50 +38,6 @@ function chatbot_chatgpt_api_key_callback($args) {
     <input type="password" id="chatgpt_api_key" name="chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text">
     <?php
 }
-
-// Use Custom GPT Assistant Id field callback - Ver 1.6.7
-function chatbot_chatgpt_use_custom_gpt_assistant_id_callback($args) {
-    $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id', 'No'));
-    ?>
-    <select id="chatbot_chatgpt_use_custom_gpt_assistant_id" name="chatbot_chatgpt_use_custom_gpt_assistant_id">
-        <option value="Yes" <?php selected( $use_assistant_id, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
-        <option value="No" <?php selected( $use_assistant_id, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
-    </select>
-    <?php
-    if ($use_assistant_id == 'No') {
-        update_option('chatbot_chatgpt_assistant_id', '');
-        update_option('chatbot_chatgpt_assistant_id_alternate', '');
-    }
-}
-
-// CustomGPT Assistant Id field callback - Ver 1.6.7
-function chatbot_chatgpt_assistant_id_callback($args) {
-    $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', 'Please provide the Custom GPT Assistant Id.'));
-    $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id', 'No'));
-    if ($use_assistant_id == 'Yes' && ($assistant_id == 'Please provide the Custom GPT Assistant Id.' or empty($assistant_id))) {
-        $assistant_id = 'Please provide the Custom GPT Assistant Id.';
-    }
-    // Set default value if empty
-    // $assistant_id = empty($assistant_id) ? 'Please provide the Custom GPT Assistant Id.': $assistant_id;
-    ?>
-    <input type="text" id="chatbot_chatgpt_assistant_id" name="chatbot_chatgpt_assistant_id" value="<?php echo esc_attr( $assistant_id ); ?>" class="regular-text">
-    <?php
-}
-
-// CustomGPT Assistant Id field callback - Ver 1.6.7
-function chatbot_chatgpt_assistant_id_alternate_callback($args) {
-    $assistant_id_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate', 'Please provide the Alternate Custom GPT Assistant Id.'));
-    $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id', 'No'));
-    if ($use_assistant_id == 'Yes' && ($assistant_id_alternate == 'Please provide the Custom GPT Assistant Id.' or empty($assistant_id_alternate))) {
-        $assistant_id_alternate = 'Please provide the Alternate Custom GPT Assistant Id, if any.';
-    }
-    // Set default value if empty
-    // $assistant_id = empty($assistant_id) ? 'Please provide the Custom GPT Assistant Id.': $assistant_id;
-    ?>
-    <input type="text" id="chatbot_chatgpt_assistant_id_alternate" name="chatbot_chatgpt_assistant_id_alternate" value="<?php echo esc_attr( $assistant_id_alternate ); ?>" class="regular-text">
-    <?php
-}
-
 
 // OpenAI Models
 // https://platform.openai.com/docs/models

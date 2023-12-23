@@ -24,7 +24,7 @@ function chatbot_chatgpt_shortcode($atts) {
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
         'style' => 'floating', // Default value
-        'assistant' => 'primary' // Default value
+        'assistant' => 'original' // Default value
     );
 
     // Combine user attributes with default attributes
@@ -32,23 +32,24 @@ function chatbot_chatgpt_shortcode($atts) {
 
     // Sanitize the 'style' attribute to ensure it contains safe data
     $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
+
+    // Sanitize the 'assistant' attribute to ensure it contains safe data
     $chatbot_chatgpt_assistant_alias = sanitize_text_field($atts['assistant']);
 
-    // Set local stoarge to the style
-    ?>
+    // DIAG - Diagnostics - Ver 1.7.2
+    chatbot_chatgpt_back_trace( "NOTICE", '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    chatbot_chatgpt_back_trace( "NOTICE", '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+
+    // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
+    echo "
     <script>
-        localStorage.setItem('chatbot_chatgpt_display_style', '<?php echo $chatbot_chatgpt_display_style; ?>');
-        localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $chatbot_chatgpt_assistant_alias; ?>');
+        localStorage.setItem('chatbot_chatgpt_display_style', '" . $chatbot_chatgpt_display_style . "');
+        localStorage.setItem('chatbot_chatgpt_assistant_alias', '" . $chatbot_chatgpt_assistant_alias . "');
     </script>
-    <?php
+    ";
 
     // Store the style and the assistant value - Ver 1.7.2
-    set_transient('chatbot_chatgpt_display_style', $chatbot_chatgpt_display_style, 60*60); // Store for 1 hour, adjust as needed
-    set_transient('chatbot_chatgpt_assistant_alias', $chatbot_chatgpt_assistant_alias, 60*60); // Store for 1 hour, adjust as needed
-
-    // DIAG = Diagnostics - Ver 1.7.2
-    chatbot_chatgpt_back_trace( "NOTICE", 'style: ' . $chatbot_chatgpt_display_style);
-    chatbot_chatgpt_back_trace( "NOTICE", 'assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
@@ -71,12 +72,13 @@ function chatbot_chatgpt_shortcode($atts) {
         </div> -->
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
-        <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
+            <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
             <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
             <button id="chatbot-chatgpt-submit">
                 <img src="<?php echo plugins_url('../assets/icons/paper-airplane-icon.png', __FILE__); ?>" alt="Send">
             </button>
-        </div>
+            </div>
+            <!-- UPLOAD FILES FOR CUSTOM GPTs GOES HERE -->
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
         <i class="dashicons dashicons-format-chat"></i>
@@ -95,12 +97,13 @@ function chatbot_chatgpt_shortcode($atts) {
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
             <div id="chatbot-chatgpt-input">
-            <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
+                <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
                 <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
                 <button id="chatbot-chatgpt-submit">
                     <img src="<?php echo plugins_url('../assets/icons/paper-airplane-icon.png', __FILE__); ?>" alt="Send">
                 </button>
             </div>
+            <!-- UPLOAD FILES FOR CUSTOM GPTs GOES HERE -->
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php
             $chatbot_chatgpt_enable_custom_buttons = 'Off'; // 'On' or 'Off'
@@ -161,6 +164,7 @@ function chatbot_chatgpt_shortcode($atts) {
         <?php
         return ob_get_clean();
     }
+
 }
 
 add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');

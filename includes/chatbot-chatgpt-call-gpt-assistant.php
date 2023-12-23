@@ -216,36 +216,10 @@ function getTheMessage($threadId, $api_key) {
     return json_decode($response, true);
 }
 
-// CustomerGPT - Assistants - Ver 1.7.7
-function chatbot_chatgpt_custom_gpt_call_api($api_key, $message) {
-
-    
-    // Get the authorization token and assistant ID
-    // $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
-
-    // Retrieve the Assistant Alias from localStorage- Ver 1.7.2
-    $chatbot_chatgpt_assistant_alias = get_transient('chatbot_chatgpt_assistant_alias');  
-    // DIAG - Diagnostics - Ver 1.7.2
-    chatbot_chatgpt_back_trace( "NOTICE", '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);    
-
-    if ($chatbot_chatgpt_assistant_alias === 'primary') {
-        // Retrieve the Assistant ID
-        $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
-        // DIAG - Diagnostics - Ver 1.7.2
-        chatbot_chatgpt_back_trace( "NOTICE", '$assistantId: ' . $assistantId);
-    } elseif ($chatbot_chatgpt_assistant_alias === 'alternate') {
-        // Fetch the Assistant Id Alternate based on Alias - Ver 1.7.2
-        $assistantId = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
-        // DIAG - Diagnostics - Ver 1.7.2
-        chatbot_chatgpt_back_trace( "NOTICE", '$assistantId: ' . $assistantId);
-    } else {
-        return "Error: Assistant ID Missing.";
-        // DIAG - Diagnostics - Ver 1.7.2
-        chatbot_chatgpt_back_trace( "ERROR", 'Assistant ID is missing.');
-    }
+// CustomerGPT - Assistants - Ver 1.7.2
+function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId) {
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( "NOTICE", 'Using Assistant Alias: ' . $chatbot_chatgpt_assistant_alias);
     chatbot_chatgpt_back_trace( "NOTICE", 'Using Assistant ID: ' . $assistantId);
 
     // Step 1: Create an Assistant

@@ -180,6 +180,7 @@ function chatbot_chatgpt_settings_page_html() {
         <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=bot_settings" class="nav-tab <?php echo $active_tab == 'bot_settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
+            <a href="?page=chatbot-chatgpt&tab=custom_gpts" class="nav-tab <?php echo $active_tab == 'custom_gpts' ? 'nav-tab-active' : ''; ?>">Custom GPTs</a>
             <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatars</a>
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
             <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
@@ -201,6 +202,10 @@ function chatbot_chatgpt_settings_page_html() {
             } elseif ($active_tab == 'api_model') {
                 settings_fields('chatbot_chatgpt_api_model');
                 do_settings_sections('chatbot_chatgpt_api_model');
+
+            } elseif ($active_tab == 'custom_gpts') {
+                settings_fields('chatbot_chatgpt_custom_gpts');
+                do_settings_sections('chatbot_chatgpt_custom_gpts');
 
             } elseif ($active_tab == 'avatar') {
                 settings_fields('chatbot_chatgpt_avatar');

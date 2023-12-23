@@ -34,10 +34,11 @@ jQuery(document).ready(function ($) {
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
     chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
-    chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot+chatgpt_assistant_alias') || 'primary';
+    chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
+
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         // console.log('Chatbot ChatGPT: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
-        // console.log('Chatbot ChatGPT: chatbot+chatgpt_assistant_alias: ' + chatbot_chatgpt_assistant_alias);
+        // console.log('Chatbot ChatGPT: chatbot_chatgpt_assistant_alias: ' + chatbot_chatgpt_assistant_alias);
     // }
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1

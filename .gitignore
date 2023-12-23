@@ -1,3 +1,4 @@
+/uploads/*
 /results/*
 /assets/images/*.png
 .vscode/*

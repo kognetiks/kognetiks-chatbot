@@ -56,6 +56,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-buttons.php'; // Refactoring Settings - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-custom-gpts.php'; // Refactoring Settings - Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-diagnostics.php'; // Refactoring Settings - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
@@ -67,6 +68,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setu
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-skins.php'; // Adpative Skins - Ver 1.6.7
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
 
 add_action('init', 'my_custom_buffer_start');
@@ -230,12 +232,6 @@ function chatbot_chatgpt_send_message() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
     // Retrieve the Use Custom GPT Assistant Id
-    $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id'));
-    // Retrieve the Assistant ID
-    $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
-    // Retrieve the Assistant ID Alternate
-    $assistant_id_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
-    // Retrieve the model from the settings or default to gpt-3.5-turbo
     $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
     // Retrieve the Max tokens - Ver 1.4.2
     $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
@@ -248,20 +244,51 @@ function chatbot_chatgpt_send_message() {
         wp_send_json_error('Invalid API key or message');
     }
 
-    // Check if the Custom GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
-    if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
+    // Check the transient for the Assistant ID - Ver 1.7.2
+    $chatbot_settings = get_chatbot_chatgpt_transients();
+    $display_style = $chatbot_settings['display_style'];
+    $chatbot_chatgpt_assistant_alias = $chatbot_settings['assistant_alias'];
+
+    // Assistants
+    // $chatbot_chatgpt_assistant_alias == 'original'; // Default
+    // $chatbot_chatgpt_assistant_alias == 'primary';
+    // $chatbot_chatgpt_assistant_alias == 'alternate';
+  
+    // Which Assistant ID to use - Ver 1.7.2
+    if ($chatbot_chatgpt_assistant_alias == 'original') {
+        $use_assistant_id = 'No';
+    } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
+        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
+        $use_assistant_id = 'Yes';
+        // Check if the Custom GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
+        if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
+            // Override the $use_assistant_id and set it to 'No'
+            $use_assistant_id = 'No';
+        }
+    } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
+        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
+        $use_assistant_id = 'Yes';
+        // Check if the Custom GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
+        if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
+            // Override the $use_assistant_id and set it to 'No'
+            $use_assistant_id = 'No';
+        }
+    } else {
         // Override the $use_assistant_id and set it to 'No'
         $use_assistant_id = 'No';
-        // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( "NOTICE", '$use_assistant_id override ' . $use_assistant_id);
+        $assistant_id = '';
     }
+
+    // DIAG - Diagnostics
+    chatbot_chatgpt_back_trace( "NOTICE", '$use_assistant_id override ' . $use_assistant_id);
+    chatbot_chatgpt_back_trace( "NOTICE", '$assistant_id ' . $assistant_id);
 
     // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( "NOTICE", 'Using Custom GPT Assistant Id: ' . $use_assistant_id);
         // Send message to Custom GPT API - Ver 1.6.7
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message);
+        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id);
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
