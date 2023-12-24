@@ -167,7 +167,7 @@ The plugin now support (as of November 2023) the latest OpenAI model **gpt-4-tur
 == Changelog ==
 
 = 1.7.2 =
-* Improved Custom GPI Assistance
+* Improved Custom GPI Assistants with update thread handling for improved performance.
 * Use [chatbot_chatgpt style=floating assistant=primary] to display the chatbot as floating using your primary assistant.
 * Use [chatbot_chatgpt style=embedded assistant=primary] to display the chatbot as embedded using your primary assistant.
 * Use [chatbot_chatgpt style=floating assistant=alternate] to display the chatbot as floating using your alternate assistant.

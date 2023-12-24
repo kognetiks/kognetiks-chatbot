@@ -32,13 +32,20 @@ function createAnAssistant($api_key) {
 }
 
 // Step 3: Add a Message to a Thread
-function addAMessage($threadId, $prompt, $api_key) {
+function addAMessage($threadId, $prompt, $context, $api_key) {
+
+    // If $context is empty, set it to the default
+    if (empty($context)) {
+        $context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.";
+    }
+
     $url = "https://api.openai.com/v1/threads/".$threadId."/messages";
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
         "Authorization: Bearer " . $api_key
     );
+
     $data = array(
         "role" => "user",
         "content" => $prompt
@@ -220,27 +227,78 @@ function getTheMessage($threadId, $api_key) {
 }
 
 // CustomerGPT - Assistants - Ver 1.7.2
-function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId) {
+function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $threadId, $user_id, $page_id) {
 
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Assistant ID: ' . $assistantId);
 
+    // Globals added for Ver 1.7.2
+    global $chatbot_chatgpt_diagnostics;
+    global $learningMessages;
+    global $errorResponses;
+    global $stopWords;
+
+    // If the threadId is not set, create a new thread
+    if (empty($threadId)) {
+        // Step 1: Create an Assistant
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 1: Create an Assistant');
+        $assistants_response = createAnAssistant($api_key);
+        // DIAG - Print the response
+        // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+
+        // Step 2: Get The Thread ID
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
+        $threadId = $assistants_response["id"];
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$threadId ' . $threadId);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$assistantId ' . $assistantId);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+        set_chatbot_chatgpt_threads($threadId, $assistantId, $user_id, $page_id);
+    }
+
     // Step 1: Create an Assistant
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 1: Create an Assistant');
-    $assistants_response = createAnAssistant($api_key);
+    // $assistants_response = createAnAssistant($api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
 
     // Step 2: Get The Thread ID
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
-    $threadId = $assistants_response["id"];
+    // $threadId = $assistants_response["id"];
     // DIAG - Print the threadId
     // chatbot_chatgpt_back_trace( 'NOTICE', '$threadId ' . $threadId);
+    // set_chatbot_chatgpt_threads($threadId, $assistantId);
+
+
+    // Conversation Context - Ver 1.7.2.1
+    // $context = "";
+    // $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
+ 
+    // // Context History - Ver 1.6.1 - Added here for Ver 1.7.2.1
+    //  $chatgpt_last_response = concatenateHistory('context_history');
+    // // DIAG Diagnostics - Ver 1.6.1
+    // // chatbot_chatgpt_back_trace( 'NOTICE', '$chatgpt_last_response ' . $chatgpt_last_response);
+    
+    // // IDEA Strip any href links and text from the $chatgpt_last_response
+    // $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
+
+    // // IDEA Strip any $learningMessages from the $chatgpt_last_response
+    // $chatgpt_last_response = str_replace($learningMessages, '', $chatgpt_last_response);
+
+    // // IDEA Strip any $errorResponses from the $chatgpt_last_response
+    // $chatgpt_last_response = str_replace($errorResponses, '', $chatgpt_last_response);
+    
+    // // Knowledge Navigator keyword append for context
+    // $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
+
+    // // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
+    // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     // Step 3: Add a Message to a Thread
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3: Add a Message to a Thread');
     $prompt = $message;
-    $assistants_response = addAMessage($threadId, $prompt, $api_key);
+    $assistants_response = addAMessage($threadId, $prompt, $context, $api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
 
