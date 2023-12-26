@@ -42,7 +42,8 @@ function kn_acquire_word_pairs( $content ) {
 
     // Extract text content from specific tags
     $textContent = '';
-    foreach (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'a'] as $tagName) {
+    // Added additional HTML tags for removal - Ver 1.7.2.1
+    foreach (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'a', 'div', 'span', 'ul', 'ol', 'table', 'tr', 'td', 'th', 'img', 'figcaption', 'figure', 'blockquote', 'pre', 'code', 'nav', 'header', 'footer', 'article', 'section', 'aside', 'main', 'body'] as $tagName) {
         $elements = $dom->getElementsByTagName($tagName);
         foreach ($elements as $element) {
             $textContent .= $element->textContent . ' ';
@@ -66,11 +67,17 @@ function kn_acquire_word_pairs( $content ) {
     // Replace new line characters with a space
     $textContent = str_replace("\n", ' ', $textContent);
         
-    // Replace all non-word characters with a space
-    $contentWithoutTags = preg_replace('/\W+/', ' ', $textContent);
+    // Ensure $textContent is in UTF-8
+    $textContentUtf8 = mb_convert_encoding($textContent, 'UTF-8', mb_detect_encoding($textContent));
 
-    // Get words and convert to lower case
-    $words = str_word_count(strtolower($contentWithoutTags), 1);
+    // Replace all non-word characters with a space, preserving Unicode characters
+    $contentWithoutTags = preg_replace('/[^\p{L}\p{N}_]+/u', ' ', $textContentUtf8);
+
+    // Convert to lower case
+    $textContentLower = mb_strtolower($contentWithoutTags, 'UTF-8');
+
+    // Split the text into words based on spaces
+    $words = explode(' ', $textContentLower);
 
     // Filter out stop words
     $words = array_diff($words, $stopWords);
@@ -119,7 +126,7 @@ function kn_acquire_word_pairs( $content ) {
     $totalWordPairCount = $totalWordPairCount + array_sum($wordPairs);
 
     // Before computing the TF-IDF for the $wordPairs array, trim the $wordPairs array to the top 10 word pairs
-    $wordPairs = array_slice($wordPairs, 0, 10);
+    $wordPairs = array_slice($wordPairs, 0, 100);
 
     // Compute the TF-IDF for the $wordPairs array
     foreach ($wordPairs as $wordPair => $count) {

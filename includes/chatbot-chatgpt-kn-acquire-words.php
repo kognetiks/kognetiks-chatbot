@@ -46,8 +46,8 @@ foreach ($dom->getElementsByTagName('style') as $style) {
 // Updated sequence of processing to remove extraneous contents bofore TF-IDF - Ver 1.6.5
 $textContent = '';
 
-// Extract text content from specific tags
-foreach (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'a'] as $tagName) {
+// Added additional HTML tags for removal - Ver 1.7.2.1
+foreach (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'a', 'div', 'span', 'ul', 'ol', 'table', 'tr', 'td', 'th', 'img', 'figcaption', 'figure', 'blockquote', 'pre', 'code', 'nav', 'header', 'footer', 'article', 'section', 'aside', 'main', 'body'] as $tagName) {
     $elements = $dom->getElementsByTagName($tagName);
     foreach ($elements as $element) {
         $textContent .= $element->textContent . ' ';
@@ -71,11 +71,17 @@ $textContent = preg_replace('!https?://\S+!', ' ', $textContent);
 // Replace new line characters with a space
 $textContent = str_replace("\n", ' ', $textContent);
     
-// Replace all non-word characters with a space
-$contentWithoutTags = preg_replace('/\W+/', ' ', $textContent);
+// Ensure $textContent is in UTF-8
+$textContentUtf8 = mb_convert_encoding($textContent, 'UTF-8', mb_detect_encoding($textContent));
 
-// Get words and convert to lower case
-$words = str_word_count(strtolower($contentWithoutTags), 1);
+// Replace all non-word characters with a space, preserving Unicode characters
+$contentWithoutTags = preg_replace('/[^\p{L}\p{N}_]+/u', ' ', $textContentUtf8);
+
+// Convert to lower case
+$textContentLower = mb_strtolower($contentWithoutTags, 'UTF-8');
+
+// Split the text into words based on spaces
+$words = explode(' ', $textContentLower);
 
 // Filter out stop words
 $words = array_diff($words, $stopWords);
@@ -116,7 +122,7 @@ arsort($topWords);
 $totalWordCount = $totalWordCount + array_sum($words);
 
 // Before computer the TF-IDF for the $words array, trim the $words array to the top 10 words
-$words = array_slice($words, 0, 10);
+$words = array_slice($words, 0, 100);
 
 // Computer the TF-IDF for the $words array
 foreach ($words as $word => $count) {

@@ -172,6 +172,8 @@ The plugin now support (as of November 2023) the latest OpenAI model **gpt-4-tur
 * Use [chatbot_chatgpt style=embedded assistant=primary] to display the chatbot as embedded using your primary assistant.
 * Use [chatbot_chatgpt style=floating assistant=alternate] to display the chatbot as floating using your alternate assistant.
 * Use [chatbot_chatgpt style=embedded assistant=alternate] to display the chatbot as embedded using your alternate assistant.
+* ==Expanded the the list of HTML tags removed durning the Knowledge Navigator scan.==
+* ==Enhanced handling of special characters such as 'á' or 'é' found in non-English languages.==
 
 = 1.7.1 =
 * Added option to have none, random or custom learnings messages.

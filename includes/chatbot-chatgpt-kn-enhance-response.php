@@ -26,6 +26,8 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     // Retrieve links to the highest scoring documents - Ver 1.6.3
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
     $words = explode(" ", $message);
+    // DIAG Diagnostic - Ver 1.7.2.1
+    chatbot_chatgpt_back_trace( 'NOTICE', '$words: ' . $words);
     $match_found = false;
     $highest_score = 0;
     $highest_score_word = "";
