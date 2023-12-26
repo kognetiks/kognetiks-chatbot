@@ -54,7 +54,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
 
     // IDEA Strip any $learningMessages from the $chatgpt_last_response
-    $chatgpt_last_response = str_replace($learningMessages, '', $chatgpt_last_response);
+    if (get_locale() !== "en_US") {
+        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
+    } else {
+        $localized_learningMessages = $learningMessages;
+    }
+    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
 
     // IDEA Strip any $errorResponses from the $chatgpt_last_response
     $chatgpt_last_response = str_replace($errorResponses, '', $chatgpt_last_response);

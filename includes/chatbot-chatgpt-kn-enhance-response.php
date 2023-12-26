@@ -114,11 +114,21 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         if ('None' === $chatbot_chatgpt_suppress_learnings) {
             $enhanced_response .= "\n\n" . "Also look" . " ";
         } elseif ('Random' === $chatbot_chatgpt_suppress_learnings) {
-            $enhanced_response .= "\n\n" . $learningMessages[array_rand($learningMessages)];
+            if (get_locale() !== "en_US") {
+                $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
+            } else {
+                $localized_learningMessages = $learningMessages;
+            }
+            $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)];
         } elseif ('Custom' === $chatbot_chatgpt_suppress_learnings) {
             $enhanced_response .= "\n\n" . $chatbot_chatgpt_custom_learnings_message . " ";
         } else {
-            $enhanced_response .= "\n\n" . $learningMessages[array_rand($learningMessages)];
+            if (get_locale() !== "en_US") {
+                $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
+            } else {
+                $localized_learningMessages = $learningMessages;
+            }
+            $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)];
         }
         $enhanced_response .= "[URL: " . $highest_score_url . "]";
     } else {

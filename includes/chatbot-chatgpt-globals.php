@@ -42,6 +42,7 @@ global $stopWords;
         "z"
     ];
 
+
 // Declare the $learningMessages array as global
 global $learningMessages;
 $learningMessages = [

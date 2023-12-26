@@ -32,6 +32,18 @@ global $totalWordCount;
 // DIAG - Diagnostic - Ver 1.6.3
 // chatbot_chatgpt_back_trace( 'NOTICE', "FUNCTION - kn_acquire_just_the_words");
 
+// Before beginning, translate the $stopWords array into the language of the website
+if (get_locale() !== "en_US") {
+    // DIAG - Diagnostic - Ver 1.7.2.1
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'get_locale()' . get_locale());
+    // $localized_stopWords = localize_global_stopwords(get_locale(), $stopWords);
+    $localized_stopWords = get_localized_stopwords(get_locale(), $stopWords);
+    // DIAG - Diagnostic - Ver 1.7.2.1
+    // chatbot_chatgpt_back_trace( 'NOTICE',  '$localized_stopWords ' . $localized_stopWords);
+} else {
+    $localized_stopWords = $stopWords;
+}
+
 $dom = new DOMDocument();
 @$dom->loadHTML($content);
 
@@ -84,7 +96,7 @@ $textContentLower = mb_strtolower($contentWithoutTags, 'UTF-8');
 $words = explode(' ', $textContentLower);
 
 // Filter out stop words
-$words = array_diff($words, $stopWords);
+$words = array_diff($words, $localized_stopWords);
 
 // Remove s at end of any words - Ver 1.6.5 - 2023 10 11
 $words = array_map(function($word) {

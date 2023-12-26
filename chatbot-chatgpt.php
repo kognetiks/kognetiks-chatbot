@@ -33,6 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $wpdb;  // Declare the global $wpdb object
 
 // Include necessary files
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localization.php'; // Refactoring Settings - Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
 
 // Include necessary files - ChatGPT API and Custom GPT Assistant API - Ver 1.6.9

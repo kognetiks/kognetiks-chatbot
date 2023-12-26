@@ -29,7 +29,8 @@ function chatbot_chatgpt_diagnostics_section_callback($args) {
 
     echo '<p>PHP Version: <b>' . $php_version . '</b><br>';
     echo 'WordPress Version: <b>' . $wp_version . '</b><br>';
-    echo 'Chatbot ChatGPT Version: <b>' . get_plugin_version() . '</b></p>';
+    echo 'Chatbot ChatGPT Version: <b>' . get_plugin_version() . '</b><br>';
+    echo 'WordPress Language Code: <b>' . get_locale() . '</b></p>';
     echo '<h2>API Status and Other Settings</h2>';
 }
 
