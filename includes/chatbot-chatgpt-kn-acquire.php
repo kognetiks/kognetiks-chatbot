@@ -94,14 +94,25 @@ function chatbot_chatgpt_kn_acquire() {
         // foreach($result as $key => $value) {
         //     chatbot_chatgpt_back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        
-        $output_str = '';
-        $output_str .= json_encode($result['post_content']) . "\n";
 
-        // Call kn_acquire_just_the_words with $output_str and return $words
-        $words = kn_acquire_just_the_words($output_str);
+        // Directly use the post content
+        $postContent = $result['post_content'];
 
-        // Call kn_acquire_word_pairs with $output_str and return $word_pairs - Ver 1.6.5
-        $word_pairs = kn_acquire_word_pairs($output_str);
+        // Check if the post content is not empty
+        if (!empty($postContent)) {
+            // Ensure the post content is treated as UTF-8
+            $postContentUtf8 = mb_convert_encoding($postContent, 'UTF-8', mb_detect_encoding($postContent));
+
+            // Now call kn_acquire_just_the_words with the UTF-8 encoded post content and return $words
+            $words = kn_acquire_just_the_words($postContentUtf8);
+
+            // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs
+            $word_pairs = kn_acquire_word_pairs($postContentUtf8);
+        } else {
+            // Handle the case where post content is empty
+            // For example, log an error, skip this post, etc.
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
+        }
         
         // Construct the URL for the post
         $url = get_permalink($result['ID']);
@@ -154,17 +165,28 @@ function chatbot_chatgpt_kn_acquire() {
     // Loop through query results
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
-        foreach($result as $key => $value) {
-            // chatbot_chatgpt_back_trace( 'NOTICE', "Key: $key, Value: $value");
-        }
-        $output_str = '';
-        $output_str .= json_encode($result['post_content']) . "\n";
+        // foreach($result as $key => $value) {
+        //     // chatbot_chatgpt_back_trace( 'NOTICE', "Key: $key, Value: $value");
+        // }
 
-        // Call kn_acquire_just_the_words with $output_str and return $words
-        $words = kn_acquire_just_the_words($output_str);
+        // Directly use the post content
+        $postContent = $result['post_content'];
 
-        // Call kn_acquire_word_pairs with $output_str and return $word_pairs - Ver 1.6.5
-        $word_pairs = kn_acquire_word_pairs($output_str);
+        // Check if the post content is not empty
+        if (!empty($postContent)) {
+            // Ensure the post content is treated as UTF-8
+            $postContentUtf8 = mb_convert_encoding($postContent, 'UTF-8', mb_detect_encoding($postContent));
+
+            // Now call kn_acquire_just_the_words with the UTF-8 encoded post content and return $words
+            $words = kn_acquire_just_the_words($postContentUtf8);
+
+            // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs
+            $word_pairs = kn_acquire_word_pairs($postContentUtf8);
+        } else {
+            // Handle the case where post content is empty
+            // For example, log an error, skip this post, etc.
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
+        }    
 
         // Construct the URL for the page
         $url = get_permalink($result['ID']);
@@ -217,18 +239,29 @@ function chatbot_chatgpt_kn_acquire() {
     // Loop through query results
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
-        foreach($result as $key => $value) {
-            // chatbot_chatgpt_back_trace( 'NOTICE', "Key: $key, Value: $value");
-        }        
-        $output_str = '';
-        $output_str .= json_encode($result['comment_content']) . "\n";
+        // foreach($result as $key => $value) {
+        //     // chatbot_chatgpt_back_trace( 'NOTICE', "Key: $key, Value: $value");
+        // }        
 
-        // Call kn_acquire_just_the_words with $output_str and return $words
-        $words = kn_acquire_just_the_words($output_str);
+        // Directly use the post content
+        $postContent = $result['post_content'];
 
-        // Call kn_acquire_word_pairs with $output_str and return $word_pairs - Ver 1.6.5
-        $word_pairs = kn_acquire_word_pairs($output_str);
+        // Check if the post content is not empty
+        if (!empty($postContent)) {
+            // Ensure the post content is treated as UTF-8
+            $postContentUtf8 = mb_convert_encoding($postContent, 'UTF-8', mb_detect_encoding($postContent));
 
+            // Now call kn_acquire_just_the_words with the UTF-8 encoded post content and return $words
+            $words = kn_acquire_just_the_words($postContentUtf8);
+
+            // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs
+            $word_pairs = kn_acquire_word_pairs($postContentUtf8);
+        } else {
+            // Handle the case where post content is empty
+            // For example, log an error, skip this post, etc.
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
+        }
+        
         // Construct the URL for the comments
         $url = get_permalink($result['ID']);
         // Construct the Title for the post

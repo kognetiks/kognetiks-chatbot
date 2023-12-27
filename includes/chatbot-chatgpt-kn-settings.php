@@ -56,6 +56,8 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
             $run_scanner = 'No';
             update_option('chatbot_chatgpt_knowledge_navigator', 'No');
             update_option('chatbot_chatgpt_scan_interval', 'No Schedule');
+        // } else if ($run_scanner === 'Now') {
+        //     chatbot_chatgpt_kn_acquire();
         } else {
             if (!wp_next_scheduled('knowledge_navigator_scan_hook')) {
 

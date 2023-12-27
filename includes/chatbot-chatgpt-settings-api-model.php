@@ -66,7 +66,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
 function chatgpt_max_tokens_setting_callback($args) {
     // Get the saved chatgpt_max_tokens_setting or default to 150
     $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', '150'));
-    // Allow for a range of tokens between 100 and 1000 in 50 step increments - Ver 1.6.1
+    // Allow for a range of tokens between 100 and 4096 in 50 step increments - Ver 1.6.1
     ?>
     <select id="chatgpt_max_tokens_setting" name="chatgpt_max_tokens_setting">
         <?php

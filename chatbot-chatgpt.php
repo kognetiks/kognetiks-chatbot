@@ -59,6 +59,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-butt
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-custom-gpts.php'; // Refactoring Settings - Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-diagnostics.php'; // Refactoring Settings - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localization.php'; // Refactoring Settings - Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-notices.php'; // Notices - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0
@@ -68,6 +69,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setu
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-skins.php'; // Adpative Skins - Ver 1.6.7
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
 
@@ -259,6 +261,9 @@ function chatbot_chatgpt_send_message() {
         wp_send_json_error('Invalid API key or message');
     }
 
+    $threadId = '';
+    $assistant_id = '';
+    
     // Check the transient for the Assistant ID - Ver 1.7.2
     $user_id = intval($_POST['user_id']);
     $page_id = intval($_POST['page_id']); 
@@ -266,15 +271,17 @@ function chatbot_chatgpt_send_message() {
     // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
     // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
     $chatbot_settings = get_chatbot_chatgpt_transients($user_id, $page_id);
-    $display_style = $chatbot_settings['display_style'];
-    $chatbot_chatgpt_assistant_alias = $chatbot_settings['assistant_alias'];
+    $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
+    $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
+    $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
+    $assistant_id = isset($chatbot_settings['assistantID']) ? $chatbot_settings['assistantID'] : '';
+    $threadID = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
     // $chatbot_chatgpt_assistant_alias == 'primary';
     // $chatbot_chatgpt_assistant_alias == 'alternate';
   
-    $assistant_id = '';
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
         $use_assistant_id = 'No';
@@ -303,8 +310,13 @@ function chatbot_chatgpt_send_message() {
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Custom GPT Assistant Id: ' . $use_assistant_id);
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
         // Send message to Custom GPT API - Ver 1.6.7
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id);
+        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $threadId, $user_id, $page_id);
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
