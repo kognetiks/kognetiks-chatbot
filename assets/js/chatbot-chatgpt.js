@@ -2,7 +2,7 @@ jQuery(document).ready(function ($) {
 
     // DIAG - Diagnostics = Ver 1.4.2
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-    //     console.log('FUNCTION: chatbot-chatgpt.js');
+    //     console.log('Chatbot ChatGPT: NOTICE: Entering chatbot-chatgpt.js');
     // }
 
     var chatGptChatBot = $('#chatbot-chatgpt').hide();
@@ -34,8 +34,11 @@ jQuery(document).ready(function ($) {
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
     chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
+    chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
+
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-    //     console.log('Chatbot ChatGPT: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+        // console.log('Chatbot ChatGPT: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+        // console.log('Chatbot ChatGPT: NOTICE: chatbot_chatgpt_assistant_alias: ' + chatbot_chatgpt_assistant_alias);
     // }
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
@@ -47,7 +50,7 @@ jQuery(document).ready(function ($) {
     //     var footerTop = site-footer.getBoundingClientRect().top;
 
     //     var visible-distance = footerTop - headerBottom;
-    //     console.log("Distance: " + distance + "px");
+    //     console.log('Chatbot ChatGPT: NOTICE: Distance:  + distance + 'px');
     // }
     
     if (chatbot_chatgpt_display_style === 'embedded') {
@@ -163,7 +166,7 @@ jQuery(document).ready(function ($) {
         if (isFirstTime) {
             // DIAG - Logging for Diagnostics
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('FUNCTION: initializeChatbot at isFirstTime');
+            //     console.log('Chatbot ChatGPT: NOTICE: initializeChatbot at isFirstTime');
             // }
             initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
 
@@ -187,7 +190,7 @@ jQuery(document).ready(function ($) {
         } else {
             // DIAG - Logging for Diagnostics - Ver 1.4.2
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('FUNCTION: initializeChatbot at else');
+            //     console.log('Chatbot ChatGPT: NOTICE: initializeChatbot at else');
             // }
             initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
@@ -293,12 +296,17 @@ jQuery(document).ready(function ($) {
         messageInput.val('');
         appendMessage(message, 'user');
 
+        var user_id = php_vars.user_id;
+        var page_id = php_vars.page_id;
+
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
             data: {
                 action: 'chatbot_chatgpt_send_message',
                 message: message,
+                user_id: user_id, // pass the user ID here
+                page_id: page_id, // pass the page ID here
             },
             beforeSend: function () {
                 showTypingIndicator();
@@ -306,7 +314,7 @@ jQuery(document).ready(function ($) {
             },
             success: function (response) {
                 removeTypingIndicator();
-                // console.log('Chatbot ChatGPT: success: ' + JSON.stringify(response));
+                // console.log('Chatbot ChatGPT: SUCCESS: ' + JSON.stringify(response));
                 if (response.success) {
                     botResponse = response.data;
                     // Revision to how disclaimers are handled - Ver 1.5.0
@@ -329,14 +337,14 @@ jQuery(document).ready(function ($) {
                     // IDEA Check for a URL
                     if (botResponse.includes('[URL: ')) {
                         // DIAG - Diagnostics - Ver 1.6.3
-                        // console.log("URL found in bot response");
+                        // console.log('Chatbot ChatGPT: ERROR: URL found in bot response");
                         link = '';
                         urlRegex = /\[URL: (.*?)\]/g;
                         match = botResponse.match(urlRegex);
                         if (match && match.length > 0) {
                             link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
                             // DAIG - Diagnostics - Ver 1.6.3
-                            // console.log(link);
+                            // console.log('Chatbot ChatGPT: NOTICE: link: ' + link);
                         }
 
                         linkElement = document.createElement('a');
@@ -365,9 +373,9 @@ jQuery(document).ready(function ($) {
             },
             error: function () {
                 removeTypingIndicator();
-                // Console log the error - Ver 1.6.7
-                // console.log('Chatbot ChatGPT: error: ' + response);
-                // console.log('Error: Unable to send message');
+                // DIAG - Log the error - Ver 1.6.7
+                // console.log('Chatbot ChatGPT: ERROR: response: ' + response);
+                // console.log('Chatbot ChatGPT: ERROR: Unable to send message');
                 appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
             },
             complete: function () {
@@ -438,7 +446,7 @@ jQuery(document).ready(function ($) {
         // DIAG - Diagnostics - Ver 1.5.0
         // nuclearOption = 'Off';
         // if (nuclearOption === 'On') {
-        //     console.log('***** NUCLEAR OPTION IS ON ***** ');
+        //     console.log('Chatbot ChatGPT: NOTICE: ***** NUCLEAR OPTION IS ON ***** ');
         //     sessionStorage.removeItem('chatgpt_conversation');
         //     // Removed in Ver 1.6.1
         //     sessionStorage.removeItem('chatgpt_last_response');
@@ -446,7 +454,7 @@ jQuery(document).ready(function ($) {
 
         // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-        //     console.log('FUNCTION: loadChatbotStatus - BEFORE DECISION');
+        //     console.log('Chatbot ChatGPT: NOTICE: loadChatbotStatus - BEFORE DECISION');
         // }
 
         // Decide what to do for a new visitor - Ver 1.5.0
@@ -465,7 +473,7 @@ jQuery(document).ready(function ($) {
 
         // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-        //     console.log('FUNCTION: loadChatbotStatus - AFTER DECISION');
+        //     console.log('Chatbot ChatGPT: NOTICE: loadChatbotStatus - AFTER DECISION');
         // }
         
         // If the chatbot status is not set in local storage, use chatgptStartStatus - Ver 1.5.1
@@ -487,7 +495,7 @@ jQuery(document).ready(function ($) {
         setTimeout(() => {
             // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log("FUNCTION: Scrolling to bottom");
+            //     console.log('Chatbot ChatGPT: NOTICE: scrollToBottom");
             // }
             conversation.scrollTop(conversation[0].scrollHeight);
         }, 100);  // delay of 100 milliseconds  
@@ -501,13 +509,13 @@ jQuery(document).ready(function ($) {
   
         // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-        //     console.log('FUNCTION: loadConversation');
+        //     console.log('Chatbot ChatGPT: NOTICE: loadConversation');
         // }
 
         if (storedConversation) {
             // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('FUNCTION: loadConversation - IN THE IF STATEMENT');
+            //     console.log('Chatbot ChatGPT: NOTICE: loadConversation - IN THE IF STATEMENT');
             // }
 
             // Check if current conversation is different from stored conversation
@@ -520,7 +528,7 @@ jQuery(document).ready(function ($) {
         } else {
             // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('FUNCTION: loadConversation - IN THE ELSE STATEMENT');
+            //     console.log('Chatbot ChatGPT: NOTICE: loadConversation - IN THE ELSE STATEMENT');
             // }
             initializeChatbot();
         }

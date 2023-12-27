@@ -26,12 +26,15 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     // Retrieve links to the highest scoring documents - Ver 1.6.3
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
     $words = explode(" ", $message);
+    // DIAG Diagnostic - Ver 1.7.2.1
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$words: ' . print_r($words, true));
     $match_found = false;
     $highest_score = 0;
     $highest_score_word = "";
     $highest_score_url = "";
 
     // Strip out $stopWords
+    // FIXME - DO I NEED TO CHECK FOR LOCALIZATION HERE?
     $words = array_diff($words, $stopWords);
  
     // Loop through each word in the message
@@ -93,9 +96,9 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     }
 
     // DIAG Diagnostic - Ver 1.6.5
-    // chatbot_chatgpt_back_trace( "NOTICE", '$highest_score: ' . $highest_score);
-    // chatbot_chatgpt_back_trace( "NOTICE", '$highest_score_word: ' . $highest_score_word);
-    // chatbot_chatgpt_back_trace( "NOTICE", 'Chatbot ChatGPT: $highest_score_url: ' . $highest_score_url);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$highest_score: ' . $highest_score);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$highest_score_word: ' . $highest_score_word);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Chatbot ChatGPT: $highest_score_url: ' . $highest_score_url);
 
     // IDEA Append message and link if found to ['choices'][0]['message']['urls']
     if ($highest_score > 0) {
@@ -109,14 +112,21 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // Support for None, Random, or Custom Learnings Messages - Ver 1.7.1
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
         $chatbot_chatgpt_custom_learnings_message = esc_attr(get_option('chatbot_chatgpt_custom_learnings_message', 'More information may be found here ...'));
-        if ('None' === $chatbot_chatgpt_suppress_learnings) {
+
+        if (get_locale() !== "en_US") {
+            $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
+        } else {
+            $localized_learningMessages = $learningMessages;
+        }
+
+        if ('None' == $chatbot_chatgpt_suppress_learnings) {
             $enhanced_response .= "\n\n" . "Also look" . " ";
-        } elseif ('Random' === $chatbot_chatgpt_suppress_learnings) {
-            $enhanced_response .= "\n\n" . $learningMessages[array_rand($learningMessages)];
-        } elseif ('Custom' === $chatbot_chatgpt_suppress_learnings) {
+        } elseif ('Random' == $chatbot_chatgpt_suppress_learnings) {
+            $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)];
+        } elseif ('Custom' == $chatbot_chatgpt_suppress_learnings) {
             $enhanced_response .= "\n\n" . $chatbot_chatgpt_custom_learnings_message . " ";
         } else {
-            $enhanced_response .= "\n\n" . $learningMessages[array_rand($learningMessages)];
+            $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)];
         }
         $enhanced_response .= "[URL: " . $highest_score_url . "]";
     } else {
@@ -138,11 +148,11 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $enhanced_response = preg_replace('/<b>(.*?)<\/b>/', '$1', $enhanced_response);
 
     // DIAG - Diagnostic - Ver 1.6.3
-    // chatbot_chatgpt_back_trace( "NOTICE", '$match_found: ' . $match_found);
-    // chatbot_chatgpt_back_trace( "NOTICE", '$highest_score: ' . $highest_score);
-    // chatbot_chatgpt_back_trace( "NOTICE", '$highest_score_word: ' . $highest_score_word);
-    // chatbot_chatgpt_back_trace( "NOTICE", '$highest_score_url: ' . $highest_score_url);
-    // chatbot_chatgpt_back_trace( "NOTICE", '$enhanced_response: ' . $enhanced_response);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$match_found: ' . $match_found);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$highest_score: ' . $highest_score);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$highest_score_word: ' . $highest_score_word);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$highest_score_url: ' . $highest_score_url);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$enhanced_response: ' . $enhanced_response);
 
 	// Interaction Tracking - Ver 1.6.3
 	update_interaction_tracking();

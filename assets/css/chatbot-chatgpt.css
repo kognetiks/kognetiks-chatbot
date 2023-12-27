@@ -88,13 +88,17 @@
 /* Support for an embedded version of the chatbot - Ver 1.7.1 */
 .embedded-style {
     height: 50vh !important; /* Adjust as needed */
-    width: 90vw !important; /* Adjust as needed */
+    /* width: 90vw !important; Adjust as needed */
     overflow: hidden;
     position: relative !important; /* Keeps bot in the same position */
     /* bottom: 10%; */
     margin: 10px auto; /* Centers horizontally and gives margin at top and bottom */
     padding: 10px; /* Adds padding inside the chatbot */
-    box-shadow: none; /* Removes any floating shadows */
+    /* box-shadow: none; */ /* Removes any floating shadows */
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     left: 0;
     right: 0;
     /* Other styling as needed */

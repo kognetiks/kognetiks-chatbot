@@ -31,7 +31,7 @@ function chatbot_chatgpt_kn_analysis_output_callback($args) {
     // Get the saved chatbot_chatgpt_kn_analysis_choice value or default to "CSV"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_kn_analysis_output', 'CSV'));
     // DIAG - Log the output choice
-    // chatbot_chatgpt_back_trace( "NOTICE", '$output_choice' . $output_choice);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$output_choice' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_kn_analysis_output" name="chatbot_chatgpt_kn_analysis_output">
         <option value="<?php echo esc_attr( 'CSV' ); ?>" <?php selected( $output_choice, 'CSV' ); ?>><?php echo esc_html( 'CSV' ); ?></option>
@@ -58,7 +58,7 @@ function chatbot_chatgpt_kn_analysis_download_csv() {
 
     // Exit early if reading fails
     if ($csv_data === false) {
-        wp_die('Error reading file.');
+        wp_die('Error reading file');
     }
 
     // Deliver the file for download

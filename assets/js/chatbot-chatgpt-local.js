@@ -6,15 +6,16 @@ jQuery(document).ready(function ($) {
         // FIXME - WORKING - Ver 1.6.6
         // let chatbotSettings = " . json_encode($chatbot_settings) . ";
     
-        // console.log('ENTERING chatbot_chatgpt_localize');
+        // console.log('Chatbot ChatGPT: NOTICE: Entering chatbot_chatgpt_localize');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         var chatgptName = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_bot_name) ? chatbotSettings.chatgpt_bot_name : 'Chatbot ChatGPT';
         var chatgpt_chatbot_bot_prompt = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_chatbot_bot_prompt) ? chatbotSettings.chatgpt_chatbot_bot_prompt : 'Enter your question ...';
         var chatgptInitialGreeting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.initial_greeting) ? chatbotSettings.initial_greeting : 'Hello! How can I help you today?';
         var chatgptSubsequentGreeting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_subsequent_greeting) ? chatbotSettings.chatgpt_subsequent_greeting : 'Hello again! How can I help you?';
-        var chatbot_chatgpt_display_style = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_display_style) ? chatbotSettings.chatbot_chatgpt_display_style : 'Chat';
-        var chatgptStartStatus = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_display_style) ? chatbotSettings.chatbot_chatgpt_display_style : 'floating';
+        var chatbot_chatgpt_display_style = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_display_style) ? chatbotSettings.chatbot_chatgpt_display_style : 'floating';
+        var chatbot_chatgpt_assistant_alias = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_assistant_alias) ? chatbotSettings.chatbot_chatgpt_assistant_alias : 'primary';
+        var chatgptStartStatus = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbotStartStatus) ? chatbotSettings.chatbotStartStatus : 'closed';
         var chatgptStartStatusNewVisitor = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgptStartStatusNewVisitor) ? chatbotSettings.chatgptStartStatusNewVisitor : 'closed';
         var chatgptDisclaimerSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_disclaimer_setting) ? chatbotSettings.chatgpt_disclaimer_setting : 'Yes';
         var chatgptMaxTokensSetting = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_max_tokens_setting) ? chatbotSettings.chatgpt_max_tokens_setting : '150';
@@ -39,11 +40,11 @@ jQuery(document).ready(function ($) {
         Object.keys(chatbotSettings).forEach((key) => {
             if(!localStorage.getItem(key)) {
                 // DIAG - Log the key and value
-                // console.log('Setting ' + key + ' in localStorage');
+                // console.log('Chatbot ChatGPT: NOTICE: Setting ' + key + ' in localStorage');
                 localStorage.setItem(key, chatbotSettings[key]);
             } else {
                 // DIAG - Log the key and value
-                // console.log(key + ' is already set in localStorage');
+                // console.log('Chatbot ChatGPT: NOTICE: ' key + ' is already set in localStorage');
             }
         });
 
@@ -53,6 +54,7 @@ jQuery(document).ready(function ($) {
         var chatgptInitialGreetingInput = document.getElementById('chatgpt_initial_greeting');
         var chatgptSubsequentGreetingInput = document.getElementById('chatgpt_subsequent_greeting');
         var chatbot_chatgpt_display_style = document.getElementById('chatbot_chatgpt_display_style');
+        var chatbot_chatgpt_assistant_alias = document.getElementById('chatbot_chatgpt_assistant_alias');
         var chatgptStartStatusInput = document.getElementById('chatgptStartStatus');
         var chatgptStartStatusNewVisitorInput = document.getElementById('chatgptStartStatusNewVisitor');
         var chatgptDisclaimerSettingInput = document.getElementById('chatgpt_disclaimer_setting');
@@ -325,7 +327,7 @@ jQuery(document).ready(function ($) {
         }
 
         // DIAG - Log exiting the function
-        // console.log('EXITING chatbot_chatgpt_localize');
+        // console.log('Chatbot ChatGPT: NOTICE: Exiting chatbot_chatgpt_localize');
         
     }
 

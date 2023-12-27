@@ -55,12 +55,12 @@ function chatbot_chatgpt_admin_footer() {
     <script type="text/javascript">
         jQuery(document).ready(function($) {
             // DIAG - Log the document ready status
-            // console.log("Document ready");
+            // console.log('Chatbot ChatGPT: NOTICE: Document ready');
             var modal;
 
             $('a.chatbot-settings').on('click', function(e) {
                 // DIAG - Log the settings link clicked status
-                // console.log("Settings link clicked");
+                // console.log('Chatbot ChatGPT: NOTICE: Settings link clicked');
             });
 
             var data = {
@@ -140,14 +140,14 @@ function chatbot_chatgpt_admin_footer() {
             $('a[href*="plugins.php?action=deactivate&plugin=chatbot-chatgpt"]').on('click',function(e) {
                 e.preventDefault();
                 // DIAG - Log the deactivation link clicked status
-                // console.log("Deactivation link clicked");
+                // console.log('Chatbot ChatGPT: NOTICE: Deactivation link clicked');
                 modal.dialog('open');
             });
 
             // Handle click on deactivation button
             $(document).on('click', '#submit-deactivation', function() {
                 // DIAG - Log the submit deactivation button clicked status
-                // console.log("Submit and Deactivate clicked");
+                // console.log('Chatbot ChatGPT: NOTICE: Submit and Deactivate clicked');
                 data.reason = $('input[name="reason"]:checked').val();
                 data.other_text = $('#other-text').val();
                 data.email = $('#email-text').val();
@@ -166,7 +166,7 @@ function chatbot_chatgpt_admin_footer() {
 
             $(document).on('click', '#just-deactivate', function() { 
                 // DIAG - Log the just deactivation button clicked status   
-                // console.log("Just Deactivate clicked");
+                // console.log('Chatbot ChatGPT: NOTICE: Just Deactivate clicked');
 
                 $.post(ajaxurl, {
                     action: 'chatbot_chatgpt_create_nonce',
@@ -181,7 +181,7 @@ function chatbot_chatgpt_admin_footer() {
             // Handle click on cancel deactivation button
             $(document).on('click', '#cancel-deactivation', function() {
                 // DIAG - Log the cancel deactivation button clicked status
-                // console.log("Cancel Deactivation clicked");
+                // console.log('Chatbot ChatGPT: NOTICE: Cancel Deactivation clicked');
                 // Redirect to the settings page for the plugin after deactivation
                 location.href = 'plugins.php';
             });
@@ -192,7 +192,7 @@ function chatbot_chatgpt_admin_footer() {
 
 function chatbot_chatgpt_deactivation_feedback() {
     // DIAG - Process the feedback data
-    // chatbot_chatgpt_back_trace( "NOTICE", "Email Ready");
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Email Ready');
     $reason = sanitize_text_field($_POST['reason']);
     $other_text = sanitize_text_field($_POST['other_text']);
     $user_email = sanitize_email($_POST['email']);
@@ -224,14 +224,14 @@ function chatbot_chatgpt_deactivation_feedback() {
     // Send the email
     if (wp_mail($to, $subject, strip_tags($body), $headers)) {
         // DIAG - Log the email sent status
-        // chatbot_chatgpt_back_trace( "NOTICE", "Email Sent Successfully");
+        // chatbot_chatgpt_back_trace( 'SUCCESS', 'Email sent successfully');
     } else {
         // DIAG - Log the email failed status
-        // chatbot_chatgpt_back_trace( "NOTICE", "Email Failed to Send");
+        // chatbot_chatgpt_back_trace( 'ERROR', 'Email failed to send');
     }
 
     // DIAG - Log the email body
-    // chatbot_chatgpt_back_trace( "NOTICE", "Email Done");
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Email done');
 
     // wp_die();
     die();
