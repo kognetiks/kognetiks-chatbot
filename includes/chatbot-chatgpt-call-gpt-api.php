@@ -62,7 +62,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
 
     // IDEA Strip any $errorResponses from the $chatgpt_last_response
-    $chatgpt_last_response = str_replace($errorResponses, '', $chatgpt_last_response);
+    if (get_locale() !== "en_US") {
+        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+    } else {
+        $localized_errorResponses = $errorResponses;
+    }
+    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
@@ -125,7 +130,15 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         return $response_body['choices'][0]['message']['content'];
     } else {
         // FIXME - Decide what to return here - it's an error
-        return;
+        if (get_locale() !== "en_US") {
+            $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+        } else {
+            $localized_errorResponses = $errorResponses;
+        }
+        $errorReturned = "";
+        // Return a random error message
+        $errorReturned = $localized_errorResponses[array_rand($localized_errorResponses)];
+        return $errorReturned;
     }
     
 }

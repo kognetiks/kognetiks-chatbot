@@ -25,9 +25,9 @@ $totalWordPairCount = 0;
 function kn_acquire_word_pairs( $content ) {
 
     global $stopWords;
-    global $max_top_words;
-    global $topWords;
-    global $totalWordCount;
+    global $max_top_word_pairs;
+    global $topWordPairs;
+    global $totalWordPairCount;
     
     // DIAG - Diagnostic - Ver 1.6.3
     // chatbot_chatgpt_back_trace( 'NOTICE', "FUNCTION - kn_acquire_just_the_words");

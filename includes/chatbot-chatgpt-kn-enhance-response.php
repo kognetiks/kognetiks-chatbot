@@ -27,13 +27,14 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
     $words = explode(" ", $message);
     // DIAG Diagnostic - Ver 1.7.2.1
-    chatbot_chatgpt_back_trace( 'NOTICE', '$words: ' . $words);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$words: ' . print_r($words, true));
     $match_found = false;
     $highest_score = 0;
     $highest_score_word = "";
     $highest_score_url = "";
 
     // Strip out $stopWords
+    // FIXME - DO I NEED TO CHECK FOR LOCALIZATION HERE?
     $words = array_diff($words, $stopWords);
  
     // Loop through each word in the message
@@ -111,23 +112,20 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // Support for None, Random, or Custom Learnings Messages - Ver 1.7.1
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
         $chatbot_chatgpt_custom_learnings_message = esc_attr(get_option('chatbot_chatgpt_custom_learnings_message', 'More information may be found here ...'));
-        if ('None' === $chatbot_chatgpt_suppress_learnings) {
+
+        if (get_locale() !== "en_US") {
+            $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
+        } else {
+            $localized_learningMessages = $learningMessages;
+        }
+
+        if ('None' == $chatbot_chatgpt_suppress_learnings) {
             $enhanced_response .= "\n\n" . "Also look" . " ";
-        } elseif ('Random' === $chatbot_chatgpt_suppress_learnings) {
-            if (get_locale() !== "en_US") {
-                $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-            } else {
-                $localized_learningMessages = $learningMessages;
-            }
+        } elseif ('Random' == $chatbot_chatgpt_suppress_learnings) {
             $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)];
-        } elseif ('Custom' === $chatbot_chatgpt_suppress_learnings) {
+        } elseif ('Custom' == $chatbot_chatgpt_suppress_learnings) {
             $enhanced_response .= "\n\n" . $chatbot_chatgpt_custom_learnings_message . " ";
         } else {
-            if (get_locale() !== "en_US") {
-                $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-            } else {
-                $localized_learningMessages = $learningMessages;
-            }
             $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)];
         }
         $enhanced_response .= "[URL: " . $highest_score_url . "]";

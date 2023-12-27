@@ -60,7 +60,7 @@ die;
 
     if (is_wp_error($response)) {
         return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your OpenAI account for additional information.';
-              // DIAG - Log the response body
+            // DIAG - Log the response body
             // chatbot_chatgpt_back_trace( 'ERROR', $response->get_error_message());
     }
 

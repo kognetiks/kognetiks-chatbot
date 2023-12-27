@@ -15,32 +15,32 @@ if ( ! defined( 'WPINC' ) )
 // Declare the $stopWords array as global
 // List of common stop words to be ignored
 global $stopWords;
-    $stopWords = [
-        "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at",
-        "b", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by",
-        "c", "can", "can't", "cannot", "could", "couldn't",
-        "d", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during",
-        "e", "each",
-        "f", "few", "for", "from", "further",
-        "g",
-        "h", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's",
-        "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself",
-        "j", "k",
-        "l", "let's",
-        "m", "me", "more", "most", "mustn't", "my", "myself",
-        "n", "no", "nor", "not",
-        "o", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours" ,"ourselves", "out", "over", "own",
-        "p", "q",
-        "r", "re",
-        "s", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such",
-        "t", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too",
-        "u", "under", "until", "up",
-        "v", "very",
-        "w", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't",
-        "x",
-        "y", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves",
-        "z"
-    ];
+$stopWords = [
+    "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't", "as", "at",
+    "b", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by",
+    "c", "can", "can't", "cannot", "could", "couldn't",
+    "d", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during",
+    "e", "each",
+    "f", "few", "for", "from", "further",
+    "g",
+    "h", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's",
+    "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself",
+    "j", "k",
+    "l", "let's",
+    "m", "me", "more", "most", "mustn't", "my", "myself",
+    "n", "no", "nor", "not",
+    "o", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours" ,"ourselves", "out", "over", "own",
+    "p", "q",
+    "r", "re",
+    "s", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such",
+    "t", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too",
+    "u", "under", "until", "up",
+    "v", "very",
+    "w", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't",
+    "x",
+    "y", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves",
+    "z"
+];
 
 
 // Declare the $learningMessages array as global

@@ -33,7 +33,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $wpdb;  // Declare the global $wpdb object
 
 // Include necessary files
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localization.php'; // Refactoring Settings - Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
 
 // Include necessary files - ChatGPT API and Custom GPT Assistant API - Ver 1.6.9
@@ -60,6 +59,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-butt
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-custom-gpts.php'; // Refactoring Settings - Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-diagnostics.php'; // Refactoring Settings - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localization.php'; // Refactoring Settings - Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-notices.php'; // Notices - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0
