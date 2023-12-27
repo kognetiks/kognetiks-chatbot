@@ -9,81 +9,63 @@ Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Easily integrate OpenAI's ChatGPT API into your WordPress website with this powerful, AI-driven chatbot plugin for personalized support and engagement.
+== Introducing Chatbot ChatGPT for WordPress: Revolutionizing Digital Interactions ==
 
-== Description ==
+Welcome to the future of website interaction with **Chatbot ChatGPT for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Custom GPT Assistants.
 
-Introducing **Integration for Custom GPT Assistants** with the **Chatbot ChatGPT for WordPress**
+**🌐 Harnessing OpenAI's Large Language Models for Enhanced Engagement**
+Dive into the world of advanced AI with OpenAI's Large Language Models at the core of our Chatbot ChatGPT. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
-The Chatbot ChatGPT for WordPress introduces an innovative feature: the integration of OpenAI's Custom GPT Assistants. You tailor these custom Assistants which are versions of GPT models designed to enhance website interactions and provide a more dynamic user experience. You can equip them with specialized knowledge and functionalities, allowing them to perform a variety of tasks such as answering FAQs, handling bookings, and offering personalized recommendations. With this feature, website owners can easily embed these Assistants into WordPress sites, using the Chatbot ChatGPT plugin. This integration not only elevates customer service but also offers a unique, interactive experience that aligns with the website's theme and content. The Assistants' ability to adapt and learn from interactions ensures continuous improvement in performance, making them an invaluable asset for businesses aiming to enhance their online presence and engagement.
+**🌟 Custom GPT Assistants: Tailored Conversational Experiences**
+Unlock the potential of personalized digital interaction. Use the Custom GPT Assistants you develop, trained with your specific knowledge and skills, are here to revolutionize your website. From handling FAQs to managing bookings and offering customized suggestions, these Assistants are seamlessly integrated into your WordPress site, promising a dynamic and engaging user experience.
 
-🤖 **Support for multiple Custom GPT Assistants** – You can now create and use both a primary or alternate Custom GPT Assistants with the Chatbot ChatGPT plugin. This feature allows you to create and use multiple Assistants for different purposes, such as customer support, booking, and more. You can also use multiple Assistants to provide a more personalized experience for your visitors. For example, you can create an Assistant for your blog and another for your online store. This way, you can provide a more personalized experience for your visitors.
+**🔀 Multiple Assistants, Multiple Roles**
+Why settle for one when you can have more? With our plugin, deploy multiple Custom GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
 
-Learn more about enabling this Custom GPT Assistants at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
+Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
-🤖 **Embedded or floating Chatbot ChatGPT** – You can now display the Chatbot ChatGPT as an embedded chatbot or floating chatbot.  The embedded chatbot is displayed on any page using the shortcode [chatbot_chatgpt style=embedded].  The floating chatbot is displayed on any page using the shortcode [chatbot_chatgpt style=floating]. 
+**🔄 Choose Your Style: Embedded or Floating Chatbots**
+Flexibility is key. Display your Chatbot ChatGPT as an embedded feature on pages or let it float across your site. With simple shortcodes, adapt the chatbot's presence to match your website's design and user needs.
 
-**Chatbot ChatGPT for WordPress** – Elevate Your Visitor's Experience with AI-Driven Personalized Support!
+**🔍 Knowledge Navigator: Unearthing Your Content's Essence**
+At the heart of our plugin lies the Knowledge Navigator. This powerful tool delves deep into your website, mapping its architecture and content, enabling the chatbot to deliver precise and contextually relevant responses. Enhanced by TF-IDF analysis, our Navigator ensures your content's unique keywords shine through, making interactions more meaningful.
 
-🔍 **Meet Knowledge Navigator** – the heart of our ChatGPT plugin. It's like a digital explorer for your website, carefully unearthing your content's essence. This innovative component initiates an in-depth analysis of your site, following every link, and meticulously building an interactive map of your site's architecture. The result? A crystal-clear understanding of your content that enables more accurate and contextually relevant responses.
+**🎭 Personalize with Custom Avatars**
+Add a creative touch with customizable avatars. Reflect your site's personality through these visual companions, enhancing user engagement and adding a unique flair to your digital space.
 
-🚀 The latest release of **Knowledge Navigator** now has a deeper understanding of your site extracting additional relevance and offering direct links to site content.
+**📊 Direct Traffic with Customizable Buttons**
+Guide your visitors where you want them. Our customizable buttons can link directly to specific pages, forms, or contact information, facilitating smoother navigation and enhanced user engagement.
 
-✨ **How Does It Work?** It employs a method known as TF-IDF (Term Frequency-Inverse Document Frequency) to rank keywords by relevance. This sophisticated measure highlights the unique keywords that define your content, all neatly tucked away in "results.csv" and "results.json" files within the plugin's folder.
+**🤖 Why Chatbot ChatGPT?**
+▪ **Natural Conversations:** Experience human-like interactions, thanks to OpenAI's Large Language Model API.
+▪ **Always Available:** Provide round-the-clock assistance in various domains, from healthcare to education.
+▪ **Seamless Integration:** Effortlessly bring your WordPress site to life with our easy-to-use plugin.
 
-🎨 **Personalize with Custom Avatars!** Enhance user engagement with avatars that suit your site's personality. Navigate to the plugin settings, choose your avatar, and enjoy a unique touch of creativity. New screenshots available!
+**✨ Supported OpenAI Models**
+▪ GPT-3.5 (gpt-3.5-turbo)
+▪ GPT-4 (gpt-4 models)
+▪ GPT-4 Turbo ('gpt-4-1106-preview')
 
-🚀 Now you can drive traffic to specific pages with customizable buttons offering direct links to your site content.  For example, you could link directly to a contact form or email address.
+**🚀 Elevate Your Website Experience**
+Chatbot ChatGPT is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
 
-🤖 **Why Choose Chatbot ChatGPT?**
+Get Chatbot ChatGPT today and redefine your WordPress site with intelligence and a personal touch.
 
-* Intuitive & Human-like Interactions: Powered by OpenAI's Large Language Model (LLM) API, ChatGPT uses natural language processing to engage with users in a conversational manner.
-* 24/7 Assistance: Automate customer service, reduce response times, and boost satisfaction across various fields, such as healthcare, education, finance, and more.
-* Easy Integration: Designed to work effortlessly with OpenAI API seamlessly bringing life to your WordPress website.
+**Note:** This plugin requires an API key from OpenAI. Obtain yours at [OpenAI API Keys](https://platform.openai.com/account/api-keys).
 
-✨ **OpenAI Models Supported**
+Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/) for more information.
 
-✨ GPT-3.5 (gpt-3.5-turbo)
-✨ GPT-4 (gpt-4 models)
-✨ **GPT-4 Turbo ('gpt-4-1106-preview' training data up to April 2023)** 
+**🌐 Features at a Glance**
+▪ **Quick Setup:** Integrate easily with OpenAI's ChatGPT API.
+▪ **Advanced AI Models:** Includes support for the latest GPT-4 Turbo.
+▪ **Customizable Interfaces:** Choose between floating and embedded chatbot styles.
+▪ **User-Friendly Settings:** Easily manage your API key and other settings.
+▪ **Intelligent Design:** Smart collapsible chatbot for a cleaner website interface.
+▪ **Engaging User Interaction:** Customize greetings and messages for a unique visitor experience.
+▪ **Persistent Memory:** The chatbot remembers interactions, offering continuity across pages.
+▪ **In-depth Content Analysis:** Knowledge Navigator ensures contextually relevant interactions.
 
-🚀 **Join Us in the Revolution of Personalized User Experience!**
-
-Chatbot ChatGPT is more than a plugin; it's an asset to your site, crafting a truly bespoke experience for your visitors. Powered by advanced AI technology, Chatbot ChatGPT is designed to offer a more interactive and tailored visitor experience.
-
-Get Chatbot ChatGPT today, and redefine your WordPress website with intelligence, creativity, and a personal touch!
-
-**Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
-
-Official website: [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/)
-
-== Features ==
-
-🚀 **Experience the Power of Chatbot ChatGPT for WordPress – Features Designed for You!**
-
-🎉 **Effortless Integration**: Get started in minutes with an easy setup process, fully integrated with OpenAI's ChatGPT API.
-
-🚀 **Cutting-Edge Support**: Benefit from support for gpt-3.5-turbo and the next-gen gpt-4 from OpenAI.  Now with an expanded list of OpenAI models supported, including the latest GPT-4 Turbo ('gpt-4-1106-preview') featuring improved instruction following, JSON mode, reproducibility outputs, parallel function calling and more.
-
-💬 **Elegant Floating Chatbot Interface**: Offers a sleek and engaging user experience using shortcode [chatbot_chatgpt style=floating]
-
-💬 **Embedded Chatbot Interface**: Offers a sleek and engaging user experience using the shortcode [chatbot_chatgpt style=embedded]
-
-🔧 **Intuitive Settings Page**: Manage API key and other parameters with a user-friendly interface.
-
-🎈 **Smart Collapsible Design**: The chatbot smoothly collapses when not in use, maintaining an uncluttered look.
-
-👋 **Warm Greetings**: Craft an inviting experience with an initial greeting message for first-time visitors.
-
-📌 **Versatile Shortcode Integration**: Embed the chatbot anywhere – on pages or in your theme's footer or sidebar – with a simple shortcode.
-
-🎚 **Flexible Start Options**: Decide if the chatbot should begin open or closed, catering to your users' preferences.
-
-📜 **Intelligent Chatbot State Maintenance**: The chatbot remembers user interactions even when navigating between pages.
-
-📝 **Fully Configurable Chatbot Identity**: Customize the chatbot's name, initial greeting, and subsequent messages to align with your brand.
-
-🔍 **Knowledge Navigator** – the heart of our ChatGPT plugin. It's like a digital explorer for your website.
+== Experience the Evolution of Website Interaction with Chatbot ChatGPT for WordPress! ==
 
 == Getting Started ==
 
@@ -116,13 +98,44 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 
 == Installation ==
 
-1. Upload the 'chatbot-chatgpt' folder to the '/wp-content/plugins/' directory.
-2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. Go to the 'Settings > Chatbot ChatGPT' page and enter your OpenAI API key.
-4. Customize the chatbot appearance and other parameters as needed.
-5. Add the chatbot to any page, theme footer or sidebar using the provided shortcode: [chatbot_chatgpt] or [chatbot_chatgpt style=floating] or [chatbot_chatgpt style=embedded]
-6. After installation, go to the 'Settings > Chatbot ChatGPT' page then click the 'Knowledge Navigator' tab and run a scan of your site.
-7. Select hourly, daily, or weekly to run the Knowledge Navigator periodically to remain current about your content.
+**Installing Chatbot ChatGPT on Your WordPress Website**
+
+Embark on a journey to elevate your website's interactivity with our Chatbot ChatGPT plugin. Here's how to get started:
+
+1. **Plugin Upload**
+   - Begin by downloading the 'chatbot-chatgpt' plugin folder.
+   - Navigate to your WordPress website's dashboard.
+   - Click on 'Plugins' and select 'Add New'.
+   - Choose the 'Upload Plugin' option at the top of the page.
+   - Upload the 'chatbot-chatgpt' folder and click 'Install Now'.
+
+2. **Plugin Activation**
+   - Once the installation is complete, activate the plugin by clicking 'Activate Plugin'.
+
+3. **API Key Configuration**
+   - After activation, head to 'Settings > Chatbot ChatGPT' in your dashboard.
+   - Enter your OpenAI API key here. (You can obtain this key from [OpenAI API Keys](https://platform.openai.com/account/api-keys) if you haven't already.)
+
+4. **Customizing Your Chatbot**
+   - In the same settings area, tailor the chatbot's appearance and functionality to match your site's style and your specific needs.
+
+5. **Embedding the Chatbot**
+   - You can add the chatbot to any page, footer, or sidebar of your theme.
+   - Use the shortcode `[chatbot_chatgpt]` for a standard chatbot.
+   - For a floating chatbot, use `[chatbot_chatgpt style=floating]`.
+   - If you prefer an embedded chatbot, use `[chatbot_chatgpt style=embedded]`.
+
+6. **Knowledge Navigator Setup**
+   - To fully utilize the capabilities of Chatbot ChatGPT, go back to 'Settings > Chatbot ChatGPT' and click on the 'Knowledge Navigator' tab.
+   - Initiate a site scan to allow the Knowledge Navigator to map and understand your site's content.
+
+7. **Scheduling Knowledge Navigator**
+   - Opt for hourly, daily, or weekly scans through the Knowledge Navigator to ensure the chatbot stays updated with your latest content.
+
+== Your Journey Towards an Interactive Website Begins! ==
+
+With Chatbot ChatGPT installed, you're now equipped to offer a more dynamic, engaging, and responsive experience to your website visitors.
+
 
 == Frequently Asked Questions ==
 
@@ -138,20 +151,20 @@ You can also customize the name of the chatbot, as well as changing the initial 
 
 = Is the chatbot available in multiple languages? =
 
-The ChatGPT API currently supports English. However, you can configure the chatbot to work with other languages supported by OpenAI in the future as the API evolves.
+Yes, Chatbot ChatGPT and the ChatGPT API support many different languages. Set the 'Site Language' option in WordPress to your preference.
 
-= Which OpenAI model does the plugin use? =
+= Which OpenAI models does the plugin use? =
 
 The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are the same models found in the ChatGPT product from OpenAI.
 
-The plugin now support (as of November 2023) the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-preview')** featuring improved instruction following based on training data up to April 2023.
+The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-preview')** featuring improved instruction following based on training data up to April 2023.  New models will be added as the become available.
 
 == Screenshots ==
 
 1. Initial Chatbot ChatGPT display
 2. Ask Chatbot ChatGPT any question
 3. Get a response from Chatbot ChatGPT
-4. Settings and Options
+4. Chatbot ChatGPT running in the embedded mode
 5. Mobile Experience - Initial Chatbot ChatGPT display
 6. Mobile Experience - Ask Chatbot ChatGTP any question
 7. Mobile Experience - Get a response from Chatbot ChatGPT
@@ -163,6 +176,7 @@ The plugin now support (as of November 2023) the latest OpenAI model **gpt-4-tur
 13. Chatbot ChatGPT response after running Knowledge Navigator
 14. Chatbot ChatGPT is now more context responsive after running Knowledge Navigator
 15. Chatbot ChatGPT has a deep understanding of your site after running Knowledge Navigator
+16. Settings and Options
 
 == Changelog ==
 
@@ -172,8 +186,9 @@ The plugin now support (as of November 2023) the latest OpenAI model **gpt-4-tur
 * Use [chatbot_chatgpt style=embedded assistant=primary] to display the chatbot as embedded using your primary assistant.
 * Use [chatbot_chatgpt style=floating assistant=alternate] to display the chatbot as floating using your alternate assistant.
 * Use [chatbot_chatgpt style=embedded assistant=alternate] to display the chatbot as embedded using your alternate assistant.
-* ==Expanded the the list of HTML tags removed durning the Knowledge Navigator scan.==
-* ==Enhanced handling of special characters such as 'á' or 'é' found in non-English languages.==
+* **Expanded the the list of HTML tags removed durning the Knowledge Navigator scan.**
+* **Enhanced handling of special characters such as 'á' or 'é' found in non-English languages.**
+* **Localization for stop words, learning messasges, and error messages based on Site Language settings**
 
 = 1.7.1 =
 * Added option to have none, random or custom learnings messages.

@@ -111,7 +111,7 @@ function chatbot_chatgpt_kn_acquire() {
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
-            error_log("Post ID " . $result['ID'] . " has empty content.");
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
         }
         
         // Construct the URL for the post
@@ -185,7 +185,7 @@ function chatbot_chatgpt_kn_acquire() {
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
-            error_log("Post ID " . $result['ID'] . " has empty content.");
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
         }    
 
         // Construct the URL for the page
@@ -259,7 +259,7 @@ function chatbot_chatgpt_kn_acquire() {
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
-            error_log("Post ID " . $result['ID'] . " has empty content.");
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
         }
         
         // Construct the URL for the comments

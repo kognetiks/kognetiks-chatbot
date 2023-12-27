@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Localization
  *
  * This file contains the code for localization of the Chatbot ChatGPT globals.
- * 
- * 
+ * It uses the ChatGPT API to translate the global variables into the your language
+ * of choice based on the Site Langauage setting found under Settings > General.
  *
  * @package chatbot-chatgpt
  */
@@ -68,7 +68,7 @@ function localize_global_stopwords($language_code, $stopWords) {
 
     $body = array(
         'model' => $model,
-        'max_tokens' => 1000,
+        'max_tokens' => 4000,
         'temperature' => 0.5,
         'messages' => array(
             array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate word-for-word anything sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the list of translated words wihtout the English.'),
@@ -96,13 +96,14 @@ function localize_global_stopwords($language_code, $stopWords) {
 
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
     // DIAG - Log the response body
-    // chatbot_chatgpt_back_trace( 'NOTICE', print_r($response_body, true));
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$response_body ' . print_r($response_body, true));
 
     // Convert the translated string back to an array
     if (!empty($response_body['choices'][0]['message']['content'])) {
         // Convert the translated string back to an array
         $translated_array = explode(", ", $response_body['choices'][0]['message']['content']);
-        error_log("STOP WORDS TRANSLATION " . print_r($translated_array, true));
+        // DIAG - Log the translations
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'STOP WORDS TRANSLATION ' . print_r($translated_array, true));
     } else {
         $translated_array = $stopWordsTemp;
     }
