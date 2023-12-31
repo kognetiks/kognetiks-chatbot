@@ -52,7 +52,7 @@ $learningMessages = [
     " Keep in mind that I'm still learning the ropes, but don't hesitate to check out ",
     " I'm in a state of constant learning, for now check out ",
     " Remember, I'm on a learning journey, so you can revisit anytime you'd like. However, you might try ",
-    " I'm in the learning phase, so your patience is appreciated. However you might find help "
+    " I'm in the learning phase, so your patience is appreciated. However you might find help here "
 ];
 
 // Declare the $errorResponses array as global

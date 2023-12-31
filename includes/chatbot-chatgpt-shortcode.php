@@ -14,12 +14,17 @@ if ( ! defined( 'WPINC' ) )
 
 function chatbot_chatgpt_shortcode($atts) {
 
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
+
     // EXAMPLE - Shortcode Attributes
     // [chatbot_chatgpt] - Default values, floating style, uses OpenAI's ChatGPT
     // [chatbot_chatgpt style="floating"] - Floating style, uses OpenAI's ChatGPT
     // [chatbot_chatgpt style="embedded"] - Embedded style, uses OpenAI's ChatGPT
     // [chatbot_chatgpt style="floating" assistant="primary"] - Floating style, Custom GPT Assistant as set in Primary setting
     // [chatbot_chatgpt style="embedded" assistant="alternate"] - Embedded style, Custom GPT Assistant as set in Alternate setting
+    // [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Floating style using a Custom GPT Assistant ID
+    // [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Embedded style using a Custom GPT Assistant ID
 
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
@@ -41,12 +46,12 @@ function chatbot_chatgpt_shortcode($atts) {
     // chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
-    echo "
-    <script>
-        localStorage.setItem('chatbot_chatgpt_display_style', '" . $chatbot_chatgpt_display_style . "');
-        localStorage.setItem('chatbot_chatgpt_assistant_alias', '" . $chatbot_chatgpt_assistant_alias . "');
-    </script>
-    ";
+    // echo "
+    // <script>
+    //     localStorage.setItem('chatbot_chatgpt_display_style', '" . $chatbot_chatgpt_display_style . "');
+    //     localStorage.setItem('chatbot_chatgpt_assistant_alias', '" . $chatbot_chatgpt_assistant_alias . "');
+    // </script>
+    // ";
 
     // Store the style and the assistant value - Ver 1.7.2
     set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
@@ -172,3 +177,29 @@ function chatbot_chatgpt_shortcode($atts) {
 }
 
 add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
+
+// Fix Updating failed. The response is not a valid JSON response. - Version 1.7.3
+// Function to output the script
+function chatbot_chatgpt_shortcode_enqueue_script() {
+    global $chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias;
+
+    // Check if the variables are set and not empty
+    $style = isset($chatbot_chatgpt_display_style) ? $chatbot_chatgpt_display_style : '';
+    $assistant = isset($chatbot_chatgpt_assistant_alias) ? $chatbot_chatgpt_assistant_alias : '';
+
+    ?>
+    <script>
+        // Check if the variables are not empty before setting them in localStorage
+        if ('<?php echo $style; ?>' !== '') {
+            localStorage.setItem('chatbot_chatgpt_display_style', '<?php echo $style; ?>');
+        }
+        if ('<?php echo $assistant; ?>' !== '') {
+            localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $assistant; ?>');
+        }
+    </script>
+    <?php
+
+}
+
+// Hook this function into the 'wp_footer' action
+add_action('wp_footer', 'chatbot_chatgpt_shortcode_enqueue_script');

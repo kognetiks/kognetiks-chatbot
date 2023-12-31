@@ -74,36 +74,23 @@ jQuery(document).ready(function ($) {
         }
     }
     
+    // Removed css from here into the .css file - Refactored for Ver 1.7.3
     // Initially hide the chatbot
     if (chatgptStartStatus === 'closed') {
-        // chatGptChatBot = document.querySelector('#chatbot-chatgpt');
-        // chatGptChatBot.style.setProperty('display', 'none', 'important');
         chatGptChatBot.hide();
         chatGptOpenButton.show();
     } else {
-        // chatGptChatBot = document.querySelector('#chatbot-chatgpt');
-        // chatGptChatBot.style.setProperty('display', 'block', 'important');
         if (chatbot_chatgpt_display_style === 'floating') {
             if (chatgpt_width_setting === 'Wide') {
-                $('#chatbot-chatgpt').css({
-                    width: '500px', // or your desired width
-                    height: '450px', // or your desired height
-                    overflow: 'visible'});
-                } else {
-                $('#chatbot-chatgpt').css({
-                    width: '300px', // or your desired width
-                    height: '450px', // or your desired height
-                    overflow: 'visible'});
-                }
-                chatGptChatBot.show();
-                chatGptOpenButton.hide();
+                $('#chatbot-chatgpt').removeClass('chatbot-narrow chatbot-full').addClass('chatbot-wide');
             } else {
-                $('#chatbot-chatgpt').css({
-                    width: '100%', // or your desired width
-                    // height: '450px', // or your desired height
-                    height: '100%',
-                    overflow: 'visible'});
+                $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-full').addClass('chatbot-narrow');
             }
+            chatGptChatBot.show();
+            chatGptOpenButton.hide();
+        } else {
+            $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-narrow').addClass('chatbot-full');
+        }
     }
 
     chatbotContainer = $('<div></div>').addClass('chatbot-container');
@@ -392,48 +379,31 @@ jQuery(document).ready(function ($) {
         }
     });
 
+    // Moved the css to the .css file - Refactored for Ver 1.7.3
     // Add the toggleChatbot() function - Ver 1.1.0
     function toggleChatbot() {
-        if (chatGptChatBot.is(':visible')) {
-            chatGptChatBot.hide();
-            chatGptOpenButton.show();
-            localStorage.setItem('chatgptStartStatus', 'closed');
-        } else {
-            // if (chatgpt_width_setting === 'Wide') {
-            //     $('#chatbot-chatgpt').css({
-            //         width: '500px', // or your desired width
-            //         height: '450px', // or your desired height
-            //         overflow: 'visible'});
-            //     } else {
-            //     $('#chatbot-chatgpt').css({
-            //         width: '300px', // or your desired width
-            //         height: '450px', // or your desired height
-            //         overflow: 'visible'});
-            // }
-            if (chatbot_chatgpt_display_style === 'floating') {
-                if (chatgpt_width_setting === 'Wide') {
-                    $('#chatbot-chatgpt').css({
-                        width: '500px', // or your desired width
-                        height: '450px', // or your desired height
-                        overflow: 'visible'});
-                    } else {
-                    $('#chatbot-chatgpt').css({
-                        width: '300px', // or your desired width
-                        height: '450px', // or your desired height
-                        overflow: 'visible'});
-                    }
-                } else {
-                    $('#chatbot-chatgpt').css({
-                        width: '100%', // or your desired width
-                        // height: '450px', // or your desired height
-                        overflow: 'visible'});
-                }
+    if (chatGptChatBot.is(':visible')) {
+        chatGptChatBot.hide();
+        chatGptOpenButton.show();
+        localStorage.setItem('chatgptStartStatus', 'closed');
+    } else {
+        if (chatbot_chatgpt_display_style === 'floating') {
+            if (chatgpt_width_setting === 'Wide') {
+                $('#chatbot-chatgpt').removeClass('chatbot-narrow chatbot-full').addClass('chatbot-wide');
+            } else {
+                $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-full').addClass('chatbot-narrow');
+            }
             chatGptChatBot.show();
             chatGptOpenButton.hide();
-            localStorage.setItem('chatgptStartStatus', 'open');
-            loadConversation();
-            scrollToBottom();
+        } else {
+            $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-narrow').addClass('chatbot-full');
         }
+        chatGptChatBot.show();
+        chatGptOpenButton.hide();
+        localStorage.setItem('chatgptStartStatus', 'open');
+        loadConversation();
+        scrollToBottom();
+    }
     }
 
     // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0 and updated for Ver 1.4.1

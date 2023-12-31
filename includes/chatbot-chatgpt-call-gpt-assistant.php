@@ -63,7 +63,7 @@ function addAMessage($threadId, $prompt, $context, $api_key) {
 }
 
 // Step 4: Run the Assistant
-function runTheAssistant($threadId, $assistantId, $api_key) {
+function runTheAssistant($threadId, $assistantId, $context, $api_key) {
     $url = "https://api.openai.com/v1/threads/" . $threadId . "/runs";
     $headers = array(
         "Content-Type: application/json",
@@ -272,8 +272,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
 
     // Conversation Context - Ver 1.7.2.1
-    // $context = "";
-    // $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
+    $context = "";
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
  
     // // Context History - Ver 1.6.1 - Added here for Ver 1.7.2.1
     //  $chatgpt_last_response = concatenateHistory('context_history');
@@ -304,7 +304,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
     // Step 4: Run the Assistant
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 4: Run the Assistant');
-    $assistants_response = runTheAssistant($threadId, $assistantId, $api_key);
+    $assistants_response = runTheAssistant($threadId, $assistantId, $context, $api_key);
 
     // Check if the response is not an array or is a string indicating an error
     if (!is_array($assistants_response) || is_string($assistants_response)) {

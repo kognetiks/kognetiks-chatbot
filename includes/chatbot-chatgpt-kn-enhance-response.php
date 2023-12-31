@@ -23,6 +23,16 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     global $stopWords;
     $enhanced_response = "";
 
+    // Check that Knowledge Navigator is finished running
+    $chatbot_chatgpt_kn_status = get_option('chatbot_chatgpt_kn_status', '');
+    // If the status does not contain 'Completed', then Knowledge Navigator is still running
+    if (false === strpos($chatbot_chatgpt_kn_status, 'Completed')) {
+        // IDEA Return one of the $errorResponses - Ver 1.6.3
+        // IDEA Belt and Suspenders - We shouldn't be here unless something went really wrong up above this point
+        // return $errorResponses[array_rand($errorResponses)];
+        return;
+    }
+
     // Retrieve links to the highest scoring documents - Ver 1.6.3
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
     $words = explode(" ", $message);

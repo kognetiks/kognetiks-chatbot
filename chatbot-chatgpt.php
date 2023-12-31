@@ -281,6 +281,7 @@ function chatbot_chatgpt_send_message() {
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
     // $chatbot_chatgpt_assistant_alias == 'primary';
     // $chatbot_chatgpt_assistant_alias == 'alternate';
+    // $chatbot_chatgpt_assistant_alias == 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'; // Custom GPT Assistant Id
   
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
@@ -302,8 +303,19 @@ function chatbot_chatgpt_send_message() {
             $use_assistant_id = 'No';
         }
     } else {
-        // Override the $use_assistant_id and set it to 'No'
-        $use_assistant_id = 'No';
+        // Reference Custom GPT Assistant IDs directly - Ver 1.7.3
+        if (substr($chatbot_chatgpt_assistant_alias, 0, 5) === 'asst_') {
+            // DIAG - Diagnostics
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Custom GPT Assistant Id: ' . $chatbot_chatgpt_assistant_alias);
+            // Override the $assistant_id with the Custom GPT Assistant Id
+            $assistant_id = $chatbot_chatgpt_assistant_alias;
+            $use_assistant_id = 'Yes';
+        } else {
+            // DIAG - Diagnostics
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
+            // Override the $use_assistant_id and set it to 'No'
+            $use_assistant_id = 'No';
+        }
     }
 
     // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7

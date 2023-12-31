@@ -30,6 +30,7 @@ function chatbot_chatgpt_support_section_callback($args) {
     </ul>
     <h3>Support:</h3>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;"> 
+        <li><a href="https://discord.gg/nXRzxUKvya" rel="nofollow ugc" target="_blank">Support @ Discord</a></li>
         <li><a href="https://kognetiks.com/wordpress-plugins/plugin-support/" rel="nofollow ugc" target="_blank">Support @ Kognetiks.com</a></li>
         <li><a href="https://wordpress.org/support/plugin/chatbot-chatgpt/" target="_blank">Support @ Wordpress.org</a></li>
         <li><a href="https://github.com/kognetiks/chatbot-chatgpt/issues" target="_blank">Support @ GitHub.com</a></li>

@@ -21,6 +21,7 @@ Unlock the potential of personalized digital interaction. Use the Custom GPT Ass
 
 **🔀 Multiple Assistants, Multiple Roles**
 Why settle for one when you can have more? With our plugin, deploy multiple Custom GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
+**Version 1.7.3 Update** Allows for virturally unlimited Custom GPT Assistants, allow you to deploy a unique assistant whereever you placed the short code.  Simply pass the "asst_" ID to the short code as one of the parameters.
 
 Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
@@ -75,7 +76,7 @@ Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chat
 4. Customize the chatbot appearance and other parameters as needed.
 5. For a floating chatbot add the shortcode to your theme's footer: [chatbot_chatgpt] or [chatbot_chatgpt style=floating]
 6. For an embedded chatbot on any page add the shortcode: [chatbot_chatgpt style=embedded]
-7. Use [chatbot_chatpgt style=floating|embedded assistant=primary|secondary] to display the chatbot as a floating chatbot or embedded chatbot with a primary or secondary assistant.
+7. Use [chatbot_chatgpt style=floating|embedded assistant=primary|alternate] to display the chatbot as a floating chatbot or embedded chatbot with a primary or alternate assistant.
 
 Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI's ChatGPT API.
 
@@ -181,7 +182,11 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 == Changelog ==
 
 = 1.7.3 =
-* TBD
+* Added support for unlimited Custom GTP Assistants in addition to 'original', 'primary' and 'alternate' short code parameters.
+* Use [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for floating Assistants.
+* Use [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for embedded Assistants.
+* Moved hard coded css from .js to the .css file for floating wide/narrow and embedded styling.
+* Fixed Updating Failed JSON error when editing pages where the Chatbot ChatGPT shortcode appears.
 
 = 1.7.2 =
 * Improved Custom GPI Assistants with update thread handling for improved performance.
