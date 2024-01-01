@@ -104,6 +104,27 @@
     /* Other styling as needed */
 }
 
+/* Removed CSS from JS file - Ver 1.7.3 */
+.chatbot-wide {
+    width: 500px !important;
+    height: 450px !important;
+    overflow: visible;
+}
+
+/* Removed CSS from JS file - Ver 1.7.3 */
+.chatbot-narrow {
+    width: 300px !important;
+    height: 450px !important;
+    overflow: visible;
+}
+
+/* Removed CSS from JS file - Ver 1.7.3 */
+.chatbot-full {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible;
+}
+
 /* Wide - Ver 1.4.2 */
 #chatbot-chatgpt.wide {
     width: 500px;

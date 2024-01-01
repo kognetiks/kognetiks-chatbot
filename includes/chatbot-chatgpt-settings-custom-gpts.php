@@ -24,9 +24,16 @@ function chatbot_chatgpt_custom_gpts_section_callback($args) {
     <p>See <a href="?page=chatbot-chatgpt&tab=support">Support</a> for more details on using multiple custom GPT assistants.</p>
     <h2>Using Multiple Custom GPT Assistants</h2>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
+    <p>You can integrate Custom GPT Assistants into your platform using one of shortcode configurations below.</p>
+    <p>Each configuration requires either 'primary', 'alternate' or a Custom GPT Assistant ID, denoted as 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'.</p>
+    <p>Custom GPT Assistants work with both 'floating' and 'embedded' styles.</p>
+    <p><b>NOTE:</b>The 'primary' and 'alternate' assistants are set in the ChatGPT settings page.</p>
+    <p><b>NOTE:</b>For best results ensure that the short code appears only once on the page.</p>
         <p>Use the following format to invoke the primary or alternate assistant:</p>
         <li><b>&#91;chatbot_chatgpt style="floating" assistant="primary"&#93;</b> - Floating style, Custom GPT Assistant as set in Primary setting</li>
         <li><b>&#91;chatbot_chatgpt style="embedded" assistant="alternate"&#93;</b> - Embedded style, Custom GPT Assistant as set in Alternate setting</li>
+        <li><b>&#91;chatbot_chatgpt style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Floating style, Custom GPT Assistant as set in Custom GPT Assistant Id setting</li>
+        <li><b>&#91;chatbot_chatgpt style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Embedded style, Custom GPT Assistant as set in Custom GPT Assistant Id setting</li>
         <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li>
     </ul>
     <?php
