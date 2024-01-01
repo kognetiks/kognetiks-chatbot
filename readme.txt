@@ -181,6 +181,9 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 
 == Changelog ==
 
+= 1.7.4 =
+TBD
+
 = 1.7.3 =
 * Added support for unlimited Custom GTP Assistants in addition to 'original', 'primary' and 'alternate' short code parameters.
 * Use [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for floating Assistants.
