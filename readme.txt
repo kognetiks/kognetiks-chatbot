@@ -199,7 +199,7 @@ TBD
 * Use [chatbot_chatgpt style=embedded assistant=alternate] to display the chatbot as embedded using your alternate assistant.
 * **Expanded the the list of HTML tags removed durning the Knowledge Navigator scan.**
 * **Enhanced handling of special characters such as 'á' or 'é' found in non-English languages.**
-* **Localization for stop words, learning messasges, and error messages based on Site Language settings**
+* **Localization for stop words, learning messages, and error messages based on Site Language settings**
 
 = 1.7.1 =
 * Added option to have none, random or custom learnings messages.

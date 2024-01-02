@@ -365,7 +365,7 @@ function chatbot_chatgpt_settings_init() {
 
     add_settings_field(
         'chatbot_chatgpt_knowledge_navigator',
-        'Run Schedule',
+        'Select Run Schedule',
         'chatbot_chatgpt_knowledge_navigator_callback',
         'chatbot_chatgpt_knowledge_navigator',
         'chatbot_chatgpt_knowledge_navigator_section'

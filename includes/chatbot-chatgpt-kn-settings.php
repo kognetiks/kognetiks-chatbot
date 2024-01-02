@@ -124,12 +124,13 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
         <h2>Knowledge Navigator Settings</h2>
         <p><b><i>When you're ready to scan you website, set the 'Run Schedule' to 'Yes', then click 'Save Settings'.</i></b></p>
         <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
-            <p><b>Knowledge Navigator</b></p>
-            <p><b>Schedule: </b><?php echo esc_attr(get_option('chatbot_chatgpt_scan_interval', 'No Schedule')); ?></p>
-            <p><b>Status: </b><?php echo esc_attr(get_option('chatbot_chatgpt_kn_status', 'In Process')); ?></p>
+            <p><b>Knowledge Navigator Status</b></p>
+            <p><b>Scheduled to Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_scan_interval', 'No Schedule')); ?></p>
+            <p><b>Status of Last Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_kn_status', 'In Process')); ?></p>
             <p><b>Content Items Analyzed: </b><?php echo esc_attr(get_option('no_of_items_analyzed', 0)); ?></p>
         </div>
         <p>Refresh this page to determine the progress and status of Knowledge Navigation!</p>
+        <p>To choose a new Run Schedule, select from one of the options below (Now, Hourly, ...)  then click 'Save Settings'.</p>
     </div>
 
     <?php

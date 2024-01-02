@@ -30,7 +30,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Declare Globals here - Ver 1.6.3
-global $wpdb;  // Declare the global $wpdb object
+global $wpdb; // Declare the global $wpdb object
+global $sessionID; // Declare the global $sessionID variable
+
+if ($sessionID == '') {
+    session_start();
+}
+$sessionID = session_id();
+error_log('Session ID: ' . $sessionID);
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
