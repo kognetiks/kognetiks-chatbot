@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.2
-Stable tag: 1.7.3
+Stable tag: 1.7.4
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -181,6 +181,9 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 
 == Changelog ==
 
+= 1.7.4 =
+* Enhanced handling for multi-threaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
+
 = 1.7.3 =
 * Added support for unlimited Custom GTP Assistants in addition to 'original', 'primary' and 'alternate' short code parameters.
 * Use [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for floating Assistants.
@@ -196,7 +199,7 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 * Use [chatbot_chatgpt style=embedded assistant=alternate] to display the chatbot as embedded using your alternate assistant.
 * **Expanded the the list of HTML tags removed durning the Knowledge Navigator scan.**
 * **Enhanced handling of special characters such as 'á' or 'é' found in non-English languages.**
-* **Localization for stop words, learning messasges, and error messages based on Site Language settings**
+* **Localization for stop words, learning messages, and error messages based on Site Language settings**
 
 = 1.7.1 =
 * Added option to have none, random or custom learnings messages.

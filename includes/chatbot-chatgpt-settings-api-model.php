@@ -10,8 +10,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // API/Model settings section callback - Ver 1.3.0
 function chatbot_chatgpt_api_model_section_callback($args) {

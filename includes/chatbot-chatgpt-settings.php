@@ -10,8 +10,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 function chatbot_chatgpt_settings_page() {
     add_options_page('Chatbot ChatGPT Settings', 'Chatbot ChatGPT', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');

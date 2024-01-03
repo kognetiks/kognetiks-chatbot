@@ -9,8 +9,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-	die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {

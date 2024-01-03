@@ -9,9 +9,10 @@
  * @package chatbot-chatgpt
  */
 
- // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Test OpenAI Model for any errors - Ver 1.6.3
  function test_chatgpt_api($api_key) {

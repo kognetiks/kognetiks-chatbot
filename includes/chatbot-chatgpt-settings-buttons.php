@@ -8,9 +8,10 @@
  * @package chatbot-chatgpt
  */
 
- // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Custom buttons settings section callback - Ver 1.6.5
 function chatbot_chatgpt_custom_button_section_callback($args) {

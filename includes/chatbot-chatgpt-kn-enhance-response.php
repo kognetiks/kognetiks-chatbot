@@ -9,8 +9,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-	die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Enhance the respse with TF-IDF - Ver 1.6.9
 function chatbot_chatgpt_enhance_with_tfidf($message) {

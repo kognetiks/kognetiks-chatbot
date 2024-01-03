@@ -12,8 +12,9 @@
 // IDEA - COMING SOON - Ver 1.6.8
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // function chatbot_chatgpt_skins_enqueue_styles() {
 

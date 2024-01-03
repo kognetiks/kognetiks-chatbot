@@ -10,8 +10,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Custom Avatar Icon - Ver 1.5.0
 function chatbot_chatgpt_avatar_section_callback($args) {

@@ -9,8 +9,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-	die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Define version number - Ver 1.6.3
 define('CHATBOT_CHATGPT_PLUGIN_VERSION', '1.6.3');
