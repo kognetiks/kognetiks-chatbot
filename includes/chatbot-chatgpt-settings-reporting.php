@@ -10,8 +10,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Reporting section callback - Ver 1.6.3
 function chatbot_chatgpt_reporting_section_callback($args) {

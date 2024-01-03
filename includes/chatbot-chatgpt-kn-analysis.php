@@ -10,8 +10,9 @@
  */
 
  // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+ if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Knowledge Navigator Analysis section callback - Ver 1.6.2
 function chatbot_chatgpt_kn_analysis_section_callback($args) {

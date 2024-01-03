@@ -9,9 +9,10 @@
  * @package chatbot-chatgpt
  */
 
- // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Cache the stopwords for the language - Ver 1.7.2
 function get_localized_stopwords($language_code, $stopWords) {

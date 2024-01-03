@@ -9,8 +9,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-	die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Step 1: Create an Assistant
 function createAnAssistant($api_key) {

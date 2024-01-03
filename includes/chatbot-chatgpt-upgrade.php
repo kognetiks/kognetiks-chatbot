@@ -9,8 +9,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // FIXME - THIS IS NOT WORKING AS EXPECTED - Ver 1.6.7
 

@@ -9,9 +9,10 @@
  * @package chatbot-chatgpt
  */
 
- // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-die;
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 global $topwords, $words, $start_url, $domain, $max_top_words, $chatbot_chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $no_of_items_analyzed;
 $start_url = site_url();

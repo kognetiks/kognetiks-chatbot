@@ -9,9 +9,9 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) )
-	die;
-
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
 
 // Set the transitent - example usage
 // set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
