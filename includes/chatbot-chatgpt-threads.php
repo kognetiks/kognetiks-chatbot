@@ -20,7 +20,7 @@ if ( ! defined( 'WPINC' ) )
 function set_chatbot_chatgpt_threads($t_threadId, $t_assistantId, $user_id, $page_id) {
 
     // Declare global variables
-    global $sessionID;
+    global $visitorID;
 
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$t_threadId' . $t_threadId);
@@ -32,9 +32,9 @@ function set_chatbot_chatgpt_threads($t_threadId, $t_assistantId, $user_id, $pag
     //     $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
     // }
 
-    // if $user_id is empty or zero then set it to $sessionID
+    // if $user_id is empty or zero then set it to $visitorID
     if (empty($user_id) || $user_id == 0) {
-        $user_id = $sessionID;
+        $user_id = $visitorID;
     }
 
     // DIAG - Diagnostics
@@ -67,7 +67,7 @@ function set_chatbot_chatgpt_threads($t_threadId, $t_assistantId, $user_id, $pag
 function get_chatbot_chatgpt_threads($user_id, $page_id) {
 
     // Declare global variables
-    global $sessionID;
+    global $visitorID;
 
     // Pass the $user_id and $page_id values from the shortcode
     // $user_id = get_current_user_id(); // Get current user ID
@@ -77,9 +77,9 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
     // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
     // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
 
-    // if $user_id is empty or zero then set it to $sessionID
+    // if $user_id is empty or zero then set it to $visitorID
     if (empty($user_id) || $user_id == 0) {
-        $user_id = $sessionID;
+        $user_id = $visitorID;
     }
 
     // Construct the unique keys

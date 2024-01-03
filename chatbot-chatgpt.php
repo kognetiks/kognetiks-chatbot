@@ -31,13 +31,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Declare Globals here - Ver 1.6.3
 global $wpdb; // Declare the global $wpdb object
-global $sessionID; // Declare the global $sessionID variable
 
-if ($sessionID == '') {
-    session_start();
+// Uniquely identify the visitor - Ver 1.7.4
+global $visitorID;
+$visitorID = get_visitor_id_cookie();
+error_log('$VisitorID ' . $visitorID);
+
+function set_visitor_cookie() {
+    $cookie_name = 'chatbot_chatbot_visitor_id';
+
+    // Check if the cookie is already set.
+    if ( empty( $_COOKIE[ $cookie_name ] ) ) {
+        // Generate a unique ID. You can use other methods to generate a unique ID.
+        $user_id = wp_generate_uuid4();
+
+        // Set the cookie for a duration, e.g., 30 days.
+        setcookie( $cookie_name, $user_id, time() + ( 30 * DAY_IN_SECONDS ), COOKIEPATH, COOKIE_DOMAIN );
+    }
 }
-$sessionID = session_id();
-error_log('Session ID: ' . $sessionID);
+
+add_action( 'init', 'set_visitor_cookie' );
+
+function get_visitor_id_cookie() {
+    $cookie_name = 'chatbot_chatbot_visitor_id';
+
+    if ( isset( $_COOKIE[ $cookie_name ] ) ) {
+        return $_COOKIE[ $cookie_name ];
+    }
+
+    return null;
+}
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
