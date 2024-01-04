@@ -137,7 +137,6 @@ Embark on a journey to elevate your website's interactivity with our Chatbot Cha
 
 With Chatbot ChatGPT installed, you're now equipped to offer a more dynamic, engaging, and responsive experience to your website visitors.
 
-
 == Frequently Asked Questions ==
 
 = How do I obtain an API key for ChatGPT? =
@@ -182,7 +181,7 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 == Changelog ==
 
 = 1.7.5 =
-TBD
+* Added support for WooCommerce product post-type.
 
 = 1.7.4 =
 * Enhanced handling for multi-threaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
