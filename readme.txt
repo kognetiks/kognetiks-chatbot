@@ -181,7 +181,8 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 == Changelog ==
 
 = 1.7.5 =
-* Added support for WooCommerce product post-type.
+* Expanded support TF-IDF indexing for WooCommerce product post-type.
+* Corrected  with Custom GPT Assistant not being selected correctly when usissueing the assistant parameter in the shortcode.
 
 = 1.7.4 =
 * Enhanced handling for multi-threaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.

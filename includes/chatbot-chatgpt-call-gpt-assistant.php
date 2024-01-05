@@ -33,14 +33,14 @@ function createAnAssistant($api_key) {
 }
 
 // Step 3: Add a Message to a Thread
-function addAMessage($threadId, $prompt, $context, $api_key) {
+function addAMessage($thread_Id, $prompt, $context, $api_key) {
 
     // If $context is empty, set it to the default
     if (empty($context)) {
         $context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.";
     }
 
-    $url = "https://api.openai.com/v1/threads/".$threadId."/messages";
+    $url = "https://api.openai.com/v1/threads/".$thread_Id."/messages";
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -64,8 +64,8 @@ function addAMessage($threadId, $prompt, $context, $api_key) {
 }
 
 // Step 4: Run the Assistant
-function runTheAssistant($threadId, $assistantId, $context, $api_key) {
-    $url = "https://api.openai.com/v1/threads/" . $threadId . "/runs";
+function runTheAssistant($thread_Id, $assistantId, $context, $api_key) {
+    $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs";
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -104,10 +104,10 @@ function runTheAssistant($threadId, $assistantId, $context, $api_key) {
 }
 
 // Step 5: Get the Run's Status
-function getTheRunsStatus($threadId, $runId, $api_key) {
+function getTheRunsStatus($thread_Id, $runId, $api_key) {
     $status = "";
     while ($status != "completed") {
-        $url = "https://api.openai.com/v1/threads/".$threadId."/runs/".$runId;
+        $url = "https://api.openai.com/v1/threads/".$thread_Id."/runs/".$runId;
         $headers = array(
             "Content-Type: application/json",
             "OpenAI-Beta: assistants=v1",
@@ -144,8 +144,8 @@ function getTheRunsStatus($threadId, $runId, $api_key) {
 }
 
 // Step 6: Get the Run's Steps
-function getTheRunsSteps($threadId, $runId, $api_key) {
-    $url = "https://api.openai.com/v1/threads/".$threadId."/runs/".$runId."/steps";
+function getTheRunsSteps($thread_Id, $runId, $api_key) {
+    $url = "https://api.openai.com/v1/threads/".$thread_Id."/runs/".$runId."/steps";
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -163,10 +163,10 @@ function getTheRunsSteps($threadId, $runId, $api_key) {
 }
 
 // Step 7: Get the Step's Status
-function getTheStepsStatus($threadId, $runId, $api_key) {
+function getTheStepsStatus($thread_Id, $runId, $api_key) {
     $status = false;
     while (!$status) {
-        $url = "https://api.openai.com/v1/threads/".$threadId."/runs/".$runId."/steps";
+        $url = "https://api.openai.com/v1/threads/".$thread_Id."/runs/".$runId."/steps";
         $headers = array(
             "Content-Type: application/json",
             "OpenAI-Beta: assistants=v1",
@@ -209,8 +209,8 @@ function getTheStepsStatus($threadId, $runId, $api_key) {
 }
 
 // Step 8: Get the Message
-function getTheMessage($threadId, $api_key) {
-    $url = "https://api.openai.com/v1/threads/".$threadId."/messages";
+function getTheMessage($thread_Id, $api_key) {
+    $url = "https://api.openai.com/v1/threads/".$thread_Id."/messages";
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -228,7 +228,7 @@ function getTheMessage($threadId, $api_key) {
 }
 
 // CustomerGPT - Assistants - Ver 1.7.2
-function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $threadId, $user_id, $page_id) {
+function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $thread_Id, $user_id, $page_id) {
 
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Assistant ID: ' . $assistantId);
@@ -240,7 +240,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     global $stopWords;
 
     // If the threadId is not set, create a new thread
-    if (empty($threadId)) {
+    if (empty($thread_Id)) {
         // Step 1: Create an Assistant
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 1: Create an Assistant');
         $assistants_response = createAnAssistant($api_key);
@@ -249,13 +249,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
         // Step 2: Get The Thread ID
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
-        $threadId = $assistants_response["id"];
+        $thread_Id = $assistants_response["id"];
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$threadId ' . $threadId);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_Id ' . $thread_Id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '$assistantId ' . $assistantId);
         // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
-        set_chatbot_chatgpt_threads($threadId, $assistantId, $user_id, $page_id);
+        set_chatbot_chatgpt_threads($thread_Id, $assistantId, $user_id, $page_id);
     }
 
     // Step 1: Create an Assistant
@@ -266,10 +266,10 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
     // Step 2: Get The Thread ID
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
-    // $threadId = $assistants_response["id"];
+    // $thread_Id = $assistants_response["id"];
     // DIAG - Print the threadId
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$threadId ' . $threadId);
-    // set_chatbot_chatgpt_threads($threadId, $assistantId);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_Id ' . $thread_Id);
+    // set_chatbot_chatgpt_threads($thread_Id, $assistantId);
 
 
     // Conversation Context - Ver 1.7.2.1
@@ -299,13 +299,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     // Step 3: Add a Message to a Thread
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3: Add a Message to a Thread');
     $prompt = $message;
-    $assistants_response = addAMessage($threadId, $prompt, $context, $api_key);
+    $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
 
     // Step 4: Run the Assistant
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 4: Run the Assistant');
-    $assistants_response = runTheAssistant($threadId, $assistantId, $context, $api_key);
+    $assistants_response = runTheAssistant($thread_Id, $assistantId, $context, $api_key);
 
     // Check if the response is not an array or is a string indicating an error
     if (!is_array($assistants_response) || is_string($assistants_response)) {
@@ -324,21 +324,21 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
     // Step 5: Get the Run's Status
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 5: Get the Run\'s Status');
-    getTheRunsStatus($threadId, $runId, $api_key);
+    getTheRunsStatus($thread_Id, $runId, $api_key);
 
     // Step 6: Get the Run's Steps
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 6: Get the Run\'s Steps');
-    $assistants_response = getTheRunsSteps($threadId, $runId, $api_key);
+    $assistants_response = getTheRunsSteps($thread_Id, $runId, $api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
 
     // Step 7: Get the Step's Status
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 7: Get the Step\'s Status');
-    getTheStepsStatus($threadId, $runId, $api_key);
+    getTheStepsStatus($thread_Id, $runId, $api_key);
 
     // Step 8: Get the Message
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 8: Get the Message');
-    $assistants_response = getTheMessage($threadId, $api_key);
+    $assistants_response = getTheMessage($thread_Id, $api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', '$assistants_response: ' . $assistants_response);
 
