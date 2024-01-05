@@ -21,6 +21,7 @@ Unlock the potential of personalized digital interaction. Use the Custom GPT Ass
 
 **🔀 Multiple Assistants, Multiple Roles**
 Why settle for one when you can have more? With our plugin, deploy multiple Custom GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
+
 **Version 1.7.3 Update** Allows for virturally unlimited Custom GPT Assistants, allow you to deploy a unique assistant whereever you placed the short code.  Simply pass the "asst_" ID to the short code as one of the parameters.
 
 Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
