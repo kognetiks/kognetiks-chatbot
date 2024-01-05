@@ -49,12 +49,13 @@ function set_chatbot_chatgpt_threads($t_threadId, $t_assistantId, $user_id, $pag
     // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
 
     // Create unique keys for transients
-    $threadId_thread_key = 'chatbot_chatgpt_threadId_' . $user_id . '_' . $page_id;
+    $thread_Id_thread_key = 'chatbot_chatgpt_threadId_' . $user_id . '_' . $page_id;
     $assistantId_thread_key = 'chatbot_chatgpt_assistantId_' . $user_id . '_' . $page_id;
 
     // Store the style and the assistant value with unique keys
-    set_transient($threadId_thread_key, $t_threadId, 60*60); // Store for 1 hour
-    set_transient($assistantId_thread_key, $t_assistantId, 60*60); // Store for 1 hour
+    // Store transients for 1 day
+    set_transient($thread_Id_thread_key, $t_threadId, 60*60*24); // Store for 1 hour
+    set_transient($assistantId_thread_key, $t_assistantId, 60*60*24); // Store for 1 hour
 
 }
 
@@ -83,11 +84,11 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
     }
 
     // Construct the unique keys
-    $threadId_thread_key = 'chatbot_chatgpt_threadId_' . $user_id . '_' . $page_id;
+    $thread_Id_thread_key = 'chatbot_chatgpt_threadId_' . $user_id . '_' . $page_id;
     $assistantId_thread_key = 'chatbot_chatgpt_assistantId_' . $user_id . '_' . $page_id;
 
     // Retrieve the stored values
-    $t_threadId = get_transient($threadId_thread_key);
+    $t_threadId = get_transient($thread_Id_thread_key);
     if ($t_threadId === false) {
         $t_threadId = '';
     }
@@ -110,8 +111,8 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
 
     // Return the values, also handle the case where the transient might have expired
     return array(
-        'threadId' => $t_threadId,
-        'assistantId' => $t_assistantId
+        'threadID' => $t_threadId,
+        'assistantID' => $t_assistantId
     );
 
 }

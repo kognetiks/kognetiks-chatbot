@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.2
-Stable tag: 1.7.4
+Stable tag: 1.7.5
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -21,6 +21,7 @@ Unlock the potential of personalized digital interaction. Use the Custom GPT Ass
 
 **🔀 Multiple Assistants, Multiple Roles**
 Why settle for one when you can have more? With our plugin, deploy multiple Custom GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
+
 **Version 1.7.3 Update** Allows for virturally unlimited Custom GPT Assistants, allow you to deploy a unique assistant whereever you placed the short code.  Simply pass the "asst_" ID to the short code as one of the parameters.
 
 Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
@@ -137,7 +138,6 @@ Embark on a journey to elevate your website's interactivity with our Chatbot Cha
 
 With Chatbot ChatGPT installed, you're now equipped to offer a more dynamic, engaging, and responsive experience to your website visitors.
 
-
 == Frequently Asked Questions ==
 
 = How do I obtain an API key for ChatGPT? =
@@ -180,6 +180,10 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 16. Settings and Options
 
 == Changelog ==
+
+= 1.7.5 =
+* Expanded support TF-IDF indexing for WooCommerce product post-type.
+* Corrected  with Custom GPT Assistant not being selected correctly when usissueing the assistant parameter in the shortcode.
 
 = 1.7.4 =
 * Enhanced handling for multi-threaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
