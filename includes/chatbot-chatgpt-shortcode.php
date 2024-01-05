@@ -61,6 +61,7 @@ function chatbot_chatgpt_shortcode($atts) {
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
     $bot_name = esc_attr(get_option('chatgpt_bot_name', 'Chatbot ChatGPT'));
     $chatgpt_chatbot_bot_prompt = esc_attr(get_option('chatgpt_chatbot_bot_prompt', 'Enter your question ...'));
+    $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
     // global $chatbot_chatgpt_enable_custom_buttons;
@@ -83,10 +84,19 @@ function chatbot_chatgpt_shortcode($atts) {
             <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
             <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
             <button id="chatbot-chatgpt-submit">
-                <img src="<?php echo plugins_url('../assets/icons/paper-airplane-icon.png', __FILE__); ?>" alt="Send">
+                <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
             </button>
-            </div>
-            <!-- UPLOAD FILES FOR CUSTOM GPTs GOES HERE -->
+            <?php
+            if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
+            ?>
+                <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
+                &nbsp;
+                <button id="chatbot-chatgpt-upload-file">
+                    <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
+                </button>
+            <?php
+            }
+            ?>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
         <i class="dashicons dashicons-format-chat"></i>
@@ -110,8 +120,19 @@ function chatbot_chatgpt_shortcode($atts) {
                 <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
                 <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
                 <button id="chatbot-chatgpt-submit">
-                    <img src="<?php echo plugins_url('../assets/icons/paper-airplane-icon.png', __FILE__); ?>" alt="Send">
+                    <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
                 </button>
+                <?php
+                if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
+                ?>
+                    <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
+                    &nbsp;
+                    <button id="chatbot-chatgpt-upload-file">
+                        <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
+                    </button>
+                <?php
+                }
+                ?>
             </div>
             <!-- UPLOAD FILES FOR CUSTOM GPTs GOES HERE -->
             <!-- Custom buttons - Ver 1.6.5 -->

@@ -184,6 +184,17 @@
     cursor: pointer;
 }
 
+/* File Upload Button - Ver 1.7.6 */
+#chatbot-chatgpt-upload-file {
+    /* background-color: #f1f1f1; */
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 6px 12px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
 /* #chatbot-chatgpt-submit img {
     background-color: #f1f1f1;
 } */
