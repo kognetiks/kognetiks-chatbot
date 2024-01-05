@@ -55,6 +55,17 @@ function chatbot_chatgpt_use_custom_gpt_assistant_id_callback($args) {
     }
 }
 
+// Allow file uploads field callback - Ver 1.7.6
+function chatbot_chatgpt_allow_file_uploads_callback($args) {
+    $allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_allow_file_uploads" name="chatbot_chatgpt_allow_file_uploads">
+        <option value="Yes" <?php selected( $allow_file_uploads, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $allow_file_uploads, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php
+}
+
 // CustomGPT Assistant Id field callback - Ver 1.6.7
 function chatbot_chatgpt_assistant_id_callback($args) {
     $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', 'Please provide the Custom GPT Assistant Id.'));

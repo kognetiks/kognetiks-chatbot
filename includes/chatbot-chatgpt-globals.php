@@ -12,6 +12,7 @@
 if ( ! defined( 'WPINC' ) ) {
     die;
 }
+
 // Declare the $stopWords array as global
 // List of common stop words to be ignored
 global $stopWords;

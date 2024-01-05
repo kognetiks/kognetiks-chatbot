@@ -69,6 +69,7 @@ function chatbot_chatgpt_settings_init() {
     
     // Settings Custom GPTs tab - Ver 1.7.2
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allow_file_uploads'); // Ver 1.7.6
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id'); // Ver 1.6.7
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
 
@@ -84,6 +85,15 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_use_custom_gpt_assistant_id',
         'Use Custom GPT Assistant Id',
         'chatbot_chatgpt_use_custom_gpt_assistant_id_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    // Allow file uploads to the Assistant - Ver 1.7.6
+    add_settings_field(
+        'chatbot_chatgpt_allow_file_uploads',
+        'Allow File Uploads',
+        'chatbot_chatgpt_allow_file_uploads_callback',
         'chatbot_chatgpt_custom_gpts',
         'chatbot_chatgpt_custom_gpts_section'
     );

@@ -161,6 +161,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_custom_button_url_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',
         'chatbot_chatgpt_custom_button_url_2' => '',
+        'chatbot_chatgpt_allow_file_uploads' => 'No'
     );
 
     // Revised for Ver 1.5.0 
@@ -177,7 +178,6 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatgpt_max_tokens_setting',
         'chatgpt_width_setting',
         'chatbot_chatgpt_diagnostics',
-        // Avatar Options - Ver 1.5.0
         'chatgpt_avatar_icon_setting',
         'chatgpt_avatar_icon_url_setting',
         'chatgpt_custom_avatar_icon_setting',
@@ -187,7 +187,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_custom_button_url_1',
         'chatbot_chatgpt_custom_button_name_2',
         'chatbot_chatgpt_custom_button_url_2',
-
+        'chatbot_chatgpt_allow_file_uploads'
     );
 
     $chatbot_settings = array();

@@ -113,6 +113,8 @@ function chatbot_chatgpt_settings_page_html() {
                         let chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
                         let chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
                         let chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
+                        // Allow File Uploads - Ver 1.7.6
+                        let chatgptAllowFileUploadsInput = document.getElementById('chatbot_chatgpt_allow_file_uploads');
 
                         // Update the local storage with the input values, if inputs exist
                         if(chatgptNameInput) localStorage.setItem('chatgpt_bot_name', chatgptNameInput.value);
@@ -137,6 +139,8 @@ function chatbot_chatgpt_settings_page_html() {
                         if(chatgptCustomButtonURL1Input) localStorage.setItem('chatbot_chatgpt_custom_button_url_1', chatgptCustomButtonURL1Input.value);
                         if(chatgptCustomButtonName2Input) localStorage.setItem('chatbot_chatgpt_custom_button_name_2', chatgptCustomButtonName2Input.value);
                         if(chatgptCustomButtonURL2Input) localStorage.setItem('chatbot_chatgpt_custom_button_url_2', chatgptCustomButtonURL2Input.value);
+                        // Allow File Uploads - Ver 1.7.6
+                        if(chatgptAllowFileUploadsInput) localStorage.setItem('chatbot_chatgpt_allow_file_uploads', chatgptAllowFileUploadsInput.value);
                     });
                 }
             });
