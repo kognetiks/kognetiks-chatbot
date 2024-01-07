@@ -96,3 +96,91 @@ function update_interaction_tracking() {
     return;
 
 }
+
+// Converation Tracking - Ver 1.7.6
+function create_conversation_logging_table() {
+    global $wpdb;
+    global $sessionId;
+    global $thread_Id;
+    global $assistant_Id;
+    global $user_id;
+    global $page_id;
+
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log'; 
+
+    // SQL to create the conversation logging table
+    $sql = "CREATE TABLE $table_name (
+        id mediumint(9) NOT NULL AUTO_INCREMENT,
+        session_id VARCHAR(255) NOT NULL,
+        user_id VARCHAR(255),
+        page_id VARCHAR(255),
+        interaction_time datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        user_type ENUM('chatbot', 'visitor') NOT NULL,
+        thread_id VARCHAR(255),
+        assistant_id VARCHAR(255),
+        message_text text NOT NULL,
+        PRIMARY KEY  (id),
+        INDEX (session_id),
+        INDEX (user_id)
+    );";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+
+    // Log errors or notify admin if there was an error
+    if (!empty($wpdb->last_error)) {
+        // DIAG - Diagnostics
+        chatbot_chatgpt_back_trace( 'ERROR', 'Error creating conversation logging table: ' . $wpdb->last_error);
+    }
+
+    return;
+
+}
+
+// Hook to run the function during plugin activation - Ver 1.7.6
+register_activation_hook(__FILE__, 'create_conversation_logging_table');
+
+// Append message to conversation log in the database - Ver 1.7.6
+function append_message_to_conversation_log($session_id, $user_id, $page_id, $user_type, $thread_id, $assistant_id, $message_text) {
+    global $wpdb;
+    global $sessionId;
+    global $thread_Id;
+    global $assistant_Id;
+    global $user_id;
+    global $page_id;
+
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+
+    // Check if conversation logging is enabled
+    if (get_option('chatbot_chatgpt_enable_conversation_logging') !== 'On') {
+        // Logging is disabled, so just return without doing anything
+        return;
+    }
+
+    // Prepare and execute the SQL statement
+    $insert_result = $wpdb->insert(
+        $table_name,
+        array(
+            'session_id' => $session_id,
+            'user_id' => $user_id,
+            'page_id' => $page_id,
+            'user_type' => $user_type,
+            'thread_id' => $thread_id,
+            'assistant_id' => $assistant_id,
+            'message_text' => $message_text
+        ),
+        array(
+            '%s', '%s', '%s', '%s', '%s', '%s', '%s'
+        )
+    );
+
+    // Check if the insert was successful
+    if ($insert_result === false) {
+        // DIAG - Diagnostics
+        chatbot_chatgpt_back_trace( 'ERROR', "Failed to insert chat message: " . $wpdb->last_error);
+        return false;
+    }
+
+    return true;
+
+}

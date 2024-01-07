@@ -16,6 +16,9 @@ if ( ! defined( 'WPINC' ) ) {
 // Upload Files to the Assistant
 function chatbot_chatgpt_upload_file_to_assistant () {
 
+    // DIAG - Diagnostic - Ver 1.7.6
+    chatbot_chatgpt_back_trace( 'NOTICE', "Entering function chatbot_chatgpt_upload_file_to_assistant()");
+
     // Get the API key
     $api_key = get_option('chatgpt_api_key');
     if (empty($api_key)) {
@@ -29,6 +32,16 @@ function chatbot_chatgpt_upload_file_to_assistant () {
 
     // Ask the user to select a file to upload
     $filePath = $_FILES['file']['tmp_name'];
+    
+    // Check if the file is empty or there is an error
+    if (empty($filePath) || $_FILES['file']['error']) {
+        // If the file is empty or there is an error, then return an error
+        $response = array(
+            'status' => 'error',
+            'message' => 'Please select a file to upload.'
+        );
+        return $response;
+    }
 
     // Initialize cURL session
     $ch = curl_init();

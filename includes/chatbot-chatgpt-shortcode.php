@@ -90,7 +90,8 @@ function chatbot_chatgpt_shortcode($atts) {
             if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
             ?>
                 <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
-                &nbsp;
+                <!-- &nbsp; -->
+                <input type="file" id="chatbot-chatgpt-upload-file" style="display: none;" />
                 <button id="chatbot-chatgpt-upload-file">
                     <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
                 </button>
@@ -126,7 +127,7 @@ function chatbot_chatgpt_shortcode($atts) {
                 if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
                 ?>
                     <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
-                    &nbsp;
+                    <!-- &nbsp; -->
                     <button id="chatbot-chatgpt-upload-file">
                         <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
                     </button>

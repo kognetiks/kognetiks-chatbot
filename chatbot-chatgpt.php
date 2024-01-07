@@ -60,6 +60,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-settings.p
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
@@ -122,13 +123,16 @@ add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
 
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
-    // Ensure the Dashicons font is properly enqueued - Ver 1.1.0
-    wp_enqueue_style( 'dashicons' );
+
+    // Enqueue the styles
+    wp_enqueue_style('dashicons');
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
+
+    // Enqueue the scripts
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
-    // Enqueue the chatbot-chatgpt-local.js file - Ver 1.4.1
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
-  
+    wp_enqueue_script('chatbot-chatgpt-upload-trigger', plugins_url('assets/js/chatbot-chatgpt-upload-trigger.js', __FILE__), array('jquery'), '1.0', true);
+
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
     $page_id = get_the_ID();
@@ -136,7 +140,6 @@ function chatbot_chatgpt_enqueue_scripts() {
         'user_id' => $user_id,
         'page_id' => $page_id
     );
-    wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
 
     // Defaults for Ver 1.6.1
     $defaults = array(
@@ -201,6 +204,10 @@ function chatbot_chatgpt_enqueue_scripts() {
     }
 
     $chatbot_settings['iconBaseURL'] = plugins_url( 'assets/icons/', __FILE__ );
+
+    // Localize the data for javascripts
+    wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
+
     wp_localize_script('chatbot-chatgpt-js', 'plugin_vars', array(
         'pluginUrl' => plugins_url('', __FILE__ ),
     ));
@@ -208,6 +215,13 @@ function chatbot_chatgpt_enqueue_scripts() {
     wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
+        'pluginUrl' => plugins_url('', __FILE__ ),
+        'ajax_url' => admin_url('admin-ajax.php'),
+    ));
+
+    // Upload files - Ver 1.7.6
+    wp_localize_script('chatbot-chatgpt-upload-trigger-js', 'chatbot_chatgpt_params', array(
+        'pluginUrl' => plugins_url('', __FILE__ ),
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
 
@@ -242,14 +256,12 @@ function chatbot_chatgpt_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
-
 // Settings and Deactivation Links - Ver - 1.5.0
 function enqueue_jquery_ui() {
     wp_enqueue_style('wp-jquery-ui-dialog');
     wp_enqueue_script('jquery-ui-dialog');
 }
 add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
-
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
@@ -385,8 +397,13 @@ function chatbot_chatgpt_send_message() {
 
 }
 
+// Add action to send messages - Ver 1.0.0
 add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
+
+// Add action to upload files - Ver 1.7.6
+add_action('wp_ajax_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
 
 // Settings and Deactivation - Ver 1.5.0
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');

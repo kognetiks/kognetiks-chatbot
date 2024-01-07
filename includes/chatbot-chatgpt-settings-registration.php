@@ -402,6 +402,7 @@ function chatbot_chatgpt_settings_init() {
 
     // Reporting settings tab - Ver 1.6.1
     register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_reporting_period');
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_enable_conversation_logging');
 
     add_settings_section(
         'chatbot_chatgpt_reporting_section',
@@ -414,6 +415,14 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_reporting_period',
         'Reporting Period',
         'chatbot_chatgpt_reporting_period_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_enable_conversation_logging',
+        'Enable Conversation Logging',
+        'chatbot_chatgpt_enable_conversation_logging_callback',
         'chatbot_chatgpt_reporting',
         'chatbot_chatgpt_reporting_section'
     );

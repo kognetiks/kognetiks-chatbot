@@ -18,6 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_reporting_section_callback($args) {
     ?>
     <div>
+        <p>Use these setting to select the reporting period for visitor interaction.  By default converation logging is initially turned off.  Please review the section <b>Covnersation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support#chatbot-conversation-log">Support</a> tab of this plugin for more details.</p>
         <h3>Visitor Interactions</h3>        
         <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p>
     </div>
@@ -36,6 +37,20 @@ function chatbot_chatgpt_reporting_period_callback($args) {
         <!-- <option value="<?php echo esc_attr( 'Weekly' ); ?>" <?php selected( $output_choice, 'Weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option> -->
         <option value="<?php echo esc_attr( 'Monthly' ); ?>" <?php selected( $output_choice, 'Monthly' ); ?>><?php echo esc_html( 'Monthly' ); ?></option>
         <option value="<?php echo esc_attr( 'Yearly' ); ?>" <?php selected( $output_choice, 'Yearly' ); ?>><?php echo esc_html( 'Yearly' ); ?></option>
+    </select>
+    <?php
+}
+
+// Conversation Logging - Ver 1.7.6
+function  chatbot_chatgpt_enable_conversation_logging_callback($args) {
+    // Get the saved chatbot_chatgpt_enable_conversation_logging value or default to "Off"
+    $output_choice = esc_attr(get_option('chatbot_chatgpt_enable_conversation_logging', 'Off'));
+    // DIAG - Log the output choice
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_enable_conversation_logging' . $output_choice);
+    ?>
+    <select id="chatbot_chatgpt_enable_conversation_logging" name="chatbot_chatgpt_enable_conversation_logging">
+        <option value="<?php echo esc_attr( 'On' ); ?>" <?php selected( $output_choice, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
+        <option value="<?php echo esc_attr( 'Off' ); ?>" <?php selected( $output_choice, 'Off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
     </select>
     <?php
 }
