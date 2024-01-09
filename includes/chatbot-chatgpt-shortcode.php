@@ -22,10 +22,10 @@ function chatbot_chatgpt_shortcode($atts) {
     // [chatbot_chatgpt] - Default values, floating style, uses OpenAI's ChatGPT
     // [chatbot_chatgpt style="floating"] - Floating style, uses OpenAI's ChatGPT
     // [chatbot_chatgpt style="embedded"] - Embedded style, uses OpenAI's ChatGPT
-    // [chatbot_chatgpt style="floating" assistant="primary"] - Floating style, Custom GPT Assistant as set in Primary setting
-    // [chatbot_chatgpt style="embedded" assistant="alternate"] - Embedded style, Custom GPT Assistant as set in Alternate setting
-    // [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Floating style using a Custom GPT Assistant ID
-    // [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Embedded style using a Custom GPT Assistant ID
+    // [chatbot_chatgpt style="floating" assistant="primary"] - Floating style, GPT Assistant as set in Primary setting
+    // [chatbot_chatgpt style="embedded" assistant="alternate"] - Embedded style, GPT Assistant as set in Alternate setting
+    // [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Floating style using a GPT Assistant ID
+    // [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Embedded style using a GPT Assistant ID
 
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
@@ -81,7 +81,8 @@ function chatbot_chatgpt_shortcode($atts) {
         </div> -->
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
-            <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
+            <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>"> -->
+            <textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>"></textarea>
             <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
             <button id="chatbot-chatgpt-submit">
                 <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
@@ -91,10 +92,15 @@ function chatbot_chatgpt_shortcode($atts) {
             ?>
                 <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
                 <!-- &nbsp; -->
-                <input type="file" id="chatbot-chatgpt-upload-file" style="display: none;" />
+                <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
                 <button id="chatbot-chatgpt-upload-file">
                     <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
                 </button>
+                <script type="text/javascript">
+                    document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
+                        document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                    });
+                </script>
             <?php
             }
             ?>
@@ -118,7 +124,8 @@ function chatbot_chatgpt_shortcode($atts) {
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
             <div id="chatbot-chatgpt-input">
-                <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
+                <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>"> -->
+                <textarea id="chatbot-chatgpt-message" rows="1" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>"></textarea>
                 <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
                 <button id="chatbot-chatgpt-submit">
                     <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
@@ -128,9 +135,11 @@ function chatbot_chatgpt_shortcode($atts) {
                 ?>
                     <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
                     <!-- &nbsp; -->
+                    <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
                     <button id="chatbot-chatgpt-upload-file">
                         <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
                     </button>
+
                 <?php
                 }
                 ?>

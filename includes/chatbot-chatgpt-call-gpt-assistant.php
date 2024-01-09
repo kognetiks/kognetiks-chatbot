@@ -129,7 +129,7 @@ function getTheRunsStatus($thread_Id, $runId, $api_key) {
             // Handle error here
             $status = "failed";
             // DIAG - Diagnostics
-            // chatbot_chatgpt_back_trace( 'ERROR', "Error - Custom GPT Assistant - Step 5");
+            // chatbot_chatgpt_back_trace( 'ERROR', "Error - GPT Assistant - Step 5");
             exit;
         }
 
@@ -137,8 +137,9 @@ function getTheRunsStatus($thread_Id, $runId, $api_key) {
         // chatbot_chatgpt_back_trace( 'NOTICE', '$responseArray: ' . $responseArray);
         
         if ($status != "completed") {
-            // Sleep for 5 seconds before polling again
-            sleep(5);
+            // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
+            // sleep(5);
+            usleep(500000);
         }
     }
 }
@@ -188,7 +189,7 @@ function getTheStepsStatus($thread_Id, $runId, $api_key) {
             // DIAG - Handle error here
             $status = "failed";
             // DIAG - Diagnostics
-            // chatbot_chatgpt_back_trace( 'ERROR', "Error - Custom GPT Assistant - Step 7.");
+            // chatbot_chatgpt_back_trace( 'ERROR', "Error - GPT Assistant - Step 7.");
             exit;
         }
 
@@ -202,8 +203,9 @@ function getTheStepsStatus($thread_Id, $runId, $api_key) {
 
         if (!$status) {
             print_r($responseArray);
-            // Sleep for 5 seconds before polling again
-            sleep(5);
+            // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
+            // sleep(5);
+            usleep(500000);
         }
     }
 }

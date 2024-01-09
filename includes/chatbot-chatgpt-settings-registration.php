@@ -75,16 +75,16 @@ function chatbot_chatgpt_settings_init() {
 
     add_settings_section(
         'chatbot_chatgpt_custom_gpts_section',
-        'Custom GPT Assistant Settings',
-        'chatbot_chatgpt_custom_gpts_section_callback',
+        'GPT Assistant Settings',
+        'chatbot_chatgpt_gpt_assistants_section_callback',
         'chatbot_chatgpt_custom_gpts'
     );
     
-    // Use Custom GPT Assistant Id (Yes or No) - Ver 1.6.7
+    // Use GPT Assistant Id (Yes or No) - Ver 1.6.7
     add_settings_field(
         'chatbot_chatgpt_use_custom_gpt_assistant_id',
-        'Use Custom GPT Assistant Id',
-        'chatbot_chatgpt_use_custom_gpt_assistant_id_callback',
+        'Use GPT Assistant Id',
+        'chatbot_chatgpt_use_gpt_assistant_id_callback',
         'chatbot_chatgpt_custom_gpts',
         'chatbot_chatgpt_custom_gpts_section'
     );

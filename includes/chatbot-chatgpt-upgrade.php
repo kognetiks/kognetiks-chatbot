@@ -13,157 +13,175 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// FIXME - THIS IS NOT WORKING AS EXPECTED - Ver 1.6.7
+// Activation Hook - Revised 1.7.6
+function chatbot_chatgpt_activate() {
 
-// If the plugin is updated, run the upgrade function.
+    // DIAG - Log the activation
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation started');
+
+    // Logic to run during activation
+    chatbot_chatgpt_upgrade();
+
+    // DIAG - Log the activation
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation completed');
+
+    return;
+
+}
+
+// Deactivation Hook - Revised 1.7.6
+function chatbot_chatgpt_deactivate() {
+
+    // DIAG - Log the activation
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin deactivation started');
+
+    // Logic to run during deactivation
+    // FIXME - THIS IS NOT DELETEING THE PLUGIN - JUST DEACTIVATION
+
+    // DIAG - Log the activation
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin deactivation completed');
+
+    return;
+
+}
+
+// Upgrade Hook for Plugin Update - Revised 1.7.6
 function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 
-    // DIAG - Log the upgrade.
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade stated');
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$upgrader_object: ' . print_r( $upgrader_object, true ));
-    // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => '$options: ', 'options' => $options]);
+    // DIAG - Log the activation
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
 
-    // Check if the plugin was updated
-    if (is_array($options) && isset($options['action']) && isset($options['type']) && $options['action'] == 'update' && $options['type'] == 'plugin' ) {
+    if ($options['action'] == 'update' && $options['type'] == 'plugin') {
         foreach($options['plugins'] as $plugin) {
-            if ($plugin == plugin_basename(__FILE__)) {
-                // DIAG - Log the action.
-                // chatbot_chatgpt_back_trace( 'SUCCESS', 'Plugin upgraded.' );
-                // The plugin was updated.
-                // Now run the upgrade function.
+            if (plugin_basename(__FILE__) === $plugin) {
+
+                // Logic to run during upgrade
                 chatbot_chatgpt_upgrade();
+
+                break;
+
             }
         }
     }
 
-    // DIAG - Log the upgrade.
-    // chatbot_chatgpt_back_trace( 'SUCCESS', 'Plugin upgrade completed');
+    // DIAG - Log the activation
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
 
     return;
 
 }
-// FIXME - THIS IS NOT WORKING AS EXPECTED - Ver 1.6.7
-add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10, 2);
 
-// If the plugin is activated or deactivated, run the upgrade function.
-function chatbot_chatgpt_upgrade_activation_deactivation($upgrader_object, $options) {
-
-    // DIAG - Log the upgrade.
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation/deactivation started');
-    // chatbot_chatgpt_back_trace( 'NOTICE', "$upgrader_object: " . print_r( $upgrader_object, true ));
-    // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => '$options: ', 'options' => $options]);
-
-    // Check if our plugin was activated
-    if (is_array($options) && isset($options['action']) && isset($options['type']) && $options['action'] == 'activate' && $options['type'] == 'plugin' ) {
-        foreach($options['plugins'] as $plugin) {
-            if ($plugin == plugin_basename(__FILE__)) {
-                // DIAG - Log the action.
-                // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation');
-                // The plugin was activated.
-                // Run the upgrade function.
-                chatbot_chatgpt_upgrade();
-            }
-        }
-    }
-
-    // Check if our plugin was deactivated
-    if (is_array($options) && isset($options['action']) && isset($options['type']) && $options['action'] == 'deactivate' && $options['type'] == 'plugin' ) {
-        foreach($options['plugins'] as $plugin) {
-            if ($plugin == plugin_basename(__FILE__)) {
-                // DIAG - Log the action.
-                // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin deactivation');
-                // The plugin was deactivated.
-                // TODO - Add code to run when plugin is deactivated.
-            }
-        }
-    }
-    
-    // DIAG - Log the upgrade.
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'COMPLETED: chatbot_chatgpt_upgrade_activation_deactinvation');
-
-    return;
-
-}
-// FIXME - THIS IS NOT WORKING AS EXPECTED - Ver 1.6.7
-register_activation_hook(__FILE__, 'chatbot_chatgpt_upgrade_activation_deactivation');
-
-// If updating the plugin, run the upgrade function.
+// Upgrade Logic - Revised 1.7.6
 function chatbot_chatgpt_upgrade() {
 
-    // DIAG - Log the upgrade.
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
+    // DIAG - Log the upgrade
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
 
-    // Get the current version of the plugin.
-    $version = get_option( 'chatbot_chatgpt_plugin_version' );
-
-    // If the plugin is not installed, set the version to 0.
-    if ( ! $version ) {
-        $version = '0';
-    }
-
-    include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-
-    // If the plugin is installed but not activated, set the version to 0.
-    if ( $version && ! is_plugin_active( plugins_url('', __FILE__ ) . '/chatbot-chatgpt.php' ) ) {
-        $version = '0';
-    }
-
-    // If the plugin is installed and activated, run the upgrade function.
-    if ( $version && is_plugin_active( 'chatbot-chatgpt/chatbot-chatgpt.php' ) ) {
-        // If the plugin is version 1.0.0 or older, run the upgrade function.
-        if ( version_compare( $version, '1.6.7', '<' ) ) {
-            chatbot_chatgpt_upgrade_167();
-            // DIAG - Log the currrent plugin version.
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Current plugin version is ' . $version );
-        }
-    }
-
-    // DIAG - Log the upgrade.
-    // chatbot_chatgpt_back_trace('SUCCESS', 'Upgrade completed.' );
-
-    return;
-}
-
-
-// Udgrade the plugin to version 1.6.7.
-function chatbot_chatgpt_upgrade_167() {
-
-    // DIAG - Log the upgrade.
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Upgrade started for version 1.6.7');
-
-    // Determine if option chatbot_chatgpt_crawler_status is in the options table.
-    // If it is then remove it.
+    // Removed obsolete or replaced options
     if ( get_option( 'chatbot_chatgpt_crawler_status' ) ) {
         delete_option( 'chatbot_chatgpt_crawler_status' );
+        chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_crawler_status option deleted');
     }
 
-    // Determine if option chatbot_chatgpt_diagnostics is in the options table.
-    // If it is and the value is null or empty or blank then set it to No.
+    // Add new or replaced options - chatbot_chatgpt_diagnostics
     if ( get_option( 'chatbot_chatgpt_diagnostics' ) ) {
         $diagnostics = get_option( 'chatbot_chatgpt_diagnostics' );
-        if ( ! $diagnostics ) {
+        if ( !$diagnostics || $diagnostics == '' || $diagnostics == ' ' ) {
             update_option( 'chatbot_chatgpt_diagnostics', 'No' );
         }
-        if ( $diagnostics == '' ) {
-            update_option( 'chatbot_chatgpt_diagnostics', 'No' );
-        }
-        if ( $diagnostics == ' ' ) {
-            update_option( 'chatbot_chatgpt_diagnostics', 'No' );
-        }
+        chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_diagnostics option updated');
     }
 
-    // Determine if option chatgpt_plugin_version is in the options table.
-    // If it is then remove it and add option chatbot_chatgpt_plugin_version only chatbot_chatgpt_plugin_version isn't in the options table.
-    if ( get_option( 'chatgpt_plugin_version' ) ) {
-        delete_option( 'chatgpt_plugin_version' );
-        if ( ! get_option( 'chatbot_chatgpt_plugin_version' ) ) {
-            add_option( 'chatbot_chatgpt_plugin_version', '1.6.7' );
-        }
+    // Add new or replaced options - chatbot_chatgpt_plugin_version
+    // If the old option exists, delete it
+    if (get_option('chatgpt_plugin_version')) {
+        delete_option('chatgpt_plugin_version');
+        // DIAG - Log the old option deletion
+        chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_plugin_version option deleted');
     }
 
-    // DIAG - Log the upgrade.
-    // chatbot_chatgpt_back_trace( 'SUCCESS', 'Upgrade completed for version 1.6.7');
+    // FIXME - DETERMINE WHAT OTHER 'OLD' OPTIONS SHOULD BE DELETED
+    // FIXME - DETERMINE WHAT OPTION NAMES NEED TO BE CHANGED (DELETE, THEN REPLACE)
+
+    // Add/update the option - chatbot_chatgpt_plugin_version
+    $plugin_version = get_plugin_version();
+    update_option('chatbot_chatgpt_plugin_version', $plugin_version);
+    // DIAG - Log the plugin version
+    chatbot_chatgpt_back_trace('NOTICE', 'chatbot_chatgpt_plugin_version option created');
+
+    // Add new/replaced options - chatbot_chatgpt_interactions
+    create_chatbot_chatgpt_interactions_table();
+    // DIAG - Log the table creation
+    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_interactions table created');
+
+    // Add new/replaced options - create_conversation_logging_table
+    create_conversation_logging_table();
+    // DIAG - Log the table creation
+    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log table created');
+
+    // DIAG - Log the upgrade compelete
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade completed');
 
     return;
 
 }
+
+// Upgrade Logic - Revised 1.7.6
+function chatbot_chatgpt_uninstall(){
+    
+        // DIAG - Log the uninstall
+        chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin uninstall started');
+    
+        // Removed obsolete or replaced options
+        // FIXME - Ask what data should be removed
+        // TBD
+    
+        // DIAG - Log the uninstall
+        chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin uninstall completed');
+
+        return;
+}
+
+// Determine if the plugin is installed
+function get_plugin_version() {
+
+    if (!function_exists('get_plugin_data')) {
+        require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+    }
+
+    $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . '../chatbot-chatgpt.php');
+    $plugin_version = $plugin_data['Version'];
+
+    // DIAG - Log the plugin version
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin version '. $plugin_version);
+
+    return $plugin_version;
+
+}
+
+// Define version number - Ver 1.6.3
+// define('CHATBOT_CHATGPT_PLUGIN_VERSION', '1.6.3');
+
+// // Check version number - Ver 1.6.3
+// function chatbot_chatgpt_check_version() {
+//     $saved_version = esc_attr(get_option('chatbot_chatgpt_plugin_version'));
+
+//     if ($saved_version === false || version_compare(CHATBOT_CHATGPT_PLUGIN_VERSION, $saved_version, '>')) {
+//         // Do this for all version upgrades or fresh installs
+//         create_chatbot_chatgpt_interactions_table();
+
+//         if ($saved_version !== false && version_compare($saved_version, '1.6.3', '<')) {
+//             // Do anything specific for upgrading to 1.6.3 or greater
+//             // (but not for fresh installs)
+//         }
+
+//         // Do any other specific version upgrade checks here
+
+//         update_option('chatbot_chatgpt_plugin_version', CHATBOT_CHATGPT_PLUGIN_VERSION);
+//     }
+
+//     return;
+
+// }
+// // Hook it to 'plugins_loaded' so it runs on every WP load
+// add_action('plugins_loaded', 'chatbot_chatgpt_check_version');

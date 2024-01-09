@@ -80,11 +80,11 @@ function chatbot_chatgpt_support_section_callback($args) {
     <div id=chatgpt-and-custom-gpt-assistants>
         <h2>ChatGPT and Custom GPT Assistants</h2>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li>In Settings > API/Model, you can select to use ChatGPT (i.e., original) or create a Custom GPT Assistant in the <a href="https://platform.openai.com/playground/" rel="nofollow ugc" target="_blank">https://platform.openai.com/playground/</a>.</li>
+            <li>In Settings > API/Model, you can select to use ChatGPT (i.e., original) or create a GPT Assistant in the <a href="https://platform.openai.com/playground/" rel="nofollow ugc" target="_blank">https://platform.openai.com/playground/</a>.</li>
             <li>ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner.</li>
             <li>It is designed to answer questions, provide suggestions, and engage in conversations with users.</li>
             <li>ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited.</li>
-            <li>Coupling the power of ChatGPT or a Custom GPT Assistant with the flexibility of WordPress, Chatbot ChatGPT for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website.</li>
+            <li>Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, Chatbot ChatGPT for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website.</li>
             <li>This provides a powerful, AI-driven chatbot for enhanced user experience and personalized support.</li>
             <li>For more information on using assistants, see <a href="https://beta.openai.com/docs/guides/assistants" rel="nofollow ugc" target="_blank">https://beta.openai.com/docs/guides/assistants</a>.</li>
             <li>Additional integration information can be found at <a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/" rel="nofollow ugc" target="_blank">https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/</a>.</li>
@@ -99,8 +99,8 @@ function chatbot_chatgpt_support_section_callback($args) {
             <li><b>&#91;chatbot_chatgpt&#93;</b> - Default values, floating style, uses OpenAI's ChatGPT</li>
             <li><b>&#91;chatbot_chatgpt style="floating"&#93;</b> - Floating style, uses OpenAI's ChatGPT</li>
             <li><b>&#91;chatbot_chatgpt style="embedded"&#93;</b> - Embedded style, uses OpenAI's ChatGPT</li>
-            <li><b>&#91;chatbot_chatgpt style="floating" assistant="primary"&#93;</b> - Floating style, Custom GPT Assistant as set in Primary setting</li>
-            <li><b>&#91;chatbot_chatgpt style="embedded" assistant="alternate"&#93;</b> - Embedded style, Custom GPT Assistant as set in Alternate setting</li>
+            <li><b>&#91;chatbot_chatgpt style="floating" assistant="primary"&#93;</b> - Floating style, GPT Assistant as set in Primary setting</li>
+            <li><b>&#91;chatbot_chatgpt style="embedded" assistant="alternate"&#93;</b> - Embedded style, GPT Assistant as set in Alternate setting</li>
         </ul>
     </div>
     <hr style="border-top: 2px solid black;">

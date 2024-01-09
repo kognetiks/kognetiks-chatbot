@@ -372,102 +372,6 @@ jQuery(document).ready(function ($) {
             },
         });
     });
-
-    // // Add the file upload functionality - Ver 1.7.6
-    // uploadfileButton.on('change', function () {
-    //     console.log('Chatbot ChatGPT: NOTICE: uploadfileButton.on(change)');
-    //     var file_data = uploadfileButton.prop('files')[0];
-    //     var form_data = new FormData();
-    //     form_data.append('file', file_data);
-    //     form_data.append('action', 'chatbot_chatgpt_upload_file');
-    //     $.ajax({
-    //         url: chatbot_chatgpt_params.ajax_url,
-    //         method: 'POST',
-    //         data: form_data,
-    //         contentType: false,
-    //         cache: false,
-    //         processData: false,
-    //         beforeSend: function () {
-    //             showTypingIndicator();
-    //             uploadfileButton.prop('disabled', true);
-    //         },
-    //         success: function (response) {
-    //             removeTypingIndicator();
-    //             // console.log('Chatbot ChatGPT: SUCCESS: ' + JSON.stringify(response));
-    //             if (response.success) {
-    //                 botResponse = response.data;
-    //                 // Revision to how disclaimers are handled - Ver 1.5.0
-    //                 if (localStorage.getItem('chatgpt_disclaimer_setting') === 'No') {
-    //                     const prefixes = [
-    //                         "As an AI, ",
-    //                         "As an AI language model, ",
-    //                         "I am an AI language model and ",
-    //                         "As an artificial intelligence, ",
-    //                         "As an AI developed by OpenAI, ",
-    //                         "As an artificial intelligence developed by OpenAI, "
-    //                     ];
-    //                     for (let prefix of prefixes) {
-    //                         if (botResponse.startsWith(prefix)) {
-    //                             botResponse = botResponse.slice(prefix.length);
-    //                             break;
-    //                         }
-    //                     }
-    //                 }
-    //                 // IDEA Check for a URL
-    //                 if (botResponse.includes('[URL: ')) {
-    //                     // DIAG - Diagnostics - Ver 1.6.3
-    //                     // console.log('Chatbot ChatGPT: ERROR: URL found in bot response");
-    //                     link = '';
-    //                     urlRegex = /\[URL: (.*?)\]/g;
-    //                     match = botResponse.match(urlRegex);
-    //                     if (match && match.length > 0) {
-    //                         link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
-    //                         // DAIG - Diagnostics - Ver 1.6.3
-    //                         // console.log('Chatbot ChatGPT: NOTICE: link: ' + link);
-    //                     }
-    //                     if (match && match.length > 0) {
-    //                         link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
-    //                         // DAIG - Diagnostics - Ver 1.6.3
-    //                         // console.log('Chatbot ChatGPT: NOTICE: link: ' + link);
-    //                     }
-
-    //                     linkElement = document.createElement('a');
-    //                     linkElement.href = link;
-    //                     linkElement.textContent = 'here';
-    //                     text = botResponse.replace(urlRegex, '');
-    //                     textElement = document.createElement('span');
-    //                     textElement.textContent = text;
-    //                     botResponse = document.createElement('div');
-    //                     botResponse.appendChild(textElement);
-    //                     botResponse.appendChild(linkElement);
-    //                     botResponse.innerHTML += '.';
-    //                     botResponse = botResponse.outerHTML;
-    //                 }
-
-    //                 // Check for double asterisks suggesting a "bold" response
-    //                 // Check for linefeeds suggesting paragraphs response
-    //                 botResponse = botResponse.replace(/\n/g, "<br>");
-    //                 botResponse = botResponse.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
-
-    //                 // Return the response
-    //                 appendMessage(botResponse, 'bot');
-    //             } else {
-    //                 appendMessage('Error: ' + response.data, 'error');
-    //             }
-    //         },
-    //         error: function () {
-    //             removeTypingIndicator();
-    //             // DIAG - Log the error - Ver 1.6.7
-    //             // console.log('Chatbot ChatGPT: ERROR: response: ' + response);
-    //             // console.log('Chatbot ChatGPT: ERROR: Unable to send message');
-    //             appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
-    //         },
-    //         complete: function () {
-    //             removeTypingIndicator();
-    //             uploadfileButton.prop('disabled', false);
-    //         },
-    //     });
-    // });
     
     // Add the keydown event listener to the message input - Ver 1.7.6
     messageInput.on('keydown', function (e) {
@@ -478,12 +382,46 @@ jQuery(document).ready(function ($) {
     });
 
     // Add the keydown event listerner to the upload file button - Ver 1.7.6
-    uploadfileButton.on('keydown', function (e) {
-        if (e.keyCode === 13) {
+    $('#chatbot-chatgpt-upload-file').on('keydown', function(e) {
+        if (e.keyCode == 13) {
             e.preventDefault();
+            console.log('Enter key pressed on upload file button');
             chatbot_chatgpt_upload_file_to_assistant();
-            uploadfileButton.trigger('click');
+            $('#chatbot-chatgpt-upload-file-input').click();
         }
+    });
+
+    // Add the click event listener to the upload file button - Ver 1.7.6
+    $('#chatbot-chatgpt-upload-file').on('click', function(e) {
+        console.log('Upload file button clicked');
+
+        var fileField = document.querySelector('#chatbot-chatgpt-upload-file-input');
+
+        // Check if a file is selected
+        if (!fileField.files.length) {
+            console.log('No file selected');
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append('file', fileField.files[0]);
+        console.log('File: ', fileField.files[0]);
+        formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
+
+        $.ajax({
+            url: chatbot_chatgpt_params.ajax_url,
+            method: 'POST',
+            data: formData,
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,  // tell jQuery not to set contentType
+            success: function(response) {
+                console.log('Response from server', response);
+                $('#chatbot-chatgpt-upload-file-input').click();
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log('AJAX error:', textStatus, errorThrown);
+            }
+        });
     });
 
     // Moved the css to the .css file - Refactored for Ver 1.7.3
