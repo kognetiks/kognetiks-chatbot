@@ -54,13 +54,23 @@ function chatbot_chatgpt_kn_analysis_download_csv() {
         wp_die('File not found!');
     }
 
-    // Read the file
-    $csv_data = file_get_contents($results_csv_file);
+    // Initialize a cURL session
+    $curl = curl_init();
 
-    // Exit early if reading fails
+    // Set the cURL options
+    curl_setopt($curl, CURLOPT_URL, 'file://' . realpath($results_csv_file));
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+
+    // Execute the cURL session
+    $csv_data = curl_exec($curl);
+
+    // Check for errors
     if ($csv_data === false) {
-        wp_die('Error reading file');
+        wp_die('Error reading file: ' . curl_error($curl));
     }
+
+    // Close the cURL session
+    curl_close($curl);
 
     // Deliver the file for download
     header('Content-Type: text/csv');
