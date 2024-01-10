@@ -110,7 +110,6 @@ function store_top_words() {
 
 // Save the results to a file
 function output_results() {
-
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
@@ -120,9 +119,11 @@ function output_results() {
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
 
     // Create the directory if it doesn't exist
-    if (!file_exists($results_dir_path) && !mkdir($results_dir_path, 0755, true)) {
-        // chatbot_chatgpt_back_trace( 'ERROR', 'Failed to create results directory');
-        return;
+    if (!file_exists($results_dir_path)) {
+        if (!mkdir($results_dir_path, 0755, true)) {
+            // chatbot_chatgpt_back_trace( 'ERROR', 'Failed to create results directory');
+            return;
+        }
     }
 
     // Define output files' paths
@@ -130,21 +131,25 @@ function output_results() {
     $results_json_file = $results_dir_path . 'results.json';
 
     // Write CSV
-    if ($f = fopen($results_csv_file, 'w')) {
-        fputcsv($f, ['Word', 'TF-IDF']);
+    try {
+        $f = new SplFileObject($results_csv_file, 'w');
+        $f->fputcsv(['Word', 'TF-IDF']);
         foreach ($topWords as $word => $tfidf) {
-            fputcsv($f, [$word, $tfidf]);
+            $f->fputcsv([$word, $tfidf]);
         }
-        fclose($f);
-    } else {
-        // chatbot_chatgpt_back_trace( 'ERROR', 'Failed to open CSV file for writing');
+    } catch (RuntimeException $e) {
+        // chatbot_chatgpt_back_trace( 'ERROR', 'Failed to open CSV file for writing: ' . $e->getMessage());
     }
 
     // Write JSON
-    if (!file_put_contents($results_json_file, json_encode($topWords))) {
-        // chatbot_chatgpt_back_trace( 'ERROR', 'Failed to write JSON file');
+    try {
+        if (file_put_contents($results_json_file, json_encode($topWords)) === false) {
+            throw new Exception("Failed to write to JSON file.");
+        }
+    } catch (Exception $e) {
+        // chatbot_chatgpt_back_trace( 'ERROR', $e->getMessage());
     }
 
     return;
-
 }
+
