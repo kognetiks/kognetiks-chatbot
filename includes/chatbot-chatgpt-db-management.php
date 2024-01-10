@@ -161,3 +161,33 @@ function append_message_to_conversation_log($sessionId, $user_id, $page_id, $use
     return true;
 
 }
+
+// Function to delete specific expired transients - Ver 1.7.6
+function clean_specific_expired_transients() {
+    global $wpdb;
+
+    // Prefix for transients in the database.
+    $prefix = '_transient_';
+
+    // The pattern to match in the transient's name.
+    $pattern = 'chatbot_chatgpt';
+
+    // SQL query to select expired transients that match the pattern.
+    $sql = $wpdb->prepare(
+        "SELECT option_name FROM $wpdb->options WHERE option_name LIKE %s AND option_name LIKE %s",
+        $wpdb->esc_like($prefix . 'timeout_') . '%',
+        '%' . $wpdb->esc_like($pattern) . '%'
+    );
+
+    // Execute the query.
+    $expired_transients = $wpdb->get_col($sql);
+
+    // Iterate through the results and delete each expired transient.
+    foreach ($expired_transients as $transient) {
+        // Extract the transient name by removing the '_transient_timeout_' prefix.
+        $transient_name = str_replace($prefix . 'timeout_', '', $transient);
+
+        // Delete the transient.
+        delete_transient($transient_name);
+    }
+}

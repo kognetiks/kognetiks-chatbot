@@ -57,8 +57,18 @@ function chatbot_chatgpt_api_test_callback($args) {
     test_chatgpt_api($api_key);
     $updated_status = esc_attr(get_option('chatbot_chatgpt_api_status', 'NOT SET'));
     ?>
-    <p>API STATUS: <?php echo esc_html( $updated_status ); ?></p>
+    <p>API STATUS: <b><?php echo esc_html( $updated_status ); ?></b></p>
     <?php
+    $status = ini_get('allow_url_fopen');
+    if ($status == 1) {
+        ?>
+        <p>PHP OPTION: <b>allow_url_fopen is enabled.</b></p>
+        <?php
+    } else {
+        ?>
+        <p>PHP OPTION: <b>allow_url_fopen is disabled.</b></p>
+        <?php
+    }
 }
 
 // Diagnostics On/Off - Ver 1.6.5

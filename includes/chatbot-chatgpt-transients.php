@@ -13,11 +13,17 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Set the transitent - example usage
-// set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+// Set the transients - file id
+// set_chatbot_chatgpt_file_id_transients($chatbot_chatgpt_file_id);
+
+// Set the transients - style and assistant alias
+// set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
+// set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);
 
 // Set the transients
-function set_chatbot_chatgpt_transients($t_chatbot_chatgpt_display_style, $t_chatbot_chatgpt_assistant_alias) {
+// function set_chatbot_chatgpt_transients($t_chatbot_chatgpt_display_style, $t_chatbot_chatgpt_assistant_alias) {
+
+function set_chatbot_chatgpt_transients( $transient_type , $transient_value) {
 
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$t_chatbot_chatgpt_display_style ' . $t_chatbot_chatgpt_display_style);
@@ -34,12 +40,16 @@ function set_chatbot_chatgpt_transients($t_chatbot_chatgpt_display_style, $t_cha
     // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
 
     // Create unique keys for transients
-    $style_transient_key = 'chatbot_chatgpt_style_' . $user_id . '_' . $page_id;
-    $assistant_transient_key = 'chatbot_chatgpt_assistant_' . $user_id . '_' . $page_id;
+    // $style_transient_key = 'chatbot_chatgpt_style_' . $user_id . '_' . $page_id;
+    // $assistant_transient_key = 'chatbot_chatgpt_assistant_' . $user_id . '_' . $page_id;
 
-    // Store the style and the assistant value with unique keys
-    set_transient($style_transient_key, $t_chatbot_chatgpt_display_style, 60*60); // Store for 1 hour
-    set_transient($assistant_transient_key, $t_chatbot_chatgpt_assistant_alias, 60*60); // Store for 1 hour
+    if ( $transient_type == 'style' ) {
+        $style_transient_key = 'chatbot_chatgpt_style_' . $user_id . '_' . $page_id;
+        set_transient($style_transient_key, $transient_value, 60*60); // Store for 1 hour
+    } elseif ( $transient_type == 'assistant_alias' ) {
+        $assistant_transient_key = 'chatbot_chatgpt_assistant_' . $user_id . '_' . $page_id;
+        set_transient($assistant_transient_key, $transient_value, 60*60); // Store for 1 hour
+    }
 
 }
 

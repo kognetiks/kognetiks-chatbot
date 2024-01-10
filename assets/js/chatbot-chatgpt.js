@@ -391,11 +391,11 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    // Add the click event listener to the upload file button - Ver 1.7.6
-    $('#chatbot-chatgpt-upload-file').on('click', function(e) {
-        console.log('Upload file button clicked');
+    // Add the change event listener to the file input field
+    $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
+        console.log('File selected');
 
-        var fileField = document.querySelector('#chatbot-chatgpt-upload-file-input');
+        var fileField = e.target;
 
         // Check if a file is selected
         if (!fileField.files.length) {
@@ -416,7 +416,7 @@ jQuery(document).ready(function ($) {
             contentType: false,  // tell jQuery not to set contentType
             success: function(response) {
                 console.log('Response from server', response);
-                $('#chatbot-chatgpt-upload-file-input').click();
+                $('#chatbot-chatgpt-upload-file-input').val('');
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log('AJAX error:', textStatus, errorThrown);

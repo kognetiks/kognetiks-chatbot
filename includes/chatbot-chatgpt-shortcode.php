@@ -55,7 +55,9 @@ function chatbot_chatgpt_shortcode($atts) {
     // ";
 
     // Store the style and the assistant value - Ver 1.7.2
-    set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+    // set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+    set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
+    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
@@ -71,7 +73,9 @@ function chatbot_chatgpt_shortcode($atts) {
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+        // set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+        set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);   
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -113,7 +117,9 @@ function chatbot_chatgpt_shortcode($atts) {
     } else {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+        // set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+        set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);   
         ob_start();
         ?>
         <!-- Romoved styling as I believe this may cause problems with some themes Ver 1.6.6 -->

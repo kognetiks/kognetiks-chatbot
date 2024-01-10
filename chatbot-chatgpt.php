@@ -269,6 +269,12 @@ function enqueue_jquery_ui() {
 }
 add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 
+// Schedule Cleanup of Expired Transients
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_event')) {
+    wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_cleanup_event');
+}
+add_action('chatbot_chatgpt_cleanup_event', 'clean_specific_expired_transients');
+
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
 
@@ -368,11 +374,13 @@ function chatbot_chatgpt_send_message() {
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant Id: ' . $use_assistant_id);
+        
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
         // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
+
         // Send message to Custom GPT API - Ver 1.6.7
 
         error_log ('$message ' . $message);

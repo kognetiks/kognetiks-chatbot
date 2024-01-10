@@ -52,15 +52,17 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
     chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
 
     if ($options['action'] == 'update' && $options['type'] == 'plugin') {
-        foreach($options['plugins'] as $plugin) {
-            if (plugin_basename(__FILE__) === $plugin) {
-
-                // Logic to run during upgrade
-                chatbot_chatgpt_upgrade();
-
-                break;
-
+        if (isset($options['plugins']) && is_array($options['plugins'])) {
+            foreach($options['plugins'] as $plugin) {
+                if (plugin_basename(__FILE__) === $plugin) {
+                    // Logic to run during upgrade
+                    chatbot_chatgpt_upgrade();
+                    break;
+                }
             }
+        } else {
+            // DIAG - Log the warning
+            chatbot_chatgpt_back_trace( 'WARNING', '"plugins" key is not set or not an array');
         }
     }
 

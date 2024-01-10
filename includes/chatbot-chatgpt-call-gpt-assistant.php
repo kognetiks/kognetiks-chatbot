@@ -22,12 +22,21 @@ function createAnAssistant($api_key) {
         "Authorization: Bearer " . $api_key
     );
 
-    $response = file_get_contents($url, false, stream_context_create(array(
+    // $response = file_get_contents($url, false, stream_context_create(array(
+    //     'http' => array(
+    //         'method' => 'POST',
+    //         'header' => $headers,
+    //     )
+    // )));
+    // PATCH - Replace file_get_contents with cURL - Ver 1.7.6
+    $context = stream_context_create(array(
         'http' => array(
             'method' => 'POST',
             'header' => $headers,
+            'ignore_errors' => true // This allows the function to proceed even if there's an HTTP error
         )
-    )));
+    ));
+    $response = fetchDataUsingCurl($url, $context);
 
     return json_decode($response, true);
 }
@@ -52,13 +61,21 @@ function addAMessage($thread_Id, $prompt, $context, $api_key) {
         "content" => $prompt
     );
 
-    $response = file_get_contents($url, false, stream_context_create(array(
+    // $response = file_get_contents($url, false, stream_context_create(array(
+    //     'http' => array(
+    //         'method' => 'POST',
+    //         'header' => $headers,
+    //         'content' => json_encode($data)
+    //     )
+    // )));
+    // PATCH - Replace file_get_contents with cURL - Ver 1.7.6
+    $context = stream_context_create(array(
         'http' => array(
             'method' => 'POST',
             'header' => $headers,
             'content' => json_encode($data)
-        )
     )));
+    $response = fetchDataUsingCurl($url, $context);
 
     return json_decode($response, true);
 }
@@ -84,7 +101,9 @@ function runTheAssistant($thread_Id, $assistantId, $context, $api_key) {
         )
     ));
 
-    $response = file_get_contents($url, false, $context);
+    // $response = file_get_contents($url, false, $context);
+    // PATCH - Replace file_get_contents with cURL - Ver 1.7.6
+    $response = fetchDataUsingCurl($url, $context);
 
     // Check for false response
     if ($response === FALSE) {
@@ -114,12 +133,19 @@ function getTheRunsStatus($thread_Id, $runId, $api_key) {
             "Authorization: Bearer " . $api_key
         );
 
-        $response = file_get_contents($url, false, stream_context_create(array(
+        // $response = file_get_contents($url, false, stream_context_create(array(
+        //     'http' => array(
+        //         'method' => 'GET',
+        //         'header' => $headers
+        //     )
+        // )));
+        // PATCH - Replace file_get_contents with cURL - Ver 1.7.6
+        $context = stream_context_create(array(
             'http' => array(
                 'method' => 'GET',
                 'header' => $headers
-            )
         )));
+        $response = fetchDataUsingCurl($url, $context);
 
         $responseArray = json_decode($response, true);
 
@@ -153,12 +179,19 @@ function getTheRunsSteps($thread_Id, $runId, $api_key) {
         "Authorization: Bearer " . $api_key
     );
 
-    $response = file_get_contents($url, false, stream_context_create(array(
+    // $response = file_get_contents($url, false, stream_context_create(array(
+    //     'http' => array(
+    //         'method' => 'GET',
+    //         'header' => $headers
+    //     )
+    // )));
+    // PATCH - Replace file_get_contents with cURL - Ver 1.7.6
+    $context = stream_context_create(array(
         'http' => array(
             'method' => 'GET',
             'header' => $headers
-        )
     )));
+    $response = fetchDataUsingCurl($url, $context);
 
     return json_decode($response, true);
 }
@@ -174,12 +207,19 @@ function getTheStepsStatus($thread_Id, $runId, $api_key) {
             "Authorization: Bearer " . $api_key
         );
 
-        $response = file_get_contents($url, false, stream_context_create(array(
+        // $response = file_get_contents($url, false, stream_context_create(array(
+        //     'http' => array(
+        //         'method' => 'GET',
+        //         'header' => $headers
+        //     )
+        // )));
+        // PATCH - Replace file_get_contents with cURL - Ver 1.7.6
+        $context = stream_context_create(array(
             'http' => array(
                 'method' => 'GET',
                 'header' => $headers
-            )
         )));
+        $response = fetchDataUsingCurl($url, $context);
 
         $responseArray = json_decode($response, true);
 
@@ -219,12 +259,19 @@ function getTheMessage($thread_Id, $api_key) {
         "Authorization: Bearer " . $api_key
     );
 
-    $response = file_get_contents($url, false, stream_context_create(array(
+    // $response = file_get_contents($url, false, stream_context_create(array(
+    //     'http' => array(
+    //         'method' => 'GET',
+    //         'header' => $headers
+    //     )
+    // )));
+    // PATCH - Replace file_get_contents with cURL - Ver 1.7.6
+    $context = stream_context_create(array(
         'http' => array(
             'method' => 'GET',
             'header' => $headers
-        )
     )));
+    $response = fetchDataUsingCurl($url, $context);
 
     return json_decode($response, true);
 }
@@ -352,4 +399,33 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
     return $assistants_response["data"][0]["content"][0]["text"]["value"];
 
+}
+
+// Replace file_get_contents with cURL - Ver 1.7.6
+function fetchDataUsingCurl($url, $context) {
+    // Initialize a cURL session
+    $curl = curl_init($url);
+
+    // Set cURL options
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+    // If there is a context (which usually contains stream context options), set the corresponding cURL options
+    if ($context) {
+        $context_options = stream_context_get_options($context);
+        if (isset($context_options['http']['method'])) {
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $context_options['http']['method']);
+        }
+        if (isset($context_options['http']['header'])) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $context_options['http']['header']);
+        }
+        if (isset($context_options['http']['content'])) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $context_options['http']['content']);
+        }
+    }
+
+    // Execute cURL session and close it
+    $response = curl_exec($curl);
+    curl_close($curl);
+
+    return $response;
 }
