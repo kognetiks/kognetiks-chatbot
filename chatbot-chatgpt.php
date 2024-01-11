@@ -99,6 +99,8 @@ $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_en
 
 // Allow file uploads on/off setting can be found on the Settings tab - Ver 1.7.6
 global $chatbot_chatgpt_allow_file_uploads;
+// TEMP OVERRIDE - Ver 1.7.6
+update_option('chatbot_chatgpt_allow_file_uploads', 'No');
 $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
 // Suppress Notices on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -275,6 +277,12 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_event')) {
 }
 add_action('chatbot_chatgpt_cleanup_event', 'clean_specific_expired_transients');
 
+// Schedule Conversation Log Cleanup - Ver 1.6.7
+if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
+    wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_conversation_log_cleanup_event');
+}
+add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_conversation_log_cleanup');
+
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
 
@@ -315,7 +323,8 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
     // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
-    $chatbot_settings = get_chatbot_chatgpt_transients($user_id, $page_id);
+    $chatbot_settings = get_chatbot_chatgpt_transients( 'dipslay_style', $user_id, $page_id);
+    $chatbot_settings = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
@@ -374,7 +383,7 @@ function chatbot_chatgpt_send_message() {
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant Id: ' . $use_assistant_id);
-        
+
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
         // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
@@ -383,12 +392,12 @@ function chatbot_chatgpt_send_message() {
 
         // Send message to Custom GPT API - Ver 1.6.7
 
-        error_log ('$message ' . $message);
+        // error_log ('$message ' . $message);
         append_message_to_conversation_log($sessionId, $user_id, $page_id, 'Visitor', $thread_Id, $assistant_id, $message);
         
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_Id, $user_id, $page_id);
 
-        error_log ('$response ' . $response);
+        // error_log ('$response ' . $response);
         append_message_to_conversation_log($sessionId, $user_id, $page_id, 'Chatbot', $thread_Id, $assistant_id, $response);
 
         // Use TF-IDF to enhance response

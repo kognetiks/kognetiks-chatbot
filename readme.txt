@@ -32,6 +32,9 @@ Flexibility is key. Display your Chatbot ChatGPT as an embedded feature on pages
 **🔍 Knowledge Navigator: Unearthing Your Content's Essence**
 At the heart of our plugin lies the Knowledge Navigator. This powerful tool delves deep into your website, mapping its architecture and content, enabling the chatbot to deliver precise and contextually relevant responses. Enhanced by TF-IDF analysis, our Navigator ensures your content's unique keywords shine through, making interactions more meaningful.
 
+** 🗎 Conversation Logging **
+Conversation Logging in this plugin records and stores chat interactions between users and the chatbot, providing valuable insights for enhancing user experience and chatbot performance. Visit the privacy policy on the Settings Support tab for details on data handling.
+
 **🎭 Personalize with Custom Avatars**
 Add a creative touch with customizable avatars. Reflect your site's personality through these visual companions, enhancing user engagement and adding a unique flair to your digital space.
 
@@ -183,7 +186,8 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 
 = 1.7.6 =
 * Expanded input to accommodate multi-line for both embedded and floating styles
-* Reduced wait duration when using GPT Assistants which should improve response time
+* Reduced wait duration when using GPT Assistants to improve response time
+* Added Conversation Logging to retain visitor and chatbot exchanges
 
 = 1.7.5 =
 * Expanded support TF-IDF indexing for WooCommerce product post-type.

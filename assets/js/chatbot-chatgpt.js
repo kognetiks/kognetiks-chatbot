@@ -375,7 +375,7 @@ jQuery(document).ready(function ($) {
     
     // Add the keydown event listener to the message input - Ver 1.7.6
     messageInput.on('keydown', function (e) {
-        if (e.keyCode === 13) {
+        if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
             submitButton.trigger('click');
         }
@@ -383,29 +383,31 @@ jQuery(document).ready(function ($) {
 
     // Add the keydown event listerner to the upload file button - Ver 1.7.6
     $('#chatbot-chatgpt-upload-file').on('keydown', function(e) {
-        if (e.keyCode == 13) {
+        if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
-            console.log('Enter key pressed on upload file button');
-            chatbot_chatgpt_upload_file_to_assistant();
+            // console.log('Chatbot ChatGPT: NOTICE: Enter key pressed on upload file button');
+            $response = chatbot_chatgpt_upload_file_to_assistant();
             $('#chatbot-chatgpt-upload-file-input').click();
         }
     });
 
     // Add the change event listener to the file input field
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
-        console.log('File selected');
+        // console.log('Chatbot ChatGPT: NOTICE: File selected');
+
+        showTypingIndicator();
 
         var fileField = e.target;
 
         // Check if a file is selected
         if (!fileField.files.length) {
-            console.log('No file selected');
+            // console.log('Chatbot ChatGPT: WARNING: No file selected');
             return;
         }
 
         var formData = new FormData();
         formData.append('file', fileField.files[0]);
-        console.log('File: ', fileField.files[0]);
+        // console.log('Chatbot ChatGPT: NOTICE: File selected ', fileField.files[0]);
         formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
 
         $.ajax({
@@ -415,13 +417,18 @@ jQuery(document).ready(function ($) {
             processData: false,  // tell jQuery not to process the data
             contentType: false,  // tell jQuery not to set contentType
             success: function(response) {
-                console.log('Response from server', response);
+                // console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
                 $('#chatbot-chatgpt-upload-file-input').val('');
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                console.log('AJAX error:', textStatus, errorThrown);
+                // console.log('AJAX error:', textStatus, errorThrown);
             }
         });
+
+        removeTypingIndicator();
+
+        appendMessage('File uploaded.', 'bot');
+
     });
 
     // Moved the css to the .css file - Refactored for Ver 1.7.3

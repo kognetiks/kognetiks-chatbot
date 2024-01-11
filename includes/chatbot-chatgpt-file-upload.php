@@ -45,8 +45,6 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         }
     }
 
-    // return;
-
     // Get the API key
     $api_key = esc_attr(get_option('chatgpt_api_key'));
     if (empty($api_key)) {
@@ -58,9 +56,6 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         return $response;
     }
 
-    // Ask the user to select a file to upload
-    // $file_path = $_FILES['file']['tmp_name'];
-    
     // Check if the file is empty or there is an error
     if (empty($file_path) || $_FILES['file']['error']) {
         // If the file is empty or there is an error, then return an error
@@ -127,6 +122,10 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     } else {
         // DAIG - Diagnostic - Ver 1.7.6
         chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully." );
+        //DIAG - Diagnostic - Ver 1.7.6
+        chatbot_chatgpt_back_trace( 'SUCCESS', 'file_id ' . $responseData['id'] );
+        // Set the transient for the file id
+        set_chatbot_chatgpt_transients('file_id', $responseData['id']);
         return array(
             'status' => 'success',
             'http_status' => $http_status,

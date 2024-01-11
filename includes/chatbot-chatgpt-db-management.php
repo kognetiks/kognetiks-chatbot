@@ -31,12 +31,12 @@ function create_chatbot_chatgpt_interactions_table() {
     // Log errors or notify admin if there was an error
     if (!empty($wpdb->last_error)) {
         // DIAG - Diagnostics
-        chatbot_chatgpt_back_trace( 'ERROR', 'Error creating chatbot_chatgpt_interactions table ' . $wpdb->last_error);
+        // chatbot_chatgpt_back_trace( 'ERROR', 'Error creating chatbot_chatgpt_interactions table ' . $wpdb->last_error);
         return;
     }
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'SUCCESS', 'Successfully created chatbot_chatgpt_interactions table');
+    // chatbot_chatgpt_back_trace( 'SUCCESS', 'Successfully created chatbot_chatgpt_interactions table');
     return;
 
 }
@@ -110,11 +110,11 @@ function create_conversation_logging_table() {
 
     // Log errors or notify admin if there was an error
     if (!empty($wpdb->last_error)) {
-        chatbot_chatgpt_back_trace( 'ERROR', 'Error creating chatbot_chatgpt_conversation_log table' . $wpdb->last_error);
+        // chatbot_chatgpt_back_trace( 'ERROR', 'Error creating chatbot_chatgpt_conversation_log table' . $wpdb->last_error);
         return;
     }
 
-    chatbot_chatgpt_back_trace( 'SUCCESS', 'Successfully created chatbot_chatgpt_conversation_log table');
+    // chatbot_chatgpt_back_trace( 'SUCCESS', 'Successfully created chatbot_chatgpt_conversation_log table');
     return;
     
 }
@@ -154,7 +154,7 @@ function append_message_to_conversation_log($sessionId, $user_id, $page_id, $use
     // Check if the insert was successful
     if ($insert_result === false) {
         // DIAG - Diagnostics
-        chatbot_chatgpt_back_trace( 'ERROR', "Failed to insert chat message: " . $wpdb->last_error);
+        // chatbot_chatgpt_back_trace( 'ERROR', "Failed to insert chat message: " . $wpdb->last_error);
         return false;
     }
 
@@ -190,4 +190,43 @@ function clean_specific_expired_transients() {
         // Delete the transient.
         delete_transient($transient_name);
     }
+}
+
+// Function to purge conversation log entries that are older than the specified number of days - Ver 1.7.6
+function chatbot_chatgpt_conversation_log_cleanup() {
+
+    global $wpdb;
+
+    // Check if conversation logging is enabled
+    if (get_option('chatbot_chatgpt_enable_conversation_logging') !== 'On') {
+        // Logging is disabled, so just return without doing anything
+        return;
+    }
+
+    // Get the number of days to keep the conversation log
+    $days_to_keep = get_option('chatbot_chatgpt_conversation_log_days_to_keep');
+
+    // If the number of days is not set, then set it to 30 days
+    if ($days_to_keep === false) {
+        $days_to_keep = 30;
+    }
+
+    // Get the date that is $days_to_keep days ago
+    $purge_date = date('Y-m-d', strtotime('-' . $days_to_keep . ' days'));
+
+    // Get the table name
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+
+    // Prepare and execute the SQL statement
+    $delete_result = $wpdb->query($wpdb->prepare("DELETE FROM $table_name WHERE interaction_time < %s", $purge_date));
+
+    // Check if the delete was successful
+    if ($delete_result === false) {
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'ERROR', "Failed to delete conversation log entries: " . $wpdb->last_error);
+        return false;
+    }
+
+    return true;
+
 }

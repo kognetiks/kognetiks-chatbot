@@ -18,7 +18,21 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_reporting_section_callback($args) {
     ?>
     <div>
-        <p>Use these setting to select the reporting period for visitor interaction.  By default converation logging is initially turned off.  Please review the section <b>Covnersation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support#chatbot-conversation-log">Support</a> tab of this plugin for more details.</p>
+        <p>Use these setting to select the reporting period for Visitor Interactions.</p>
+        <p>By default converation logging is initially turned <b>Off</b>.</p>
+        <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support#chatbot-conversation-log">Support</a> tab of this plugin for more details.</p>
+        <h3>Visitor Conversations Items and Stored Utilized</h3>
+        <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
+        <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
+        <h3>Download Conversation Data</h3>
+        <p>Use the 'Download Data' button to retrieve the conversation data.</p>
+        <?php
+            if (is_admin()) {
+                $header = " ";
+                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Data</a>';
+                echo $header;
+            }
+        ?>
         <h3>Visitor Interactions</h3>        
         <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p>
     </div>
@@ -55,6 +69,24 @@ function  chatbot_chatgpt_enable_conversation_logging_callback($args) {
     <?php
 }
 
+// Conversation log retention period - Ver 1.7.6
+function chatbot_chatgpt_conversation_log_days_to_keep_callback($args) {
+    // Get the saved chatbot_chatgpt_conversation_log_days_to_keep value or default to "30"
+    $output_choice = esc_attr(get_option('chatbot_chatgpt_conversation_log_days_to_keep', '30'));
+    // DIAG - Log the output choice
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log_days_to_keep' . $output_choice);
+    ?>
+    <select id="chatbot_chatgpt_conversation_log_days_to_keep" name="chatbot_chatgpt_conversation_log_days_to_keep">
+        <option value="<?php echo esc_attr( '1' ); ?>" <?php selected( $output_choice, '7' ); ?>><?php echo esc_html( '1' ); ?></option>
+        <option value="<?php echo esc_attr( '7' ); ?>" <?php selected( $output_choice, '7' ); ?>><?php echo esc_html( '7' ); ?></option>
+        <option value="<?php echo esc_attr( '30' ); ?>" <?php selected( $output_choice, '30' ); ?>><?php echo esc_html( '30' ); ?></option>
+        <option value="<?php echo esc_attr( '60' ); ?>" <?php selected( $output_choice, '60' ); ?>><?php echo esc_html( '60' ); ?></option>
+        <option value="<?php echo esc_attr( '90' ); ?>" <?php selected( $output_choice, '90' ); ?>><?php echo esc_html( '90' ); ?></option>
+        <option value="<?php echo esc_attr( '180' ); ?>" <?php selected( $output_choice, '180' ); ?>><?php echo esc_html( '180' ); ?></option>
+        <option value="<?php echo esc_attr( '365' ); ?>" <?php selected( $output_choice, '365' ); ?>><?php echo esc_html( '365' ); ?></option>
+    </select>
+    <?php
+}
 
 // Chatbot ChatGPT Simple Chart - Ver 1.6.3
 function generate_gd_bar_chart($labels, $data, $colors, $name) {
@@ -237,3 +269,93 @@ function chatbot_chatgpt_delete_chart() {
 }
 add_action('chatbot_chatgpt_delete_chart', 'chatbot_chatgpt_delete_chart');
 
+
+// Count the number of conversations stored - Ver 1.7.6
+function chatbot_chatgpt_count_conversations() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    $results = $wpdb->get_results("SELECT COUNT(id) AS count FROM $table_name");
+    return $results[0]->count;
+}
+
+// Calculated size of the converations stored - Ver 1.7.6
+function chatbot_chatgpt_size_conversations() {
+    global $wpdb;
+    $database_name = $wpdb->dbname;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    $results = $wpdb->get_results("SELECT table_name AS `Table`, round(((data_length + index_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES WHERE table_schema = '$database_name' AND table_name = '$table_name'");
+    return $results[0]->{'Size in MB'};
+}
+
+// Download the conversation data - Ver 1.7.6
+function chatbot_chatgpt_download_conversation_data() {
+
+    // Export data from the chatbot_chatgpt_conversation_log table to a csv file
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+
+    // Ask user where to save the file
+    $filename = 'chatbot_chatgpt_conversation_log_' . date('Y-m-d') . '.csv';
+    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
+
+    // Create results directory if it doesn't exist
+    if (!file_exists($results_dir_path)) {
+        mkdir($results_dir_path, 0777, true);
+    }
+
+    $results_csv_file = $results_dir_path . $filename;
+
+    // Open file for writing
+    $file = fopen($results_csv_file, 'w');
+
+    // Check if file opened successfully
+    if ($file === false) {
+        wp_die('Error opening file for writing');
+    }
+
+    // Write headers to file
+    fputcsv($file, array_keys($results[0]));
+
+    // Write results to file
+    foreach ($results as $result) {
+        fputcsv($file, $result);
+    }
+
+    // Close the file
+    fclose($file);
+
+    // Exit early if the file doesn't exist
+    if (!file_exists($results_csv_file)) {
+        wp_die('File not found!');
+    }
+
+    // Initialize a cURL session
+    $curl = curl_init();
+
+    // Set the cURL options
+    curl_setopt($curl, CURLOPT_URL, 'file://' . realpath($results_csv_file));
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+
+    // Execute the cURL session
+    $csv_data = curl_exec($curl);
+
+    // Check for errors
+    if ($csv_data === false) {
+        wp_die('Error reading file: ' . curl_error($curl));
+    }
+
+    // Close the cURL session
+    curl_close($curl);
+
+    // Deliver the file for download
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment;filename=Chatbot Conversation Log.csv');
+    echo $csv_data;
+
+    // Delete the file
+    unlink($results_csv_file);
+    exit;
+
+}
+add_action('admin_post_chatbot_chatgpt_download_conversation_data', 'chatbot_chatgpt_download_conversation_data');

@@ -17,13 +17,13 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_activate() {
 
     // DIAG - Log the activation
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation started');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation started');
 
     // Logic to run during activation
     chatbot_chatgpt_upgrade();
 
     // DIAG - Log the activation
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation completed');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation completed');
 
     return;
 
@@ -33,13 +33,24 @@ function chatbot_chatgpt_activate() {
 function chatbot_chatgpt_deactivate() {
 
     // DIAG - Log the activation
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin deactivation started');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin deactivation started');
 
     // Logic to run during deactivation
     // FIXME - THIS IS NOT DELETEING THE PLUGIN - JUST DEACTIVATION
 
+    // FIXME - Asked what data should be removed
+    // 
+    // DB - chatbot_chatgpt_conversation_log
+    // DB - chatbot_chatgpt_interactions
+    // DB - chatbot_chatgpt_knowledge_base
+    // DB - chatbot_chatgpt_knowledge_base_tfidf
+
+    // FIXME - Asked what options should be removed
+    //
+    // OPTIONS - *chatbot_chatgpt*
+
     // DIAG - Log the activation
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin deactivation completed');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin deactivation completed');
 
     return;
 
@@ -49,7 +60,7 @@ function chatbot_chatgpt_deactivate() {
 function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 
     // DIAG - Log the activation
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
 
     if ($options['action'] == 'update' && $options['type'] == 'plugin') {
         if (isset($options['plugins']) && is_array($options['plugins'])) {
@@ -62,12 +73,12 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
             }
         } else {
             // DIAG - Log the warning
-            chatbot_chatgpt_back_trace( 'WARNING', '"plugins" key is not set or not an array');
+            // chatbot_chatgpt_back_trace( 'WARNING', '"plugins" key is not set or not an array');
         }
     }
 
     // DIAG - Log the activation
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
 
     return;
 
@@ -77,12 +88,12 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 function chatbot_chatgpt_upgrade() {
 
     // DIAG - Log the upgrade
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade started');
 
     // Removed obsolete or replaced options
     if ( get_option( 'chatbot_chatgpt_crawler_status' ) ) {
         delete_option( 'chatbot_chatgpt_crawler_status' );
-        chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_crawler_status option deleted');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_crawler_status option deleted');
     }
 
     // Add new or replaced options - chatbot_chatgpt_diagnostics
@@ -91,7 +102,7 @@ function chatbot_chatgpt_upgrade() {
         if ( !$diagnostics || $diagnostics == '' || $diagnostics == ' ' ) {
             update_option( 'chatbot_chatgpt_diagnostics', 'No' );
         }
-        chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_diagnostics option updated');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_diagnostics option updated');
     }
 
     // Add new or replaced options - chatbot_chatgpt_plugin_version
@@ -99,7 +110,24 @@ function chatbot_chatgpt_upgrade() {
     if (get_option('chatgpt_plugin_version')) {
         delete_option('chatgpt_plugin_version');
         // DIAG - Log the old option deletion
-        chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_plugin_version option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_plugin_version option deleted');
+    }
+
+    // Replace option - chatbot_chatgpt_width_setting
+    // If the old option exists, delete it
+    if (get_option('chatbot_width_setting')) {
+        $chatbot_chatgpt_width_setting = get_option('chatbot_width_setting');
+        delete_option('chatbot_width_setting');
+        update_option('chatbot_chatgpt_width_setting', $chatbot_chatgpt_width_setting);
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_width_setting option deleted');
+    }
+    if (get_option('chatgpt_width_setting')) {
+        $chatbot_chatgpt_width_setting = get_option('chatbot_width_setting');
+        delete_option('chatgpt_width_setting');
+        update_option('chatbot_chatgpt_width_setting', $chatbot_chatgpt_width_setting);
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_width_setting option replaced');
     }
 
     // FIXME - DETERMINE WHAT OTHER 'OLD' OPTIONS SHOULD BE DELETED
@@ -109,20 +137,20 @@ function chatbot_chatgpt_upgrade() {
     $plugin_version = get_plugin_version();
     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
     // DIAG - Log the plugin version
-    chatbot_chatgpt_back_trace('NOTICE', 'chatbot_chatgpt_plugin_version option created');
+    // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_chatgpt_plugin_version option created');
 
     // Add new/replaced options - chatbot_chatgpt_interactions
     create_chatbot_chatgpt_interactions_table();
     // DIAG - Log the table creation
-    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_interactions table created');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_interactions table created');
 
     // Add new/replaced options - create_conversation_logging_table
     create_conversation_logging_table();
     // DIAG - Log the table creation
-    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log table created');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log table created');
 
     // DIAG - Log the upgrade compelete
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade completed');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade completed');
 
     return;
 
@@ -132,14 +160,22 @@ function chatbot_chatgpt_upgrade() {
 function chatbot_chatgpt_uninstall(){
     
         // DIAG - Log the uninstall
-        chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin uninstall started');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin uninstall started');
     
-        // Removed obsolete or replaced options
+        // Remove obsolete or replaced options
+        // FIXME - Ask what data should be removed
+        // TBD
+
+        // Remove tables
+        // FIXME - Ask what data should be removed
+        // TBD
+
+        // Remove transients
         // FIXME - Ask what data should be removed
         // TBD
     
         // DIAG - Log the uninstall
-        chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin uninstall completed');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin uninstall completed');
 
         return;
 }
@@ -155,7 +191,7 @@ function get_plugin_version() {
     $plugin_version = $plugin_data['Version'];
 
     // DIAG - Log the plugin version
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin version '. $plugin_version);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin version '. $plugin_version);
 
     return $plugin_version;
 

@@ -55,7 +55,6 @@ function chatbot_chatgpt_shortcode($atts) {
     // ";
 
     // Store the style and the assistant value - Ver 1.7.2
-    // set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
     set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);
 
@@ -73,7 +72,6 @@ function chatbot_chatgpt_shortcode($atts) {
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
-        // set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
         set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);   
         ob_start();
@@ -117,7 +115,6 @@ function chatbot_chatgpt_shortcode($atts) {
     } else {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
-        // set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
         set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);   
         ob_start();

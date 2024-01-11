@@ -159,6 +159,9 @@ function chatbot_chatgpt_support_section_callback($args) {
         <h3>Data Storage and Use</h3>
         <p>Information on how the collected data is stored and used is provided, and should adhear to privacy standards like GDPR and CCPA.</p>
 
+        <h2>Converation Log Deletion</h2>
+        <p>You can set the retention period in the plugin settings to automatially delete entries in the conversation log after certain periods of days (1, 7, 30, etc.).</p>
+
         <h3>Privacy Policy and Link</h3>
         <p>We encourage the inclusion of a privacy policy link in the chatbot interface. The policy should detail the management of chatbot data.</p>
         <p>A link to your site's privacy policy should base64_encode included the <b>Example Notification</b> below, which explains the specifics of chatbot data management.</p>
