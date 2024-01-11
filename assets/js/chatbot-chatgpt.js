@@ -146,7 +146,7 @@ jQuery(document).ready(function ($) {
 
     function initializeChatbot() {
 
-        isFirstTime = !localStorage.getItem('chatgptChatbotOpened') || false;
+        isFirstTime = !localStorage.getItem('chatbot_chatgpt_opened') || false;
 
         // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
         localStorage.removeItem('chatgpt_conversation');
@@ -171,7 +171,7 @@ jQuery(document).ready(function ($) {
             }
 
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
-            localStorage.setItem('chatgptChatbotOpened', 'true');
+            localStorage.setItem('chatbot_chatgpt_opened', 'true');
             // Save the conversation after the initial greeting is appended - Ver 1.2.0
             sessionStorage.setItem('chatgpt_conversation', conversation.html());           
 
@@ -188,7 +188,7 @@ jQuery(document).ready(function ($) {
             }
 
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
-            localStorage.setItem('chatgptChatbotOpened', 'true');
+            localStorage.setItem('chatbot_chatgpt_opened', 'true');
 
         }
 

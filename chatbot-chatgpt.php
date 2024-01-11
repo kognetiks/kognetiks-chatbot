@@ -211,7 +211,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
     }
 
-    $chatbot_settings['iconBaseURL'] = plugins_url( 'assets/icons/', __FILE__ );
+    $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( 'assets/icons/', __FILE__ );
 
     // Localize the data for javascripts
     wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
