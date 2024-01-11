@@ -46,7 +46,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     }
 
     // Get the API key
-    $api_key = esc_attr(get_option('chatgpt_api_key'));
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
         // If the API key is empty, then return an error
         $response = array(

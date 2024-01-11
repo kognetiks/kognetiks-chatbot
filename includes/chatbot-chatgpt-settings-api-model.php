@@ -36,9 +36,9 @@ function chatbot_chatgpt_api_model_section_callback($args) {
 
 // API key field callback
 function chatbot_chatgpt_api_key_callback($args) {
-    $api_key = get_option('chatgpt_api_key');
+    $api_key = get_option('chatbot_chatgpt_api_key');
     ?>
-    <input type="password" id="chatgpt_api_key" name="chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text">
+    <input type="password" id="chatbot_chatgpt_api_key" name="chatbot_chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text">
     <?php
 }
 
@@ -48,13 +48,13 @@ function chatbot_chatgpt_api_key_callback($args) {
 // https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
-    // Get the saved chatgpt_model_choice value or default to "gpt-3.5-turbo"
-    $model_choice = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
+    $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     if ($model_choice == 'gpt-4-1106-preview') {
         $model_choice = 'gpt-4-turbo';
     }
     ?>
-    <select id="chatgpt_model_choice" name="chatgpt_model_choice">
+    <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
         <option value="<?php echo esc_attr( 'gpt-4-turbo' ); ?>" <?php selected( $model_choice, 'gpt-4-turbo' ); ?>><?php echo esc_html( 'gpt-4-turbo' ); ?></option>
         <!-- <option value="<?php echo esc_attr( 'gpt-4-1106-preview' ); ?>" <?php selected( $model_choice, 'gpt-4-1106-preview' ); ?>><?php echo esc_html( 'gpt-4-1106-preview' ); ?></option> -->
         <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
@@ -65,11 +65,11 @@ function chatbot_chatgpt_model_choice_callback($args) {
 
 // Max Tokens choice - Ver 1.4.2
 function chatgpt_max_tokens_setting_callback($args) {
-    // Get the saved chatgpt_max_tokens_setting or default to 150
-    $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', '150'));
+    // Get the saved chatbot_chatgpt_max_tokens_setting or default to 150
+    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150'));
     // Allow for a range of tokens between 100 and 4096 in 50 step increments - Ver 1.6.1
     ?>
-    <select id="chatgpt_max_tokens_setting" name="chatgpt_max_tokens_setting">
+    <select id="chatbot_chatgpt_max_tokens_setting" name="chatbot_chatgpt_max_tokens_setting">
         <?php
         for ($i=100; $i<=4096; $i+=50) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';

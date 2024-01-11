@@ -151,25 +151,25 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     // Defaults for Ver 1.6.1
     $defaults = array(
-        'chatgpt_bot_name' => 'Chatbot ChatGPT',
+        'chatbot_chatgpt_bot_name' => 'Chatbot ChatGPT',
         // TODO IDEA - Add a setting to fix or randomize the bot prompt
-        'chatgpt_chatbot_bot_prompt' => 'Enter your question ...',
-        'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
-        'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
+        'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
+        'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
+        'chatbot_chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatbot_chatgpt_display_style' => 'floating',
         'chatbot_chatgpt_assistant_alias' => 'primary',
-        'chatgptStartStatus' => 'closed',
-        'chatgptStartStatusNewVisitor' => 'closed',
-        'chatgpt_disclaimer_setting' => 'No',
-        'chatgpt_max_tokens_setting' => '150',
-        'chatgpt_width_setting' => 'Narrow',
+        'chatbot_chatgpt_start_status' => 'closed',
+        'chatbot_chatgpt_start_status_new_visitor' => 'closed',
+        'chatbot_chatgpt_disclaimer_setting' => 'No',
+        'chatbot_chatgpt_max_tokens_setting' => '150',
+        'chatbot_chatgpt_width_setting' => 'Narrow',
         'chatbot_chatgpt_diagnostics' => 'Off',
-        'chatgpt_avatar_icon_setting' => 'icon-001.png',
-        'chatgpt_avatar_icon_url_setting' => '',
-        'chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
-        'chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
-        'chatgpt_model_choice' => 'gpt-3.5-turbo',
-        'chatgpt_max_tokens_setting' => 150,
+        'chatbot_chatgpt_avatar_icon_setting' => 'icon-001.png',
+        'chatbot_chatgpt_avatar_icon_url_setting' => '',
+        'chatbot_chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
+        'chatbot_chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
+        'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
+        'chatbot_chatgpt_max_tokens_setting' => 150,
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
         'chatbot_chatgpt_enable_custom_buttons' => 'Off',
         'chatbot_chatgpt_custom_button_name_1' => '',
@@ -181,22 +181,22 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     // Revised for Ver 1.5.0 
     $option_keys = array(
-        'chatgpt_bot_name',
-        'chatgpt_chatbot_bot_prompt', // Added in Ver 1.6.6
-        'chatgpt_initial_greeting',
-        'chatgpt_subsequent_greeting',
+        'chatbot_chatgpt_bot_name',
+        'chatbot_chatgpt_bot_prompt', // Added in Ver 1.6.6
+        'chatbot_chatgpt_initial_greeting',
+        'chatbot_chatgpt_subsequent_greeting',
         'chatbot_chatgpt_display_style',
         'chatbot_chatgpt_assistant_alias',
-        'chatgptStartStatus',
-        'chatgptStartStatusNewVisitor',
-        'chatgpt_disclaimer_setting',
-        'chatgpt_max_tokens_setting',
-        'chatgpt_width_setting',
+        'chatbot_chatgpt_start_status',
+        'chatbot_chatgpt_start_status_new_visitor',
+        'chatbot_chatgpt_disclaimer_setting',
+        'chatbot_chatgpt_max_tokens_setting',
+        'chatbot_chatgpt_width_setting',
         'chatbot_chatgpt_diagnostics',
-        'chatgpt_avatar_icon_setting',
-        'chatgpt_avatar_icon_url_setting',
-        'chatgpt_custom_avatar_icon_setting',
-        'chatgpt_avatar_greeting_setting',
+        'chatbot_chatgpt_avatar_icon_setting',
+        'chatbot_chatgpt_avatar_icon_url_setting',
+        'chatbot_chatgpt_custom_avatar_icon_setting',
+        'chatbot_chatgpt_avatar_greeting_setting',
         'chatbot_chatgpt_enable_custom_buttons',
         'chatbot_chatgpt_custom_button_name_1',
         'chatbot_chatgpt_custom_button_url_1',
@@ -291,9 +291,9 @@ function chatbot_chatgpt_send_message() {
     global $thread_Id;
 
     // Retrieve the API key
-    $api_key = esc_attr(get_option('chatgpt_api_key'));
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     // Retrieve the Use GPT Assistant Id
-    $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     // FIXME - If gpt-4-turbo is selected, set the API model to gpt-4-1106-preview, i.e., the API name for the model
     if ($model == 'gpt-4-turbo') {
         $model = 'gpt-4-1106-preview';
@@ -301,7 +301,7 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$model: ' . $model);
     // Retrieve the Max tokens - Ver 1.4.2
-    $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
+    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 150));
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
@@ -524,8 +524,8 @@ function enqueue_greetings_script() {
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
     $greetings = array(
-        'initial_greeting' => esc_attr(get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?')),
-        'subsequent_greeting' => esc_attr(get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?')),
+        'initial_greeting' => esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?')),
+        'subsequent_greeting' => esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?')),
     );
 
     wp_localize_script('greetings', 'greetings_data', $greetings);

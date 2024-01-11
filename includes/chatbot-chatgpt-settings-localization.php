@@ -40,7 +40,7 @@ function localize_global_stopwords($language_code, $stopWords) {
     $stopWordsTemp = $stopWords;
 
     // Get the API key
-    $api_key = get_option('chatgpt_api_key');
+    $api_key = get_option('chatbot_chatgpt_api_key');
     if (empty($api_key)) {
         $stopWords_string = implode("\n",$stopWords);
         $translated_array = explode("\n", $stopWords_string);
@@ -56,7 +56,7 @@ function localize_global_stopwords($language_code, $stopWords) {
     );
 
     // Model and message for testing
-    $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
     if ($model == 'gpt-4-turbo') {
         $model = 'gpt-4-1106-preview';
@@ -142,7 +142,7 @@ function localize_global_learningMessages($language_code, $learningMessages) {
     $learningMessagesTemp = $learningMessages;
 
     // Get the API key
-    $api_key = get_option('chatgpt_api_key');
+    $api_key = get_option('chatbot_chatgpt_api_key');
     if (empty($api_key)) {
         $learningMessages_string = implode("\n", $learningMessages);
         $translated_array = explode("\n", $learningMessages_string);
@@ -158,7 +158,7 @@ function localize_global_learningMessages($language_code, $learningMessages) {
     );
 
     // Model and message for testing
-    $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
     if ($model == 'gpt-4-turbo') {
         $model = 'gpt-4-1106-preview';
@@ -247,7 +247,7 @@ function localize_global_errorResponses($language_code, $errorResponses) {
     $errorResponsesTemp = $errorResponses;
 
     // Get the API key
-    $api_key = get_option('chatgpt_api_key');
+    $api_key = get_option('chatbot_chatgpt_api_key');
     if (empty($api_key)) {
         $errorResponses_string = implode("\n", $errorResponses);
         $translated_array = explode("\n", $errorResponses_string);
@@ -263,7 +263,7 @@ function localize_global_errorResponses($language_code, $errorResponses) {
     );
 
     // Model and message for testing
-    $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
     if ($model == 'gpt-4-turbo') {
         $model = 'gpt-4-1106-preview';

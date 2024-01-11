@@ -107,29 +107,203 @@ function chatbot_chatgpt_upgrade() {
 
     // Add new or replaced options - chatbot_chatgpt_plugin_version
     // If the old option exists, delete it
-    if (get_option('chatgpt_plugin_version')) {
-        delete_option('chatgpt_plugin_version');
+    if (get_option( 'chatgpt_plugin_version' )) {
+        delete_option( 'chatgpt_plugin_version' );
         // DIAG - Log the old option deletion
         // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_plugin_version option deleted');
     }
 
     // Replace option - chatbot_chatgpt_width_setting
     // If the old option exists, delete it
-    if (get_option('chatbot_width_setting')) {
-        $chatbot_chatgpt_width_setting = get_option('chatbot_width_setting');
-        delete_option('chatbot_width_setting');
-        update_option('chatbot_chatgpt_width_setting', $chatbot_chatgpt_width_setting);
+    if (get_option( 'chatbot_width_setting' )) {
+        $chatbot_chatgpt_width_setting = get_option( 'chatbot_width_setting' );
+        delete_option( 'chatbot_width_setting' );
+        update_option( 'chatbot_chatgpt_width_setting', $chatbot_chatgpt_width_setting );
         // DIAG - Log the old option deletion
         // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_width_setting option deleted');
     }
-    if (get_option('chatgpt_width_setting')) {
+    if (get_option( 'chatgpt_width_setting' )) {
         $chatbot_chatgpt_width_setting = get_option('chatbot_width_setting');
-        delete_option('chatgpt_width_setting');
-        update_option('chatbot_chatgpt_width_setting', $chatbot_chatgpt_width_setting);
+        delete_option( 'chatgpt_width_setting' );
+        update_option( 'chatbot_chatgpt_width_setting', $chatbot_chatgpt_width_setting );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_width_setting option replaced');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_chatgpt_width_setting option replaced');
     }
 
+    // Replace option - chatbot_chatgpt_api_key
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_api_key' )) {
+        $chatbot_chatgpt_api_key = get_option( 'chatgpt_api_key' );
+        delete_option( 'chatgpt_api_key' );
+        update_option( 'chatbot_chatgpt_api_key', $chatbot_chatgpt_api_key );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_width_setting option deleted');
+    }
+
+    // Replace option - chatbot_chatgpt_avatar_greeting_setting
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_avatar_greeting_setting' )) {
+        $chatbot_chatgpt_avatar_greeting_setting = get_option( 'chatgpt_avatar_greeting_setting' );
+        delete_option( 'chatgpt_avatar_greeting_setting' );
+        update_option( 'chatbot_chatgpt_avatar_greeting_setting', $chatbot_chatgpt_avatar_greeting_setting );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', 'cchatgpt_avatar_greeting_setting option deleted');
+    }
+
+    // Replace option - chatgpt_avatar_icon_setting
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_avatar_icon_setting' )) {
+        $chatbot_chatgpt_avatar_greeting_setting = get_option( 'chatgpt_avatar_icon_setting' );
+        delete_option( 'chatgpt_avatar_icon_setting' );
+        update_option( 'chatbot_chatgpt_avatar_icon_setting', $chatbot_chatgpt_avatar_icon_setting );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_avatar_icon_setting option deleted');
+    }
+    if (get_option ( 'chatbot_chatgpt_avatar_icon' )) {
+        delete_option( 'chatbot_chatgpt_avatar_icon' );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_chatgpt_avatar_icon option replaced');
+    }
+
+    // Replace option - chatgpt_avatar_icon_setting
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_avatar_icon_url_setting' )) {
+        $chatbot_chatgpt_avatar_icon_url_setting = get_option( 'chatgpt_avatar_icon_url_setting' );
+        delete_option( 'chatgpt_avatar_icon_url_setting' );
+        update_option( 'chatbot_chatgpt_avatar_icon_url_setting', $chatbot_chatgpt_avatar_icon_url_setting );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_avatar_icon_url_setting option deleted');
+    }
+
+    // Replace option - chatgpt_bot_name
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_bot_name' )) {
+        $chatbot_chatgpt_bot_name = get_option( 'chatgpt_bot_name' );
+        delete_option( 'chatgpt_bot_name' );
+        update_option( 'chatbot_chatgpt_bot_name', $chatbot_chatgpt_bot_name );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_bot_name option deleted');
+    }
+
+    // Replace option - chatgpt_custom_avatar_icon_setting
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_custom_avatar_icon_setting' )) {
+        $chatbot_chatgpt_custom_avatar_icon_setting = get_option( 'chatgpt_custom_avatar_icon_setting' );
+        delete_option( 'chatgpt_custom_avatar_icon_setting' );
+        update_option( 'chatbot_chatgpt_custom_avatar_icon_setting', $chatbot_chatgpt_custom_avatar_icon_setting );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_custom_avatar_icon_setting option deleted');
+    }
+
+    // Replace option - chatgpt_diagnostics
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_diagnostics' )) {
+        $chatbot_chatgpt_diagnostics = get_option( 'chatgpt_diagnostics' );
+        delete_option( 'chatgpt_diagnostics' );
+        update_option( 'chatbot_chatgpt_diagnostics', $chatbot_chatgpt_diagnostics );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_diagnostics option deleted');
+    }
+
+    // Replace option - chatgpt_disclaimer_setting
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_disclaimer_setting' )) {
+        $chatbot_chatgpt_disclaimer_setting = get_option( 'chatgpt_disclaimer_setting' );
+        delete_option( 'chatgpt_disclaimer_setting' );
+        update_option( 'chatbot_chatgpt_disclaimer_setting', $chatbot_chatgpt_disclaimer_setting );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_disclaimer_setting option deleted');
+    }
+
+    // Replace option - chatgpt_initial_greeting
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_initial_greeting' )) {
+        $chatbot_chatgpt_initial_greeting = get_option( 'chatgpt_initial_greeting' );
+        delete_option( 'chatgpt_initial_greeting' );
+        update_option( 'chatbot_chatgpt_initial_greeting', $chatbot_chatgpt_initial_greeting );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_initial_greeting option deleted');
+    }
+
+    // Replace option - chatgpt_max_tokens_setting
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_max_tokens_setting' )) {
+        $chatbot_chatgpt_max_tokens_setting = get_option( 'chatgpt_max_tokens_setting' );
+        delete_option( 'chatgpt_max_tokens_setting' );
+        update_option( 'chatbot_chatgpt_max_tokens_setting', $chatbot_chatgpt_max_tokens_setting );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_max_tokens_setting option deleted');
+    }
+
+    // Replace option - chatgpt_model_choice
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_model_choice' )) {
+        $chatbot_chatgpt_model_choice = get_option( 'chatgpt_model_choice' );
+        delete_option( 'chatgpt_model_choice' );
+        update_option( 'chatbot_chatgpt_model_choice', $chatbot_chatgpt_model_choice );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_model_choice option deleted');
+    }
+
+    // Replace option - chatgptStartStatusNewVisitor
+    // If the old option exists, delete it
+    if (get_option( 'chatgptStartStatusNewVisitor' )) {
+        $chatbot_chatgpt_start_status_new_visitor = get_option( 'chatgptStartStatusNewVisitor' );
+        delete_option( 'chatgptStartStatusNewVisitor' );
+        update_option( 'chatbot_chatgpt_start_status_new_visitor', $chatbot_chatgpt_start_status_new_visitor );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgptStartStatusNewVisitor option deleted');
+    }
+    if (get_option( 'chatgpt_start_status' )) {
+        delete_option( 'chatgpt_start_status' );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_start_status option deleted');
+    }
+
+    // Replace option - chatgptstartstatus
+    // If the old option exists, delete it
+    if (get_option( 'chatgptstartstatus' )) {
+        $chatbot_chatgpt_start_status = get_option( 'chatgptstartstatus' );
+        delete_option( 'chatgptstartstatus' );
+        update_option( 'chatbot_chatgpt_start_status', $chatbot_chatgpt_start_status );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgptstartstatus option deleted');
+    }
+
+    // Replace option - chatgpt_chatbot_bot_prompt
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_chatbot_bot_prompt' )) {
+        $chatbot_chatgpt_bot_prompt = get_option( 'chatgpt_chatbot_bot_prompt' );
+        delete_option( 'chatgpt_chatbot_bot_prompt' );
+        update_option( 'chatbot_chatgpt_bot_prompts', $chatbot_chatgpt_bot_prompt );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_chatbot_bot_prompt option deleted');
+    }
+
+    // Replace option - chatgpt_subsequent_greeting
+    // If the old option exists, delete it
+    if (get_option( 'chatgpt_subsequent_greeting' )) {
+        $chatbot_chatgpt_subsequent_greeting = get_option( 'chatgpt_subsequent_greeting' );
+        delete_option( 'chatgpt_subsequent_greeting' );
+        update_option( 'chatbot_chatgpt_subsequent_greeting', $chatbot_chatgpt_subsequent_greeting );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_subsequent_greeting option deleted');
+    }
+
+    // Replace option - chatGPTChatBotStatus
+    if (get_option( 'chatGPTChatBotStatus' )) {
+        delete_option( 'chatGPTChatBotStatus' );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatGPTChatBotStatus option deleted');
+    }
+
+    // Replace option - chatGPTChatBotStatusNewVisitor
+    if (get_option( 'chatGPTChatBotStatusNewVisitor' )) {
+        delete_option( 'chatGPTChatBotStatusNewVisitor' );
+        // DIAG - Log the old option deletion
+        // chatbot_chatgpt_back_trace('NOTICE', chatGPTChatBotStatusNewVisitor option deleted');
+    }
+    
     // FIXME - DETERMINE WHAT OTHER 'OLD' OPTIONS SHOULD BE DELETED
     // FIXME - DETERMINE WHAT OPTION NAMES NEED TO BE CHANGED (DELETE, THEN REPLACE)
 
@@ -197,29 +371,3 @@ function get_plugin_version() {
 
 }
 
-// Define version number - Ver 1.6.3
-// define('CHATBOT_CHATGPT_PLUGIN_VERSION', '1.6.3');
-
-// // Check version number - Ver 1.6.3
-// function chatbot_chatgpt_check_version() {
-//     $saved_version = esc_attr(get_option('chatbot_chatgpt_plugin_version'));
-
-//     if ($saved_version === false || version_compare(CHATBOT_CHATGPT_PLUGIN_VERSION, $saved_version, '>')) {
-//         // Do this for all version upgrades or fresh installs
-//         create_chatbot_chatgpt_interactions_table();
-
-//         if ($saved_version !== false && version_compare($saved_version, '1.6.3', '<')) {
-//             // Do anything specific for upgrading to 1.6.3 or greater
-//             // (but not for fresh installs)
-//         }
-
-//         // Do any other specific version upgrade checks here
-
-//         update_option('chatbot_chatgpt_plugin_version', CHATBOT_CHATGPT_PLUGIN_VERSION);
-//     }
-
-//     return;
-
-// }
-// // Hook it to 'plugins_loaded' so it runs on every WP load
-// add_action('plugins_loaded', 'chatbot_chatgpt_check_version');
