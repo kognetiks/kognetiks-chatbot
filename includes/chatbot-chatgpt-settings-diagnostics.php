@@ -35,27 +35,29 @@ function chatbot_chatgpt_diagnostics_section_callback($args) {
     echo '<h2>API Status and Other Settings</h2>';
 }
 
+// Moved to chatbot-chatgpt-upgrade.php - Ver 1.7.6
 // Return the version of the plugin
-function get_plugin_version() {
-    if (!function_exists('get_plugin_data')) {
-        require_once(ABSPATH . 'wp-admin/includes/plugin.php');
-    }
+// function get_plugin_version() {
+//     if (!function_exists('get_plugin_data')) {
+//         require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+//     }
 
-    $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . '../chatbot-chatgpt.php');
-    $plugin_version = $plugin_data['Version'];
-    // Set the plugin version in the database
-    update_option('chatbot_chatgpt_plugin_version', $plugin_version);
+//     $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . '../chatbot-chatgpt.php');
+//     $plugin_version = $plugin_data['Version'];
+//     // Set the plugin version in the database
+//     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
 
-    return $plugin_version;
-}
+//     return $plugin_version;
+
+// }
 
 // Call the api-test.php file to test the API
 function chatbot_chatgpt_api_test_callback($args) {
-    $api_key = get_option('chatgpt_api_key');
+    $api_key = get_option('chatbot_chatgpt_api_key');
     test_chatgpt_api($api_key);
     $updated_status = esc_attr(get_option('chatbot_chatgpt_api_status', 'NOT SET'));
     ?>
-    <p>API STATUS: <?php echo esc_html( $updated_status ); ?></p>
+    <p>API STATUS: <b><?php echo esc_html( $updated_status ); ?></b></p>
     <?php
 }
 
@@ -64,7 +66,7 @@ function chatbot_chatgpt_diagnostics_setting_callback($args) {
     global $chatbot_chatgpt_diagnostics;
     $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
     ?>
-    <select id="chatgpt_diagnostics_setting" name = "chatbot_chatgpt_diagnostics">
+    <select id="chatbot_chatgpt_diagnostics" name = "chatbot_chatgpt_diagnostics">
         <option value="Off" <?php selected( $chatbot_chatgpt_diagnostics, 'Off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
         <option value="Success" <?php selected( $chatbot_chatgpt_diagnostics, 'Success' ); ?>><?php echo esc_html( 'Success' ); ?></option>
         <option value="Notice" <?php selected( $chatbot_chatgpt_diagnostics, 'Notice' ); ?>><?php echo esc_html( 'Notice' ); ?></option>

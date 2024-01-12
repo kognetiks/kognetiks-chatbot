@@ -12,23 +12,24 @@ jQuery(document).ready(function ($) {
     var conversation = $('#chatbot-chatgpt-conversation');
 
     submitButton = $('#chatbot-chatgpt-submit');
+    uploadfileButton = $('#chatbot-chatgpt-upload-file');
     chatGptOpenButton = $('#chatgpt-open-btn');
 
-    chatgptStartStatus = localStorage.getItem('chatgptStartStatus') || 'closed';
-    chatgptStartStatusNewVisitor = localStorage.getItem('chatgptStartStatusNewVisitor') || 'closed';
-    initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
-    subsequentGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
-    chatgpt_disclaimer_setting = localStorage.getItem('chatgpt_disclaimer_setting') || 'Yes';
-    chatgpt_chatbot_bot_prompt = localStorage.getItem('chatgpt_chatbot_bot_prompt') || 'Enter your question ...';
-    chatgpt_width_setting = localStorage.getItem('chatgpt_width_setting') || 'Narrow';
+    chatbot_chatgpt_start_status = localStorage.getItem('chatbot_chatgpt_start_status') || 'closed';
+    chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor') || 'closed';
+    initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
+    subsequentGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
+    chatbot_chatgpt_disclaimer_setting = localStorage.getItem('chatbot_chatgpt_disclaimer_setting') || 'Yes';
+    chatbot_chatgpt_bot_prompt = localStorage.getItem('chatbot_chatgpt_bot_prompt') || 'Enter your question ...';
+    chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
 
-    localStorage.setItem('chatgptStartStatus', chatgptStartStatus);
-    localStorage.setItem('chatgptStartStatusNewVisitor', chatgptStartStatusNewVisitor);
-    localStorage.setItem('chatgpt_initial_greeting', initialGreeting);
-    localStorage.setItem('chatgpt_subsequent_greeting', subsequentGreeting);
-    localStorage.setItem('chatgpt_disclaimer_setting', chatgpt_disclaimer_setting);
-    localStorage.setItem('chatgpt_chatbot_bot_prompt', chatgpt_chatbot_bot_prompt);
-    localStorage.setItem('chatgpt_width_setting', chatgpt_width_setting);
+    localStorage.setItem('chatbot_chatgpt_start_status', chatbot_chatgpt_start_status);
+    localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', chatbot_chatgpt_start_status_new_visitor);
+    localStorage.setItem('chatbot_chatgpt_initial_greeting', initialGreeting);
+    localStorage.setItem('chatbot_chatgpt_subsequent_greeting', subsequentGreeting);
+    localStorage.setItem('chatbot_chatgpt_disclaimer_setting', chatbot_chatgpt_disclaimer_setting);
+    localStorage.setItem('chatbot_chatgpt_bot_prompt', chatbot_chatgpt_bot_prompt);
+    localStorage.setItem('chatbot_chatgpt_width_setting', chatbot_chatgpt_width_setting);
 
     pluginUrl = plugin_vars.pluginUrl;
 
@@ -57,16 +58,16 @@ jQuery(document).ready(function ($) {
         // Apply configurations for embedded style
         $('#chatbot-chatgpt').addClass('embedded-style').removeClass('floating-style');
         // Other configurations specific to embedded style
-        chatgptStartStatus = 'open'; // Force the chatbot to open if embedded
-        chatgptStartStatusNewVisitor = 'open'; // Force the chatbot to open if embedded
-        localStorage.setItem('chatgptStartStatus', chatgptStartStatus);
-        localStorage.setItem('chatgptStartStatusNewVisitor', chatgptStartStatusNewVisitor);
+        chatbot_chatgpt_start_status = 'open'; // Force the chatbot to open if embedded
+        chatbot_chatgpt_start_status_new_visitor = 'open'; // Force the chatbot to open if embedded
+        localStorage.setItem('chatbot_chatgpt_start_status', chatbot_chatgpt_start_status);
+        localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', chatbot_chatgpt_start_status_new_visitor);
         chatGptChatBot.addClass('embedded-style').removeClass('floating-style');
     } else {
         // Apply configurations for floating style
         $('#chatbot-chatgpt').addClass('floating-style').removeClass('embedded-style');
         // Other configurations specific to floating style
-        if (chatgpt_width_setting === 'Wide') {
+        if (chatbot_chatgpt_width_setting === 'Wide') {
             chatGptChatBot.addClass('wide');
         } else {
             // chatGptChatBot.removeClass('wide').css('display', 'none');
@@ -76,12 +77,12 @@ jQuery(document).ready(function ($) {
     
     // Removed css from here into the .css file - Refactored for Ver 1.7.3
     // Initially hide the chatbot
-    if (chatgptStartStatus === 'closed') {
+    if (chatbot_chatgpt_start_status === 'closed') {
         chatGptChatBot.hide();
         chatGptOpenButton.show();
     } else {
         if (chatbot_chatgpt_display_style === 'floating') {
-            if (chatgpt_width_setting === 'Wide') {
+            if (chatbot_chatgpt_width_setting === 'Wide') {
                 $('#chatbot-chatgpt').removeClass('chatbot-narrow chatbot-full').addClass('chatbot-wide');
             } else {
                 $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-full').addClass('chatbot-narrow');
@@ -98,17 +99,17 @@ jQuery(document).ready(function ($) {
     chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
     // Avatar and Custom Message - Ver 1.5.0
-    selectedAvatar = localStorage.getItem('chatgpt_avatar_icon_setting');
+    selectedAvatar = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
     
     if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
         // Construct the path to the avatar
         avatarPath = pluginUrl + '/assets/icons/' + selectedAvatar;
         
         // If an avatar is selected and it's not 'icon-000.png', use the avatar
-        avatarImg = $('<img>').attr('id', 'chatgpt_avatar_icon_setting').attr('class', 'chatbot-avatar').attr('src', avatarPath);
+        avatarImg = $('<img>').attr('id', 'chatbot_chatgpt_avatar_icon_setting').attr('class', 'chatbot-avatar').attr('src', avatarPath);
     
         // Get the stored greeting message. If it's not set, default to a custom value.
-        avatarGreeting = localStorage.getItem('chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
+        avatarGreeting = localStorage.getItem('chatbot_chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
 
         // Revised to address cross-site scripting - Ver 1.6.4
         // // Create a bubble with the greeting message
@@ -145,7 +146,7 @@ jQuery(document).ready(function ($) {
 
     function initializeChatbot() {
 
-        isFirstTime = !localStorage.getItem('chatgptChatbotOpened') || false;
+        isFirstTime = !localStorage.getItem('chatbot_chatgpt_opened') || false;
 
         // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
         localStorage.removeItem('chatgpt_conversation');
@@ -155,7 +156,7 @@ jQuery(document).ready(function ($) {
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('Chatbot ChatGPT: NOTICE: initializeChatbot at isFirstTime');
             // }
-            initialGreeting = localStorage.getItem('chatgpt_initial_greeting') || 'Hello! How can I help you today?';
+            initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
 
             // Don't append the greeting if it's already in the conversation
             if (conversation.text().includes(initialGreeting)) {
@@ -170,7 +171,7 @@ jQuery(document).ready(function ($) {
             }
 
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
-            localStorage.setItem('chatgptChatbotOpened', 'true');
+            localStorage.setItem('chatbot_chatgpt_opened', 'true');
             // Save the conversation after the initial greeting is appended - Ver 1.2.0
             sessionStorage.setItem('chatgpt_conversation', conversation.html());           
 
@@ -179,7 +180,7 @@ jQuery(document).ready(function ($) {
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('Chatbot ChatGPT: NOTICE: initializeChatbot at else');
             // }
-            initialGreeting = localStorage.getItem('chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
+            initialGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
             // Don't append the greeting if it's already in the conversation
             if (conversation.text().includes(initialGreeting)) {
@@ -187,7 +188,7 @@ jQuery(document).ready(function ($) {
             }
 
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
-            localStorage.setItem('chatgptChatbotOpened', 'true');
+            localStorage.setItem('chatbot_chatgpt_opened', 'true');
 
         }
 
@@ -305,7 +306,7 @@ jQuery(document).ready(function ($) {
                 if (response.success) {
                     botResponse = response.data;
                     // Revision to how disclaimers are handled - Ver 1.5.0
-                    if (localStorage.getItem('chatgpt_disclaimer_setting') === 'No') {
+                    if (localStorage.getItem('chatbot_chatgpt_disclaimer_setting') === 'No') {
                         const prefixes = [
                             "As an AI, ",
                             "As an AI language model, ",
@@ -371,12 +372,63 @@ jQuery(document).ready(function ($) {
             },
         });
     });
-
+    
+    // Add the keydown event listener to the message input - Ver 1.7.6
     messageInput.on('keydown', function (e) {
-        if (e.keyCode === 13) {
+        if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
             submitButton.trigger('click');
         }
+    });
+
+    // Add the keydown event listerner to the upload file button - Ver 1.7.6
+    $('#chatbot-chatgpt-upload-file').on('keydown', function(e) {
+        if (e.keyCode === 13  && !e.shiftKey) {
+            e.preventDefault();
+            // console.log('Chatbot ChatGPT: NOTICE: Enter key pressed on upload file button');
+            $response = chatbot_chatgpt_upload_file_to_assistant();
+            $('#chatbot-chatgpt-upload-file-input').click();
+        }
+    });
+
+    // Add the change event listener to the file input field
+    $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
+        // console.log('Chatbot ChatGPT: NOTICE: File selected');
+
+        showTypingIndicator();
+
+        var fileField = e.target;
+
+        // Check if a file is selected
+        if (!fileField.files.length) {
+            // console.log('Chatbot ChatGPT: WARNING: No file selected');
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append('file', fileField.files[0]);
+        // console.log('Chatbot ChatGPT: NOTICE: File selected ', fileField.files[0]);
+        formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
+
+        $.ajax({
+            url: chatbot_chatgpt_params.ajax_url,
+            method: 'POST',
+            data: formData,
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,  // tell jQuery not to set contentType
+            success: function(response) {
+                // console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
+                $('#chatbot-chatgpt-upload-file-input').val('');
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                // console.log('AJAX error:', textStatus, errorThrown);
+            }
+        });
+
+        removeTypingIndicator();
+
+        appendMessage('File uploaded.', 'bot');
+
     });
 
     // Moved the css to the .css file - Refactored for Ver 1.7.3
@@ -385,10 +437,10 @@ jQuery(document).ready(function ($) {
     if (chatGptChatBot.is(':visible')) {
         chatGptChatBot.hide();
         chatGptOpenButton.show();
-        localStorage.setItem('chatgptStartStatus', 'closed');
+        localStorage.setItem('chatbot_chatgpt_start_status', 'closed');
     } else {
         if (chatbot_chatgpt_display_style === 'floating') {
-            if (chatgpt_width_setting === 'Wide') {
+            if (chatbot_chatgpt_width_setting === 'Wide') {
                 $('#chatbot-chatgpt').removeClass('chatbot-narrow chatbot-full').addClass('chatbot-wide');
             } else {
                 $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-full').addClass('chatbot-narrow');
@@ -400,7 +452,7 @@ jQuery(document).ready(function ($) {
         }
         chatGptChatBot.show();
         chatGptOpenButton.hide();
-        localStorage.setItem('chatgptStartStatus', 'open');
+        localStorage.setItem('chatbot_chatgpt_start_status', 'open');
         loadConversation();
         scrollToBottom();
     }
@@ -408,8 +460,8 @@ jQuery(document).ready(function ($) {
 
     // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0 and updated for Ver 1.4.1
     function loadChatbotStatus() {
-        chatgptStartStatus = localStorage.getItem('chatgptStartStatus');
-        chatgptStartStatusNewVisitor = localStorage.getItem('chatgptStartStatusNewVisitor');
+        chatbot_chatgpt_start_status = localStorage.getItem('chatbot_chatgpt_start_status');
+        chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor');
 
         // Nuclear option to clear session conversation - Ver 1.5.0
         // Do not use unless alsolutely needed
@@ -428,16 +480,16 @@ jQuery(document).ready(function ($) {
         // }
 
         // Decide what to do for a new visitor - Ver 1.5.0
-        if (chatbotSettings.chatgptStartStatusNewVisitor === 'open') {
-            if (chatgptStartStatusNewVisitor === null) {
+        if (chatbotSettings.chatbot_chatgpt_start_status_new_visitor === 'open') {
+            if (chatbot_chatgpt_start_status_new_visitor === null) {
                 // Override initial status
-                chatgptStartStatus = 'open';
-                chatgptStartStatusNewVisitor = 'closed';
-                localStorage.setItem('chatgptStartStatusNewVisitor', 'closed');
+                chatbot_chatgpt_start_status = 'open';
+                chatbot_chatgpt_start_status_new_visitor = 'closed';
+                localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
             } else {
                 // Override initial status
-                chatgptStartStatusNewVisitor = 'closed';
-                localStorage.setItem('chatgptStartStatusNewVisitor', 'closed');
+                chatbot_chatgpt_start_status_new_visitor = 'closed';
+                localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
             }
         }
 
@@ -446,8 +498,8 @@ jQuery(document).ready(function ($) {
         //     console.log('Chatbot ChatGPT: NOTICE: loadChatbotStatus - AFTER DECISION');
         // }
         
-        // If the chatbot status is not set in local storage, use chatgptStartStatus - Ver 1.5.1
-        if (chatgptStartStatus === 'closed') {
+        // If the chatbot status is not set in local storage, use chatbot_chatgpt_start_status - Ver 1.5.1
+        if (chatbot_chatgpt_start_status === 'closed') {
             chatGptChatBot.hide();
             chatGptOpenButton.show();
         } else {
@@ -475,7 +527,7 @@ jQuery(document).ready(function ($) {
     // Load conversation from local storage if available - Ver 1.2.0
     function loadConversation() {
         storedConversation = sessionStorage.getItem('chatgpt_conversation');
-        localStorage.setItem('chatgptStartStatusNewVisitor', 'closed');
+        localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
   
         // DIAG - Diagnostics - Ver 1.5.0
         // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {

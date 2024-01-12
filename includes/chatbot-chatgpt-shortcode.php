@@ -22,10 +22,10 @@ function chatbot_chatgpt_shortcode($atts) {
     // [chatbot_chatgpt] - Default values, floating style, uses OpenAI's ChatGPT
     // [chatbot_chatgpt style="floating"] - Floating style, uses OpenAI's ChatGPT
     // [chatbot_chatgpt style="embedded"] - Embedded style, uses OpenAI's ChatGPT
-    // [chatbot_chatgpt style="floating" assistant="primary"] - Floating style, Custom GPT Assistant as set in Primary setting
-    // [chatbot_chatgpt style="embedded" assistant="alternate"] - Embedded style, Custom GPT Assistant as set in Alternate setting
-    // [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Floating style using a Custom GPT Assistant ID
-    // [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Embedded style using a Custom GPT Assistant ID
+    // [chatbot_chatgpt style="floating" assistant="primary"] - Floating style, GPT Assistant as set in Primary setting
+    // [chatbot_chatgpt style="embedded" assistant="alternate"] - Embedded style, GPT Assistant as set in Alternate setting
+    // [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Floating style using a GPT Assistant ID
+    // [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Embedded style using a GPT Assistant ID
 
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
@@ -55,12 +55,14 @@ function chatbot_chatgpt_shortcode($atts) {
     // ";
 
     // Store the style and the assistant value - Ver 1.7.2
-    set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+    set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
+    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
-    $bot_name = esc_attr(get_option('chatgpt_bot_name', 'Chatbot ChatGPT'));
-    $chatgpt_chatbot_bot_prompt = esc_attr(get_option('chatgpt_chatbot_bot_prompt', 'Enter your question ...'));
+    $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Chatbot ChatGPT'));
+    $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
+    $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
     // global $chatbot_chatgpt_enable_custom_buttons;
@@ -70,7 +72,8 @@ function chatbot_chatgpt_shortcode($atts) {
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+        set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);   
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -80,13 +83,29 @@ function chatbot_chatgpt_shortcode($atts) {
         </div> -->
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
-            <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
+            <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
+            <textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
             <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
             <button id="chatbot-chatgpt-submit">
-                <img src="<?php echo plugins_url('../assets/icons/paper-airplane-icon.png', __FILE__); ?>" alt="Send">
+                <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
             </button>
-            </div>
-            <!-- UPLOAD FILES FOR CUSTOM GPTs GOES HERE -->
+            <?php
+            if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
+            ?>
+                <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
+                <!-- &nbsp; -->
+                <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                <button id="chatbot-chatgpt-upload-file">
+                    <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
+                </button>
+                <script type="text/javascript">
+                    document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
+                        document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                    });
+                </script>
+            <?php
+            }
+            ?>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
         <i class="dashicons dashicons-format-chat"></i>
@@ -96,7 +115,8 @@ function chatbot_chatgpt_shortcode($atts) {
     } else {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
+        set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);   
         ob_start();
         ?>
         <!-- Romoved styling as I believe this may cause problems with some themes Ver 1.6.6 -->
@@ -107,11 +127,25 @@ function chatbot_chatgpt_shortcode($atts) {
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
             <div id="chatbot-chatgpt-input">
-                <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatgpt_chatbot_bot_prompt ); ?>">
+                <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
+                <textarea id="chatbot-chatgpt-message" rows="1" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
                 <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
                 <button id="chatbot-chatgpt-submit">
-                    <img src="<?php echo plugins_url('../assets/icons/paper-airplane-icon.png', __FILE__); ?>" alt="Send">
+                    <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
                 </button>
+                <?php
+                if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
+                ?>
+                    <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
+                    <!-- &nbsp; -->
+                    <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                    <button id="chatbot-chatgpt-upload-file">
+                        <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
+                    </button>
+
+                <?php
+                }
+                ?>
             </div>
             <!-- UPLOAD FILES FOR CUSTOM GPTs GOES HERE -->
             <!-- Custom buttons - Ver 1.6.5 -->

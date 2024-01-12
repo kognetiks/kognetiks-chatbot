@@ -13,10 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Set the transitent - example usage
-// set_chatbot_chatgpt_transients($chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias);
-
-// Set the threads
+// Set the threads transient
 function set_chatbot_chatgpt_threads($t_threadId, $t_assistantId, $user_id, $page_id) {
 
     // Declare global variables

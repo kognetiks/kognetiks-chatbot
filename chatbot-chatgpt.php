@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.7.5
+ * Version:     1.7.6
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -44,7 +44,7 @@ $sessionId = session_id();
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
 
-// Include necessary files - ChatGPT API and Custom GPT Assistant API - Ver 1.6.9
+// Include necessary files - ChatGPT API and GPT Assistant API - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
 
@@ -60,6 +60,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-settings.p
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
@@ -96,6 +97,12 @@ $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics'
 global $chatbot_chatgpt_enable_custom_buttons;
 $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
+// Allow file uploads on/off setting can be found on the Settings tab - Ver 1.7.6
+global $chatbot_chatgpt_allow_file_uploads;
+// TEMP OVERRIDE - Ver 1.7.6
+update_option('chatbot_chatgpt_allow_file_uploads', 'No');
+$chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+
 // Suppress Notices on/off setting can be found on the Settings tab - Ver 1.6.5
 global $chatbot_chatgpt_suppress_notices;
 $chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppress_notices', 'Off'));
@@ -116,15 +123,24 @@ function chatbot_chatgpt_enqueue_admin_scripts() {
 }
 add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
 
+// Activation, deactivation, and uninstall functions
+register_activation_hook(__FILE__, 'chatbot_chatgpt_activate');
+register_deactivation_hook(__FILE__, 'chatbot_chatgpt_deactivate');
+register_uninstall_hook(__FILE__, 'chatbot_chatgpt_uninstall');
+add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10, 2);
+
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
-    // Ensure the Dashicons font is properly enqueued - Ver 1.1.0
-    wp_enqueue_style( 'dashicons' );
+
+    // Enqueue the styles
+    wp_enqueue_style('dashicons');
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
+
+    // Enqueue the scripts
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
-    // Enqueue the chatbot-chatgpt-local.js file - Ver 1.4.1
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
-  
+    wp_enqueue_script('chatbot-chatgpt-file-upload-js', plugins_url('assets/js/chatbot-chatgpt-file-upload.js', __FILE__), array('jquery'), '1.0', true);
+    
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
     $page_id = get_the_ID();
@@ -132,62 +148,61 @@ function chatbot_chatgpt_enqueue_scripts() {
         'user_id' => $user_id,
         'page_id' => $page_id
     );
-    wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
 
     // Defaults for Ver 1.6.1
     $defaults = array(
-        'chatgpt_bot_name' => 'Chatbot ChatGPT',
+        'chatbot_chatgpt_bot_name' => 'Chatbot ChatGPT',
         // TODO IDEA - Add a setting to fix or randomize the bot prompt
-        'chatgpt_chatbot_bot_prompt' => 'Enter your question ...',
-        'chatgpt_initial_greeting' => 'Hello! How can I help you today?',
-        'chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
+        'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
+        'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
+        'chatbot_chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatbot_chatgpt_display_style' => 'floating',
         'chatbot_chatgpt_assistant_alias' => 'primary',
-        'chatgptStartStatus' => 'closed',
-        'chatgptStartStatusNewVisitor' => 'closed',
-        'chatgpt_disclaimer_setting' => 'No',
-        'chatgpt_max_tokens_setting' => '150',
-        'chatgpt_width_setting' => 'Narrow',
+        'chatbot_chatgpt_start_status' => 'closed',
+        'chatbot_chatgpt_start_status_new_visitor' => 'closed',
+        'chatbot_chatgpt_disclaimer_setting' => 'No',
+        'chatbot_chatgpt_max_tokens_setting' => '150',
+        'chatbot_chatgpt_width_setting' => 'Narrow',
         'chatbot_chatgpt_diagnostics' => 'Off',
-        'chatgpt_avatar_icon_setting' => 'icon-001.png',
-        'chatgpt_avatar_icon_url_setting' => '',
-        'chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
-        'chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
-        'chatgpt_model_choice' => 'gpt-3.5-turbo',
-        'chatgpt_max_tokens_setting' => 150,
+        'chatbot_chatgpt_avatar_icon_setting' => 'icon-001.png',
+        'chatbot_chatgpt_avatar_icon_url_setting' => '',
+        'chatbot_chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
+        'chatbot_chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
+        'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
+        'chatbot_chatgpt_max_tokens_setting' => 150,
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
         'chatbot_chatgpt_enable_custom_buttons' => 'Off',
         'chatbot_chatgpt_custom_button_name_1' => '',
         'chatbot_chatgpt_custom_button_url_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',
         'chatbot_chatgpt_custom_button_url_2' => '',
+        'chatbot_chatgpt_allow_file_uploads' => 'No'
     );
 
     // Revised for Ver 1.5.0 
     $option_keys = array(
-        'chatgpt_bot_name',
-        'chatgpt_chatbot_bot_prompt', // Added in Ver 1.6.6
-        'chatgpt_initial_greeting',
-        'chatgpt_subsequent_greeting',
+        'chatbot_chatgpt_bot_name',
+        'chatbot_chatgpt_bot_prompt', // Added in Ver 1.6.6
+        'chatbot_chatgpt_initial_greeting',
+        'chatbot_chatgpt_subsequent_greeting',
         'chatbot_chatgpt_display_style',
         'chatbot_chatgpt_assistant_alias',
-        'chatgptStartStatus',
-        'chatgptStartStatusNewVisitor',
-        'chatgpt_disclaimer_setting',
-        'chatgpt_max_tokens_setting',
-        'chatgpt_width_setting',
+        'chatbot_chatgpt_start_status',
+        'chatbot_chatgpt_start_status_new_visitor',
+        'chatbot_chatgpt_disclaimer_setting',
+        'chatbot_chatgpt_max_tokens_setting',
+        'chatbot_chatgpt_width_setting',
         'chatbot_chatgpt_diagnostics',
-        // Avatar Options - Ver 1.5.0
-        'chatgpt_avatar_icon_setting',
-        'chatgpt_avatar_icon_url_setting',
-        'chatgpt_custom_avatar_icon_setting',
-        'chatgpt_avatar_greeting_setting',
+        'chatbot_chatgpt_avatar_icon_setting',
+        'chatbot_chatgpt_avatar_icon_url_setting',
+        'chatbot_chatgpt_custom_avatar_icon_setting',
+        'chatbot_chatgpt_avatar_greeting_setting',
         'chatbot_chatgpt_enable_custom_buttons',
         'chatbot_chatgpt_custom_button_name_1',
         'chatbot_chatgpt_custom_button_url_1',
         'chatbot_chatgpt_custom_button_name_2',
         'chatbot_chatgpt_custom_button_url_2',
-
+        'chatbot_chatgpt_allow_file_uploads'
     );
 
     $chatbot_settings = array();
@@ -196,7 +211,11 @@ function chatbot_chatgpt_enqueue_scripts() {
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
     }
 
-    $chatbot_settings['iconBaseURL'] = plugins_url( 'assets/icons/', __FILE__ );
+    $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( 'assets/icons/', __FILE__ );
+
+    // Localize the data for javascripts
+    wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
+
     wp_localize_script('chatbot-chatgpt-js', 'plugin_vars', array(
         'pluginUrl' => plugins_url('', __FILE__ ),
     ));
@@ -204,6 +223,13 @@ function chatbot_chatgpt_enqueue_scripts() {
     wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
+        'pluginUrl' => plugins_url('', __FILE__ ),
+        'ajax_url' => admin_url('admin-ajax.php'),
+    ));
+
+    // Upload files - Ver 1.7.6
+    wp_localize_script('chatbot-chatgpt-upload-trigger-js', 'chatbot_chatgpt_params', array(
+        'pluginUrl' => plugins_url('', __FILE__ ),
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
 
@@ -238,7 +264,6 @@ function chatbot_chatgpt_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
-
 // Settings and Deactivation Links - Ver - 1.5.0
 function enqueue_jquery_ui() {
     wp_enqueue_style('wp-jquery-ui-dialog');
@@ -246,13 +271,29 @@ function enqueue_jquery_ui() {
 }
 add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 
+// Schedule Cleanup of Expired Transients
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_event')) {
+    wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_cleanup_event');
+}
+add_action('chatbot_chatgpt_cleanup_event', 'clean_specific_expired_transients');
+
+// Schedule Conversation Log Cleanup - Ver 1.6.7
+if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
+    wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_conversation_log_cleanup_event');
+}
+add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_conversation_log_cleanup');
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
+
+    // Global variables
+    global $sessionId;
+    global $thread_Id;
+
     // Retrieve the API key
-    $api_key = esc_attr(get_option('chatgpt_api_key'));
-    // Retrieve the Use Custom GPT Assistant Id
-    $model = esc_attr(get_option('chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    // Retrieve the Use GPT Assistant Id
+    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     // FIXME - If gpt-4-turbo is selected, set the API model to gpt-4-1106-preview, i.e., the API name for the model
     if ($model == 'gpt-4-turbo') {
         $model = 'gpt-4-1106-preview';
@@ -260,7 +301,7 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$model: ' . $model);
     // Retrieve the Max tokens - Ver 1.4.2
-    $max_tokens = esc_attr(get_option('chatgpt_max_tokens_setting', 150));
+    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 150));
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
@@ -282,7 +323,8 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
     // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
-    $chatbot_settings = get_chatbot_chatgpt_transients($user_id, $page_id);
+    $chatbot_settings = get_chatbot_chatgpt_transients( 'dipslay_style', $user_id, $page_id);
+    $chatbot_settings = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
@@ -293,7 +335,7 @@ function chatbot_chatgpt_send_message() {
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
     // $chatbot_chatgpt_assistant_alias == 'primary';
     // $chatbot_chatgpt_assistant_alias == 'alternate';
-    // $chatbot_chatgpt_assistant_alias == 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'; // Custom GPT Assistant Id
+    // $chatbot_chatgpt_assistant_alias == 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'; // GPT Assistant Id
   
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
@@ -303,7 +345,7 @@ function chatbot_chatgpt_send_message() {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
         $use_assistant_id = 'Yes';
         // error_log ('Using Primary GPT Assistant Id ' . $assistant_id);
-        // Check if the Custom GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
+        // Check if the GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
         if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
@@ -313,21 +355,21 @@ function chatbot_chatgpt_send_message() {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
         $use_assistant_id = 'Yes';
         // error_log ('Using Alternate GPT Assistant Id ' . $assistant_id);
-        // Check if the Custom GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
+        // Check if the GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
         if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // error_log ('Falling back to ChatGPT API');
         }
     } else {
-        // Reference Custom GPT Assistant IDs directly - Ver 1.7.3
+        // Reference GPT Assistant IDs directly - Ver 1.7.3
         if (substr($chatbot_chatgpt_assistant_alias, 0, 5) === 'asst_') {
             // DIAG - Diagnostics
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Custom GPT Assistant Id: ' . $chatbot_chatgpt_assistant_alias);
-            // Override the $assistant_id with the Custom GPT Assistant Id
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant Id: ' . $chatbot_chatgpt_assistant_alias);
+            // Override the $assistant_id with the GPT Assistant Id
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
-            // error_log ('Using Custom GPT Assistant Id ' . $assistant_id);
+            // error_log ('Using GPT Assistant Id ' . $assistant_id);
         } else {
             // DIAG - Diagnostics
             // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
@@ -340,14 +382,24 @@ function chatbot_chatgpt_send_message() {
     // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Custom GPT Assistant Id: ' . $use_assistant_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant Id: ' . $use_assistant_id);
+
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
         // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
+
         // Send message to Custom GPT API - Ver 1.6.7
+
+        // error_log ('$message ' . $message);
+        append_message_to_conversation_log($sessionId, $user_id, $page_id, 'Visitor', $thread_Id, $assistant_id, $message);
+        
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_Id, $user_id, $page_id);
+
+        // error_log ('$response ' . $response);
+        append_message_to_conversation_log($sessionId, $user_id, $page_id, 'Chatbot', $thread_Id, $assistant_id, $response);
+
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
@@ -381,8 +433,13 @@ function chatbot_chatgpt_send_message() {
 
 }
 
+// Add action to send messages - Ver 1.0.0
 add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
+
+// Add action to upload files - Ver 1.7.6
+add_action('wp_ajax_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
 
 // Settings and Deactivation - Ver 1.5.0
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
@@ -467,8 +524,8 @@ function enqueue_greetings_script() {
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
     $greetings = array(
-        'initial_greeting' => esc_attr(get_option('chatgpt_initial_greeting', 'Hello! How can I help you today?')),
-        'subsequent_greeting' => esc_attr(get_option('chatgpt_subsequent_greeting', 'Hello again! How can I help you?')),
+        'initial_greeting' => esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?')),
+        'subsequent_greeting' => esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?')),
     );
 
     wp_localize_script('greetings', 'greetings_data', $greetings);

@@ -4,25 +4,25 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.2
-Stable tag: 1.7.5
+Stable tag: 1.7.6
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Introducing Chatbot ChatGPT for WordPress: Revolutionizing Digital Interactions ==
 
-Welcome to the future of website interaction with **Chatbot ChatGPT for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Custom GPT Assistants.
+Welcome to the future of website interaction with **Chatbot ChatGPT for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and GPT Assistants.
 
 **🌐 Harnessing OpenAI's Large Language Models for Enhanced Engagement**
 Dive into the world of advanced AI with OpenAI's Large Language Models at the core of our Chatbot ChatGPT. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
-**🌟 Custom GPT Assistants: Tailored Conversational Experiences**
-Unlock the potential of personalized digital interaction. Use the Custom GPT Assistants you develop, trained with your specific knowledge and skills, are here to revolutionize your website. From handling FAQs to managing bookings and offering customized suggestions, these Assistants are seamlessly integrated into your WordPress site, promising a dynamic and engaging user experience.
+**🌟 GPT Assistants: Tailored Conversational Experiences**
+Unlock the potential of personalized digital interaction. Use the GPT Assistants you develop, trained with your specific knowledge and skills, are here to revolutionize your website. From handling FAQs to managing bookings and offering customized suggestions, these Assistants are seamlessly integrated into your WordPress site, promising a dynamic and engaging user experience.
 
 **🔀 Multiple Assistants, Multiple Roles**
-Why settle for one when you can have more? With our plugin, deploy multiple Custom GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
+Why settle for one when you can have more? With our plugin, deploy multiple GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
 
-**Version 1.7.3 Update** Allows for virturally unlimited Custom GPT Assistants, allow you to deploy a unique assistant whereever you placed the short code.  Simply pass the "asst_" ID to the short code as one of the parameters.
+**Version 1.7.3 Update** Allows for virturally unlimited GPT Assistants, allow you to deploy a unique assistant whereever you placed the short code.  Simply pass the "asst_" ID to the short code as one of the parameters.
 
 Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
@@ -31,6 +31,9 @@ Flexibility is key. Display your Chatbot ChatGPT as an embedded feature on pages
 
 **🔍 Knowledge Navigator: Unearthing Your Content's Essence**
 At the heart of our plugin lies the Knowledge Navigator. This powerful tool delves deep into your website, mapping its architecture and content, enabling the chatbot to deliver precise and contextually relevant responses. Enhanced by TF-IDF analysis, our Navigator ensures your content's unique keywords shine through, making interactions more meaningful.
+
+** 🗎 Conversation Logging **
+Conversation Logging in this plugin records and stores chat interactions between users and the chatbot, providing valuable insights for enhancing user experience and chatbot performance. Visit the privacy policy on the Settings Support tab for details on data handling.
 
 **🎭 Personalize with Custom Avatars**
 Add a creative touch with customizable avatars. Reflect your site's personality through these visual companions, enhancing user engagement and adding a unique flair to your digital space.
@@ -181,15 +184,20 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 
 == Changelog ==
 
+= 1.7.6 =
+* Expanded input to accommodate multi-line for both embedded and floating styles
+* Reduced wait duration when using GPT Assistants to improve response time
+* Added Conversation Logging to retain visitor and chatbot exchanges
+
 = 1.7.5 =
 * Expanded support TF-IDF indexing for WooCommerce product post-type.
-* Corrected  with Custom GPT Assistant not being selected correctly when usissueing the assistant parameter in the shortcode.
+* Corrected with GPT Assistant not being selected correctly when usissueing the assistant parameter in the shortcode.
 
 = 1.7.4 =
 * Enhanced handling for multi-threaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
 
 = 1.7.3 =
-* Added support for unlimited Custom GTP Assistants in addition to 'original', 'primary' and 'alternate' short code parameters.
+* Added support for unlimited GPT Assistants in addition to 'original', 'primary' and 'alternate' short code parameters.
 * Use [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for floating Assistants.
 * Use [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for embedded Assistants.
 * Moved hard coded css from .js to the .css file for floating wide/narrow and embedded styling.
@@ -215,7 +223,7 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 * Corrected logic error to chatbot's response when no enhanced response was available.
 
 = 1.6.9 =
-* Added additional installation and support information for using Custom GPT Assistants.
+* Added additional installation and support information for using GPT Assistants.
 * Added enhanced diagnostic and error logging for developers.
 
 = 1.6.8 =

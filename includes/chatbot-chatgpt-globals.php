@@ -12,6 +12,7 @@
 if ( ! defined( 'WPINC' ) ) {
     die;
 }
+
 // Declare the $stopWords array as global
 // List of common stop words to be ignored
 global $stopWords;
@@ -69,8 +70,8 @@ $errorResponses = [
 ];
 
 // Declare the $chatbot_chatgpt_bot_prompt as global - Ver 1.6.6
-global $chatgpt_chatbot_bot_prompt;
-$chatgpt_chatbot_bot_prompt = [
+global $chatbot_chatgpt_bot_prompt;
+$chatbot_chatgpt_bot_prompt = [
     "Enter your question ...",
     "Ask me a question ...",
     "I'm listening ...",

@@ -175,12 +175,23 @@
 }
 
 #chatbot-chatgpt-submit {
-    /* background-color: #f1f1f1; */
-    color: #fff;
+    background-color: #f1f1f1 !important;
+    /* color: #fff; */
     border: none;
     border-radius: 3px;
-    padding: 6px 12px;
-    margin-left: 5px;
+    padding: 6px 6px;
+    margin-left: 3px;
+    cursor: pointer;
+}
+
+/* File Upload Button - Ver 1.7.6 */
+#chatbot-chatgpt-upload-file {
+    background-color: #f1f1f1 !important;
+    /* color: #fff; */
+    border: none;
+    border-radius: 3px;
+    padding: 6px 6px;
+    margin-left: 3px;
     cursor: pointer;
 }
 

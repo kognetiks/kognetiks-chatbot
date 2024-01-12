@@ -18,11 +18,11 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_settings_init() {
 
     // API/Model settings tab - Ver 1.3.0
-    // register_setting('chatbot_chatgpt_api_model', 'chatgpt_api_key');
+    // register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key');
     // Obfuscate the API key in settings registration - Ver 1.5.0
-    register_setting('chatbot_chatgpt_api_model', 'chatgpt_api_key', 'sanitize_api_key');
-    register_setting('chatbot_chatgpt_api_model', 'chatgpt_model_choice');
-    register_setting('chatbot_chatgpt_api_model', 'chatgpt_max_tokens_setting'); // Max Tokens setting options - Ver 1.4.2
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key', 'sanitize_api_key');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_model_choice');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_max_tokens_setting'); // Max Tokens setting options - Ver 1.4.2
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context'); // Covnersation Context - Ver 1.6.1
 
     add_settings_section(
@@ -33,7 +33,7 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatgpt_api_key',
+        'chatbot_chatgpt_api_key',
         'ChatGPT API Key',
         'chatbot_chatgpt_api_key_callback',
         'chatbot_chatgpt_api_model',
@@ -41,7 +41,7 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatgpt_model_choice',
+        'chatbot_chatgpt_model_choice',
         'ChatGPT Model Choice',
         'chatbot_chatgpt_model_choice_callback',
         'chatbot_chatgpt_api_model',
@@ -50,7 +50,7 @@ function chatbot_chatgpt_settings_init() {
     
     // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
     add_settings_field(
-        'chatgpt_max_tokens_setting',
+        'chatbot_chatgpt_max_tokens_setting',
         'Maximum Tokens Setting',
         'chatgpt_max_tokens_setting_callback',
         'chatbot_chatgpt_api_model',
@@ -69,24 +69,34 @@ function chatbot_chatgpt_settings_init() {
     
     // Settings Custom GPTs tab - Ver 1.7.2
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allow_file_uploads'); // Ver 1.7.6
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id'); // Ver 1.6.7
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
 
     add_settings_section(
         'chatbot_chatgpt_custom_gpts_section',
-        'Custom GPT Assistant Settings',
-        'chatbot_chatgpt_custom_gpts_section_callback',
+        'GPT Assistant Settings',
+        'chatbot_chatgpt_gpt_assistants_section_callback',
         'chatbot_chatgpt_custom_gpts'
     );
     
-    // Use Custom GPT Assistant Id (Yes or No) - Ver 1.6.7
+    // Use GPT Assistant Id (Yes or No) - Ver 1.6.7
     add_settings_field(
         'chatbot_chatgpt_use_custom_gpt_assistant_id',
-        'Use Custom GPT Assistant Id',
-        'chatbot_chatgpt_use_custom_gpt_assistant_id_callback',
+        'Use GPT Assistant Id',
+        'chatbot_chatgpt_use_gpt_assistant_id_callback',
         'chatbot_chatgpt_custom_gpts',
         'chatbot_chatgpt_custom_gpts_section'
     );
+
+    // Allow file uploads to the Assistant - Ver 1.7.6
+    // add_settings_field(
+    //     'chatbot_chatgpt_allow_file_uploads',
+    //     'Allow File Uploads',
+    //     'chatbot_chatgpt_allow_file_uploads_callback',
+    //     'chatbot_chatgpt_custom_gpts',
+    //     'chatbot_chatgpt_custom_gpts_section'
+    // );
 
     // CustomGPT Assistant Id - Ver 1.6.7
     add_settings_field(
@@ -108,17 +118,17 @@ function chatbot_chatgpt_settings_init() {
 
 
     // Settings settings tab - Ver 1.3.0
-    register_setting('chatbot_chatgpt_settings', 'chatgpt_bot_name');
-    register_setting('chatbot_chatgpt_settings', 'chatgptStartStatus');
-    register_setting('chatbot_chatgpt_settings', 'chatgptStartStatusNewVisitor');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_bot_name');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_start_status');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_start_status_new_visitor');
     // Added in Ver 1.6.6
-    register_setting('chatbot_chatgpt_settings', 'chatgpt_chatbot_bot_prompt');
-    register_setting('chatbot_chatgpt_settings', 'chatgpt_initial_greeting');
-    register_setting('chatbot_chatgpt_settings', 'chatgpt_subsequent_greeting');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_bot_prompt');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_initial_greeting');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_subsequent_greeting');
     // Option to remove the OpenAI disclaimer - Ver 1.4.1
-    register_setting('chatbot_chatgpt_settings', 'chatgpt_disclaimer_setting');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
     // Option to select narrow or wide chatboat - Ver 1.4.2
-    register_setting('chatbot_chatgpt_settings', 'chatgpt_width_setting');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_width_setting');
     // Option to set diagnotics on/off - Ver 1.5.0
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_diagnostics');
 
@@ -130,7 +140,7 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatgpt_bot_name',
+        'chatbot_chatgpt_bot_name',
         'Bot Name',
         'chatbot_chatgpt_bot_name_callback',
         'chatbot_chatgpt_settings',
@@ -138,7 +148,7 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatgptStartStatus',
+        'chatbot_chatgpt_start_status',
         'Start Status',
         'chatbot_chatgptStartStatus_callback',
         'chatbot_chatgpt_settings',
@@ -146,15 +156,15 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatgptStartStatusNewVisitor',
+        'chatbot_chatgpt_start_status_new_visitor',
         'Start Status New Visitor',
-        'chatbot_chatgptStartStatusNewVisitor_callback',
+        'chatbot_chatbot_chatgpt_start_status_new_visitor_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
     );
 
         add_settings_field(
-        'chatgpt_chatbot_bot_prompt',
+        'chatbot_chatgpt_bot_prompt',
         'Chatbot Prompt',
         'chatbot_chatgpt_bot_prompt_callback',
         'chatbot_chatgpt_settings',
@@ -162,7 +172,7 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatgpt_initial_greeting',
+        'chatbot_chatgpt_initial_greeting',
         'Initial Greeting',
         'chatbot_chatgpt_initial_greeting_callback',
         'chatbot_chatgpt_settings',
@@ -170,7 +180,7 @@ function chatbot_chatgpt_settings_init() {
     );
 
     add_settings_field(
-        'chatgpt_subsequent_greeting',
+        'chatbot_chatgpt_subsequent_greeting',
         'Subsequent Greeting',
         'chatbot_chatgpt_subsequent_greeting_callback',
         'chatbot_chatgpt_settings',
@@ -179,7 +189,7 @@ function chatbot_chatgpt_settings_init() {
 
     // Option to remove the OpenAI disclaimer - Ver 1.4.1
     add_settings_field(
-        'chatgpt_disclaimer_setting',
+        'chatbot_chatgpt_disclaimer_setting',
         'Include "As an AI language model" disclaimer',
         'chatgpt_disclaimer_setting_callback',
         'chatbot_chatgpt_settings',
@@ -188,9 +198,9 @@ function chatbot_chatgpt_settings_init() {
 
     // Option to change the width of the bot from narrow to wide - Ver 1.4.2
     add_settings_field(
-        'chatgpt_width_setting',
+        'chatbot_chatgpt_width_setting',
         'Chatbot Width Setting',
-        'chatgpt_width_setting_callback',
+        'chatbot_chatgpt_width_setting_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
     );
@@ -293,10 +303,10 @@ function chatbot_chatgpt_settings_init() {
     );
 
     // Avatar settings tab - Ver 1.5.0
-    register_setting('chatbot_chatgpt_avatar', 'chatgpt_avatar_icon_setting');
-    register_setting('chatbot_chatgpt_avatar', 'chatgpt_avatar_icon_url_setting');
-    register_setting('chatbot_chatgpt_avatar', 'chatgpt_custom_avatar_icon_setting');
-    register_setting('chatbot_chatgpt_avatar', 'chatgpt_avatar_greeting_setting');
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_setting');
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_url_setting');
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_custom_avatar_icon_setting');
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_greeting_setting');
     register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_set');
 
     // Register a new section in the "chatbot_chatgpt" page
@@ -309,7 +319,7 @@ function chatbot_chatgpt_settings_init() {
 
     // Avatar Greeting
     add_settings_field(
-        'chatgpt_avatar_greeting_setting',
+        'chatbot_chatgpt_avatar_greeting_setting',
         'Avatar Greeting',
         'chatbot_chatgpt_avatar_greeting_callback',
         'chatbot_chatgpt_avatar',
@@ -327,7 +337,7 @@ function chatbot_chatgpt_settings_init() {
     
     // Register new fields in the "chatbot_chatgpt_avatar_section" section, inside the "chatbot_chatgpt_avatar" page
     add_settings_field(
-        'chatgpt_avatar_icon_setting',
+        'chatbot_chatgpt_avatar_icon_setting',
         'Avatar Icon Setting',
         'chatbot_chatgpt_avatar_icon_callback',
         'chatbot_chatgpt_avatar',
@@ -336,7 +346,7 @@ function chatbot_chatgpt_settings_init() {
 
     // Coming in Ver 2.0.0
     // add_settings_field(
-    //     'chatgpt_custom_avatar_icon_setting',
+    //     'chatbot_chatgpt_custom_avatar_icon_setting',
     //     'Custom Avatar URL',
     //     'chatbot_chatgpt_custom_avatar_callback',
     //     'chatbot_chatgpt_avatar',
@@ -392,6 +402,8 @@ function chatbot_chatgpt_settings_init() {
 
     // Reporting settings tab - Ver 1.6.1
     register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_reporting_period');
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_enable_conversation_logging');
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_log_days_to_keep');
 
     add_settings_section(
         'chatbot_chatgpt_reporting_section',
@@ -404,6 +416,22 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_reporting_period',
         'Reporting Period',
         'chatbot_chatgpt_reporting_period_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_enable_conversation_logging',
+        'Enable Conversation Logging',
+        'chatbot_chatgpt_enable_conversation_logging_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_conversation_log_days_to_keep',
+        'Conversation Log Days to Keep',
+        'chatbot_chatgpt_conversation_log_days_to_keep_callback',
         'chatbot_chatgpt_reporting',
         'chatbot_chatgpt_reporting_section'
     );
