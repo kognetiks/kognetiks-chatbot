@@ -55,11 +55,10 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value) {
 }
 
 // Get the transient - example usage
-
-
 // $chatbot_settings = get_chatbot_chatgpt_transients();
 // $display_style = $chatbot_settings['display_style'];
 // $assistant_alias = $chatbot_settings['assistant_alias'];
+// $file_id = $chatbot_settings['file_id'];
 
 // Get the transients
 function get_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id) {
@@ -69,6 +68,7 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id) {
     // $page_id = get_the_ID(); // Get current page ID
 
     // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type ' . $transient_type);
     // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
     // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
 
