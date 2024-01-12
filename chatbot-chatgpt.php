@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.7.7
+ * Version:     1.7.8
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -37,9 +37,10 @@ global $sessionId; // Declare the global $sessionID variable
 
 if ($sessionId == '') {
     session_start();
+    $sessionId = session_id();
+    session_write_close();
+    // error_log('Session ID: ' . $sessionId);
 }
-$sessionId = session_id();
-// error_log('Session ID: ' . $sessionId);
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5

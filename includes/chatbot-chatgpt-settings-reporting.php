@@ -33,8 +33,17 @@ function chatbot_chatgpt_reporting_section_callback($args) {
                 echo $header;
             }
         ?>
-        <h3>Visitor Interactions</h3>        
-        <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p>
+        <h3>Download Interactions Data</h3>
+        <p>Use the 'Download Data' button to retrieve the interactions data.</p>
+        <?php
+            if (is_admin()) {
+                $header = " ";
+                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Data</a>';
+                echo $header;
+            }
+        ?>
+        <!-- <h3>Visitor Interactions</h3> -->
+        <!-- <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p> -->
     </div>
     <?php
 }
@@ -161,7 +170,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
         $data_value_y = (int)($data_value_y);
 
         // https://fonts.google.com/specimen/Roboto - Ver 1.6.7
-        $fontFile = plugin_dir_path(__FILE__) . '../assets/fonts/roboto/Roboto-Black.ttf'; // Replace this with the path to your font file
+        $fontFile = plugin_dir_path(__FILE__) . '../assets/fonts/roboto/Roboto-Black.ttf';
 
         imagettftext($image, $font_size, 0, $data_value_x, $data_value_y, $black, $fontFile, $data[$i]);
 
@@ -188,10 +197,20 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     // Check is GD Library is installed - Ver 1.6.3
     if (extension_loaded('gd')) {
-        // DIAG - Diagnostic - Ver 1.6.3
-        // echo '<p>ALERT: GD Library is installed and loaded!</p>';
+        // GD Library is installed and loaded
+        // DIAG - Log the output choice
+        chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is installed and loaded.');
     } else {
-        echo '<p>ALERT: GD Library is not installed! No chart will be displayed.</p>';
+        // Create a detailed admin error message
+        function chatbot_chatgpt_extension_load_error() {
+            $class = 'notice notice-error';
+            $message = __( 'Chatbot ChatGPT requires the GD Library to function correctly, but it is not installed or enabled on your server. Please install or enable the GD Library.', 'chatbot-chatgpt' );
+            printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        }
+        add_action( 'admin_notices', 'chatbot_chatgpt_extension_load_error' );
+        // DIAG - Log the output choice
+        chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
+        // Disable the shortcode functionality
         return;
     }
 
@@ -228,7 +247,11 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         // Modify the SQL query to group the results based on the reporting period
         $results = $wpdb->get_results("SELECT $group_by AS date, SUM(count) AS count FROM $table_name WHERE date >= '$start_date' GROUP BY $group_by");
 
-        if(!empty($results)) {
+        if(!empty($wpdb->last_error)) {
+            // DIAG - Handle the error
+            chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
+            return;
+        } else if(!empty($results)) {
             $labels = [];
             $data = [];
             foreach ($results as $result) {
@@ -242,7 +265,8 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
     }
 
     if (empty( $a['labels']) || empty($atts['data'])) {
-        return '<p>You need to specify both the labels and data for the chart to work.</p>';
+        // return '<p>You need to specify both the labels and data for the chart to work.</p>';
+        return '<p>No data to chart at this time. Plesae visit again later.</p>';
     }
 
     // Generate the chart
@@ -253,9 +277,9 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     return '<img src="' . $img_url . '" alt="Bar Chart">';
 }
-
+// TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8
 // Add shortcode
-add_shortcode('chatbot_chatgpt_simple_chart', 'chatbot_chatgpt_simple_chart_shortcode_function');
+// add_shortcode('chatbot_chatgpt_simple_chart', 'chatbot_chatgpt_simple_chart_shortcode_function');
 
 
 // Clean up ../image subdirectory - Ver 1.6.3
@@ -287,16 +311,30 @@ function chatbot_chatgpt_size_conversations() {
     return $results[0]->{'Size in MB'};
 }
 
-// Download the conversation data - Ver 1.7.6
+function chatbot_chatgpt_download_interactions_data() {
+
+    // Export data from the chatbot_chatgpt_interactions table to a csv file
+    chatbot_chatgpt_export_data('chatbot_chatgpt_interactions', 'Chatbot ChatGPT Interactions');
+
+}
+
 function chatbot_chatgpt_download_conversation_data() {
 
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
+    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot ChatGPT Conversation Logs');
+    
+}
+
+// Download the conversation data - Ver 1.7.6
+function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
+
+    // Export data from the chatbot_chatgpt_conversation_log table to a csv file
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    $table_name = $wpdb->prefix . $t_table_name;
     $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
 
     // Ask user where to save the file
-    $filename = 'chatbot_chatgpt_conversation_log_' . date('Y-m-d') . '.csv';
+    $filename = $t_file_name . ' ' . date('Y-m-d') . '.csv';
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
 
     // Create results directory if it doesn't exist
@@ -350,7 +388,7 @@ function chatbot_chatgpt_download_conversation_data() {
 
     // Deliver the file for download
     header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=Chatbot Conversation Log.csv');
+    header('Content-Disposition: attachment;filename=' . $filename);
     echo $csv_data;
 
     // Delete the file
@@ -359,3 +397,4 @@ function chatbot_chatgpt_download_conversation_data() {
 
 }
 add_action('admin_post_chatbot_chatgpt_download_conversation_data', 'chatbot_chatgpt_download_conversation_data');
+add_action('admin_post_chatbot_chatgpt_download_interactions_data', 'chatbot_chatgpt_download_interactions_data');

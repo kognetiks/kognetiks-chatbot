@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.2
-Stable tag: 1.7.7
+Stable tag: 1.7.8
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -183,6 +183,11 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 16. Settings and Options
 
 == Changelog ==
+
+= 1.7.8 =
+* Correct closing the active session and REST API error that is encountered
+* Removed charting from Reporting tab as this has caused some users issues
+* Replaced with an option to download Interaction data as a CSV file
 
 = 1.7.7 =
 * Expanded input to accommodate multi-line for both embedded and floating styles
