@@ -184,6 +184,11 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 
 == Changelog ==
 
+= 1.7.8 =
+* Correct closing the active session and REST API error that is encountered
+* Removed charting from Reporting tab as this has caused some users issues
+* Replaced with an option to download Interaction data as a CSV file
+
 = 1.7.7 =
 * Expanded input to accommodate multi-line for both embedded and floating styles
 * Reduced wait duration when using GPT Assistants to improve response time

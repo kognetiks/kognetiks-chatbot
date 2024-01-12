@@ -33,8 +33,17 @@ function chatbot_chatgpt_reporting_section_callback($args) {
                 echo $header;
             }
         ?>
-        <h3>Visitor Interactions</h3>        
-        <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p>
+        <h3>Download Interactions Data</h3>
+        <p>Use the 'Download Data' button to retrieve the interactions data.</p>
+        <?php
+            if (is_admin()) {
+                $header = " ";
+                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Data</a>';
+                echo $header;
+            }
+        ?>
+        <!-- <h3>Visitor Interactions</h3> -->
+        <!-- <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p> -->
     </div>
     <?php
 }
@@ -268,8 +277,9 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     return '<img src="' . $img_url . '" alt="Bar Chart">';
 }
+// TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8
 // Add shortcode
-add_shortcode('chatbot_chatgpt_simple_chart', 'chatbot_chatgpt_simple_chart_shortcode_function');
+// add_shortcode('chatbot_chatgpt_simple_chart', 'chatbot_chatgpt_simple_chart_shortcode_function');
 
 
 // Clean up ../image subdirectory - Ver 1.6.3
@@ -301,16 +311,30 @@ function chatbot_chatgpt_size_conversations() {
     return $results[0]->{'Size in MB'};
 }
 
-// Download the conversation data - Ver 1.7.6
+function chatbot_chatgpt_download_interactions_data() {
+
+    // Export data from the chatbot_chatgpt_interactions table to a csv file
+    chatbot_chatgpt_export_data('chatbot_chatgpt_interactions', 'Chatbot ChatGPT Interactions');
+
+}
+
 function chatbot_chatgpt_download_conversation_data() {
 
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
+    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot ChatGPT Conversation Logs');
+    
+}
+
+// Download the conversation data - Ver 1.7.6
+function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
+
+    // Export data from the chatbot_chatgpt_conversation_log table to a csv file
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    $table_name = $wpdb->prefix . $t_table_name;
     $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
 
     // Ask user where to save the file
-    $filename = 'chatbot_chatgpt_conversation_log_' . date('Y-m-d') . '.csv';
+    $filename = $t_file_name . ' ' . date('Y-m-d') . '.csv';
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
 
     // Create results directory if it doesn't exist
@@ -364,7 +388,7 @@ function chatbot_chatgpt_download_conversation_data() {
 
     // Deliver the file for download
     header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=Chatbot Conversation Log.csv');
+    header('Content-Disposition: attachment;filename=' . $filename);
     echo $csv_data;
 
     // Delete the file
@@ -373,3 +397,4 @@ function chatbot_chatgpt_download_conversation_data() {
 
 }
 add_action('admin_post_chatbot_chatgpt_download_conversation_data', 'chatbot_chatgpt_download_conversation_data');
+add_action('admin_post_chatbot_chatgpt_download_interactions_data', 'chatbot_chatgpt_download_interactions_data');

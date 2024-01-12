@@ -36,6 +36,7 @@ function chatbot_chatgpt_gpt_assistants_section_callback($args) {
         <li><b>&#91;chatbot_chatgpt style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Floating style, GPT Assistant as set in GPT Assistant Id setting</li>
         <li><b>&#91;chatbot_chatgpt style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Embedded style, GPT Assistant as set in GPT Assistant Id setting</li>
         <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li>
+    <p><b>NOTE: </b>When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
     </ul>
     <?php
 }
