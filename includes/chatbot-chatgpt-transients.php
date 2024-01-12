@@ -50,7 +50,7 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value) {
     }
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Transient set $transient_key ' . $transient_value);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Transient set $transient_key ' . $transient_value);
 
 }
 
@@ -94,8 +94,5 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id) {
         }
         return array('file_id' => $transient_value);
     }
-
-    // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Returning $transient_key ' . print_r($transient_value, true));
 
 }

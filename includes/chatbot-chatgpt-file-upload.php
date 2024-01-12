@@ -17,14 +17,14 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_upload_file_to_assistant() {
 
     // DIAG - Diagnostic - Ver 1.7.6
-    chatbot_chatgpt_back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
+    // chatbot_chatgpt_back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
 
     $upload_dir = WP_CONTENT_DIR . '/plugins/chatbot-chatgpt/uploads/';
     $file_path = $upload_dir . basename($_FILES['file']['name']);
 
     // DIAG - Diagnostic - Ver 1.7.6
-    chatbot_chatgpt_back_trace( 'NOTICE', $upload_dir );
-    chatbot_chatgpt_back_trace( 'NOTICE', $file_path );
+    // chatbot_chatgpt_back_trace( 'NOTICE', $upload_dir );
+    // chatbot_chatgpt_back_trace( 'NOTICE', $file_path );
 
     if (!file_exists($upload_dir)) {
         mkdir($upload_dir, 0777, true); // Create directory if it doesn't exist
@@ -32,16 +32,16 @@ function chatbot_chatgpt_upload_file_to_assistant() {
 
     // Check if there was an error during the file upload
     if ($_FILES['file']['error'] > 0) {
-        chatbot_chatgpt_back_trace('ERROR', "Error during file upload: " . $_FILES['file']['error']);
+        // chatbot_chatgpt_back_trace('ERROR', "Error during file upload: " . $_FILES['file']['error']);
     } else {
         if (move_uploaded_file($_FILES['file']['tmp_name'], $file_path)) {
             // File is successfully uploaded
             // Diagnostic - Ver 1.7.6
-            chatbot_chatgpt_back_trace( 'SUCCESS', "File is successfully uploaded" );
+            // chatbot_chatgpt_back_trace( 'SUCCESS', "File is successfully uploaded" );
         } else {
             // Handle error
             // Diagnostic - Ver 1.7.6
-            chatbot_chatgpt_back_trace( 'ERROR', "Error uploading file" );
+            // chatbot_chatgpt_back_trace( 'ERROR', "Error uploading file" );
         }
     }
 
@@ -94,7 +94,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         // Retrieve the error message before closing the cURL handle
         $errorMessage = 'Error:' . curl_error($ch);
         // DIAG - Diagnostic - Ver 1.7.6
-        chatbot_chatgpt_back_trace( 'ERROR', $errorMessage );
+        // chatbot_chatgpt_back_trace( 'ERROR', $errorMessage );
         curl_close($ch); // Make sure to close the cURL session after getting the error message
         return array(
             'status' => 'error',
@@ -113,7 +113,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     if ($http_status != 200 || isset($responseData['error'])) {
         $errorMessage = $responseData['error']['message'] ?? 'Unknown error occurred.';
         // DIAG - Diagnostic - Ver 1.7.6
-        chatbot_chatgpt_back_trace( 'ERROR', $errorMessage );
+        // chatbot_chatgpt_back_trace( 'ERROR', $errorMessage );
         return array(
             'status' => 'error',
             'http_status' => $http_status,
@@ -121,9 +121,9 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         );
     } else {
         // DAIG - Diagnostic - Ver 1.7.6
-        chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully." );
+        // chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully." );
         //DIAG - Diagnostic - Ver 1.7.6
-        chatbot_chatgpt_back_trace( 'SUCCESS', 'file_id ' . $responseData['id'] );
+        // chatbot_chatgpt_back_trace( 'SUCCESS', 'file_id ' . $responseData['id'] );
         // Set the transient for the file id
         set_chatbot_chatgpt_transients('file_id', $responseData['id']);
         return array(
@@ -135,7 +135,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     }
 
     // DIAG - Diagnostic - Ver 1.7.6
-    chatbot_chatgpt_back_trace( 'NOTICE', "Exiting chatbot_chatgpt_upload_file_to_assistant()" );
+    // chatbot_chatgpt_back_trace( 'NOTICE', "Exiting chatbot_chatgpt_upload_file_to_assistant()" );
 
     return;
 
