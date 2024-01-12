@@ -37,9 +37,10 @@ global $sessionId; // Declare the global $sessionID variable
 
 if ($sessionId == '') {
     session_start();
+    $sessionId = session_id();
+    session_write_close();
+    // error_log('Session ID: ' . $sessionId);
 }
-$sessionId = session_id();
-// error_log('Session ID: ' . $sessionId);
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
