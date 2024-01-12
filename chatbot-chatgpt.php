@@ -88,6 +88,12 @@ function my_custom_buffer_start() {
     ob_start();
 }
 
+// Check for Upgrades - Ver 1.7.7
+if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
+    chatbot_chatgpt_upgrade();
+    update_option('chatbot_chatgpt_upgraded', 'Yes');
+}
+
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 // update_option('chatbot_chatgpt_diagnostics', 'Off');
 global $chatbot_chatgpt_diagnostics;
