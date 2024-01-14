@@ -363,11 +363,10 @@ function get_plugin_version() {
 
     $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . '../chatbot-chatgpt.php');
     $plugin_version = $plugin_data['Version'];
-
+    update_option('chatbot_chatgpt_plugin_version', $plugin_version);
     // DIAG - Log the plugin version
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin version '. $plugin_version);
 
     return $plugin_version;
 
 }
-

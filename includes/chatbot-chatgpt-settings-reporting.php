@@ -21,29 +21,30 @@ function chatbot_chatgpt_reporting_section_callback($args) {
         <p>Use these setting to select the reporting period for Visitor Interactions.</p>
         <p>By default converation logging is initially turned <b>Off</b>.</p>
         <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support#chatbot-conversation-log">Support</a> tab of this plugin for more details.</p>
-        <h3>Visitor Conversations Items and Stored Utilized</h3>
-        <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
-        <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
-        <h3>Download Conversation Data</h3>
-        <p>Use the 'Download Data' button to retrieve the conversation data.</p>
-        <?php
-            if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Data</a>';
-                echo $header;
-            }
-        ?>
-        <h3>Download Interactions Data</h3>
-        <p>Use the 'Download Data' button to retrieve the interactions data.</p>
-        <?php
-            if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Data</a>';
-                echo $header;
-            }
-        ?>
+        <h3>Conversation Data</h3>
+            <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
+            <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
+            <p>Use the button (below) to retrieve the conversation data.</p>
+            <?php
+                if (is_admin()) {
+                    $header = " ";
+                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Converation Data</a>';
+                    echo $header;
+                }
+            ?>
+        <h3>Interactions Data</h3>
+            <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
+            <p>Use the button (below) to retrieve the interactions data.</p>
+            <?php
+                if (is_admin()) {
+                    $header = " ";
+                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Interaction Data</a>';
+                    echo $header;
+                }
+            ?>
         <!-- <h3>Visitor Interactions</h3> -->
         <!-- <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p> -->
+        <h3>Reporting Settings</h3>
     </div>
     <?php
 }
@@ -293,6 +294,65 @@ function chatbot_chatgpt_delete_chart() {
 }
 add_action('chatbot_chatgpt_delete_chart', 'chatbot_chatgpt_delete_chart');
 
+// Return Interactions data in a table - Ver 1.7.8
+function chatbot_chatgpt_interactions_table() {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
+
+    // Get the reporting period from the options
+    $reporting_period = get_option('chatbot_chatgpt_reporting_period');
+    
+        // Calculate the start date and group by clause based on the reporting period
+        if($reporting_period === 'Daily') {
+            $start_date = date('Y-m-d', strtotime("-7 days"));
+            // $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
+            $group_by = "DATE_FORMAT(date, '%m-%d')";
+        } elseif($reporting_period === 'Monthly') {
+            $start_date = date('Y-m-01', strtotime("-3 months"));
+            $group_by = "DATE_FORMAT(date, '%Y-%m')";
+        } else {
+            $start_date = date('Y-01-01', strtotime("-3 years"));
+            $group_by = "DATE_FORMAT(date, '%Y')";
+        }
+        
+        // Modify the SQL query to group the results based on the reporting period
+        $results = $wpdb->get_results("SELECT $group_by AS date, SUM(count) AS count FROM $table_name WHERE date >= '$start_date' GROUP BY $group_by");
+
+        if(!empty($wpdb->last_error)) {
+            // DIAG - Handle the error
+            chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
+            return;
+        } else if(!empty($results)) {
+            $labels = [];
+            $data = [];
+            foreach ($results as $result) {
+                $labels[] = $result->date;
+                $data[] = $result->count;
+            }
+            
+            $a['labels'] = $labels;
+            $atts['data'] = $data;
+
+            $output = '<table class="widefat striped" style="table-layout: fixed; width: auto;">';
+            $output .= '<thead><tr><th style="width: 96px;">Date</th><th style="width: 96px;">Count</th></tr></thead>';
+            $output .= '<tbody>';
+            foreach ($results as $result) {
+                $output .= '<tr>';
+                $output .= '<td style="width: 96px;">' . $result->date . '</td>';
+                $output .= '<td style="width: 96px;">' . $result->count . '</td>';
+                $output .= '</tr>';
+            }
+            $output .= '</tbody>';
+            $output .= '</table>';            
+
+        return $output;
+
+    } else {
+        return '<p>No data to report at this time. Plesae visit again later.</p>';
+    }
+
+}
 
 // Count the number of conversations stored - Ver 1.7.6
 function chatbot_chatgpt_count_conversations() {
