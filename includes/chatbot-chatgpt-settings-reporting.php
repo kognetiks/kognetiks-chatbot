@@ -24,7 +24,7 @@ function chatbot_chatgpt_reporting_section_callback($args) {
         <h3>Conversation Data</h3>
             <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
             <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
-            <p>Use the button (below) to retrieve the conversation data.</p>
+            <p>Use the button (below) to retrieve the conversation data and download as a CSV file.</p>
             <?php
                 if (is_admin()) {
                     $header = " ";
@@ -33,8 +33,10 @@ function chatbot_chatgpt_reporting_section_callback($args) {
                 }
             ?>
         <h3>Interactions Data</h3>
+            <!-- TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8 -->
+            <!-- <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p> -->
             <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
-            <p>Use the button (below) to retrieve the interactions data.</p>
+            <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
             <?php
                 if (is_admin()) {
                     $header = " ";
@@ -42,8 +44,6 @@ function chatbot_chatgpt_reporting_section_callback($args) {
                     echo $header;
                 }
             ?>
-        <!-- <h3>Visitor Interactions</h3> -->
-        <!-- <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p> -->
         <h3>Reporting Settings</h3>
     </div>
     <?php
