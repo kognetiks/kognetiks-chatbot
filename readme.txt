@@ -193,7 +193,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 = 1.7.8 =
 * Correct closing the active session and REST API error that is encountered
-* Removed charting from Reporting tab as this has caused some users issues
+* Removed charting from Reporting tab as this has caused some users issues and a table instead
 * Replaced with an option to download Interaction data as a CSV file
 
 = 1.7.7 =
