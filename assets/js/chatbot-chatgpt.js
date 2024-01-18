@@ -392,44 +392,87 @@ jQuery(document).ready(function ($) {
     });
 
     // Add the change event listener to the file input field
+    // $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
+    //     // console.log('Chatbot ChatGPT: NOTICE: File selected');
+
+    //     showTypingIndicator();
+
+    //     var fileField = e.target;
+
+    //     // Check if a file is selected
+    //     if (!fileField.files.length) {
+    //         // console.log('Chatbot ChatGPT: WARNING: No file selected');
+    //         return;
+    //     }
+
+    //     var formData = new FormData();
+    //     formData.append('file', fileField.files[0]);
+    //     // console.log('Chatbot ChatGPT: NOTICE: File selected ', fileField.files[0]);
+    //     formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
+
+    //     $.ajax({
+    //         url: chatbot_chatgpt_params.ajax_url,
+    //         method: 'POST',
+    //         data: formData,
+    //         processData: false,  // tell jQuery not to process the data
+    //         contentType: false,  // tell jQuery not to set contentType
+    //         success: function(response) {
+    //             // console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
+    //             $('#chatbot-chatgpt-upload-file-input').val('');
+    //         },
+    //         error: function(jqXHR, textStatus, errorThrown) {
+    //             // console.log('AJAX error:', textStatus, errorThrown);
+    //         }
+    //     });
+
+    //     removeTypingIndicator();
+
+    //     appendMessage('File uploaded.', 'bot');
+
+    // });
+
+    //
+    // THIS IS WHERE I LEFT OFF - Ver 1.7.9
+    //
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
-        // console.log('Chatbot ChatGPT: NOTICE: File selected');
-
         showTypingIndicator();
-
+    
         var fileField = e.target;
-
+    
         // Check if a file is selected
         if (!fileField.files.length) {
-            // console.log('Chatbot ChatGPT: WARNING: No file selected');
             return;
         }
-
-        var formData = new FormData();
-        formData.append('file', fileField.files[0]);
-        // console.log('Chatbot ChatGPT: NOTICE: File selected ', fileField.files[0]);
-        formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
-
-        $.ajax({
-            url: chatbot_chatgpt_params.ajax_url,
-            method: 'POST',
-            data: formData,
-            processData: false,  // tell jQuery not to process the data
-            contentType: false,  // tell jQuery not to set contentType
-            success: function(response) {
-                // console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
-                $('#chatbot-chatgpt-upload-file-input').val('');
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                // console.log('AJAX error:', textStatus, errorThrown);
+    
+        var file = fileField.files[0];
+        var reader = new FileReader();
+        var fileContents; // Variable to store file contents outside the onload function
+    
+        // Define the onload function for the FileReader
+        reader.onload = function(e) {
+            var contents = e.target.result;
+        
+            // If the file is an image, display it in an img element
+            if (file.type.startsWith('image/')) {
+                var img = document.createElement('img');
+                img.src = contents;
+                document.body.appendChild(img);
+            }
+        };
+        
+        reader.readAsDataURL(file);  // Read the file as a data URL
+    
+        // Add a click event handler for the submit button
+        $('#submitButton').on('click', function() {
+            if (fileContents) { // If fileContents is not empty
+                // Append the file contents to the messageInput field
+                var messageInput = $('#messageInput');
+                var currentInput = messageInput.val();
+                messageInput.val(currentInput + fileContents);
             }
         });
-
-        removeTypingIndicator();
-
-        appendMessage('File uploaded.', 'bot');
-
     });
+    
 
     // Moved the css to the .css file - Refactored for Ver 1.7.3
     // Add the toggleChatbot() function - Ver 1.1.0

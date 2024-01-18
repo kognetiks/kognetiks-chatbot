@@ -16,8 +16,11 @@ if ( ! defined( 'WPINC' ) ) {
 // Upload Files to the Assistant
 function chatbot_chatgpt_upload_file_to_assistant() {
 
+    global $file_contents;
+    $file_contents = '';
+
     // DIAG - Diagnostic - Ver 1.7.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
+    chatbot_chatgpt_back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
 
     $upload_dir = WP_CONTENT_DIR . '/plugins/chatbot-chatgpt/uploads/';
     $file_path = $upload_dir . basename($_FILES['file']['name']);
@@ -66,6 +69,16 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         return $response;
     }
 
+    // Read the file contents - Ver 1.7.9
+    $file_contents = file_get_contents($file_path);
+    return array(
+        'status' => 'success',
+        'http_status' => $http_status,
+        'file_id' => $responseData['id'],
+        'message' => 'File uploaded successfully.'
+    );
+    return;
+
     // Initialize cURL session
     $ch = curl_init();
 
@@ -78,7 +91,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     ));
 
     // Add the file to upload and the purpose
-    // One of answers, classifications, serach, converations, or fine-tune
+    // One of answers, classifications, search, converations, or fine-tune
     $postFields = array(
         'file' => new CURLFile($file_path),
         'purpose' => 'assistants'
