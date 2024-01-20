@@ -374,14 +374,14 @@ function chatbot_chatgpt_size_conversations() {
 function chatbot_chatgpt_download_interactions_data() {
 
     // Export data from the chatbot_chatgpt_interactions table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_interactions', 'Chatbot ChatGPT Interactions');
+    chatbot_chatgpt_export_data('chatbot_chatgpt_interactions', 'Chatbot-ChatGPT-Interactions');
 
 }
 
 function chatbot_chatgpt_download_conversation_data() {
 
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot ChatGPT Conversation Logs');
+    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Conversation Logs');
     
 }
 
@@ -393,9 +393,26 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     $table_name = $wpdb->prefix . $t_table_name;
     $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
 
+    // Check for empty results
+    if (empty($results)) {
+        $message = __( 'No data in the file. Please enable conversation and interaction logging if currently off.', 'chatbot-chatgpt' );
+        set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
+        wp_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
+        exit;
+    }
+
+    // Check for errors
+    if (!empty($wpdb->last_error)) {
+        $message = __( 'Error reading table: ' . $wpdb->last_error, 'chatbot-chatgpt' );
+        set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
+        wp_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
+        exit;
+    }
+
     // Ask user where to save the file
-    $filename = $t_file_name . ' ' . date('Y-m-d') . '.csv';
+    $filename = $t_file_name . '-' . date('Y-m-d') . '.csv';
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
+    $results_dir_path = str_replace('\\', '/', $results_dir_path);
 
     // Create results directory if it doesn't exist
     if (!file_exists($results_dir_path)) {
@@ -403,17 +420,29 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     }
 
     $results_csv_file = $results_dir_path . $filename;
+    error_log($results_csv_file);
 
     // Open file for writing
     $file = fopen($results_csv_file, 'w');
 
     // Check if file opened successfully
     if ($file === false) {
-        wp_die('Error opening file for writing');
+        $message = __( 'Error opening file for writing. Please try again.', 'chatbot-chatgpt' );
+        set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
+        wp_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
+        exit;
     }
 
     // Write headers to file
-    fputcsv($file, array_keys($results[0]));
+    if (isset($results[0]) && is_array($results[0])) {
+        $keys = array_keys($results[0]);
+        fputcsv($file, $keys);
+    } else {
+        $class = 'notice notice-error';
+        $message = __( 'Chatbot ChatGPT No data in the file. Please enable conversation logging if currently off.', 'chatbot-chatgpt' );
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        return;
+    }
 
     // Write results to file
     foreach ($results as $result) {
@@ -425,7 +454,10 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Exit early if the file doesn't exist
     if (!file_exists($results_csv_file)) {
-        wp_die('File not found!');
+        $class = 'notice notice-error';
+        $message = __( 'File not found!' . $results_csv_file, 'chatbot-chatgpt' );
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        return;
     }
 
     // Initialize a cURL session
@@ -440,7 +472,10 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Check for errors
     if ($csv_data === false) {
-        wp_die('Error reading file: ' . curl_error($curl));
+        $class = 'notice notice-error';
+        $message = __( 'Error reading file: ' . curl_error($curl), 'chatbot-chatgpt' );
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        return;
     }
 
     // Close the cURL session
@@ -455,6 +490,17 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     unlink($results_csv_file);
     exit;
 
+
 }
 add_action('admin_post_chatbot_chatgpt_download_conversation_data', 'chatbot_chatgpt_download_conversation_data');
 add_action('admin_post_chatbot_chatgpt_download_interactions_data', 'chatbot_chatgpt_download_interactions_data');
+
+// Function to display the reporting message - Ver 1.7.9
+function chatbot_chatgpt_admin_notice() {
+    $message = get_transient('chatbot_chatgpt_admin_error');
+    if (!empty($message)) {
+        printf('<div class="%1$s"><p><b>Chatbot ChatGPT: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
+        delete_transient('chatbot_chatgpt_admin_error'); // Clear the transient after displaying the message
+    }
+}
+add_action('admin_notices', 'chatbot_chatgpt_admin_notice');
