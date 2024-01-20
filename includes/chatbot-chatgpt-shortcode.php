@@ -147,7 +147,6 @@ function chatbot_chatgpt_shortcode($atts) {
                 }
                 ?>
             </div>
-            <!-- UPLOAD FILES FOR CUSTOM GPTs GOES HERE -->
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php
             $chatbot_chatgpt_enable_custom_buttons = 'Off'; // 'On' or 'Off'

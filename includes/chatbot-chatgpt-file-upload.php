@@ -77,7 +77,12 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         'file_id' => $responseData['id'],
         'message' => 'File uploaded successfully.'
     );
+
     return;
+
+    //
+    // LOOKS LIKE BELOW IS NOT USED ANYMORE - Ver 1.7.9
+    //
 
     // Initialize cURL session
     $ch = curl_init();

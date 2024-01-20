@@ -387,6 +387,7 @@ jQuery(document).ready(function ($) {
             e.preventDefault();
             // console.log('Chatbot ChatGPT: NOTICE: Enter key pressed on upload file button');
             $response = chatbot_chatgpt_upload_file_to_assistant();
+            console.log('Chatbot ChatGPT: NOTICE: File upload clicked. Response: ' + $response);
             $('#chatbot-chatgpt-upload-file-input').click();
         }
     });

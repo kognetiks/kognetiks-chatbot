@@ -242,6 +242,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     global $learningMessages;
     global $errorResponses;
     global $stopWords;
+    global $file_contents;
 
     // If the threadId is not set, create a new thread
     if (empty($thread_Id)) {
@@ -303,6 +304,12 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     // Step 3: Add a Message to a Thread
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3: Add a Message to a Thread');
     $prompt = $message;
+    
+    // Add $file_contents to the prompt - Ver 1.7.9
+    if (!empty($file_contents)) {
+        $prompt = $prompt . ' ' . $file_contents;
+    }
+    
     $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);

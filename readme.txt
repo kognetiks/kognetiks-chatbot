@@ -189,7 +189,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.7.9 =
-* TBD
+* Added error handling for reporting output to files
 
 = 1.7.8 =
 * Correct closing the active session and REST API error that is encountered
