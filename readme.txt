@@ -32,7 +32,7 @@ Flexibility is key. Display your Chatbot ChatGPT as an embedded feature on pages
 **🔍 Knowledge Navigator: Unearthing Your Content's Essence**
 At the heart of our plugin lies the Knowledge Navigator. This powerful tool delves deep into your website, mapping its architecture and content, enabling the chatbot to deliver precise and contextually relevant responses. Enhanced by TF-IDF analysis, our Navigator ensures your content's unique keywords shine through, making interactions more meaningful.
 
-** 🗎 Conversation Logging **
+**🗎 Conversation Logging**
 Conversation Logging in this plugin records and stores chat interactions between users and the chatbot, providing valuable insights for enhancing user experience and chatbot performance. Visit the privacy policy on the Settings Support tab for details on data handling.
 
 **🎭 Personalize with Custom Avatars**
