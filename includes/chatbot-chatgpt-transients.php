@@ -21,6 +21,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Set the transients - style and assistant alias
 // set_chatbot_chatgpt_transients( 'style', $chatbot_chatgpt_display_style);
 // set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias);
+// set_chatbot_chatgpt_transients( 'file_id', $chatbot_chatgpt_assistant_alias);
 
 function set_chatbot_chatgpt_transients( $transient_type , $transient_value) {
 
@@ -47,6 +48,12 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value) {
     } elseif ( $transient_type == 'assistant_alias' ) {
         $assistant_transient_key = 'chatbot_chatgpt_assistant_' . $user_id . '_' . $page_id;
         set_transient($assistant_transient_key, $transient_value, 60*60); // Store for 1 hour
+    } elseif ( $transient_type == 'file_id' ) {
+        $file_transient_key = 'chatbot_chatgpt_file_id_' . $user_id . '_' . $page_id;
+        set_transient($file_transient_key, $transient_value, 60*60); // Store for 1 hour
+    } elseif ( $transitent_type == 'asst_file_id ') {
+        $asst_file_transient_key = 'chatbot_chatgpt_asst_file_id_' . $user_id . '_' . $page_id;
+        set_transient($asst_file_transient_key, $transient_value, 60*60); // Store for 1 hour
     }
 
     // DIAG - Diagnostics
@@ -93,6 +100,33 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id) {
             $transient_value = '';
         }
         return array('file_id' => $transient_value);
+    } elseif ( $transient_type == 'asst_file_id') {
+        $asst_file_transient_key = 'chatbot_chatgpt_asst_file_id_' . $user_id . '_' . $page_id;
+        $transient_value = get_transient($asst_file_transient_key);
+        if ($transient_value === false) {
+            $transient_value = '';
+        }
+        return array('asst_file_id' => $transient_value);
+    }
+
+}
+
+
+// Delete the transients - Ver 1.7.9
+function delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id) {
+
+    if ( $transient_type == 'style' ) {
+        $style_transient_key = 'chatbot_chatgpt_style_' . $user_id . '_' . $page_id;
+        delete_transient($style_transient_key);
+    } elseif ( $transient_type == 'assistant_alias' ) {
+        $assistant_transient_key = 'chatbot_chatgpt_assistant_' . $user_id . '_' . $page_id;
+        delete_transient($assistant_transient_key);
+    } elseif ( $transient_type == 'file_id' ) {
+        $file_transient_key = 'chatbot_chatgpt_file_id_' . $user_id . '_' . $page_id;
+        delete_transient($file_transient_key);
+    } elseif ( $transient_type == 'asst_file_id') {
+        $asst_file_transient_key = 'chatbot_chatgpt_asst_file_id_' . $user_id . '_' . $page_id;
+        delete_transient($asst_file_transient_key);
     }
 
 }

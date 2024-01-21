@@ -16,11 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 // Upload Files to the Assistant
 function chatbot_chatgpt_upload_file_to_assistant() {
 
-    global $file_contents;
-    $file_contents = '';
-
     // DIAG - Diagnostic - Ver 1.7.6
-    chatbot_chatgpt_back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
+    // chatbot_chatgpt_back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
 
     $upload_dir = WP_CONTENT_DIR . '/plugins/chatbot-chatgpt/uploads/';
     $file_path = $upload_dir . basename($_FILES['file']['name']);
@@ -35,16 +32,27 @@ function chatbot_chatgpt_upload_file_to_assistant() {
 
     // Check if there was an error during the file upload
     if ($_FILES['file']['error'] > 0) {
+        // DIAG - Diagnostic - Ver 1.7.9
         // chatbot_chatgpt_back_trace('ERROR', "Error during file upload: " . $_FILES['file']['error']);
+        $response = array(
+            'status' => 'error',
+            'message' => 'Oops! Something went wrong during the upload. Please try again later.'
+        );
+        return $response;
     } else {
         if (move_uploaded_file($_FILES['file']['tmp_name'], $file_path)) {
             // File is successfully uploaded
-            // Diagnostic - Ver 1.7.6
+            // DIAG - Diagnostic - Ver 1.7.9
             // chatbot_chatgpt_back_trace( 'SUCCESS', "File is successfully uploaded" );
         } else {
             // Handle error
-            // Diagnostic - Ver 1.7.6
+            // DIAG - Diagnostic - Ver 1.7.9
             // chatbot_chatgpt_back_trace( 'ERROR', "Error uploading file" );
+            $response = array(
+                'status' => 'error',
+                'message' => 'Oops! Something went wrong during the upload. Please try again later.'
+            );
+            return $response;    
         }
     }
 
@@ -54,7 +62,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         // If the API key is empty, then return an error
         $response = array(
             'status' => 'error',
-            'message' => 'API key is missing. Please enter your API key in the Chatbot ChatGPT settings.'
+            'message' => 'Oops! You API key is missing. Please enter your API key in the Chatbot ChatGPT settings.'
         );
         return $response;
     }
@@ -64,24 +72,26 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         // If the file is empty or there is an error, then return an error
         $response = array(
             'status' => 'error',
-            'message' => 'Please select a file to upload.'
+            'message' => 'Oops! Please select a file to upload.'
         );
         return $response;
     }
 
-    // Read the file contents - Ver 1.7.9
-    $file_contents = file_get_contents($file_path);
-    return array(
-        'status' => 'success',
-        'http_status' => $http_status,
-        'file_id' => $responseData['id'],
-        'message' => 'File uploaded successfully.'
-    );
+    // Before returning, put the name of the file in a transient
+    // set_chatbot_chatgpt_transients( 'file_id', $_FILES['file']['name']);
+    // DIAG - Diagnostic - Ver 1.7.9
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'file_id ' . $_FILES['file']['name'] );
 
-    return;
+    // Success - return a success message
+    // $response = array(
+    //     'status' => 'success',
+    //     'message' => 'File uploaded successfully.'
+    // );
+
+    // return $response;
 
     //
-    // LOOKS LIKE BELOW IS NOT USED ANYMORE - Ver 1.7.9
+    // Push the file up to the Assistant - Ver 1.7.9
     //
 
     // Initialize cURL session
@@ -96,7 +106,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     ));
 
     // Add the file to upload and the purpose
-    // One of answers, classifications, search, converations, or fine-tune
+    // One of answers, classifications, serach, converations, or fine-tune
     $postFields = array(
         'file' => new CURLFile($file_path),
         'purpose' => 'assistants'
@@ -139,18 +149,25 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         );
     } else {
         // DAIG - Diagnostic - Ver 1.7.6
-        // chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully." );
+        chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully." );
         //DIAG - Diagnostic - Ver 1.7.6
-        // chatbot_chatgpt_back_trace( 'SUCCESS', 'file_id ' . $responseData['id'] );
+        chatbot_chatgpt_back_trace( 'SUCCESS', 'asst_file_id ' . $responseData['id'] );
         // Set the transient for the file id
-        set_chatbot_chatgpt_transients('file_id', $responseData['id']);
+        set_chatbot_chatgpt_transients('asst_file_id', $responseData['id']);
+
+        // Delete the file locally now that it has been uploaded to the Assistant
+        unlink($file_path);
+
         return array(
             'status' => 'success',
             'http_status' => $http_status,
-            'file_id' => $responseData['id'],
+            'asst_file_id' => $responseData['id'],
             'message' => 'File uploaded successfully.'
         );
     }
+
+    // Delete the file locally now that it has been uploaded to the Assistant
+    unlink($file_path);
 
     // DIAG - Diagnostic - Ver 1.7.6
     // chatbot_chatgpt_back_trace( 'NOTICE', "Exiting chatbot_chatgpt_upload_file_to_assistant()" );

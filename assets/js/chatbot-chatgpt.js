@@ -387,117 +387,49 @@ jQuery(document).ready(function ($) {
             e.preventDefault();
             // console.log('Chatbot ChatGPT: NOTICE: Enter key pressed on upload file button');
             $response = chatbot_chatgpt_upload_file_to_assistant();
-            console.log('Chatbot ChatGPT: NOTICE: File upload clicked. Response: ' + $response);
             $('#chatbot-chatgpt-upload-file-input').click();
         }
     });
 
     // Add the change event listener to the file input field
-    // $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
-    //     // console.log('Chatbot ChatGPT: NOTICE: File selected');
-
-    //     showTypingIndicator();
-
-    //     var fileField = e.target;
-
-    //     // Check if a file is selected
-    //     if (!fileField.files.length) {
-    //         // console.log('Chatbot ChatGPT: WARNING: No file selected');
-    //         return;
-    //     }
-
-    //     var formData = new FormData();
-    //     formData.append('file', fileField.files[0]);
-    //     // console.log('Chatbot ChatGPT: NOTICE: File selected ', fileField.files[0]);
-    //     formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
-
-    //     $.ajax({
-    //         url: chatbot_chatgpt_params.ajax_url,
-    //         method: 'POST',
-    //         data: formData,
-    //         processData: false,  // tell jQuery not to process the data
-    //         contentType: false,  // tell jQuery not to set contentType
-    //         success: function(response) {
-    //             // console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
-    //             $('#chatbot-chatgpt-upload-file-input').val('');
-    //         },
-    //         error: function(jqXHR, textStatus, errorThrown) {
-    //             // console.log('AJAX error:', textStatus, errorThrown);
-    //         }
-    //     });
-
-    //     removeTypingIndicator();
-
-    //     appendMessage('File uploaded.', 'bot');
-
-    // });
-
-    //
-    // THIS IS WHERE I LEFT OFF - Ver 1.7.9
-    //
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
+        // console.log('Chatbot ChatGPT: NOTICE: File selected');
 
         showTypingIndicator();
 
-        console.log('Chatbot ChatGPT: NOTICE: File selected');
-    
         var fileField = e.target;
-    
+
         // Check if a file is selected
         if (!fileField.files.length) {
+            // console.log('Chatbot ChatGPT: WARNING: No file selected');
             return;
         }
 
-        // DIAG - Diagnostics - Ver 1.7.9
-        console.log('Chatbot ChatGPT: NOTICE: File selected ', fileField.files[0]);
-    
-        var file = fileField.files[0];
-        var reader = new FileReader();
-        var fileContents; // Variable to store file contents outside the onload function
-         
-        reader.onload = function(event) {
-            fileContents = event.target.result;
+        var formData = new FormData();
+        formData.append('file', fileField.files[0]);
+        // console.log('Chatbot ChatGPT: NOTICE: File selected ', fileField.files[0]);
+        formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
 
-            // DIAG - Diagnostics - Ver 1.7.9
-            console.log(fileContents)
-            // Set the dynamic URL for the PHP script using the plugin URL
-
-            // Send fileContents to a PHP script
-            var url = plugin_vars.pluginUrl + '/includes/chatbot-chatgpt-catch-fileContents.php';
-
-            // DIAG - Diagnostics - Ver 1.7.9
-            console.log('Chatbot ChatGPT: NOTICE: url: ' + url);
-            
-            var formData = new FormData();
-            formData.append('data', fileContents);
-
-            // var formData = new FormData();
-            // formData.append('testKey', 'testValue');
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(response) {
-                    console.log('Response: ', response);
-                },
-                error: function(error) {
-                    console.log('Error: ', error);
-                }
-            });
-
-        };
-        reader.readAsText(file);
+        $.ajax({
+            url: chatbot_chatgpt_params.ajax_url,
+            method: 'POST',
+            data: formData,
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,  // tell jQuery not to set contentType
+            success: function(response) {
+                // console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
+                $('#chatbot-chatgpt-upload-file-input').val('');
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                // console.log('AJAX error:', textStatus, errorThrown);
+            }
+        });
 
         removeTypingIndicator();
 
-        // Return a message to the user
         appendMessage('File uploaded.', 'bot');
 
-    });
-    
+    });    
 
     // Moved the css to the .css file - Refactored for Ver 1.7.3
     // Add the toggleChatbot() function - Ver 1.1.0
@@ -583,7 +515,7 @@ jQuery(document).ready(function ($) {
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
         setTimeout(() => {
-            // DIAG - Diagnostics - Ver 1.5.0
+            // DIAG 399999- Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('Chatbot ChatGPT: NOTICE: scrollToBottom");
             // }
