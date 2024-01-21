@@ -436,7 +436,10 @@ jQuery(document).ready(function ($) {
     // THIS IS WHERE I LEFT OFF - Ver 1.7.9
     //
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
+
         showTypingIndicator();
+
+        console.log('Chatbot ChatGPT: NOTICE: File selected');
     
         var fileField = e.target;
     
@@ -444,34 +447,55 @@ jQuery(document).ready(function ($) {
         if (!fileField.files.length) {
             return;
         }
+
+        // DIAG - Diagnostics - Ver 1.7.9
+        console.log('Chatbot ChatGPT: NOTICE: File selected ', fileField.files[0]);
     
         var file = fileField.files[0];
         var reader = new FileReader();
         var fileContents; // Variable to store file contents outside the onload function
-    
-        // Define the onload function for the FileReader
-        reader.onload = function(e) {
-            var contents = e.target.result;
-        
-            // If the file is an image, display it in an img element
-            if (file.type.startsWith('image/')) {
-                var img = document.createElement('img');
-                img.src = contents;
-                document.body.appendChild(img);
-            }
+         
+        reader.onload = function(event) {
+            fileContents = event.target.result;
+
+            // DIAG - Diagnostics - Ver 1.7.9
+            console.log(fileContents)
+            // Set the dynamic URL for the PHP script using the plugin URL
+
+            // Send fileContents to a PHP script
+            var url = plugin_vars.pluginUrl + '/includes/chatbot-chatgpt-catch-fileContents.php';
+
+            // DIAG - Diagnostics - Ver 1.7.9
+            console.log('Chatbot ChatGPT: NOTICE: url: ' + url);
+            
+            var formData = new FormData();
+            formData.append('data', fileContents);
+
+            // var formData = new FormData();
+            // formData.append('testKey', 'testValue');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    console.log('Response: ', response);
+                },
+                error: function(error) {
+                    console.log('Error: ', error);
+                }
+            });
+
         };
-        
-        reader.readAsDataURL(file);  // Read the file as a data URL
-    
-        // Add a click event handler for the submit button
-        $('#submitButton').on('click', function() {
-            if (fileContents) { // If fileContents is not empty
-                // Append the file contents to the messageInput field
-                var messageInput = $('#messageInput');
-                var currentInput = messageInput.val();
-                messageInput.val(currentInput + fileContents);
-            }
-        });
+        reader.readAsText(file);
+
+        removeTypingIndicator();
+
+        // Return a message to the user
+        appendMessage('File uploaded.', 'bot');
+
     });
     
 

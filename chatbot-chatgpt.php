@@ -60,6 +60,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-scheduler.
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-settings.php'; // Knowlege Navigator - Settings - Ver 1.6.1
 
 // Include necessary files
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-catch-fileContents.php'; // Catch the fileContents - Ver 1.7.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
