@@ -35,7 +35,7 @@ function createAnAssistant($api_key) {
 }
 
 // Step 3: Add a Message to a Thread
-function addAMessage($thread_Id, $prompt, $context, $api_key) {
+function addAMessage($thread_Id, $prompt, $context, $api_key, $file_id = null) {
 
     // If $context is empty, set it to the default
     if (empty($context)) {
@@ -53,6 +53,11 @@ function addAMessage($thread_Id, $prompt, $context, $api_key) {
         "role" => "user",
         "content" => $prompt
     );
+
+    // Add the file reference if file_id is provided
+    if ($file_id) {
+        $data['file'] = $file_id;
+    }
 
     $context = stream_context_create(array(
         'http' => array(
@@ -303,25 +308,38 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     // Step 3: Add a Message to a Thread
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3: Add a Message to a Thread');
     $prompt = $message;
-    
-    // Fetch the file contents - Ver 1.7.9
-    $file_contents = chatbot_chatgpt_retrieve_file_contents();
-    // Fetch the file id - Ver 1.7.9
-    $asst_file_id = chatbot_chatgpt_retrieve_file_id();
-    // Add $file_contents to the prompt - Ver 1.7.9
-    // if (!empty($file_contents)) {
-    //     $prompt = $prompt . ' ' . $file_contents;
-    // }
-    //DIAG - Diagnostics - Ver 1.7.9
-    chatbot_chatgpt_back_trace( 'NOTICE', '$asst_file_id ' . $asst_file_id);
-    $prompt = "myfiles_browser.open_url('" . $asst_file_id . "')";
-    // DIAG - Diagnostics - Ver 1.7.9
-    chatbot_chatgpt_back_trace( 'NOTICE', '$prompt ' . $prompt);
-    // Step 3-4: Open and read the file in the Assistant
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3-4: Open and read the file in the Assistant');
-    $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
+    // $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+    
+    // Fetch the file contents - Ver 1.7.9
+    // $file_contents = chatbot_chatgpt_retrieve_file_contents();
+
+    // Fetch the file id - Ver 1.7.9
+    $asst_file_id = chatbot_chatgpt_retrieve_file_id();
+    if (empty($asst_file_id)) {
+        chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retireve');
+        $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
+    } else {
+        //DIAG - Diagnostics - Ver 1.7.9
+        chatbot_chatgpt_back_trace( 'NOTICE', '$asst_file_id ' . $asst_file_id);
+        // Step 3-4: Open and read the file in the Assistant - Ver 1.7.9
+        // DIAG - Diagnostics - Ver 1.7.9
+        chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3-4: Open and read the file in the Assistant');
+        // $prompt = "myfiles_browser.open_url('" . $asst_file_id . "')";
+        // $prompt = 'Please summarize the contents of the file with ID ' . $asst_file_id;
+        // DIAG - Diagnostics - Ver 1.7.9
+        chatbot_chatgpt_back_trace( 'NOTICE', '$prompt ' . $prompt);
+        $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key, $asst_file_id);
+        // DIAG - Print the response
+        // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+
+        // Now sent the user's prompt
+        // $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
+    }
+
+    // I THINK THIS WAS AN EXTRA CALL TO ADD A MESSAGE - Ver 1.7.9
+    // $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
 
     // Step 4: Run the Assistant
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 4: Run the Assistant');
@@ -447,11 +465,45 @@ function chatbot_chatgpt_retrieve_file_id() {
     
         // Retrieve the file
         $file_id = get_chatbot_chatgpt_transients( 'asst_file_id', $user_id, $page_id);
-        $file = $file_id['asst_file_id'];
+        $asst_file_id = $file_id['asst_file_id'];
     
-        // Delete the file
+        // Delete the transient
         delete_chatbot_chatgpt_transients( 'asst_file_id', $user_id, $page_id);
 
-        return $file;
+        // Delete the file
+        deleteUploadedFile($asst_file_id);
+
+        return $asst_file_id;
+
+}
+
+// Cleanup in Aisle 4 on OpenAI - Ver 1.7.9
+function deleteUploadedFile($asst_file_id) {
+
+    // Get the API key
+    $apiKey = esc_attr(get_option('chatbot_chatgpt_api_key'));
+
+    $url = 'https://api.openai.com/v1/files/' . $asst_file_id;
+    
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    curl_setopt($curl, CURLOPT_HTTPHEADER, [
+      'Authorization: Bearer ' . $apiKey,
+      'Content-Type: application/json'
+    ]);
+    
+    $response = curl_exec($curl);
+    $http_status_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+    
+    if ($http_status_code == 204) {
+        chatbot_chatgpt_back_trace( 'NOTICE', "File deleted successfully.\n");
+    } else {
+        // If the request was not successful, you may want to handle it differently,
+        // such as logging an error or retrying the request.
+        chatbot_chatgpt_back_trace( 'NOTICE', "Failed to delete file. HTTP status code: $http_status_code\n");
+        chatbot_chatgpt_back_trace( 'NOTICE', "Response: $response\n");
+    }
 
 }

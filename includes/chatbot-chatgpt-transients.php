@@ -51,7 +51,7 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value) {
     } elseif ( $transient_type == 'file_id' ) {
         $file_transient_key = 'chatbot_chatgpt_file_id_' . $user_id . '_' . $page_id;
         set_transient($file_transient_key, $transient_value, 60*60); // Store for 1 hour
-    } elseif ( $transitent_type == 'asst_file_id ') {
+    } elseif ( $transient_type == 'asst_file_id') {
         $asst_file_transient_key = 'chatbot_chatgpt_asst_file_id_' . $user_id . '_' . $page_id;
         set_transient($asst_file_transient_key, $transient_value, 60*60); // Store for 1 hour
     }

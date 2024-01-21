@@ -161,7 +161,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         return array(
             'status' => 'success',
             'http_status' => $http_status,
-            'asst_file_id' => $responseData['id'],
+            'id' => $responseData['id'],
             'message' => 'File uploaded successfully.'
         );
     }
