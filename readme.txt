@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.2
-Stable tag: 1.7.8
+Stable tag: 1.7.9
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -22,7 +22,9 @@ Unlock the potential of personalized digital interaction. Use the GPT Assistants
 **🔀 Multiple Assistants, Multiple Roles**
 Why settle for one when you can have more? With our plugin, deploy multiple GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
 
-**Version 1.7.3 Update** Allows for virturally unlimited GPT Assistants, allow you to deploy a unique assistant whereever you placed the short code.  Simply pass the "asst_" ID to the short code as one of the parameters.
+The latest version of the plugin allows for virturally unlimited GPT Assistants, allowing you to deploy a unique assistant whereever you placed the shortcode.  Simply pass the "asst_" ID to the shortcode as one of the parameters.
+
+Unlock enhanced functionality with our latest feature - **now you can upload files directly to each GPT Assistant**, providing an even more dynamic and tailored user experience across your platforms.
 
 Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
@@ -32,7 +34,7 @@ Flexibility is key. Display your Chatbot ChatGPT as an embedded feature on pages
 **🔍 Knowledge Navigator: Unearthing Your Content's Essence**
 At the heart of our plugin lies the Knowledge Navigator. This powerful tool delves deep into your website, mapping its architecture and content, enabling the chatbot to deliver precise and contextually relevant responses. Enhanced by TF-IDF analysis, our Navigator ensures your content's unique keywords shine through, making interactions more meaningful.
 
-** 🗎 Conversation Logging **
+**🗎 Conversation Logging**
 Conversation Logging in this plugin records and stores chat interactions between users and the chatbot, providing valuable insights for enhancing user experience and chatbot performance. Visit the privacy policy on the Settings Support tab for details on data handling.
 
 **🎭 Personalize with Custom Avatars**
@@ -159,9 +161,13 @@ Yes, Chatbot ChatGPT and the ChatGPT API support many different languages. Set t
 
 = Which OpenAI models does the plugin use? =
 
-The plugin supports the gpt-3.5-turbo and gpt-4 models from OpenAI.  These are the same models found in the ChatGPT product from OpenAI.
+The plugin supports the gpt-3.5-turbo, gpt-4, gpt-4-1106-preview models from OpenAI.  These are the same models found in the ChatGPT product from OpenAI.
 
-The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-preview')** featuring improved instruction following based on training data up to April 2023.  New models will be added as the become available.
+The plugin now supports the latest OpenAI model **gpt-4-turbo (i.e., 'gpt-4-1106-preview')** featuring improved instruction following based on training data up to April 2023.  New models will be added as the become available.
+
+= More FAQs =
+
+You can find more frequently asked questions at [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
 
 == Screenshots ==
 
@@ -184,9 +190,13 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 
 == Changelog ==
 
+= 1.7.9 =
+* Added file uploads to GPT Assistants **only** for use in processing, search, retieval, etc.
+* Added additional error handling for reporting output to files
+
 = 1.7.8 =
 * Correct closing the active session and REST API error that is encountered
-* Removed charting from Reporting tab as this has caused some users issues
+* Removed charting from Reporting tab as this has caused some users issues and a table instead
 * Replaced with an option to download Interaction data as a CSV file
 
 = 1.7.7 =
@@ -202,7 +212,7 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo ('gpt-4-1106-previ
 * Enhanced handling for multi-threaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
 
 = 1.7.3 =
-* Added support for unlimited GPT Assistants in addition to 'original', 'primary' and 'alternate' short code parameters.
+* Added support for unlimited GPT Assistants in addition to 'original', 'primary' and 'alternate' shortcode parameters.
 * Use [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for floating Assistants.
 * Use [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for embedded Assistants.
 * Moved hard coded css from .js to the .css file for floating wide/narrow and embedded styling.

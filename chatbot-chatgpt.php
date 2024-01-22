@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
- * Version:     1.7.8
+ * Version:     1.7.9
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -107,7 +107,7 @@ $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_en
 // Allow file uploads on/off setting can be found on the Settings tab - Ver 1.7.6
 global $chatbot_chatgpt_allow_file_uploads;
 // TEMP OVERRIDE - Ver 1.7.6
-update_option('chatbot_chatgpt_allow_file_uploads', 'No');
+// update_option('chatbot_chatgpt_allow_file_uploads', 'No');
 $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
 // Suppress Notices on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -146,7 +146,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Enqueue the scripts
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
-    wp_enqueue_script('chatbot-chatgpt-file-upload-js', plugins_url('assets/js/chatbot-chatgpt-file-upload.js', __FILE__), array('jquery'), '1.0', true);
+    // wp_enqueue_script('chatbot-chatgpt-file-upload-js', plugins_url('assets/js/chatbot-chatgpt-file-upload.js', __FILE__), array('jquery'), '1.0', true);
     
     // Localize the data for user id and page id
     $user_id = get_current_user_id();

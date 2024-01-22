@@ -21,29 +21,30 @@ function chatbot_chatgpt_reporting_section_callback($args) {
         <p>Use these setting to select the reporting period for Visitor Interactions.</p>
         <p>By default converation logging is initially turned <b>Off</b>.</p>
         <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support#chatbot-conversation-log">Support</a> tab of this plugin for more details.</p>
-        <h3>Visitor Conversations Items and Stored Utilized</h3>
-        <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
-        <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
-        <h3>Download Conversation Data</h3>
-        <p>Use the 'Download Data' button to retrieve the conversation data.</p>
-        <?php
-            if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Data</a>';
-                echo $header;
-            }
-        ?>
-        <h3>Download Interactions Data</h3>
-        <p>Use the 'Download Data' button to retrieve the interactions data.</p>
-        <?php
-            if (is_admin()) {
-                $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Data</a>';
-                echo $header;
-            }
-        ?>
-        <!-- <h3>Visitor Interactions</h3> -->
-        <!-- <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p> -->
+        <h3>Conversation Data</h3>
+            <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
+            <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
+            <p>Use the button (below) to retrieve the conversation data and download as a CSV file.</p>
+            <?php
+                if (is_admin()) {
+                    $header = " ";
+                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Converation Data</a>';
+                    echo $header;
+                }
+            ?>
+        <h3>Interactions Data</h3>
+            <!-- TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8 -->
+            <!-- <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p> -->
+            <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
+            <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
+            <?php
+                if (is_admin()) {
+                    $header = " ";
+                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Interaction Data</a>';
+                    echo $header;
+                }
+            ?>
+        <h3>Reporting Settings</h3>
     </div>
     <?php
 }
@@ -199,7 +200,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
     if (extension_loaded('gd')) {
         // GD Library is installed and loaded
         // DIAG - Log the output choice
-        chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is installed and loaded.');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is installed and loaded.');
     } else {
         // Create a detailed admin error message
         function chatbot_chatgpt_extension_load_error() {
@@ -209,7 +210,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         }
         add_action( 'admin_notices', 'chatbot_chatgpt_extension_load_error' );
         // DIAG - Log the output choice
-        chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
         // Disable the shortcode functionality
         return;
     }
@@ -249,7 +250,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
         if(!empty($wpdb->last_error)) {
             // DIAG - Handle the error
-            chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
+            // chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
             return;
         } else if(!empty($results)) {
             $labels = [];
@@ -293,6 +294,65 @@ function chatbot_chatgpt_delete_chart() {
 }
 add_action('chatbot_chatgpt_delete_chart', 'chatbot_chatgpt_delete_chart');
 
+// Return Interactions data in a table - Ver 1.7.8
+function chatbot_chatgpt_interactions_table() {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
+
+    // Get the reporting period from the options
+    $reporting_period = get_option('chatbot_chatgpt_reporting_period');
+    
+        // Calculate the start date and group by clause based on the reporting period
+        if($reporting_period === 'Daily') {
+            $start_date = date('Y-m-d', strtotime("-7 days"));
+            // $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
+            $group_by = "DATE_FORMAT(date, '%m-%d')";
+        } elseif($reporting_period === 'Monthly') {
+            $start_date = date('Y-m-01', strtotime("-3 months"));
+            $group_by = "DATE_FORMAT(date, '%Y-%m')";
+        } else {
+            $start_date = date('Y-01-01', strtotime("-3 years"));
+            $group_by = "DATE_FORMAT(date, '%Y')";
+        }
+        
+        // Modify the SQL query to group the results based on the reporting period
+        $results = $wpdb->get_results("SELECT $group_by AS date, SUM(count) AS count FROM $table_name WHERE date >= '$start_date' GROUP BY $group_by");
+
+        if(!empty($wpdb->last_error)) {
+            // DIAG - Handle the error
+            // chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
+            return;
+        } else if(!empty($results)) {
+            $labels = [];
+            $data = [];
+            foreach ($results as $result) {
+                $labels[] = $result->date;
+                $data[] = $result->count;
+            }
+            
+            $a['labels'] = $labels;
+            $atts['data'] = $data;
+
+            $output = '<table class="widefat striped" style="table-layout: fixed; width: auto;">';
+            $output .= '<thead><tr><th style="width: 96px;">Date</th><th style="width: 96px;">Count</th></tr></thead>';
+            $output .= '<tbody>';
+            foreach ($results as $result) {
+                $output .= '<tr>';
+                $output .= '<td style="width: 96px;">' . $result->date . '</td>';
+                $output .= '<td style="width: 96px;">' . $result->count . '</td>';
+                $output .= '</tr>';
+            }
+            $output .= '</tbody>';
+            $output .= '</table>';            
+
+        return $output;
+
+    } else {
+        return '<p>No data to report at this time. Plesae visit again later.</p>';
+    }
+
+}
 
 // Count the number of conversations stored - Ver 1.7.6
 function chatbot_chatgpt_count_conversations() {
@@ -314,14 +374,14 @@ function chatbot_chatgpt_size_conversations() {
 function chatbot_chatgpt_download_interactions_data() {
 
     // Export data from the chatbot_chatgpt_interactions table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_interactions', 'Chatbot ChatGPT Interactions');
+    chatbot_chatgpt_export_data('chatbot_chatgpt_interactions', 'Chatbot-ChatGPT-Interactions');
 
 }
 
 function chatbot_chatgpt_download_conversation_data() {
 
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot ChatGPT Conversation Logs');
+    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Conversation Logs');
     
 }
 
@@ -333,9 +393,26 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     $table_name = $wpdb->prefix . $t_table_name;
     $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
 
+    // Check for empty results
+    if (empty($results)) {
+        $message = __( 'No data in the file. Please enable conversation and interaction logging if currently off.', 'chatbot-chatgpt' );
+        set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
+        wp_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
+        exit;
+    }
+
+    // Check for errors
+    if (!empty($wpdb->last_error)) {
+        $message = __( 'Error reading table: ' . $wpdb->last_error, 'chatbot-chatgpt' );
+        set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
+        wp_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
+        exit;
+    }
+
     // Ask user where to save the file
-    $filename = $t_file_name . ' ' . date('Y-m-d') . '.csv';
+    $filename = $t_file_name . '-' . date('Y-m-d') . '.csv';
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
+    $results_dir_path = str_replace('\\', '/', $results_dir_path);
 
     // Create results directory if it doesn't exist
     if (!file_exists($results_dir_path)) {
@@ -343,17 +420,29 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     }
 
     $results_csv_file = $results_dir_path . $filename;
+    error_log($results_csv_file);
 
     // Open file for writing
     $file = fopen($results_csv_file, 'w');
 
     // Check if file opened successfully
     if ($file === false) {
-        wp_die('Error opening file for writing');
+        $message = __( 'Error opening file for writing. Please try again.', 'chatbot-chatgpt' );
+        set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
+        wp_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
+        exit;
     }
 
     // Write headers to file
-    fputcsv($file, array_keys($results[0]));
+    if (isset($results[0]) && is_array($results[0])) {
+        $keys = array_keys($results[0]);
+        fputcsv($file, $keys);
+    } else {
+        $class = 'notice notice-error';
+        $message = __( 'Chatbot ChatGPT No data in the file. Please enable conversation logging if currently off.', 'chatbot-chatgpt' );
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        return;
+    }
 
     // Write results to file
     foreach ($results as $result) {
@@ -365,7 +454,10 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Exit early if the file doesn't exist
     if (!file_exists($results_csv_file)) {
-        wp_die('File not found!');
+        $class = 'notice notice-error';
+        $message = __( 'File not found!' . $results_csv_file, 'chatbot-chatgpt' );
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        return;
     }
 
     // Initialize a cURL session
@@ -380,7 +472,10 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Check for errors
     if ($csv_data === false) {
-        wp_die('Error reading file: ' . curl_error($curl));
+        $class = 'notice notice-error';
+        $message = __( 'Error reading file: ' . curl_error($curl), 'chatbot-chatgpt' );
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        return;
     }
 
     // Close the cURL session
@@ -395,6 +490,17 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     unlink($results_csv_file);
     exit;
 
+
 }
 add_action('admin_post_chatbot_chatgpt_download_conversation_data', 'chatbot_chatgpt_download_conversation_data');
 add_action('admin_post_chatbot_chatgpt_download_interactions_data', 'chatbot_chatgpt_download_interactions_data');
+
+// Function to display the reporting message - Ver 1.7.9
+function chatbot_chatgpt_admin_notice() {
+    $message = get_transient('chatbot_chatgpt_admin_error');
+    if (!empty($message)) {
+        printf('<div class="%1$s"><p><b>Chatbot ChatGPT: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
+        delete_transient('chatbot_chatgpt_admin_error'); // Clear the transient after displaying the message
+    }
+}
+add_action('admin_notices', 'chatbot_chatgpt_admin_notice');

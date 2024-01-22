@@ -429,7 +429,7 @@ jQuery(document).ready(function ($) {
 
         appendMessage('File uploaded.', 'bot');
 
-    });
+    });    
 
     // Moved the css to the .css file - Refactored for Ver 1.7.3
     // Add the toggleChatbot() function - Ver 1.1.0
@@ -515,7 +515,7 @@ jQuery(document).ready(function ($) {
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
         setTimeout(() => {
-            // DIAG - Diagnostics - Ver 1.5.0
+            // DIAG 399999- Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('Chatbot ChatGPT: NOTICE: scrollToBottom");
             // }

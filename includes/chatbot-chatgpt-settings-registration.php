@@ -90,13 +90,13 @@ function chatbot_chatgpt_settings_init() {
     );
 
     // Allow file uploads to the Assistant - Ver 1.7.6
-    // add_settings_field(
-    //     'chatbot_chatgpt_allow_file_uploads',
-    //     'Allow File Uploads',
-    //     'chatbot_chatgpt_allow_file_uploads_callback',
-    //     'chatbot_chatgpt_custom_gpts',
-    //     'chatbot_chatgpt_custom_gpts_section'
-    // );
+    add_settings_field(
+        'chatbot_chatgpt_allow_file_uploads',
+        'Allow File Uploads',
+        'chatbot_chatgpt_allow_file_uploads_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
 
     // CustomGPT Assistant Id - Ver 1.6.7
     add_settings_field(

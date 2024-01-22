@@ -131,15 +131,15 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         }
 
         if ('None' == $chatbot_chatgpt_suppress_learnings) {
-            $enhanced_response .= "\n\n" . "Also look" . " ";
-        } elseif ('Random' == $chatbot_chatgpt_suppress_learnings) {
-            $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)];
-        } elseif ('Custom' == $chatbot_chatgpt_suppress_learnings) {
-            $enhanced_response .= "\n\n" . $chatbot_chatgpt_custom_learnings_message . " ";
+            // $enhanced_response .= "\n\n" . "Also look" . " ";
         } else {
-            $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)];
+            if ('Random' == $chatbot_chatgpt_suppress_learnings) {
+                $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)];
+            } elseif ('Custom' == $chatbot_chatgpt_suppress_learnings) {
+                $enhanced_response .= "\n\n" . $chatbot_chatgpt_custom_learnings_message . " ";
+            }
+            $enhanced_response .= "[URL: " . $highest_score_url . "]";
         }
-        $enhanced_response .= "[URL: " . $highest_score_url . "]";
     } else {
         // If no match is found, return a generic response
         $match_found = false;
