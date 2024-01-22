@@ -312,15 +312,15 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     // Fetch the file id - Ver 1.7.9
     $asst_file_id = chatbot_chatgpt_retrieve_file_id();
     if (empty($asst_file_id)) {
-        chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retireve');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retireve');
         $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
-        chatbot_chatgpt_back_trace( 'NOTICE', '$asst_file_id ' . $asst_file_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$asst_file_id ' . $asst_file_id);
         // DIAG - Diagnostics - Ver 1.7.9
-        chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3: Open and read the file in the Assistant');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3: Open and read the file in the Assistant');
         // DIAG - Diagnostics - Ver 1.7.9
-        chatbot_chatgpt_back_trace( 'NOTICE', '$prompt ' . $prompt);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$prompt ' . $prompt);
         $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key, $asst_file_id);
         // DIAG - Print the response
         // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
@@ -428,9 +428,9 @@ function chatbot_chatgpt_retrieve_file_contents() {
     $file_contents = file_get_contents($file_path_and_name);
 
     // DIAG - Diagnostics - Ver 1.7.9
-    chatbot_chatgpt_back_trace( 'NOTICE', '$file_id ' . $file);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$file_path_and_name ' . $file_path_and_name);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$file_contents ' . print_r($file_contents));
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id ' . $file);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_path_and_name ' . $file_path_and_name);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_contents ' . print_r($file_contents));
 
     // Now delete the file
     unlink($file_path_and_name);
@@ -489,12 +489,14 @@ function deleteUploadedFile($asst_file_id) {
     curl_close($curl);
     
     if ($http_status_code == 200 || $http_status_code == 204) {
-        chatbot_chatgpt_back_trace( 'SUCCESS', "File deleted successfully.\n");
+        // DIAG - Diagnostics - Ver 1.7.9
+        // chatbot_chatgpt_back_trace( 'SUCCESS', "File deleted successfully.\n");
     } else {
         // If the request was not successful, you may want to handle it differently,
         // such as logging an error or retrying the request.
-        chatbot_chatgpt_back_trace( 'ERROR', "HTTP status code: $http_status_code\n");
-        chatbot_chatgpt_back_trace( 'ERROR', "Response: $response\n");
+        // DIAG - Diagnostics - Ver 1.7.9
+        // chatbot_chatgpt_back_trace( 'ERROR', "HTTP status code: $http_status_code\n");
+        // chatbot_chatgpt_back_trace( 'ERROR', "Response: $response\n");
     }
 
 }

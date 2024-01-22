@@ -64,6 +64,11 @@ function chatbot_chatgpt_shortcode($atts) {
     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
     $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
+    // If assistant is set to 'original' then do not allow file uploads - Ver 1.7.9
+    if ($chatbot_chatgpt_assistant_alias == 'original') {
+        $chatbot_chatgpt_allow_file_uploads = 'No';
+    }
+
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
     // global $chatbot_chatgpt_enable_custom_buttons;
     // $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));

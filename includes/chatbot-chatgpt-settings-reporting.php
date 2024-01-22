@@ -200,7 +200,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
     if (extension_loaded('gd')) {
         // GD Library is installed and loaded
         // DIAG - Log the output choice
-        chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is installed and loaded.');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is installed and loaded.');
     } else {
         // Create a detailed admin error message
         function chatbot_chatgpt_extension_load_error() {
@@ -210,7 +210,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         }
         add_action( 'admin_notices', 'chatbot_chatgpt_extension_load_error' );
         // DIAG - Log the output choice
-        chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
         // Disable the shortcode functionality
         return;
     }
@@ -250,7 +250,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
         if(!empty($wpdb->last_error)) {
             // DIAG - Handle the error
-            chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
+            // chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
             return;
         } else if(!empty($results)) {
             $labels = [];
@@ -321,7 +321,7 @@ function chatbot_chatgpt_interactions_table() {
 
         if(!empty($wpdb->last_error)) {
             // DIAG - Handle the error
-            chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
+            // chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
             return;
         } else if(!empty($results)) {
             $labels = [];

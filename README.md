@@ -20,6 +20,8 @@ Why settle for one when you can have more? With our plugin, deploy multiple GPT 
 
 The latest version of the plugin allows for virturally unlimited GPT Assistants, allowing you to deploy a unique assistant whereever you placed the shortcode.  Simply pass the "asst_" ID to the shortcode as one of the parameters.
 
+Unlock enhanced functionality with our latest feature - **now you can upload files directly to each GPT Assistant**, providing an even more dynamic and tailored user experience across your platforms.
+
 Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
 **🔄 Choose Your Style: Embedded or Floating Chatbots**
@@ -168,6 +170,5 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 💬 Looking for **plugin support**, please visit [https://kognetiks.com/wordpress-plugins/plugin-support/](https://kognetiks.com/wordpress-plugins/plugin-support/).
 
 📜 For **frequently asked questions**, please visit [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
-
 
 Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/) for more information.
