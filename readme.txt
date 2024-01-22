@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.2
-Stable tag: 1.7.9
+Stable tag: 1.8.0
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -190,8 +190,11 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 == Changelog ==
 
+= 1.8.0 =
+* TBD
+
 = 1.7.9 =
-* Added file uploads to GPT Assistants **only** for use in processing, search, retieval, etc.
+* Added file uploads to GPT Assistants **only** for use in processing, search, retrieval, etc.
 * Added additional error handling for reporting output to files
 
 = 1.7.8 =
