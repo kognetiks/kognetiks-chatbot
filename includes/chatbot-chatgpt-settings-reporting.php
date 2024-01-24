@@ -411,8 +411,11 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Ask user where to save the file
     $filename = $t_file_name . '-' . date('Y-m-d') . '.csv';
-    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
-    $results_dir_path = str_replace('\\', '/', $results_dir_path);
+    // Replace spaces with - in the filename
+    $filename = str_replace(' ', '-', $filename);
+    // $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
+    // $results_dir_path = str_replace('\\', '/', $results_dir_path);
+    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
 
     // Create results directory if it doesn't exist
     if (!file_exists($results_dir_path)) {
@@ -465,6 +468,8 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Set the cURL options
     curl_setopt($curl, CURLOPT_URL, 'file://' . realpath($results_csv_file));
+    // curl_setopt($curl, CURLOPT_URL, 'http://' . realpath($results_csv_file));
+    // curl_setopt($curl, CURLOPT_URL, $results_csv_file);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 
     // Execute the cURL session

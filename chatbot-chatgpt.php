@@ -29,6 +29,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
+// Main plugin file - Ver 1.8.0
+define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
+
 // Declare Globals here - Ver 1.6.3
 global $wpdb; // Declare the global $wpdb object
 
