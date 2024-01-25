@@ -423,8 +423,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     }
 
     $results_csv_file = $results_dir_path . $filename;
-    error_log($results_csv_file);
-
+    
     // Open file for writing
     $file = fopen($results_csv_file, 'w');
 
