@@ -191,7 +191,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.0 =
-* TBD
+* Corrected path/name error for file downloads for conversation and interaction data
 
 = 1.7.9 =
 * Added file uploads to GPT Assistants **only** for use in processing, search, retrieval, etc.
