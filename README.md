@@ -18,7 +18,7 @@ Unlock the potential of personalized digital interaction. Use the GPT Assistants
 
 Why settle for one when you can have more? With our plugin, deploy multiple GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
 
-The latest version of the plugin allows for virturally unlimited GPT Assistants, allowing you to deploy a unique assistant whereever you placed the shortcode.  Simply pass the "asst_" ID to the shortcode as one of the parameters.
+The latest version of the plugin allows for virtually unlimited GPT Assistants, allowing you to deploy a unique assistant wherever you placed the shortcode.  Simply pass the "asst_" ID to the shortcode as one of the parameters.
 
 Unlock enhanced functionality with our latest feature - **now you can upload files directly to each GPT Assistant**, providing an even more dynamic and tailored user experience across your platforms.
 

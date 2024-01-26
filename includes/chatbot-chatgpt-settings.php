@@ -83,7 +83,7 @@ function chatbot_chatgpt_settings_page_html() {
     
         <script>
             jQuery(document).ready(function($) {
-                var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
+                let chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
 
                 if (chatgptSettingsForm) {
 
@@ -91,18 +91,18 @@ function chatbot_chatgpt_settings_page_html() {
 
                         // Changed const to var - Ver 1.5.0
                         // Get the input elements by their ids
-                        var chatgptNameInput = document.getElementById('chatbot_chatgpt_bot_name');
-                        var chatgpt_chatbot_bot_promptInput = document.getElementById('chatbot_chatgpt_bot_prompt');
-                        var chatgptInitialGreetingInput = document.getElementById('chatbot_chatgpt_initial_greeting');
-                        var chatgptSubsequentGreetingInput = document.getElementById('chatbot_chatgpt_subsequent_greeting');
-                        var chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
-                        var chatbot_chatgpt_start_status_new_visitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
-                        var chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
+                        let chatgptNameInput = document.getElementById('chatbot_chatgpt_bot_name');
+                        let chatgpt_chatbot_bot_promptInput = document.getElementById('chatbot_chatgpt_bot_prompt');
+                        let chatgptInitialGreetingInput = document.getElementById('chatbot_chatgpt_initial_greeting');
+                        let chatgptSubsequentGreetingInput = document.getElementById('chatbot_chatgpt_subsequent_greeting');
+                        let chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
+                        let chatbot_chatgpt_start_status_new_visitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
+                        let chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
                         // New options for max tokens and width - Ver 1.4.2
-                        var chatgptMaxTokensSettingInput = document.getElementById('chatbot_chatgpt_max_tokens_setting');
-                        var chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
+                        let chatgptMaxTokensSettingInput = document.getElementById('chatbot_chatgpt_max_tokens_setting');
+                        let chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
                         // New options for diagnostics on/off - Ver 1.5.0
-                        var chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
+                        let chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
                         // Avatar Settings - Ver 1.4.3
                         let chatgptAvatarIconSettingInput = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                         let chatgptCustomAvatarIconSettingInput = document.getElementById('chatbot_chatgpt_custom_avatar_icon_setting');
@@ -150,11 +150,11 @@ function chatbot_chatgpt_settings_page_html() {
             window.onload = function() {
                 // Assign the function to the window object to make it globally accessible
                 window.selectIcon = function(id) {
-                    var chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
+                    let chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                     if(chatgptElement) {
                         // Clear border from previously selected icon
-                        var previousIconId = chatgptElement.value;
-                        var previousIcon = document.getElementById(previousIconId);
+                        let previousIconId = chatgptElement.value;
+                        let previousIcon = document.getElementById(previousIconId);
                         if(previousIcon) previousIcon.style.border = "none";  // Change "" to "none"
 
                         // Set border for new selected icon
@@ -170,8 +170,8 @@ function chatbot_chatgpt_settings_page_html() {
                 }
 
                 // If no icon has been selected, select the first one by default
-                var iconFromStorage = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
-                var chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
+                let iconFromStorage = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
+                let chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                 if(chatgptElement) {
                     if (iconFromStorage) {
                         window.selectIcon(iconFromStorage);
@@ -187,6 +187,7 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
             <a href="?page=chatbot-chatgpt&tab=gpt_assistants" class="nav-tab <?php echo $active_tab == 'gpt_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>
             <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatars</a>
+            <a href="?page=chatbot-chatgpt&tab=appearance" class="nav-tab <?php echo $active_tab == 'appearance' ? 'nav-tab-active' : ''; ?>">Appearance</a>
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
             <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
             <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Analysis</a>
@@ -235,6 +236,10 @@ function chatbot_chatgpt_settings_page_html() {
             } elseif ($active_tab == 'diagnostics') {
                 settings_fields('chatbot_chatgpt_diagnostics');
                 do_settings_sections('chatbot_chatgpt_diagnostics');
+
+            } elseif ($active_tab == 'appearance') {
+                settings_fields('chatbot_chatgpt_appearance');
+                do_settings_sections('chatbot_chatgpt_appearance');
 
             // IDEA Coming Soon in Ver 2.0.0
             // } elseif ($active_tab == 'premium') {

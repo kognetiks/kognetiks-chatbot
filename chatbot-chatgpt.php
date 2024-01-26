@@ -2,7 +2,7 @@
 /*
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
- * Description: A simple plugin to add a Chatbot ChatGPT to your Wordpress Website.
+ * Description: A simple plugin to add a Chatbot ChatGPT to your WordPress Website.
  * Version:     1.8.1
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
@@ -53,14 +53,14 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-call-gpt-api.
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
 
 // Include necessary files - Knowledge Navigator
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire.php'; // Knowledge Navigator Acquistion - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-words.php'; // Knowledge Navigator Acquistion - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-word-pairs.php'; // Knowledge Navigator Acquistion - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-analysis.php'; // Knowlege Navigator Analysis- Ver 1.6.2
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire.php'; // Knowledge Navigator Acquisition - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-word-pairs.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-analysis.php'; // Knowledge Navigator Analysis- Ver 1.6.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-enhance-response.php'; // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-settings.php'; // Knowlege Navigator - Settings - Ver 1.6.1
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
@@ -80,7 +80,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-prem
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-registration.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-reporting.php'; // Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setup.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-skins.php'; // Adpative Skins - Ver 1.6.7
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-appearance.php'; // Adaptive Skins - Ver 1.6.7
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-threads.php'; // Ver 1.7.2.1
@@ -149,8 +149,12 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Enqueue the scripts
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
-    // wp_enqueue_script('chatbot-chatgpt-file-upload-js', plugins_url('assets/js/chatbot-chatgpt-file-upload.js', __FILE__), array('jquery'), '1.0', true);
-    
+
+    // Enqueue DOMPurify - Ver 1.8.1
+    // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
+    // https://chat.openai.com/c/275770c1-fa72-404b-97c2-2dad2e8a0230
+    wp_enqueue_script( 'dompurify', plugin_dir_url(__FILE__) . 'assets/js/purify.min.js', array(), '1.0.0', true );
+
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
     $page_id = get_the_ID();
@@ -179,7 +183,6 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
         'chatbot_chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
         'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
-        'chatbot_chatgpt_max_tokens_setting' => 150,
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
         'chatbot_chatgpt_enable_custom_buttons' => 'Off',
         'chatbot_chatgpt_custom_button_name_1' => '',
@@ -373,7 +376,7 @@ function chatbot_chatgpt_send_message() {
         }
     } else {
         // Reference GPT Assistant IDs directly - Ver 1.7.3
-        if (substr($chatbot_chatgpt_assistant_alias, 0, 5) === 'asst_') {
+        if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_')) {
             // DIAG - Diagnostics
             // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant Id: ' . $chatbot_chatgpt_assistant_alias);
             // Override the $assistant_id with the GPT Assistant Id
@@ -416,7 +419,7 @@ function chatbot_chatgpt_send_message() {
         // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => 'response', 'response' => $response]);
         // Clean (erase) the output buffer - Ver 1.6.8
         ob_clean();
-        if (substr($response, 0, 6) === 'Error:' || substr($response, 0, 7) === 'Failed:') {
+        if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
             // Return response
             wp_send_json_error('Oops! Something went wrong on our end. Please try again later');
         } else {

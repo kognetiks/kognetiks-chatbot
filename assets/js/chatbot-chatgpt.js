@@ -105,31 +105,27 @@ jQuery(document).ready(function ($) {
         // Construct the path to the avatar
         avatarPath = pluginUrl + '/assets/icons/' + selectedAvatar;
         
-        // If an avatar is selected and it's not 'icon-000.png', use the avatar
-        avatarImg = $('<img>').attr('id', 'chatbot_chatgpt_avatar_icon_setting').attr('class', 'chatbot-avatar').attr('src', avatarPath);
-    
-        // Get the stored greeting message. If it's not set, default to a custom value.
-        avatarGreeting = localStorage.getItem('chatbot_chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
-
-        // Revised to address cross-site scripting - Ver 1.6.4
-        // // Create a bubble with the greeting message
-        // var bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
-    
-        // // Append the avatar and the bubble to the button and apply the class for the avatar icon
-        // chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
-
         // IDEA - Add option to suppress avatar greeting in setting options page
         // IDEA - If blank greeting, don't show the bubble
         // IDEA - Add option to suppress avatar greeting if clicked on
 
-        // Sanitize the avatarGreeting variable
-        sanitizedGreeting = $('<div>').text(avatarGreeting).html();
+        // Updated to address cross-site scripting - Ver 1.8.1
+        // If an avatar is selected and it's not 'icon-000.png', use the avatar
+        avatarImg = $('<img>')
+            .attr('id', 'chatbot_chatgpt_avatar_icon_setting')
+            .attr('class', 'chatbot-avatar')
+            .attr('src', avatarPath);
 
-        // Create a bubble with the sanitized greeting message
-        bubble = $('<div>').html(sanitizedGreeting).addClass('chatbot-bubble');
+        // Get the stored greeting message. If it's not set, default to a custom value.
+        avatarGreeting = localStorage.getItem('chatbot_chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
+
+        // Create a bubble with the greeting message
+        // Using .text() for safety, as it automatically escapes HTML
+        bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
 
         // Append the avatar and the bubble to the button and apply the class for the avatar icon
         chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
+
 
     } else {
         // If no avatar is selected or the selected avatar is 'icon-000.png', use the dashicon
@@ -222,7 +218,10 @@ jQuery(document).ready(function ($) {
 
         messageElement = $('<div></div>').addClass('chat-message');
         // Use HTML for the response so that links are clickable - Ver 1.6.3
-        textElement = $('<span></span>').html(message);
+        // textElement = $('<span></span>').html(message);
+        // Fix for XSS vulnerability - Ver 1.8.1
+        var sanitizedMessage = DOMPurify.sanitize(message);
+        textElement = $('<span></span>').html(sanitizedMessage);
 
         // Add initial greetings if first time
         if (cssClass) {
@@ -541,9 +540,14 @@ jQuery(document).ready(function ($) {
             // }
 
             // Check if current conversation is different from stored conversation
+            // if (conversation.html() !== storedConversation) {
+            //     conversation.html(storedConversation);  // Set the conversation HTML to stored conversation
+            // }
+            // Fix for XSS vulnerability - Ver 1.8.1
             if (conversation.html() !== storedConversation) {
-                conversation.html(storedConversation);  // Set the conversation HTML to stored conversation
-            }
+                var sanitizedConversation = DOMPurify.sanitize(storedConversation);
+                conversation.html(sanitizedConversation);  // Set the conversation HTML to sanitized stored conversation
+            }          
 
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
