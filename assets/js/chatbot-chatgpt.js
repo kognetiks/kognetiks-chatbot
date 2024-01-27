@@ -99,8 +99,18 @@ jQuery(document).ready(function ($) {
     chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
     // Avatar and Custom Message - Ver 1.5.0
-    selectedAvatar = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
-    
+    selectedAvatar = encodeURIComponent(localStorage.getItem('chatbot_chatgpt_avatar_icon_setting'));
+    if (isValidAvatarSetting(selectedAvatar)) {
+        // Is valid avatar setting
+        // DIAG - Diagnostics - Ver 1.8.1
+        // console.log('Chatbot ChatGPT: NOTICE: selectedAvatar: ' + selectedAvatar);
+    } else {
+        // Is not valid avatar setting
+        // DIAG - Diagnostics - Ver 1.8.1
+        // console.error('Chatbot ChatGPT: ERROR: selectedAvatar: ' + selectedAvatar);
+        selectedAvatar = 'icon-000.png';
+    }
+
     if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
         // Construct the path to the avatar
         avatarPath = pluginUrl + '/assets/icons/' + selectedAvatar;
@@ -125,8 +135,6 @@ jQuery(document).ready(function ($) {
 
         // Append the avatar and the bubble to the button and apply the class for the avatar icon
         chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
-
-
     } else {
         // If no avatar is selected or the selected avatar is 'icon-000.png', use the dashicon
         // Remove the avatar-icon class (if it was previously added) and add the dashicon class
@@ -324,7 +332,7 @@ jQuery(document).ready(function ($) {
                     // IDEA Check for a URL
                     if (botResponse.includes('[URL: ')) {
                         // DIAG - Diagnostics - Ver 1.6.3
-                        // console.log('Chatbot ChatGPT: ERROR: URL found in bot response");
+                        // console.error('Chatbot ChatGPT: ERROR: URL found in bot response");
                         link = '';
                         urlRegex = /\[URL: (.*?)\]/g;
                         match = botResponse.match(urlRegex);
@@ -361,8 +369,8 @@ jQuery(document).ready(function ($) {
             error: function () {
                 removeTypingIndicator();
                 // DIAG - Log the error - Ver 1.6.7
-                // console.log('Chatbot ChatGPT: ERROR: response: ' + response);
-                // console.log('Chatbot ChatGPT: ERROR: Unable to send message');
+                // console.error('Chatbot ChatGPT: ERROR: response: ' + response);
+                // console.error('Chatbot ChatGPT: ERROR: Unable to send message');
                 appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
             },
             complete: function () {
@@ -420,7 +428,7 @@ jQuery(document).ready(function ($) {
                 $('#chatbot-chatgpt-upload-file-input').val('');
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                // console.log('AJAX error:', textStatus, errorThrown);
+                // console.error('AJAX error:', textStatus, errorThrown);
             }
         });
 
@@ -514,7 +522,7 @@ jQuery(document).ready(function ($) {
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
         setTimeout(() => {
-            // DIAG 399999- Diagnostics - Ver 1.5.0
+            // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('Chatbot ChatGPT: NOTICE: scrollToBottom");
             // }
@@ -559,6 +567,24 @@ jQuery(document).ready(function ($) {
             initializeChatbot();
         }
 
+    }
+
+    // Validation function - Ver 1.8.1
+    function isValidAvatarSetting(setting) {
+        const allowedAvatars = ['icon-001.png', 'icon-002.png', 'icon-003.png', 'icon-004.png', 'icon-005.png', 'icon-006.png', 'icon-007.png', 'icon-008.png', 'icon-009.png', 'icon-010.png',
+                                'icon-011.png', 'icon-012.png', 'icon-013.png', 'icon-014.png', 'icon-015.png', 'icon-016.png', 'icon-017.png', 'icon-018.png', 'icon-019.png', 'icon-020.png',
+                                'icon-021.png', 'icon-022.png', 'icon-023.png', 'icon-024.png', 'icon-025.png', 'icon-026.png', 'icon-027.png', 'icon-028.png', 'icon-029.png',
+                                'icon-001.png', 'icon-002.png', 'icon-003.png', 'icon-004.png', 'icon-005.png', 'icon-006.png', 'icon-007.png', 'icon-008.png', 'icon-009.png', 'icon-010.png',
+                                'chinese-001.png', 'chinese-002.png', 'chinese-003.png', 'chinese-004.png', 'chinese-005.png', 'chinese-006.png', 'chinese-007.png', 'chinese-008.png', 'chinese-009.png',
+                                'christmas-001.png', 'christmas-002.png', 'christmas-003.png', 'christmas-004.png', 'christmas-005.png', 'christmas-006.png', 'christmas-007.png', 'christmas-008.png', 'christmas-009.png',
+                                'fall-001.png', 'fall-002.png', 'fall-003.png', 'fall-004.png', 'fall-005.png', 'fall-006.png', 'fall-007.png', 'fall-008.png', 'fall-009.png',
+                                'halloween-001.png', 'halloween-002.png', 'halloween-003.png', 'halloween-004.png', 'halloween-005.png', 'halloween-006.png', 'halloween-007.png', 'halloween-008.png', 'halloween-009.png',
+                                'spring-001.png', 'spring-002.png', 'spring-003.png', 'spring-004.png', 'spring-005.png', 'spring-006.png', 'spring-007.png', 'spring-008.png', 'spring-009.png',
+                                'summer-001.png', 'summer-002.png', 'summer-003.png', 'summer-004.png', 'summer-005.png', 'summer-006.png', 'summer-007.png', 'summer-008.png', 'summer-009.png',
+                                'thanksgiving-001.png', 'thanksgiving-002.png', 'thanksgiving-003.png', 'thanksgiving-004.png', 'thanksgiving-005.png', 'thanksgiving-006.png', 'thanksgiving-007.png', 'thanksgiving-008.png', 'thanksgiving-009.png',
+                                'winter-001.png', 'winter-002.png', 'winter-003.png', 'winter-004.png', 'winter-005.png', 'winter-006.png', 'winter-007.png', 'winter-008.png', 'winter-009.png',
+            ];
+        return allowedAvatars.includes(setting);
     }
 
     // Call the loadChatbotStatus function here - Ver 1.1.0

@@ -166,9 +166,6 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         );
     }
 
-    // Delete the file locally now that it has been uploaded to the Assistant
-    unlink($file_path);
-
     // DIAG - Diagnostic - Ver 1.7.6
     // chatbot_chatgpt_back_trace( 'NOTICE', "Exiting chatbot_chatgpt_upload_file_to_assistant()" );
 
