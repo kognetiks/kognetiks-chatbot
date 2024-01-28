@@ -19,8 +19,8 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_appearance_settings() {
     
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_background_color');
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_reset');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_header_background_color');
+    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_reset');
 
     add_settings_section(
         'chatbot_chatgpt_appearance_section',
@@ -57,7 +57,7 @@ function chatbot_chatgpt_appearance_settings() {
 add_action('admin_init', 'chatbot_chatgpt_appearance_settings');
 
 
-// Custom Avatar Icon - Ver 1.5.0
+// Custom Appearence Settings - Ver 1.8.1
 function chatbot_chatgpt_appearence_section_callback($args) {
     ?>
     <div>
@@ -89,7 +89,7 @@ function chatbot_chatgpt_appearance_background_color_callback() {
 }
 
 // Now override the css with the color chosen by the user
-function chatbot_chatgpt_appearance_custom_css_settings() {
+function chatbot_chatgpt_appearance_background_custom_css_settings() {
     $chatbot_chatgpt_appearance_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_background_color', '#f1f1f1'));
     ?>
     <style type="text/css">
@@ -105,7 +105,7 @@ function chatbot_chatgpt_appearance_custom_css_settings() {
     </style>
     <?php
 }
-add_action('wp_head', 'chatbot_chatgpt_appearance_header_background_custom_css_settings');
+add_action('wp_head', 'chatbot_chatgpt_appearance_background_custom_css_settings');
 
 // Set the chatbot background color
 function chatbot_chatgpt_appearance_header_background_color_callback() {

@@ -146,10 +146,10 @@ function chatbot_chatgpt_enqueue_scripts() {
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
 
     // Custom css overrides - Ver 1.8.1
-    $customer_css_path = plugins_url(assets/css/chatbot-chatgpt-custom.css', __FILE__));
-    if ( file_exists ( $customer_css_path )) {
-        wp_enqueue_style('chatbot-chatgpt-custom-css', plugins_url('assets/css/chatbot-chatgpt-custom.css', __FILE__));
-    }
+    // $customer_css_path = plugins_url(assets/css/chatbot-chatgpt-custom.css', __FILE__));
+    // if ( file_exists ( $customer_css_path )) {
+    //     wp_enqueue_style('chatbot-chatgpt-custom-css', plugins_url('assets/css/chatbot-chatgpt-custom.css', __FILE__));
+    // }
 
     // Enqueue the scripts
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
