@@ -169,7 +169,7 @@ jQuery(document).ready(function ($) {
 
             lastMessage = conversation.children().last().text();
 
-            // Don't append the subseqent greeting if it's already in the converation - Ver 1.5.0
+            // Don't append the subsequent greeting if it's already in the conversation - Ver 1.5.0
             if (lastMessage === subsequentGreeting) {
                 return;
             }
@@ -338,7 +338,7 @@ jQuery(document).ready(function ($) {
                         match = botResponse.match(urlRegex);
                         if (match && match.length > 0) {
                             link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
-                            // DAIG - Diagnostics - Ver 1.6.3
+                            // DIAG - Diagnostics - Ver 1.6.3
                             // console.log('Chatbot ChatGPT: NOTICE: link: ' + link);
                         }
 
@@ -388,7 +388,7 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    // Add the keydown event listerner to the upload file button - Ver 1.7.6
+    // Add the keydown event listener to the upload file button - Ver 1.7.6
     $('#chatbot-chatgpt-upload-file').on('keydown', function(e) {
         if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
@@ -471,7 +471,7 @@ jQuery(document).ready(function ($) {
         chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor');
 
         // Nuclear option to clear session conversation - Ver 1.5.0
-        // Do not use unless alsolutely needed
+        // Do not use unless absolutely needed
         // DIAG - Diagnostics - Ver 1.5.0
         // nuclearOption = 'Off';
         // if (nuclearOption === 'On') {
@@ -591,7 +591,7 @@ jQuery(document).ready(function ($) {
     loadChatbotStatus(); 
 
     // Load the conversation when the chatbot is shown on page load - Ver 1.2.0
-    // Let the convesation stay persistent in session storage for increased privacy - Ver 1.4.2
+    // Let the conversation stay persistent in session storage for increased privacy - Ver 1.4.2
     // loadConversation();
 
 });

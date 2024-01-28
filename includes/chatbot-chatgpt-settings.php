@@ -231,8 +231,9 @@ function chatbot_chatgpt_settings_page_html() {
             ?>
         </form>
     </div>
+    <!-- REMOVED IN VER 1.8.1   -->
     <!-- Added closing tags for body and html - Ver 1.4.1 -->
-    </body>
-    </html>
+    <!--    </body>-->
+    <!--    </html>-->
     <?php
 }

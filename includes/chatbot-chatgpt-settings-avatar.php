@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Custom Avatar Icon - Ver 1.5.0
-function chatbot_chatgpt_avatar_section_callback($args) {
+function chatbot_chatgpt_avatar_section_callback($args): void {
     echo '<div>
         <p>Choose an avatar that best represents you and your brand.  You can change your avatar at any time.</p>
         <p>It\'s ok you don\'t want an Avatar.  Just select the \'None\' option among the originals.</p>

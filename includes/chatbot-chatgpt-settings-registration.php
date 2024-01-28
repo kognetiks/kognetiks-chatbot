@@ -23,7 +23,7 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key', 'sanitize_api_key');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_model_choice');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_max_tokens_setting'); // Max Tokens setting options - Ver 1.4.2
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context'); // Covnersation Context - Ver 1.6.1
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context'); // Conversation Context - Ver 1.6.1
 
     add_settings_section(
         'chatbot_chatgpt_api_model_section',
@@ -127,7 +127,7 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_subsequent_greeting');
     // Option to remove the OpenAI disclaimer - Ver 1.4.1
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
-    // Option to select narrow or wide chatboat - Ver 1.4.2
+    // Option to select narrow or wide chatbot - Ver 1.4.2
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_width_setting');
     // Option to set diagnotics on/off - Ver 1.5.0
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_diagnostics');

@@ -36,7 +36,7 @@ function chatbot_chatgpt_deactivate() {
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin deactivation started');
 
     // Logic to run during deactivation
-    // FIXME - THIS IS NOT DELETEING THE PLUGIN - JUST DEACTIVATION
+    // FIXME - THIS IS NOT DELETING THE PLUGIN - JUST DEACTIVATION
 
     // FIXME - Asked what data should be removed
     // 
@@ -161,7 +161,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_avatar_greeting_setting' );
         update_option( 'chatbot_chatgpt_avatar_greeting_setting', $chatbot_chatgpt_avatar_greeting_setting );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', 'cchatgpt_avatar_greeting_setting option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_chatgpt_avatar_greeting_setting option deleted');
     }
 
     // Replace option - chatgpt_avatar_icon_setting
@@ -337,7 +337,7 @@ function chatbot_chatgpt_upgrade() {
     // DIAG - Log the table creation
     // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log table created');
 
-    // DIAG - Log the upgrade compelete
+    // DIAG - Log the upgrade complete
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade completed');
 
     return;

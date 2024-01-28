@@ -106,7 +106,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     ));
 
     // Add the file to upload and the purpose
-    // One of answers, classifications, serach, converations, or fine-tune
+    // One of answers, classifications, search, conversations, or fine-tune
     $postFields = array(
         'file' => new CURLFile($file_path),
         'purpose' => 'assistants'
@@ -148,7 +148,7 @@ function chatbot_chatgpt_upload_file_to_assistant() {
             'message' => $errorMessage
         );
     } else {
-        // DAIG - Diagnostic - Ver 1.7.6
+        // DIAG - Diagnostic - Ver 1.7.6
         // chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully." );
         //DIAG - Diagnostic - Ver 1.7.6
         // chatbot_chatgpt_back_trace( 'SUCCESS', 'asst_file_id ' . $responseData['id'] );

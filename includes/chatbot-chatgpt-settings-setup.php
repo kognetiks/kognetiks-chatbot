@@ -22,7 +22,7 @@ function chatbot_chatgpt_settings_section_callback($args) {
 }
 
 // Chatbot ChatGPT Name
-function chatbot_chatgpt_bot_name_callback($args) {
+function chatbot_chatgpt_bot_name_callback($args): void {
     $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Chatbot ChatGPT'));
     ?>
     <input type="text" id="chatbot_chatgpt_bot_name" name="chatbot_chatgpt_bot_name" value="<?php echo esc_attr( $bot_name ); ?>" class="regular-text">
@@ -92,4 +92,3 @@ function chatbot_chatgpt_width_setting_callback($args) {
     </select>
     <?php
 }
-

@@ -15,14 +15,9 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {
-    // Diagnostics - Ver 1.6.1
-    global $chatbot_chatgpt_diagnostics;
+
     global $learningMessages;
     global $errorResponses;
-    global $stopWords;
-
-    // Reporting - Ver 1.6.3
-    global $wpdb;
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -43,7 +38,6 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')));
 
     // Conversation Context - Ver 1.6.1
-    $context = "";
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
  
     // Context History - Ver 1.6.1
@@ -79,7 +73,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // DIAG Diagnostics - Ver 1.6.1
     // chatbot_chatgpt_back_trace( 'NOTICE', '$context: ' . $context);
 
-    // Added Role, System, Content Static Veriable - Ver 1.6.0
+    // Added Role, System, Content Static Variable - Ver 1.6.0
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
@@ -119,12 +113,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
     if (isset($response_body['message'])) {
         $response_body['message'] = trim($response_body['message']);
-        if (substr($response_body['message'], -1) !== '.') {
+        if (!str_ends_with($response_body['message'], '.')) {
             $response_body['message'] .= '.';
         }
     }
 
-    if (isset($response_body['choices']) && !empty($response_body['choices'])) {
+    if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine
         // Context History - Ver 1.6.1
         addEntry('context_history', $response_body['choices'][0]['message']['content']);
@@ -136,10 +130,8 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         } else {
             $localized_errorResponses = $errorResponses;
         }
-        $errorReturned = "";
         // Return a random error message
-        $errorReturned = $localized_errorResponses[array_rand($localized_errorResponses)];
-        return $errorReturned;
+        return $localized_errorResponses[array_rand($localized_errorResponses)];
     }
     
 }

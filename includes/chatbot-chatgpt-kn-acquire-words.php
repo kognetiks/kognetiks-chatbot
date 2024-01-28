@@ -56,7 +56,7 @@ foreach ($dom->getElementsByTagName('style') as $style) {
     $style->parentNode->removeChild($style);
 }
 
-// Updated sequence of processing to remove extraneous contents bofore TF-IDF - Ver 1.6.5
+// Updated sequence of processing to remove extraneous contents before TF-IDF - Ver 1.6.5
 $textContent = '';
 
 // Added additional HTML tags for removal - Ver 1.7.2.1

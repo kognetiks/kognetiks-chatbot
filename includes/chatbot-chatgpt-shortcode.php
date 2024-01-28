@@ -124,7 +124,7 @@ function chatbot_chatgpt_shortcode($atts) {
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);   
         ob_start();
         ?>
-        <!-- Romoved styling as I believe this may cause problems with some themes Ver 1.6.6 -->
+        <!-- Removed styling as I believe this may cause problems with some themes Ver 1.6.6 -->
         <!-- <div id="chatbot-chatgpt" style="display: none;"> -->
         <div id="chatbot-chatgpt">
             <div id="chatbot-chatgpt-header">
@@ -160,7 +160,7 @@ function chatbot_chatgpt_shortcode($atts) {
             // chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_enable_custom_buttons: ' . $chatbot_chatgpt_enable_custom_buttons);
             if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
                 ?>
-                <div id="chatboat-chatgpt-custom-buttons" style="text-align: center;">
+                <div id="chatbot-chatgpt-custom-buttons" style="text-align: center;">
                     <?php
                     $chatbot_chatgpt_custom_button_name_1 = '';
                     $chatbot_chatgpt_custom_button_url_1 = '';

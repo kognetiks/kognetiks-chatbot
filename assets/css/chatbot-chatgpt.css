@@ -349,7 +349,7 @@
     background-color: #0257b3;
 }
 
-#chatboat-chatgpt-custom-buttons {
+#chatbot-chatgpt-custom-buttons {
     text-align: center;
 }
 
@@ -445,11 +445,11 @@ input:hover {
 }
 
 @keyframes round {
-    0%{ transform: rotate (0deg); }
-    10%{ transform: rotate (60deg); }
-    20%{ transform: rotate (120deg); }
-    40%{ transform: rotate (180deg); }
-    60%{ transform: rotate (240deg); }
-    80%{ transform: rotate (300deg); }
-    100%{ transform: rotate (360deg); }
+    0%{ transform: rotate(0deg); }
+    10%{ transform: rotate(60deg); }
+    20%{ transform: rotate(120deg); }
+    40%{ transform: rotate(180deg); }
+    60%{ transform: rotate(240deg); }
+    80%{ transform: rotate(300deg); }
+    100%{ transform: rotate(360deg); }
 }

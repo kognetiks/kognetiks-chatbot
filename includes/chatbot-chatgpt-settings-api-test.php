@@ -98,7 +98,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatgpt_option_updated($option_name, $old_value, $new_value) {
 
     // Check if the "Diagnostics" tab is active
-    if ($option_name !== 'chatgpt_model_chorice') {
+    if ($option_name !== 'chatgpt_model_choice') {
         return;
     } elseif ($option_name !== 'chatbot_chatgpt_api_key') {
         return;

@@ -41,7 +41,7 @@ function chatbot_chatgpt_support_section_callback() {
             <li>Easy setup and integration with OpenAI&#8217;s ChatGPT API</li>
             <li>Support for gpt-3.5-turbo</li>
             <li>Support for gpt-4 (Learn how to access the gpt-4 API at <a href="https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4" rel="nofollow ugc" target="_blank">https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4</a></li>
-            <li>Support for gpt-4-turbo, OpenAI's latesting model with knowledge cutoff of April 2023, learn more at <a href="https://help.openai.com/en/articles/8555510-gpt-4-turbo" rel="nofollow ugc" target="_blank">https://help.openai.com/en/articles/8555510-gpt-4-turbo</a></li>
+            <li>Support for gpt-4-turbo, OpenAI's latest model with knowledge cutoff of April 2023, learn more at <a href="https://help.openai.com/en/articles/8555510-gpt-4-turbo" rel="nofollow ugc" target="_blank">https://help.openai.com/en/articles/8555510-gpt-4-turbo</a></li>
             <li>Floating chatbot interface with customizable appearance</li>
             <li>User-friendly settings page for managing API key and other parameters</li>
             <li>Collapsible chatbot interface when not in use</li>

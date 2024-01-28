@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Knowlege Navigator - Enhance Response - Ver 1.6.9
+ * Chatbot ChatGPT for WordPress - Knowledge Navigator - Enhance Response - Ver 1.6.9
  *
- * This file contains the code for to utlize the DB with the TF-IDF data to enhance the chatbots response.
+ * This file contains the code for to utilize the DB with the TF-IDF data to enhance the chatbots response.
  * 
  *
  * @package chatbot-chatgpt

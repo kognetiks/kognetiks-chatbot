@@ -1,6 +1,6 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - CUstom GPTs
+ * Chatbot ChatGPT for WordPress - Settings - Custom GPTs
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
  * It allows users to configure the API key and other parameters
@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // GPT Assistants settings section callback - Ver 1.7.2
 function chatbot_chatgpt_gpt_assistants_section_callback($args) {
     ?>
-    <p>Configure settings for your GPT Assistans by adding your below.</p>
+    <p>Configure settings for your GPT Assistants by adding your below.</p>
     <p>If you have developed a GPT Assistant, you will need the id of the assistant - is usually starts with "asst_".</p>
     <p>Enter your GPT Assistant Id instead of ChatGPT.  Set the 'Use GPT Assistant ID' to 'Yes'.</p>
     <p>Otherwise, you can leave the GPT Assistant ID field blank and set the usage to 'No'.</p>

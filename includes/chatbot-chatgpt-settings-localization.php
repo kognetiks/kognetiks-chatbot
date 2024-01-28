@@ -4,7 +4,7 @@
  *
  * This file contains the code for localization of the Chatbot ChatGPT globals.
  * It uses the ChatGPT API to translate the global variables into the your language
- * of choice based on the Site Langauage setting found under Settings > General.
+ * of choice based on the Site Language setting found under Settings > General.
  *
  * @package chatbot-chatgpt
  */

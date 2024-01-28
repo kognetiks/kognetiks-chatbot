@@ -69,7 +69,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                 update_option('chatbot_chatgpt_kn_status', 'In Process');
 
                 // Log action to debug.log
-                // chatbot_chatgpt_back_trace( 'NOTICE', 'BEFORE crawl_scehedule_event_hook');
+                // chatbot_chatgpt_back_trace( 'NOTICE', 'BEFORE crawl_schedule_event_hook');
 
                 // IDEA WP Cron Scheduler - VER 1.6.2
                 // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616

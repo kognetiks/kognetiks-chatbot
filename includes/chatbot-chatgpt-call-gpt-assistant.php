@@ -312,7 +312,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     // Fetch the file id - Ver 1.7.9
     $asst_file_id = chatbot_chatgpt_retrieve_file_id();
     if (empty($asst_file_id)) {
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retireve');
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retrieve');
         $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
@@ -439,8 +439,8 @@ function chatbot_chatgpt_retrieve_file_contents() {
 
 }
 
-// Retireve the file id - Ver 1.7.9
-function chatbot_chatgpt_retrieve_file_id() {
+// Retrieve the file id - Ver 1.7.9
+function chatbot_chatgpt_retrieve_file_id(): string {
     
         $user_id = get_current_user_id(); // Get current user ID
         $page_id = get_the_ID(); // Get current page ID

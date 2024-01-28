@@ -2,7 +2,7 @@
 /**
  * Chatbot ChatGPT for WordPress - Knowledge Navigator - TF-IDF Analyzer
  *
- * This file contains the code for the Chatbot ChatGPT Knowlege Navigator analysis.
+ * This file contains the code for the Chatbot ChatGPT Knowledge Navigator analysis.
  * 
  * 
  *
@@ -10,7 +10,9 @@
  */
 
  // If this file is called directly, abort.
- if ( ! defined( 'WPINC' ) ) {
+use JetBrains\PhpStorm\NoReturn;
+
+if ( ! defined( 'WPINC' ) ) {
     die;
 }
 

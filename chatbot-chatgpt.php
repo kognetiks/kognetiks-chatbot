@@ -24,6 +24,8 @@
 // If this file is called directly, die.
 defined( 'WPINC' ) || die;
 
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.1');
+
 // If this file is called directly, die.
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
@@ -88,7 +90,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-transients.ph
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
 
 add_action('init', 'my_custom_buffer_start');
-function my_custom_buffer_start() {
+function my_custom_buffer_start(): void {
     ob_start();
 }
 
@@ -127,7 +129,7 @@ $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppr
 // Context History - Ver 1.6.1
 $context_history = [];
 
-function chatbot_chatgpt_enqueue_admin_scripts() {
+function chatbot_chatgpt_enqueue_admin_scripts(): void {
     wp_enqueue_script('chatbot_chatgpt_admin', plugins_url('assets/js/chatbot-chatgpt-admin.js', __FILE__), array('jquery'), '1.0.0', true);
 }
 add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
@@ -139,7 +141,7 @@ register_uninstall_hook(__FILE__, 'chatbot_chatgpt_uninstall');
 add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10, 2);
 
 // Enqueue plugin scripts and styles
-function chatbot_chatgpt_enqueue_scripts() {
+function chatbot_chatgpt_enqueue_scripts(): void {
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
@@ -225,7 +227,7 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
-        $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
+        $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
     }
 
@@ -254,7 +256,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Populate the chatbot settings array with values from the database, using default values where necessary
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
-        $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
+        $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
@@ -283,7 +285,7 @@ function chatbot_chatgpt_enqueue_scripts() {
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
 // Settings and Deactivation Links - Ver - 1.5.0
-function enqueue_jquery_ui() {
+function enqueue_jquery_ui(): void {
     wp_enqueue_style('wp-jquery-ui-dialog');
     wp_enqueue_script('jquery-ui-dialog');
 }
@@ -302,7 +304,7 @@ if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
 add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_conversation_log_cleanup');
 
 // Handle Ajax requests
-function chatbot_chatgpt_send_message() {
+function chatbot_chatgpt_send_message(): void {
 
     // Global variables
     global $sessionId;
@@ -341,7 +343,7 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
     // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
-    $chatbot_settings = get_chatbot_chatgpt_transients( 'dipslay_style', $user_id, $page_id);
+    $chatbot_settings = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';

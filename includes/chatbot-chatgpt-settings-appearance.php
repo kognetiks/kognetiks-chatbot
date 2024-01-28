@@ -1,9 +1,9 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Appearence - Ver 1.8.1
+ * Chatbot ChatGPT for WordPress - Settings - Appearance - Ver 1.8.1
  *
  * This file contains the code for the Chatbot ChatGPT settings page.
- * It handles the appearence settings and other parameters.
+ * It handles the appearance settings and other parameters.
  * 
  *
  * @package chatbot-chatgpt
@@ -25,7 +25,7 @@ function chatbot_chatgpt_appearance_settings() {
     add_settings_section(
         'chatbot_chatgpt_appearance_section',
         'Appearance Settings',
-        'chatbot_chatgpt_appearence_section_callback',
+        'chatbot_chatgpt_appearance_section_callback',
         'chatbot_chatgpt_appearance'
     );
 
@@ -57,8 +57,8 @@ function chatbot_chatgpt_appearance_settings() {
 add_action('admin_init', 'chatbot_chatgpt_appearance_settings');
 
 
-// Custom Appearence Settings - Ver 1.8.1
-function chatbot_chatgpt_appearence_section_callback($args) {
+// Custom Appearance Settings - Ver 1.8.1
+function chatbot_chatgpt_appearance_section_callback($args) {
     ?>
     <div>
         <p>Choose an color combinations that best represents you and your brand.  You can change your color combinations at any time.</p>
