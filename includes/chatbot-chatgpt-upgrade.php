@@ -86,20 +86,16 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 
 // Upgrade Logic - Local Storage - Ver 1.8.1
 function chatbot_chatgpt_cleanup_local_storage() {
-
-    // DIAG - Log the upgrade
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Local upgrade started');
-        echo "
-        <script>
-            if(localStorage.getItem('reminderCount') !== null) {
-                localStorage.removeItem('reminderCount');
-            }
-
-            if(localStorage.getItem('chatbot_chatgpt_diagnostics') !== null) {
-                localStorage.removeItem('chatbot_chatgpt_diagnostics');
-            }
-        </script>
-        ";
+    echo "
+    <script>
+        if(localStorage.getItem('reminderCount') !== null) {
+            localStorage.removeItem('reminderCount');
+        }
+        if(localStorage.getItem('chatbot_chatgpt_diagnostics') !== null) {
+            localStorage.removeItem('chatbot_chatgpt_diagnostics');
+        }
+    </script>
+    ";
 }
 
 // Upgrade Logic - Revised 1.7.6

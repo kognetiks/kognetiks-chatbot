@@ -172,6 +172,9 @@ function chatbot_chatgpt_back_trace($message_type = "NOTICE", $message = "No mes
         if (in_array($message_type, ['ERROR', 'WARNING', 'NOTICE'])) {
             error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [$message_type] [$message]");
         }
+    } elseif ('Debug' === $chatbot_chatgpt_diagnostics) {
+        // Print all types of messages
+        error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [$message_type] [$message]");
     } else {
         // Exit if none of the conditions are met
         return;

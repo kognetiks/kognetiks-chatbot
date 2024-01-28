@@ -39,8 +39,6 @@ function chatbot_chatgpt_settings_page_html() {
     // Check reminderCount in local storage - Ver 1.8.1
     $reminderCount = intval(esc_attr(get_option('chatbot_chatgpt_reminder_count', 0)));
     if ($reminderCount % 50 === 0 && $reminderCount <= 500) {
-        // DIAG - Diagnostic - Ver 1.8.1
-        chatbot_chatgpt_back_trace( 'NOTICE', 'Reminder Count: If statement ' . $reminderCount);
         $message = 'If you and your visitors are enjoying having this chatbot on your site, please take a moment to <a href="https://wordpress.org/support/plugin/chatbot-chatgpt/reviews/" target="_blank">rate and review this plugin</a>. Thank you!';
         chatbot_chatgpt_general_admin_notice($message);
         // Add 1 to reminderCount and update localStorage
@@ -49,8 +47,14 @@ function chatbot_chatgpt_settings_page_html() {
     } else {
         $reminderCount++;
         update_option('chatbot_chatgpt_reminder_count', $reminderCount);
-        // DIAG - Diagnostic - Ver 1.8.1
-        chatbot_chatgpt_back_trace( 'NOTICE', 'Reminder Count: Else statement ' . $reminderCount);
+    }
+
+    // Check if the user wants to reset the appearance settings to default - Ver 1.8.1
+    $chatbot_chatgpt_appearance_reset = esc_attr(get_option('chatbot_chatgpt_appearance_reset', 'No'));
+    // DIAG - Diagnostics
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Appearance Restore Defaults: ' . $chatbot_chatgpt_appearance_reset);
+    if ( $chatbot_chatgpt_appearance_reset == 'Yes' ) {
+        chatbot_chatgpt_appearance_restore_default_settings();
     }
 
     ?>
