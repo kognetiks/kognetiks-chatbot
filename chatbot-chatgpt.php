@@ -99,7 +99,6 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 }
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
-// update_option('chatbot_chatgpt_diagnostics', 'Off');
 global $chatbot_chatgpt_diagnostics;
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
@@ -529,7 +528,6 @@ function concatenateHistory($transient_name) {
 
 // Initialize the Greetings - Ver 1.6.1
 function enqueue_greetings_script() {
-    global $chatbot_chatgpt_diagnostics;
 
     // DIAG - Diagnostics - Ver 1.6.1
     // chatbot_chatgpt_back_trace( 'NOTICE', "enqueue_greetings_script() called");

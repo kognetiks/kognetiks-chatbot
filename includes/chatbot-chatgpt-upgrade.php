@@ -20,7 +20,7 @@ function chatbot_chatgpt_activate() {
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation started');
 
     // Logic to run during activation
-    chatbot_chatgpt_upgrade();
+    chatbot_chatgpt_local_upgrade();
 
     // DIAG - Log the activation
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation completed');
@@ -67,7 +67,7 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
             foreach($options['plugins'] as $plugin) {
                 if (plugin_basename(__FILE__) === $plugin) {
                     // Logic to run during upgrade
-                    chatbot_chatgpt_upgrade();
+                    chatbot_chatgpt_local_upgrade();
                     break;
                 }
             }
@@ -82,6 +82,24 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 
     return;
 
+}
+
+// Upgrade Logic - Local Storage - Ver 1.8.1
+function chatbot_chatgpt_cleanup_local_storage() {
+
+    // DIAG - Log the upgrade
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Local upgrade started');
+        echo "
+        <script>
+            if(localStorage.getItem('reminderCount') !== null) {
+                localStorage.removeItem('reminderCount');
+            }
+
+            if(localStorage.getItem('chatbot_chatgpt_diagnostics') !== null) {
+                localStorage.removeItem('chatbot_chatgpt_diagnostics');
+            }
+        </script>
+        ";
 }
 
 // Upgrade Logic - Revised 1.7.6

@@ -490,24 +490,6 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_custom_button_section'
     );
 
-    // Appearance settings tab - Ver 1.8.1
-    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_background_color');
-
-    add_settings_section(
-        'chatbot_chatgpt_appearance_section',
-        'Appearance Settings',
-        'chatbot_chatgpt_appearence_section_callback',
-        'chatbot_chatgpt_appearance'
-    );
-
-    add_settings_field(
-        'chatbot_chatgpt_appearance_background_color',
-        'Background Color',
-        'chatbot_chatgpt_appearance_background_color_callback',
-        'chatbot_chatgpt_appearance',
-        'chatbot_chatgpt_appearance_section'
-    );
-
 }
 
 add_action('admin_init', 'chatbot_chatgpt_settings_init');

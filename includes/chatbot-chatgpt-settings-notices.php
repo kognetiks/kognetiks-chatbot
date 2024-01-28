@@ -14,9 +14,18 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
+// General function to display the message - Ver 1.8.1
+function chatbot_chatgpt_general_admin_notice($message) {
+    if (!empty($message)) {
+        printf('<div class="%1$s"><p><b>Chatbot ChatGPT: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
+        return;
+    }
+}
+add_action('admin_notices', 'chatbot_chatgpt_general_admin_notice');
+
+
 // Notify outcomes - Ver 1.6.3
 function display_option_value_admin_notice() {
-
 
     // Suppress Notices On/Off - Ver 1.6.5
     global $chatbot_chatgpt_suppress_notices;
