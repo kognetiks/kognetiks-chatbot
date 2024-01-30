@@ -24,20 +24,20 @@ function chatbot_chatgpt_gpt_assistants_section_callback($args) {
     <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</p>
     <p>See <a href="?page=chatbot-chatgpt&tab=support">Support</a> for more details on using multiple GPT assistants.</p>
     <h2>Using Multiple GPT Assistants</h2>
-    <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
     <p>You can integrate GPT Assistants into your platform using one of shortcode configurations below.</p>
     <p>Each configuration requires either 'primary', 'alternate' or a GPT Assistant ID, denoted as 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'.</p>
     <p>GPT Assistants work with both 'floating' and 'embedded' styles.</p>
     <p><b>NOTE:</b>The 'primary' and 'alternate' assistants are set in the ChatGPT settings page.</p>
     <p><b>NOTE:</b>For best results ensure that the shortcode appears only once on the page.</p>
-        <p>Use the following format to invoke the primary or alternate assistant:</p>
+    <p>Use the following format to invoke the primary or alternate assistant:</p>
+    <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><b>&#91;chatbot_chatgpt style="floating" assistant="primary"&#93;</b> - Floating style, GPT Assistant as set in Primary setting</li>
         <li><b>&#91;chatbot_chatgpt style="embedded" assistant="alternate"&#93;</b> - Embedded style, GPT Assistant as set in Alternate setting</li>
         <li><b>&#91;chatbot_chatgpt style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Floating style, GPT Assistant as set in GPT Assistant Id setting</li>
         <li><b>&#91;chatbot_chatgpt style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Embedded style, GPT Assistant as set in GPT Assistant Id setting</li>
         <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li>
-    <p><b>NOTE: </b>When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
     </ul>
+    <p><b>NOTE: </b>When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
     <?php
 }
 

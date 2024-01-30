@@ -20,7 +20,8 @@ function chatbot_chatgpt_activate() {
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation started');
 
     // Logic to run during activation
-    chatbot_chatgpt_local_upgrade();
+    chatbot_chatgpt_upgrade();
+    chatbot_chatgpt_cleanup_local_storage();
 
     // DIAG - Log the activation
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin activation completed');
@@ -67,7 +68,8 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
             foreach($options['plugins'] as $plugin) {
                 if (plugin_basename(__FILE__) === $plugin) {
                     // Logic to run during upgrade
-                    chatbot_chatgpt_local_upgrade();
+                    chatbot_chatgpt_upgrade();
+                    chatbot_chatgpt_cleanup_local_storage();
                     break;
                 }
             }

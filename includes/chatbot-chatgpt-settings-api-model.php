@@ -29,7 +29,7 @@ function chatbot_chatgpt_api_model_section_callback($args) {
     <h3>Conversation Context</h3>
     <p>Enter a conversation context to help the model understand the conversation.  See the default for ideas.</p>
     <h3>More Information</h3>
-    <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" taget="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
+    <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <?php
 }
 
