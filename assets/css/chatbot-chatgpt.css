@@ -138,8 +138,8 @@
 }
 
 #chatbot-chatgpt-header {
-    background-color: #222;
-    color: #fff;
+    background-color: #222222;
+    color: #ffffff;
     padding: 10px;
     font-size: 16px;
     border-top-left-radius: 5px;
@@ -179,7 +179,7 @@
 
 #chatbot-chatgpt-submit {
     background-color: #f1f1f1 !important;
-    /* color: #fff; */
+    /* color: #ffffff; */
     border: none;
     border-radius: 3px;
     padding: 6px 6px;
@@ -354,7 +354,7 @@
 }
 
 #chatgptTitle.title {
-    color: white;
+    color: #ffffff;
     font-size: inherit;
     font-family: inherit;
     flex-grow: 1;

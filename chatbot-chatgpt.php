@@ -147,6 +147,9 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     wp_enqueue_style('dashicons');
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
 
+    // Now override the default styles with the custom styles - Ver 1.8.1
+    chatbot_chatgpt_appearance_custom_css_settings();
+
     // Custom css overrides - Ver 1.8.1
     // $customer_css_path = plugins_url(assets/css/chatbot-chatgpt-custom.css', __FILE__));
     // if ( file_exists ( $customer_css_path )) {
