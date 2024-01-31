@@ -191,7 +191,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.1 =
-* TBD
+* Added Appearance settings tab to the Chatbot settings.  These will override the CSS with user selected settings
 
 = 1.8.0 =
 * Corrected path/name error for file downloads for conversation and interaction data

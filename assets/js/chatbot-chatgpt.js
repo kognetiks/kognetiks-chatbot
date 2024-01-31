@@ -75,6 +75,16 @@ jQuery(document).ready(function ($) {
         }
     }
     
+    // Override start status for mobile devices - Ver 1.8.1
+    if (isMobile()) {
+        chatbot_chatgpt_start_status = 'closed';
+        chatbot_chatgpt_start_status_new_visitor = 'closed';
+        localStorage.setItem('chatbot_chatgpt_start_status', chatbot_chatgpt_start_status);
+        localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', chatbot_chatgpt_start_status_new_visitor);
+
+        // TODO - IF MOBILE REMOVE ICON AND SHOW  DASHICON AND DETERMINE WIDTH AND ORIENTATION (PORTRAIT OR LANDSCAPE)
+    }
+
     // Removed css from here into the .css file - Refactored for Ver 1.7.3
     // Initially hide the chatbot
     if (chatbot_chatgpt_start_status === 'closed') {
@@ -585,6 +595,11 @@ jQuery(document).ready(function ($) {
                                 'winter-001.png', 'winter-002.png', 'winter-003.png', 'winter-004.png', 'winter-005.png', 'winter-006.png', 'winter-007.png', 'winter-008.png', 'winter-009.png',
             ];
         return allowedAvatars.includes(setting);
+    }
+
+    // Detect mobile device - Ver 1.8.1
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 800);
     }
 
     // Call the loadChatbotStatus function here - Ver 1.1.0
