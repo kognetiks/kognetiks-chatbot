@@ -82,12 +82,17 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-prem
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-registration.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-reporting.php'; // Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setup.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-appearance.php'; // Adaptive Skins - Ver 1.6.7
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
+
+// Include necessary files - Appearance - Ver 1.8.1
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-appearance.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-body.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-dimensions.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-text.php';
 
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start(): void {
