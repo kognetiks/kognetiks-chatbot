@@ -166,9 +166,4 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         );
     }
 
-    // DIAG - Diagnostic - Ver 1.7.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', "Exiting chatbot_chatgpt_upload_file_to_assistant()" );
-
-    return;
-
 }

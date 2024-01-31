@@ -14,20 +14,20 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_settings_page() {
+function chatbot_chatgpt_settings_page(): void {
     add_options_page('Chatbot ChatGPT Settings', 'Chatbot ChatGPT', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
 }
 add_action('admin_menu', 'chatbot_chatgpt_settings_page');
 
 // Settings page HTML - Ver 1.3.0
-function chatbot_chatgpt_settings_page_html() {
+function chatbot_chatgpt_settings_page_html(): void {
     if (!current_user_can('manage_options')) {
         return;
     }
 
     chatbot_chatgpt_localize();
 
-    $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'bot_settings';
+    $active_tab = $_GET['tab'] ?? 'bot_settings';
 
     if (isset($_GET['settings-updated'])) {
         add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
@@ -41,13 +41,10 @@ function chatbot_chatgpt_settings_page_html() {
     if ($reminderCount % 50 === 0 && $reminderCount <= 500) {
         $message = 'If you and your visitors are enjoying having this chatbot on your site, please take a moment to <a href="https://wordpress.org/support/plugin/chatbot-chatgpt/reviews/" target="_blank">rate and review this plugin</a>. Thank you!';
         chatbot_chatgpt_general_admin_notice($message);
-        // Add 1 to reminderCount and update localStorage
-        $reminderCount++;
-        update_option('chatbot_chatgpt_reminder_count', $reminderCount);
-    } else {
-        $reminderCount++;
-        update_option('chatbot_chatgpt_reminder_count', $reminderCount);
     }
+    // Add 1 to reminderCount and update localStorage
+    $reminderCount++;
+    update_option('chatbot_chatgpt_reminder_count', $reminderCount);
 
     // Check if the user wants to reset the appearance settings to default - Ver 1.8.1
     $chatbot_chatgpt_appearance_reset = esc_attr(get_option('chatbot_chatgpt_appearance_reset', 'No'));
@@ -120,9 +117,9 @@ function chatbot_chatgpt_settings_page_html() {
                     });
                 }
             });
-        </script>
+       </script>
 
-        <script>
+       <script>
             window.onload = function() {
                 // Assign the function to the window object to make it globally accessible
                 window.selectIcon = function(id) {
@@ -156,9 +153,9 @@ function chatbot_chatgpt_settings_page_html() {
                     }
                 }
             }
-        </script>
+       </script>
 
-        <h2 class="nav-tab-wrapper">
+       <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=bot_settings" class="nav-tab <?php echo $active_tab == 'bot_settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
             <a href="?page=chatbot-chatgpt&tab=gpt_assistants" class="nav-tab <?php echo $active_tab == 'gpt_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>
@@ -172,10 +169,10 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
             <!-- Coming Soon in Ver 2.0.0 -->
             <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->
-        </h2>
+       </h2>
 
-        <!-- Updated id - Ver 1.4.1 -->
-        <form id="chatgpt-settings-form" action="options.php" method="post">
+       <!-- Updated id - Ver 1.4.1 -->
+       <form id="chatgpt-settings-form" action="options.php" method="post">
             <?php
             if ($active_tab == 'bot_settings') {
                 settings_fields('chatbot_chatgpt_settings');
@@ -224,12 +221,12 @@ function chatbot_chatgpt_settings_page_html() {
 
             } elseif ($active_tab == 'support') {
                 settings_fields('chatbot_chatgpt_support');
-                do_settings_sections('chatbot_chatgpt_support');            
-        }
+                do_settings_sections('chatbot_chatgpt_support');
+       }
 
             submit_button('Save Settings');
             ?>
-        </form>
+       </form>
     </div>
     <!-- REMOVED IN VER 1.8.1   -->
     <!-- Added closing tags for body and html - Ver 1.4.1 -->
