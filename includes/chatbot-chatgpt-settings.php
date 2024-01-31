@@ -233,4 +233,4 @@ function chatbot_chatgpt_settings_page_html(): void {
     <!--    </body>-->
     <!--    </html>-->
     <?php
-}
+    }
