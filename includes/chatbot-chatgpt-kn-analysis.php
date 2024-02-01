@@ -10,8 +10,6 @@
  */
 
 // If this file is called directly, abort.
-use JetBrains\PhpStorm\NoReturn;
-
 if ( ! defined( 'WPINC' ) ) {
     die;
 }

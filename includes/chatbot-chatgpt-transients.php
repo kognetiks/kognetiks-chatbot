@@ -23,7 +23,7 @@ if ( ! defined( 'WPINC' ) ) {
 // set_chatbot_chatgpt_transients( 'assistant_alias', $chatbot_chatgpt_assistant_alias);
 // set_chatbot_chatgpt_transients( 'file_id', $chatbot_chatgpt_assistant_alias);
 
-function set_chatbot_chatgpt_transients( $transient_type , $transient_value) {
+function set_chatbot_chatgpt_transients( $transient_type , $transient_value): void {
 
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type ' . $transient_type);
@@ -113,7 +113,7 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id) {
 
 
 // Delete the transients - Ver 1.7.9
-function delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id) {
+function delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id): void {
 
     if ( $transient_type == 'style' ) {
         $style_transient_key = 'chatbot_chatgpt_style_' . $user_id . '_' . $page_id;

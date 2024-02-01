@@ -80,7 +80,7 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_custom_gpts'
     );
     
-    // Use GPT Assistant Id (Yes or No) - Ver 1.6.7
+    // Use GPT Assistant ID (Yes or No) - Ver 1.6.7
     add_settings_field(
         'chatbot_chatgpt_use_custom_gpt_assistant_id',
         'Use GPT Assistant Id',
@@ -223,7 +223,7 @@ function chatbot_chatgpt_settings_init() {
     // Option to check API status - Ver 1.6.5
     add_settings_field(
         'chatbot_chatgpt_api_test',
-        'API Test',
+        'API Test Results',
         'chatbot_chatgpt_api_test_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'

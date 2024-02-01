@@ -220,7 +220,7 @@ function chatbot_chatgpt_conversation_log_cleanup() {
     // Prepare and execute the SQL statement
     $delete_result = $wpdb->query($wpdb->prepare("DELETE FROM $table_name WHERE interaction_time < %s", $purge_date));
 
-    // Check if the delete was successful
+    // Check if delete was successful
     if ($delete_result === false) {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'ERROR', "Failed to delete conversation log entries: " . $wpdb->last_error);

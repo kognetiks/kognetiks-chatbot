@@ -149,8 +149,8 @@ function chatbot_chatgpt_upload_file_to_assistant() {
         );
     } else {
         // DIAG - Diagnostic - Ver 1.7.6
-        // chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully." );
-        //DIAG - Diagnostic - Ver 1.7.6
+        // chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully" );
+        // DIAG - Diagnostic - Ver 1.7.6
         // chatbot_chatgpt_back_trace( 'SUCCESS', 'asst_file_id ' . $responseData['id'] );
         // Set the transient for the file id
         set_chatbot_chatgpt_transients('asst_file_id', $responseData['id']);

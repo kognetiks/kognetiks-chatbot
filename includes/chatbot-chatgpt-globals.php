@@ -63,7 +63,7 @@ $errorResponses = [
     " Unfortunately, we might have encountered a problem with the OpenAI API. Please give it another shot in a little while.",
     " I apologize, but it appears there's a hiccup with the OpenAI API at the moment. We can attempt this again later.",
     " The OpenAI API seems to be experiencing difficulties right now. We can come back to this when it's resolved.",
-    " I'm sorry, but it seems like there's an error from the OpenAI API's side. Please retry in a bit.",
+    " I'm sorry, but it seems like there's an error from the OpenAI API side. Please retry in a bit.",
     " There might be a temporary issue with the OpenAI API. Please try your request again in a little while.",
     " The OpenAI API encountered an error, but don't worry, it happens. Let's give it another shot later.",
     " It looks like there could be a technical problem with the OpenAI API. Feel free to try again in a bit to see if things are working smoothly."

@@ -241,7 +241,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
 
     $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( 'assets/icons/', __FILE__ );
 
-    // Localize the data for javascripts
+    // Localize the data for javascript
     wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
 
     wp_localize_script('chatbot-chatgpt-js', 'plugin_vars', array(
@@ -320,7 +320,7 @@ function chatbot_chatgpt_send_message(): void {
 
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
-    // Retrieve the Use GPT Assistant Id
+    // Retrieve the Use GPT Assistant ID
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     // FIXME - If gpt-4-turbo is selected, set the API model to gpt-4-1106-preview, i.e., the API name for the model
     if ($model == 'gpt-4-turbo') {
@@ -368,12 +368,12 @@ function chatbot_chatgpt_send_message(): void {
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
         $use_assistant_id = 'No';
-        // error_log ('Using Original GPT Assistant Id');
+        // error_log ('Using Original GPT Assistant ID');
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
         $use_assistant_id = 'Yes';
-        // error_log ('Using Primary GPT Assistant Id ' . $assistant_id);
-        // Check if the GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
+        // error_log ('Using Primary GPT Assistant ID ' . $assistant_id);
+        // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
@@ -382,8 +382,8 @@ function chatbot_chatgpt_send_message(): void {
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
         $use_assistant_id = 'Yes';
-        // error_log ('Using Alternate GPT Assistant Id ' . $assistant_id);
-        // Check if the GPT Assistant Id is blank, null, or "Please provide the Customer GPT Assistant Id."
+        // error_log ('Using Alternate GPT Assistant ID ' . $assistant_id);
+        // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
@@ -393,8 +393,8 @@ function chatbot_chatgpt_send_message(): void {
         // Reference GPT Assistant IDs directly - Ver 1.7.3
         if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_')) {
             // DIAG - Diagnostics
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant Id: ' . $chatbot_chatgpt_assistant_alias);
-            // Override the $assistant_id with the GPT Assistant Id
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
+            // Override the $assistant_id with the GPT Assistant ID
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
             // error_log ('Using GPT Assistant Id ' . $assistant_id);
@@ -410,7 +410,7 @@ function chatbot_chatgpt_send_message(): void {
     // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant Id: ' . $use_assistant_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
 
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
@@ -473,7 +473,7 @@ add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_c
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
 
 // Crawler aka Knowledge Navigator - Ver 1.6.1
-function chatbot_chatgpt_kn_status_activation() {
+function chatbot_chatgpt_kn_status_activation(): void {
     add_option('chatbot_chatgpt_kn_status', 'Never Run');
     // clear any old scheduled runs
     if (wp_next_scheduled('crawl_scheduled_event_hook')) {
@@ -487,14 +487,14 @@ function chatbot_chatgpt_kn_status_activation() {
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
 
 // Clean Up in Aisle 4
-function chatbot_chatgpt_kn_status_deactivation() {
+function chatbot_chatgpt_kn_status_deactivation(): void {
     delete_option('chatbot_chatgpt_kn_status');
     wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); 
 }
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
-function addEntry($transient_name, $newEntry) {
+function addEntry($transient_name, $newEntry): void {
     $context_history = get_transient($transient_name);
     if (!$context_history) {
         $context_history = [];
@@ -534,7 +534,7 @@ function addEntry($transient_name, $newEntry) {
 
 
 // Function to return message and response - Ver 1.6.1
-function concatenateHistory($transient_name) {
+function concatenateHistory($transient_name): string {
     $context_history = get_transient($transient_name);
     if (!$context_history) {
         return ''; // Return an empty string if the transient does not exist
@@ -543,7 +543,7 @@ function concatenateHistory($transient_name) {
 }
 
 // Initialize the Greetings - Ver 1.6.1
-function enqueue_greetings_script() {
+function enqueue_greetings_script(): void {
 
     // DIAG - Diagnostics - Ver 1.6.1
     // chatbot_chatgpt_back_trace( 'NOTICE', "enqueue_greetings_script() called");
@@ -562,7 +562,7 @@ add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
 
 
 // Function to add the adaptive appearance settings to the Chatbot ChatGPT settings page
-function chatbot_chatgpt_settings_appearance() {
+function chatbot_chatgpt_settings_appearance(): void {
 
     // Register the settings
     register_setting('chatbot_chatgpt_settings_appearance', 'chatbot_chatgpt_appearance');
@@ -587,7 +587,7 @@ function chatbot_chatgpt_settings_appearance() {
 }
 
 // Add the color picker to the adaptive appearance settings section - Ver 1.8.1
-function enqueue_color_picker($hook_suffix) {
+function enqueue_color_picker($hook_suffix): void {
     // first check that $hook_suffix is appropriate for your admin page
     wp_enqueue_style('wp-color-picker');
     wp_enqueue_script('my-script-handle', plugin_dir_url(__FILE__) . 'assets/js/chatbot-chatgpt-color-picker.js', array('wp-color-picker'), false, true);

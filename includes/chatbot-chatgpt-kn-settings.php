@@ -99,7 +99,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                 }
                 
                 // DIAG - Log action to debug.log
-                // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER crawl_scehedule_event_hook');
+                // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER crawl_schedule_event_hook');
 
                 // Log scan interval - Ver 1.6.3
                 if ($interval === 'Now') {

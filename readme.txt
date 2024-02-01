@@ -265,7 +265,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Added a new option to customize the chatbot's message prompt - See Settings, then Settings.
 
 = 1.6.5 =
-* Added option for two user configurable buttons at the bottom of the chat bot - See Settings - Custom Buttons.
+* Added option for two user configurable buttons at the bottom of the chatbot - See Settings - Custom Buttons.
 * User configurable buttons can direct chatters to contact forms, email, or other pages.
 * Added a new option to check API key validity - See Settings > Diagnostics & Notices.
 * Added support for Echo Knowledge Base (EKB) post_type - Ver 1.6.5.

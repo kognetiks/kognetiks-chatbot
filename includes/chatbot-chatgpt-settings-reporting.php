@@ -19,7 +19,7 @@ function chatbot_chatgpt_reporting_section_callback($args) {
     ?>
     <div>
         <p>Use these setting to select the reporting period for Visitor Interactions.</p>
-        <p>By default conversation logging is initially turned <b>Off</b>.</p>
+        <p>By default, conversation logging is initially turned <b>Off</b>.</p>
         <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support#chatbot-conversation-log">Support</a> tab of this plugin for more details.</p>
         <h3>Conversation Data</h3>
             <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
@@ -152,7 +152,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
         $center_x = $x1 + ($bar_width / 2);
         $data_value_x = $center_x - (imagefontwidth($font_size) * strlen($data[$i]) / 2);
         $data_value_y = $y1 - 15;
-        $data_value_y = $data_value_y < 0 ? 0 : $data_value_y;
+        $data_value_y = max($data_value_y, 0);
 
         // Draw a bar
         imagefilledrectangle($image, $x1, $y1, $x2, $y2, $light_blue);
@@ -164,7 +164,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
         $label_x = $center_x - (imagefontwidth(round($font_size)) * strlen($labels[$i]) / 2);
 
         $data_value_y = $y1 - 5; // Moves the counts up or down
-        $data_value_y = $data_value_y < 0 ? 0 : $data_value_y;
+        $data_value_y = max($data_value_y, 0);
 
         // Fix: Explicitly cast to int
         $data_value_x = (int)($data_value_x);

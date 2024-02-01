@@ -120,7 +120,7 @@ function chatbot_chatgpt_support_section_callback() {
     <hr style="border-top: 2px solid black;">
     <div id="chatbot-conversation-log"><a id="chatbot-conversation-log"></a>
         <h3>Conversation Logging Overview</h3>
-        <p>This chatbot logs interactions with visitors to provide insights and enhance user experience. By default the option to log conversations is turned off. Below is an overview of the table structure and its functionality.</p>
+        <p>This chatbot logs interactions with visitors to provide insights and enhance user experience. By default, the option to log conversations is turned off. Below is an overview of the table structure and its functionality.</p>
 
         <h3>Table Structure Overview</h3>
         <p>The table is designed to store key elements of each interaction, including:</p>
@@ -156,7 +156,7 @@ function chatbot_chatgpt_support_section_callback() {
         <p>Visitors should be informed that interactions with the chatbot are recorded. This should be communicated through a notice when the chatbot is first engaged.</p>
 
         <h3>Purpose of Data Collection</h3>
-        <p>The data collected may used to improve user experience and chatbot functionality. You should ensure that all data is handled securely and in compliance with relevant privacy regulations.</p>
+        <p>The data collected may be used to improve user experience and chatbot functionality. You should ensure that all data is handled securely and in compliance with relevant privacy regulations.</p>
 
         <h3>Data Storage and Use</h3>
         <p>Information on how the collected data is stored and used is provided, and should adhere to privacy standards like GDPR and CCPA.</p>
@@ -184,7 +184,7 @@ function chatbot_chatgpt_support_section_callback() {
     <div id="chatbot-diagnostics">
         <h3>Chatbot Diagnostics - For Developers</h3>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li>By default the <b>Chatbot Diagnostics</b> setting is disabled. When enabled, the plugin provides useful information about the <b>Chatbot ChatGPT's</b> operation. This information can be used to troubleshoot issues and to better understand how the it is functioning.</li>
+            <li>By default, the <b>Chatbot Diagnostics</b> setting is disabled. When enabled, the plugin provides useful information about the <b>Chatbot ChatGPT's</b> operation. This information can be used to troubleshoot issues and to better understand how it is functioning.</li>
             <li>The plugin supports Success, Notice, Warning, Failure, and Error, i.e., increasing levels of severity. The default level is Success. The higher the level, the more information is provided.</li>
             <li>In addition to setting the <b>Chatbot ChatGPT's</b> diagnostics reporting level, you will also need to enable WordPress debugging. This can be done by setting the <b>WP_DEBUG</b> constant to true in your wp-config.php file.</li>
             <li>Turning on WordPress debugging will cause all PHP errors, notices, and warnings to be displayed. This is useful for debugging and development purposes.</li>

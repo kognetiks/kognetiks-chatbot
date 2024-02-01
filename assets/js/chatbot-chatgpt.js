@@ -297,7 +297,7 @@ jQuery(document).ready(function ($) {
         // IDEA - Add option to suppress avatar greeting if clicked on
 
         // Updated to address cross-site scripting - Ver 1.8.1
-        // If an avatar is selected and it's not 'icon-000.png', use the avatar
+        // If an avatar is selected, and it's not 'icon-000.png', use the avatar
         avatarImg = $('<img>')
             .attr('id', 'chatbot_chatgpt_avatar_icon_setting')
             .attr('class', 'chatbot-avatar')
@@ -509,7 +509,7 @@ jQuery(document).ready(function ($) {
                     // IDEA Check for a URL
                     if (botResponse.includes('[URL: ')) {
                         // DIAG - Diagnostics - Ver 1.6.3
-                        // console.error('Chatbot ChatGPT: ERROR: URL found in bot response");
+                        // console.error('Chatbot ChatGPT: ERROR: URL found in bot response');
                         link = '';
                         urlRegex = /\[URL: (.*?)\]/g;
                         match = botResponse.match(urlRegex);

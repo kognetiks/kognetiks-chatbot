@@ -19,7 +19,7 @@ function chatbot_chatgpt_gpt_assistants_section_callback($args) {
     ?>
     <p>Configure settings for your GPT Assistants by adding your below.</p>
     <p>If you have developed a GPT Assistant, you will need the id of the assistant - is usually starts with "asst_".</p>
-    <p>Enter your GPT Assistant Id instead of ChatGPT.  Set the 'Use GPT Assistant ID' to 'Yes'.</p>
+    <p>Enter your GPT Assistant ID instead of ChatGPT.  Set the 'Use GPT Assistant ID' to 'Yes'.</p>
     <p>Otherwise, you can leave the GPT Assistant ID field blank and set the usage to 'No'.</p>
     <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</p>
     <p>See <a href="?page=chatbot-chatgpt&tab=support">Support</a> for more details on using multiple GPT assistants.</p>
@@ -33,8 +33,8 @@ function chatbot_chatgpt_gpt_assistants_section_callback($args) {
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><b>&#91;chatbot_chatgpt style="floating" assistant="primary"&#93;</b> - Floating style, GPT Assistant as set in Primary setting</li>
         <li><b>&#91;chatbot_chatgpt style="embedded" assistant="alternate"&#93;</b> - Embedded style, GPT Assistant as set in Alternate setting</li>
-        <li><b>&#91;chatbot_chatgpt style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Floating style, GPT Assistant as set in GPT Assistant Id setting</li>
-        <li><b>&#91;chatbot_chatgpt style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Embedded style, GPT Assistant as set in GPT Assistant Id setting</li>
+        <li><b>&#91;chatbot_chatgpt style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Floating style, GPT Assistant as set in GPT Assistant ID setting</li>
+        <li><b>&#91;chatbot_chatgpt style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Embedded style, GPT Assistant as set in GPT Assistant ID setting</li>
         <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li>
     </ul>
     <p><b>NOTE: </b>When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
@@ -67,7 +67,7 @@ function chatbot_chatgpt_allow_file_uploads_callback($args) {
     <?php
 }
 
-// GPT Assistant Id field callback - Ver 1.6.7
+// GPT Assistant ID field callback - Ver 1.6.7
 function chatbot_chatgpt_assistant_id_callback($args) {
     $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', 'Please provide the GPT Assistant Id.'));
     $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id', 'No'));
@@ -75,13 +75,13 @@ function chatbot_chatgpt_assistant_id_callback($args) {
         $assistant_id = 'Please provide the GPT Assistant Id.';
     }
     // Set default value if empty
-    // $assistant_id = empty($assistant_id) ? 'Please provide the GPT Assistant Id.': $assistant_id;
+    // $assistant_id = empty($assistant_id) ? 'Please provide the GPT Assistant ID.': $assistant_id;
     ?>
     <input type="text" id="chatbot_chatgpt_assistant_id" name="chatbot_chatgpt_assistant_id" value="<?php echo esc_attr( $assistant_id ); ?>" class="regular-text">
     <?php
 }
 
-// GPT Assistant Id field callback - Ver 1.6.7
+// GPT Assistant ID field callback - Ver 1.6.7
 function chatbot_chatgpt_assistant_id_alternate_callback($args) {
     $assistant_id_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate', 'Please provide the Alternate GPT Assistant Id.'));
     $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id', 'No'));
@@ -89,7 +89,7 @@ function chatbot_chatgpt_assistant_id_alternate_callback($args) {
         $assistant_id_alternate = 'Please provide the Alternate GPT Assistant Id, if any.';
     }
     // Set default value if empty
-    // $assistant_id = empty($assistant_id) ? 'Please provide the GPT Assistant Id.': $assistant_id;
+    // $assistant_id = empty($assistant_id) ? 'Please provide the GPT Assistant ID.': $assistant_id;
     ?>
     <input type="text" id="chatbot_chatgpt_assistant_id_alternate" name="chatbot_chatgpt_assistant_id_alternate" value="<?php echo esc_attr( $assistant_id_alternate ); ?>" class="regular-text">
     <?php
