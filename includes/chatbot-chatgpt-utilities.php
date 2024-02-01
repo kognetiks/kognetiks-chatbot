@@ -1,9 +1,9 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Upgrade the chatbot-chatgpt plugin.
+ * Chatbot ChatGPT for WordPress - Utlities - Ver 1.8.1
  *
- * This file contains the code for upgrading the plugin.
- * It should run with the plugin is activated, deactivated, or updated.
+ * This file contains the code for plugin utilities.
+ * It is used to check for mobile devices and other utilities.
  *
  * @package chatbot-chatgpt
  */

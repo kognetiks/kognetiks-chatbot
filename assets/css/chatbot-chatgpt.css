@@ -455,3 +455,29 @@ input:hover {
     80%{ transform: rotate(300deg); }
     100%{ transform: rotate(360deg); }
 }
+
+
+/* CSS for mobile devices - Ver 1.8.1 */
+/* .mobile-portrait {
+    width: 90%;
+    height: 60%;
+}
+
+.mobile-landscape {
+    width: 60%;
+    height: 90%;
+} */
+
+/* @media (max-width: 800px) {
+    .mobile-portrait {
+        width: 90%;
+        height: 60%;
+    }
+}
+
+@media (min-width: 801px) {
+    .mobile-landscape {
+        width: 60%;
+        height: 90%;
+    }
+} */
