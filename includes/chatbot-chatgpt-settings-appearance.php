@@ -26,6 +26,7 @@ function chatbot_chatgpt_appearance_settings(): void {
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_bot_text_background_color');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_width_wide');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_width_narrow');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_width_setting');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_reset');
 
     add_settings_section(
@@ -87,6 +88,15 @@ function chatbot_chatgpt_appearance_settings(): void {
         'chatbot_chatgpt_appearance_width_narrow',
         'Chatbot Width Narrow',
         'chatbot_chatgpt_appearance_width_narrow_callback',
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_section'
+    );
+
+    // Option to change the width of the bot from narrow to wide - Ver 1.4.2
+    add_settings_field(
+        'chatbot_chatgpt_width_setting',
+        'Chatbot Width Setting',
+        'chatbot_chatgpt_width_setting_callback',
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_section'
     );

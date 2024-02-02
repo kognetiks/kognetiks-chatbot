@@ -96,81 +96,13 @@ jQuery(document).ready(function ($) {
         console.log('Orientation:', orientation.type);
         }
 
-        // // Overrides for mobile devices - Ver 1.8.1
-        // if (isMobile()) {
+        updateChatbotStyles();
     
-        //     // Assuming isMobile() correctly identifies mobile devices
-        //     const chatbotContainer = document.getElementById('#chatbot-chatgpt');
-        
-        //     // Adjust styles based on orientation
-        //     const orientation = screen.orientation.type.includes('portrait') ? 'portrait' : 'landscape';
-        
-        //     if (orientation === 'portrait') {
-
-        //         console.log('Chatbot ChatGPT: NOTICE: Mobile device in portrait mode');
-        //         console.log('Chatbot ChatGPT: NOTICE: innerWidth: ', viewportWidth = window.innerWidth);
-        //         console.log('Chatbot ChatGPT: NOTICE: innerHeight: ', viewportHeight = window.innerHeight);
-
-        //         // Select the chatbot element by its ID
-        //         const chatbotElement = document.getElementById('chatbot-chatgpt');
+        // Listen for orientation changes
+        window.addEventListener('orientationchange', updateChatbotStyles);
     
-        //         // Check if the element has the classes we want to remove
-        //         if (chatbotElement.classList.contains('wide')) {
-        //             chatbotElement.classList.remove('wide');
-        //         }
-    
-        //         if (chatbotElement.classList.contains('chatbot-wide')) {
-        //             chatbotElement.classList.remove('chatbot-wide');
-        //         }
-    
-        //         // Add the 'mobile' class to the element
-        //         chatbotElement.classList.add('mobile-portrait');
-
-        //         // Set it to a specific pixel value based on the viewport size
-        //         chatbotElement.style.width = `${viewportWidth * 0.9}px`;
-        //         chatbotElement.style.height = `${viewportHeight * 0.6}px`;
-
-        //     } else {
-
-        //         console.log('Chatbot ChatGPT: NOTICE: Mobile device in landscape mode');
-        //         console.log('Chatbot ChatGPT: NOTICE: innerWidth: ', viewportWidth = window.innerWidth);
-        //         console.log('Chatbot ChatGPT: NOTICE: innerHeight: ', viewportHeight = window.innerHeight);
-
-        //         // Select the chatbot element by its ID
-        //         const chatbotElement = document.getElementById('chatbot-chatgpt');
-    
-        //         // Check if the element has the classes we want to remove
-        //         if (chatbotElement.classList.contains('wide')) {
-        //             chatbotElement.classList.remove('wide');
-        //         }
-    
-        //         if (chatbotElement.classList.contains('chatbot-wide')) {
-        //             chatbotElement.classList.remove('chatbot-wide');
-        //         }
-    
-        //         // Add the 'mobile' class to the element
-        //         chatbotElement.classList.add('mobile-landscape');
-
-                
-        //         // Set it to a specific pixel value based on the viewport size
-        //         chatbotElement.style.width = `${viewportWidth * 0.6}px`;
-        //         chatbotElement.style.height = `${viewportHeight * 0.9}px`;
-
-        //     }
-        // }
-
-        // Overrides for mobile devices - Ver 1.8.1
-        // if (isMobile()) {
-            // Initial update
-            updateChatbotStyles();
-        
-            // Listen for orientation changes
-            window.addEventListener('orientationchange', updateChatbotStyles);
-        
-            // Listen for resize events
-            window.addEventListener('resize', updateChatbotStyles);
-        // }
-
+        // Listen for resize events
+        window.addEventListener('resize', updateChatbotStyles);
 
         // TODO - IF MOBILE REMOVE ICON AND SHOW  DASHICON AND DETERMINE WIDTH AND ORIENTATION (PORTRAIT OR LANDSCAPE)
         
@@ -188,69 +120,6 @@ jQuery(document).ready(function ($) {
             } else {
                 $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-full').addClass('chatbot-narrow');
             }
-
-            // // Overrides for mobile devices - Ver 1.8.1
-            // if (isMobile()) {
-      
-            //     // Assuming isMobile() correctly identifies mobile devices
-            //     const chatbotContainer = document.getElementById('#chatbot-chatgpt');
-            
-            //     // Adjust styles based on orientation
-            //     const orientation = screen.orientation.type.includes('portrait') ? 'portrait' : 'landscape';
-            
-            //     if (orientation === 'portrait') {
-
-            //         console.log('Chatbot ChatGPT: NOTICE: Mobile device in portrait mode');
-            //         console.log('Chatbot ChatGPT: NOTICE: innerWidth: ', viewportWidth = window.innerWidth);
-            //         console.log('Chatbot ChatGPT: NOTICE: innerHeight: ', viewportHeight = window.innerHeight);
-
-            //         // Select the chatbot element by its ID
-            //         const chatbotElement = document.getElementById('chatbot-chatgpt');
-        
-            //         // Check if the element has the classes we want to remove
-            //         if (chatbotElement.classList.contains('wide')) {
-            //             chatbotElement.classList.remove('wide');
-            //         }
-        
-            //         if (chatbotElement.classList.contains('chatbot-wide')) {
-            //             chatbotElement.classList.remove('chatbot-wide');
-            //         }
-        
-            //         // Add the 'mobile' class to the element
-            //         chatbotElement.classList.add('mobile-portrait');
-
-            //         // Set it to a specific pixel value based on the viewport size
-            //         chatbotElement.style.width = `${viewportWidth * 0.9}px`;
-            //         chatbotElement.style.height = `${viewportHeight * 0.6}px`;
-
-            //     } else {
-
-            //         console.log('Chatbot ChatGPT: NOTICE: Mobile device in landscape mode');
-            //         console.log('Chatbot ChatGPT: NOTICE: innerWidth: ', viewportWidth = window.innerWidth);
-            //         console.log('Chatbot ChatGPT: NOTICE: innerHeight: ', viewportHeight = window.innerHeight);
-
-            //         // Select the chatbot element by its ID
-            //         const chatbotElement = document.getElementById('chatbot-chatgpt');
-        
-            //         // Check if the element has the classes we want to remove
-            //         if (chatbotElement.classList.contains('wide')) {
-            //             chatbotElement.classList.remove('wide');
-            //         }
-        
-            //         if (chatbotElement.classList.contains('chatbot-wide')) {
-            //             chatbotElement.classList.remove('chatbot-wide');
-            //         }
-        
-            //         // Add the 'mobile' class to the element
-            //         chatbotElement.classList.add('mobile-landscape');
-
-                    
-            //         // Set it to a specific pixel value based on the viewport size
-            //         chatbotElement.style.width = `${viewportWidth * 0.6}px`;
-            //         chatbotElement.style.height = `${viewportHeight * 0.9}px`;
-
-            //     }
-            // }
 
             // Overrides for mobile devices - Ver 1.8.1
             if (isMobile()) {
@@ -285,6 +154,12 @@ jQuery(document).ready(function ($) {
         // Is not valid avatar setting
         // DIAG - Diagnostics - Ver 1.8.1
         // console.error('Chatbot ChatGPT: ERROR: selectedAvatar: ' + selectedAvatar);
+        selectedAvatar = 'icon-000.png';
+    }
+
+    // Overrides for mobile devices - Ver 1.8.1
+    if (isMobile()) {
+        // Set selectedAvatar to 'icon-000.png' for mobile devices
         selectedAvatar = 'icon-000.png';
     }
 
@@ -770,31 +645,37 @@ jQuery(document).ready(function ($) {
     }
 
     function updateChatbotStyles() {
+
+        console.log('Chatbot ChatGPT: NOTICE: updateChatbotStyles');
+
         const chatbotElement = document.getElementById('chatbot-chatgpt');
         if (!chatbotElement) return;
     
         // Calculate the viewport dimensions
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+        viewportWidth = window.innerWidth;
+        viewportHeight = window.innerHeight;
+
+        console.log('Chatbot ChatGPT: NOTICE: Viewport Width:', viewportWidth, 'Viewport Height:', viewportHeight);
     
         // Adjust styles based on orientation
         const orientation = (screen.orientation && screen.orientation.type.includes('portrait')) ? 'portrait' : 'landscape';
     
         // Remove classes that are not needed
         chatbotElement.classList.remove('wide', 'chatbot-wide');
-    
+
         // Apply styles and classes based on the orientation
         if (orientation === 'portrait') {
             console.log('Chatbot ChatGPT: NOTICE: Mobile device in portrait mode');
             chatbotElement.classList.add('mobile-portrait');
-            chatbotElement.style.width = `${viewportWidth * 0.9}px`;
-            chatbotElement.style.height = `${viewportHeight * 0.6}px`;
+            chatbotElement.style.setProperty('width', `${viewportWidth * 0.8}px`, 'important');
+            chatbotElement.style.setProperty('height', `${viewportHeight * 0.7}px`, 'important');
         } else {
             console.log('Chatbot ChatGPT: NOTICE: Mobile device in landscape mode');
             chatbotElement.classList.add('mobile-landscape');
-            chatbotElement.style.width = `${viewportWidth * 0.6}px`;
-            chatbotElement.style.height = `${viewportHeight * 0.9}px`;
+            chatbotElement.style.setProperty('width', `${viewportWidth * 0.7}px`, 'important');
+            chatbotElement.style.setProperty('height', `${viewportHeight * 0.8}px`, 'important');
         }
+
     }
 
     // Call the loadChatbotStatus function here - Ver 1.1.0

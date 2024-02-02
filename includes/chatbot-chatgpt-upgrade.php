@@ -171,7 +171,7 @@ function chatbot_chatgpt_upgrade() {
     if (get_option( 'chatgpt_avatar_icon_setting' )) {
         $chatbot_chatgpt_avatar_greeting_setting = get_option( 'chatgpt_avatar_icon_setting' );
         delete_option( 'chatgpt_avatar_icon_setting' );
-        update_option( 'chatbot_chatgpt_avatar_icon_setting', $chatbot_chatgpt_avatar_icon_setting );
+        update_option( 'chatbot_chatgpt_avatar_icon_setting', $chatbot_chatgpt_avatar_greeting_setting );
         // DIAG - Log the old option deletion
         // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_avatar_icon_setting option deleted');
     }

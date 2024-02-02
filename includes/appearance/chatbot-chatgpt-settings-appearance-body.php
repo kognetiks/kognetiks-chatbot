@@ -95,3 +95,14 @@ function chatbot_chatgpt_appearance_header_background_custom_css_settings(): voi
     <?php
 }
 add_action('wp_head', 'chatbot_chatgpt_appearance_header_background_custom_css_settings');
+
+// Set the chatbot width
+function chatbot_chatgpt_width_setting_callback($args) {
+    $chatgpt_width = esc_attr(get_option('chatbot_chatgpt_width_setting', 'Narrow'));
+    ?>
+    <select id="chatbot_chatgpt_width_setting" name = "chatbot_chatgpt_width_setting">
+        <option value="Narrow" <?php selected( $chatgpt_width, 'Narrow' ); ?>><?php echo esc_html( 'Narrow' ); ?></option>
+        <option value="Wide" <?php selected( $chatgpt_width, 'Wide' ); ?>><?php echo esc_html( 'Wide' ); ?></option>
+    </select>
+    <?php
+}

@@ -48,7 +48,8 @@ function localize_global_stopwords($language_code, $stopWords) {
     }
 
     // The current ChatGPT API URL endpoint for GPT-3.5-Turbo and GPT-4
-    $api_url = 'https://api.openai.com/v1/chat/completions';
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -150,7 +151,8 @@ function localize_global_learningMessages($language_code, $learningMessages) {
     }
 
     // The current ChatGPT API URL endpoint for GPT-3.5-Turbo and GPT-4
-    $api_url = 'https://api.openai.com/v1/chat/completions';
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -255,7 +257,8 @@ function localize_global_errorResponses($language_code, $errorResponses) {
     }
 
     // The current ChatGPT API URL endpoint for GPT-3.5-Turbo and GPT-4
-    $api_url = 'https://api.openai.com/v1/chat/completions';
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,

@@ -38,13 +38,15 @@ function chatbot_chatgpt_settings_page_html(): void {
 
     // Check reminderCount in local storage - Ver 1.8.1
     $reminderCount = intval(esc_attr(get_option('chatbot_chatgpt_reminder_count', 0)));
-    if ($reminderCount % 50 === 0 && $reminderCount <= 500) {
+    if ($reminderCount % 100 === 0 && $reminderCount <= 500) {
         $message = 'If you and your visitors are enjoying having this chatbot on your site, please take a moment to <a href="https://wordpress.org/support/plugin/chatbot-chatgpt/reviews/" target="_blank">rate and review this plugin</a>. Thank you!';
         chatbot_chatgpt_general_admin_notice($message);
     }
     // Add 1 to reminderCount and update localStorage
-    $reminderCount++;
-    update_option('chatbot_chatgpt_reminder_count', $reminderCount);
+    if ($reminderCount < 501) {
+        $reminderCount++;
+        update_option('chatbot_chatgpt_reminder_count', $reminderCount);
+    }
 
     // Check if the user wants to reset the appearance settings to default - Ver 1.8.1
     $chatbot_chatgpt_appearance_reset = esc_attr(get_option('chatbot_chatgpt_appearance_reset', 'No'));
@@ -67,7 +69,7 @@ function chatbot_chatgpt_settings_page_html(): void {
                     chatgptSettingsForm.addEventListener('submit', function() {
 
                         // Changed const to var - Ver 1.5.0
-                        // Get the input elements by their ids
+                        // Get the input elements by their IDs
                         let chatgptNameInput = document.getElementById('chatbot_chatgpt_bot_name');
                         let chatgpt_chatbot_bot_promptInput = document.getElementById('chatbot_chatgpt_bot_prompt');
                         let chatgptInitialGreetingInput = document.getElementById('chatbot_chatgpt_initial_greeting');

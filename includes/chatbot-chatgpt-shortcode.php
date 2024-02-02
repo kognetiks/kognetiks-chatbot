@@ -89,7 +89,7 @@ function chatbot_chatgpt_shortcode($atts) {
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
             <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
-            <label for="chatbot-chatgpt-message"></label><textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
+            <label for="chatbot-chatgpt-message"></label><textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
             <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
             <button id="chatbot-chatgpt-submit">
                 <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
@@ -133,7 +133,7 @@ function chatbot_chatgpt_shortcode($atts) {
             <div id="chatbot-chatgpt-conversation"></div>
             <div id="chatbot-chatgpt-input">
                 <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
-                <textarea id="chatbot-chatgpt-message" rows="1" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
+                <textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
                 <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
                 <button id="chatbot-chatgpt-submit">
                     <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
@@ -223,8 +223,8 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     global $chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias;
 
     // Check if the variables are set and not empty
-    $style = isset($chatbot_chatgpt_display_style) ? $chatbot_chatgpt_display_style : '';
-    $assistant = isset($chatbot_chatgpt_assistant_alias) ? $chatbot_chatgpt_assistant_alias : '';
+    $style = $chatbot_chatgpt_display_style ?? '';
+    $assistant = $chatbot_chatgpt_assistant_alias ?? '';
 
     ?>
     <script>

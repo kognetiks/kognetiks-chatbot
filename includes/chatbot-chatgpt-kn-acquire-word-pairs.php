@@ -165,7 +165,7 @@ function computePairedTFIDF($term) {
 
 function computePairedTermFrequency($term) {
     
-    global $totalWordPairCount;
+    global $totalWordPairCount, $topWordPairs;
 
     return $topWordPairs[$term] / count($topWordPairs);
 

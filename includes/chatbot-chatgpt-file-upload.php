@@ -98,7 +98,8 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     $ch = curl_init();
 
     // Set cURL options
-    curl_setopt($ch, CURLOPT_URL, 'https://api.openai.com/v1/files');
+    // curl_setopt($ch, CURLOPT_URL, 'https://api.openai.com/v1/files');
+    curl_setopt($ch, CURLOPT_URL, get_files_api_url());
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(

@@ -15,7 +15,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Step 1: Create an Assistant
 function createAnAssistant($api_key) {
-    $url = "https://api.openai.com/v1/threads";
+    // $url = "https://api.openai.com/v1/threads";
+    $url = get_threads_api_url();
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -42,7 +43,8 @@ function addAMessage($thread_Id, $prompt, $context, $api_key, $file_id = null) {
         $context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.";
     }
 
-    $url = "https://api.openai.com/v1/threads/".$thread_Id."/messages";
+    // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/messages";
+    $url = get_threads_api_url() . '/' . $thread_Id . '/messages';
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -72,7 +74,8 @@ function addAMessage($thread_Id, $prompt, $context, $api_key, $file_id = null) {
 
 // Step 4: Run the Assistant
 function runTheAssistant($thread_Id, $assistantId, $context, $api_key) {
-    $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs";
+    // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs";
+    $url = get_threads_api_url() . '/' . $thread_Id . '/runs';
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -114,7 +117,8 @@ function runTheAssistant($thread_Id, $assistantId, $context, $api_key) {
 function getTheRunsStatus($thread_Id, $runId, $api_key) {
     $status = "";
     while ($status != "completed") {
-        $url = "https://api.openai.com/v1/threads/".$thread_Id."/runs/".$runId;
+        // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs/".$runId;
+        $url = get_threads_api_url() . '/' . $thread_Id . '/runs/' . $runId;
         $headers = array(
             "Content-Type: application/json",
             "OpenAI-Beta: assistants=v1",
@@ -153,7 +157,8 @@ function getTheRunsStatus($thread_Id, $runId, $api_key) {
 
 // Step 6: Get the Run's Steps
 function getTheRunsSteps($thread_Id, $runId, $api_key) {
-    $url = "https://api.openai.com/v1/threads/".$thread_Id."/runs/".$runId."/steps";
+    // $url = "https://api.openai.com/v1/threads/" . $thread_Id ."/runs/" . $runId ."/steps";
+    $url = get_threads_api_url() . '/' . $thread_Id . '/runs/' . $runId . '/steps';
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -174,7 +179,8 @@ function getTheRunsSteps($thread_Id, $runId, $api_key) {
 function getTheStepsStatus($thread_Id, $runId, $api_key) {
     $status = false;
     while (!$status) {
-        $url = "https://api.openai.com/v1/threads/".$thread_Id."/runs/".$runId."/steps";
+        // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs/" . $runId . "/steps";
+        $url = get_threads_api_url() . '/' . $thread_Id . '/runs/' . $runId . '/steps';
         $headers = array(
             "Content-Type: application/json",
             "OpenAI-Beta: assistants=v1",
@@ -219,7 +225,8 @@ function getTheStepsStatus($thread_Id, $runId, $api_key) {
 
 // Step 8: Get the Message
 function getTheMessage($thread_Id, $api_key) {
-    $url = "https://api.openai.com/v1/threads/".$thread_Id."/messages";
+    // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/messages";
+    $url = get_threads_api_url() . '/' . $thread_Id . '/messages';
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -474,7 +481,8 @@ function deleteUploadedFile($asst_file_id) {
     // Get the API key
     $apiKey = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
-    $url = 'https://api.openai.com/v1/files/' . $asst_file_id;
+    // $url = 'https://api.openai.com/v1/files/' . $asst_file_id;
+    $url = get_files_api_url() . '/' . $asst_file_id;
     
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);

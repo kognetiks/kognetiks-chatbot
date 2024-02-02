@@ -353,11 +353,11 @@ function chatbot_chatgpt_send_message(): void {
     // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
     $chatbot_settings = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
-    $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
-    $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
+    $display_style = $chatbot_settings['display_style'] ?? '';
+    $chatbot_chatgpt_assistant_alias = $chatbot_settings['assistant_alias'] ?? '';
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
-    $assistant_id = isset($chatbot_settings['assistantID']) ? $chatbot_settings['assistantID'] : '';
-    $thread_Id = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
+    $assistant_id = $chatbot_settings['assistantID'] ?? '';
+    $thread_Id = $chatbot_settings['threadID'] ?? '';
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default

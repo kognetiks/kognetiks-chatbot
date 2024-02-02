@@ -264,7 +264,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
     }
 
     // Generate the chart
-    $img_path = generate_gd_bar_chart($a['labels'], $atts['data'], isset($atts['color']) ? $atts['color'] : null, $a['name']);
+    $img_path = generate_gd_bar_chart($a['labels'], $atts['data'], $atts['color'] ?? null, $a['name']);
     $img_url = plugin_dir_url(__FILE__) . '../assets/images/' . $a['name'] . '.png';
 
     wp_schedule_single_event(time() + 60, 'chatbot_chatgpt_delete_chart', array($img_path)); // 60 seconds delay

@@ -82,13 +82,3 @@ function chatgpt_disclaimer_setting_callback($args) {
     <?php    
 }
 
-// Option for narrow or wide chatbot - Ver 1.4.2
-function chatbot_chatgpt_width_setting_callback($args) {
-    $chatgpt_width = esc_attr(get_option('chatbot_chatgpt_width_setting', 'Narrow'));
-    ?>
-    <select id="chatbot_chatgpt_width_setting" name = "chatbot_chatgpt_width_setting">
-        <option value="Narrow" <?php selected( $chatgpt_width, 'Narrow' ); ?>><?php echo esc_html( 'Narrow' ); ?></option>
-        <option value="Wide" <?php selected( $chatgpt_width, 'Wide' ); ?>><?php echo esc_html( 'Wide' ); ?></option>
-    </select>
-    <?php
-}
