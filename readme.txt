@@ -191,9 +191,10 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.1 =
-* Added Appearance settings tab to the Chatbot settings.  These will override the CSS with user selected settings.
+* Added Appearance Chatbot settings tabs.  These will override the CSS with user selected settings.
 * Improved mobile experience.  Active adjustments for changes in orientation (portrait and landscape).
-* If mobile, always start chatbot in closed status on page load.
+* If mobile, always start chatbot in closed status upon page load.
+* Added support for alternate API endpoints via a URL setting.
 
 = 1.8.0 =
 * Corrected path/name error for file downloads for conversation and interaction data
