@@ -85,15 +85,15 @@ jQuery(document).ready(function ($) {
         // Determine the viewport width and height
         let viewportWidth = window.innerWidth;
         let viewportHeight = window.innerHeight;
-        console.log('Viewport Width:', viewportWidth, 'Viewport Height:', viewportHeight);
+        // console.log('Viewport Width:', viewportWidth, 'Viewport Height:', viewportHeight);
         // Determine the orientation
         const orientation = screen.orientation || screen.mozOrientation || screen.msOrientation;
         if (orientation.type === 'landscape-primary') {
-        console.log('Orientation: Landscape');
+        // console.log('Orientation: Landscape');
         } else if (orientation.type === 'portrait-primary') {
-        console.log('Orientation: Portrait');
+        // console.log('Orientation: Portrait');
         } else {
-        console.log('Orientation:', orientation.type);
+        // console.log('Orientation:', orientation.type);
         }
 
         updateChatbotStyles();
@@ -418,10 +418,10 @@ jQuery(document).ready(function ($) {
                     appendMessage('Error: ' + response.data, 'error');
                 }
             },
-            error: function () {
+            error: function (response) {
                 removeTypingIndicator();
                 // DIAG - Log the error - Ver 1.6.7
-                // console.error('Chatbot ChatGPT: ERROR: response: ' + response);
+                // console.log('Chatbot ChatGPT: ERROR: ' + JSON.stringify(response));
                 // console.error('Chatbot ChatGPT: ERROR: Unable to send message');
                 appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
             },
@@ -646,7 +646,7 @@ jQuery(document).ready(function ($) {
 
     function updateChatbotStyles() {
 
-        console.log('Chatbot ChatGPT: NOTICE: updateChatbotStyles');
+        // console.log('Chatbot ChatGPT: NOTICE: updateChatbotStyles');
 
         const chatbotElement = document.getElementById('chatbot-chatgpt');
         if (!chatbotElement) return;
@@ -655,7 +655,7 @@ jQuery(document).ready(function ($) {
         viewportWidth = window.innerWidth;
         viewportHeight = window.innerHeight;
 
-        console.log('Chatbot ChatGPT: NOTICE: Viewport Width:', viewportWidth, 'Viewport Height:', viewportHeight);
+        // console.log('Chatbot ChatGPT: NOTICE: Viewport Width:', viewportWidth, 'Viewport Height:', viewportHeight);
     
         // Adjust styles based on orientation
         const orientation = (screen.orientation && screen.orientation.type.includes('portrait')) ? 'portrait' : 'landscape';
@@ -665,12 +665,12 @@ jQuery(document).ready(function ($) {
 
         // Apply styles and classes based on the orientation
         if (orientation === 'portrait') {
-            console.log('Chatbot ChatGPT: NOTICE: Mobile device in portrait mode');
+            // console.log('Chatbot ChatGPT: NOTICE: Mobile device in portrait mode');
             chatbotElement.classList.add('mobile-portrait');
             chatbotElement.style.setProperty('width', `${viewportWidth * 0.8}px`, 'important');
             chatbotElement.style.setProperty('height', `${viewportHeight * 0.7}px`, 'important');
         } else {
-            console.log('Chatbot ChatGPT: NOTICE: Mobile device in landscape mode');
+            // console.log('Chatbot ChatGPT: NOTICE: Mobile device in landscape mode');
             chatbotElement.classList.add('mobile-landscape');
             chatbotElement.style.setProperty('width', `${viewportWidth * 0.7}px`, 'important');
             chatbotElement.style.setProperty('height', `${viewportHeight * 0.8}px`, 'important');

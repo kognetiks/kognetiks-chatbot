@@ -20,7 +20,8 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     global $errorResponses;
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
-    $api_url = 'https://api.openai.com/v1/chat/completions';
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -41,7 +42,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
  
     // Context History - Ver 1.6.1
-     $chatgpt_last_response = concatenateHistory('context_history');
+    $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
     // DIAG Diagnostics - Ver 1.6.1
     // chatbot_chatgpt_back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
     
@@ -85,7 +86,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     );
 
     // Context History - Ver 1.6.1
-    addEntry('context_history', $message);
+    addEntry('chatbot_chatgpt_context_history', $message);
 
     // DIAG Diagnostics - Ver 1.6.1
     // chatbot_chatgpt_back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
@@ -118,10 +119,16 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         }
     }
 
+    // DIAG - Diagnostics - Ver 1.8.1
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$response_body: ' . print_r($response_body))
+    // chatbot_chatgpt_back_trace('NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
+    // chatbot_chatgpt_back_trace('NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
+    // chatbot_chatgpt_back_trace('NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
+
     if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine
         // Context History - Ver 1.6.1
-        addEntry('context_history', $response_body['choices'][0]['message']['content']);
+        addEntry('chatbot_chatgpt_context_history', $response_body['choices'][0]['message']['content']);
         return $response_body['choices'][0]['message']['content'];
     } else {
         // FIXME - Decide what to return here - it's an error

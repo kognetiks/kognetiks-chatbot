@@ -58,6 +58,8 @@ function addAMessage($thread_Id, $prompt, $context, $api_key, $file_id = null) {
 
     // Add the file reference if file_id is provided
     if ($file_id) {
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3 - File ID: ' . $file_id);
         $data['file'] = $file_id;
     }
 
@@ -106,7 +108,7 @@ function runTheAssistant($thread_Id, $assistantId, $context, $api_key) {
     // Check HTTP response code
     if (http_response_code() != 200) {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'ERROR', 'HTTP response code: ' . http_response_code());
+        // chatbot_chatgpt_back_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code()));
         return "Error: HTTP response code " . http_response_code();
     }
 
@@ -145,7 +147,7 @@ function getTheRunsStatus($thread_Id, $runId, $api_key) {
         }
 
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$responseArray: ' . $responseArray);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray));
         
         if ($status != "completed") {
             // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
@@ -287,15 +289,14 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_Id ' . $thread_Id);
     // set_chatbot_chatgpt_threads($thread_Id, $assistantId);
 
-
     // Conversation Context - Ver 1.7.2.1
     $context = "";
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
  
     // // Context History - Ver 1.6.1 - Added here for Ver 1.7.2.1
-    //  $chatgpt_last_response = concatenateHistory('context_history');
+    //  $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
     // // DIAG Diagnostics - Ver 1.6.1
-    // // chatbot_chatgpt_back_trace( 'NOTICE', '$chatgpt_last_response ' . $chatgpt_last_response);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$chatgpt_last_response ' . $chatgpt_last_response);
     
     // // IDEA Strip any href links and text from the $chatgpt_last_response
     // $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
@@ -361,6 +362,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     $assistants_response = getTheRunsSteps($thread_Id, $runId, $api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $assistants_response["data"][0]["usage"]["completion_tokens"]);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Step 7: Get the Step's Status
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 7: Get the Step\'s Status');
@@ -369,14 +373,14 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     // Step 8: Get the Message
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 8: Get the Message');
     $assistants_response = getTheMessage($thread_Id, $api_key);
-    // DIAG - Print the response
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistants_response: ' . $assistants_response);
 
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();
 
     // Remove citations from the response
     $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
+    // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistants_response: ' . $assistants_response["data"][0]["content"][0]["text"]["value"]);
 
     return $assistants_response["data"][0]["content"][0]["text"]["value"];
 
@@ -415,7 +419,7 @@ function fetchDataUsingCurl($url, $context) {
 function chatbot_chatgpt_retrieve_file_contents() {
 
     $user_id = get_current_user_id(); // Get current user ID
-    $page_id = get_the_ID(); // Get current page ID
+    $page_id = get_the_id(); // Get current page ID
     if (empty($page_id)) {
         $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
     }
@@ -450,7 +454,7 @@ function chatbot_chatgpt_retrieve_file_contents() {
 function chatbot_chatgpt_retrieve_file_id(): string {
     
         $user_id = get_current_user_id(); // Get current user ID
-        $page_id = get_the_ID(); // Get current page ID
+        $page_id = get_the_id(); // Get current page ID
         if (empty($page_id)) {
             $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
         }

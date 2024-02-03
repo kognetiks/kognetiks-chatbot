@@ -139,7 +139,7 @@ function chatbot_chatgpt_appearance_reset_callback(): void {
 function chatbot_chatgpt_appearance_restore_default_settings(): void {
 
     // DIAG - Enter function
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_restore_default_settings()');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_restore_default_settings()');
 
     $chatbot_chatgpt_appearance_reset = 'No';
     update_option('chatbot_chatgpt_appearance_reset', $chatbot_chatgpt_appearance_reset);
@@ -161,7 +161,7 @@ function chatbot_chatgpt_appearance_restore_default_settings(): void {
     chatbot_chatgpt_appearance_custom_css_settings();
 
     // DIAG - Exit function
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Exit function: chatbot_chatgpt_appearance_restore_default_settings()');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Exit function: chatbot_chatgpt_appearance_restore_default_settings()');
 
 }
 

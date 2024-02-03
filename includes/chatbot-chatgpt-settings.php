@@ -51,7 +51,7 @@ function chatbot_chatgpt_settings_page_html(): void {
     // Check if the user wants to reset the appearance settings to default - Ver 1.8.1
     $chatbot_chatgpt_appearance_reset = esc_attr(get_option('chatbot_chatgpt_appearance_reset', 'No'));
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Appearance Restore Defaults: ' . $chatbot_chatgpt_appearance_reset);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Appearance Restore Defaults: ' . $chatbot_chatgpt_appearance_reset);
     if ( $chatbot_chatgpt_appearance_reset == 'Yes' ) {
         chatbot_chatgpt_appearance_restore_default_settings();
     }

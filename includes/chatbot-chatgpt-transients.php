@@ -29,7 +29,7 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value): vo
     // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type ' . $transient_type);
 
     $user_id = get_current_user_id(); // Get current user ID
-    $page_id = get_the_ID(); // Get current page ID
+    $page_id = get_the_id(); // Get current page ID
     if (empty($page_id)) {
         $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
     }
@@ -72,7 +72,7 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id) {
 
     // Pass the $user_id and $page_id values from the shortcode
     // $user_id = get_current_user_id(); // Get current user ID
-    // $page_id = get_the_ID(); // Get current page ID
+    // $page_id = get_the_id(); // Get current page ID
 
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type ' . $transient_type);

@@ -172,7 +172,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
 
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
-    $page_id = get_the_ID();
+    $page_id = get_the_id();
     $script_data_array = array(
         'user_id' => $user_id,
         'page_id' => $page_id
