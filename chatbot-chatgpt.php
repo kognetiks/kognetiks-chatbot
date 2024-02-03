@@ -356,7 +356,7 @@ function chatbot_chatgpt_send_message(): void {
     $display_style = $chatbot_settings['display_style'] ?? '';
     $chatbot_chatgpt_assistant_alias = $chatbot_settings['assistant_alias'] ?? '';
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
-    $assistant_id = $chatbot_settings['assistant_id'] ?? '';
+    $assistant_id = $chatbot_settings['assistant_alias'] ?? '';
     $thread_id = $chatbot_settings['thread_id'] ?? '';
 
     // Assistants

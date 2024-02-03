@@ -16,6 +16,14 @@ if ( ! defined( 'WPINC' ) ) {
 // Upload Files to the Assistant
 function chatbot_chatgpt_upload_file_to_assistant(): array {
 
+    if (empty($user_id)) {
+        $user_id = get_current_user_id(); // Get current user ID
+        $page_id = get_the_id(); // Get current page ID
+        if (empty($page_id)) {
+            $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
+        }
+    }
+
     // DIAG - Diagnostic - Ver 1.7.6
     // chatbot_chatgpt_back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
 
@@ -74,9 +82,9 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
     }
 
     // Before returning, put the name of the file in a transient
-    // set_chatbot_chatgpt_transients( 'file_id', $_FILES['file']['name']);
+    // set_chatbot_chatgpt_transients( 'chatbot_chatgpt_file_id', $_FILES['file']['name']);
     // DIAG - Diagnostic - Ver 1.7.9
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'file_id ' . $_FILES['file']['name'] );
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_file_id ' . $_FILES['file']['name'] );
 
     // Success - return a success message
     // $response = array(
@@ -149,8 +157,14 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
         // chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully" );
         // DIAG - Diagnostic - Ver 1.7.6
         // chatbot_chatgpt_back_trace( 'SUCCESS', 'asst_file_id ' . $responseData['id'] );
+    
+        // Before returning, put the name of the file in a transient
+        // set_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $_FILES['file']['name']);
+        // DIAG - Diagnostic - Ver 1.7.9
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_assistant_file_id ' . $_FILES['file']['name'] );
+
         // Set the transient for the file id
-        set_chatbot_chatgpt_transients('chatbot_chatgpt_assistant_file_id', $responseData['id']);
+        set_chatbot_chatgpt_transients('chatbot_chatgpt_assistant_file_id', $responseData['id'], $user_id, $page_id);
 
         // Delete the file locally now that it has been uploaded to the Assistant
         unlink($file_path);
