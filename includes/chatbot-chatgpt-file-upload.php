@@ -150,7 +150,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
         // DIAG - Diagnostic - Ver 1.7.6
         // chatbot_chatgpt_back_trace( 'SUCCESS', 'asst_file_id ' . $responseData['id'] );
         // Set the transient for the file id
-        set_chatbot_chatgpt_transients('asst_file_id', $responseData['id']);
+        set_chatbot_chatgpt_transients('chatbot_chatgpt_assistant_file_id', $responseData['id']);
 
         // Delete the file locally now that it has been uploaded to the Assistant
         unlink($file_path);

@@ -36,38 +36,40 @@ function createAnAssistant($api_key) {
 }
 
 // Step 3: Add a Message to a Thread
-function addAMessage($thread_Id, $prompt, $context, $api_key, $file_id = null) {
+function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // If $context is empty, set it to the default
     if (empty($context)) {
         $context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.";
     }
 
-    // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/messages";
-    $url = get_threads_api_url() . '/' . $thread_Id . '/messages';
+    // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/messages";
+    $url = get_threads_api_url() . '/' . $thread_id . '/messages';
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
         "Authorization: Bearer " . $api_key
     );
 
+    // DIAG - Diagnostics
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3 - $prompt: ' . $prompt);
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3 - $file_id: ' . $file_id);
+    error_log('Step 3 - $prompt: ' . $prompt);
+    error_log('Step 3 - $file_id: ' . $file_id);
+    
     $data = array(
         "role" => "user",
-        "content" => $prompt
+        "content" => $prompt,
+        "file" => $file_id
     );
 
-    // Add the file reference if file_id is provided
-    if ($file_id) {
-        // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3 - File ID: ' . $file_id);
-        $data['file'] = $file_id;
-    }
+    $json_data = json_encode($data);
 
     $context = stream_context_create(array(
         'http' => array(
             'method' => 'POST',
             'header' => $headers,
-            'content' => json_encode($data)
+            'content' => $json_data
     )));
     $response = fetchDataUsingCurl($url, $context);
 
@@ -75,16 +77,16 @@ function addAMessage($thread_Id, $prompt, $context, $api_key, $file_id = null) {
 }
 
 // Step 4: Run the Assistant
-function runTheAssistant($thread_Id, $assistantId, $context, $api_key) {
-    // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs";
-    $url = get_threads_api_url() . '/' . $thread_Id . '/runs';
+function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
+    // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs";
+    $url = get_threads_api_url() . '/' . $thread_id . '/runs';
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
         "Authorization: Bearer " . $api_key
     );
     $data = array(
-        "assistant_id" => $assistantId
+        "assistant_id" => $assistant_id
     );
 
     $context = stream_context_create(array(
@@ -116,11 +118,11 @@ function runTheAssistant($thread_Id, $assistantId, $context, $api_key) {
 }
 
 // Step 5: Get the Run's Status
-function getTheRunsStatus($thread_Id, $runId, $api_key): void {
+function getTheRunsStatus($thread_id, $runId, $api_key): void {
     $status = "";
     while ($status != "completed") {
-        // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs/".$runId;
-        $url = get_threads_api_url() . '/' . $thread_Id . '/runs/' . $runId;
+        // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/".$runId;
+        $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId;
         $headers = array(
             "Content-Type: application/json",
             "OpenAI-Beta: assistants=v1",
@@ -158,9 +160,9 @@ function getTheRunsStatus($thread_Id, $runId, $api_key): void {
 }
 
 // Step 6: Get the Run's Steps
-function getTheRunsSteps($thread_Id, $runId, $api_key) {
-    // $url = "https://api.openai.com/v1/threads/" . $thread_Id ."/runs/" . $runId ."/steps";
-    $url = get_threads_api_url() . '/' . $thread_Id . '/runs/' . $runId . '/steps';
+function getTheRunsSteps($thread_id, $runId, $api_key) {
+    // $url = "https://api.openai.com/v1/threads/" . $thread_id ."/runs/" . $runId ."/steps";
+    $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -178,11 +180,11 @@ function getTheRunsSteps($thread_Id, $runId, $api_key) {
 }
 
 // Step 7: Get the Step's Status
-function getTheStepsStatus($thread_Id, $runId, $api_key): void {
+function getTheStepsStatus($thread_id, $runId, $api_key): void {
     $status = false;
     while (!$status) {
-        // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs/" . $runId . "/steps";
-        $url = get_threads_api_url() . '/' . $thread_Id . '/runs/' . $runId . '/steps';
+        // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/" . $runId . "/steps";
+        $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
         $headers = array(
             "Content-Type: application/json",
             "OpenAI-Beta: assistants=v1",
@@ -226,9 +228,9 @@ function getTheStepsStatus($thread_Id, $runId, $api_key): void {
 }
 
 // Step 8: Get the Message
-function getTheMessage($thread_Id, $api_key) {
-    // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/messages";
-    $url = get_threads_api_url() . '/' . $thread_Id . '/messages';
+function getTheMessage($thread_id, $api_key) {
+    // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/messages";
+    $url = get_threads_api_url() . '/' . $thread_id . '/messages';
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: assistants=v1",
@@ -246,10 +248,10 @@ function getTheMessage($thread_Id, $api_key) {
 }
 
 // CustomerGPT - Assistants - Ver 1.7.2
-function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $thread_Id, $user_id, $page_id) {
+function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id) {
 
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Assistant ID: ' . $assistantId);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Assistant ID: ' . $assistant_id);
 
     // Globals added for Ver 1.7.2
     global $chatbot_chatgpt_diagnostics;
@@ -258,7 +260,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     global $stopWords;
 
     // If the threadId is not set, create a new thread
-    if (empty($thread_Id)) {
+    if (empty($thread_id)) {
         // Step 1: Create an Assistant
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 1: Create an Assistant');
         $assistants_response = createAnAssistant($api_key);
@@ -267,13 +269,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
         // Step 2: Get The Thread ID
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
-        $thread_Id = $assistants_response["id"];
+        $thread_id = $assistants_response["id"];
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_Id ' . $thread_Id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$assistantId ' . $assistantId);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id ' . $thread_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id ' . $assistant_id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
-        set_chatbot_chatgpt_threads($thread_Id, $assistantId, $user_id, $page_id);
+        set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
     }
 
     // Step 1: Create an Assistant
@@ -284,10 +286,10 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
     // Step 2: Get The Thread ID
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
-    // $thread_Id = $assistants_response["id"];
+    // $thread_id = $assistants_response["id"];
     // DIAG - Print the threadId
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_Id ' . $thread_Id);
-    // set_chatbot_chatgpt_threads($thread_Id, $assistantId);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id ' . $thread_id);
+    // set_chatbot_chatgpt_threads($thread_id, $assistant_id);
 
     // Conversation Context - Ver 1.7.2.1
     $context = "";
@@ -318,25 +320,25 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
     $prompt = $message;
     
     // Fetch the file id - Ver 1.7.9
-    $asst_file_id = chatbot_chatgpt_retrieve_file_id();
-    if (empty($asst_file_id)) {
+    $file_id = chatbot_chatgpt_retrieve_file_id();
+    if (empty($file_id)) {
         // chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retrieve');
-        $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key);
+        $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key);
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$asst_file_id ' . $asst_file_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id ' . $file_id);
         // DIAG - Diagnostics - Ver 1.7.9
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3: Open and read the file in the Assistant');
         // DIAG - Diagnostics - Ver 1.7.9
         // chatbot_chatgpt_back_trace( 'NOTICE', '$prompt ' . $prompt);
-        $assistants_response = addAMessage($thread_Id, $prompt, $context, $api_key, $asst_file_id);
+        $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, $file_id);
         // DIAG - Print the response
         // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
     }
 
     // Step 4: Run the Assistant
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 4: Run the Assistant');
-    $assistants_response = runTheAssistant($thread_Id, $assistantId, $context, $api_key);
+    $assistants_response = runTheAssistant($thread_id, $assistant_id, $context, $api_key);
 
     // Check if the response is not an array or is a string indicating an error
     if (!is_array($assistants_response) || is_string($assistants_response)) {
@@ -355,11 +357,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
     // Step 5: Get the Run's Status
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 5: Get the Run\'s Status');
-    getTheRunsStatus($thread_Id, $runId, $api_key);
+    getTheRunsStatus($thread_id, $runId, $api_key);
 
     // Step 6: Get the Run's Steps
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 6: Get the Run\'s Steps');
-    $assistants_response = getTheRunsSteps($thread_Id, $runId, $api_key);
+    $assistants_response = getTheRunsSteps($thread_id, $runId, $api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
@@ -368,11 +370,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 
     // Step 7: Get the Step's Status
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 7: Get the Step\'s Status');
-    getTheStepsStatus($thread_Id, $runId, $api_key);
+    getTheStepsStatus($thread_id, $runId, $api_key);
 
     // Step 8: Get the Message
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 8: Get the Message');
-    $assistants_response = getTheMessage($thread_Id, $api_key);
+    $assistants_response = getTheMessage($thread_id, $api_key);
 
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();
@@ -387,7 +389,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 }
 
 // Fetch data with cURL - Ver 1.7.6
-function fetchDataUsingCurl($url, $context): bool|string {
+function fetchDataUsingCurl($url, $context) {
     // Initialize a cURL session
     $curl = curl_init($url);
 
@@ -417,7 +419,7 @@ function fetchDataUsingCurl($url, $context): bool|string {
 }
 
 // Add file contents to the prompt - Ver 1.7.9
-function chatbot_chatgpt_retrieve_file_contents(): false|string {
+function chatbot_chatgpt_retrieve_file_contents() {
 
     $user_id = get_current_user_id(); // Get current user ID
     $page_id = get_the_id(); // Get current page ID
@@ -428,11 +430,11 @@ function chatbot_chatgpt_retrieve_file_contents(): false|string {
     $file_contents = '';
 
     // Retrieve the file
-    $file_id = get_chatbot_chatgpt_transients( 'file_id', $user_id, $page_id);
+    $file_id = get_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
     $file = $file_id['file_id'];
 
     // Delete the file
-    delete_chatbot_chatgpt_transients( 'file_id', $user_id, $page_id);
+    delete_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
 
     // Read the file contents
     $upload_dir = WP_CONTENT_DIR . '/plugins/chatbot-chatgpt/uploads/';
@@ -461,33 +463,35 @@ function chatbot_chatgpt_retrieve_file_id(): string {
         }
     
         // Retrieve the file
-        $file_id = get_chatbot_chatgpt_transients( 'asst_file_id', $user_id, $page_id);
+        $file_id = get_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
 
         // If the file id is empty, return an empty string
         if (empty($file_id)) {
             return '';
         }
 
-        $asst_file_id = $file_id['asst_file_id'];
+        $file_id = $file_id['chatbot_chatgpt_assistant_file_id'];
     
         // Delete the transient
-        delete_chatbot_chatgpt_transients( 'asst_file_id', $user_id, $page_id);
+        delete_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
 
         // Delete the file
-        deleteUploadedFile($asst_file_id);
+        deleteUploadedFile($file_id);
 
-        return $asst_file_id;
+        return $file_id;
 
 }
 
 // Cleanup in Aisle 4 on OpenAI - Ver 1.7.9
-function deleteUploadedFile($asst_file_id): void {
+function deleteUploadedFile($file_id) {
+
+    return;
 
     // Get the API key
     $apiKey = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
-    // $url = 'https://api.openai.com/v1/files/' . $asst_file_id;
-    $url = get_files_api_url() . '/' . $asst_file_id;
+    // $url = 'https://api.openai.com/v1/files/' . $file_id;
+    $url = get_files_api_url() . '/' . $file_id;
     
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);

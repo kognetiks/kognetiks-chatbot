@@ -122,7 +122,7 @@ function create_conversation_logging_table(): void {
 // register_activation_hook(__FILE__, 'create_conversation_logging_table');
 
 // Append message to conversation log in the database - Ver 1.7.6
-function append_message_to_conversation_log($sessionId, $user_id, $page_id, $user_type, $thread_Id, $assistant_id, $message) {
+function append_message_to_conversation_log($session_id, $user_id, $page_id, $user_type, $thread_id, $assistant_id, $message) {
 
     global $wpdb;
 
@@ -138,11 +138,11 @@ function append_message_to_conversation_log($sessionId, $user_id, $page_id, $use
     $insert_result = $wpdb->insert(
         $table_name,
         array(
-            'session_id' => $sessionId,
+            'session_id' => $session_id,
             'user_id' => $user_id,
             'page_id' => $page_id,
             'user_type' => $user_type,
-            'thread_id' => $thread_Id,
+            'thread_id' => $thread_id,
             'assistant_id' => $assistant_id,
             'message_text' => $message
         ),

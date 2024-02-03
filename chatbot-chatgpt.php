@@ -38,13 +38,13 @@ define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
 global $wpdb; // Declare the global $wpdb object
 
 // Uniquely Identify the Visitor - Ver 1.7.4
-global $sessionId; // Declare the global $sessionID variable
+global $session_id; // Declare the global $session_id variable
 
-if ($sessionId == '') {
+if ($session_id == '') {
     session_start();
-    $sessionId = session_id();
+    $session_id = session_id();
     session_write_close();
-    // error_log('Session ID: ' . $sessionId);
+    // error_log('Session ID: ' . $session_id);
 }
 
 // Include necessary files
@@ -315,8 +315,8 @@ add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_co
 function chatbot_chatgpt_send_message(): void {
 
     // Global variables
-    global $sessionId;
-    global $thread_Id;
+    global $session_id;
+    global $thread_id;
 
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
@@ -339,11 +339,11 @@ function chatbot_chatgpt_send_message(): void {
         wp_send_json_error('Invalid API key or message');
     }
 
-    $thread_Id = '';
+    $thread_id = '';
     $assistant_id = '';
     $user_id = '';
     $page_id = '';
-    // error_log ('$sessionId ' . $sessionId);
+    // error_log ('$session_id ' . $session_id);
     
     // Check the transient for the Assistant ID - Ver 1.7.2
     $user_id = intval($_POST['user_id']);
@@ -356,8 +356,8 @@ function chatbot_chatgpt_send_message(): void {
     $display_style = $chatbot_settings['display_style'] ?? '';
     $chatbot_chatgpt_assistant_alias = $chatbot_settings['assistant_alias'] ?? '';
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
-    $assistant_id = $chatbot_settings['assistantID'] ?? '';
-    $thread_Id = $chatbot_settings['threadID'] ?? '';
+    $assistant_id = $chatbot_settings['assistant_id'] ?? '';
+    $thread_id = $chatbot_settings['thread_id'] ?? '';
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
@@ -421,12 +421,12 @@ function chatbot_chatgpt_send_message(): void {
         // Send message to Custom GPT API - Ver 1.6.7
 
         // error_log ('$message ' . $message);
-        append_message_to_conversation_log($sessionId, $user_id, $page_id, 'Visitor', $thread_Id, $assistant_id, $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_Id, $user_id, $page_id);
+        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);
 
         // error_log ('$response ' . $response);
-        append_message_to_conversation_log($sessionId, $user_id, $page_id, 'Chatbot', $thread_Id, $assistant_id, $response);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
