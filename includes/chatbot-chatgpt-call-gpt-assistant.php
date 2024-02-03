@@ -116,7 +116,7 @@ function runTheAssistant($thread_Id, $assistantId, $context, $api_key) {
 }
 
 // Step 5: Get the Run's Status
-function getTheRunsStatus($thread_Id, $runId, $api_key) {
+function getTheRunsStatus($thread_Id, $runId, $api_key): void {
     $status = "";
     while ($status != "completed") {
         // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs/".$runId;
@@ -178,7 +178,7 @@ function getTheRunsSteps($thread_Id, $runId, $api_key) {
 }
 
 // Step 7: Get the Step's Status
-function getTheStepsStatus($thread_Id, $runId, $api_key) {
+function getTheStepsStatus($thread_Id, $runId, $api_key): void {
     $status = false;
     while (!$status) {
         // $url = "https://api.openai.com/v1/threads/" . $thread_Id . "/runs/" . $runId . "/steps";
@@ -387,7 +387,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistantId, $
 }
 
 // Fetch data with cURL - Ver 1.7.6
-function fetchDataUsingCurl($url, $context) {
+function fetchDataUsingCurl($url, $context): bool|string {
     // Initialize a cURL session
     $curl = curl_init($url);
 
@@ -413,10 +413,11 @@ function fetchDataUsingCurl($url, $context) {
     curl_close($curl);
 
     return $response;
+
 }
 
 // Add file contents to the prompt - Ver 1.7.9
-function chatbot_chatgpt_retrieve_file_contents() {
+function chatbot_chatgpt_retrieve_file_contents(): false|string {
 
     $user_id = get_current_user_id(); // Get current user ID
     $page_id = get_the_id(); // Get current page ID
@@ -480,7 +481,7 @@ function chatbot_chatgpt_retrieve_file_id(): string {
 }
 
 // Cleanup in Aisle 4 on OpenAI - Ver 1.7.9
-function deleteUploadedFile($asst_file_id) {
+function deleteUploadedFile($asst_file_id): void {
 
     // Get the API key
     $apiKey = esc_attr(get_option('chatbot_chatgpt_api_key'));

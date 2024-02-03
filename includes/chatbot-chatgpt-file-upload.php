@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Upload Files to the Assistant
-function chatbot_chatgpt_upload_file_to_assistant() {
+function chatbot_chatgpt_upload_file_to_assistant(): array {
 
     // DIAG - Diagnostic - Ver 1.7.6
     // chatbot_chatgpt_back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
@@ -34,11 +34,10 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     if ($_FILES['file']['error'] > 0) {
         // DIAG - Diagnostic - Ver 1.7.9
         // chatbot_chatgpt_back_trace('ERROR', "Error during file upload: " . $_FILES['file']['error']);
-        $response = array(
+        return array(
             'status' => 'error',
             'message' => 'Oops! Something went wrong during the upload. Please try again later.'
         );
-        return $response;
     } else {
         if (move_uploaded_file($_FILES['file']['tmp_name'], $file_path)) {
             // File is successfully uploaded
@@ -48,11 +47,10 @@ function chatbot_chatgpt_upload_file_to_assistant() {
             // Handle error
             // DIAG - Diagnostic - Ver 1.7.9
             // chatbot_chatgpt_back_trace( 'ERROR', "Error uploading file" );
-            $response = array(
+            return array(
                 'status' => 'error',
                 'message' => 'Oops! Something went wrong during the upload. Please try again later.'
             );
-            return $response;    
         }
     }
 
@@ -60,21 +58,19 @@ function chatbot_chatgpt_upload_file_to_assistant() {
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
         // If the API key is empty, then return an error
-        $response = array(
-            'status' => 'error',
+        return array(
+                'status' => 'error',
             'message' => 'Oops! You API key is missing. Please enter your API key in the Chatbot ChatGPT settings.'
         );
-        return $response;
     }
 
     // Check if the file is empty or there is an error
     if (empty($file_path) || $_FILES['file']['error']) {
         // If the file is empty or there is an error, then return an error
-        $response = array(
+        return array(
             'status' => 'error',
             'message' => 'Oops! Please select a file to upload.'
         );
-        return $response;
     }
 
     // Before returning, put the name of the file in a transient
