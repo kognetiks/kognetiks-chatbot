@@ -39,80 +39,68 @@ function createAnAssistant($api_key) {
 
 // Step 3: Add a Message to a Thread
 function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
-
-    // If $context is empty, set it to the default
-    if (empty($context)) {
-        $context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.";
-    }
-
-    // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/messages";
+    // Set the URL
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
-    // $headers = array(
-    //     "Content-Type: application/json",
-    //     "OpenAI-Beta: assistants=v1",
-    //     "Authorization: Bearer " . $api_key
-    // );
 
-    // // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Inside addAMessage - $prompt: ' . $prompt);
-    
-    // $data = array(
-    //     "role" => "user",
-    //     "content" => $prompt
-    // );
-
-    // // Add the file reference if file_id is provided
-
-
-    // if ($file_id) {
-    //     // DIAG - Diagnostics
-    //     chatbot_chatgpt_back_trace( 'NOTICE', 'Inside addAMessage - $file_id: ' . $file_id);
-    //     $data['file'] = $file_id;
-    // }
-
+    // Set up the headers
+    // $headers = [
+    //     'Content-Type: application/json',
+    //     'OpenAI-Beta: assistants=v1',
+    //     'Authorization: Bearer ' . $api_key
+    // ];
     $headers = [
         'Content-Type: application/json',
-        'OpenAI-Beta: assistants=v1',
         'Authorization: Bearer ' . $api_key
     ];
 
-    if (empty($file_id)) {
-        $data = [
-            'model' => esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo')),
-            'prompt' => $prompt,
-            'temperature' => 0.7,
-            'max_tokens' => esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')),
-            'top_p' => 1,
-            'frequency_penalty' => 0,
-            'presence_penalty' => 0,
-            'stop' => ['\n']
-        ];
-    } else {
-        $data = [
-            'model' => esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo')),
-            'prompt' => $prompt,
-            'temperature' => 0.7,
-            'max_tokens' => esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')),
-            'top_p' => 1,
-            'frequency_penalty' => 0,
-            'presence_penalty' => 0,
-            'stop' => ['\n'],
-            'file' => $file_id
-        ];
+
+    // Set up the data payload
+    $data = [
+        'model' => esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo')),
+        'prompt' => $prompt,
+        'temperature' => 0.7,
+        'max_tokens' => esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')),
+        'top_p' => 1,
+        'frequency_penalty' => 0,
+        'presence_penalty' => 0,
+        'stop' => ['\n'],
+    ];
+
+    // Add the file reference if file_id is provided
+    if (!empty($file_id)) {
+        $data['file'] = $file_id;
     }
 
-    $json_data = json_encode($data);
+    // Initialize cURL session
+    $ch = curl_init();
 
-    $context = stream_context_create(array(
-        'http' => array(
-            'method' => 'POST',
-            'header' => $headers,
-            'content' => $json_data
-    )));
-    $response = fetchDataUsingCurl($url, $context);
+    // Set cURL options
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-    return json_decode($response, true);
+    // Execute cURL session
+    $response = curl_exec($ch);
+
+    // Check for cURL errors
+    if (curl_errno($ch)) {
+        // DIAG - Diagnostics
+        chatbot_chatgpt_back_trace( 'ERROR', 'Curl error: ' . curl_error($ch));
+        curl_close($ch);
+        return null;
+    }
+
+    // Close cURL session
+    curl_close($ch);
+
+    // DIAG - Diagnostics
+    chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r(json_decode($response, true)));
     
+    // Return the API response
+    return json_decode($response, true);
+
 }
 
 // Step 4: Run the Assistant
@@ -365,15 +353,12 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
 
     if (empty($file_id)) {
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retrieve');
+        chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retrieve');
         $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key);
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id ' . $file_id);
-        // DIAG - Diagnostics - Ver 1.7.9
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3: Open and read the file in the Assistant');
-        // DIAG - Diagnostics - Ver 1.7.9
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$prompt ' . $prompt);
+        chatbot_chatgpt_back_trace( 'NOTICE', 'File to retrieve');
+        chatbot_chatgpt_back_trace( 'NOTICE', '$file_id ' . $file_id);
         $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, $file_id);
         // DIAG - Print the response
         // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
