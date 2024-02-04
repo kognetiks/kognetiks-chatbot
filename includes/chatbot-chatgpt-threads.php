@@ -51,8 +51,8 @@ function set_chatbot_chatgpt_threads($t_thread_id, $t_assistant_id, $user_id, $p
 
     // Store the style and the assistant value with unique keys
     // Store transients for 1 day
-    set_transient($thread_id_thread_key, $t_thread_id, 60*60*24); // Store for 1 hour
-    set_transient($assistant_id_thread_key, $t_assistant_id, 60*60*24); // Store for 1 hour
+    set_transient($thread_id_thread_key, $t_thread_id, 60*60*4); // Store for 4 hours
+    set_transient($assistant_id_thread_key, $t_assistant_id, 60*60*4); // Store for 4 hours
 
 }
 

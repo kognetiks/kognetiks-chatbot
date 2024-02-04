@@ -16,6 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Call the ChatGPT API
 function chatbot_chatgpt_call_api($api_key, $message) {
 
+    global $session_id;
     global $learningMessages;
     global $errorResponses;
 
@@ -122,11 +123,31 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // DIAG - Diagnostics - Ver 1.8.1
     // chatbot_chatgpt_back_trace( 'NOTICE', '$response_body: ' . print_r($response_body))
 
+    // Get the user ID and page ID
+    if (empty($user_id)) {
+        $user_id = get_current_user_id(); // Get current user ID
+    
+        if (0 === $user_id) { // If user is not logged in, get_current_user_id() will return 0
+            $user_id = $session_id; // Use session ID instead
+        }
+    }
+    if (empty($page_id)) {
+        $page_id = get_the_id(); // Get current page ID
+        if (empty($page_id)) {
+            $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
+        }
+    }
+
     // DIAG - Diagnostics - Ver 1.8.1
     // FIXME - ADD THE USAGE TO CONVERATION TRACKER
     chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
     chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
     chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
+
+    // Add the usage to the conversation tracker
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
 
     if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine

@@ -195,6 +195,8 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Improved mobile experience.  Active adjustments for changes in orientation (portrait and landscape).
 * If mobile, always start chatbot in closed status upon page load.
 * Added support for alternate API endpoints via a URL setting.
+* Added prompt tokens, completion tokens, and total tokens to the conversation log.
+* Reporting on token counts coming soon.
 
 = 1.8.0 =
 * Corrected path/name error for file downloads for conversation and interaction data

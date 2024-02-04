@@ -94,8 +94,8 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
     // Add the file to upload and the purpose
     // One of answers, classifications, search, conversations, or fine-tune
     $postFields = array(
-        'file' => new CURLFile($file_path),
-        'purpose' => 'assistants'
+        'purpose' => 'assistants',
+        'file' => new CURLFile($file_path)
     );
     curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
 

@@ -39,67 +39,114 @@ function createAnAssistant($api_key) {
 
 // Step 3: Add a Message to a Thread
 function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
-    // Set the URL
-    $url = get_threads_api_url() . '/' . $thread_id . '/messages';
 
-    // Set up the headers
-    // $headers = [
-    //     'Content-Type: application/json',
-    //     'OpenAI-Beta: assistants=v1',
-    //     'Authorization: Bearer ' . $api_key
-    // ];
-    $headers = [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $api_key
-    ];
+    if (empty($file_id)) {
 
+        // Set the URL
+        $url = get_threads_api_url() . '/' . $thread_id . '/messages';
 
-    // Set up the data payload
-    $data = [
-        'model' => esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo')),
-        'prompt' => $prompt,
-        'temperature' => 0.7,
-        'max_tokens' => esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')),
-        'top_p' => 1,
-        'frequency_penalty' => 0,
-        'presence_penalty' => 0,
-        'stop' => ['\n'],
-    ];
+        $headers = [
+            'Content-Type: application/json',
+            'OpenAI-Beta: assistants=v1',
+            'Authorization: Bearer ' . $api_key
+        ];
 
-    // Add the file reference if file_id is provided
-    if (!empty($file_id)) {
-        $data['file'] = $file_id;
-    }
+        // Set up the data payload
+        $data = [
+            'role' => 'user',
+            'content' => $prompt,
+        ];
 
-    // Initialize cURL session
-    $ch = curl_init();
+        // Add the file reference if file_id is provided
+        if (!empty($file_id)) {
+            $data['file'] = [$file_id];
+        }
 
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-    // Execute cURL session
-    $response = curl_exec($ch);
-
-    // Check for cURL errors
-    if (curl_errno($ch)) {
         // DIAG - Diagnostics
-        chatbot_chatgpt_back_trace( 'ERROR', 'Curl error: ' . curl_error($ch));
+        chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data));
+
+        // Initialize cURL session
+        $ch = curl_init();
+
+        // Set cURL options
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+        // Execute cURL session
+        $response = curl_exec($ch);
+
+        // Check for cURL errors
+        if (curl_errno($ch)) {
+            // DIAG - Diagnostics
+            chatbot_chatgpt_back_trace( 'ERROR', 'Curl error: ' . curl_error($ch));
+            curl_close($ch);
+            return null;
+        }
+
+        // Close cURL session
         curl_close($ch);
-        return null;
+
+        // DIAG - Diagnostics
+        chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r(json_decode($response, true)));
+        
+        // Return the API response
+        return json_decode($response, true);
+
+    } else {
+
+        // Set the URL
+        $url = get_threads_api_url() . '/' . $thread_id . '/messages';
+
+        $headers = [
+            'Content-Type: application/json',
+            'OpenAI-Beta: assistants=v1',
+            'Authorization: Bearer ' . $api_key
+        ];
+      
+        // Set up the data payload
+        $data = [
+            'role' => 'user',
+            'content' => $prompt,
+            'file_ids' => ['file' => $file_id]
+        ];
+
+        // DIAG - Diagnostics
+        chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data));
+
+        // Initialize cURL session
+        $ch = curl_init();
+
+        // Set cURL options
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+        // Execute cURL session
+        $response = curl_exec($ch);
+
+        // Check for cURL errors
+        if (curl_errno($ch)) {
+            // DIAG - Diagnostics
+            chatbot_chatgpt_back_trace( 'ERROR', 'Curl error: ' . curl_error($ch));
+            curl_close($ch);
+            return null;
+        }
+
+        // Close cURL session
+        curl_close($ch);
+
+        // DIAG - Diagnostics
+        chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r(json_decode($response, true)));
+        
+        // Return the API response
+        return json_decode($response, true);
+
     }
-
-    // Close cURL session
-    curl_close($ch);
-
-    // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r(json_decode($response, true)));
-    
-    // Return the API response
-    return json_decode($response, true);
 
 }
 
@@ -361,7 +408,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         chatbot_chatgpt_back_trace( 'NOTICE', '$file_id ' . $file_id);
         $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, $file_id);
         // DIAG - Print the response
-        // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+        chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
     }
 
     // Step 4: Run the Assistant
@@ -395,9 +442,14 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // DIAG - Diagnostics - Ver 1.8.1
     // FIXME - ADD THE USAGE TO CONVERATION TRACKER
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $assistants_response["data"][0]["usage"]["completion_tokens"]);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
+
+    // Add the usage to the conversation tracker
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $response_body["usage"]["prompt_tokens"]);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $response_body["usage"]["completion_tokens"]);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $response_body["usage"]["total_tokens"]);
 
     // Step 7: Get the Step's Status
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 7: Get the Step\'s Status');

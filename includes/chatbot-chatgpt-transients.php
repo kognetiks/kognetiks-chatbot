@@ -44,7 +44,7 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
     };
 
     // Store the transient
-    set_transient($transient_key, $transient_value, 60*60); // Store for 1 hour
+    set_transient($transient_key, $transient_value, 60*60*4); // Store for 4 hours
 
     // DIAG - Diagnostics
     chatbot_chatgpt_back_trace( 'NOTICE', 'Transient SET - Begin');

@@ -123,3 +123,4 @@ function get_files_api_url() {
 function get_chat_completions_api_url() {
     return get_openai_api_base_url() . "/chat/completions";
 }
+
