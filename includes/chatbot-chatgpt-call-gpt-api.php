@@ -121,9 +121,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // DIAG - Diagnostics - Ver 1.8.1
     // chatbot_chatgpt_back_trace( 'NOTICE', '$response_body: ' . print_r($response_body))
-    // chatbot_chatgpt_back_trace('NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    // chatbot_chatgpt_back_trace('NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    // chatbot_chatgpt_back_trace('NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
+
+    // DIAG - Diagnostics - Ver 1.8.1
+    // FIXME - ADD THE USAGE TO CONVERATION TRACKER
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
+    chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
 
     if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine

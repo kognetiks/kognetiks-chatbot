@@ -56,11 +56,6 @@ function set_chatbot_chatgpt_threads($t_thread_id, $t_assistant_id, $user_id, $p
 
 }
 
-// Get the transient - example usage
-// $chatbot_settings = get_chatbot_chatgpt_transients();
-// $display_style = $chatbot_settings['display_style'];
-// $assistant_alias = $chatbot_settings['assistant_alias'];
-
 // Get the threads
 function get_chatbot_chatgpt_threads($user_id, $page_id) {
 

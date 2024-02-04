@@ -47,26 +47,58 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/messages";
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
-    $headers = array(
-        "Content-Type: application/json",
-        "OpenAI-Beta: assistants=v1",
-        "Authorization: Bearer " . $api_key
-    );
+    // $headers = array(
+    //     "Content-Type: application/json",
+    //     "OpenAI-Beta: assistants=v1",
+    //     "Authorization: Bearer " . $api_key
+    // );
 
-    // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Inside addAMessage - $prompt: ' . $prompt);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Inside addAMessage - $file_id: ' . $file_id);
+    // // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Inside addAMessage - $prompt: ' . $prompt);
     
-    $data = array(
-        "role" => "user",
-        "content" => $prompt
-    );
+    // $data = array(
+    //     "role" => "user",
+    //     "content" => $prompt
+    // );
 
-    // Add the file reference if file_id is provided
+    // // Add the file reference if file_id is provided
 
 
-    if ($file_id) {
-        $data['file'] = $file_id;
+    // if ($file_id) {
+    //     // DIAG - Diagnostics
+    //     chatbot_chatgpt_back_trace( 'NOTICE', 'Inside addAMessage - $file_id: ' . $file_id);
+    //     $data['file'] = $file_id;
+    // }
+
+    $headers = [
+        'Content-Type: application/json',
+        'OpenAI-Beta: assistants=v1',
+        'Authorization: Bearer ' . $api_key
+    ];
+
+    if (empty($file_id)) {
+        $data = [
+            'model' => esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo')),
+            'prompt' => $prompt,
+            'temperature' => 0.7,
+            'max_tokens' => esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')),
+            'top_p' => 1,
+            'frequency_penalty' => 0,
+            'presence_penalty' => 0,
+            'stop' => ['\n']
+        ];
+    } else {
+        $data = [
+            'model' => esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo')),
+            'prompt' => $prompt,
+            'temperature' => 0.7,
+            'max_tokens' => esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')),
+            'top_p' => 1,
+            'frequency_penalty' => 0,
+            'presence_penalty' => 0,
+            'stop' => ['\n'],
+            'file' => $file_id
+        ];
     }
 
     $json_data = json_encode($data);
@@ -80,6 +112,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     $response = fetchDataUsingCurl($url, $context);
 
     return json_decode($response, true);
+    
 }
 
 // Step 4: Run the Assistant
@@ -329,7 +362,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 1.8.1
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3 - following call to chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
 
     if (empty($file_id)) {
         // chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retrieve');
@@ -374,6 +407,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $assistants_response = getTheRunsSteps($thread_id, $runId, $api_key);
     // DIAG - Print the response
     // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+
+    // DIAG - Diagnostics - Ver 1.8.1
+    // FIXME - ADD THE USAGE TO CONVERATION TRACKER
     chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
     chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $assistants_response["data"][0]["usage"]["completion_tokens"]);
     chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
@@ -391,8 +427,6 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // Remove citations from the response
     $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
-    // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistants_response: ' . $assistants_response["data"][0]["content"][0]["text"]["value"]);
 
     return $assistants_response["data"][0]["content"][0]["text"]["value"];
 
@@ -429,41 +463,28 @@ function fetchDataUsingCurl($url, $context) {
 }
 
 // Retrieve the file id - Ver 1.7.9
-function chatbot_chatgpt_retrieve_file_id($user_id = null, $page_id = null) {
-    
-        // If the user_id is empty, set it to the current user ID
-        if (empty($user_id)) {
-            $user_id = get_current_user_id(); // Get current user ID
-            $page_id = get_the_id(); // Get current page ID
-            if (empty($page_id)) {
-                $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
-            }   
-        }
+function chatbot_chatgpt_retrieve_file_id() {
 
-        // DIAG - Diagnostics - Ver 1.8.1
-        chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id() - $user_id: ' . $user_id);
-        chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id() - $page_id: ' . $page_id);
+    // Retrieve the file
+    $file_id = get_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id' );
 
-        // Retrieve the file
-        $file_id = get_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
+    // DIAG - Diagnostics - Ver 1.8.1
+    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_assistant_file_id: ' . $file_id);
 
-        // DIAG - Diagnostics - Ver 1.8.1
-        chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id() - $file_id: ' . $file_id['chatbot_chatgpt_assistant_file_id']);
+    // If the file id is empty, return an empty string
+    if (empty($file_id)) {
+        return '';
+    }
 
-        // If the file id is empty, return an empty string
-        if (empty($file_id)) {
-            return '';
-        }
+    // Delete the transient
+    // FIXME - DECIDE - SHOULD WE DELETE THE TRANSIENT OR JUST LET IT EXPIRE
+    // delete_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
 
-        $file_id = $file_id['chatbot_chatgpt_assistant_file_id'];
-    
-        // Delete the transient
-        // delete_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
+    // Delete the file
+    // FIXME - DECIDE - SHOULD IF WE DELETE THE UPLOADED FILE NOW OR HANDLE IT LATER
+    // deleteUploadedFile($file_id);
 
-        // Delete the file
-        deleteUploadedFile($file_id);
-
-        return $file_id;
+    return $file_id;
 
 }
 
