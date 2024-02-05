@@ -344,11 +344,11 @@ function chatbot_chatgpt_send_message(): void {
     $thread_Id = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
 
     // DIAG - Diagnostics
-    Chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $user_id: ' . $user_id);
-    Chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $assistant_id: ' . $assistant_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $thread_Id: ' . $thread_Id);
+    // Chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $user_id: ' . $user_id);
+    // Chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $assistant_id: ' . $assistant_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $thread_Id: ' . $thread_Id);
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
@@ -360,30 +360,30 @@ function chatbot_chatgpt_send_message(): void {
     if ($chatbot_chatgpt_assistant_alias == 'original') {
         $use_assistant_id = 'No';
         // DIAG - Diagnostics - Ver 1.8.1
-        chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using Original GPT Assistant ID');
+        // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using Original GPT Assistant ID');
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
-        chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
+        // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
         // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
-            chatbot_chatgpt_back_trace ( 'NOTICE' ,'Falling back to ChatGPT API' );
+            // chatbot_chatgpt_back_trace ( 'NOTICE' ,'Falling back to ChatGPT API' );
         }
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
-        chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
+        // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
         // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
-            chatbot_chatgpt_back_trace ( 'NOTICE' ,'Falling back to ChatGPT API' );
+            // chatbot_chatgpt_back_trace ( 'NOTICE' ,'Falling back to ChatGPT API' );
         }
     } else {
         // Reference GPT Assistant IDs directly - Ver 1.7.3
@@ -394,14 +394,14 @@ function chatbot_chatgpt_send_message(): void {
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
             // DIAG - Diagnostics - Ver 1.8.1
-            chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using GPT Assistant Id ' . $assistant_id);
+            // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using GPT Assistant Id ' . $assistant_id);
         } else {
             // DIAG - Diagnostics
             // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
-            chatbot_chatgpt_back_trace ( 'NOTICE' , 'Falling back to ChatGPT API');
+            // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Falling back to ChatGPT API');
         }
     }
 

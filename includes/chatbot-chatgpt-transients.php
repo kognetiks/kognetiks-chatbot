@@ -47,13 +47,13 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
     set_transient($transient_key, $transient_value, 60*60*4); // Store for 4 hours
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Transient SET - Begin');
-    chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type ' . $transient_type);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id ' . $session_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$transient_value ' . $transient_value);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Transient SET - End');
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Transient SET - Begin');
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type ' . $transient_type);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_value ' . $transient_value);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Transient SET - End');
 
 }
 
@@ -77,13 +77,13 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     }
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Transient GET - Begin');
-    chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type ' . $transient_type);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Transient GET - Begin');
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type ' . $transient_type);
     if ($transient_type == 'file_id' || $transient_type == 'chatbot_chatgpt_assistant_file_id') {
-        chatbot_chatgpt_back_trace( 'NOTICE', '$session_id ' . $session_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id ' . $session_id);
     } else {
-        chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
-        chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
     }
 
     // Construct the transient key based on the transient type
@@ -102,8 +102,8 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     $transient_value = get_transient($transient_key);
 
     // DIAG - Diagnostics
-    chatbot_chatgpt_back_trace( 'NOTICE', '$transient_value ' . $transient_value);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'Transient GET - End');
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_value ' . $transient_value);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Transient GET - End');
 
     // Return the transient value if it's found, or an empty string if not
     return $transient_value !== false ? $transient_value : '';
