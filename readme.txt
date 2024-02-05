@@ -191,7 +191,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.2 =
-* TBD
+* Removed verbose diagnostics
 
 = 1.8.1 =
 * Added Appearance Chatbot settings tabs.  These will override the CSS with user selected settings.
