@@ -40,8 +40,7 @@
     z-index: 100;
     white-space: normal;
     display: inline-block;
-    /*font: inherit !important;*/
-    font-family: inherit !important; /* Inherits font-family from parent */
+    font: inherit !important;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
     box-sizing: border-box;
     min-width: 200px; /* Minimum width */
@@ -216,8 +215,7 @@
 
 .user-message {
     text-align: right;
-    /*font: inherit;*/
-    font-family: inherit; /* Inherits font-family from parent */
+    font: inherit;
 }
 
 .user-text {
@@ -228,8 +226,7 @@
     border-radius: 12px;
     border-bottom-right-radius: 0;
     overflow-wrap: anywhere;
-    /*font: inherit;*/
-    font-family: inherit; /* Inherits font-family from parent */
+    font: inherit;
 }
 
 .bot-message {
@@ -245,8 +242,7 @@
     border-radius: 12px;
     border-bottom-left-radius: 0;
     overflow-wrap: anywhere;
-    /*font: inherit;*/
-    font-family: inherit; /* Inherits font-family from parent */
+    font: inherit;
 }
 
 .error-message {
@@ -256,8 +252,7 @@
 .error-text {
     color: red;
     font-weight: bold;
-    /*font: inherit;*/
-    font-family: inherit; /* Inherits font-family from parent */
+    font: inherit;
 }
 
 .message-space {
@@ -301,7 +296,6 @@
     cursor: pointer;
     padding: 5px;
     float: right;
-    font-family: inherit; /* Inherits font-family from parent */
 }
 
 /* #chatgpt-open-btn {
@@ -344,8 +338,7 @@
     border-radius: 10%;
     width: 80px;
     z-index: 100;
-    /*font-family: dashicons;*/
-    font-family: inherit !important; /* Inherits font-family from parent */
+    font-family: dashicons;
     display: flex; 
     justify-content: center; 
     align-items: center;
@@ -361,8 +354,7 @@
 
 #chatgptTitle.title {
     color: #ffffff;
-    /*font-size: inherit;*/
-    font-family: inherit; /* Inherits font-family from parent */
+    font-size: inherit;
     flex-grow: 1;
 }
 

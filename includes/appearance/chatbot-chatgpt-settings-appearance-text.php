@@ -41,7 +41,7 @@ function chatbot_chatgpt_appearance_text_color_callback(): void {
 function chatbot_chatgpt_appearance_text_color_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
     ?>
-    <style>
+    <style id='chatbot-chatgpt-appearance-tex-color-custom-css-settings' type='text/css'>
         /* .chatbot-bubble {
             color: <?php echo $chatbot_chatgpt_appearance_text_color; ?> !important;
         } */
@@ -96,7 +96,7 @@ function chatbot_chatgpt_appearance_user_text_background_color_callback(): void 
 function chatbot_chatgpt_appearance_user_text_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_user_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_user_text_background_color', '#007bff'));
     ?>
-    <style>
+    <style id='chatbot-chatgpt-appearance-user-text-custom-css-settings' type='text/css'>
         .user-text {
             background-color: <?php echo $chatbot_chatgpt_appearance_user_text_background_color; ?> !important;
         }
@@ -129,7 +129,7 @@ function chatbot_chatgpt_appearance_bot_text_background_color_callback(): void {
 function chatbot_chatgpt_appearance_bot_text_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_bot_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_bot_text_background_color', '#5BC236'));
     ?>
-    <style>
+    <style id='chatbot-chatgpt-appearance-bot-text-custom-css-settings' type='text/css'>
         .bot-text {
             background-color: <?php echo $chatbot_chatgpt_appearance_bot_text_background_color; ?> !important;
         }

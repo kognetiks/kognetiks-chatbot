@@ -44,7 +44,7 @@ function chatbot_chatgpt_appearance_width_wide_callback(): void {
 function chatbot_chatgpt_appearance_width_wide_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_width_wide = esc_attr(get_option('chatbot_chatgpt_appearance_width_wide', '500px'));
     ?>
-    <style>
+    <style id='chatbot-chatgpt-appearance-width-wide-custom-css-settings' type='text/css'>
         .chatbot-wide {
             width: <?php echo $chatbot_chatgpt_appearance_width_wide; ?> !important;
         }
@@ -83,7 +83,7 @@ function chatbot_chatgpt_appearance_width_narrow_callback(): void {
 function chatbot_chatgpt_appearance_width_narrow_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_width_narrow = esc_attr(get_option('chatbot_chatgpt_appearance_width_narrow', '300px'));
     ?>
-    <style>
+    <style id='chatbot-chatgpt-appearance-width-narrow-custom-css-settings' type='text/css'>
         .chatbot-narrow {
             width: <?php echo $chatbot_chatgpt_appearance_width_narrow; ?> !important;
         }

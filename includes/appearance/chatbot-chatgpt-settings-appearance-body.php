@@ -41,7 +41,7 @@ function chatbot_chatgpt_appearance_background_color_callback(): void {
 function chatbot_chatgpt_appearance_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_background_color', '#f1f1f1'));
     ?>
-    <style>
+    <style id='chatbot-chatgpt-appearance-background-custom-css-settings' type='text/css'>
         .chatbot-bubble {
             background-color: <?php echo $chatbot_chatgpt_appearance_background_color; ?> !important;
         }
@@ -87,7 +87,7 @@ function chatbot_chatgpt_appearance_header_background_color_callback(): void {
 function chatbot_chatgpt_appearance_header_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_header_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_header_background_color', '#222222'));
     ?>
-    <style>
+    <style id='chatbot-chatgpt-appearance-header-background-custom-css-settings' type='text/css'>
         #chatbot-chatgpt-header {
             background-color: <?php echo $chatbot_chatgpt_appearance_header_background_color; ?> !important;
         }
