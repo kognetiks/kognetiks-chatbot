@@ -45,6 +45,9 @@ function chatbot_chatgpt_deactivate() {
     // DB - chatbot_chatgpt_knowledge_base
     // DB - chatbot_chatgpt_knowledge_base_tfidf
 
+    // FIXME - Asked what transients should be removed
+    // 
+
     // FIXME - Asked what options should be removed
     //
     // OPTIONS - *chatbot_chatgpt*

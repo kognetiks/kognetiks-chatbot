@@ -57,7 +57,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // Add the file reference if file_id is provided
     if (!empty($file_id)) {
-        $data['file'] = [$file_id];
+        $data['file'] = $file_id;
         // $data['file_ids'] = ['file' => $file_id];
     }
 
@@ -465,8 +465,15 @@ function chatbot_chatgpt_retrieve_file_id() {
     // delete_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
 
     // Delete the file
-    // FIXME - DECIDE - SHOULD IF WE DELETE THE UPLOADED FILE NOW OR HANDLE IT LATER
     // deleteUploadedFile($file_id);
+
+    // Set a transient that expires in 2 hours
+    set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, 2 * 60 * 60);
+
+    // Set a cron job to delete the file in 1 hour 59 minutes
+    if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
+        wp_schedule_single_event(time() + 59 * 60 + 1 * 60 * 60, 'delete_uploaded_file', array($file_id));
+    }
 
     return $file_id;
 
@@ -474,9 +481,6 @@ function chatbot_chatgpt_retrieve_file_id() {
 
 // Cleanup in Aisle 4 on OpenAI - Ver 1.7.9
 function deleteUploadedFile($file_id) {
-
-    // FIXME - DO NOT DELETE THE FILE UNTIL WE ARE SURE IT IS NOT BEING USED
-    return;
 
     // Get the API key
     $apiKey = esc_attr(get_option('chatbot_chatgpt_api_key'));
@@ -498,13 +502,14 @@ function deleteUploadedFile($file_id) {
     
     if ($http_status_code == 200 || $http_status_code == 204) {
         // DIAG - Diagnostics - Ver 1.7.9
-        // chatbot_chatgpt_back_trace( 'SUCCESS', "File deleted successfully.\n");
+        chatbot_chatgpt_back_trace( 'SUCCESS', "File deleted successfully.\n");
     } else {
         // If the request was not successful, you may want to handle it differently,
         // such as logging an error or retrying the request.
         // DIAG - Diagnostics - Ver 1.7.9
-        // chatbot_chatgpt_back_trace( 'ERROR', "HTTP status code: $http_status_code\n");
-        // chatbot_chatgpt_back_trace( 'ERROR', "Response: $response\n");
+        chatbot_chatgpt_back_trace( 'ERROR', "HTTP status code: $http_status_code\n");
+        chatbot_chatgpt_back_trace( 'ERROR', "Response: $response\n");
     }
 
 }
+add_action( 'delete_uploaded_file', 'deleteUploadedFile' );
