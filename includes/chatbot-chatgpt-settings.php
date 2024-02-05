@@ -33,9 +33,6 @@ function chatbot_chatgpt_settings_page_html(): void {
         add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
     }
     
-    // Cleanup in Aisle 4 - Ver 1.8.1
-    chatbot_chatgpt_cleanup_local_storage();
-
     // Check reminderCount in local storage - Ver 1.8.1
     $reminderCount = intval(esc_attr(get_option('chatbot_chatgpt_reminder_count', 0)));
     if ($reminderCount % 100 === 0 && $reminderCount <= 500) {
