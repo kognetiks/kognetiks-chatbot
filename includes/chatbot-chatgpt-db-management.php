@@ -78,8 +78,8 @@ function update_interaction_tracking() {
 
 }
 
-// Converation Tracking - Ver 1.7.6
-function create_conversation_logging_table() {
+// Conversation Tracking - Ver 1.7.6
+function create_conversation_logging_table(): void {
 
     global $wpdb;
 
@@ -122,7 +122,7 @@ function create_conversation_logging_table() {
 // register_activation_hook(__FILE__, 'create_conversation_logging_table');
 
 // Append message to conversation log in the database - Ver 1.7.6
-function append_message_to_conversation_log($sessionId, $user_id, $page_id, $user_type, $thread_Id, $assistant_id, $message) {
+function append_message_to_conversation_log($session_id, $user_id, $page_id, $user_type, $thread_id, $assistant_id, $message) {
 
     global $wpdb;
 
@@ -138,11 +138,11 @@ function append_message_to_conversation_log($sessionId, $user_id, $page_id, $use
     $insert_result = $wpdb->insert(
         $table_name,
         array(
-            'session_id' => $sessionId,
+            'session_id' => $session_id,
             'user_id' => $user_id,
             'page_id' => $page_id,
             'user_type' => $user_type,
-            'thread_id' => $thread_Id,
+            'thread_id' => $thread_id,
             'assistant_id' => $assistant_id,
             'message_text' => $message
         ),
@@ -163,7 +163,7 @@ function append_message_to_conversation_log($sessionId, $user_id, $page_id, $use
 }
 
 // Function to delete specific expired transients - Ver 1.7.6
-function clean_specific_expired_transients() {
+function clean_specific_expired_transients(): void {
     global $wpdb;
 
     // Prefix for transients in the database.
@@ -220,7 +220,7 @@ function chatbot_chatgpt_conversation_log_cleanup() {
     // Prepare and execute the SQL statement
     $delete_result = $wpdb->query($wpdb->prepare("DELETE FROM $table_name WHERE interaction_time < %s", $purge_date));
 
-    // Check if the delete was successful
+    // Check if delete was successful
     if ($delete_result === false) {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'ERROR', "Failed to delete conversation log entries: " . $wpdb->last_error);

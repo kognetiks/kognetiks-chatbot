@@ -28,8 +28,10 @@ function chatbot_chatgpt_api_model_section_callback($args) {
     <p>For more information about the maximum tokens parameter, please see <a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank">https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them</a>.</p>
     <h3>Conversation Context</h3>
     <p>Enter a conversation context to help the model understand the conversation.  See the default for ideas.</p>
+    <h3>Base URL</h3>
+    <p>Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
     <h3>More Information</h3>
-    <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" taget="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
+    <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <?php
 }
 
@@ -67,7 +69,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
 function chatgpt_max_tokens_setting_callback($args) {
     // Get the saved chatbot_chatgpt_max_tokens_setting or default to 150
     $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150'));
-    // Allow for a range of tokens between 100 and 4096 in 50 step increments - Ver 1.6.1
+    // Allow for a range of tokens between 100 and 4096 in 50-step increments - Ver 1.6.1
     ?>
     <select id="chatbot_chatgpt_max_tokens_setting" name="chatbot_chatgpt_max_tokens_setting">
         <?php
@@ -96,3 +98,29 @@ function chatbot_chatgpt_conversation_context_callback($args) {
     <textarea id='chatbot_chatgpt_conversation_context' name='chatbot_chatgpt_conversation_context' rows='5' cols='50' maxlength='2500'><?php echo esc_html(stripslashes($chatbot_chatgpt_conversation_context)); ?></textarea>
     <?php
 }
+
+// Base URL for the OpenAI API - Ver 1.8.1
+function chatbot_chatgpt_base_url_callback($args) {
+    $chatbot_chatgpt_base_url = esc_attr(get_option('chatbot_chatgpt_base_url', 'https://api.openai.com/v1'));
+    ?>
+    <input type="text" id="chatbot_chatgpt_base_url" name="chatbot_chatgpt_base_url" value="<?php echo esc_attr( $chatbot_chatgpt_base_url ); ?>" class="regular-text">
+    <?php
+}
+
+// Base URL function calls - Ver 1.8.1
+function get_openai_api_base_url() {
+    return esc_attr(get_option('chatbot_chatgpt_base_url', 'https://api.openai.com/v1'));
+}
+
+function get_threads_api_url() {
+    return get_openai_api_base_url() . "/threads";
+}
+
+function get_files_api_url() {
+    return get_openai_api_base_url() . "/files";
+}
+
+function get_chat_completions_api_url() {
+    return get_openai_api_base_url() . "/chat/completions";
+}
+

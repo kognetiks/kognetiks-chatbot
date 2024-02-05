@@ -24,22 +24,20 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_start_status' => 'closed',
         'chatbot_chatgpt_start_status_new_visitor' => 'closed',
         'chatbot_chatgpt_disclaimer_setting' => 'No',
-        'chatbot_chatgpt_max_tokens_setting' => '150',
+        'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
         'chatbot_chatgpt_width_setting' => 'Narrow',
-        'chatbot_chatgpt_diagnostics' => 'Off',
         'chatbot_chatgpt_avatar_icon_setting' => 'icon-001.png',
         'chatbot_chatgpt_avatar_icon_url_setting' => '',
         'chatbot_chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
         'chatbot_chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
-        'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
-        'chatbot_chatgpt_max_tokens_setting' => 150,
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
         'chatbot_chatgpt_enable_custom_buttons' => 'Off',
         'chatbot_chatgpt_custom_button_name_1' => '',
         'chatbot_chatgpt_custom_button_url_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',
         'chatbot_chatgpt_custom_button_url_2' => '',
-        'chatbot_chatgpt_allow_file_uploads' => 'No'
+        'chatbot_chatgpt_allow_file_uploads' => 'No',
+        'chatbot_chatgpt_diagnostics' => 'Off'
     );
 
     // Revised for Ver 1.5.0 
@@ -51,24 +49,25 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_start_status',
         'chatbot_chatgpt_start_status_new_visitor',
         'chatbot_chatgpt_disclaimer_setting',
-        'chatbot_chatgpt_max_tokens_setting',
+        'chatbot_chatgpt_model_choice',
         'chatbot_chatgpt_width_setting',
-        'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_avatar_icon_setting',
         'chatbot_chatgpt_avatar_icon_url_setting',
         'chatbot_chatgpt_custom_avatar_icon_setting',
         'chatbot_chatgpt_avatar_greeting_setting',
+        'chatbot_chatgpt_conversation_context',
         'chatbot_chatgpt_enable_custom_buttons',
         'chatbot_chatgpt_custom_button_name_1',
         'chatbot_chatgpt_custom_button_url_1',
         'chatbot_chatgpt_custom_button_name_2',
         'chatbot_chatgpt_custom_button_url_2',
-        'chatbot_chatgpt_allow_file_uploads'
+        'chatbot_chatgpt_allow_file_uploads',
+        'chatbot_chatgpt_diagnostics'
     );
 
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
-        $default_value = isset($defaults[$key]) ? $defaults[$key] : '';
+        $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);

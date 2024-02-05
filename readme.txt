@@ -3,8 +3,8 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assistants, custom GPTs
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.4.2
-Stable tag: 1.8.0
+Tested up to: 6.4.3
+Stable tag: 1.8.1
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -22,7 +22,7 @@ Unlock the potential of personalized digital interaction. Use the GPT Assistants
 **🔀 Multiple Assistants, Multiple Roles**
 Why settle for one when you can have more? With our plugin, deploy multiple GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
 
-The latest version of the plugin allows for virturally unlimited GPT Assistants, allowing you to deploy a unique assistant whereever you placed the shortcode.  Simply pass the "asst_" ID to the shortcode as one of the parameters.
+The latest version of the plugin allows for virtually unlimited GPT Assistants, allowing you to deploy a unique assistant wherever you placed the shortcode.  Simply pass the "asst_" ID to the shortcode as one of the parameters.
 
 Unlock enhanced functionality with our latest feature - **now you can upload files directly to each GPT Assistant**, providing an even more dynamic and tailored user experience across your platforms.
 
@@ -190,6 +190,14 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 == Changelog ==
 
+= 1.8.1 =
+* Added Appearance Chatbot settings tabs.  These will override the CSS with user selected settings.
+* Improved mobile experience.  Active adjustments for changes in orientation (portrait and landscape).
+* If mobile, always start chatbot in closed status upon page load.
+* Added support for alternate API endpoints via a URL setting.
+* Added prompt tokens, completion tokens, and total tokens to the conversation log.
+* Reporting on token counts coming soon.
+
 = 1.8.0 =
 * Corrected path/name error for file downloads for conversation and interaction data
 
@@ -209,7 +217,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 = 1.7.5 =
 * Expanded support TF-IDF indexing for WooCommerce product post-type.
-* Corrected with GPT Assistant not being selected correctly when usissueing the assistant parameter in the shortcode.
+* Corrected with GPT Assistant not being selected correctly when using the assistant parameter in the shortcode.
 
 = 1.7.4 =
 * Enhanced handling for multi-threaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
@@ -227,7 +235,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Use [chatbot_chatgpt style=embedded assistant=primary] to display the chatbot as embedded using your primary assistant.
 * Use [chatbot_chatgpt style=floating assistant=alternate] to display the chatbot as floating using your alternate assistant.
 * Use [chatbot_chatgpt style=embedded assistant=alternate] to display the chatbot as embedded using your alternate assistant.
-* **Expanded the the list of HTML tags removed durning the Knowledge Navigator scan.**
+* **Expanded the list of HTML tags removed during the Knowledge Navigator scan.**
 * **Enhanced handling of special characters such as 'á' or 'é' found in non-English languages.**
 * **Localization for stop words, learning messages, and error messages based on Site Language settings**
 
@@ -260,7 +268,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Added a new option to customize the chatbot's message prompt - See Settings, then Settings.
 
 = 1.6.5 =
-* Added option for two user configurable buttons at the bottom of the chat bot - See Settings - Custom Buttons.
+* Added option for two user configurable buttons at the bottom of the chatbot - See Settings - Custom Buttons.
 * User configurable buttons can direct chatters to contact forms, email, or other pages.
 * Added a new option to check API key validity - See Settings > Diagnostics & Notices.
 * Added support for Echo Knowledge Base (EKB) post_type - Ver 1.6.5.
@@ -274,7 +282,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Added reporting of chatbot interactions to the Knowledge Navigator.
 
 = 1.6.2 =
-* Added cron scheduling for the Knowledge Navigator to refresh the knowledge baes hourly, daily, and weekly, as well as to cancel schedule.
+* Added cron scheduling for the Knowledge Navigator to refresh the knowledge base hourly, daily, and weekly, as well as to cancel schedule.
 * Added Knowledge Navigator Analysis to facilitate downloading results as a CSV file for insights into Knowledge base.
 
 = 1.6.1 =

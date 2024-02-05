@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Support settings section callback - Ver 1.3.0
-function chatbot_chatgpt_support_section_callback($args) {
+function chatbot_chatgpt_support_section_callback() {
     ?>
     <div id='overview'>
         <h3>Overview</h3>
@@ -24,16 +24,16 @@ function chatbot_chatgpt_support_section_callback($args) {
         <p>Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo, gpt-4, or gpt-4-turbo model to bring artificial intelligence to life within your WordPress website.</p>
         <p><b>Important Note:</b> This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.<p>
         <h3>Official Sites:</h3>
-            <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;"> 
+            <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/" rel="nofollow ugc" target="_blank">Kognetiks.com</a></li>
             <li><a href="https://github.com/kognetiks/chatbot-chatgpt" target="_blank">https://github.com/kognetiks/chatbot-chatgpt</a></li>
             <li><a href="https://wordpress.org/plugins/chatbot-chatgpt/" target="_blank">https://wordpress.org/plugins/chatbot-chatgpt/</a></li>
         </ul>
         <h3>Support:</h3>
-            <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;"> 
+            <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><a href="https://discord.gg/nXRzxUKvya" rel="nofollow ugc" target="_blank">Support @ Discord</a></li>
             <li><a href="https://kognetiks.com/wordpress-plugins/plugin-support/" rel="nofollow ugc" target="_blank">Support @ Kognetiks.com</a></li>
-            <li><a href="https://wordpress.org/support/plugin/chatbot-chatgpt/" target="_blank">Support @ Wordpress.org</a></li>
+            <li><a href="https://wordpress.org/support/plugin/chatbot-chatgpt/" target="_blank">Support @ WordPress.org</a></li>
             <li><a href="https://github.com/kognetiks/chatbot-chatgpt/issues" target="_blank">Support @ GitHub.com</a></li>
         </ul>
         <h3>Features</h3>
@@ -41,7 +41,7 @@ function chatbot_chatgpt_support_section_callback($args) {
             <li>Easy setup and integration with OpenAI&#8217;s ChatGPT API</li>
             <li>Support for gpt-3.5-turbo</li>
             <li>Support for gpt-4 (Learn how to access the gpt-4 API at <a href="https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4" rel="nofollow ugc" target="_blank">https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4</a></li>
-            <li>Support for gpt-4-turbo, OpenAI's latesting model with knowledge cutoff of April 2023, learn more at <a href="https://help.openai.com/en/articles/8555510-gpt-4-turbo" rel="nofollow ugc" target="_blank">https://help.openai.com/en/articles/8555510-gpt-4-turbo</a></li>
+            <li>Support for gpt-4-turbo, OpenAI's latest model with knowledge cutoff of April 2023, learn more at <a href="https://help.openai.com/en/articles/8555510-gpt-4-turbo" rel="nofollow ugc" target="_blank">https://help.openai.com/en/articles/8555510-gpt-4-turbo</a></li>
             <li>Floating chatbot interface with customizable appearance</li>
             <li>User-friendly settings page for managing API key and other parameters</li>
             <li>Collapsible chatbot interface when not in use</li>
@@ -95,7 +95,9 @@ function chatbot_chatgpt_support_section_callback($args) {
             <li>As explain above, build your custom GPT assistants in the OpenAI Playground.</li>
             <li>Decide which one of your assistants will be 'primary' and which one will be 'alternate'.</li>
             <li>Incorporate your assistants in one of several different ways using the <b>&#91;chatbot_chatgpt&#93;</B> shortcode.</li>
-            <p>Use the following format to invoke the primary or alternate assistant:</p>
+        </ul>
+        <p>Use the following format to invoke the primary or alternate assistant:</p>
+        <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><b>&#91;chatbot_chatgpt&#93;</b> - Default values, floating style, uses OpenAI's ChatGPT</li>
             <li><b>&#91;chatbot_chatgpt style="floating"&#93;</b> - Floating style, uses OpenAI's ChatGPT</li>
             <li><b>&#91;chatbot_chatgpt style="embedded"&#93;</b> - Embedded style, uses OpenAI's ChatGPT</li>
@@ -118,7 +120,7 @@ function chatbot_chatgpt_support_section_callback($args) {
     <hr style="border-top: 2px solid black;">
     <div id="chatbot-conversation-log"><a id="chatbot-conversation-log"></a>
         <h3>Conversation Logging Overview</h3>
-        <p>This chatbot logs interactions with visitors to provide insights and enhance user experience. By default the option to log conversations is turned off. Below is an overview of the table structure and its functionality.</p>
+        <p>This chatbot logs interactions with visitors to provide insights and enhance user experience. By default, the option to log conversations is turned off. Below is an overview of the table structure and its functionality.</p>
 
         <h3>Table Structure Overview</h3>
         <p>The table is designed to store key elements of each interaction, including:</p>
@@ -154,18 +156,18 @@ function chatbot_chatgpt_support_section_callback($args) {
         <p>Visitors should be informed that interactions with the chatbot are recorded. This should be communicated through a notice when the chatbot is first engaged.</p>
 
         <h3>Purpose of Data Collection</h3>
-        <p>The data collected may used to improve user experience and chatbot functionality. You should ensure that all data is handled securely and in compliance with relevant privacy regulations.</p>
+        <p>The data collected may be used to improve user experience and chatbot functionality. You should ensure that all data is handled securely and in compliance with relevant privacy regulations.</p>
 
         <h3>Data Storage and Use</h3>
-        <p>Information on how the collected data is stored and used is provided, and should adhear to privacy standards like GDPR and CCPA.</p>
+        <p>Information on how the collected data is stored and used is provided, and should adhere to privacy standards like GDPR and CCPA.</p>
 
-        <h2>Converation Log Deletion</h2>
-        <p>You can set the retention period in the plugin settings to automatially delete entries in the conversation log after certain periods of days (1, 7, 30, etc.).</p>
+        <h2>Conversation Log Deletion</h2>
+        <p>You can set the retention period in the plugin settings to automatically delete entries in the conversation log after certain periods of days (1, 7, 30, etc.).</p>
 
         <h3>Privacy Policy and Link</h3>
         <p>We encourage the inclusion of a privacy policy link in the chatbot interface. The policy should detail the management of chatbot data.</p>
         <p>A link to your site's privacy policy should base64_encode included the <b>Example Notification</b> below, which explains the specifics of chatbot data management.</p>
-        <p>Please consult with the approriate legal counsel and professionals to ensure that your privacy policy is compliant with all applicable laws and regulations.</p>
+        <p>Please consult with the appropriate legal counsel and professionals to ensure that your privacy policy is compliant with all applicable laws and regulations.</p>
 
         <h3>Details in Privacy Policy</h3>
         <p>The privacy policy suggests detailed information about data collection, use, legal basis for processing, retention practices, and user rights.</p>
@@ -182,7 +184,7 @@ function chatbot_chatgpt_support_section_callback($args) {
     <div id="chatbot-diagnostics">
         <h3>Chatbot Diagnostics - For Developers</h3>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li>By default the <b>Chatbot Diagnostics</b> setting is disabled. When enabled, the plugin provides useful information about the <b>Chatbot ChatGPT's</b> operation. This information can be used to troubleshoot issues and to better understand how the it is functioning.</li>
+            <li>By default, the <b>Chatbot Diagnostics</b> setting is disabled. When enabled, the plugin provides useful information about the <b>Chatbot ChatGPT's</b> operation. This information can be used to troubleshoot issues and to better understand how it is functioning.</li>
             <li>The plugin supports Success, Notice, Warning, Failure, and Error, i.e., increasing levels of severity. The default level is Success. The higher the level, the more information is provided.</li>
             <li>In addition to setting the <b>Chatbot ChatGPT's</b> diagnostics reporting level, you will also need to enable WordPress debugging. This can be done by setting the <b>WP_DEBUG</b> constant to true in your wp-config.php file.</li>
             <li>Turning on WordPress debugging will cause all PHP errors, notices, and warnings to be displayed. This is useful for debugging and development purposes.</li>

@@ -2,15 +2,15 @@
 /**
  * Chatbot ChatGPT for WordPress - Knowledge Navigator - TF-IDF Analyzer
  *
- * This file contains the code for the Chatbot ChatGPT Knowlege Navigator analysis.
+ * This file contains the code for the Chatbot ChatGPT Knowledge Navigator analysis.
  * 
  * 
  *
  * @package chatbot-chatgpt
  */
 
- // If this file is called directly, abort.
- if ( ! defined( 'WPINC' ) ) {
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
@@ -42,7 +42,7 @@ function chatbot_chatgpt_kn_analysis_output_callback($args) {
 
 
 // Download the TF-IDF data
-function chatbot_chatgpt_kn_analysis_download_csv() {
+function chatbot_chatgpt_kn_analysis_download_csv(): void {
     // Generate the results directory path
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
 

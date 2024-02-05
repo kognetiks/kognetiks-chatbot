@@ -15,6 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_shortcode($atts) {
 
+    global $session_id;
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
 
@@ -55,8 +56,16 @@ function chatbot_chatgpt_shortcode($atts) {
     // ";
 
     // Store the style and the assistant value - Ver 1.7.2
-    set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
-    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);
+    $user_id = get_current_user_id(); // Get current user ID
+    if (empty($user_id)) {
+        $user_id = $session_id; // Get the session ID if $user_id is not set
+    }
+    $page_id = get_the_id(); // Get current page ID
+    if (empty($page_id)) {
+        $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
+    }
+    set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id);
+    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id);
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
@@ -77,8 +86,8 @@ function chatbot_chatgpt_shortcode($atts) {
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);   
+        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id);
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id);   
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -89,7 +98,7 @@ function chatbot_chatgpt_shortcode($atts) {
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
             <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
-            <textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
+            <label for="chatbot-chatgpt-message"></label><textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
             <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
             <button id="chatbot-chatgpt-submit">
                 <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
@@ -120,11 +129,11 @@ function chatbot_chatgpt_shortcode($atts) {
     } else {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients( 'style' , $chatbot_chatgpt_display_style);
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias);   
+        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id);
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id);   
         ob_start();
         ?>
-        <!-- Romoved styling as I believe this may cause problems with some themes Ver 1.6.6 -->
+        <!-- Removed styling as I believe this may cause problems with some themes Ver 1.6.6 -->
         <!-- <div id="chatbot-chatgpt" style="display: none;"> -->
         <div id="chatbot-chatgpt">
             <div id="chatbot-chatgpt-header">
@@ -133,7 +142,7 @@ function chatbot_chatgpt_shortcode($atts) {
             <div id="chatbot-chatgpt-conversation"></div>
             <div id="chatbot-chatgpt-input">
                 <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
-                <textarea id="chatbot-chatgpt-message" rows="1" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
+                <textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
                 <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
                 <button id="chatbot-chatgpt-submit">
                     <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
@@ -160,7 +169,7 @@ function chatbot_chatgpt_shortcode($atts) {
             // chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_enable_custom_buttons: ' . $chatbot_chatgpt_enable_custom_buttons);
             if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
                 ?>
-                <div id="chatboat-chatgpt-custom-buttons" style="text-align: center;">
+                <div id="chatbot-chatgpt-custom-buttons" style="text-align: center;">
                     <?php
                     $chatbot_chatgpt_custom_button_name_1 = '';
                     $chatbot_chatgpt_custom_button_url_1 = '';
@@ -223,8 +232,8 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     global $chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias;
 
     // Check if the variables are set and not empty
-    $style = isset($chatbot_chatgpt_display_style) ? $chatbot_chatgpt_display_style : '';
-    $assistant = isset($chatbot_chatgpt_assistant_alias) ? $chatbot_chatgpt_assistant_alias : '';
+    $style = $chatbot_chatgpt_display_style ?? '';
+    $assistant = $chatbot_chatgpt_assistant_alias ?? '';
 
     ?>
     <script>

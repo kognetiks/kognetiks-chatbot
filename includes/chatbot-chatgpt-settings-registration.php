@@ -23,7 +23,8 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key', 'sanitize_api_key');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_model_choice');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_max_tokens_setting'); // Max Tokens setting options - Ver 1.4.2
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context'); // Covnersation Context - Ver 1.6.1
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context'); // Conversation Context - Ver 1.6.1
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_base_url'); // Ver 1.8.1
 
     add_settings_section(
         'chatbot_chatgpt_api_model_section',
@@ -57,11 +58,20 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_api_model_section'
     );
 
-    // Setting to adjust in small increments the number of Max Tokens - Ver 1.4.2
+    // Setting to adjust the conversation context - Ver 1.4.2
     add_settings_field(
         'chatbot_chatgpt_conversation_context',
         'Conversation Context',
         'chatbot_chatgpt_conversation_context_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
+    // Set the base URL for the API - Ver 1.8.1
+    add_settings_field(
+        'chatbot_chatgpt_base_url',
+        'Base URL',
+        'chatbot_chatgpt_base_url_callback',
         'chatbot_chatgpt_api_model',
         'chatbot_chatgpt_api_model_section'
     );
@@ -80,7 +90,7 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_custom_gpts'
     );
     
-    // Use GPT Assistant Id (Yes or No) - Ver 1.6.7
+    // Use GPT Assistant ID (Yes or No) - Ver 1.6.7
     add_settings_field(
         'chatbot_chatgpt_use_custom_gpt_assistant_id',
         'Use GPT Assistant Id',
@@ -127,8 +137,6 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_subsequent_greeting');
     // Option to remove the OpenAI disclaimer - Ver 1.4.1
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
-    // Option to select narrow or wide chatboat - Ver 1.4.2
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_width_setting');
     // Option to set diagnotics on/off - Ver 1.5.0
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_diagnostics');
 
@@ -196,14 +204,15 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_settings_section'
     );
 
+    // Moved to Appearance tab in Ver 1.8.1
     // Option to change the width of the bot from narrow to wide - Ver 1.4.2
-    add_settings_field(
-        'chatbot_chatgpt_width_setting',
-        'Chatbot Width Setting',
-        'chatbot_chatgpt_width_setting_callback',
-        'chatbot_chatgpt_settings',
-        'chatbot_chatgpt_settings_section'
-    );
+    // add_settings_field(
+    //     'chatbot_chatgpt_width_setting',
+    //     'Chatbot Width Setting',
+    //     'chatbot_chatgpt_width_setting_callback',
+    //     'chatbot_chatgpt_settings',
+    //     'chatbot_chatgpt_settings_section'
+    // );
 
     // Diagnostics settings tab - Ver 1.6.5
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
@@ -223,7 +232,7 @@ function chatbot_chatgpt_settings_init() {
     // Option to check API status - Ver 1.6.5
     add_settings_field(
         'chatbot_chatgpt_api_test',
-        'API Test',
+        'API Test Results',
         'chatbot_chatgpt_api_test_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'

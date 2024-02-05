@@ -15,8 +15,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 global $topWords;
 
-// Handle long running scripts with a scheduled event function - Ver 1.6.1
-function knowledge_navigator_scan() {
+// Handle long-running scripts with a scheduled event function - Ver 1.6.1
+function knowledge_navigator_scan(): void {
 
     global $topWords;
 
@@ -63,4 +63,3 @@ function knowledge_navigator_scan() {
 
 }
 add_action('knowledge_navigator_scan_hook', 'knowledge_navigator_scan');
-

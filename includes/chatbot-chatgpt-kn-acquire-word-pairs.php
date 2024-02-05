@@ -100,7 +100,7 @@ function kn_acquire_word_pairs( $content ) {
 
     // Remove 's' and 'â' at end of any words - Ver 1.6.5 - 2023 10 11
     $words = array_map(function($word) {
-        return rtrim($word, 'sâÃ¢Ã£Â²Ã°');
+        return rtrim($word, 'sâÃ¢£Â²°');
     }, $words);
 
     // Filter out any $words that are equal to a blank space
@@ -165,7 +165,7 @@ function computePairedTFIDF($term) {
 
 function computePairedTermFrequency($term) {
     
-    global $totalWordPairCount;
+    global $totalWordPairCount, $topWordPairs;
 
     return $topWordPairs[$term] / count($topWordPairs);
 

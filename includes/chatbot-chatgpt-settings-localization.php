@@ -3,8 +3,8 @@
  * Chatbot ChatGPT for WordPress - Localization
  *
  * This file contains the code for localization of the Chatbot ChatGPT globals.
- * It uses the ChatGPT API to translate the global variables into the your language
- * of choice based on the Site Langauage setting found under Settings > General.
+ * It uses the ChatGPT API to translate the global variables into your language
+ * of choice based on the Site Language setting found under Settings > General.
  *
  * @package chatbot-chatgpt
  */
@@ -48,7 +48,8 @@ function localize_global_stopwords($language_code, $stopWords) {
     }
 
     // The current ChatGPT API URL endpoint for GPT-3.5-Turbo and GPT-4
-    $api_url = 'https://api.openai.com/v1/chat/completions';
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -72,7 +73,7 @@ function localize_global_stopwords($language_code, $stopWords) {
         'max_tokens' => 4000,
         'temperature' => 0.5,
         'messages' => array(
-            array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate word-for-word anything sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the list of translated words wihtout the English.'),
+            array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate word-for-word anything sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the list of translated words without the English.'),
             array('role' => 'user', 'content' => $stopWords)
         ),
     );
@@ -121,7 +122,7 @@ function get_localized_learningMessages($language_code, $learningMessages) {
     $cached_learningMessages = get_transient('chatbot_chatgpt_learningMessages_' . $language_code);
 
     if ($cached_learningMessages === false) {
-        // learningMessagesnot in cache, so call the function
+        // learningMessages not in cache, so call the function
         $cached_learningMessages = localize_global_learningMessages($language_code, $learningMessages);
         // Store the learningMessages in the cache, set an appropriate expiration time
         set_transient('chatbot_chatgpt_learningMessages_' . $language_code, $cached_learningMessages, 31536000);
@@ -150,7 +151,8 @@ function localize_global_learningMessages($language_code, $learningMessages) {
     }
 
     // The current ChatGPT API URL endpoint for GPT-3.5-Turbo and GPT-4
-    $api_url = 'https://api.openai.com/v1/chat/completions';
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -174,7 +176,7 @@ function localize_global_learningMessages($language_code, $learningMessages) {
         'max_tokens' => 1000,
         'temperature' => 0.5,
         'messages' => array(
-            array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate the phrases sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the translated phrases wihtout the English.'),
+            array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate the phrases sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the translated phrases without the English.'),
             array('role' => 'user', 'content' => $learningMessages)
         ),
     );
@@ -226,7 +228,7 @@ function get_localized_errorResponses($language_code, $errorResponses) {
     $cached_errorResponses = get_transient('chatbot_chatgpt_errorResponses_' . $language_code);
 
     if ($cached_errorResponses === false) {
-        // errorResponsesnot in cache, so call the function
+        // errorResponses not in cache, so call the function
         $cached_errorResponses = localize_global_errorResponses($language_code, $errorResponses);
         // Store the errorResponses in the cache, set an appropriate expiration time
         set_transient('chatbot_chatgpt_errorResponses_' . $language_code, $cached_errorResponses, 31536000);
@@ -255,7 +257,8 @@ function localize_global_errorResponses($language_code, $errorResponses) {
     }
 
     // The current ChatGPT API URL endpoint for GPT-3.5-Turbo and GPT-4
-    $api_url = 'https://api.openai.com/v1/chat/completions';
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -279,7 +282,7 @@ function localize_global_errorResponses($language_code, $errorResponses) {
         'max_tokens' => 1000,
         'temperature' => 0.5,
         'messages' => array(
-            array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate the phrases sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the translated phrases wihtout the English.'),
+            array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate the phrases sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the translated phrases without the English.'),
             array('role' => 'user', 'content' => $errorResponses)
         ),
     );

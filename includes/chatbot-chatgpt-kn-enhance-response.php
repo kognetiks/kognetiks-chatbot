@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Knowlege Navigator - Enhance Response - Ver 1.6.9
+ * Chatbot ChatGPT for WordPress - Knowledge Navigator - Enhance Response - Ver 1.6.9
  *
- * This file contains the code for to utlize the DB with the TF-IDF data to enhance the chatbots response.
+ * This file contains the code for to utilize the DB with the TF-IDF data to enhance the chatbots response.
  * 
  *
  * @package chatbot-chatgpt
@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Enhance the respse with TF-IDF - Ver 1.6.9
+// Enhance the response with TF-IDF - Ver 1.6.9
 function chatbot_chatgpt_enhance_with_tfidf($message) {
 
 	// Global Variables
@@ -171,7 +171,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 	if (isset($enhanced_response) && !empty($enhanced_response)) {
 		// Handle the response from the chat engine
 		// Context History - Ver 1.6.1
-		addEntry('context_history', $enhanced_response);
+		addEntry('chatbot_chatgpt_context_history', $enhanced_response);
 		return $enhanced_response;
 	} else {
 		// Handle any errors that are returned from the chat engine

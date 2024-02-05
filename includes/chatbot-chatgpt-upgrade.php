@@ -1,6 +1,6 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Upgrade the chatbot-chatgpt plugin.
+ * Chatbot ChatGPT for WordPress - Upgrade the chatbot-chatgpt plugin
  *
  * This file contains the code for upgrading the plugin.
  * It should run with the plugin is activated, deactivated, or updated.
@@ -36,7 +36,7 @@ function chatbot_chatgpt_deactivate() {
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin deactivation started');
 
     // Logic to run during deactivation
-    // FIXME - THIS IS NOT DELETEING THE PLUGIN - JUST DEACTIVATION
+    // FIXME - THIS IS NOT DELETING THE PLUGIN - JUST DEACTIVATION
 
     // FIXME - Asked what data should be removed
     // 
@@ -44,6 +44,9 @@ function chatbot_chatgpt_deactivate() {
     // DB - chatbot_chatgpt_interactions
     // DB - chatbot_chatgpt_knowledge_base
     // DB - chatbot_chatgpt_knowledge_base_tfidf
+
+    // FIXME - Asked what transients should be removed
+    // 
 
     // FIXME - Asked what options should be removed
     //
@@ -147,7 +150,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_avatar_greeting_setting' );
         update_option( 'chatbot_chatgpt_avatar_greeting_setting', $chatbot_chatgpt_avatar_greeting_setting );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', 'cchatgpt_avatar_greeting_setting option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_chatgpt_avatar_greeting_setting option deleted');
     }
 
     // Replace option - chatgpt_avatar_icon_setting
@@ -155,9 +158,9 @@ function chatbot_chatgpt_upgrade() {
     if (get_option( 'chatgpt_avatar_icon_setting' )) {
         $chatbot_chatgpt_avatar_greeting_setting = get_option( 'chatgpt_avatar_icon_setting' );
         delete_option( 'chatgpt_avatar_icon_setting' );
-        update_option( 'chatbot_chatgpt_avatar_icon_setting', $chatbot_chatgpt_avatar_icon_setting );
+        update_option( 'chatbot_chatgpt_avatar_icon_setting', $chatbot_chatgpt_avatar_greeting_setting );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_avatar_icon_setting option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_avatar_icon_setting option deleted');
     }
     if (get_option ( 'chatbot_chatgpt_avatar_icon' )) {
         delete_option( 'chatbot_chatgpt_avatar_icon' );
@@ -172,7 +175,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_avatar_icon_url_setting' );
         update_option( 'chatbot_chatgpt_avatar_icon_url_setting', $chatbot_chatgpt_avatar_icon_url_setting );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_avatar_icon_url_setting option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_avatar_icon_url_setting option deleted');
     }
 
     // Replace option - chatgpt_bot_name
@@ -182,7 +185,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_bot_name' );
         update_option( 'chatbot_chatgpt_bot_name', $chatbot_chatgpt_bot_name );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_bot_name option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_bot_name option deleted');
     }
 
     // Replace option - chatgpt_custom_avatar_icon_setting
@@ -192,7 +195,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_custom_avatar_icon_setting' );
         update_option( 'chatbot_chatgpt_custom_avatar_icon_setting', $chatbot_chatgpt_custom_avatar_icon_setting );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_custom_avatar_icon_setting option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_custom_avatar_icon_setting option deleted');
     }
 
     // Replace option - chatgpt_diagnostics
@@ -202,7 +205,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_diagnostics' );
         update_option( 'chatbot_chatgpt_diagnostics', $chatbot_chatgpt_diagnostics );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_diagnostics option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_diagnostics option deleted');
     }
 
     // Replace option - chatgpt_disclaimer_setting
@@ -222,7 +225,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_initial_greeting' );
         update_option( 'chatbot_chatgpt_initial_greeting', $chatbot_chatgpt_initial_greeting );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_initial_greeting option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_initial_greeting option deleted');
     }
 
     // Replace option - chatgpt_max_tokens_setting
@@ -232,7 +235,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_max_tokens_setting' );
         update_option( 'chatbot_chatgpt_max_tokens_setting', $chatbot_chatgpt_max_tokens_setting );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_max_tokens_setting option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_max_tokens_setting option deleted');
     }
 
     // Replace option - chatgpt_model_choice
@@ -242,7 +245,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_model_choice' );
         update_option( 'chatbot_chatgpt_model_choice', $chatbot_chatgpt_model_choice );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_model_choice option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_model_choice option deleted');
     }
 
     // Replace option - chatgptStartStatusNewVisitor
@@ -252,12 +255,12 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgptStartStatusNewVisitor' );
         update_option( 'chatbot_chatgpt_start_status_new_visitor', $chatbot_chatgpt_start_status_new_visitor );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgptStartStatusNewVisitor option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgptStartStatusNewVisitor option deleted');
     }
     if (get_option( 'chatgpt_start_status' )) {
         delete_option( 'chatgpt_start_status' );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_start_status option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_start_status option deleted');
     }
 
     // Replace option - chatgptstartstatus
@@ -267,7 +270,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgptstartstatus' );
         update_option( 'chatbot_chatgpt_start_status', $chatbot_chatgpt_start_status );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgptstartstatus option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgptstartstatus option deleted');
     }
 
     // Replace option - chatgpt_chatbot_bot_prompt
@@ -277,7 +280,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_chatbot_bot_prompt' );
         update_option( 'chatbot_chatgpt_bot_prompts', $chatbot_chatgpt_bot_prompt );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_chatbot_bot_prompt option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_chatbot_bot_prompt option deleted');
     }
 
     // Replace option - chatgpt_subsequent_greeting
@@ -287,21 +290,21 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_subsequent_greeting' );
         update_option( 'chatbot_chatgpt_subsequent_greeting', $chatbot_chatgpt_subsequent_greeting );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatgpt_subsequent_greeting option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_subsequent_greeting option deleted');
     }
 
     // Replace option - chatGPTChatBotStatus
     if (get_option( 'chatGPTChatBotStatus' )) {
         delete_option( 'chatGPTChatBotStatus' );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatGPTChatBotStatus option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatGPTChatBotStatus option deleted');
     }
 
     // Replace option - chatGPTChatBotStatusNewVisitor
     if (get_option( 'chatGPTChatBotStatusNewVisitor' )) {
         delete_option( 'chatGPTChatBotStatusNewVisitor' );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', chatGPTChatBotStatusNewVisitor option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'chatGPTChatBotStatusNewVisitor option deleted');
     }
     
     // FIXME - DETERMINE WHAT OTHER 'OLD' OPTIONS SHOULD BE DELETED
@@ -323,7 +326,7 @@ function chatbot_chatgpt_upgrade() {
     // DIAG - Log the table creation
     // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log table created');
 
-    // DIAG - Log the upgrade compelete
+    // DIAG - Log the upgrade complete
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Plugin upgrade completed');
 
     return;

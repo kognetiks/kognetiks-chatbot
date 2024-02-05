@@ -23,7 +23,8 @@ if ( ! defined( 'WPINC' ) ) {
     update_option('chatbot_chatgpt_api_status','API Error Type: Status Unknown');
 
     // The current ChatGPT API URL endpoint for GPT-3.5-Turbo and GPT-4
-    $api_url = 'https://api.openai.com/v1/chat/completions';
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -74,10 +75,10 @@ if ( ! defined( 'WPINC' ) ) {
     // https://platform.openai.com/docs/guides/error-codes/api-errors
     //
     if (isset($response_body['error'])) {
-        $error_type = isset($response_body['error']['type']) ? $response_body['error']['type'] : 'Unknown';
-        $error_message = isset($response_body['error']['message']) ? $response_body['error']['message'] : 'No additional information.';
+        $error_type = $response_body['error']['type'] ?? 'Unknown';
+        $error_message = $response_body['error']['message'] ?? 'No additional information.';
         $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-    } elseif (isset($response_body['choices']) && !empty($response_body['choices'])) {
+    } elseif (!empty($response_body['choices'])) {
         $updated_status = 'Success: Connection to ChatGPT API was successful!';
         // chatbot_chatgpt_back_trace( 'SUCCESS', 'chatbot_chatgpt_api_status' . $updated_status);
     } else {
@@ -90,15 +91,17 @@ if ( ! defined( 'WPINC' ) ) {
     // TODO - Monitor the chatbot_chatgpt_api_status option for changes
     // chatbot_chatgpt_back_trace( 'WARNING', 'chatbot_chatgpt_api_status: ' . esc_html($updated_status));
 
+    return $updated_status;
+
 }
 
 // FIXME - TEST THE ASSISTANT IF PROVIDED - Ver 1.6.7
 
 // This function is executed whenever any option is updated
-function chatgpt_option_updated($option_name, $old_value, $new_value) {
+function chatgpt_option_updated($option_name, $old_value, $new_value): void {
 
     // Check if the "Diagnostics" tab is active
-    if ($option_name !== 'chatgpt_model_chorice') {
+    if ($option_name !== 'chatgpt_model_choice') {
         return;
     } elseif ($option_name !== 'chatbot_chatgpt_api_key') {
         return;

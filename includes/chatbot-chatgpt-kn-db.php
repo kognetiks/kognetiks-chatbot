@@ -1,6 +1,6 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Knowlege Navigator - Database and File Management - Ver 1.6.3
+ * Chatbot ChatGPT for WordPress - Knowledge Navigator - Database and File Management - Ver 1.6.3
  *
  * This file contains the code for table actions for database and file management.
  * 
@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Database Management - drop the table if it exists, then add it if it doesn't exist - Ver 1.6.3
-function dbKNStore() {
+function dbKNStore(): bool {
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
@@ -40,12 +40,10 @@ function dbKNStore() {
         return false;  // Table creation failed
     }
 
-    return;
-
 }
 
 // Database Management - drop a table if it exists, then add it if it doesn't exist to store the TF-IDF words and score - Ver 1.6.3
-function dbKNStoreTFIDF() {
+function dbKNStoreTFIDF(): bool {
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
@@ -69,12 +67,10 @@ function dbKNStoreTFIDF() {
         return false;  // Table creation failed
     }
 
-    return;
-
 }
 
 // Store the top words for context
-function store_top_words() {
+function store_top_words(): void {
 
     global $wpdb;
     global $topWords;
@@ -152,4 +148,3 @@ function output_results() {
 
     return;
 }
-

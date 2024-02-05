@@ -75,6 +75,39 @@ jQuery(document).ready(function ($) {
         }
     }
     
+    // Overrides for mobile devices - Ver 1.8.1
+    if (isMobile()) {
+        // chatbot_chatgpt_start_status = 'closed';
+        // chatbot_chatgpt_start_status_new_visitor = 'closed';
+        localStorage.setItem('chatbot_chatgpt_start_status', chatbot_chatgpt_start_status);
+        localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', chatbot_chatgpt_start_status_new_visitor);
+
+        // Determine the viewport width and height
+        let viewportWidth = window.innerWidth;
+        let viewportHeight = window.innerHeight;
+        // console.log('Viewport Width:', viewportWidth, 'Viewport Height:', viewportHeight);
+        // Determine the orientation
+        const orientation = screen.orientation || screen.mozOrientation || screen.msOrientation;
+        if (orientation.type === 'landscape-primary') {
+        // console.log('Orientation: Landscape');
+        } else if (orientation.type === 'portrait-primary') {
+        // console.log('Orientation: Portrait');
+        } else {
+        // console.log('Orientation:', orientation.type);
+        }
+
+        updateChatbotStyles();
+    
+        // Listen for orientation changes
+        window.addEventListener('orientationchange', updateChatbotStyles);
+    
+        // Listen for resize events
+        window.addEventListener('resize', updateChatbotStyles);
+
+        // TODO - IF MOBILE REMOVE ICON AND SHOW  DASHICON AND DETERMINE WIDTH AND ORIENTATION (PORTRAIT OR LANDSCAPE)
+        
+    }
+
     // Removed css from here into the .css file - Refactored for Ver 1.7.3
     // Initially hide the chatbot
     if (chatbot_chatgpt_start_status === 'closed') {
@@ -87,6 +120,19 @@ jQuery(document).ready(function ($) {
             } else {
                 $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-full').addClass('chatbot-narrow');
             }
+
+            // Overrides for mobile devices - Ver 1.8.1
+            if (isMobile()) {
+                // Initial update
+                updateChatbotStyles();
+            
+                // Listen for orientation changes
+                window.addEventListener('orientationchange', updateChatbotStyles);
+            
+                // Listen for resize events
+                window.addEventListener('resize', updateChatbotStyles);
+            }
+
             chatGptChatBot.show();
             chatGptOpenButton.hide();
         } else {
@@ -99,38 +145,48 @@ jQuery(document).ready(function ($) {
     chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
     // Avatar and Custom Message - Ver 1.5.0
-    selectedAvatar = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
-    
+    selectedAvatar = encodeURIComponent(localStorage.getItem('chatbot_chatgpt_avatar_icon_setting'));
+    if (isValidAvatarSetting(selectedAvatar)) {
+        // Is valid avatar setting
+        // DIAG - Diagnostics - Ver 1.8.1
+        // console.log('Chatbot ChatGPT: NOTICE: selectedAvatar: ' + selectedAvatar);
+    } else {
+        // Is not valid avatar setting
+        // DIAG - Diagnostics - Ver 1.8.1
+        // console.error('Chatbot ChatGPT: ERROR: selectedAvatar: ' + selectedAvatar);
+        selectedAvatar = 'icon-000.png';
+    }
+
+    // Overrides for mobile devices - Ver 1.8.1
+    if (isMobile()) {
+        // Set selectedAvatar to 'icon-000.png' for mobile devices
+        selectedAvatar = 'icon-000.png';
+    }
+
     if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
         // Construct the path to the avatar
         avatarPath = pluginUrl + '/assets/icons/' + selectedAvatar;
         
-        // If an avatar is selected and it's not 'icon-000.png', use the avatar
-        avatarImg = $('<img>').attr('id', 'chatbot_chatgpt_avatar_icon_setting').attr('class', 'chatbot-avatar').attr('src', avatarPath);
-    
-        // Get the stored greeting message. If it's not set, default to a custom value.
-        avatarGreeting = localStorage.getItem('chatbot_chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
-
-        // Revised to address cross-site scripting - Ver 1.6.4
-        // // Create a bubble with the greeting message
-        // var bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
-    
-        // // Append the avatar and the bubble to the button and apply the class for the avatar icon
-        // chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
-
         // IDEA - Add option to suppress avatar greeting in setting options page
         // IDEA - If blank greeting, don't show the bubble
         // IDEA - Add option to suppress avatar greeting if clicked on
 
-        // Sanitize the avatarGreeting variable
-        sanitizedGreeting = $('<div>').text(avatarGreeting).html();
+        // Updated to address cross-site scripting - Ver 1.8.1
+        // If an avatar is selected, and it's not 'icon-000.png', use the avatar
+        avatarImg = $('<img>')
+            .attr('id', 'chatbot_chatgpt_avatar_icon_setting')
+            .attr('class', 'chatbot-avatar')
+            .attr('src', avatarPath);
 
-        // Create a bubble with the sanitized greeting message
-        bubble = $('<div>').html(sanitizedGreeting).addClass('chatbot-bubble');
+        // Get the stored greeting message. If it's not set, default to a custom value.
+        avatarGreeting = localStorage.getItem('chatbot_chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
+
+        // Create a bubble with the greeting message
+        // Using .text() for safety, as it automatically escapes HTML
+        bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
 
         // Append the avatar and the bubble to the button and apply the class for the avatar icon
         chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
-
     } else {
         // If no avatar is selected or the selected avatar is 'icon-000.png', use the dashicon
         // Remove the avatar-icon class (if it was previously added) and add the dashicon class
@@ -165,7 +221,7 @@ jQuery(document).ready(function ($) {
 
             lastMessage = conversation.children().last().text();
 
-            // Don't append the subseqent greeting if it's already in the converation - Ver 1.5.0
+            // Don't append the subsequent greeting if it's already in the conversation - Ver 1.5.0
             if (lastMessage === subsequentGreeting) {
                 return;
             }
@@ -222,7 +278,10 @@ jQuery(document).ready(function ($) {
 
         messageElement = $('<div></div>').addClass('chat-message');
         // Use HTML for the response so that links are clickable - Ver 1.6.3
-        textElement = $('<span></span>').html(message);
+        // textElement = $('<span></span>').html(message);
+        // Fix for XSS vulnerability - Ver 1.8.1
+        var sanitizedMessage = DOMPurify.sanitize(message);
+        textElement = $('<span></span>').html(sanitizedMessage);
 
         // Add initial greetings if first time
         if (cssClass) {
@@ -325,13 +384,13 @@ jQuery(document).ready(function ($) {
                     // IDEA Check for a URL
                     if (botResponse.includes('[URL: ')) {
                         // DIAG - Diagnostics - Ver 1.6.3
-                        // console.log('Chatbot ChatGPT: ERROR: URL found in bot response");
+                        // console.error('Chatbot ChatGPT: ERROR: URL found in bot response');
                         link = '';
                         urlRegex = /\[URL: (.*?)\]/g;
                         match = botResponse.match(urlRegex);
                         if (match && match.length > 0) {
                             link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
-                            // DAIG - Diagnostics - Ver 1.6.3
+                            // DIAG - Diagnostics - Ver 1.6.3
                             // console.log('Chatbot ChatGPT: NOTICE: link: ' + link);
                         }
 
@@ -359,11 +418,11 @@ jQuery(document).ready(function ($) {
                     appendMessage('Error: ' + response.data, 'error');
                 }
             },
-            error: function () {
+            error: function (response) {
                 removeTypingIndicator();
                 // DIAG - Log the error - Ver 1.6.7
-                // console.log('Chatbot ChatGPT: ERROR: response: ' + response);
-                // console.log('Chatbot ChatGPT: ERROR: Unable to send message');
+                // console.log('Chatbot ChatGPT: ERROR: ' + JSON.stringify(response));
+                // console.error('Chatbot ChatGPT: ERROR: Unable to send message');
                 appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
             },
             complete: function () {
@@ -381,7 +440,7 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    // Add the keydown event listerner to the upload file button - Ver 1.7.6
+    // Add the keydown event listener to the upload file button - Ver 1.7.6
     $('#chatbot-chatgpt-upload-file').on('keydown', function(e) {
         if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
@@ -421,7 +480,7 @@ jQuery(document).ready(function ($) {
                 $('#chatbot-chatgpt-upload-file-input').val('');
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                // console.log('AJAX error:', textStatus, errorThrown);
+                // console.error('AJAX error:', textStatus, errorThrown);
             }
         });
 
@@ -464,7 +523,7 @@ jQuery(document).ready(function ($) {
         chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor');
 
         // Nuclear option to clear session conversation - Ver 1.5.0
-        // Do not use unless alsolutely needed
+        // Do not use unless absolutely needed
         // DIAG - Diagnostics - Ver 1.5.0
         // nuclearOption = 'Off';
         // if (nuclearOption === 'On') {
@@ -515,7 +574,7 @@ jQuery(document).ready(function ($) {
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
         setTimeout(() => {
-            // DIAG 399999- Diagnostics - Ver 1.5.0
+            // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('Chatbot ChatGPT: NOTICE: scrollToBottom");
             // }
@@ -541,9 +600,14 @@ jQuery(document).ready(function ($) {
             // }
 
             // Check if current conversation is different from stored conversation
+            // if (conversation.html() !== storedConversation) {
+            //     conversation.html(storedConversation);  // Set the conversation HTML to stored conversation
+            // }
+            // Fix for XSS vulnerability - Ver 1.8.1
             if (conversation.html() !== storedConversation) {
-                conversation.html(storedConversation);  // Set the conversation HTML to stored conversation
-            }
+                var sanitizedConversation = DOMPurify.sanitize(storedConversation);
+                conversation.html(sanitizedConversation);  // Set the conversation HTML to sanitized stored conversation
+            }          
 
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
@@ -557,11 +621,68 @@ jQuery(document).ready(function ($) {
 
     }
 
+    // Validation function - Ver 1.8.1
+    function isValidAvatarSetting(setting) {
+        const allowedAvatars = ['icon-001.png', 'icon-002.png', 'icon-003.png', 'icon-004.png', 'icon-005.png', 'icon-006.png', 'icon-007.png', 'icon-008.png', 'icon-009.png', 'icon-010.png',
+                                'icon-011.png', 'icon-012.png', 'icon-013.png', 'icon-014.png', 'icon-015.png', 'icon-016.png', 'icon-017.png', 'icon-018.png', 'icon-019.png', 'icon-020.png',
+                                'icon-021.png', 'icon-022.png', 'icon-023.png', 'icon-024.png', 'icon-025.png', 'icon-026.png', 'icon-027.png', 'icon-028.png', 'icon-029.png',
+                                'icon-001.png', 'icon-002.png', 'icon-003.png', 'icon-004.png', 'icon-005.png', 'icon-006.png', 'icon-007.png', 'icon-008.png', 'icon-009.png', 'icon-010.png',
+                                'chinese-001.png', 'chinese-002.png', 'chinese-003.png', 'chinese-004.png', 'chinese-005.png', 'chinese-006.png', 'chinese-007.png', 'chinese-008.png', 'chinese-009.png',
+                                'christmas-001.png', 'christmas-002.png', 'christmas-003.png', 'christmas-004.png', 'christmas-005.png', 'christmas-006.png', 'christmas-007.png', 'christmas-008.png', 'christmas-009.png',
+                                'fall-001.png', 'fall-002.png', 'fall-003.png', 'fall-004.png', 'fall-005.png', 'fall-006.png', 'fall-007.png', 'fall-008.png', 'fall-009.png',
+                                'halloween-001.png', 'halloween-002.png', 'halloween-003.png', 'halloween-004.png', 'halloween-005.png', 'halloween-006.png', 'halloween-007.png', 'halloween-008.png', 'halloween-009.png',
+                                'spring-001.png', 'spring-002.png', 'spring-003.png', 'spring-004.png', 'spring-005.png', 'spring-006.png', 'spring-007.png', 'spring-008.png', 'spring-009.png',
+                                'summer-001.png', 'summer-002.png', 'summer-003.png', 'summer-004.png', 'summer-005.png', 'summer-006.png', 'summer-007.png', 'summer-008.png', 'summer-009.png',
+                                'thanksgiving-001.png', 'thanksgiving-002.png', 'thanksgiving-003.png', 'thanksgiving-004.png', 'thanksgiving-005.png', 'thanksgiving-006.png', 'thanksgiving-007.png', 'thanksgiving-008.png', 'thanksgiving-009.png',
+                                'winter-001.png', 'winter-002.png', 'winter-003.png', 'winter-004.png', 'winter-005.png', 'winter-006.png', 'winter-007.png', 'winter-008.png', 'winter-009.png',
+            ];
+        return allowedAvatars.includes(setting);
+    }
+
+    // Detect mobile device - Ver 1.8.1
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 800);
+    }
+
+    function updateChatbotStyles() {
+
+        // console.log('Chatbot ChatGPT: NOTICE: updateChatbotStyles');
+
+        const chatbotElement = document.getElementById('chatbot-chatgpt');
+        if (!chatbotElement) return;
+    
+        // Calculate the viewport dimensions
+        viewportWidth = window.innerWidth;
+        viewportHeight = window.innerHeight;
+
+        // console.log('Chatbot ChatGPT: NOTICE: Viewport Width:', viewportWidth, 'Viewport Height:', viewportHeight);
+    
+        // Adjust styles based on orientation
+        const orientation = (screen.orientation && screen.orientation.type.includes('portrait')) ? 'portrait' : 'landscape';
+    
+        // Remove classes that are not needed
+        chatbotElement.classList.remove('wide', 'chatbot-wide');
+
+        // Apply styles and classes based on the orientation
+        if (orientation === 'portrait') {
+            // console.log('Chatbot ChatGPT: NOTICE: Mobile device in portrait mode');
+            chatbotElement.classList.add('mobile-portrait');
+            chatbotElement.style.setProperty('width', `${viewportWidth * 0.8}px`, 'important');
+            chatbotElement.style.setProperty('height', `${viewportHeight * 0.7}px`, 'important');
+        } else {
+            // console.log('Chatbot ChatGPT: NOTICE: Mobile device in landscape mode');
+            chatbotElement.classList.add('mobile-landscape');
+            chatbotElement.style.setProperty('width', `${viewportWidth * 0.7}px`, 'important');
+            chatbotElement.style.setProperty('height', `${viewportHeight * 0.8}px`, 'important');
+        }
+
+    }
+
     // Call the loadChatbotStatus function here - Ver 1.1.0
     loadChatbotStatus(); 
 
     // Load the conversation when the chatbot is shown on page load - Ver 1.2.0
-    // Let the convesation stay persistent in session storage for increased privacy - Ver 1.4.2
+    // Let the conversation stay persistent in session storage for increased privacy - Ver 1.4.2
     // loadConversation();
 
 });

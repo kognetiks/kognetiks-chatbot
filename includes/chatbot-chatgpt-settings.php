@@ -14,95 +14,69 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_settings_page() {
+function chatbot_chatgpt_settings_page(): void {
     add_options_page('Chatbot ChatGPT Settings', 'Chatbot ChatGPT', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
 }
 add_action('admin_menu', 'chatbot_chatgpt_settings_page');
 
 // Settings page HTML - Ver 1.3.0
-function chatbot_chatgpt_settings_page_html() {
+function chatbot_chatgpt_settings_page_html(): void {
     if (!current_user_can('manage_options')) {
         return;
     }
 
     chatbot_chatgpt_localize();
 
-    $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'bot_settings';
+    $active_tab = $_GET['tab'] ?? 'bot_settings';
 
     if (isset($_GET['settings-updated'])) {
         add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
     }
-
-    // REMOVED Ver 1.3.0
-    // settings_errors('chatbot_chatgpt_messages');
     
+    // Check reminderCount in local storage - Ver 1.8.1
+    $reminderCount = intval(esc_attr(get_option('chatbot_chatgpt_reminder_count', 0)));
+    if ($reminderCount % 100 === 0 && $reminderCount <= 500) {
+        $message = 'If you and your visitors are enjoying having this chatbot on your site, please take a moment to <a href="https://wordpress.org/support/plugin/chatbot-chatgpt/reviews/" target="_blank">rate and review this plugin</a>. Thank you!';
+        chatbot_chatgpt_general_admin_notice($message);
+    }
+    // Add 1 to reminderCount and update localStorage
+    if ($reminderCount < 501) {
+        $reminderCount++;
+        update_option('chatbot_chatgpt_reminder_count', $reminderCount);
+    }
+
+    // Check if the user wants to reset the appearance settings to default - Ver 1.8.1
+    $chatbot_chatgpt_appearance_reset = esc_attr(get_option('chatbot_chatgpt_appearance_reset', 'No'));
+    // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Appearance Restore Defaults: ' . $chatbot_chatgpt_appearance_reset);
+    if ( $chatbot_chatgpt_appearance_reset == 'Yes' ) {
+        chatbot_chatgpt_appearance_restore_default_settings();
+    }
+
     ?>
     <div class="wrap">
         <h1><span class="dashicons dashicons-format-chat"></span> <?php echo esc_html(get_admin_page_title()); ?></h1>
 
-        <!-- Message Box - Ver 1.3.0 -->
-        <div id="message-box-container"></div>
-
-        <!-- Message Box - Ver 1.3.0 -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
-                // Read the start status - Ver 1.4.1
-                const chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
-                const chatbot_chatgpt_start_status_new_visitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
-                const reminderCount = localStorage.getItem('reminderCount') || 0;
-
-                if (reminderCount % 25 === 0 && reminderCount <= 200) {
-                    const messageBox = document.createElement('div');
-                    messageBox.id = 'rateReviewMessageBox';
-                    messageBox.innerHTML = `
-                    <div id="rateReviewMessageBox" style="background-color: white; border: 1px solid black; padding: 10px; position: relative;">
-                        <div class="message-content" style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>If you and your visitors are enjoying having this chatbot on your site, please take a moment to <a href="https://wordpress.org/support/plugin/chatbot-chatgpt/reviews/" target="_blank">rate and review this plugin</a>. Thank you!</span>
-                            <button id="closeMessageBox" class="dashicons dashicons-dismiss" style="background: none; border: none; cursor: pointer; outline: none; padding: 0; margin-left: 10px;"></button>
-                            
-                        </div>
-                    </div>
-                    `;
-
-                    document.querySelector('#message-box-container').insertAdjacentElement('beforeend', messageBox);
-
-                    document.getElementById('closeMessageBox').addEventListener('click', function() {
-                        messageBox.style.display = 'none';
-                        localStorage.setItem('reminderCount', parseInt(reminderCount, 10) + 1);
-                    });
-                } else {
-                    let reminderCount = +localStorage.getItem('reminderCount') || 0;
-                    if (reminderCount < 200) {
-                        reminderCount++;
-                        localStorage.setItem('reminderCount', reminderCount);
-                    }
-                }
-            });
-        </script>
-    
-        <script>
+       <script>
             jQuery(document).ready(function($) {
-                var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
+                let chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
 
                 if (chatgptSettingsForm) {
 
                     chatgptSettingsForm.addEventListener('submit', function() {
 
                         // Changed const to var - Ver 1.5.0
-                        // Get the input elements by their ids
-                        var chatgptNameInput = document.getElementById('chatbot_chatgpt_bot_name');
-                        var chatgpt_chatbot_bot_promptInput = document.getElementById('chatbot_chatgpt_bot_prompt');
-                        var chatgptInitialGreetingInput = document.getElementById('chatbot_chatgpt_initial_greeting');
-                        var chatgptSubsequentGreetingInput = document.getElementById('chatbot_chatgpt_subsequent_greeting');
-                        var chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
-                        var chatbot_chatgpt_start_status_new_visitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
-                        var chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
+                        // Get the input elements by their IDs
+                        let chatgptNameInput = document.getElementById('chatbot_chatgpt_bot_name');
+                        let chatgpt_chatbot_bot_promptInput = document.getElementById('chatbot_chatgpt_bot_prompt');
+                        let chatgptInitialGreetingInput = document.getElementById('chatbot_chatgpt_initial_greeting');
+                        let chatgptSubsequentGreetingInput = document.getElementById('chatbot_chatgpt_subsequent_greeting');
+                        let chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
+                        let chatbot_chatgpt_start_status_new_visitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
+                        let chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
                         // New options for max tokens and width - Ver 1.4.2
-                        var chatgptMaxTokensSettingInput = document.getElementById('chatbot_chatgpt_max_tokens_setting');
-                        var chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
-                        // New options for diagnostics on/off - Ver 1.5.0
-                        var chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
+                        let chatgptMaxTokensSettingInput = document.getElementById('chatbot_chatgpt_max_tokens_setting');
+                        let chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
                         // Avatar Settings - Ver 1.4.3
                         let chatgptAvatarIconSettingInput = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                         let chatgptCustomAvatarIconSettingInput = document.getElementById('chatbot_chatgpt_custom_avatar_icon_setting');
@@ -127,8 +101,6 @@ function chatbot_chatgpt_settings_page_html() {
                         // New options for max tokens and width - Ver 1.4.2
                         if(chatgptMaxTokensSettingInput) localStorage.setItem('chatbot_chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
                         if(chatgptWidthSettingInput) localStorage.setItem('chatbot_chatgpt_width_setting', chatgptWidthSettingInput.value);
-                        // New options for diagnostics on/off - Ver 1.5.0
-                        if(chatgptDiagnosticsSettingInput) localStorage.setItem('chatbot_chatgpt_diagnostics', chatgptDiagnosticsSettingInput.value);
                         // Avatar Settings - Ver 1.5.0
                         if(chatgptAvatarIconSettingInput) localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', chatgptAvatarIconSettingInput.value);
                         if(chatgptCustomAvatarIconSettingInput) localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', chatgptCustomAvatarIconSettingInput.value);
@@ -144,17 +116,17 @@ function chatbot_chatgpt_settings_page_html() {
                     });
                 }
             });
-        </script>
+       </script>
 
-        <script>
+       <script>
             window.onload = function() {
                 // Assign the function to the window object to make it globally accessible
                 window.selectIcon = function(id) {
-                    var chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
+                    let chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                     if(chatgptElement) {
                         // Clear border from previously selected icon
-                        var previousIconId = chatgptElement.value;
-                        var previousIcon = document.getElementById(previousIconId);
+                        let previousIconId = chatgptElement.value;
+                        let previousIcon = document.getElementById(previousIconId);
                         if(previousIcon) previousIcon.style.border = "none";  // Change "" to "none"
 
                         // Set border for new selected icon
@@ -170,8 +142,8 @@ function chatbot_chatgpt_settings_page_html() {
                 }
 
                 // If no icon has been selected, select the first one by default
-                var iconFromStorage = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
-                var chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
+                let iconFromStorage = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
+                let chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                 if(chatgptElement) {
                     if (iconFromStorage) {
                         window.selectIcon(iconFromStorage);
@@ -180,13 +152,14 @@ function chatbot_chatgpt_settings_page_html() {
                     }
                 }
             }
-        </script>
+       </script>
 
-        <h2 class="nav-tab-wrapper">
+       <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=bot_settings" class="nav-tab <?php echo $active_tab == 'bot_settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
             <a href="?page=chatbot-chatgpt&tab=gpt_assistants" class="nav-tab <?php echo $active_tab == 'gpt_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>
             <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatars</a>
+            <a href="?page=chatbot-chatgpt&tab=appearance" class="nav-tab <?php echo $active_tab == 'appearance' ? 'nav-tab-active' : ''; ?>">Appearance</a>
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
             <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
             <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Analysis</a>
@@ -195,10 +168,10 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
             <!-- Coming Soon in Ver 2.0.0 -->
             <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->
-        </h2>
+       </h2>
 
-        <!-- Updated id - Ver 1.4.1 -->
-        <form id="chatgpt-settings-form" action="options.php" method="post">
+       <!-- Updated id - Ver 1.4.1 -->
+       <form id="chatgpt-settings-form" action="options.php" method="post">
             <?php
             if ($active_tab == 'bot_settings') {
                 settings_fields('chatbot_chatgpt_settings');
@@ -236,6 +209,10 @@ function chatbot_chatgpt_settings_page_html() {
                 settings_fields('chatbot_chatgpt_diagnostics');
                 do_settings_sections('chatbot_chatgpt_diagnostics');
 
+            } elseif ($active_tab == 'appearance') {
+                settings_fields('chatbot_chatgpt_appearance');
+                do_settings_sections('chatbot_chatgpt_appearance');
+
             // IDEA Coming Soon in Ver 2.0.0
             // } elseif ($active_tab == 'premium') {
             //     settings_fields('chatbot_chatgpt_premium');
@@ -243,12 +220,12 @@ function chatbot_chatgpt_settings_page_html() {
 
             } elseif ($active_tab == 'support') {
                 settings_fields('chatbot_chatgpt_support');
-                do_settings_sections('chatbot_chatgpt_support');            
-        }
+                do_settings_sections('chatbot_chatgpt_support');
+       }
 
             submit_button('Save Settings');
             ?>
-        </form>
+       </form>
     </div>
     <!-- Added closing tags for body and html - Ver 1.4.1 -->
     </body>

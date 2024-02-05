@@ -23,7 +23,7 @@ $totalWordCount = 0;
 $totalWordPairCount = 0;
 
 // Output Knowledge Navigator Data to log files for pages, posts and comments - Ver 1.6.3
-function chatbot_chatgpt_kn_acquire() {
+function chatbot_chatgpt_kn_acquire(): void {
 
     global $wpdb;
     global $topWords;
@@ -81,7 +81,7 @@ function chatbot_chatgpt_kn_acquire() {
     }
 
     // Query WordPress database for post content
-    // Added support for Echo Knowlege Base (EKB) post_type - Ver 1.6.5
+    // Added support for Echo Knowledge Base (EKB) post_type - Ver 1.6.5
     // https://wordpress.org/support/topic/great-with-minor-code-edits/
     // https://wordpress.org/support/topic/add-pages-and-knowledge-base-to-search/
     // Added support for WooCommerce product post_type - Ver 1.7.5
@@ -263,11 +263,11 @@ function chatbot_chatgpt_kn_acquire() {
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
+            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['id'] . ' has empty content.');
         }
         
         // Construct the URL for the comments
-        $url = get_permalink($result['ID']);
+        $url = get_permalink($result['id']);
         // Construct the Title for the post
         $title = 'Comment';
         // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
@@ -331,4 +331,3 @@ function chatbot_chatgpt_kn_acquire() {
 
 // Add the action hook
 add_action( 'chatbot_chatgpt_kn_acquire', 'chatbot_chatgpt_kn_acquire' );
-

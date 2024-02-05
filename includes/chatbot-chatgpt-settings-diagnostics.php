@@ -15,9 +15,9 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Diagnostics settings section callback - Ver 1.6.5
-function chatbot_chatgpt_diagnostics_section_callback($args) {
+function chatbot_chatgpt_diagnostics_section_callback($args): void {
     ?>
-    <p>The Diagnostics tab checks the API status and set options for diagostics and notices.</p>
+    <p>The Diagnostics tab checks the API status and set options for diagnostics and notices.</p>
     <p>You can turn on/off console and error logging (as of Version 1.6.5 most are now commented out).</p>
     <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
     <h2>System and Plugin Information</h2>
@@ -172,6 +172,9 @@ function chatbot_chatgpt_back_trace($message_type = "NOTICE", $message = "No mes
         if (in_array($message_type, ['ERROR', 'WARNING', 'NOTICE'])) {
             error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [$message_type] [$message]");
         }
+    } elseif ('Debug' === $chatbot_chatgpt_diagnostics) {
+        // Print all types of messages
+        error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [$message_type] [$message]");
     } else {
         // Exit if none of the conditions are met
         return;

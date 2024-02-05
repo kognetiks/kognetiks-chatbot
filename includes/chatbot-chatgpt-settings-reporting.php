@@ -19,7 +19,7 @@ function chatbot_chatgpt_reporting_section_callback($args) {
     ?>
     <div>
         <p>Use these setting to select the reporting period for Visitor Interactions.</p>
-        <p>By default converation logging is initially turned <b>Off</b>.</p>
+        <p>By default, conversation logging is initially turned <b>Off</b>.</p>
         <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support#chatbot-conversation-log">Support</a> tab of this plugin for more details.</p>
         <h3>Conversation Data</h3>
             <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
@@ -152,7 +152,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
         $center_x = $x1 + ($bar_width / 2);
         $data_value_x = $center_x - (imagefontwidth($font_size) * strlen($data[$i]) / 2);
         $data_value_y = $y1 - 15;
-        $data_value_y = $data_value_y < 0 ? 0 : $data_value_y;
+        $data_value_y = max($data_value_y, 0);
 
         // Draw a bar
         imagefilledrectangle($image, $x1, $y1, $x2, $y2, $light_blue);
@@ -164,7 +164,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
         $label_x = $center_x - (imagefontwidth(round($font_size)) * strlen($labels[$i]) / 2);
 
         $data_value_y = $y1 - 5; // Moves the counts up or down
-        $data_value_y = $data_value_y < 0 ? 0 : $data_value_y;
+        $data_value_y = max($data_value_y, 0);
 
         // Fix: Explicitly cast to int
         $data_value_x = (int)($data_value_x);
@@ -197,18 +197,11 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
 function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     // Check is GD Library is installed - Ver 1.6.3
-    if (extension_loaded('gd')) {
+    if (!extension_loaded('gd')) {
         // GD Library is installed and loaded
         // DIAG - Log the output choice
         // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is installed and loaded.');
-    } else {
-        // Create a detailed admin error message
-        function chatbot_chatgpt_extension_load_error() {
-            $class = 'notice notice-error';
-            $message = __( 'Chatbot ChatGPT requires the GD Library to function correctly, but it is not installed or enabled on your server. Please install or enable the GD Library.', 'chatbot-chatgpt' );
-            printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
-        }
-        add_action( 'admin_notices', 'chatbot_chatgpt_extension_load_error' );
+        chatbot_chatgpt_general_admin_notice('Chatbot ChatGPT requires the GD Library to function correctly, but it is not installed or enabled on your server. Please install or enable the GD Library.');
         // DIAG - Log the output choice
         // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
         // Disable the shortcode functionality
@@ -271,7 +264,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
     }
 
     // Generate the chart
-    $img_path = generate_gd_bar_chart($a['labels'], $atts['data'], isset($atts['color']) ? $atts['color'] : null, $a['name']);
+    $img_path = generate_gd_bar_chart($a['labels'], $atts['data'], $atts['color'] ?? null, $a['name']);
     $img_url = plugin_dir_url(__FILE__) . '../assets/images/' . $a['name'] . '.png';
 
     wp_schedule_single_event(time() + 60, 'chatbot_chatgpt_delete_chart', array($img_path)); // 60 seconds delay
@@ -359,15 +352,17 @@ function chatbot_chatgpt_count_conversations() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     $results = $wpdb->get_results("SELECT COUNT(id) AS count FROM $table_name");
+    // TODO - Handle errors
     return $results[0]->count;
 }
 
-// Calculated size of the converations stored - Ver 1.7.6
+// Calculated size of the conversations stored - Ver 1.7.6
 function chatbot_chatgpt_size_conversations() {
     global $wpdb;
     $database_name = $wpdb->dbname;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     $results = $wpdb->get_results("SELECT table_name AS `Table`, round(((data_length + index_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES WHERE table_schema = '$database_name' AND table_name = '$table_name'");
+    // TODO - Handle errors
     return $results[0]->{'Size in MB'};
 }
 
