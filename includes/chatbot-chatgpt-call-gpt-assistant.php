@@ -232,7 +232,7 @@ function getTheStepsStatus($thread_id, $runId, $api_key): void {
 
         foreach ($data as $item) {
             if ($item["status"] == "completed") {
-                echo "Step completed\n";
+                // echo "Step completed\n";
                 $status = true;
                 break;
             }

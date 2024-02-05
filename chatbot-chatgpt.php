@@ -270,25 +270,6 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
-    // Update localStorage - Ver 1.6.1
-    echo "<script type=\"text/javascript\">
-    document.addEventListener('DOMContentLoaded', (event) => {
-        // Encode the chatbot settings array into JSON format for use in JavaScript
-        let chatbotSettings = " . json_encode($chatbot_settings) . ";
-
-        Object.keys(chatbotSettings).forEach((key) => {
-            if(!localStorage.getItem(key)) {
-                // DIAG - Log the key and value
-                // console.log('Chatbot ChatGPT: NOTICE: Setting ' + key + ' in localStorage');
-                localStorage.setItem(key, chatbotSettings[key]);
-            } else {
-                // DIAG - Log the key and value
-                // console.log('Chatbot ChatGPT: NOTICE: ' + key + ' is already set in localStorage');
-            }
-        });
-    });
-    </script>";
-    
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
