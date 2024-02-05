@@ -191,7 +191,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.3 =
-* TBD
+* Removed font family inheritance from the body tag to prevent conflicts with themes.
 
 = 1.8.2 =
 * Removed verbose diagnostics
