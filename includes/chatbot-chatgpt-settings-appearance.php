@@ -171,6 +171,7 @@ function chatbot_chatgpt_appearance_restore_default_settings(): void {
     delete_option('chatbot_chatgpt_appearance_user_text_background_color');
     delete_option('chatbot_chatgpt_appearance_bot_text_background_color');
     delete_option('chatbot_chatgpt_appearance_greeting_text_color');
+    delete_option('chatbot_chatgpt_appearance_header_text_color');
 
     // Delete the width settings
     delete_option('chatbot_chatgpt_appearance_width_wide');

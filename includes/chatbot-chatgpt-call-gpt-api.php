@@ -86,6 +86,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
             ),
     );
 
+    // FIXME - Allow for file uploads here
+    // $file = 'path/to/file';
+
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
 

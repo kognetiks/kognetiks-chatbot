@@ -413,29 +413,23 @@ function chatbot_chatgpt_send_message(): void {
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
-
-        // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
         // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
-
-        // Send message to Custom GPT API - Ver 1.6.7
 
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
+        // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);
-
-        // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$response ' . $response);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => 'response', 'response' => $response]);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+
         // Clean (erase) the output buffer - Ver 1.6.8
         ob_clean();
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
@@ -447,16 +441,29 @@ function chatbot_chatgpt_send_message(): void {
         }
     } else {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT API: ' . $use_assistant_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT');
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$message ' . $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+        
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_api($api_key, $message);
+        
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
+        
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);
+
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+
         // Return response
         wp_send_json_success($response);
     }

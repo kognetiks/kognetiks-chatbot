@@ -40,7 +40,8 @@
     z-index: 100;
     white-space: normal;
     display: inline-block;
-    font: inherit !important;
+    /* font: inherit !important; */
+    font-family: inherit !important;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
     box-sizing: border-box;
     min-width: 200px; /* Minimum width */

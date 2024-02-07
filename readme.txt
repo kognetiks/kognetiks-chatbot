@@ -191,7 +191,8 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.5 =
-* TBD
+* Appended message types for prompt, completion, and total tokens to the conversation log.
+* Additional adjustments to css and appearance settings.
 
 = 1.8.4 =
 * Removed unnecesary styling.
