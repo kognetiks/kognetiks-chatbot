@@ -93,5 +93,14 @@ function chatbot_chatgpt_width_setting_callback($args) {
     <?php
 
     update_option ('chatbot_chatgpt_width_setting', $chatgpt_width);
+    
+    $chatbot_chatgpt_appearance_width_narrow = esc_attr(get_option('chatbot_chatgpt_appearance_width_narrow', '300px'));
+
+    // Update the $GLOBALS for wide and narrow
+    if ($chatgpt_width == 'Wide') {
+        chatbot_chatgpt_appearance_width_wide_custom_css_settings();
+    } else {
+        chatbot_chatgpt_appearance_width_narrow_custom_css_settings();
+    }
 
 }

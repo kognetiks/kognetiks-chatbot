@@ -181,7 +181,7 @@ function chatbot_chatgpt_appearance_restore_default_settings(): void {
     chatbot_chatgpt_appearance_custom_css_settings();
 
     // Update the width setting to 'Narrow'
-    update_option ('chatbot_chatgpt_width_setting', 'Narrow');
+    // update_option ('chatbot_chatgpt_width_setting', 'Narrow');
 
     // DIAG - Exit function
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Exit function: chatbot_chatgpt_appearance_restore_default_settings()');
