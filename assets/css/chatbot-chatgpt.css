@@ -63,10 +63,6 @@
     position: fixed;
     bottom: 10px;
     right: 10px;
-    /* background-color: #f1f1f1; */
-    /* border: 1px solid #ccc; */
-    /* border-radius: 5px; */
-    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); */
     display: flex;
     flex-direction: column;
     z-index: 100;
@@ -94,20 +90,16 @@
 /* Support for an embedded version of the chatbot - Ver 1.7.1 */
 .embedded-style {
     height: 50vh !important; /* Adjust as needed */
-    /* width: 90vw !important; Adjust as needed */
     overflow: hidden;
     position: relative !important; /* Keeps bot in the same position */
-    /* bottom: 10%; */
     margin: 10px auto; /* Centers horizontally and gives margin at top and bottom */
     padding: 10px; /* Adds padding inside the chatbot */
-    /* box-shadow: none; */ /* Removes any floating shadows */
     background-color: #f1f1f1;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     left: 0;
     right: 0;
-    /* Other styling as needed */
 }
 
 /* Removed CSS from JS file - Ver 1.7.3 */
@@ -182,7 +174,6 @@
 
 #chatbot-chatgpt-submit {
     background-color: #f1f1f1 !important;
-    /* color: #ffffff; */
     border: none;
     border-radius: 3px;
     padding: 6px 6px;
@@ -193,17 +184,12 @@
 /* File Upload Button - Ver 1.7.6 */
 #chatbot-chatgpt-upload-file {
     background-color: #f1f1f1 !important;
-    /* color: #fff; */
     border: none;
     border-radius: 3px;
     padding: 6px 6px;
     margin-left: 3px;
     cursor: pointer;
 }
-
-/* #chatbot-chatgpt-submit img {
-    background-color: #f1f1f1;
-} */
 
 /* CSS for append message */
 .chat-message {
@@ -415,35 +401,3 @@
     text-decoration: none !important;
 }
 
-/* CSS for the chatbot chatgpt color picker - Ver 1.8.1 */
-/* body {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-} */
-
-/* input {
-    margin: 2em;
-    width: 3em;
-    height: 3em;
-    border: .4em solid black;
-    border-radius: 20%;
-    outline: none;
-    cursor: pointer;
-    box-shadow: 0 0 .5em #111;
-} */
-
-/* input:hover {
-    animation: round 2s infinite;
-} */
-
-/* @keyframes round {
-    0%{ transform: rotate(0deg); }
-    10%{ transform: rotate(60deg); }
-    20%{ transform: rotate(120deg); }
-    40%{ transform: rotate(180deg); }
-    60%{ transform: rotate(240deg); }
-    80%{ transform: rotate(300deg); }
-    100%{ transform: rotate(360deg); }
-} */

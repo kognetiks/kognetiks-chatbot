@@ -22,11 +22,13 @@ function chatbot_chatgpt_appearance_settings(): void {
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_header_background_color');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_bubble_background_color');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_text_color');
+    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_header_text_color');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_user_text_background_color');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_bot_text_background_color');
+    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_greeting_text_color');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_width_wide');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_width_narrow');
-    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_width_setting');
+    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_width_setting');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_reset');
 
     add_settings_section(
@@ -53,6 +55,14 @@ function chatbot_chatgpt_appearance_settings(): void {
     );
 
     add_settings_field(
+        'chatbot_chatgpt_appearance_header_text_color',
+        'Header Text Color',
+        'chatbot_chatgpt_appearance_header_text_color_callback',
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_section'
+    );
+
+    add_settings_field(
         'chatbot_chatgpt_appearance_text_color',
         'Text Color',
         'chatbot_chatgpt_appearance_text_color_callback',
@@ -72,6 +82,14 @@ function chatbot_chatgpt_appearance_settings(): void {
         'chatbot_chatgpt_appearance_bot_text_background_color',
         'Bot Text Background Color',
         'chatbot_chatgpt_appearance_bot_text_background_color_callback',
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_appearance_greeting_text_color',
+        'Greeting Text Color',
+        'chatbot_chatgpt_appearance_greeting_text_color_callback',
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_section'
     );
@@ -152,6 +170,7 @@ function chatbot_chatgpt_appearance_restore_default_settings(): void {
     delete_option('chatbot_chatgpt_appearance_text_color');
     delete_option('chatbot_chatgpt_appearance_user_text_background_color');
     delete_option('chatbot_chatgpt_appearance_bot_text_background_color');
+    delete_option('chatbot_chatgpt_appearance_greeting_text_color');
 
     // Delete the width settings
     delete_option('chatbot_chatgpt_appearance_width_wide');
@@ -159,6 +178,9 @@ function chatbot_chatgpt_appearance_restore_default_settings(): void {
 
     // Now override the css with the default color
     chatbot_chatgpt_appearance_custom_css_settings();
+
+    // Update the width setting to 'Narrow'
+    update_option ('chatbot_chatgpt_width_setting', 'Narrow');
 
     // DIAG - Exit function
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Exit function: chatbot_chatgpt_appearance_restore_default_settings()');
@@ -176,6 +198,8 @@ function chatbot_chatgpt_appearance_custom_css_settings(): void {
     chatbot_chatgpt_appearance_text_color_custom_css_settings();
     chatbot_chatgpt_appearance_user_text_background_custom_css_settings();
     chatbot_chatgpt_appearance_bot_text_background_custom_css_settings();
+    chatbot_chatgpt_appearance_greeting_text_color_custom_css_settings();
+    chatbot_chatgpt_appearance_header_text_color_custom_css_settings();
 
     // Dimension settings
     chatbot_chatgpt_appearance_width_wide_custom_css_settings();
@@ -195,12 +219,13 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
 
     // Inject the custom css settings
     $chatbotChatGPTAppearanceCSS = $GLOBALS['chatbotChatGPTAppearanceCSS'];
-    $chatbotChatGPTAppearanceCSS = implode("\n", $chatbotChatGPTAppearanceCSS);
+    $chatbotChatGPTAppearanceCSS = implode("\n", $chatbotChatGPTAppearanceCSS); // Prepend spaces for indentation
     ?>
     <style type="text/css">
         <?php
+        // Loop through each CSS rule and output it with indentation
         foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
-            echo $cssRule . "\n";
+            echo "\t\t" . $cssRule . "\n"; // Add spaces before each rule for indentation
         }
         ?>
     </style>

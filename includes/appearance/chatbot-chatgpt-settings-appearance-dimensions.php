@@ -37,7 +37,6 @@ function chatbot_chatgpt_appearance_width_wide_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_width_wide', $chatbot_chatgpt_appearance_width_wide);
-        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 
@@ -72,7 +71,6 @@ function chatbot_chatgpt_appearance_width_narrow_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_width_narrow', $chatbot_chatgpt_appearance_width_narrow);
-        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 

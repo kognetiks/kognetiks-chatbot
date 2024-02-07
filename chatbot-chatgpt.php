@@ -29,7 +29,7 @@
 // If this file is called directly, die.
 defined( 'WPINC' ) || die;
 
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.1');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.5');
 
 // If this file is called directly, die.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,12 +44,16 @@ global $wpdb; // Declare the global $wpdb object
 
 // Uniquely Identify the Visitor - Ver 1.7.4
 global $session_id; // Declare the global $session_id variable
-
-if ($session_id == '') {
-    session_start();
+// Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
+ob_start();
+// Start the session if it has not been started, set the global, then close the session
+if (empty($session_id)) {
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     $session_id = session_id();
     session_write_close();
-    // error_log ('Session ID: ' . $session_id);
+    // error_log('Session ID: ' . $session_id);
 }
 
 // Include necessary files
