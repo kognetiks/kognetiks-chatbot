@@ -417,7 +417,7 @@
 
 /* CSS for the chatbot chatgpt color picker - Ver 1.8.1 */
 body {
-    height: 100vh;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
