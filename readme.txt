@@ -191,7 +191,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.4 =
-* Removed unnecesaary styling.
+* Removed unnecesary styling.
 
 = 1.8.3 =
 * Removed font family inheritance from the body tag to prevent conflicts with themes.
