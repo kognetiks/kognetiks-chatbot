@@ -416,14 +416,14 @@
 }
 
 /* CSS for the chatbot chatgpt color picker - Ver 1.8.1 */
-body {
-    height: 100vh;
+/* body {
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-}
+} */
 
-input {
+/* input {
     margin: 2em;
     width: 3em;
     height: 3em;
@@ -432,13 +432,13 @@ input {
     outline: none;
     cursor: pointer;
     box-shadow: 0 0 .5em #111;
-}
+} */
 
-input:hover {
+/* input:hover {
     animation: round 2s infinite;
-}
+} */
 
-@keyframes round {
+/* @keyframes round {
     0%{ transform: rotate(0deg); }
     10%{ transform: rotate(60deg); }
     20%{ transform: rotate(120deg); }
@@ -446,4 +446,4 @@ input:hover {
     60%{ transform: rotate(240deg); }
     80%{ transform: rotate(300deg); }
     100%{ transform: rotate(360deg); }
-}
+} */

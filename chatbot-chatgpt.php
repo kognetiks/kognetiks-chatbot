@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your WordPress Website.
- * Version:     1.8.3
+ * Version:     1.8.4
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -49,7 +49,7 @@ if ($session_id == '') {
     session_start();
     $session_id = session_id();
     session_write_close();
-    // error_log('Session ID: ' . $session_id);
+    // error_log ('Session ID: ' . $session_id);
 }
 
 // Include necessary files
@@ -418,12 +418,14 @@ function chatbot_chatgpt_send_message(): void {
 
         // Send message to Custom GPT API - Ver 1.6.7
 
-        // error_log ('$message ' . $message);
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);
 
-        // error_log ('$response ' . $response);
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$response ' . $response);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Use TF-IDF to enhance response

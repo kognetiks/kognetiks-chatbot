@@ -181,4 +181,30 @@ function chatbot_chatgpt_appearance_custom_css_settings(): void {
     chatbot_chatgpt_appearance_width_wide_custom_css_settings();
     chatbot_chatgpt_appearance_width_narrow_custom_css_settings();
 
+    // Inject inline css
+    chatbot_chatgpt_appearance_inject_custom_css_settings();
+
 }
+
+// Inject the custom css settings
+function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
+
+    // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Injecting custom CSS settings...');
+    // chatbot_chatgpt_back_trace( 'NOTICE', print_r($GLOBALS['chatbotChatGPTAppearanceCSS'], true));
+
+    // Inject the custom css settings
+    $chatbotChatGPTAppearanceCSS = $GLOBALS['chatbotChatGPTAppearanceCSS'];
+    $chatbotChatGPTAppearanceCSS = implode("\n", $chatbotChatGPTAppearanceCSS);
+    ?>
+    <style type="text/css">
+        <?php
+        foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
+            echo $cssRule . "\n";
+        }
+        ?>
+    </style>
+    <?php
+}
+// Hook into wp_head
+add_action('wp_footer', 'chatbot_chatgpt_appearance_inject_custom_css_settings');

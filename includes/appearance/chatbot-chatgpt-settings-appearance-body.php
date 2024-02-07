@@ -34,31 +34,21 @@ function chatbot_chatgpt_appearance_background_color_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_background_color', $chatbot_chatgpt_appearance_background_color);
+        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 
 // Now override the css with the color chosen by the user
 function chatbot_chatgpt_appearance_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_background_color', '#f1f1f1'));
-    ?>
-    <style id='chatbot-chatgpt-appearance-background-custom-css-settings' type='text/css'>
-        .chatbot-bubble {
-            background-color: <?php echo $chatbot_chatgpt_appearance_background_color; ?> !important;
-        }
-        .floating-style {
-            background-color: <?php echo $chatbot_chatgpt_appearance_background_color; ?> !important;
-        }
-        .embedded-style {
-            background-color: <?php echo $chatbot_chatgpt_appearance_background_color; ?> !important;
-        }
-        #chatbot-chatgpt-submit {
-            background-color: <?php echo $chatbot_chatgpt_appearance_background_color; ?> !important;
-        }
-        #chatbot-chatgpt-upload-file {
-            background-color: <?php echo $chatbot_chatgpt_appearance_background_color; ?> !important;
-        }
-    </style>
-    <?php
+
+    // Define CSS styles as global variables
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bubble'] = ".chatbot-bubble { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['floating-style'] = ".floating-style { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['embedded-style'] = ".embedded-style { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-submit'] = "#chatbot-chatgpt-submit { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-upload-file'] = "#chatbot-chatgpt-upload-file { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    
 }
 add_action('wp_head', 'chatbot_chatgpt_appearance_background_custom_css_settings');
 
@@ -80,19 +70,17 @@ function chatbot_chatgpt_appearance_header_background_color_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_header_background_color', $chatbot_chatgpt_appearance_header_background_color);
+        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 
 // Now override the css with the color chosen by the user
 function chatbot_chatgpt_appearance_header_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_header_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_header_background_color', '#222222'));
-    ?>
-    <style id='chatbot-chatgpt-appearance-header-background-custom-css-settings' type='text/css'>
-        #chatbot-chatgpt-header {
-            background-color: <?php echo $chatbot_chatgpt_appearance_header_background_color; ?> !important;
-        }
-    </style>
-    <?php
+
+    // Define CSS styles as global variables
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-header'] = "#chatbot-chatgpt-header { background-color: {$chatbot_chatgpt_appearance_header_background_color} !important; }";
+
 }
 add_action('wp_head', 'chatbot_chatgpt_appearance_header_background_custom_css_settings');
 
@@ -103,6 +91,12 @@ function chatbot_chatgpt_width_setting_callback($args) {
     <select id="chatbot_chatgpt_width_setting" name = "chatbot_chatgpt_width_setting">
         <option value="Narrow" <?php selected( $chatgpt_width, 'Narrow' ); ?>><?php echo esc_html( 'Narrow' ); ?></option>
         <option value="Wide" <?php selected( $chatgpt_width, 'Wide' ); ?>><?php echo esc_html( 'Wide' ); ?></option>
+        <option value="Custom" <?php selected( $chatgpt_width, 'Custom' ); ?>><?php echo esc_html( 'Custom' ); ?></option>
     </select>
     <?php
+
+    // FIXME - IF NARROW THEN RESET WIDTH TO 300PX
+    // FIXME - IF WIDE THEN RESET WIDTH TO 500PX
+    // FIXME - IF CUSTOM THEN RESET WIDTH TO 100% OR USER DEFINED VALUE
+
 }

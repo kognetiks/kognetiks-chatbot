@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.3
-Stable tag: 1.8.3
+Stable tag: 1.8.4
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -189,6 +189,9 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 16. Settings and Options
 
 == Changelog ==
+
+= 1.8.4 =
+* Removed unnecesary styling.
 
 = 1.8.3 =
 * Removed font family inheritance from the body tag to prevent conflicts with themes.

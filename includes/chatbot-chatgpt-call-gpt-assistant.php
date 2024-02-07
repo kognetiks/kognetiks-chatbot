@@ -57,12 +57,20 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // Add the file reference if file_id is provided
     if (!empty($file_id)) {
-        $data['file'] = $file_id;
-        // $data['file_ids'] = ['file' => $file_id];
+        // $data['file'] = $file_id;
+        $data['file_ids'] = [$file_id];
     }
 
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data));
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));
+
+    // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id: ' . $file_id);
+
+    // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace('NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
 
     // Initialize cURL session
     $ch = curl_init();
@@ -76,6 +84,9 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // Execute cURL session
     $response = curl_exec($ch);
+
+    // DIAG - Diagnostics
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r($response, true));
 
     // Check for cURL errors
     if (curl_errno($ch)) {

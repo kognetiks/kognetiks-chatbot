@@ -37,22 +37,18 @@ function chatbot_chatgpt_appearance_width_wide_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_width_wide', $chatbot_chatgpt_appearance_width_wide);
+        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 
 // Now override the css with the color chosen by the user
 function chatbot_chatgpt_appearance_width_wide_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_width_wide = esc_attr(get_option('chatbot_chatgpt_appearance_width_wide', '500px'));
-    ?>
-    <style id='chatbot-chatgpt-appearance-width-wide-custom-css-settings' type='text/css'>
-        .chatbot-wide {
-            width: <?php echo $chatbot_chatgpt_appearance_width_wide; ?> !important;
-        }
-        #chatbot-chatgpt.wide {
-            width: <?php echo $chatbot_chatgpt_appearance_width_wide; ?> !important;
-        }
-    </style>
-    <?php
+
+    // Define CSS styles as global variables
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-wide'] = ".chatbot-wide { width: {$chatbot_chatgpt_appearance_width_wide} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-wide'] = "#chatbot-chatgpt.wide { width: {$chatbot_chatgpt_appearance_width_wide} !important; }";
+
 }
 
 // Set the chatbot user text background color
@@ -76,20 +72,16 @@ function chatbot_chatgpt_appearance_width_narrow_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_width_narrow', $chatbot_chatgpt_appearance_width_narrow);
+        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 
 // Now override the css with the color chosen by the user
 function chatbot_chatgpt_appearance_width_narrow_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_width_narrow = esc_attr(get_option('chatbot_chatgpt_appearance_width_narrow', '300px'));
-    ?>
-    <style id='chatbot-chatgpt-appearance-width-narrow-custom-css-settings' type='text/css'>
-        .chatbot-narrow {
-            width: <?php echo $chatbot_chatgpt_appearance_width_narrow; ?> !important;
-        }
-        #chatbot-chatgpt.narrow {
-            width: <?php echo $chatbot_chatgpt_appearance_width_narrow; ?> !important;
-        }
-    </style>
-    <?php
+
+    // Define CSS styles as global variables
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-narrow'] = ".chatbot-narrow { width: {$chatbot_chatgpt_appearance_width_narrow} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-narrow'] = "#chatbot-chatgpt.narrow { width: {$chatbot_chatgpt_appearance_width_narrow} !important; }";
+
 }
