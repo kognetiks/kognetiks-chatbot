@@ -104,6 +104,37 @@ function create_conversation_logging_table(): void {
             // If the operation was successful, log the success
             // chatbot_chatgpt_back_trace('SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
         }
+
+        // Fetch rows where user_type is missing
+        $rows = $wpdb->get_results("SELECT id FROM $table_name WHERE user_type IS NULL OR user_type = '' ORDER BY id ASC", ARRAY_A);
+
+        // Sequence of user_types to update with
+        $sequence = ["Prompt Tokens", "Completion Tokens", "Total Tokens"];
+        $sequenceIndex = 0;
+
+        foreach ($rows as $row) {
+            // Update the row with the corresponding sequence value
+            $update_result = $wpdb->update(
+                $table_name, 
+                ['user_type' => $sequence[$sequenceIndex]], // data
+                ['id' => $row['id']] // where
+            );
+
+            // Move to the next sequence value, or reset if at the end of the sequence
+            $sequenceIndex = ($sequenceIndex + 1) % count($sequence);
+
+            if ($update_result === false) {
+                // If there was an error, log it
+                // chatbot_chatgpt_back_trace('ERROR', 'Error updating missing chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+            } else {
+                // If the operation was successful, log the success
+                // chatbot_chatgpt_back_trace('SUCCESS', 'Successfully updated missing values in chatbot_chatgpt_conversation_log table');
+            }
+        }
+        
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace('SUCCESS', 'Successfully updated chatbot_chatgpt_conversation_log table');
+
     } else {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace('NOTICE', 'Table does not exist: ' . $table_name);
