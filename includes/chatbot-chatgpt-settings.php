@@ -25,6 +25,7 @@ function chatbot_chatgpt_settings_page_html(): void {
         return;
     }
 
+    // Localize the settings - Added back in for Ver 1.8.5
     chatbot_chatgpt_localize();
 
     $active_tab = $_GET['tab'] ?? 'bot_settings';

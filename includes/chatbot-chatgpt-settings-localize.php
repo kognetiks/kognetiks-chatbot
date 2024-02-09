@@ -73,23 +73,23 @@ function chatbot_chatgpt_localize(){
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
+    // FIXME - WAS ADDED IN 1.6.1
     // Update localStorage - Ver 1.6.1
     echo "<script type=\"text/javascript\">
+    //DIAG - Diagnostics
+    console.log('chatbot_chatgpt_settings_localize.php - start');
     document.addEventListener('DOMContentLoaded', (event) => {
         // Encode the chatbot settings array into JSON format for use in JavaScript
         let chatbotSettings = " . json_encode($chatbot_settings) . ";
-
         Object.keys(chatbotSettings).forEach((key) => {
-            if(!localStorage.getItem(key)) {
-                // DIAG - Log the key and value
-                // console.log('Chatbot ChatGPT: NOTICE: Setting ' + key + ' in localStorage');
-                localStorage.setItem(key, chatbotSettings[key]);
-            } else {
-                // DIAG - Log the key and value
-                // console.log('Chatbot ChatGPT: NOTICE: ' + key + ' is already set in localStorage');
-            }
+            // DIAG - Diagnostics
+            console.log('VIA PHP LOCALIZE Setting ' + key + ' ' + chatbotSettings[key] + ' in localStorage');
+            localStorage.setItem(key, chatbotSettings[key]);
         });
+        // Moved inside the DOMContentLoaded event listener
+        console.log('chatbot_chatgpt_settings_localize.php - finish');
     });
     </script>";
+    
 
 }

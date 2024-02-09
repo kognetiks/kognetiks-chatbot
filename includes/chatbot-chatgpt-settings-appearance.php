@@ -209,9 +209,6 @@ function chatbot_chatgpt_appearance_custom_css_settings(): void {
     // Inject inline css
     chatbot_chatgpt_appearance_inject_custom_css_settings();
 
-    // Run localisation
-    chatbot_chatgpt_localize();
-
 }
 
 // Inject the custom css settings
@@ -234,9 +231,6 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
         ?>
     </style>
     <?php
-
-    // Run localisation
-    chatbot_chatgpt_localize();
     
 }
 // Hook into wp_head

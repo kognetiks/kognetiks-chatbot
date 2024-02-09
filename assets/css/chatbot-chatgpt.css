@@ -40,11 +40,11 @@
     z-index: 100;
     white-space: normal;
     display: inline-block;
-    /* font: inherit !important; */
+    font: inherit !important;
     font-family: inherit !important;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
     box-sizing: border-box;
-    min-width: 200px; /* Minimum width */
+    min-width: 300px; /* Minimum width */
     max-width: 500px; /* Maximum width */
     max-height: 100px; /* Maximum height */
     overflow-y: auto; /* Scrollbar for overflow content */
@@ -283,27 +283,14 @@
     cursor: pointer;
     padding: 5px;
     float: right;
+    font: inherit;
+    font-family: inherit;
 }
-
-/* #chatgpt-open-btn {
-    position: fixed;
-    bottom: 2%;
-    right: 2%;
-    background-color: #007bff;
-    border: none;
-    cursor: pointer;
-    padding: 15px;
-    float: right;
-    box-shadow: 2px 4px 15px rgb(102, 92, 143);
-    border-radius: 10%;
-    width: 80px;
-    z-index: 100;
-} */
 
 /* Reset font family for Dashicons */
 #chatgpt-open-btn-dashicon {
     position: relative;
-    font-family: dashicons, serif !important;
+    font-family: dashicons, inherit !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -325,7 +312,8 @@
     border-radius: 10%;
     width: 80px;
     z-index: 100;
-    font-family: dashicons;
+    font: inherit !important;
+    font-family: dashicons, inherit !important;
     display: flex; 
     justify-content: center; 
     align-items: center;
