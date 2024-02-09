@@ -125,13 +125,6 @@ function chatbot_chatgpt_upgrade() {
         // DIAG - Log the old option deletion
         // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_width_setting option deleted');
     }
-    if (get_option( 'chatgpt_width_setting' )) {
-        $chatbot_chatgpt_width_setting = get_option('chatbot_width_setting');
-        delete_option( 'chatgpt_width_setting' );
-        update_option( 'chatbot_chatgpt_width_setting', $chatbot_chatgpt_width_setting );
-        // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_chatgpt_width_setting option replaced');
-    }
 
     // Replace option - chatbot_chatgpt_api_key
     // If the old option exists, delete it
@@ -140,7 +133,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_api_key' );
         update_option( 'chatbot_chatgpt_api_key', $chatbot_chatgpt_api_key );
         // DIAG - Log the old option deletion
-        // chatbot_chatgpt_back_trace('NOTICE', 'chatbot_width_setting option deleted');
+        // chatbot_chatgpt_back_trace('NOTICE', 'hatgpt_api_key option deleted');
     }
 
     // Replace option - chatbot_chatgpt_avatar_greeting_setting
@@ -162,6 +155,9 @@ function chatbot_chatgpt_upgrade() {
         // DIAG - Log the old option deletion
         // chatbot_chatgpt_back_trace('NOTICE', 'chatgpt_avatar_icon_setting option deleted');
     }
+
+    // Replace option - chatgpt_avatar_icon_setting
+    // If the old option exists, delete it
     if (get_option ( 'chatbot_chatgpt_avatar_icon' )) {
         delete_option( 'chatbot_chatgpt_avatar_icon' );
         // DIAG - Log the old option deletion

@@ -48,6 +48,9 @@ function chatbot_chatgpt_appearance_width_wide_custom_css_settings(): void {
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-wide'] = ".chatbot-wide { width: {$chatbot_chatgpt_appearance_width_wide} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-wide'] = "#chatbot-chatgpt.wide { width: {$chatbot_chatgpt_appearance_width_wide} !important; }";
 
+    // Run localisation
+    chatbot_chatgpt_localize();
+
 }
 
 // Set the chatbot user text background color
@@ -81,5 +84,8 @@ function chatbot_chatgpt_appearance_width_narrow_custom_css_settings(): void {
     // Define CSS styles as global variables
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-narrow'] = ".chatbot-narrow { width: {$chatbot_chatgpt_appearance_width_narrow} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-narrow'] = "#chatbot-chatgpt.narrow { width: {$chatbot_chatgpt_appearance_width_narrow} !important; }";
+
+    // Run localisation
+    chatbot_chatgpt_localize();
 
 }

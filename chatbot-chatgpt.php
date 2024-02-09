@@ -46,11 +46,31 @@ global $wpdb; // Declare the global $wpdb object
 global $session_id; // Declare the global $session_id variable
 // Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
 ob_start();
+
+// Updated for Ver 1.8.5
+// Cookie “PHPSESSID” does not have a proper “SameSite” attribute value. Soon, cookies 
+// without the “SameSite” attribute or with an invalid value will be treated as “Lax”. 
+// This means that the cookie will no longer be sent in third-party contexts. If your 
+// application depends on this cookie being available in such contexts, please add the 
+// “SameSite=None“ attribute to it. To know more about the “SameSite“ attribute, 
+// read https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+
 // Start the session if it has not been started, set the global, then close the session
 if (empty($session_id)) {
     if (session_status() == PHP_SESSION_NONE) {
+        // Set the session cookie parameters
+        session_set_cookie_params([
+            'lifetime' => 0, // Lifetime of the session cookie, defined in seconds.
+            'path' => '/', // Path where the cookie is accessible.
+            'domain' => $_SERVER['HTTP_HOST'], // Domain which the cookie is available.
+            'secure' => true, // If true the cookie will only be sent over secure connections.
+            'httponly' => true, // If true the cookie will only be accessible through the HTTP protocol.
+            'samesite' => 'None' // Prevents the browser from sending this cookie along with cross-site requests.
+        ]);
+
         session_start();
     }
+
     $session_id = session_id();
     session_write_close();
     // error_log('Session ID: ' . $session_id);
@@ -242,10 +262,17 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_allow_file_uploads'
     );
 
+    // $chatbot_settings = array();
+    // foreach ($option_keys as $key) {
+    //     $default_value = $defaults[$key] ?? '';
+    //     $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+    // }
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+        // DIAG - Diagnostics
+        chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( 'assets/icons/', __FILE__ );
@@ -271,13 +298,13 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     ));
 
     // Populate the chatbot settings array with values from the database, using default values where necessary
-    $chatbot_settings = array();
-    foreach ($option_keys as $key) {
-        $default_value = $defaults[$key] ?? '';
-        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
-        // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
-    }
+    // $chatbot_settings = array();
+    // foreach ($option_keys as $key) {
+    //     $default_value = $defaults[$key] ?? '';
+    //     $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+    //     // DIAG - Diagnostics
+    //     // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+    // }
 
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
@@ -492,7 +519,8 @@ function chatbot_chatgpt_kn_status_activation(): void {
     }
     // clear the 'knowledge_navigator_scan_hook' hook on plugin activation - Ver 1.6.3
     if (wp_next_scheduled('knowledge_navigator_scan_hook')) {
-        wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear scheduled runs
+        // BREAK/FIX - Do not unset the hook - Ver 1.8.5
+        // wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear scheduled runs
     }
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
