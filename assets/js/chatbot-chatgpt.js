@@ -15,27 +15,26 @@ jQuery(document).ready(function ($) {
     uploadfileButton = $('#chatbot-chatgpt-upload-file');
     chatGptOpenButton = $('#chatgpt-open-btn');
 
-    chatbot_chatgpt_start_status = localStorage.getItem('chatbot_chatgpt_start_status') || 'closed';
-    chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor') || 'closed';
-    initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
-    subsequentGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
-    chatbot_chatgpt_disclaimer_setting = localStorage.getItem('chatbot_chatgpt_disclaimer_setting') || 'Yes';
-    chatbot_chatgpt_bot_prompt = localStorage.getItem('chatbot_chatgpt_bot_prompt') || 'Enter your question ...';
-    chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
-
-    localStorage.setItem('chatbot_chatgpt_start_status', chatbot_chatgpt_start_status);
-    localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', chatbot_chatgpt_start_status_new_visitor);
-    localStorage.setItem('chatbot_chatgpt_initial_greeting', initialGreeting);
-    localStorage.setItem('chatbot_chatgpt_subsequent_greeting', subsequentGreeting);
-    localStorage.setItem('chatbot_chatgpt_disclaimer_setting', chatbot_chatgpt_disclaimer_setting);
-    localStorage.setItem('chatbot_chatgpt_bot_prompt', chatbot_chatgpt_bot_prompt);
-    localStorage.setItem('chatbot_chatgpt_width_setting', chatbot_chatgpt_width_setting);
-
-    pluginUrl = plugin_vars.pluginUrl;
+    chatbotChatgptBotName = localStorage.getItem('chatbot_chatgpt_bot_name') || 'Chatbot ChatGPT';
+    chatbotChatgptBotPrompt = localStorage.getItem('chatbot_chatgpt_bot_prompt') || 'Enter your question ...';
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
     chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
     chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
+
+    initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
+    subsequentGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
+
+    chatbotChatgptDisplaySytle = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
+    chatbotChatgptAssistantAlias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
+
+    chatbot_chatgpt_start_status = localStorage.getItem('chatbot_chatgpt_start_status') || 'closed';
+    chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor') || 'closed';
+
+    chatbot_chatgpt_disclaimer_setting = localStorage.getItem('chatbot_chatgpt_disclaimer_setting') || 'Yes';
+    chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
+
+    pluginUrl = plugin_vars.pluginUrl;
 
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         // console.log('Chatbot ChatGPT: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);

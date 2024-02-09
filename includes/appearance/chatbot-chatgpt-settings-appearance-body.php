@@ -34,7 +34,6 @@ function chatbot_chatgpt_appearance_background_color_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_background_color', $chatbot_chatgpt_appearance_background_color);
-        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 
@@ -70,7 +69,6 @@ function chatbot_chatgpt_appearance_header_background_color_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_header_background_color', $chatbot_chatgpt_appearance_header_background_color);
-        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 
@@ -91,12 +89,18 @@ function chatbot_chatgpt_width_setting_callback($args) {
     <select id="chatbot_chatgpt_width_setting" name = "chatbot_chatgpt_width_setting">
         <option value="Narrow" <?php selected( $chatgpt_width, 'Narrow' ); ?>><?php echo esc_html( 'Narrow' ); ?></option>
         <option value="Wide" <?php selected( $chatgpt_width, 'Wide' ); ?>><?php echo esc_html( 'Wide' ); ?></option>
-        <option value="Custom" <?php selected( $chatgpt_width, 'Custom' ); ?>><?php echo esc_html( 'Custom' ); ?></option>
     </select>
     <?php
 
-    // FIXME - IF NARROW THEN RESET WIDTH TO 300PX
-    // FIXME - IF WIDE THEN RESET WIDTH TO 500PX
-    // FIXME - IF CUSTOM THEN RESET WIDTH TO 100% OR USER DEFINED VALUE
+    update_option ('chatbot_chatgpt_width_setting', $chatgpt_width);
+    
+    $chatbot_chatgpt_appearance_width_narrow = esc_attr(get_option('chatbot_chatgpt_appearance_width_narrow', '300px'));
+
+    // Update the $GLOBALS for wide and narrow
+    if ($chatgpt_width == 'Wide') {
+        chatbot_chatgpt_appearance_width_wide_custom_css_settings();
+    } else {
+        chatbot_chatgpt_appearance_width_narrow_custom_css_settings();
+    }
 
 }

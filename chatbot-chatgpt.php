@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your WordPress Website.
- * Version:     1.8.4
+ * Version:     1.8.5
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -29,7 +29,7 @@
 // If this file is called directly, die.
 defined( 'WPINC' ) || die;
 
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.1');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.5');
 
 // If this file is called directly, die.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,12 +44,36 @@ global $wpdb; // Declare the global $wpdb object
 
 // Uniquely Identify the Visitor - Ver 1.7.4
 global $session_id; // Declare the global $session_id variable
+// Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
+ob_start();
 
-if ($session_id == '') {
-    session_start();
+// Updated for Ver 1.8.5
+// Cookie “PHPSESSID” does not have a proper “SameSite” attribute value. Soon, cookies 
+// without the “SameSite” attribute or with an invalid value will be treated as “Lax”. 
+// This means that the cookie will no longer be sent in third-party contexts. If your 
+// application depends on this cookie being available in such contexts, please add the 
+// “SameSite=None“ attribute to it. To know more about the “SameSite“ attribute, 
+// read https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+
+// Start the session if it has not been started, set the global, then close the session
+if (empty($session_id)) {
+    if (session_status() == PHP_SESSION_NONE) {
+        // Set the session cookie parameters
+        session_set_cookie_params([
+            'lifetime' => 0, // Lifetime of the session cookie, defined in seconds.
+            'path' => '/', // Path where the cookie is accessible.
+            'domain' => $_SERVER['HTTP_HOST'], // Domain which the cookie is available.
+            'secure' => true, // If true the cookie will only be sent over secure connections.
+            'httponly' => true, // If true the cookie will only be accessible through the HTTP protocol.
+            'samesite' => 'None' // Prevents the browser from sending this cookie along with cross-site requests.
+        ]);
+
+        session_start();
+    }
+
     $session_id = session_id();
     session_write_close();
-    // error_log ('Session ID: ' . $session_id);
+    // error_log('Session ID: ' . $session_id);
 }
 
 // Include necessary files
@@ -238,10 +262,17 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_allow_file_uploads'
     );
 
+    // $chatbot_settings = array();
+    // foreach ($option_keys as $key) {
+    //     $default_value = $defaults[$key] ?? '';
+    //     $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+    // }
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( 'assets/icons/', __FILE__ );
@@ -267,13 +298,13 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     ));
 
     // Populate the chatbot settings array with values from the database, using default values where necessary
-    $chatbot_settings = array();
-    foreach ($option_keys as $key) {
-        $default_value = $defaults[$key] ?? '';
-        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
-        // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
-    }
+    // $chatbot_settings = array();
+    // foreach ($option_keys as $key) {
+    //     $default_value = $defaults[$key] ?? '';
+    //     $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+    //     // DIAG - Diagnostics
+    //     // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+    // }
 
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
@@ -409,29 +440,23 @@ function chatbot_chatgpt_send_message(): void {
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
-
-        // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
         // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
         // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '* * * chatbot-chatgpt.php * * *');
-
-        // Send message to Custom GPT API - Ver 1.6.7
 
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
+        // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);
-
-        // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$response ' . $response);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => 'response', 'response' => $response]);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+
         // Clean (erase) the output buffer - Ver 1.6.8
         ob_clean();
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
@@ -443,16 +468,29 @@ function chatbot_chatgpt_send_message(): void {
         }
     } else {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT API: ' . $use_assistant_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT');
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$message ' . $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+        
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_api($api_key, $message);
+        
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
+        
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);
+
+        // DIAG - Diagnostics
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+
         // Return response
         wp_send_json_success($response);
     }
@@ -481,7 +519,8 @@ function chatbot_chatgpt_kn_status_activation(): void {
     }
     // clear the 'knowledge_navigator_scan_hook' hook on plugin activation - Ver 1.6.3
     if (wp_next_scheduled('knowledge_navigator_scan_hook')) {
-        wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear scheduled runs
+        // BREAK/FIX - Do not unset the hook - Ver 1.8.5
+        // wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear scheduled runs
     }
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');

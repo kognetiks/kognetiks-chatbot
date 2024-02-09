@@ -479,11 +479,17 @@ function chatbot_chatgpt_retrieve_file_id() {
     // deleteUploadedFile($file_id);
 
     // Set a transient that expires in 2 hours
-    set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, 2 * 60 * 60);
+    $timeFrameForDelete = time() + 2 * 60 * 60;
+    // FIXME - SHORTEST TIME FRAME FOR DELETE
+    $timeFrameForDelete = time() + 60 + 60;
+    set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
 
-    // Set a cron job to delete the file in 1 hour 59 minutes
+    // Set a cron job to delete the file in 1 hour 45 minutes
+    $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+    // FIXME - SHORTEST TIME FRAME FOR DELETE
+    $shorterTimeFrameForDelete = time() + 45 + 60;
     if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
-        wp_schedule_single_event(time() + 59 * 60 + 1 * 60 * 60, 'delete_uploaded_file', array($file_id));
+        wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
     }
 
     return $file_id;

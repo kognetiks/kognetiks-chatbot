@@ -25,6 +25,7 @@ function chatbot_chatgpt_settings_page_html(): void {
         return;
     }
 
+    // Localize the settings - Added back in for Ver 1.8.5
     chatbot_chatgpt_localize();
 
     $active_tab = $_GET['tab'] ?? 'bot_settings';
@@ -59,24 +60,26 @@ function chatbot_chatgpt_settings_page_html(): void {
 
        <script>
             jQuery(document).ready(function($) {
-                let chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
+                var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
 
                 if (chatgptSettingsForm) {
 
                     chatgptSettingsForm.addEventListener('submit', function() {
 
                         // Changed const to var - Ver 1.5.0
-                        // Get the input elements by their IDs
-                        let chatgptNameInput = document.getElementById('chatbot_chatgpt_bot_name');
-                        let chatgpt_chatbot_bot_promptInput = document.getElementById('chatbot_chatgpt_bot_prompt');
-                        let chatgptInitialGreetingInput = document.getElementById('chatbot_chatgpt_initial_greeting');
-                        let chatgptSubsequentGreetingInput = document.getElementById('chatbot_chatgpt_subsequent_greeting');
-                        let chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
-                        let chatbot_chatgpt_start_status_new_visitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
-                        let chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
+                        // Get the input elements by their ids
+                        var chatgptNameInput = document.getElementById('chatbot_chatgpt_bot_name');
+                        var chatgpt_chatbot_bot_promptInput = document.getElementById('chatbot_chatgpt_bot_prompt');
+                        var chatgptInitialGreetingInput = document.getElementById('chatbot_chatgpt_initial_greeting');
+                        var chatgptSubsequentGreetingInput = document.getElementById('chatbot_chatgpt_subsequent_greeting');
+                        var chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
+                        var chatbot_chatgpt_start_status_new_visitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
+                        var chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
                         // New options for max tokens and width - Ver 1.4.2
-                        let chatgptMaxTokensSettingInput = document.getElementById('chatbot_chatgpt_max_tokens_setting');
-                        let chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
+                        var chatgptMaxTokensSettingInput = document.getElementById('chatbot_chatgpt_max_tokens_setting');
+                        var chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
+                        // New options for diagnostics on/off - Ver 1.5.0
+                        var chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
                         // Avatar Settings - Ver 1.4.3
                         let chatgptAvatarIconSettingInput = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                         let chatgptCustomAvatarIconSettingInput = document.getElementById('chatbot_chatgpt_custom_avatar_icon_setting');
@@ -122,11 +125,11 @@ function chatbot_chatgpt_settings_page_html(): void {
             window.onload = function() {
                 // Assign the function to the window object to make it globally accessible
                 window.selectIcon = function(id) {
-                    let chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
+                    var chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                     if(chatgptElement) {
                         // Clear border from previously selected icon
-                        let previousIconId = chatgptElement.value;
-                        let previousIcon = document.getElementById(previousIconId);
+                        var previousIconId = chatgptElement.value;
+                        var previousIcon = document.getElementById(previousIconId);
                         if(previousIcon) previousIcon.style.border = "none";  // Change "" to "none"
 
                         // Set border for new selected icon
@@ -142,8 +145,8 @@ function chatbot_chatgpt_settings_page_html(): void {
                 }
 
                 // If no icon has been selected, select the first one by default
-                let iconFromStorage = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
-                let chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
+                var iconFromStorage = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
+                var chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                 if(chatgptElement) {
                     if (iconFromStorage) {
                         window.selectIcon(iconFromStorage);

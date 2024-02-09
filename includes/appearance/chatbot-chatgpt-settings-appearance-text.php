@@ -34,7 +34,6 @@ function chatbot_chatgpt_appearance_text_color_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_text_color', $chatbot_chatgpt_appearance_text_color);
-        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 
@@ -48,7 +47,6 @@ function chatbot_chatgpt_appearance_text_color_custom_css_settings(): void {
     $GLOBALS['chatbotChatGPTAppearanceCSS']['embedded-style'] = ".embedded-style { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['user-text'] = ".user-text { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['bot-text'] = ".bot-text { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatgptTitle'] = "#chatgptTitle.title { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['typing-dot'] = ".typing-dot { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-custom-button-class'] = ".chatbot-chatgpt-custom-button-class { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
 
@@ -72,7 +70,6 @@ function chatbot_chatgpt_appearance_user_text_background_color_callback(): void 
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_user_text_background_color', $chatbot_chatgpt_appearance_user_text_background_color);
-        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 
 }
@@ -83,6 +80,66 @@ function chatbot_chatgpt_appearance_user_text_background_custom_css_settings(): 
 
     // Define CSS styles as global variables
     $GLOBALS['chatbotChatGPTAppearanceCSS']['user-text'] = ".user-text { background-color: {$chatbot_chatgpt_appearance_user_text_background_color} !important; }";
+
+}
+
+// Set the chatbot greeting text color
+function chatbot_chatgpt_appearance_greeting_text_color_callback(): void {
+    // Get the value of the setting we've registered with register_setting()
+    $chatbot_chatgpt_appearance_greeting_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_greeting_text_color', '#000000'));
+    ?>
+    <input type="text" id="chatbot_chatgpt_appearance_greeting_text_color"
+        name="chatbot_chatgpt_appearance_greeting_text_color"
+        value="<?php echo esc_attr($chatbot_chatgpt_appearance_greeting_text_color); ?>"
+        class="my-color-field"
+    />
+    <?php
+    if(empty($chatbot_chatgpt_appearance_greeting_text_color)) {
+        // Show an error message or handle the error
+        chatbot_chatgpt_general_admin_notice( 'Text color cannot be blank.');
+        update_option('chatbot_chatgpt_appearance_greeting_text_color', '#000000');
+    } else {
+        // Save the value
+        update_option('chatbot_chatgpt_appearance_text_color', $chatbot_chatgpt_appearance_greeting_text_color);
+    }
+}
+
+// Now override the css with the color chosen by the user
+function chatbot_chatgpt_appearance_greeting_text_color_custom_css_settings(): void {
+    $chatbot_chatgpt_appearance_greeting_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
+
+    // Define CSS styles as global variables
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bubble'] = ".chatbot-bubble { color: {$chatbot_chatgpt_appearance_greeting_text_color} !important; }";
+
+}
+
+// Set the chatbot greeting text color
+function chatbot_chatgpt_appearance_header_text_color_callback(): void {
+    // Get the value of the setting we've registered with register_setting()
+    $chatbot_chatgpt_appearance_header_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_header_text_color', '#ffffff'));
+    ?>
+    <input type="text" id="chatbot_chatgpt_appearance_header_text_color"
+        name="chatbot_chatgpt_appearance_header_text_color"
+        value="<?php echo esc_attr($chatbot_chatgpt_appearance_header_text_color); ?>"
+        class="my-color-field"
+    />
+    <?php
+    if(empty($chatbot_chatgpt_appearance_header_text_color)) {
+        // Show an error message or handle the error
+        chatbot_chatgpt_general_admin_notice( 'Text color cannot be blank.');
+        update_option('chatbot_chatgpt_appearance_header_text_color', '#ffffff');
+    } else {
+        // Save the value
+        update_option('chatbot_chatgpt_appearance_header_text_color', $chatbot_chatgpt_appearance_header_text_color);
+    }
+}
+
+// Now override the css with the color chosen by the user
+function chatbot_chatgpt_appearance_header_text_color_custom_css_settings(): void {
+    $chatbot_chatgpt_appearance_header_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_header_text_color', '#ffffff'));
+
+    // Define CSS styles as global variables
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatgptTitle.title'] = "#chatgptTitle.title { color: {$chatbot_chatgpt_appearance_header_text_color} !important; }";
 
 }
 
@@ -104,7 +161,6 @@ function chatbot_chatgpt_appearance_bot_text_background_color_callback(): void {
     } else {
         // Save the value
         update_option('chatbot_chatgpt_appearance_bot_text_background_color', $chatbot_chatgpt_appearance_bot_text_background_color);
-        update_option ('chatbot_chatgpt_width_setting', 'Custom');
     }
 }
 
