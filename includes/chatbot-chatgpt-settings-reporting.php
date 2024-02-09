@@ -44,6 +44,16 @@ function chatbot_chatgpt_reporting_section_callback($args) {
                     echo $header;
                 }
             ?>
+        <h3>Token Data</h3>
+            <p><?php echo chatbot_chatgpt_total_tokens() ?></p>
+            <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
+            <?php
+                if (is_admin()) {
+                    $header = " ";
+                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_token_usage_data')) . '">Download Token Usage Data</a>';
+                    echo $header;
+                }
+            ?>
         <h3>Reporting Settings</h3>
     </div>
     <?php
@@ -366,6 +376,66 @@ function chatbot_chatgpt_size_conversations() {
     return $results[0]->{'Size in MB'};
 }
 
+// Total Prompt Tokens, Completion Tokens, and Total Tokens - Ver 1.8.5
+function chatbot_chatgpt_total_tokens() {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    
+    // Get the reporting period from the options
+    $reporting_period = get_option('chatbot_chatgpt_reporting_period');
+    
+    // Calculate the start date and group by clause based on the reporting period
+    if ($reporting_period === 'Daily') {
+        $start_date = date('Y-m-d', strtotime("-7 days"));
+        $group_by = "DATE_FORMAT(interaction_time, '%m-%d')";
+    } elseif ($reporting_period === 'Monthly') {
+        $start_date = date('Y-m-01', strtotime("-3 months"));
+        $group_by = "DATE_FORMAT(interaction_time, '%Y-%m')";
+    } else {
+        $start_date = date('Y-01-01', strtotime("-3 years"));
+        $group_by = "DATE_FORMAT(interaction_time, '%Y')";
+    }
+    
+    $results = $wpdb->get_results("
+        SELECT $group_by AS interaction_time, 
+            SUM(CASE WHEN user_type = 'Total Tokens' THEN CAST(message_text AS UNSIGNED) ELSE 0 END) AS count 
+        FROM $table_name 
+        WHERE interaction_time >= '$start_date' 
+        GROUP BY $group_by
+        ");
+    
+    if (!empty($wpdb->last_error)) {
+        // Handle the error
+        return '<p>Error retrieving data: ' . esc_html($wpdb->last_error) . '</p>';
+    } else if (!empty($results)) {
+        $labels = [];
+        $data = [];
+        foreach ($results as $result) {
+            $labels[] = $result->interaction_time; // Changed from result->date to result->interaction_time
+            $data[] = $result->count;
+        }
+        
+        $output = '<table class="widefat striped" style="table-layout: fixed; width: auto;">';
+        $output .= '<thead><tr><th>Date</th><th>Total Tokens</th></tr></thead>';
+        $output .= '<tbody>';
+        foreach ($results as $result) {
+            $output .= '<tr>';
+            $output .= '<td>' . esc_html($result->interaction_time) . '</td>'; // Corrected to use interaction_time
+            $output .= '<td>' . number_format($result->count) . '</td>';
+            $output .= '</tr>';
+        }
+        $output .= '</tbody>';
+        $output .= '</table>';
+    
+        return $output;
+    } else {
+        return '<p>No data to report at this time. Please visit again later.</p>';
+    }
+    
+
+}
+
 function chatbot_chatgpt_download_interactions_data() {
 
     // Export data from the chatbot_chatgpt_interactions table to a csv file
@@ -380,13 +450,25 @@ function chatbot_chatgpt_download_conversation_data() {
     
 }
 
+function chatbot_chatgpt_download_token_usage_data() {
+
+    // Export data from the chatbot_chatgpt_conversation_log table to a csv file
+    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Token Usage');
+
+}
+
 // Download the conversation data - Ver 1.7.6
 function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
     global $wpdb;
     $table_name = $wpdb->prefix . $t_table_name;
-    $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+
+    if ( $t_file_name === 'Chatbot-ChatGPT-Token Usage' ) {
+        $results = $wpdb->get_results("SELECT id, session_id, user_id, interaction_time, user_type, message_text FROM $table_name WHERE user_type IN ('Prompt Tokens', 'Completion Tokens', 'Total Tokens')", ARRAY_A);
+    } else {
+        $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+    }
 
     // Check for empty results
     if (empty($results)) {
@@ -493,6 +575,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 }
 add_action('admin_post_chatbot_chatgpt_download_conversation_data', 'chatbot_chatgpt_download_conversation_data');
 add_action('admin_post_chatbot_chatgpt_download_interactions_data', 'chatbot_chatgpt_download_interactions_data');
+add_action('admin_post_chatbot_chatgpt_download_token_usage_data', 'chatbot_chatgpt_download_token_usage_data');
 
 // Function to display the reporting message - Ver 1.7.9
 function chatbot_chatgpt_admin_notice() {

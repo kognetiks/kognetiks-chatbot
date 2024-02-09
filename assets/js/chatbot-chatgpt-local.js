@@ -38,19 +38,19 @@ jQuery(document).ready(function ($) {
         var chatgptAllowFileUploadsInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_allow_file_uploads) ? chatbotSettings.chatbot_chatgpt_allow_file_uploads : 'No';
     
         // DIAG - Diagnostics - Ver 1.8.5
-        console.log('Before localStorage.set Item loop');
+        // console.log('Before localStorage.set Item loop');
 
         Object.keys(chatbotSettings).forEach((key) => {
 
             localStorage.setItem(key, chatbotSettings[key]);
             
             // DIAG - Diagnostics - Ver 1.8.5
-            console.log('Setting ' + key + ' Value ' + chatbotSettings[key] + ' in localStorage');
+            // console.log('Setting ' + key + ' Value ' + chatbotSettings[key] + ' in localStorage');
 
         });
 
         // DIAG - Diagnostics - Ver 1.8.5
-        console.log('After localStorage.set Item loop');
+        // console.log('After localStorage.set Item loop');
 
         // Get the input elements
         var chatbotChatgptBotNameInput = document.getElementById('chatbot_chatgpt_bot_name');
