@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Set the chatbot text color
+// Set the chatbot width
 function chatbot_chatgpt_appearance_width_wide_callback(): void {
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_appearance_width_wide = esc_attr(get_option('chatbot_chatgpt_appearance_width_wide', '500px'));
@@ -40,7 +40,7 @@ function chatbot_chatgpt_appearance_width_wide_callback(): void {
     }
 }
 
-// Now override the css with the color chosen by the user
+// Now override the css with the width chosen by the user
 function chatbot_chatgpt_appearance_width_wide_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_width_wide = esc_attr(get_option('chatbot_chatgpt_appearance_width_wide', '500px'));
 

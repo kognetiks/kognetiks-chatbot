@@ -195,8 +195,8 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 = 1.8.5 =
 * Appended message types for prompt, completion, and total tokens to the conversation log.
-* Additional adjustments to css and appearance settings.
 * Added reporting and data export for total tokens, prompt tokens, and completion tokens - see Settings > Reporting.
+* Additional adjustments to css and appearance settings.
 
 = 1.8.4 =
 * Removed unnecesary styling.

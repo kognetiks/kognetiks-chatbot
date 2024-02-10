@@ -45,8 +45,10 @@ function chatbot_chatgpt_appearance_text_color_custom_css_settings(): void {
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bubble'] = ".chatbot-bubble { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['floating-style'] = ".floating-style { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['embedded-style'] = ".embedded-style { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['user-text'] = ".user-text { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['bot-text'] = ".bot-text { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
+    $user_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_bot_text_background_color', '#007bff'));
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['user-text'] = ".user-text { color: {$chatbot_chatgpt_appearance_text_color} !important; background-color: {$user_text_background_color} !important; }";
+    $bot_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_bot_text_background_color', '#5BC236'));
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['bot-text'] = ".bot-text { color: {$chatbot_chatgpt_appearance_text_color} !important; background-color: {$bot_text_background_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['typing-dot'] = ".typing-dot { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-custom-button-class'] = ".chatbot-chatgpt-custom-button-class { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
 
@@ -78,8 +80,10 @@ function chatbot_chatgpt_appearance_user_text_background_color_callback(): void 
 function chatbot_chatgpt_appearance_user_text_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_user_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_user_text_background_color', '#007bff'));
 
+    // Check for text color
+    $text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
     // Define CSS styles as global variables
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['user-text'] = ".user-text { background-color: {$chatbot_chatgpt_appearance_user_text_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['user-text'] = ".user-text { background-color: {$chatbot_chatgpt_appearance_user_text_background_color} !important; color: {$text_color} !important; }";
 
 }
 
@@ -100,7 +104,7 @@ function chatbot_chatgpt_appearance_greeting_text_color_callback(): void {
         update_option('chatbot_chatgpt_appearance_greeting_text_color', '#000000');
     } else {
         // Save the value
-        update_option('chatbot_chatgpt_appearance_text_color', $chatbot_chatgpt_appearance_greeting_text_color);
+        update_option('chatbot_chatgpt_appearance_greeting_text_color', $chatbot_chatgpt_appearance_greeting_text_color);
     }
 }
 
@@ -168,8 +172,11 @@ function chatbot_chatgpt_appearance_bot_text_background_color_callback(): void {
 function chatbot_chatgpt_appearance_bot_text_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_bot_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_bot_text_background_color', '#5BC236'));
 
+    // Check for text color
+    $text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
+
     // Define CSS styles as global variables
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['bot-text'] = ".bot-text { background-color: {$chatbot_chatgpt_appearance_bot_text_background_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['typing-indicator'] = ".typing-indicator { background-color: {$chatbot_chatgpt_appearance_bot_text_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['bot-text'] = ".bot-text { background-color: {$chatbot_chatgpt_appearance_bot_text_background_color} !important; color: {$text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['typing-indicator'] = ".typing-indicator { background-color: {$chatbot_chatgpt_appearance_bot_text_background_color} !important; color: {$text_color} !important; }";
 
 }
