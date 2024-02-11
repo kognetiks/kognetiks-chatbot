@@ -101,7 +101,7 @@ function chatbot_chatgpt_shortcode($atts) {
             <label for="chatbot-chatgpt-message"></label><textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
             <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
             <button id="chatbot-chatgpt-submit">
-                <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
+                <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
             </button>
             <?php
             if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
@@ -110,7 +110,7 @@ function chatbot_chatgpt_shortcode($atts) {
                 <!-- &nbsp; -->
                 <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
                 <button id="chatbot-chatgpt-upload-file">
-                    <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
+                    <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
@@ -143,7 +143,7 @@ function chatbot_chatgpt_shortcode($atts) {
                 <textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
                 <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
                 <button id="chatbot-chatgpt-submit">
-                    <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
+                    <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                 </button>
                 <?php
                 if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
@@ -152,7 +152,7 @@ function chatbot_chatgpt_shortcode($atts) {
                     <!-- &nbsp; -->
                     <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
                     <button id="chatbot-chatgpt-upload-file">
-                        <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
+                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                     </button>
 
                 <?php

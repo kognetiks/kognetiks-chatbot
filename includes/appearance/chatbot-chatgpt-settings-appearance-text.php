@@ -40,9 +40,10 @@ function chatbot_chatgpt_appearance_text_color_callback(): void {
 // Now override the css with the color chosen by the user
 function chatbot_chatgpt_appearance_text_color_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
+    $chatbot_chatgpt_appearance_background_greeting_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_greeting_text_color', '#000000'));
 
     // Define CSS styles as global variables
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bubble'] = ".chatbot-bubble { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bubble'] = ".chatbot-bubble { color: {$chatbot_chatgpt_appearance_text_color} !important; background-color: {$chatbot_chatgpt_appearance_background_greeting_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['floating-style'] = ".floating-style { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['embedded-style'] = ".embedded-style { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $user_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_bot_text_background_color', '#007bff'));

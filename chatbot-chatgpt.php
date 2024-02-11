@@ -116,6 +116,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-utilities.php'; // Ver 1.8.6
 
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-appearance.php';
@@ -137,6 +138,9 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 global $chatbot_chatgpt_diagnostics;
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
+
+// Dump the chatbot settings
+// chatbot_chatgpt_dump_options_to_file();
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
 global $chatbot_chatgpt_enable_custom_buttons;

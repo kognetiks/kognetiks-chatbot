@@ -191,7 +191,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.6 =
-* TBD
+* Corrected font color in appearance settings for the chatbot.
 
 = 1.8.5 =
 * Appended message types for prompt, completion, and total tokens to the conversation log.
