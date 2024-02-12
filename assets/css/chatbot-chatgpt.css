@@ -21,7 +21,9 @@
 /* Padding for Avatars - Ver 1.5.0 */
 #chatgpt-open-btn.dashicon {
     padding: 25px;
-    font-family: dashicons, serif !important;
+    /* Removed font-family - Ver 1.8.6 */
+    /* font-family: dashicons, serif !important; */
+    font-family: inherit !important;
     height: 20px;
     width: 20px;
 }
@@ -176,9 +178,9 @@
 #chatbot-chatgpt-submit {
     background-color: #f1f1f1 !important;
     border: none;
-    border-radius: 3px;
-    padding: 6px 6px;
-    margin-left: 3px;
+    border-radius: 1px;
+    padding: 1px 1px;
+    margin-left: 1px;
     cursor: pointer;
 }
 
@@ -186,9 +188,19 @@
 #chatbot-chatgpt-upload-file {
     background-color: #f1f1f1 !important;
     border: none;
-    border-radius: 3px;
-    padding: 6px 6px;
-    margin-left: 3px;
+    border-radius: 1px;
+    padding: 1px 1px;
+    margin-left: 1px;
+    cursor: pointer;
+}
+
+/* Erase Conversation Button - Ver 1.8.6 */
+#chatbot-chatgpt-erase-conversation {
+    background-color: #f1f1f1 !important;
+    border: none;
+    border-radius: 1px;
+    padding: 1px 1px;
+    margin-left: 1px;
     cursor: pointer;
 }
 
@@ -250,12 +262,14 @@
     position: relative;
     display: flex;
     align-items: center;
-    background-color: #007bff;
+    /* Removed background-color - Ver 1.8.6 */
+    /* background-color: #007bff; */
     border: none;
     cursor: pointer;
     text-align: center;
-    padding: 15px;
-    border-radius: 10%;
+    /* Adjusted padding - Ver 1.8.6 */
+    padding: 1px;
+    border-radius: 1px;
     justify-content: center;
     flex-wrap: nowrap;
     margin-top: 0px
@@ -268,13 +282,14 @@
 .chatbot-collapsed {
     width: 48px;
     height: 48px;
-    background-color: #007bff;
+    /* Removed background-color - Ver 1.8.6 */
+    /* background-color: #007bff; */
     border-radius: 50%;
     cursor: pointer;
     display: none;
 }
 
-#chatbot-open-btn {
+/* #chatbot-open-btn {
     position: fixed;
     bottom: 5%;
     right: 5%;
@@ -285,12 +300,14 @@
     float: right;
     font: inherit;
     font-family: inherit;
-}
+} */
 
 /* Reset font family for Dashicons */
 #chatgpt-open-btn-dashicon {
     position: relative;
-    font-family: dashicons, inherit !important;
+    /* Removed font-family - Ver 1.8.6 */
+    /* font-family: dashicons, inherit !important; */
+    font-family: inherit !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -310,10 +327,12 @@
     float: right;
     box-shadow: 2px 4px 15px rgb(102, 92, 143);
     border-radius: 10%;
-    width: 80px;
+    width: 50px;
     z-index: 100;
     font: inherit !important;
-    font-family: dashicons, inherit !important;
+    /* Removed font-family - Ver 1.8.6 */
+    /* font-family: dashicons, inherit !important; */
+    font-family: inherit !important;
     display: flex; 
     justify-content: center; 
     align-items: center;

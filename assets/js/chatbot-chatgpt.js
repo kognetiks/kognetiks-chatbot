@@ -36,6 +36,27 @@ jQuery(document).ready(function ($) {
 
     pluginUrl = plugin_vars.pluginUrl;
 
+    // Get an open icon for the chatbot - Ver 1.8.6
+    chatbotopenicon = pluginUrl + '/assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    chatbotopenicon = $('<img>')
+    .attr('id', 'chatbot-open-icon')
+    .attr('class', 'chatbot-open-icon')
+    .attr('src', chatbotopenicon);
+
+    // Get a collapse icon for the chatbot - Ver 1.8.6
+    chatbotcollapseicon = pluginUrl + '/assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
+    chatbotcollapseicon = $('<img>')
+    .attr('id', 'chatbot-collapse-icon')
+    .attr('class', 'chatbot-collapse-icon')
+    .attr('src', chatbotcollapseicon);
+
+    // Get am erase icon for the chatbot - Ver 1.8.6
+    chatboteraseicon = pluginUrl + '/assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
+    chatboteraseicon = $('<img>')
+    .attr('id', 'chatbot-erase-icon')
+    .attr('class', 'chatbot-erase-icon')
+    .attr('src', chatboteraseicon);
+
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
         // console.log('Chatbot ChatGPT: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
         // console.log('Chatbot ChatGPT: NOTICE: chatbot_chatgpt_assistant_alias: ' + chatbot_chatgpt_assistant_alias);
@@ -140,7 +161,11 @@ jQuery(document).ready(function ($) {
     }
 
     chatbotContainer = $('<div></div>').addClass('chatbot-container');
-    chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
+
+    // Changed this out for an image - Ver 1.8.6
+    // chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
+    chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').append(chatbotcollapseicon); // Add a collapse button
+
     chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
     // Avatar and Custom Message - Ver 1.5.0
@@ -161,6 +186,8 @@ jQuery(document).ready(function ($) {
         // Set selectedAvatar to 'icon-000.png' for mobile devices
         selectedAvatar = 'icon-000.png';
     }
+
+
 
     if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
         // Construct the path to the avatar
@@ -189,7 +216,9 @@ jQuery(document).ready(function ($) {
     } else {
         // If no avatar is selected or the selected avatar is 'icon-000.png', use the dashicon
         // Remove the avatar-icon class (if it was previously added) and add the dashicon class
-        chatGptOpenButton.empty().removeClass('avatar-icon').addClass('dashicons dashicons-format-chat dashicon');
+        // chatGptOpenButton.empty().removeClass('avatar-icon').addClass('dashicons dashicons-format-chat dashicon');
+        // chatGptOpenButton.empty().removeClass('avatar-icon').addClass('dashicons chatbot-open-icon chatbotopenicon'); // Add a open button
+        chatGptOpenButton.empty().removeClass('avatar-icon').addClass('chatbot-open-icon').append(chatbotopenicon); // Add a open button
     }
     
     // Append the collapse button and collapsed chatbot icon to the chatbot container
@@ -487,8 +516,39 @@ jQuery(document).ready(function ($) {
 
         appendMessage('File uploaded.', 'bot');
 
-    });    
+    });
 
+    // Add the keydown event listener to the erase conversation button
+    $('#chatbot-chatgpt-erase-conversation').on('keydown', function(e) {
+        if (e.keyCode === 13  && !e.shiftKey) {
+            e.preventDefault();
+            console.log('Chatbot ChatGPT: NOTICE: Enter key pressed on upload file button');
+            $response = chatbot_chatgpt_erase_converation();
+            $('#chatbot-chatgpt-erase-conversation-input').click();
+        }
+    });
+
+    // Function to erase conversation
+    $('#chatbot-chatgpt-erase-conversation-input').on('change', function(e) {
+        console.log('Chatbot ChatGPT: NOTICE: Erasing conversation');
+
+        $.ajax({
+            url: chatbot_chatgpt_params.ajax_url,
+            method: 'POST',
+            data: {
+                action: 'chatbot_chatgpt_erase_conversation'
+            },
+            success: function(response) {
+                console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
+                // Clear the conversation display area
+                $('#chatbot-chatgpt-conversation-display').html('');
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                // console.error('AJAX error:', textStatus, errorThrown);
+            }
+        });
+    });
+    
     // Moved the css to the .css file - Refactored for Ver 1.7.3
     // Add the toggleChatbot() function - Ver 1.1.0
     function toggleChatbot() {

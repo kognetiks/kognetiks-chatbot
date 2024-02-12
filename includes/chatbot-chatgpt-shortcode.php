@@ -96,33 +96,35 @@ function chatbot_chatgpt_shortcode($atts) {
             <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
         </div> -->
         <div id="chatbot-chatgpt-conversation"></div>
-        <div id="chatbot-chatgpt-input">
-            <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
-            <label for="chatbot-chatgpt-message"></label><textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
-            <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
-            <button id="chatbot-chatgpt-submit">
-                <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
-            </button>
-            <?php
-            if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
-            ?>
-                <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
-                <!-- &nbsp; -->
-                <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
-                <button id="chatbot-chatgpt-upload-file">
-                    <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+        <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 20px; width: 100%;">
+            <div style="flex-grow: 1; max-width: 95%;">
+                <label for="chatbot-chatgpt-message"></label>
+                <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 100%;"></textarea>
+            </div>
+            
+            <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <button id="chatbot-chatgpt-submit">
+                    <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                 </button>
-                <script type="text/javascript">
-                    document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-upload-file-input').click();
-                    });
-                </script>
-            <?php
-            }
-            ?>
+                <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
+                    <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                    <button id="chatbot-chatgpt-upload-file">
+                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+                    </button>
+                    <script type="text/javascript">
+                        document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
+                            document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                        });
+                    </script>
+                <?php endif; ?>
+                <button id="chatbot-chatgpt-erase-conversation">
+                    <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
+                </button>
+            </div>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
-        <i class="dashicons dashicons-format-chat"></i>
+        <!-- <i class="dashicons dashicons-format-chat"></i> -->
+        <i class="chatbot-open-icon"></i>
         </button>
         <?php
         return ob_get_clean();
@@ -138,27 +140,32 @@ function chatbot_chatgpt_shortcode($atts) {
                 <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
-            <div id="chatbot-chatgpt-input">
-                <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
-                <textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
-                <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
-                <button id="chatbot-chatgpt-submit">
-                    <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
-                </button>
-                <?php
-                if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
-                ?>
-                    <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
-                    <!-- &nbsp; -->
-                    <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
-                    <button id="chatbot-chatgpt-upload-file">
-                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
-                    </button>
-
-                <?php
-                }
-                ?>
-            </div>
+                <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 100%;">
+                    <div style="flex-grow: 1; max-width: 95%;">
+                        <label for="chatbot-chatgpt-message"></label>
+                        <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 100%;"></textarea>
+                    </div>
+                    
+                    <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <button id="chatbot-chatgpt-submit">
+                            <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
+                        </button>
+                        <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
+                            <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                            <button id="chatbot-chatgpt-upload-file">
+                                <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+                            </button>
+                            <script type="text/javascript">
+                                document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
+                                    document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                                });
+                            </script>
+                        <?php endif; ?>
+                        <button id="chatbot-chatgpt-erase-conversation">
+                            <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
+                        </button>
+                    </div>
+                </div>
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php
             $chatbot_chatgpt_enable_custom_buttons = 'Off'; // 'On' or 'Off'
@@ -214,7 +221,8 @@ function chatbot_chatgpt_shortcode($atts) {
             ?>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
-        <i class="dashicons dashicons-format-chat"></i>
+        <!-- <i class="dashicons dashicons-format-chat"></i> -->
+        <i class="chatbot-open-icon"></i>
         </button>
         <?php
         return ob_get_clean();

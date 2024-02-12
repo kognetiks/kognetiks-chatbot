@@ -139,7 +139,7 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 global $chatbot_chatgpt_diagnostics;
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
-// Dump the chatbot settings
+// Dump the chatbot settings - Ver 1.8.6
 // chatbot_chatgpt_dump_options_to_file();
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -510,6 +510,10 @@ add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_
 // Add action to upload files - Ver 1.7.6
 add_action('wp_ajax_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
+
+// Add action to erase conversation - Ver 1.8.6
+add_action('wp_ajax_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation');
 
 // Settings and Deactivation - Ver 1.5.0
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
