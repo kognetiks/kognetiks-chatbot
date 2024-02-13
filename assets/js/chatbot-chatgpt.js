@@ -522,7 +522,10 @@ jQuery(document).ready(function ($) {
     // Add the click event listener to the clear button - Ver 1.8.6
     $('#chatbot-chatgpt-erase-btn').on('click', function() {
 
-        console.log('Chatbot ChatGPT: NOTICE: Erase conversation selected');
+        // console.log('Chatbot ChatGPT: NOTICE: Erase conversation selected');
+        // console.log('Chatbot ChatGPT: NOTICE: Assistant Alias: ' + localStorage.getItem('chatbot_chatgpt_assistant_alias'));
+
+        // FIXME - NOT HANDLING 'ORIGINAL' CORRECTLY
     
         showTypingIndicator();
     
@@ -531,12 +534,12 @@ jQuery(document).ready(function ($) {
             method: 'POST',
             data: {
                 action: 'chatbot_chatgpt_erase_conversation', // The action to be handled on the server-side
-                param: 'clearn' // Additional parameter to be sent to the server
+                param: localStorage.getItem('chatbot_chatgpt_assistant_alias') // The assistant alias - original, primary or asst_
             },
             success: function(response) {
-                console.log('Success:', response);
+                console.log('Success:', response.data);
                 // Handle success, such as clearing the conversation display
-                appendMessage('Conversation cleared.', 'bot');
+                appendMessage( response.data, 'bot');
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error('AJAX error:', textStatus, errorThrown);

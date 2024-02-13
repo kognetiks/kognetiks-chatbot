@@ -13,12 +13,17 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_erase_conversation_handler( $reset_type = null ) {
+function chatbot_chatgpt_erase_conversation_handler( $reset_type ) {
+
+    if (isset($_POST['param'])) {
+        $reset_type = sanitize_text_field($_POST['param']); // Always sanitize user input
+        // Your logic here based on the 'param'
+    }
 
     // DIAG Diagnostics - Ver 1.8.6
     chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_erase_conversation_handler() called with $reset_type = ' . $reset_type);
     
-    if ( $reset_type == 'original' ) {
+    if ( $reset_type == 'original') {
         // Delete transient data
         delete_transient( 'chatbot_chatgpt_context_history' );
         wp_send_json_success('Conversation cleared - Original.');
@@ -27,5 +32,7 @@ function chatbot_chatgpt_erase_conversation_handler( $reset_type = null ) {
         // FIXME - This is not working - Ver 1.8.6
         wp_send_json_success('Conversation cleared - Assistant.');
     }
+
+    wp_send_json_error('Conversation not cleared.');
 
 }
