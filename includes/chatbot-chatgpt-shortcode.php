@@ -117,14 +117,9 @@ function chatbot_chatgpt_shortcode($atts) {
                         });
                     </script>
                 <?php endif; ?>
-                <button id="chatbot-chatgpt-erase-conversation">
+                <button id="chatbot-chatgpt-erase-btn">
                     <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
                 </button>
-                <!-- <script type="text/javascript">
-                    document.getElementById('chatbot-chatgpt-erase-conversation').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-erase-conversation').click();
-                    });
-                </script> -->
             </div>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
@@ -166,15 +161,9 @@ function chatbot_chatgpt_shortcode($atts) {
                                 });
                             </script>
                         <?php endif; ?>
-                        <button id="chatbot-chatgpt-erase-conversation">
+                        <button id="chatbot-chatgpt-erase-btn">
                             <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
                         </button>
-                        <script type="text/javascript">
-                            document.getElementById('chatbot-chatgpt-erase-conversation').addEventListener('click', function() {
-                                document.getElementById('chatbot-chatgpt-erase-conversation-input').click();
-                            });
-                        </script>
-                    </div>
                 </div>
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php

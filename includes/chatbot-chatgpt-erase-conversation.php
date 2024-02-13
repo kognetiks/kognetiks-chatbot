@@ -13,12 +13,14 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_erase_conversation() {
+function chatbot_chatgpt_erase_conversation_handler() {
 
     // DIAG Diagnostics - Ver 1.8.6
     chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_erase_conversation() called');
     
     // Delete transient data
     // delete_transient( 'chatbot_chatgpt_conversation' );
+
+    wp_send_json_success('Conversation erased successfully.');
 
 }

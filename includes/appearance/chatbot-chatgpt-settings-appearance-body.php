@@ -48,6 +48,7 @@ function chatbot_chatgpt_appearance_background_custom_css_settings(): void {
     $GLOBALS['chatbotChatGPTAppearanceCSS']['embedded-style'] = ".embedded-style { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-submit'] = "#chatbot-chatgpt-submit { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-upload-file'] = "#chatbot-chatgpt-upload-file { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-erase-conversation'] = "#chatbot-chatgpt-erase-btn { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
     
 }
 add_action('wp_head', 'chatbot_chatgpt_appearance_background_custom_css_settings');

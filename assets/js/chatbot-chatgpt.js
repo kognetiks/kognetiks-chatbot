@@ -480,6 +480,7 @@ jQuery(document).ready(function ($) {
 
     // Add the change event listener to the file input field
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
+
         // console.log('Chatbot ChatGPT: NOTICE: File selected');
 
         showTypingIndicator();
@@ -518,41 +519,25 @@ jQuery(document).ready(function ($) {
 
     });
 
-    // Add the keydown event listener to the erase conversation button
-    $('#chatbot-chatgpt-erase-conversation').on('keydown', function(e) {
-        if (e.keyCode === 13  && !e.shiftKey) {
-            e.preventDefault();
-            console.log('Chatbot ChatGPT: NOTICE: Enter key pressed on erase conversation button');
-            $response = chatbot_chatgpt_erase_conversation();
-            $('#chatbot-chatgpt-erase-conversation').click();
-        }
-    });
+    $('#chatbot-chatgpt-erase-btn').on('click', function() {
 
-    // Add the change event listener to the file input field
-    $('#chatbot-chatgpt-erase-conversation').on('change', function(e) {
-        
         console.log('Chatbot ChatGPT: NOTICE: Erase conversation selected');
 
         showTypingIndicator();
-
-        var fileField = e.target;
-
-        var formData = new FormData();
-        formData.append('action', 'chatbot_chatgpt_erase_conversation');
 
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
             data: {
-                action: 'chatbot_chatgpt_erase_conversation'
+                action: 'chatbot_chatgpt_erase_conversation',
             },
             success: function(response) {
-                console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
-                // Clear the conversation display area
-                $('#chatbot-chatgpt-erase-conversation').val('');
+                console.log('Success:', response);
+                // Handle success, such as clearing the conversation display
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error('AJAX error:', textStatus, errorThrown);
+                // Handle error
             }
         });
 

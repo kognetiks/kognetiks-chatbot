@@ -513,8 +513,8 @@ add_action('wp_ajax_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_
 add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
 
 // Add action to erase conversation - Ver 1.8.6
-add_action('wp_ajax_chatbot_chatgpt_erase_conversation', 'chatbot-chatgpt-erase-conversation');
-add_action('wp_ajax_nopriv_chatbot_chatgpt_erase_conversation', 'chatbot-chatgpt-erase-conversation');
+add_action('wp_ajax_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation_handler');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation_handler'); // For logged-out users, if needed
 
 // Settings and Deactivation - Ver 1.5.0
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
