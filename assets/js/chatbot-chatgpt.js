@@ -522,15 +522,23 @@ jQuery(document).ready(function ($) {
     $('#chatbot-chatgpt-erase-conversation').on('keydown', function(e) {
         if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
-            console.log('Chatbot ChatGPT: NOTICE: Enter key pressed on upload file button');
-            $response = chatbot_chatgpt_erase_converation();
-            $('#chatbot-chatgpt-erase-conversation-input').click();
+            console.log('Chatbot ChatGPT: NOTICE: Enter key pressed on erase conversation button');
+            $response = chatbot_chatgpt_erase_conversation();
+            $('#chatbot-chatgpt-erase-conversation').click();
         }
     });
 
-    // Function to erase conversation
-    $('#chatbot-chatgpt-erase-conversation-input').on('change', function(e) {
-        console.log('Chatbot ChatGPT: NOTICE: Erasing conversation');
+    // Add the change event listener to the file input field
+    $('#chatbot-chatgpt-erase-conversation').on('change', function(e) {
+        
+        console.log('Chatbot ChatGPT: NOTICE: Erase conversation selected');
+
+        showTypingIndicator();
+
+        var fileField = e.target;
+
+        var formData = new FormData();
+        formData.append('action', 'chatbot_chatgpt_erase_conversation');
 
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
@@ -541,12 +549,17 @@ jQuery(document).ready(function ($) {
             success: function(response) {
                 console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
                 // Clear the conversation display area
-                $('#chatbot-chatgpt-conversation-display').html('');
+                $('#chatbot-chatgpt-erase-conversation').val('');
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                // console.error('AJAX error:', textStatus, errorThrown);
+                console.error('AJAX error:', textStatus, errorThrown);
             }
         });
+
+        removeTypingIndicator();
+
+        appendMessage('Conversation cleared.', 'bot');
+
     });
     
     // Moved the css to the .css file - Refactored for Ver 1.7.3
