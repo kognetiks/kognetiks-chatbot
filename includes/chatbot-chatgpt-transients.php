@@ -35,7 +35,7 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
     // Set the transient based on the type
     if ( $transient_type == 'display_style' ) {
         $transient_key = 'chatbot_chatgpt_style_' . $page_id . '_' . $user_id;
-    } elseif ( $transient_type == 'assistant_alias' ) {
+    } elseif (  $transient_type== 'assistant_alias' ) {
         $transient_key = 'chatbot_chatgpt_assistant_' . $page_id . '_' . $user_id;
     } elseif ( $transient_type == 'file_id' ) {
         $transient_key = 'chatbot_chatgpt_file_id_' . $session_id;

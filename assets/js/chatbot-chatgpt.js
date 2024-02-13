@@ -533,16 +533,15 @@ jQuery(document).ready(function ($) {
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
             data: {
-                action: 'chatbot_chatgpt_erase_conversation', // The action to be handled on the server-side
-                param: localStorage.getItem('chatbot_chatgpt_assistant_alias') // The assistant alias - original, primary or asst_
+                action: 'chatbot_chatgpt_erase_conversation' // The action to be handled on the server-side
             },
             success: function(response) {
-                console.log('Success:', response.data);
+                // console.log('Success:', response.data);
                 // Handle success, such as clearing the conversation display
                 appendMessage( response.data, 'bot');
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                console.error('AJAX error:', textStatus, errorThrown);
+                // console.error('AJAX error:', textStatus, errorThrown);
                 // Handle error
                 appendMessage('Error: Unable to clear conversation.', 'error');
             }

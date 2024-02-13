@@ -115,7 +115,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', print_r($response, true));
+    // chatbot_chatgpt_back_trace( 'NOTICE', print_r($response, true));
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);

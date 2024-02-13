@@ -48,11 +48,11 @@ global $session_id; // Declare the global $session_id variable
 ob_start();
 
 // Updated for Ver 1.8.5
-// Cookie “PHPSESSID” does not have a proper “SameSite” attribute value. Soon, cookies 
-// without the “SameSite” attribute or with an invalid value will be treated as “Lax”. 
+// Cookie "PHPSESSID" does not have a proper "SameSite" attribute value. Soon, cookies 
+// without the "SameSite" attribute or with an invalid value will be treated as “Lax”. 
 // This means that the cookie will no longer be sent in third-party contexts. If your 
 // application depends on this cookie being available in such contexts, please add the 
-// “SameSite=None“ attribute to it. To know more about the “SameSite“ attribute, 
+// "SameSite=None" attribute to it. To know more about the "SameSite" attribute, 
 // read https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
 
 // Start the session if it has not been started, set the global, then close the session
@@ -65,7 +65,7 @@ if (empty($session_id)) {
             'domain' => $_SERVER['HTTP_HOST'], // Domain which the cookie is available.
             'secure' => true, // If true the cookie will only be sent over secure connections.
             'httponly' => true, // If true the cookie will only be accessible through the HTTP protocol.
-            'samesite' => 'None' // Prevents the browser from sending this cookie along with cross-site requests.
+            'samesite' => 'Strict' // Prevents the browser from sending this cookie along with cross-site requests.
         ]);
 
         session_start();
