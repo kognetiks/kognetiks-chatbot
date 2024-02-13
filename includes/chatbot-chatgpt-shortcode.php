@@ -164,6 +164,7 @@ function chatbot_chatgpt_shortcode($atts) {
                         <button id="chatbot-chatgpt-erase-btn">
                             <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
                         </button>
+                    </div>
                 </div>
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php

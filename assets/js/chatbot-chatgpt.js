@@ -519,32 +519,34 @@ jQuery(document).ready(function ($) {
 
     });
 
+    // Add the click event listener to the clear button - Ver 1.8.6
     $('#chatbot-chatgpt-erase-btn').on('click', function() {
 
         console.log('Chatbot ChatGPT: NOTICE: Erase conversation selected');
-
+    
         showTypingIndicator();
-
+    
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
             data: {
-                action: 'chatbot_chatgpt_erase_conversation',
+                action: 'chatbot_chatgpt_erase_conversation', // The action to be handled on the server-side
+                param: 'clearn' // Additional parameter to be sent to the server
             },
             success: function(response) {
                 console.log('Success:', response);
                 // Handle success, such as clearing the conversation display
+                appendMessage('Conversation cleared.', 'bot');
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error('AJAX error:', textStatus, errorThrown);
                 // Handle error
+                appendMessage('Error: Unable to clear conversation.', 'error');
             }
         });
-
+    
         removeTypingIndicator();
-
-        appendMessage('Conversation cleared.', 'bot');
-
+       
     });
     
     // Moved the css to the .css file - Refactored for Ver 1.7.3
