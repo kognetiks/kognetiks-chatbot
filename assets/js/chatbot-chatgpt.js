@@ -187,12 +187,20 @@ jQuery(document).ready(function ($) {
         selectedAvatar = 'icon-000.png';
     }
 
-
-
+    // Select the avatar based on the setting - Ver 1.5.0
     if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
-        // Construct the path to the avatar
-        avatarPath = pluginUrl + '/assets/icons/' + selectedAvatar;
-        
+
+        // FIXME - Add option for custom Avatar - Ver 1.8.6
+        var chatbot_chatgpt_custom_avatar_icon_setting = localStorage.getItem('chatbot_chatgpt_custom_avatar_icon_setting') || '';
+
+        if (chatbot_chatgpt_custom_avatar_icon_setting === '') {
+            // Construct the path to the avatar
+            avatarPath = pluginUrl + '/assets/icons/' + selectedAvatar;
+        } else {
+            // Construct the path to the avatar
+            avatarPath = chatbot_chatgpt_custom_avatar_icon_setting; // Use the custom URL
+        }
+
         // IDEA - Add option to suppress avatar greeting in setting options page
         // IDEA - If blank greeting, don't show the bubble
         // IDEA - Add option to suppress avatar greeting if clicked on
@@ -582,6 +590,12 @@ jQuery(document).ready(function ($) {
     function loadChatbotStatus() {
         chatbot_chatgpt_start_status = localStorage.getItem('chatbot_chatgpt_start_status');
         chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor');
+
+        // Always start with the chatbot closed for new visitors - Mobile override - Ver 1.8.6
+        if (isMobile()) {
+            chatbot_chatgpt_start_status = 'closed';
+            chatbot_chatgpt_start_status_new_visitor = 'closed';
+        }
 
         // Nuclear option to clear session conversation - Ver 1.5.0
         // Do not use unless absolutely needed

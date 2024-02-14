@@ -124,6 +124,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-appe
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-body.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-dimensions.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-text.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-user-css.php';
 
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start(): void {
@@ -229,7 +230,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_diagnostics' => 'Off',
         'chatbot_chatgpt_avatar_icon_setting' => 'icon-001.png',
         'chatbot_chatgpt_avatar_icon_url_setting' => '',
-        'chatbot_chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
+        'chatbot_chatgpt_custom_avatar_icon_setting' => '',
         'chatbot_chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
         'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',

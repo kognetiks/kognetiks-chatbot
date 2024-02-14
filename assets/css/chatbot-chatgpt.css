@@ -15,14 +15,14 @@
 }
 
 #chatgpt-open-btn.avatar-icon {
-    padding: 5px;
+    width: 70px;
+    width: 70px;
+    padding: 5px 5px;
 }
 
 /* Padding for Avatars - Ver 1.5.0 */
 #chatgpt-open-btn.dashicon {
     padding: 25px;
-    /* Removed font-family - Ver 1.8.6 */
-    /* font-family: dashicons, serif !important; */
     font-family: inherit !important;
     height: 20px;
     width: 20px;
@@ -31,7 +31,7 @@
 /* Avatar Settings - Ver 1.5.0 */
 .chatbot-bubble {
     background-color: #f0f0f0;
-    color: #000;
+    color: #000000;
     border-radius: 3px;
     padding: 10px 15px; /* Balanced padding */
     margin: 10px;
@@ -184,6 +184,10 @@
     cursor: pointer;
 }
 
+#chatbot-chatgpt-submit:hover {
+    background-color: #dcdcdc !important;    
+}
+
 /* File Upload Button - Ver 1.7.6 */
 #chatbot-chatgpt-upload-file {
     background-color: #f1f1f1 !important;
@@ -194,6 +198,10 @@
     cursor: pointer;
 }
 
+#chatbot-chatgpt-upload-file:hover {
+    background-color: #dcdcdc !important;    
+}
+
 #chatbot-chatgpt-erase-btn {
     background-color: #f1f1f1 !important;
     border: none;
@@ -201,6 +209,10 @@
     padding: 1px 1px;
     margin-left: 1px;
     cursor: pointer;
+}
+
+#chatbot-chatgpt-erase-btn:hover {
+    background-color: #dcdcdc !important;    
 }
 
 /* CSS for append message */
@@ -275,7 +287,7 @@
 }
 
 .chatbot-collapse-btn:hover {
-    background-color: #0257b3;    
+    background-color: #dcdcdc;    
 }
 
 .chatbot-collapsed {
@@ -338,7 +350,7 @@
 }
 
 #chatgpt-open-btn:hover {
-    background-color: #0257b3;
+    background-color: #dcdcdc;
 }
 
 #chatbot-chatgpt-custom-buttons {
@@ -388,7 +400,6 @@
 .chatbot-chatgpt-custom-button-class {
     background-color: #3B82F6;
     color: #ffffff;
-    /* font-weight: bold; */
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
     text-decoration: none;
@@ -407,4 +418,3 @@
     color: inherit;
     text-decoration: none !important;
 }
-
