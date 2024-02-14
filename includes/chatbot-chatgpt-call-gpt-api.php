@@ -17,6 +17,10 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_call_api($api_key, $message) {
 
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
     global $learningMessages;
     global $errorResponses;
 

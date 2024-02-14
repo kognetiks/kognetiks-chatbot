@@ -241,7 +241,7 @@ jQuery(document).ready(function ($) {
         isFirstTime = !localStorage.getItem('chatbot_chatgpt_opened') || false;
 
         // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
-        localStorage.removeItem('chatgpt_conversation');
+        localStorage.removeItem('chatbot_chatgpt_conversation');
 
         if (isFirstTime) {
             // DIAG - Logging for Diagnostics
@@ -265,7 +265,7 @@ jQuery(document).ready(function ($) {
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatbot_chatgpt_opened', 'true');
             // Save the conversation after the initial greeting is appended - Ver 1.2.0
-            sessionStorage.setItem('chatgpt_conversation', conversation.html());           
+            sessionStorage.setItem('chatbot_chatgpt_conversation', conversation.html());           
 
         } else {
             // DIAG - Logging for Diagnostics - Ver 1.4.2
@@ -350,7 +350,7 @@ jQuery(document).ready(function ($) {
         // window.scrollTo(0, document.body.scrollHeight);
 
         // Save the conversation locally between bot sessions - Ver 1.2.0
-        sessionStorage.setItem('chatgpt_conversation', conversation.html());
+        sessionStorage.setItem('chatbot_chatgpt_conversation', conversation.html());
 
     }
 
@@ -532,8 +532,6 @@ jQuery(document).ready(function ($) {
 
         // console.log('Chatbot ChatGPT: NOTICE: Erase conversation selected');
         // console.log('Chatbot ChatGPT: NOTICE: Assistant Alias: ' + localStorage.getItem('chatbot_chatgpt_assistant_alias'));
-
-        // FIXME - NOT HANDLING 'ORIGINAL' CORRECTLY
     
         showTypingIndicator();
     
@@ -603,7 +601,7 @@ jQuery(document).ready(function ($) {
         // nuclearOption = 'Off';
         // if (nuclearOption === 'On') {
         //     console.log('Chatbot ChatGPT: NOTICE: ***** NUCLEAR OPTION IS ON ***** ');
-        //     sessionStorage.removeItem('chatgpt_conversation');
+        //     sessionStorage.removeItem('chatbot_chatgpt_conversation');
         //     // Removed in Ver 1.6.1
         //     sessionStorage.removeItem('chatgpt_last_response');
         // }
@@ -660,7 +658,7 @@ jQuery(document).ready(function ($) {
    
     // Load conversation from local storage if available - Ver 1.2.0
     function loadConversation() {
-        storedConversation = sessionStorage.getItem('chatgpt_conversation');
+        storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
   
         // DIAG - Diagnostics - Ver 1.5.0

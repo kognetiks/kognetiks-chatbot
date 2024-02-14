@@ -191,10 +191,10 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.6 =
-* Corrected font color in appearance settings for the chatbot.
-* Added functinality for a covnesration reset clearning interaction history.
+* Added functionality for a conversation reset clearning user interaction history.
 * Now supports your custom avatar - see Settings > Avatars for more information.
-* Support for custom CSS for the chatbot - see Settings > Appearance for more information.
+* Corrected font color in appearance settings for the chatbot.
+* Support added for user customizable CSS rules - see Settings > Appearance for more details.
 
 = 1.8.5 =
 * Appended message types for prompt, completion, and total tokens to the conversation log.

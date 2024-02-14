@@ -18,6 +18,10 @@ function set_chatbot_chatgpt_threads($t_thread_id, $t_assistant_id, $user_id, $p
 
     // Declare global variables
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
 
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$t_thread_id' . $t_thread_id);
@@ -61,6 +65,10 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
 
     // Declare global variables
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
 
     // Pass the $user_id and $page_id values from the shortcode
     // $user_id = get_current_user_id(); // Get current user ID

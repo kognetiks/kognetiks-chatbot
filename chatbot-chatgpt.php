@@ -212,7 +212,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'user_id' => $user_id,
         'page_id' => $page_id
     );
-
+    
     // Defaults for Ver 1.6.1
     $defaults = array(
         'chatbot_chatgpt_bot_name' => 'Chatbot ChatGPT',
@@ -339,7 +339,10 @@ function chatbot_chatgpt_send_message(): void {
 
     // Global variables
     global $session_id;
+    global $user_id;
+    global $page_id;
     global $thread_id;
+    global $assistant_id;
 
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
@@ -379,6 +382,9 @@ function chatbot_chatgpt_send_message(): void {
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
     $assistant_id = isset($chatbot_settings['assistantID']) ? $chatbot_settings['assistantID'] : '';
     $thread_Id = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
+
+    // Set the session variables - Ver 1.8.6
+    $_SESSION['chatbot_chatgpt_thread_id'] = $thread_id;
 
     // DIAG - Diagnostics
     // Chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $user_id: ' . $user_id);
@@ -452,6 +458,10 @@ function chatbot_chatgpt_send_message(): void {
         // DIAG - Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+
+        // Keep track of the session variables - Ver 1.8.6
+        $_SESSION['assistant_id'] = $assistant_id;
+        $_SESSION['thread_id'] = $thread_id;
         
         // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);

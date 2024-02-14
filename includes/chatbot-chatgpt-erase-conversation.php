@@ -21,11 +21,36 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
     // THEREFORE ITS NOT DELETING THE CORRECT TRANSIENT (ANY TRANSIENT)
 
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+
+    global $post;
 
     $user_id = get_current_user_id();
-    $page_id = isset($_POST['page_id']) ? intval($_POST['page_id']) : 0;
-    $transient_type = 'assistant_alias';
+    if ( $user_id !== '' ) {
+        // DIAG = Diagnostics
+        chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    } else {
+        // DIAG = Diagnostics
+        chatbot_chatgpt_back_trace( 'NOTICE', 'No user is currently logged in.');
+        chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+        $user_id = $session_id;
+    }
 
+    if ( $page_id !== '') {
+        // DIAG = Diagnostics
+        chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    } else {
+        // DIAG = Diagnostics
+        chatbot_chatgpt_back_trace( 'NOTICE', 'No page is currently set.');
+        chatbot_chatgpt_back_trace( 'NOTICE', '$post: ' . $post);
+        $page_id = $post->ID;
+    }
+
+    $transient_type = 'assistant_alias';
+    
     $assistant_id = get_chatbot_chatgpt_transients( $transient_type , $user_id, $page_id);
 
     if ( $assistant_id == '' ) {

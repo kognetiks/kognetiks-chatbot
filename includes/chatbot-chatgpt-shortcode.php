@@ -16,6 +16,10 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_shortcode($atts) {
 
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
 
@@ -42,6 +46,7 @@ function chatbot_chatgpt_shortcode($atts) {
 
     // Sanitize the 'assistant' attribute to ensure it contains safe data
     $chatbot_chatgpt_assistant_alias = sanitize_text_field($atts['assistant']);
+    $assistant_id = $chatbot_chatgpt_assistant_alias;
 
     // DIAG - Diagnostics - Ver 1.7.2
     // chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
@@ -235,7 +240,9 @@ add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
 // Fix Updating failed. The response is not a valid JSON response. - Version 1.7.3
 // Function to output the script
 function chatbot_chatgpt_shortcode_enqueue_script() {
-    global $chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias;
+
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
 
     // Check if the variables are set and not empty
     $style = $chatbot_chatgpt_display_style ?? '';

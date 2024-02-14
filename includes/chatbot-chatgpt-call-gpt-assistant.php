@@ -282,6 +282,10 @@ function getTheMessage($thread_id, $api_key) {
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id) {
 
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
 
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Using Assistant ID: ' . $assistant_id);
