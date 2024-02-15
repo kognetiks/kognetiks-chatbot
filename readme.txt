@@ -191,7 +191,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.7 -
-* TBD
+* Quick fix for collapse button
 
 = 1.8.6 =
 * Added functionality for a conversation reset clearning user interaction history.
