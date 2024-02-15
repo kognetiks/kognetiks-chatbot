@@ -25,11 +25,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     // $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -156,14 +156,14 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // FIXME - ADD THE USAGE TO CONVERATION TRACKER
+    // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);

@@ -192,6 +192,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 = 1.8.6 =
 * Added functionality for a conversation reset clearning user interaction history.
+* Improved conversation continuity for longer interactions.
 * Now supports your custom avatar - see Settings > Avatars for more information.
 * Corrected font color in appearance settings for the chatbot.
 * Support added for user customizable CSS rules - see Settings > Appearance for more details.

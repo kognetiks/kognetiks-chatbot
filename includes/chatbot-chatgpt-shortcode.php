@@ -23,12 +23,20 @@ function chatbot_chatgpt_shortcode($atts) {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
 
+    $script_data_array = array(
+        'user_id' => $user_id,
+        'page_id' => $page_id,
+        'session_id' => $session_id,
+        'thread_id' => $thread_id,
+        'assistant_id' => $assistant_id
+    );
+
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // EXAMPLE - Shortcode Attributes
     // [chatbot_chatgpt] - Default values, floating style, uses OpenAI's ChatGPT
@@ -76,8 +84,8 @@ function chatbot_chatgpt_shortcode($atts) {
     if (empty($page_id)) {
         $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
     }
-    set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id);
-    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id);
+    set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
+    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
@@ -97,8 +105,8 @@ function chatbot_chatgpt_shortcode($atts) {
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id);
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id);   
+        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -142,8 +150,8 @@ function chatbot_chatgpt_shortcode($atts) {
     } else {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id);
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id);   
+        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
         ob_start();
         ?>
         <div id="chatbot-chatgpt">

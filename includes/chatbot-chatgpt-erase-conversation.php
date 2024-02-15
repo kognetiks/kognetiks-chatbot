@@ -32,11 +32,11 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // $user_id = get_current_user_id();
     if ( $user_id !== '' ) {
@@ -69,24 +69,28 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
         $reset_type = 'assistant';
     }
     
-    // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', '$reset_type: ' . $reset_type);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type: ' . $transient_type);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    
     if ( $reset_type == 'original') {
         // Delete transient data
         delete_transient( 'chatbot_chatgpt_context_history' );
         wp_send_json_success('Conversation cleared - Original.');
     } else {
+        $thread_id = ''; // Nullify the thread_id
+        // Wipe the Context
+        update_option( 'chatbot_chatgpt_conversation_context' ,'' , true);
         // Delete transient data - Assistants
         delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id, $session_id);
-        // FIXME - This is not working - Ver 1.8.6
+        // Delete the threads
+        delete_chatbot_chatgpt_threads($user_id, $page_id);
         wp_send_json_success('Conversation cleared - Assistant.');
     }
+
+    // DIAG - Diagnostics - Ver 1.8.6
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$reset_type: ' . $reset_type);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type: ' . $transient_type);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     wp_send_json_error('Conversation not cleared.');
 

@@ -221,11 +221,11 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     
     // Defaults for Ver 1.6.1
     $defaults = array(
@@ -395,8 +395,8 @@ function chatbot_chatgpt_send_message(): void {
     $page_id = intval($_POST['page_id']);
 
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $page_id: ' . $page_id);
 
     $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
@@ -408,18 +408,11 @@ function chatbot_chatgpt_send_message(): void {
     $thread_Id = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-
-    // DIAG - Diagnostics
-    // Chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $user_id: ' . $user_id);
-    // Chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $assistant_id: ' . $assistant_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $thread_Id: ' . $thread_Id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default

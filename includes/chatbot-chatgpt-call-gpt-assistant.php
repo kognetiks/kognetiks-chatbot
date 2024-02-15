@@ -288,11 +288,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
@@ -321,6 +321,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
     $page_id = get_the_id();
+    
     $script_data_array = array(
         'user_id' => $user_id,
         'page_id' => $page_id,

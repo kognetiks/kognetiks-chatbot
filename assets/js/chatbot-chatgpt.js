@@ -370,6 +370,9 @@ jQuery(document).ready(function ($) {
     }
 
     submitButton.on('click', function () {
+        
+        // showTypingIndicator();
+
         message = messageInput.val().trim();
 
         if (!message) {
@@ -470,7 +473,7 @@ jQuery(document).ready(function ($) {
         });
 
         // Belt & Suspenders - Ver 1.8.6
-        removeTypingIndicator();
+        // removeTypingIndicator();
 
     });
     
@@ -496,7 +499,9 @@ jQuery(document).ready(function ($) {
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
 
         // console.log('Chatbot ChatGPT: NOTICE: File selected');
-
+  
+        // showTypingIndicator();
+        
         var fileField = e.target;
 
         // Check if a file is selected
@@ -544,7 +549,7 @@ jQuery(document).ready(function ($) {
         });
         
         // Belt & Suspenders - Ver 1.8.6
-        removeTypingIndicator();
+        // removeTypingIndicator();
 
     });
 
@@ -552,7 +557,9 @@ jQuery(document).ready(function ($) {
     $('#chatbot-chatgpt-erase-btn').on('click', function() {
 
         // console.log('Chatbot ChatGPT: NOTICE: Erase conversation selected');
-    
+        
+        // showTypingIndicator();
+
         var user_id = php_vars.user_id;
         var page_id = php_vars.page_id;
         var session_id = php_vars.session_id;
@@ -599,7 +606,7 @@ jQuery(document).ready(function ($) {
         });
 
         // Belt & Suspenders - Ver 1.8.6
-        removeTypingIndicator();
+        // removeTypingIndicator();
        
     });
     
