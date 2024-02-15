@@ -281,8 +281,7 @@
     position: relative;
     display: flex;
     align-items: center;
-    /* Removed background-color - Ver 1.8.6 */
-    /* background-color: #007bff; */
+    background-color: #f1f1f1;
     border: none;
     cursor: pointer;
     text-align: center;
