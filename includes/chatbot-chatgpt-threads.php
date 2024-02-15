@@ -23,6 +23,13 @@ function set_chatbot_chatgpt_threads($t_thread_id, $t_assistant_id, $user_id, $p
     global $thread_id;
     global $assistant_id;
 
+    // DIAG - Diagnostics - Ver 1.8.6
+    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$t_thread_id' . $t_thread_id);
     // chatbot_chatgpt_back_trace( 'NOTICE', '$t_assistant_id ' . $t_assistant_id);

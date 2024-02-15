@@ -533,13 +533,24 @@ jQuery(document).ready(function ($) {
         // console.log('Chatbot ChatGPT: NOTICE: Erase conversation selected');
         // console.log('Chatbot ChatGPT: NOTICE: Assistant Alias: ' + localStorage.getItem('chatbot_chatgpt_assistant_alias'));
     
+        var user_id = php_vars.user_id;
+        var page_id = php_vars.page_id;
+        var session_id = php_vars.session_id;
+        var assistant_id = php_vars.assistant_id;
+        var thread_id = php_vars.thread_id;
+
         showTypingIndicator();
     
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
             data: {
-                action: 'chatbot_chatgpt_erase_conversation' // The action to be handled on the server-side
+                action: 'chatbot_chatgpt_erase_conversation', // The action to be handled on the server-side
+                user_id: user_id, // pass the user ID here
+                page_id: page_id, // pass the page ID here
+                session_id: session_id, // pass the session
+                thread_id: thread_id, // pass the thread ID
+                assistant_id: assistant_id, // pass the assistant ID
             },
             success: function(response) {
                 // console.log('Success:', response.data);

@@ -23,6 +23,13 @@ function chatbot_chatgpt_shortcode($atts) {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
 
+    // DIAG - Diagnostics - Ver 1.8.6
+    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+
     // EXAMPLE - Shortcode Attributes
     // [chatbot_chatgpt] - Default values, floating style, uses OpenAI's ChatGPT
     // [chatbot_chatgpt style="floating"] - Floating style, uses OpenAI's ChatGPT

@@ -26,27 +26,37 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
     global $thread_id;
     global $assistant_id;
 
-    global $post;
+    if (isset($_POST['user_id']) && isset($_POST['page_id'])) {
+        $user_id = $_POST['user_id'];
+        $page_id = $_POST['page_id'];
+    }
 
-    $user_id = get_current_user_id();
+    // DIAG - Diagnostics - Ver 1.8.6
+    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+
+    // $user_id = get_current_user_id();
     if ( $user_id !== '' ) {
         // DIAG = Diagnostics
-        chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
     } else {
         // DIAG = Diagnostics
-        chatbot_chatgpt_back_trace( 'NOTICE', 'No user is currently logged in.');
-        chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'No user is currently logged in.');
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
         $user_id = $session_id;
     }
 
     if ( $page_id !== '') {
         // DIAG = Diagnostics
-        chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
     } else {
         // DIAG = Diagnostics
-        chatbot_chatgpt_back_trace( 'NOTICE', 'No page is currently set.');
-        chatbot_chatgpt_back_trace( 'NOTICE', '$post: ' . $post);
-        $page_id = $post->ID;
+        // chatbot_chatgpt_back_trace( 'NOTICE', 'No page is currently set.');
+        // chatbot_chatgpt_back_trace( 'NOTICE', '$post: ' . $post);
+        $page_id = $_POST['page_id'];
     }
 
     $transient_type = 'assistant_alias';

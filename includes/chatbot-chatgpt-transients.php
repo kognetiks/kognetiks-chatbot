@@ -17,6 +17,17 @@ if ( ! defined( 'WPINC' ) ) {
 function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null): void {
 
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+
+    // DIAG - Diagnostics - Ver 1.8.6
+    chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     if (empty($user_id)) {
         $user_id = get_current_user_id(); // Get current user ID
