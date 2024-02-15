@@ -25,6 +25,7 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_max_tokens_setting'); // Max Tokens setting options - Ver 1.4.2
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context'); // Conversation Context - Ver 1.6.1
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_base_url'); // Ver 1.8.1
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_timeout_setting'); // Ver 1.8.8
 
     add_settings_section(
         'chatbot_chatgpt_api_model_section',
@@ -72,6 +73,15 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_base_url',
         'Base URL',
         'chatbot_chatgpt_base_url_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
+    // Timeout setting - Ver 1.8.8
+    add_settings_field(
+        'chatbot_chatgpt_timeout_setting',
+        'Timeout Setting (in seconds)',
+        'chatbot_chatgpt_timeout_setting_callback',
         'chatbot_chatgpt_api_model',
         'chatbot_chatgpt_api_model_section'
     );

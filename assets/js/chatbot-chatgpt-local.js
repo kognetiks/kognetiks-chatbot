@@ -36,6 +36,9 @@ jQuery(document).ready(function ($) {
 
         // Allow file uploads - Ver 1.7.6
         var chatgptAllowFileUploadsInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_allow_file_uploads) ? chatbotSettings.chatbot_chatgpt_allow_file_uploads : 'No';
+
+        // Timeout Setting - Ver 1.8.8
+        var chatgptTimeoutSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_timeout_setting) ? chatbotSettings.chatbot_chatgpt_timeout_setting : '30';
     
         // DIAG - Diagnostics - Ver 1.8.5
         // console.log('Before localStorage.set Item loop');
@@ -83,6 +86,9 @@ jQuery(document).ready(function ($) {
 
         // Allow file uploads - Ver 1.7.6
         var chatgptAllowFileUploadsInput = document.getElementById('chatbot_chatgpt_allow_file_uploads');
+
+        // Timeout Setting - Ver 1.8.8
+        var chatgptTimeoutSettingInput = document.getElementById('chatbot_chatgpt_timeout_setting');
 
         if(chatbotChatgptBotNameInput) {
             chatbotChatgptBotNameInput.addEventListener('change', function() {
@@ -230,6 +236,13 @@ jQuery(document).ready(function ($) {
             });
         }
 
+        // Timeout Setting - Ver 1.8.8
+        if(chatgptTimeoutSettingInput) {
+            chatgptTimeoutSettingInput.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_timeout_setting', this.value);
+            });
+        }
+
         // Update the localStorage values when the form is submitted - Ver 1.4.1
         // chatgpt-settings-form vs. your-form-id
         var chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
@@ -271,6 +284,12 @@ jQuery(document).ready(function ($) {
 
                 // Allow file uploads - Ver 1.7.6
                 var chatgptAllowFileUploadsInput = document.getElementById('chatbot_chatgpt_allow_file_uploads');
+
+                // Timeout Setting - Ver 1.8.8
+                var chatgptTimeoutSettingInput = document.getElementById('chatbot_chatgpt_timeout_setting');
+
+                // Timeout Setting - Ver 1.8.8
+                var chatgptTimeoutSettingInput = document.getElementById('chatbot_chatgpt_timeout_setting');
 
                 if(chatbotChatgptBotNameInput) {
                     localStorage.setItem('chatbot_chatgpt_bot_name', chatbotChatgptBotNameInput.value);
@@ -348,6 +367,11 @@ jQuery(document).ready(function ($) {
                 // Allow file uploads - Ver 1.7.6
                 if(chatgptAllowFileUploadsInput) {
                     localStorage.setItem('chatbot_chatgpt_allow_file_uploads', chatgptAllowFileUploadsInput.value);
+                }
+
+                // Timeout Setting - Ver 1.8.8
+                if(chatgptTimeoutSettingInput) {
+                    localStorage.setItem('chatbot_chatgpt_timeout_setting', chatgptTimeoutSettingInput.value);
                 }
 
             });

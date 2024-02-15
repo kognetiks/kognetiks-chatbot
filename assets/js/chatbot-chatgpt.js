@@ -34,6 +34,15 @@ jQuery(document).ready(function ($) {
     chatbot_chatgpt_disclaimer_setting = localStorage.getItem('chatbot_chatgpt_disclaimer_setting') || 'Yes';
     chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
 
+    // Add variables for the timeout setting - Ver 1.8.8
+    timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 30;
+    console.log('Chatbot ChatGPT: NOTICE: timeout_setting: ' + timeout_setting);
+    // Convert the timeout setting to a number
+    timeout_setting = parseInt(timeout_setting);
+    // Convert the timeout setting to milliseconds
+    timeout_setting = timeout_setting * 1000;
+
+
     pluginUrl = plugin_vars.pluginUrl;
 
     // Get an open icon for the chatbot - Ver 1.8.6
@@ -388,7 +397,7 @@ jQuery(document).ready(function ($) {
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
-            timeout: 15000, // Example: 10,000ms = 10 seconds
+            timeout: timeout_setting, // Example: 10,000ms = 10 seconds
             data: {
                 action: 'chatbot_chatgpt_send_message',
                 message: message,
@@ -518,7 +527,7 @@ jQuery(document).ready(function ($) {
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
-            timeout: 15000, // Example: 10,000ms = 10 seconds
+            timeout: timeout_setting, // Example: 10,000ms = 10 seconds
             data: formData,
             processData: false,  // tell jQuery not to process the data
             contentType: false,  // tell jQuery not to set contentType
@@ -569,7 +578,7 @@ jQuery(document).ready(function ($) {
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
-            timeout: 15000, // Example: 10,000ms = 10 seconds
+            timeout: timeout_setting, // Example: 10,000ms = 10 seconds
             data: {
                 action: 'chatbot_chatgpt_erase_conversation', // The action to be handled on the server-side
                 user_id: user_id, // pass the user ID here

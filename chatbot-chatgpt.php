@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your WordPress Website.
- * Version:     1.8.7
+ * Version:     1.8.8
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -29,7 +29,7 @@
 // If this file is called directly, die.
 defined( 'WPINC' ) || die;
 
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.7');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.8');
 
 // If this file is called directly, die.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -253,7 +253,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_custom_button_url_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',
         'chatbot_chatgpt_custom_button_url_2' => '',
-        'chatbot_chatgpt_allow_file_uploads' => 'No'
+        'chatbot_chatgpt_allow_file_uploads' => 'No',
+        'chatbot_chatgpt_timeout_setting' => '30',
     );
 
     // Revised for Ver 1.5.0 
@@ -279,7 +280,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_custom_button_url_1',
         'chatbot_chatgpt_custom_button_name_2',
         'chatbot_chatgpt_custom_button_url_2',
-        'chatbot_chatgpt_allow_file_uploads'
+        'chatbot_chatgpt_allow_file_uploads',
+        'chatbot_chatgpt_timeout_setting',
     );
 
     // $chatbot_settings = array();
