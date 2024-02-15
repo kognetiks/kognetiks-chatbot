@@ -36,7 +36,7 @@ jQuery(document).ready(function ($) {
 
     // Add variables for the timeout setting - Ver 1.8.8
     timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 30;
-    console.log('Chatbot ChatGPT: NOTICE: timeout_setting: ' + timeout_setting);
+    // console.log('Chatbot ChatGPT: NOTICE: timeout_setting: ' + timeout_setting);
     // Convert the timeout setting to a number
     timeout_setting = parseInt(timeout_setting);
     // Convert the timeout setting to milliseconds
