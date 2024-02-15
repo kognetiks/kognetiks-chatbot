@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.3
-Stable tag: 1.8.5
+Stable tag: 1.8.6
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -190,10 +190,17 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 == Changelog ==
 
+= 1.8.6 =
+* Added functionality for a conversation reset clearning user interaction history.
+* Improved conversation continuity for longer interactions.
+* Now supports your custom avatar - see Settings > Avatars for more information.
+* Corrected font color in appearance settings for the chatbot.
+* Support added for user customizable CSS rules - see Settings > Appearance for more details.
+
 = 1.8.5 =
 * Appended message types for prompt, completion, and total tokens to the conversation log.
-* Additional adjustments to css and appearance settings.
 * Added reporting and data export for total tokens, prompt tokens, and completion tokens - see Settings > Reporting.
+* Additional adjustments to css and appearance settings.
 
 = 1.8.4 =
 * Removed unnecesary styling.

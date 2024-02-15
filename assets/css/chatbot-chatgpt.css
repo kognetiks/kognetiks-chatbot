@@ -15,13 +15,15 @@
 }
 
 #chatgpt-open-btn.avatar-icon {
-    padding: 5px;
+    width: 70px;
+    width: 70px;
+    padding: 5px 5px;
 }
 
 /* Padding for Avatars - Ver 1.5.0 */
 #chatgpt-open-btn.dashicon {
     padding: 25px;
-    font-family: dashicons, serif !important;
+    font-family: inherit !important;
     height: 20px;
     width: 20px;
 }
@@ -29,7 +31,7 @@
 /* Avatar Settings - Ver 1.5.0 */
 .chatbot-bubble {
     background-color: #f0f0f0;
-    color: #000;
+    color: #000000;
     border-radius: 3px;
     padding: 10px 15px; /* Balanced padding */
     margin: 10px;
@@ -176,20 +178,41 @@
 #chatbot-chatgpt-submit {
     background-color: #f1f1f1 !important;
     border: none;
-    border-radius: 3px;
-    padding: 6px 6px;
-    margin-left: 3px;
+    border-radius: 1px;
+    padding: 1px 1px;
+    margin-left: 1px;
     cursor: pointer;
+}
+
+#chatbot-chatgpt-submit:hover {
+    background-color: #dcdcdc !important;    
 }
 
 /* File Upload Button - Ver 1.7.6 */
 #chatbot-chatgpt-upload-file {
     background-color: #f1f1f1 !important;
     border: none;
-    border-radius: 3px;
-    padding: 6px 6px;
-    margin-left: 3px;
+    border-radius: 1px;
+    padding: 1px 1px;
+    margin-left: 1px;
     cursor: pointer;
+}
+
+#chatbot-chatgpt-upload-file:hover {
+    background-color: #dcdcdc !important;    
+}
+
+#chatbot-chatgpt-erase-btn {
+    background-color: #f1f1f1 !important;
+    border: none;
+    border-radius: 1px;
+    padding: 1px 1px;
+    margin-left: 1px;
+    cursor: pointer;
+}
+
+#chatbot-chatgpt-erase-btn:hover {
+    background-color: #dcdcdc !important;    
 }
 
 /* CSS for append message */
@@ -233,12 +256,20 @@
 }
 
 .error-message {
-    text-align: center;
+    display: inline-block;
+    /* font-weight: bold; */
+    background-color: red;
+    color: black;
+    padding: 5px 10px;
+    border-radius: 12px;
+    border-bottom-left-radius: 0;
+    overflow-wrap: anywhere;
+    font: inherit;
 }
 
 .error-text {
-    color: red;
-    font-weight: bold;
+    color: black;
+    font-weight: bolder;
     font: inherit;
 }
 
@@ -250,31 +281,34 @@
     position: relative;
     display: flex;
     align-items: center;
-    background-color: #007bff;
+    /* Removed background-color - Ver 1.8.6 */
+    /* background-color: #007bff; */
     border: none;
     cursor: pointer;
     text-align: center;
-    padding: 15px;
-    border-radius: 10%;
+    /* Adjusted padding - Ver 1.8.6 */
+    padding: 1px;
+    border-radius: 1px;
     justify-content: center;
     flex-wrap: nowrap;
     margin-top: 0px
 }
 
 .chatbot-collapse-btn:hover {
-    background-color: #0257b3;    
+    background-color: #dcdcdc;    
 }
 
 .chatbot-collapsed {
     width: 48px;
     height: 48px;
-    background-color: #007bff;
+    /* Removed background-color - Ver 1.8.6 */
+    /* background-color: #007bff; */
     border-radius: 50%;
     cursor: pointer;
     display: none;
 }
 
-#chatbot-open-btn {
+/* #chatbot-open-btn {
     position: fixed;
     bottom: 5%;
     right: 5%;
@@ -285,12 +319,14 @@
     float: right;
     font: inherit;
     font-family: inherit;
-}
+} */
 
 /* Reset font family for Dashicons */
 #chatgpt-open-btn-dashicon {
     position: relative;
-    font-family: dashicons, inherit !important;
+    /* Removed font-family - Ver 1.8.6 */
+    /* font-family: dashicons, inherit !important; */
+    font-family: inherit !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -310,17 +346,19 @@
     float: right;
     box-shadow: 2px 4px 15px rgb(102, 92, 143);
     border-radius: 10%;
-    width: 80px;
+    width: 50px;
     z-index: 100;
     font: inherit !important;
-    font-family: dashicons, inherit !important;
+    /* Removed font-family - Ver 1.8.6 */
+    /* font-family: dashicons, inherit !important; */
+    font-family: inherit !important;
     display: flex; 
     justify-content: center; 
     align-items: center;
 }
 
 #chatgpt-open-btn:hover {
-    background-color: #0257b3;
+    background-color: #dcdcdc;
 }
 
 #chatbot-chatgpt-custom-buttons {
@@ -370,7 +408,6 @@
 .chatbot-chatgpt-custom-button-class {
     background-color: #3B82F6;
     color: #ffffff;
-    /* font-weight: bold; */
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
     text-decoration: none;
@@ -389,4 +426,3 @@
     color: inherit;
     text-decoration: none !important;
 }
-

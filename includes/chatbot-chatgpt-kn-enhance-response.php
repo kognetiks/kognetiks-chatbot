@@ -18,7 +18,6 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
 	// Global Variables
     global $wpdb;
-    global $chatbot_chatgpt_diagnostics;
     global $learningMessages;
     global $errorResponses;
     global $stopWords;

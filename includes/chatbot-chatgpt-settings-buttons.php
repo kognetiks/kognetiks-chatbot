@@ -24,7 +24,6 @@ function chatbot_chatgpt_custom_button_section_callback($args) {
 
 // Custom buttons on/off settings field callback - Ver 1.6.5
 function chatbot_chatgpt_enable_custom_buttons_callback($args) {
-    global $chatbot_chatgpt_enable_custom_buttons;
     $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
     ?>
     <select id="chatbot_chatgpt_enable_custom_buttons" name="chatbot_chatgpt_enable_custom_buttons">

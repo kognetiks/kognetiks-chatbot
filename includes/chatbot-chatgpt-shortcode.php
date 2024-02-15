@@ -16,8 +16,27 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_shortcode($atts) {
 
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
+
+    $script_data_array = array(
+        'user_id' => $user_id,
+        'page_id' => $page_id,
+        'session_id' => $session_id,
+        'thread_id' => $thread_id,
+        'assistant_id' => $assistant_id
+    );
+
+    // DIAG - Diagnostics - Ver 1.8.6
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // EXAMPLE - Shortcode Attributes
     // [chatbot_chatgpt] - Default values, floating style, uses OpenAI's ChatGPT
@@ -42,6 +61,7 @@ function chatbot_chatgpt_shortcode($atts) {
 
     // Sanitize the 'assistant' attribute to ensure it contains safe data
     $chatbot_chatgpt_assistant_alias = sanitize_text_field($atts['assistant']);
+    $assistant_id = $chatbot_chatgpt_assistant_alias;
 
     // DIAG - Diagnostics - Ver 1.7.2
     // chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
@@ -64,8 +84,8 @@ function chatbot_chatgpt_shortcode($atts) {
     if (empty($page_id)) {
         $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
     }
-    set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id);
-    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id);
+    set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
+    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
@@ -79,15 +99,14 @@ function chatbot_chatgpt_shortcode($atts) {
     }
 
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
-    // global $chatbot_chatgpt_enable_custom_buttons;
     // $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id);
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id);   
+        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -96,41 +115,43 @@ function chatbot_chatgpt_shortcode($atts) {
             <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
         </div> -->
         <div id="chatbot-chatgpt-conversation"></div>
-        <div id="chatbot-chatgpt-input">
-            <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
-            <label for="chatbot-chatgpt-message"></label><textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
-            <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
-            <button id="chatbot-chatgpt-submit">
-                <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
-            </button>
-            <?php
-            if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
-            ?>
-                <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
-                <!-- &nbsp; -->
-                <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
-                <button id="chatbot-chatgpt-upload-file">
-                    <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
+        <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 20px; width: 100%;">
+            <div style="flex-grow: 1; max-width: 95%;">
+                <label for="chatbot-chatgpt-message"></label>
+                <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 100%;"></textarea>
+            </div>
+            
+            <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <button id="chatbot-chatgpt-submit">
+                    <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                 </button>
-                <script type="text/javascript">
-                    document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-upload-file-input').click();
-                    });
-                </script>
-            <?php
-            }
-            ?>
+                <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
+                    <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                    <button id="chatbot-chatgpt-upload-file">
+                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+                    </button>
+                    <script type="text/javascript">
+                        document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
+                            document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                        });
+                    </script>
+                <?php endif; ?>
+                <button id="chatbot-chatgpt-erase-btn">
+                    <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
+                </button>
+            </div>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
-        <i class="dashicons dashicons-format-chat"></i>
+        <!-- <i class="dashicons dashicons-format-chat"></i> -->
+        <i class="chatbot-open-icon"></i>
         </button>
         <?php
         return ob_get_clean();
     } else {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id);
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id);   
+        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -138,30 +159,34 @@ function chatbot_chatgpt_shortcode($atts) {
                 <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
-            <div id="chatbot-chatgpt-input">
-                <!-- <input type="text" id="chatbot-chatgpt-message" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"> -->
-                <textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr( $chatbot_chatgpt_bot_prompt ); ?>"></textarea>
-                <!-- <button id="chatbot-chatgpt-submit">Send</button> -->
-                <button id="chatbot-chatgpt-submit">
-                    <img src="<?php echo plugins_url('../assets/icons/paper-airplane-modern-icon.png', __FILE__); ?>" alt="Send">
-                </button>
-                <?php
-                if ($chatbot_chatgpt_allow_file_uploads == 'Yes') {
-                ?>
-                    <!-- Add a non-breaking space to ensure that the button is not hidden - Ver 1.7.6 -->
-                    <!-- &nbsp; -->
-                    <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
-                    <button id="chatbot-chatgpt-upload-file">
-                        <img src="<?php echo plugins_url('../assets/icons/paper-clip-modern-icon.png', __FILE__); ?>" alt="Upload File">
-                    </button>
-
-                <?php
-                }
-                ?>
-            </div>
+                <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 100%;">
+                    <div style="flex-grow: 1; max-width: 95%;">
+                        <label for="chatbot-chatgpt-message"></label>
+                        <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 100%;"></textarea>
+                    </div>
+                    
+                    <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <button id="chatbot-chatgpt-submit">
+                            <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
+                        </button>
+                        <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
+                            <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                            <button id="chatbot-chatgpt-upload-file">
+                                <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+                            </button>
+                            <script type="text/javascript">
+                                document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
+                                    document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                                });
+                            </script>
+                        <?php endif; ?>
+                        <button id="chatbot-chatgpt-erase-btn">
+                            <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
+                        </button>
+                    </div>
+                </div>
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php
-            $chatbot_chatgpt_enable_custom_buttons = 'Off'; // 'On' or 'Off'
             $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
             // DIAG - Diagnostics - Ver 1.6.5
             // chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_enable_custom_buttons: ' . $chatbot_chatgpt_enable_custom_buttons);
@@ -214,7 +239,8 @@ function chatbot_chatgpt_shortcode($atts) {
             ?>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
-        <i class="dashicons dashicons-format-chat"></i>
+        <!-- <i class="dashicons dashicons-format-chat"></i> -->
+        <i class="chatbot-open-icon"></i>
         </button>
         <?php
         return ob_get_clean();
@@ -227,7 +253,9 @@ add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
 // Fix Updating failed. The response is not a valid JSON response. - Version 1.7.3
 // Function to output the script
 function chatbot_chatgpt_shortcode_enqueue_script() {
-    global $chatbot_chatgpt_display_style, $chatbot_chatgpt_assistant_alias;
+
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
 
     // Check if the variables are set and not empty
     $style = $chatbot_chatgpt_display_style ?? '';

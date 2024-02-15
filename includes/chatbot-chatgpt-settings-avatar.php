@@ -17,7 +17,8 @@ if ( ! defined( 'WPINC' ) ) {
 // Custom Avatar Icon - Ver 1.5.0
 function chatbot_chatgpt_avatar_section_callback($args): void {
     echo '<div>
-        <p>Choose an avatar that best represents you and your brand.  You can change your avatar at any time.</p>
+        <p>Choose an avatar that best represents you and your brand or link to your own (recommended 60x60px).</p>
+        <p>You can change your avatar at any time.</p>
         <p>It\'s ok you don\'t want an Avatar.  Just select the \'None\' option among the originals.</p>
         <p><b><i>Don\'t forget to click \'Save Settings\' to save your changes.</i><b></p>
     </div>';
@@ -26,7 +27,7 @@ function chatbot_chatgpt_avatar_section_callback($args): void {
 // Custom Avatar Icon - Ver 1.5.0
 function chatbot_chatgpt_custom_avatar_callback($args) {
     // Get the avatar option. If it's not set or is NULL, default to custom value.
-    $custom_avatar_icon = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', 'icon-001.png'));
+    $custom_avatar_icon = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
     ?>
     <input type="text" id="chatbot_chatgpt_custom_avatar_icon_setting" name="chatbot_chatgpt_custom_avatar_icon_setting" value="<?php echo esc_attr( $custom_avatar_icon ); ?>" class="regular-text">
     <?php

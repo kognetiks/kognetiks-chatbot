@@ -28,7 +28,7 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_width_setting' => 'Narrow',
         'chatbot_chatgpt_avatar_icon_setting' => 'icon-001.png',
         'chatbot_chatgpt_avatar_icon_url_setting' => '',
-        'chatbot_chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
+        'chatbot_chatgpt_custom_avatar_icon_setting' => '',
         'chatbot_chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
         'chatbot_chatgpt_enable_custom_buttons' => 'Off',

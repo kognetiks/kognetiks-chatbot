@@ -47,7 +47,6 @@ function chatbot_chatgpt_api_test_callback($args) {
 
 // Diagnostics On/Off - Ver 1.6.5
 function chatbot_chatgpt_diagnostics_setting_callback($args) {
-    global $chatbot_chatgpt_diagnostics;
     $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
     ?>
     <select id="chatbot_chatgpt_diagnostics" name = "chatbot_chatgpt_diagnostics">

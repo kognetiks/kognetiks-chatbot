@@ -3,7 +3,7 @@
  * Plugin Name: Chatbot ChatGPT
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
  * Description: A simple plugin to add a Chatbot ChatGPT to your WordPress Website.
- * Version:     1.8.5
+ * Version:     1.8.6
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -29,7 +29,7 @@
 // If this file is called directly, die.
 defined( 'WPINC' ) || die;
 
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.5');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.6');
 
 // If this file is called directly, die.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -48,11 +48,11 @@ global $session_id; // Declare the global $session_id variable
 ob_start();
 
 // Updated for Ver 1.8.5
-// Cookie “PHPSESSID” does not have a proper “SameSite” attribute value. Soon, cookies 
-// without the “SameSite” attribute or with an invalid value will be treated as “Lax”. 
+// Cookie "PHPSESSID" does not have a proper "SameSite" attribute value. Soon, cookies 
+// without the "SameSite" attribute or with an invalid value will be treated as “Lax”. 
 // This means that the cookie will no longer be sent in third-party contexts. If your 
 // application depends on this cookie being available in such contexts, please add the 
-// “SameSite=None“ attribute to it. To know more about the “SameSite“ attribute, 
+// "SameSite=None" attribute to it. To know more about the "SameSite" attribute, 
 // read https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
 
 // Start the session if it has not been started, set the global, then close the session
@@ -65,7 +65,7 @@ if (empty($session_id)) {
             'domain' => $_SERVER['HTTP_HOST'], // Domain which the cookie is available.
             'secure' => true, // If true the cookie will only be sent over secure connections.
             'httponly' => true, // If true the cookie will only be accessible through the HTTP protocol.
-            'samesite' => 'None' // Prevents the browser from sending this cookie along with cross-site requests.
+            'samesite' => 'Strict' // Prevents the browser from sending this cookie along with cross-site requests.
         ]);
 
         session_start();
@@ -96,6 +96,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-settings.p
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-file-upload.php'; // Functions - Ver 1.7.6
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-erase-conversation.php'; // Functions - Ver 1.8.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
@@ -116,12 +117,14 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-utilities.php'; // Ver 1.8.6
 
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-appearance.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-body.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-dimensions.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-text.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-user-css.php';
 
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start(): void {
@@ -135,11 +138,12 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 }
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
-global $chatbot_chatgpt_diagnostics;
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
+// Dump the chatbot settings - Ver 1.8.6
+// chatbot_chatgpt_dump_options_to_file();
+
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
-global $chatbot_chatgpt_enable_custom_buttons;
 $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
 // Allow file uploads on/off setting can be found on the Settings tab - Ver 1.7.6
@@ -177,6 +181,12 @@ add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10,
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts(): void {
 
+    global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+
     // Enqueue the styles
     wp_enqueue_style('dashicons');
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
@@ -204,9 +214,19 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     $page_id = get_the_id();
     $script_data_array = array(
         'user_id' => $user_id,
-        'page_id' => $page_id
+        'page_id' => $page_id,
+        'session_id' => $session_id,
+        'thread_id' => $thread_id,
+        'assistant_id' => $assistant_id
     );
 
+    // DIAG - Diagnostics - Ver 1.8.6
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    
     // Defaults for Ver 1.6.1
     $defaults = array(
         'chatbot_chatgpt_bot_name' => 'Chatbot ChatGPT',
@@ -224,7 +244,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_diagnostics' => 'Off',
         'chatbot_chatgpt_avatar_icon_setting' => 'icon-001.png',
         'chatbot_chatgpt_avatar_icon_url_setting' => '',
-        'chatbot_chatgpt_custom_avatar_icon_setting' => 'icon-001.png',
+        'chatbot_chatgpt_custom_avatar_icon_setting' => '',
         'chatbot_chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
         'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
         'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
@@ -333,10 +353,16 @@ function chatbot_chatgpt_send_message(): void {
 
     // Global variables
     global $session_id;
+    global $user_id;
+    global $page_id;
     global $thread_id;
+    global $assistant_id;
+
+    $api_key = '';
 
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+
     // Retrieve the Use GPT Assistant ID
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     // FIXME - If gpt-4-turbo is selected, set the API model to gpt-4-1106-preview, i.e., the API name for the model
@@ -345,8 +371,10 @@ function chatbot_chatgpt_send_message(): void {
     }
     // DIAG - Diagnostics
     // chatbot_chatgpt_back_trace( 'NOTICE', '$model: ' . $model);
+
     // Retrieve the Max tokens - Ver 1.4.2
     $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 150));
+
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
@@ -356,15 +384,20 @@ function chatbot_chatgpt_send_message(): void {
         wp_send_json_error('Invalid API key or message');
     }
 
-    $thread_id = '';
-    $assistant_id = '';
-    $user_id = '';
-    $page_id = '';
-    // error_log ('$session_id ' . $session_id);
+    // Removed in Ver 1.8.6 - 2024 02 15
+    // $thread_id = '';
+    // $assistant_id = '';
+    // $user_id = '';
+    // $page_id = '';
     
     // Check the transient for the Assistant ID - Ver 1.7.2
     $user_id = intval($_POST['user_id']);
-    $page_id = intval($_POST['page_id']); 
+    $page_id = intval($_POST['page_id']);
+
+    // DIAG - Diagnostics - Ver 1.8.6
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $page_id: ' . $page_id);
+
     $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
 
@@ -374,12 +407,12 @@ function chatbot_chatgpt_send_message(): void {
     $assistant_id = isset($chatbot_settings['assistantID']) ? $chatbot_settings['assistantID'] : '';
     $thread_Id = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
 
-    // DIAG - Diagnostics
-    // Chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $user_id: ' . $user_id);
-    // Chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $assistant_id: ' . $assistant_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: $thread_Id: ' . $thread_Id);
+    // DIAG - Diagnostics - Ver 1.8.6
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
@@ -506,6 +539,10 @@ add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_
 // Add action to upload files - Ver 1.7.6
 add_action('wp_ajax_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
+
+// Add action to erase conversation - Ver 1.8.6
+add_action('wp_ajax_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation_handler');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation_handler'); // For logged-out users, if needed
 
 // Settings and Deactivation - Ver 1.5.0
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');

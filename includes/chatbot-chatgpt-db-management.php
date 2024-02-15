@@ -240,7 +240,7 @@ function clean_specific_expired_transients(): void {
         $transient_name = str_replace($prefix . 'timeout_', '', $transient);
 
         // Delete the transient.
-        delete_transient($transient_name);
+        delete_transient( $transient_name );
     }
 }
 

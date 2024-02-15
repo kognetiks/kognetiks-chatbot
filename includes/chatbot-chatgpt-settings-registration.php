@@ -353,14 +353,14 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_avatar_section'
     );
 
-    // Coming in Ver 2.0.0
-    // add_settings_field(
-    //     'chatbot_chatgpt_custom_avatar_icon_setting',
-    //     'Custom Avatar URL',
-    //     'chatbot_chatgpt_custom_avatar_callback',
-    //     'chatbot_chatgpt_avatar',
-    //     'chatbot_chatgpt_avatar_section'
-    // );
+    // Custom Avatar URL
+    add_settings_field(
+        'chatbot_chatgpt_custom_avatar_icon_setting',
+        'Custom Avatar URL (60x60px)',
+        'chatbot_chatgpt_custom_avatar_callback',
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_section'
+    );
 
     // Knowledge Navigator settings tab - Ver 1.6.1
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_knowledge_navigator');

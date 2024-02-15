@@ -28,7 +28,7 @@ function chatbot_chatgpt_reporting_section_callback($args) {
             <?php
                 if (is_admin()) {
                     $header = " ";
-                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Converation Data</a>';
+                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Conversation Data</a>';
                     echo $header;
                 }
             ?>

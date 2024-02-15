@@ -30,6 +30,7 @@ function chatbot_chatgpt_appearance_settings(): void {
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_width_narrow');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_width_setting');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_reset');
+    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_user_css_setting');
 
     add_settings_section(
         'chatbot_chatgpt_appearance_section',
@@ -127,6 +128,14 @@ function chatbot_chatgpt_appearance_settings(): void {
         'chatbot_chatgpt_appearance_section'
     );
 
+    add_settings_field(
+        'chatbot_chatgpt_appearance_user_css_setting',
+        'Custom CSS',
+        'chatbot_chatgpt_appearance_user_css_setting_callback',
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_section'
+    );
+
 }
 add_action('admin_init', 'chatbot_chatgpt_appearance_settings');
 
@@ -218,9 +227,26 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Injecting custom CSS settings...');
     // chatbot_chatgpt_back_trace( 'NOTICE', print_r($GLOBALS['chatbotChatGPTAppearanceCSS'], true));
 
+    // Prepend any user CSS settings
+    $chatbot_chatgpt_appearance_user_css_setting = esc_attr(get_option('chatbot_chatgpt_appearance_user_css_setting', ''));
+    // Remove any leading or trailing spaces
+    $chatbot_chatgpt_appearance_user_css_setting = trim($chatbot_chatgpt_appearance_user_css_setting);
+    // Remove multiple spaces
+    $chatbot_chatgpt_appearance_user_css_setting = preg_replace('/\s+/', ' ', $chatbot_chatgpt_appearance_user_css_setting);
+    // Remove any line breaks
+    $chatbot_chatgpt_appearance_user_css_setting = str_replace(array("\r", "\n"), '', $chatbot_chatgpt_appearance_user_css_setting);
+
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-user-css'] = $chatbot_chatgpt_appearance_user_css_setting;
+
+    // DIAG - Diagnostics - Ver 1.8.6
+    // foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
+    //     chatbot_chatgpt_back_trace( 'NOTICE', 'cssRule: ' . $cssRule);
+    // }
+
     // Inject the custom css settings
     $chatbotChatGPTAppearanceCSS = $GLOBALS['chatbotChatGPTAppearanceCSS'];
     $chatbotChatGPTAppearanceCSS = implode("\n", $chatbotChatGPTAppearanceCSS); // Prepend spaces for indentation
+
     ?>
     <style type="text/css">
         <?php
