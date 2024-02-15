@@ -191,12 +191,13 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.8
+* Add an adjustable timeout settings to the chatbot to prevent long running queries.
 
 = 1.8.7 -
 * Quick fix for collapse button
 
 = 1.8.6 =
-* Added functionality for a conversation reset clearning user interaction history.
+* Added functionality for a conversation reset clearing user interaction history.
 * Improved conversation continuity for longer interactions.
 * Now supports your custom avatar - see Settings > Avatars for more information.
 * Corrected font color in appearance settings for the chatbot.

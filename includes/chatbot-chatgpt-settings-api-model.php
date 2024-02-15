@@ -124,3 +124,18 @@ function get_chat_completions_api_url() {
     return get_openai_api_base_url() . "/chat/completions";
 }
 
+// Timeout Settings Callback - Ver 1.8.8
+function chatbot_chatgpt_timeout_setting_callback($args) {
+    // Get the saved chatbot_chatgpt_timeout value or default to 30
+    $timeout = esc_attr(get_option('chatbot_chatgpt_timeout_setting', '30'));
+    // Allow for a range of tokens between 5 and 500 in 5-step increments - Ver 1.8.8
+    ?>
+    <select id="chatbot_chatgpt_timeout_setting" name="chatbot_chatgpt_timeout_setting">
+        <?php
+        for ($i=5; $i<=500; $i+=5) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($timeout, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
