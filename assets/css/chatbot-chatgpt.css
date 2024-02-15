@@ -256,12 +256,20 @@
 }
 
 .error-message {
-    text-align: center;
+    display: inline-block;
+    /* font-weight: bold; */
+    background-color: red;
+    color: black;
+    padding: 5px 10px;
+    border-radius: 12px;
+    border-bottom-left-radius: 0;
+    overflow-wrap: anywhere;
+    font: inherit;
 }
 
 .error-text {
-    color: red;
-    font-weight: bold;
+    color: black;
+    font-weight: bolder;
     font: inherit;
 }
 

@@ -91,7 +91,6 @@ function chatbot_chatgpt_shortcode($atts) {
     }
 
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
-    // global $chatbot_chatgpt_enable_custom_buttons;
     // $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
     // Depending on the style, adjust the output - Ver 1.7.1
@@ -180,7 +179,6 @@ function chatbot_chatgpt_shortcode($atts) {
                 </div>
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php
-            $chatbot_chatgpt_enable_custom_buttons = 'Off'; // 'On' or 'Off'
             $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
             // DIAG - Diagnostics - Ver 1.6.5
             // chatbot_chatgpt_back_trace( 'NOTICE', '$chatbot_chatgpt_enable_custom_buttons: ' . $chatbot_chatgpt_enable_custom_buttons);

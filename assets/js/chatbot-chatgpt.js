@@ -385,6 +385,7 @@ jQuery(document).ready(function ($) {
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
+            timeout: 15000, // Example: 10,000ms = 10 seconds
             data: {
                 action: 'chatbot_chatgpt_send_message',
                 message: message,
@@ -396,76 +397,81 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function (response) {
-                removeTypingIndicator();
                 // console.log('Chatbot ChatGPT: SUCCESS: ' + JSON.stringify(response));
-                if (response.success) {
-                    botResponse = response.data;
-                    // Revision to how disclaimers are handled - Ver 1.5.0
-                    if (localStorage.getItem('chatbot_chatgpt_disclaimer_setting') === 'No') {
-                        const prefixes = [
-                            "As an AI, ",
-                            "As an AI language model, ",
-                            "I am an AI language model and ",
-                            "As an artificial intelligence, ",
-                            "As an AI developed by OpenAI, ",
-                            "As an artificial intelligence developed by OpenAI, "
-                        ];
-                        for (let prefix of prefixes) {
-                            if (botResponse.startsWith(prefix)) {
-                                botResponse = botResponse.slice(prefix.length);
-                                break;
-                            }
+                botResponse = response.data;
+                // Revision to how disclaimers are handled - Ver 1.5.0
+                if (localStorage.getItem('chatbot_chatgpt_disclaimer_setting') === 'No') {
+                    const prefixes = [
+                        "As an AI, ",
+                        "As an AI language model, ",
+                        "I am an AI language model and ",
+                        "As an artificial intelligence, ",
+                        "As an AI developed by OpenAI, ",
+                        "As an artificial intelligence developed by OpenAI, "
+                    ];
+                    for (let prefix of prefixes) {
+                        if (botResponse.startsWith(prefix)) {
+                            botResponse = botResponse.slice(prefix.length);
+                            break;
                         }
                     }
-                    // IDEA Check for a URL
-                    if (botResponse.includes('[URL: ')) {
+                }
+                // IDEA Check for a URL
+                if (botResponse.includes('[URL: ')) {
+                    // DIAG - Diagnostics - Ver 1.6.3
+                    // console.error('Chatbot ChatGPT: ERROR: URL found in bot response');
+                    link = '';
+                    urlRegex = /\[URL: (.*?)\]/g;
+                    match = botResponse.match(urlRegex);
+                    if (match && match.length > 0) {
+                        link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
                         // DIAG - Diagnostics - Ver 1.6.3
-                        // console.error('Chatbot ChatGPT: ERROR: URL found in bot response');
-                        link = '';
-                        urlRegex = /\[URL: (.*?)\]/g;
-                        match = botResponse.match(urlRegex);
-                        if (match && match.length > 0) {
-                            link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
-                            // DIAG - Diagnostics - Ver 1.6.3
-                            // console.log('Chatbot ChatGPT: NOTICE: link: ' + link);
-                        }
-
-                        linkElement = document.createElement('a');
-                        linkElement.href = link;
-                        linkElement.textContent = 'here';
-                        text = botResponse.replace(urlRegex, '');
-                        textElement = document.createElement('span');
-                        textElement.textContent = text;
-                        botResponse = document.createElement('div');
-                        botResponse.appendChild(textElement);
-                        botResponse.appendChild(linkElement);
-                        botResponse.innerHTML += '.';
-                        botResponse = botResponse.outerHTML;
+                        // console.log('Chatbot ChatGPT: NOTICE: link: ' + link);
                     }
+
+                    linkElement = document.createElement('a');
+                    linkElement.href = link;
+                    linkElement.textContent = 'here';
+                    text = botResponse.replace(urlRegex, '');
+                    textElement = document.createElement('span');
+                    textElement.textContent = text;
+                    botResponse = document.createElement('div');
+                    botResponse.appendChild(textElement);
+                    botResponse.appendChild(linkElement);
+                    botResponse.innerHTML += '.';
+                    botResponse = botResponse.outerHTML;
 
                     // Check for double asterisks suggesting a "bold" response
                     // Check for linefeeds suggesting paragraphs response
                     botResponse = botResponse.replace(/\n/g, "<br>");
                     botResponse = botResponse.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
-
-                    // Return the response
-                    appendMessage(botResponse, 'bot');
-                } else {
-                    appendMessage('Error: ' + response.data, 'error');
                 }
             },
-            error: function (response) {
-                removeTypingIndicator();
-                // DIAG - Log the error - Ver 1.6.7
-                // console.log('Chatbot ChatGPT: ERROR: ' + JSON.stringify(response));
-                // console.error('Chatbot ChatGPT: ERROR: Unable to send message');
-                appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
+            error: function (jqXHR, status, error) {
+                if(status === "timeout") {
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! This request timed out. Please try again.', 'error');
+                    botResponse = '';
+                } else {
+                    // DIAG - Log the error - Ver 1.6.7
+                    console.log('Chatbot ChatGPT: ERROR: ' + JSON.stringify(response));
+                    appendMessage('Error: ' + errorThrown, 'error');
+                    appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
+                    botResponse = '';
+                }
             },
             complete: function () {
                 removeTypingIndicator();
+                if (botResponse) {
+                    appendMessage(botResponse, 'bot');
+                }
                 submitButton.prop('disabled', false);
             },
         });
+
+        // Belt & Suspenders - Ver 1.8.6
+        removeTypingIndicator();
+
     });
     
     // Add the keydown event listener to the message input - Ver 1.7.6
@@ -491,8 +497,6 @@ jQuery(document).ready(function ($) {
 
         // console.log('Chatbot ChatGPT: NOTICE: File selected');
 
-        showTypingIndicator();
-
         var fileField = e.target;
 
         // Check if a file is selected
@@ -509,21 +513,38 @@ jQuery(document).ready(function ($) {
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
+            timeout: 15000, // Example: 10,000ms = 10 seconds
             data: formData,
             processData: false,  // tell jQuery not to process the data
             contentType: false,  // tell jQuery not to set contentType
+            beforeSend: function () {
+                showTypingIndicator();
+                submitButton.prop('disabled', true);
+            },
             success: function(response) {
                 // console.log('Chatbot ChatGPT: NOTICE: Response from server', response);
                 $('#chatbot-chatgpt-upload-file-input').val('');
+                appendMessage('File successfully uploaded.', 'bot');
             },
-            error: function(jqXHR, textStatus, errorThrown) {
-                // console.error('AJAX error:', textStatus, errorThrown);
-            }
+            error: function(jqXHR, status, error) {
+                if(status === "timeout") {
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! This request timed out. Please try again.', 'error');
+                } else {
+                    // DIAG - Log the error - Ver 1.6.7
+                    // console.log('Chatbot ChatGPT: ERROR: ' + JSON.stringify(response));
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! Failed to upload file. Please try again.', 'error');
+                }
+            },
+            complete: function () {
+                removeTypingIndicator();
+                submitButton.prop('disabled', false);
+            },
         });
-
+        
+        // Belt & Suspenders - Ver 1.8.6
         removeTypingIndicator();
-
-        appendMessage('File uploaded.', 'bot');
 
     });
 
@@ -531,19 +552,17 @@ jQuery(document).ready(function ($) {
     $('#chatbot-chatgpt-erase-btn').on('click', function() {
 
         // console.log('Chatbot ChatGPT: NOTICE: Erase conversation selected');
-        // console.log('Chatbot ChatGPT: NOTICE: Assistant Alias: ' + localStorage.getItem('chatbot_chatgpt_assistant_alias'));
     
         var user_id = php_vars.user_id;
         var page_id = php_vars.page_id;
         var session_id = php_vars.session_id;
         var assistant_id = php_vars.assistant_id;
         var thread_id = php_vars.thread_id;
-
-        showTypingIndicator();
     
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
+            timeout: 15000, // Example: 10,000ms = 10 seconds
             data: {
                 action: 'chatbot_chatgpt_erase_conversation', // The action to be handled on the server-side
                 user_id: user_id, // pass the user ID here
@@ -552,18 +571,34 @@ jQuery(document).ready(function ($) {
                 thread_id: thread_id, // pass the thread ID
                 assistant_id: assistant_id, // pass the assistant ID
             },
+            beforeSend: function () {
+                showTypingIndicator();
+                submitButton.prop('disabled', true);
+            },
             success: function(response) {
+                sessionStorage.setItem('chatbot_chatgpt_conversation', ''); // Clear the conversation from sessionStorage
+                // DIAG - Log the response
                 // console.log('Success:', response.data);
-                // Handle success, such as clearing the conversation display
                 appendMessage( response.data, 'bot');
             },
-            error: function(jqXHR, textStatus, errorThrown) {
-                // console.error('AJAX error:', textStatus, errorThrown);
-                // Handle error
-                appendMessage('Error: Unable to clear conversation.', 'error');
-            }
+            error: function(jqXHR, status, error) {
+                if(status === "timeout") {
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! This request timed out. Please try again.', 'error');
+                } else {
+                    // DIAG - Log the error - Ver 1.6.7
+                    // console.log('Chatbot ChatGPT: ERROR: ' + JSON.stringify(response));
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! Unable to clear conversation. Please try again.', 'error');
+                }
+            },
+            complete: function () {
+                removeTypingIndicator();
+                submitButton.prop('disabled', false);
+            },
         });
-    
+
+        // Belt & Suspenders - Ver 1.8.6
         removeTypingIndicator();
        
     });

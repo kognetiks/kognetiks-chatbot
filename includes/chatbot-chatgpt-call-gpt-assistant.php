@@ -295,7 +295,6 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // Globals added for Ver 1.7.2
-    global $chatbot_chatgpt_diagnostics;
     global $learningMessages;
     global $errorResponses;
     global $stopWords;
@@ -318,6 +317,17 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
         set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
     }
+
+    // Localize the data for user id and page id
+    $user_id = get_current_user_id();
+    $page_id = get_the_id();
+    $script_data_array = array(
+        'user_id' => $user_id,
+        'page_id' => $page_id,
+        'session_id' => $session_id,
+        'thread_id' => $thread_id,
+        'assistant_id' => $assistant_id
+    );
 
     // Step 1: Create an Assistant
     // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 1: Create an Assistant');

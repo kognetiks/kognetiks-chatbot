@@ -138,14 +138,12 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 }
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
-global $chatbot_chatgpt_diagnostics;
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
 // Dump the chatbot settings - Ver 1.8.6
 // chatbot_chatgpt_dump_options_to_file();
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
-global $chatbot_chatgpt_enable_custom_buttons;
 $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
 // Allow file uploads on/off setting can be found on the Settings tab - Ver 1.7.6
