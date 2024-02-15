@@ -190,6 +190,8 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 == Changelog ==
 
+= 1.8.8
+
 = 1.8.7 -
 * Quick fix for collapse button
 
