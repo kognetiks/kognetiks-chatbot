@@ -109,7 +109,12 @@ function chatbot_chatgpt_shortcode($atts) {
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
         ob_start();
         ?>
-        <div id="chatbot-chatgpt">
+        <div id="chatbot-chatgpt" name="chatbot-chatgpt" style="display: flex;" class="embedded-style chatbot-full">
+        <script>
+            $(document).ready(function() {
+                $('#chatbot-chatgpt').removeClass('floating-style').addClass('embedded-style');
+            });
+        </script>
         <!-- REMOVED FOR EMBEDDED -->
         <!-- <div id="chatbot-chatgpt-header">
             <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>

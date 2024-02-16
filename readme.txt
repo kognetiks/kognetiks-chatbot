@@ -193,10 +193,10 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 = 1.8.9 =
 * TBD
 
-= 1.8.8
+= 1.8.8 =
 * Add an adjustable timeout settings to the chatbot to prevent long running queries.
 
-= 1.8.7 -
+= 1.8.7 =
 * Quick fix for collapse button
 
 = 1.8.6 =
