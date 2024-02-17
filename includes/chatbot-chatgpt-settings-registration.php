@@ -345,6 +345,15 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_avatar_section'
     );
 
+    // Custom Avatar URL
+    add_settings_field(
+        'chatbot_chatgpt_custom_avatar_icon_setting',
+        'Custom Avatar URL (60x60px)',
+        'chatbot_chatgpt_custom_avatar_callback',
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_section'
+    );
+
     // Avatar Icon Set
     // add_settings_field(
     //     'chatbot_chatgpt_avatar_icon_set',
@@ -354,20 +363,11 @@ function chatbot_chatgpt_settings_init() {
     //     'chatbot_chatgpt_avatar_section'
     // );
     
-    // Register new fields in the "chatbot_chatgpt_avatar_section" section, inside the "chatbot_chatgpt_avatar" page
+    // Avatar Icon Selection - None, Custom, or one from the various sets
     add_settings_field(
         'chatbot_chatgpt_avatar_icon_setting',
-        'Avatar Icon Setting',
+        'Avatar Icon Options',
         'chatbot_chatgpt_avatar_icon_callback',
-        'chatbot_chatgpt_avatar',
-        'chatbot_chatgpt_avatar_section'
-    );
-
-    // Custom Avatar URL
-    add_settings_field(
-        'chatbot_chatgpt_custom_avatar_icon_setting',
-        'Custom Avatar URL (60x60px)',
-        'chatbot_chatgpt_custom_avatar_callback',
         'chatbot_chatgpt_avatar',
         'chatbot_chatgpt_avatar_section'
     );

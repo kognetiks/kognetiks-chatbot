@@ -110,11 +110,11 @@ function chatbot_chatgpt_shortcode($atts) {
         ob_start();
         ?>
         <div id="chatbot-chatgpt" name="chatbot-chatgpt" style="display: flex;" class="embedded-style chatbot-full">
-        <script>
+        <!-- <script>
             $(document).ready(function() {
                 $('#chatbot-chatgpt').removeClass('floating-style').addClass('embedded-style');
             });
-        </script>
+        </script> -->
         <!-- REMOVED FOR EMBEDDED -->
         <!-- <div id="chatbot-chatgpt-header">
             <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
