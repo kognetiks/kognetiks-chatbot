@@ -191,7 +191,8 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.8.9 =
-* TBD
+* ALlow custom Avatar - see Settings > Avatars for more information.
+* Resolved IOS and Chrome mobile issues with the chatbot.
 
 = 1.8.8 =
 * Add an adjustable timeout settings to the chatbot to prevent long running queries.
