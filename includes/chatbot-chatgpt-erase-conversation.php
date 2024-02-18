@@ -46,7 +46,8 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
         // DIAG = Diagnostics
         // chatbot_chatgpt_back_trace( 'NOTICE', 'No user is currently logged in.');
         // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-        $user_id = $session_id;
+        // Removed - Ver 1.9.0
+        // $user_id = $session_id;
     }
 
     if ( $page_id !== '') {

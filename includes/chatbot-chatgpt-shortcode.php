@@ -46,11 +46,13 @@ function chatbot_chatgpt_shortcode($atts) {
     // [chatbot_chatgpt style="embedded" assistant="alternate"] - Embedded style, GPT Assistant as set in Alternate setting
     // [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Floating style using a GPT Assistant ID
     // [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Embedded style using a GPT Assistant ID
+    // [chatbot_chatgpt style="embedded" assistant="original" prompt="How do I install this pluging"] - Floating style, uses OpenAI's ChatGPT
 
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
         'style' => 'floating', // Default value
-        'assistant' => 'original' // Default value
+        'assistant' => 'original', // Default value
+        'prompt' => '', // Default value
     );
 
     // Combine user attributes with default attributes
@@ -78,7 +80,8 @@ function chatbot_chatgpt_shortcode($atts) {
     // Store the style and the assistant value - Ver 1.7.2
     $user_id = get_current_user_id(); // Get current user ID
     if (empty($user_id)) {
-        $user_id = $session_id; // Get the session ID if $user_id is not set
+        // Removed - Ver 1.9.0
+        // $user_id = $session_id; // Get the session ID if $user_id is not set
     }
     $page_id = get_the_id(); // Get current page ID
     if (empty($page_id)) {

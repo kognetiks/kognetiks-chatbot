@@ -126,8 +126,8 @@ function get_chat_completions_api_url() {
 
 // Timeout Settings Callback - Ver 1.8.8
 function chatbot_chatgpt_timeout_setting_callback($args) {
-    // Get the saved chatbot_chatgpt_timeout value or default to 30
-    $timeout = esc_attr(get_option('chatbot_chatgpt_timeout_setting', '30'));
+    // Get the saved chatbot_chatgpt_timeout value or default to 60
+    $timeout = esc_attr(get_option('chatbot_chatgpt_timeout_setting', '60'));
     // Allow for a range of tokens between 5 and 500 in 5-step increments - Ver 1.8.8
     ?>
     <select id="chatbot_chatgpt_timeout_setting" name="chatbot_chatgpt_timeout_setting">
