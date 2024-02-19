@@ -1,9 +1,9 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Transients
+ * AI Powered Chatbot for WordPress - Transients
  *
  * This file contains the code for managing the transients used
- * to display the Chatbot ChatGPT on the website.
+ * to display the Chatbot on the website.
  *
  * @package chatbot-chatgpt
  */

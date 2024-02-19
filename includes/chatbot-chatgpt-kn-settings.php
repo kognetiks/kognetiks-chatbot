@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Knowledge Navigator - Settings
+ * AI Powered Chatbot for WordPress - Knowledge Navigator - Settings
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * These are all the options for the Knowledge Navigator.
  * 
  *

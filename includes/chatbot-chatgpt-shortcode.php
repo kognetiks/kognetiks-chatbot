@@ -1,9 +1,9 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Shortcode Registration
+ * AI Powered Chatbot for WordPress - Shortcode Registration
  *
  * This file contains the code for registering the shortcode used
- * to display the Chatbot ChatGPT on the website.
+ * to display the Chatbot on the website.
  *
  * @package chatbot-chatgpt
  */
@@ -39,14 +39,14 @@ function chatbot_chatgpt_shortcode($atts) {
     // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // EXAMPLE - Shortcode Attributes
-    // [chatbot_chatgpt] - Default values, floating style, uses OpenAI's ChatGPT
-    // [chatbot_chatgpt style="floating"] - Floating style, uses OpenAI's ChatGPT
-    // [chatbot_chatgpt style="embedded"] - Embedded style, uses OpenAI's ChatGPT
-    // [chatbot_chatgpt style="floating" assistant="primary"] - Floating style, GPT Assistant as set in Primary setting
-    // [chatbot_chatgpt style="embedded" assistant="alternate"] - Embedded style, GPT Assistant as set in Alternate setting
-    // [chatbot_chatgpt style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Floating style using a GPT Assistant ID
-    // [chatbot_chatgpt style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Embedded style using a GPT Assistant ID
-    // [chatbot_chatgpt style="embedded" assistant="original" prompt="How do I install this pluging"] - Floating style, uses OpenAI's ChatGPT
+    // [chatbot] - Default values, floating style, uses OpenAI's ChatGPT
+    // [chatbot style="floating"] - Floating style, uses OpenAI's ChatGPT
+    // [chatbot style="embedded"] - Embedded style, uses OpenAI's ChatGPT
+    // [chatbot style="floating" assistant="primary"] - Floating style, GPT Assistant as set in Primary setting
+    // [chatbot style="embedded" assistant="alternate"] - Embedded style, GPT Assistant as set in Alternate setting
+    // [chatbot style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Floating style using a GPT Assistant ID
+    // [chatbot style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Embedded style using a GPT Assistant ID
+    // [chatbot style="embedded" assistant="original" prompt="How do I install this pluging"] - Floating style, uses OpenAI's ChatGPT
 
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
@@ -92,7 +92,7 @@ function chatbot_chatgpt_shortcode($atts) {
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
-    $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Chatbot ChatGPT'));
+    $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Chatbot'));
     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
     $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
@@ -255,8 +255,8 @@ function chatbot_chatgpt_shortcode($atts) {
     }
 
 }
-
 add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
 
 // Fix Updating failed. The response is not a valid JSON response. - Version 1.7.3
 // Function to output the script

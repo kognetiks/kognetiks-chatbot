@@ -1,6 +1,6 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Knowledge Navigator - Enhance Response - Ver 1.6.9
+ * AI Powered Chatbot for WordPress - Knowledge Navigator - Enhance Response - Ver 1.6.9
  *
  * This file contains the code for to utilize the DB with the TF-IDF data to enhance the chatbots response.
  * 
@@ -108,7 +108,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     // DIAG Diagnostic - Ver 1.6.5
     // chatbot_chatgpt_back_trace( 'NOTICE', '$highest_score: ' . $highest_score);
     // chatbot_chatgpt_back_trace( 'NOTICE', '$highest_score_word: ' . $highest_score_word);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Chatbot ChatGPT: $highest_score_url: ' . $highest_score_url);
+    // chatbot_chatgpt_back_trace( 'NOTICE', 'Chatbot: $highest_score_url: ' . $highest_score_url);
 
     // IDEA Append message and link if found to ['choices'][0]['message']['urls']
     if ($highest_score > 0) {

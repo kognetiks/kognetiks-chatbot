@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Premium Page
+ * AI Powered Chatbot for WordPress - Settings - Premium Page
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It handles the premium settings and other parameters.
  * 
  *

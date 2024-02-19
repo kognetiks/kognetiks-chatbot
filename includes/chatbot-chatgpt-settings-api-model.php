@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - API/Model Page
+ * AI Powered Chatbot for WordPress - Settings - API/Model Page
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It allows users to configure the API key and other parameters
  * required to access the ChatGPT API from their own account.
  *
@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // API/Model settings section callback - Ver 1.3.0
 function chatbot_chatgpt_api_model_section_callback($args) {
     ?>
-    <p>Configure the settings for the Chatbot ChatGPT plugin by adding your API key and selecting the GPT model of your choice.</p>
+    <p>Configure the settings for the Chatbot plugin by adding your API key and selecting the GPT model of your choice.</p>
     <h3>ChatGPT API Key</h3>
     <p>This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p>
     <h3>ChatGPT Model Choice</h3>

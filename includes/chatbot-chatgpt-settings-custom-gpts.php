@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Custom GPTs
+ * AI Powered Chatbot for WordPress - Settings - Custom GPTs
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It allows users to configure the API key and other parameters
  * required to access the ChatGPT API from their own account.
  *

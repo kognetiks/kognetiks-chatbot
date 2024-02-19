@@ -1,9 +1,9 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Clear Conversation - Ver 1.8.6
+ * AI Powered Chatbot for WordPress - Clear Conversation - Ver 1.8.6
  *
  * This file contains the code for uploading files as part
- * in support of Custom GPT Assistants via the Chatbot ChatGPT.
+ * in support of Custom GPT Assistants via the Chatbot.
  *
  * @package chatbot-chatgpt
  */

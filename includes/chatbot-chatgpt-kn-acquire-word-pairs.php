@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Knowledge Navigator - Acquire Word Pairs
+ * AI Powered Chatbot for WordPress - Settings - Knowledge Navigator - Acquire Word Pairs
  *
- * This file contains the code for the Chatbot ChatGPT Knowledge Navigator.
+ * This file contains the code for the Chatbot Knowledge Navigator.
  * 
  * 
  *

@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Appearance - Ver 1.8.1
+ * AI Powered Chatbot for WordPress - Settings - Appearance - Ver 1.8.1
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It handles the appearance settings and other parameters.
  * 
  *

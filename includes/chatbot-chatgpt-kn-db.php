@@ -1,6 +1,6 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Knowledge Navigator - Database and File Management - Ver 1.6.3
+ * AI Powered Chatbot for WordPress - Knowledge Navigator - Database and File Management - Ver 1.6.3
  *
  * This file contains the code for table actions for database and file management.
  * 

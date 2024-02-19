@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Localize
+ * AI Powered Chatbot for WordPress - Localize
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It localizes the settings and other parameters.
  * 
  *
@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_localize(){
 
     $defaults = array(
-        'chatbot_chatgpt_bot_name' => 'Chatbot ChatGPT',
+        'chatbot_chatgpt_bot_name' => 'Chatbot',
         'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
         'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatbot_chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',

@@ -1,7 +1,7 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Custom Buttons
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * AI Powered Chatbot for WordPress - Settings - Custom Buttons
+ * This file contains the code for the Chatbot settings page.
  * It allows users to configure the custom buttons.
  * 
  *

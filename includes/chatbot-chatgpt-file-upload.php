@@ -1,9 +1,9 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - File Uploads - Ver 1.7.6
+ * AI Powered Chatbot for WordPress - File Uploads - Ver 1.7.6
  *
  * This file contains the code for uploading files as part
- * in support of Custom GPT Assistants via the Chatbot ChatGPT.
+ * in support of Custom GPT Assistants via the Chatbot.
  *
  * @package chatbot-chatgpt
  */
@@ -62,7 +62,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
         // If the API key is empty, then return an error
         return array(
                 'status' => 'error',
-            'message' => 'Oops! You API key is missing. Please enter your API key in the Chatbot ChatGPT settings.'
+            'message' => 'Oops! You API key is missing. Please enter your API key in the Chatbot settings.'
         );
     }
 

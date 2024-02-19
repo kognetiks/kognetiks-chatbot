@@ -1,9 +1,9 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Database Management for Reporting - Ver 1.6.3
+ * AI Powered Chatbot for WordPress - Database Management for Reporting - Ver 1.6.3
  *
  * This file contains the code for table actions for reporting
- * to display the Chatbot ChatGPT on the website.
+ * to display the Chatbot on the website.
  *
  * @package chatbot-chatgpt
  */

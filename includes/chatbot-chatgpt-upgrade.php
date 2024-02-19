@@ -1,6 +1,6 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Upgrade the chatbot-chatgpt plugin
+ * AI Powered Chatbot for WordPress - Upgrade the chatbot-chatgpt plugin
  *
  * This file contains the code for upgrading the plugin.
  * It should run with the plugin is activated, deactivated, or updated.

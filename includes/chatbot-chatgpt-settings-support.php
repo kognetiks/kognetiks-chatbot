@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Support Page
+ * AI Powered Chatbot for WordPress - Settings - Support Page
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It handles the support settings and other parameters.
  * 
  *
@@ -19,15 +19,15 @@ function chatbot_chatgpt_support_section_callback() {
     ?>
     <div id='overview'>
         <h3>Overview</h3>
-        <p>Chatbot ChatGPT for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.</p>
+        <p>AI Powered Chatbot for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.</p>
         <p>ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner. It is designed to answer questions, provide suggestions, and engage in conversations with users. ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, ChatGPT can be used in various fields such as healthcare, education, finance, and many more.</p>
-        <p>Chatbot ChatGPT leverages the OpenAI platform using the gpt-3.5-turbo, gpt-4, or gpt-4-turbo model to bring artificial intelligence to life within your WordPress website.</p>
+        <p>The AI Powered Chatbot for WordPress leverages the OpenAI platform using the gpt-3.5-turbo, gpt-4, or gpt-4-turbo model to bring artificial intelligence to life within your WordPress website.</p>
         <p><b>Important Note:</b> This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.<p>
         <h3>Official Sites:</h3>
             <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/" rel="nofollow ugc" target="_blank">Kognetiks.com</a></li>
             <li><a href="https://github.com/kognetiks/chatbot-chatgpt" target="_blank">https://github.com/kognetiks/chatbot-chatgpt</a></li>
-            <li><a href="https://wordpress.org/plugins/chatbot-chatgpt/" target="_blank">https://wordpress.org/plugins/chatbot-chatgpt/</a></li>
+            <li><a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/ai-powered-chatbot-for-wordpress/" target="_blank">https://wordpress.org/plugins/chatbot-chatgpt/</a></li>
         </ul>
         <h3>Support:</h3>
             <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -57,7 +57,7 @@ function chatbot_chatgpt_support_section_callback() {
         <h3>Getting Started</h3>
         <ol>
             <li>Obtain your API key by signing up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.</li>
-            <li>Install and activate the Chatbot ChatGPT plugin.</li>
+            <li>Install and activate the Chatbot plugin.</li>
             <li>Navigate to the settings page (Settings &gt; API/Model) and enter your API key.</li>
             <li>Customize the chatbot appearance and other parameters as needed.</li>
         <li>Add the chatbot to any page or post using the provided shortcode: <b>&#91;chatbot_chatgpt&#93;</b></li>
@@ -67,10 +67,10 @@ function chatbot_chatgpt_support_section_callback() {
         <ol>
             <li>Upload the &#8216;chatbot-chatgpt&#8217; folder to the &#8216;/wp-content/plugins/&#8217; directory.</li>
             <li>Activate the plugin through the &#8216;Plugins&#8217; menu in WordPress.</li>
-            <li>Go to the &#8216;Settings &gt; Chatbot ChatGPT&#8217; page and enter your OpenAI API key.</li>
+            <li>Go to the &#8216;Settings &gt; Chatbot&#8217; page and enter your OpenAI API key.</li>
             <li>Customize the chatbot appearance and other parameters as needed.</li>
             <li>Add the chatbot to any page or post using the provided shortcode: <b>&#91;chatbot_chatgpt&#93;<b></li>
-            <li><b>Chatbot ChatGPT</b> now support either an embedded chatbot or floating chatbot.</li>
+            <li><b>Chatbot</b> now support either an embedded chatbot or floating chatbot.</li>
             <li>Use <b>&#91;chatbot_chatgpt&#93;</b> or <b>&#91;chatbot_chatgpt style="floating"&#93;</b> to display the chatbot as a floating chatbot.</li>
             <li>Use <b>&#91;chatbot_chatgpt style="embedded"&#93;</b> to display the chatbot as an embedded chatbot.</li>
             <li>By default, the chatbot will appear in the lower right corner of the page. This is adjustable in the .css file but not recommended for the causal site builders.</li>
@@ -78,13 +78,13 @@ function chatbot_chatgpt_support_section_callback() {
     </div>
     <hr style="border-top: 2px solid black;">
     <div id=chatgpt-and-custom-gpt-assistants>
-        <h2>ChatGPT and Custom GPT Assistants</h2>
+        <h2>ChatGPT and GPT Assistants</h2>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li>In Settings > API/Model, you can select to use ChatGPT (i.e., original) or create a GPT Assistant in the <a href="https://platform.openai.com/playground/" rel="nofollow ugc" target="_blank">https://platform.openai.com/playground/</a>.</li>
             <li>ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner.</li>
             <li>It is designed to answer questions, provide suggestions, and engage in conversations with users.</li>
             <li>ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited.</li>
-            <li>Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, Chatbot ChatGPT for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website.</li>
+            <li>Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, AI Powered Chatbot for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website.</li>
             <li>This provides a powerful, AI-driven chatbot for enhanced user experience and personalized support.</li>
             <li>For more information on using assistants, see <a href="https://beta.openai.com/docs/guides/assistants" rel="nofollow ugc" target="_blank">https://beta.openai.com/docs/guides/assistants</a>.</li>
             <li>Additional integration information can be found at <a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/" rel="nofollow ugc" target="_blank">https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/</a>.</li>
@@ -184,16 +184,16 @@ function chatbot_chatgpt_support_section_callback() {
     <div id="chatbot-diagnostics">
         <h3>Chatbot Diagnostics - For Developers</h3>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li>By default, the <b>Chatbot Diagnostics</b> setting is disabled. When enabled, the plugin provides useful information about the <b>Chatbot ChatGPT's</b> operation. This information can be used to troubleshoot issues and to better understand how it is functioning.</li>
+            <li>By default, the <b>Chatbot Diagnostics</b> setting is disabled. When enabled, the plugin provides useful information about the <b>Chatbot's</b> operation. This information can be used to troubleshoot issues and to better understand how it is functioning.</li>
             <li>The plugin supports Success, Notice, Warning, Failure, and Error, i.e., increasing levels of severity. The default level is Success. The higher the level, the more information is provided.</li>
-            <li>In addition to setting the <b>Chatbot ChatGPT's</b> diagnostics reporting level, you will also need to enable WordPress debugging. This can be done by setting the <b>WP_DEBUG</b> constant to true in your wp-config.php file.</li>
+            <li>In addition to setting the <b>Chatbot's</b> diagnostics reporting level, you will also need to enable WordPress debugging. This can be done by setting the <b>WP_DEBUG</b> constant to true in your wp-config.php file.</li>
             <li>Turning on WordPress debugging will cause all PHP errors, notices, and warnings to be displayed. This is useful for debugging and development purposes.</li>
             <li><b><i>NOTE: It is not recommended to enable WordPress debugging on a production site.</i></b></li>
         </ul>
     </div>
     <hr style="border-top: 2px solid black;">
     <div id="thank-you">
-        <h2><i>Thank you for using Chatbot ChatGPT for WordPress</i></h2>
+        <h2><i>Thank you for using AI Powered Chatbot for WordPress</i></h2>
     </div>
     <?php
 }

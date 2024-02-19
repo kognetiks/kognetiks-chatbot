@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Localization
+ * AI Powered Chatbot for WordPress - Localization
  *
- * This file contains the code for localization of the Chatbot ChatGPT globals.
+ * This file contains the code for localization of the Chatbot globals.
  * It uses the ChatGPT API to translate the global variables into your language
  * of choice based on the Site Language setting found under Settings > General.
  *

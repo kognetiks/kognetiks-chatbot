@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Notices
+ * AI Powered Chatbot for WordPress - Notices
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It handles the notices and other parameters.
  * 
  *
@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // General function to display the message - Ver 1.8.1
 function chatbot_chatgpt_general_admin_notice($message) {
     if (!empty($message)) {
-        printf('<div class="%1$s"><p><b>Chatbot ChatGPT: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
+        printf('<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
         return;
     }
 }

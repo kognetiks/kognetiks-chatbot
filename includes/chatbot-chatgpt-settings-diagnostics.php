@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Diagnostics
+ * AI Powered Chatbot for WordPress - Settings - Diagnostics
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It allows users to configure the reporting and other parameters
  * required to access the ChatGPT API from their own account.
  *
@@ -30,7 +30,7 @@ function chatbot_chatgpt_diagnostics_section_callback($args): void {
 
     echo '<p>PHP Version: <b>' . $php_version . '</b><br>';
     echo 'WordPress Version: <b>' . $wp_version . '</b><br>';
-    echo 'Chatbot ChatGPT Version: <b>' . get_plugin_version() . '</b><br>';
+    echo 'Chatbot Version: <b>' . get_plugin_version() . '</b><br>';
     echo 'WordPress Language Code: <b>' . get_locale() . '</b></p>';
     echo '<h2>API Status and Other Settings</h2>';
 }
@@ -155,25 +155,25 @@ function chatbot_chatgpt_back_trace($message_type = "NOTICE", $message = "No mes
     // Check for other levels and print messages accordingly
     if ('Error' === $chatbot_chatgpt_diagnostics) {
         // Print all types of messages
-        error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [$message_type] [$message]");
+        error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
     } elseif ('Success' === $chatbot_chatgpt_diagnostics || 'Failure' === $chatbot_chatgpt_diagnostics) {
         // Print only SUCCESS and FAILURE messages
         if (in_array($message_type, ['SUCCESS', 'FAILURE'])) {
-            error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [$message_type] [$message]");
+            error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
         }
     } elseif ('Warning' === $chatbot_chatgpt_diagnostics) {
         // Print only ERROR and WARNING messages
         if (in_array($message_type, ['ERROR', 'WARNING'])) {
-            error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [$message_type] [$message]");
+            error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
         }
     } elseif ('Notice' === $chatbot_chatgpt_diagnostics) {
         // Print ERROR, WARNING, and NOTICE messages
         if (in_array($message_type, ['ERROR', 'WARNING', 'NOTICE'])) {
-            error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [$message_type] [$message]");
+            error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
         }
     } elseif ('Debug' === $chatbot_chatgpt_diagnostics) {
         // Print all types of messages
-        error_log("[Chatbot ChatGPT] [$file] [$function] [$line] [$message_type] [$message]");
+        error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
     } else {
         // Exit if none of the conditions are met
         return;

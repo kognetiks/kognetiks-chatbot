@@ -1,9 +1,9 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Globals - Ver 1.6.5
+ * AI Powered Chatbot for WordPress - Globals - Ver 1.6.5
  *
  * This file contains the code for table actions for reporting
- * to display the Chatbot ChatGPT on the website.
+ * to display the Chatbot on the website.
  *
  * @package chatbot-chatgpt
  */

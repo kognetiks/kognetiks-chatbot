@@ -1,8 +1,8 @@
 <?php
 /*
- * Plugin Name: Chatbot ChatGPT
+ * Plugin Name: AI Powered Chatbot for WordPress
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
- * Description: A simple plugin to add a Chatbot ChatGPT to your WordPress Website.
+ * Description: A simple plugin to add an AI Powered Chatbot for WordPress to your WordPress Website.
  * Version:     1.9.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
@@ -17,7 +17,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Chatbot ChatGPT. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
+ * along with AI Powered Chatbot for WordPress. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
  * 
 */
 
@@ -229,7 +229,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     
     // Defaults for Ver 1.6.1
     $defaults = array(
-        'chatbot_chatgpt_bot_name' => 'Chatbot ChatGPT',
+        'chatbot_chatgpt_bot_name' => 'Chatbot',
         // TODO IDEA - Add a setting to fix or randomize the bot prompt
         'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
         'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
@@ -639,7 +639,7 @@ function enqueue_greetings_script(): void {
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
 
 
-// Function to add the adaptive appearance settings to the Chatbot ChatGPT settings page
+// Function to add the adaptive appearance settings to the Chatbot settings page
 function chatbot_chatgpt_settings_appearance(): void {
 
     // Register the settings

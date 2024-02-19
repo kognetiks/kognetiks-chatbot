@@ -1,9 +1,9 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Threads
+ * AI Powered Chatbot for WordPress - Threads
  *
  * This file contains the code for managing the threads used
- * to display the Chatbot ChatGPT on the website.
+ * to display the Chatbot on the website.
  *
  * @package chatbot-chatgpt
  */

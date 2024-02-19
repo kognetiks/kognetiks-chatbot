@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Reporting Page
+ * AI Powered Chatbot for WordPress - Settings - Reporting Page
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It handles the reporting settings and other parameters.
  *
  *
@@ -34,7 +34,7 @@ function chatbot_chatgpt_reporting_section_callback($args) {
             ?>
         <h3>Interactions Data</h3>
             <!-- TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8 -->
-            <!-- <p><?php echo do_shortcode('[chatbot_chatgpt_simple_chart from_database="true"]'); ?></p> -->
+            <!-- <p><?php echo do_shortcode('[chatbot_simple_chart from_database="true"]'); ?></p> -->
             <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
             <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
             <?php
@@ -108,7 +108,7 @@ function chatbot_chatgpt_conversation_log_days_to_keep_callback($args) {
     <?php
 }
 
-// Chatbot ChatGPT Simple Chart - Ver 1.6.3
+// Chatbot Simple Chart - Ver 1.6.3
 function generate_gd_bar_chart($labels, $data, $colors, $name) {
     // Create an image
     $width = 500;
@@ -203,7 +203,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
 }
 
 
-// Chatbot ChatGPT Charts - Ver 1.6.3
+// Chatbot Charts - Ver 1.6.3
 function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     // Check is GD Library is installed - Ver 1.6.3
@@ -211,7 +211,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         // GD Library is installed and loaded
         // DIAG - Log the output choice
         // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is installed and loaded.');
-        chatbot_chatgpt_general_admin_notice('Chatbot ChatGPT requires the GD Library to function correctly, but it is not installed or enabled on your server. Please install or enable the GD Library.');
+        chatbot_chatgpt_general_admin_notice('Chatbot requires the GD Library to function correctly, but it is not installed or enabled on your server. Please install or enable the GD Library.');
         // DIAG - Log the output choice
         // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
         // Disable the shortcode functionality
@@ -284,6 +284,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 // TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8
 // Add shortcode
 // add_shortcode('chatbot_chatgpt_simple_chart', 'chatbot_chatgpt_simple_chart_shortcode_function');
+// add_shortcode('chatbot_simple_chart', 'chatbot_chatgpt_simple_chart_shortcode_function');
 
 
 // Clean up ../image subdirectory - Ver 1.6.3
@@ -518,7 +519,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
         fputcsv($file, $keys);
     } else {
         $class = 'notice notice-error';
-        $message = __( 'Chatbot ChatGPT No data in the file. Please enable conversation logging if currently off.', 'chatbot-chatgpt' );
+        $message = __( 'Chatbot No data in the file. Please enable conversation logging if currently off.', 'chatbot-chatgpt' );
         printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
         return;
     }
@@ -581,7 +582,7 @@ add_action('admin_post_chatbot_chatgpt_download_token_usage_data', 'chatbot_chat
 function chatbot_chatgpt_admin_notice() {
     $message = get_transient('chatbot_chatgpt_admin_error');
     if (!empty($message)) {
-        printf('<div class="%1$s"><p><b>Chatbot ChatGPT: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
+        printf('<div class="%1$s"><p><b>Chatbot: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
         delete_transient('chatbot_chatgpt_admin_error'); // Clear the transient after displaying the message
     }
 }

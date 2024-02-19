@@ -1,8 +1,8 @@
 <?php
 /**
- * Chatbot ChatGPT for WordPress - Settings - Setup Page
+ * AI Powered Chatbot for WordPress - Settings - Setup Page
  *
- * This file contains the code for the Chatbot ChatGPT settings page.
+ * This file contains the code for the Chatbot settings page.
  * It handles the setup settings and other parameters.
  * 
  *
@@ -17,13 +17,13 @@ if ( ! defined( 'WPINC' ) ) {
 // Settings section callback - Ver 1.3.0
 function chatbot_chatgpt_settings_section_callback($args) {
     ?>
-    <p>Configure settings for the Chatbot ChatGPT plugin, including the bot name, start status, and greetings.</p>
+    <p>Configure settings for the Chatbot plugin, including the bot name, start status, and greetings.</p>
     <?php
 }
 
-// Chatbot ChatGPT Name
+// Chatbot Name
 function chatbot_chatgpt_bot_name_callback($args): void {
-    $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Chatbot ChatGPT'));
+    $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Chatbot'));
     ?>
     <input type="text" id="chatbot_chatgpt_bot_name" name="chatbot_chatgpt_bot_name" value="<?php echo esc_attr( $bot_name ); ?>" class="regular-text">
     <?php
