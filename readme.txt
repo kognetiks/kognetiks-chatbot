@@ -145,7 +145,7 @@ With Chatbot installed, you're now equipped to offer a more dynamic, engaging, a
 
 == Frequently Asked Questions ==
 
-= How do I obtain an API key for ChatGPT? =
+= How do I obtain an API key for the API? =
 
 To obtain an API key, sign up for an account at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys). Once registered, you will have access to your API key.
 
@@ -236,7 +236,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Corrected path/name error for file downloads for conversation and interaction data
 
 = 1.7.9 =
-* Added file uploads to GPT Assistants **only** for use in processing, search, retrieval, etc.
+* Added file uploads to Assistants **only** for use in processing, search, retrieval, etc.
 * Added additional error handling for reporting output to files
 
 = 1.7.8 =
@@ -246,7 +246,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 = 1.7.7 =
 * Expanded input to accommodate multi-line for both embedded and floating styles
-* Reduced wait duration when using GPT Assistants to improve response time
+* Reduced wait duration when using Assistants to improve response time
 * Added Conversation Logging to retain visitor and chatbot exchanges
 
 = 1.7.5 =
@@ -257,7 +257,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Enhanced handling for multi-threaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
 
 = 1.7.3 =
-* Added support for unlimited GPT Assistants in addition to 'original', 'primary' and 'alternate' shortcode parameters.
+* Added support for unlimited Assistants in addition to 'original', 'primary' and 'alternate' shortcode parameters.
 * Use [chatbot style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for floating Assistants.
 * Use [chatbot style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for embedded Assistants.
 * Moved hard coded css from .js to the .css file for floating wide/narrow and embedded styling.
@@ -283,7 +283,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Corrected logic error to chatbot's response when no enhanced response was available.
 
 = 1.6.9 =
-* Added additional installation and support information for using GPT Assistants.
+* Added additional installation and support information for using Assistants.
 * Added enhanced diagnostic and error logging for developers.
 
 = 1.6.8 =

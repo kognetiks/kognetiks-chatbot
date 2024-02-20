@@ -1,24 +1,24 @@
 # AI Powered Chatbot for WordPress
 
-The **AI Powered Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites by deploying OpenAI's ChatGPT Large Language Models (LLMs) and GPT Assistants. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
+The **AI Powered Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites by deploying OpenAI's ChatGPT Large Language Models (LLMs) and Assistants. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
 ## Features
 
-Welcome to the future of website interaction with **AI Powered Chatbot for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and GPT Assistants.
+Welcome to the future of website interaction with **AI Powered Chatbot for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Assistants.
 
 **🌐 Harnessing OpenAI's Large Language Models for Enhanced Engagement**
 
 Dive into the world of advanced AI with OpenAI's Large Language Models at the core of our Chatbot. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
-**🌟 GPT Assistants: Tailored Conversational Experiences**
+**🌟 Assistants: Tailored Conversational Experiences**
 
-Unlock the potential of personalized digital interaction. Use the GPT Assistants you develop, trained with your specific knowledge and skills, are here to revolutionize your website. From handling FAQs to managing bookings and offering customized suggestions, these Assistants are seamlessly integrated into your WordPress site, promising a dynamic and engaging user experience.
+Unlock the potential of personalized digital interaction. Use the Assistants you develop, trained with your specific knowledge and skills, are here to revolutionize your website. From handling FAQs to managing bookings and offering customized suggestions, these Assistants are seamlessly integrated into your WordPress site, promising a dynamic and engaging user experience.
 
 **🔀 Multiple Assistants, Multiple Roles**
 
-Why settle for one when you can have more? With our plugin, deploy multiple GPT Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
+Why settle for one when you can have more? With our plugin, deploy multiple Assistants for varied roles. Imagine an Assistant dedicated to your blog and another for your e-commerce platform, each delivering a tailored experience to your visitors.
 
-The latest version of the plugin allows for virtually unlimited GPT Assistants, allowing you to deploy a unique assistant wherever you placed the shortcode.  Simply pass the "asst_" ID to the shortcode as one of the parameters.
+The latest version of the plugin allows for virtually unlimited Assistants, allowing you to deploy a unique assistant wherever you placed the shortcode.  Simply pass the "asst_" ID to the shortcode as one of the parameters.
 
 Unlock enhanced functionality with our latest feature - **now you can upload files directly to each GPT Assistant**, providing an even more dynamic and tailored user experience across your platforms.
 
@@ -125,7 +125,7 @@ With Chatbot installed, you're now equipped to offer a more dynamic, engaging, a
 
 ## Frequently Asked Questions
 
-**How do I obtain an API key for ChatGPT?**
+**How do I obtain an API key for the API?**
 
 To obtain an API key, sign up for an account at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys). Once registered, you will have access to your API key.
 
