@@ -191,7 +191,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.9.0 =
-* TBD
+* Promoted custom CSS to load after the plugin's CSS to allow for easier customization.
 
 = 1.8.9 =
 * Allow custom Avatar - see Settings > Avatars for more information.

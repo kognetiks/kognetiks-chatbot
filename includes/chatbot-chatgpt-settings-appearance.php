@@ -236,7 +236,7 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
     // Remove any line breaks
     $chatbot_chatgpt_appearance_user_css_setting = str_replace(array("\r", "\n"), '', $chatbot_chatgpt_appearance_user_css_setting);
 
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-user-css'] = $chatbot_chatgpt_appearance_user_css_setting;
+    // $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-user-css'] = $chatbot_chatgpt_appearance_user_css_setting;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
@@ -250,6 +250,7 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
     ?>
     <style type="text/css">
         <?php
+        echo "\t\t" . $chatbot_chatgpt_appearance_user_css_setting . "\n"; // Put user CSS settings at the top
         // Loop through each CSS rule and output it with indentation
         foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
             echo "\t\t" . $cssRule . "\n"; // Add spaces before each rule for indentation

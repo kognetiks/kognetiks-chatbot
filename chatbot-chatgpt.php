@@ -2,7 +2,7 @@
 /*
  * Plugin Name: AI Powered Chatbot for WordPress
  * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
- * Description: A simple plugin to add an AI Powered Chatbot for WordPress to your WordPress Website.
+ * Description: A simple plugin to add an AI Powered Chatbot to your WordPress Website.
  * Version:     1.9.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
