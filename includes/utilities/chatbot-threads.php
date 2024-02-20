@@ -99,21 +99,6 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
         'assistant_id' => $assistant_id
     );
 
-    // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'GET PART 2 $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'GET PART 2 $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'GET PART 2 $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'GET PART 2 $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'GET PART 2 $assistant_id: ' . $assistant_id);
-
-    $script_data_array = array(
-        'user_id' => $user_id,
-        'page_id' => $page_id,
-        'session_id' => $session_id,
-        'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id
-    );
-
 }
 
 // Delete the threads

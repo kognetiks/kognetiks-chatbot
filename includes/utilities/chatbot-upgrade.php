@@ -353,19 +353,3 @@ function chatbot_chatgpt_uninstall(){
         return;
 }
 
-// Determine if the plugin is installed
-function get_plugin_version() {
-
-    if (!function_exists('get_plugin_data')) {
-        require_once(ABSPATH . 'wp-admin/includes/plugin.php');
-    }
-
-    $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . '../chatbot-chatgpt.php');
-    $plugin_version = $plugin_data['Version'];
-    update_option('chatbot_chatgpt_plugin_version', $plugin_version);
-    // DIAG - Log the plugin version
-    // back_trace( 'NOTICE', 'Plugin version '. $plugin_version);
-
-    return $plugin_version;
-
-}

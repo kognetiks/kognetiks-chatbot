@@ -297,9 +297,6 @@ jQuery(document).ready(function ($) {
                 // Timeout Setting - Ver 1.8.8
                 var chatgptTimeoutSettingInput = document.getElementById('chatbot_chatgpt_timeout_setting');
 
-                // Timeout Setting - Ver 1.8.8
-                var chatgptTimeoutSettingInput = document.getElementById('chatbot_chatgpt_timeout_setting');
-
                 if(chatbotChatgptBotNameInput) {
                     localStorage.setItem('chatbot_chatgpt_bot_name', chatbotChatgptBotNameInput.value);
                 }

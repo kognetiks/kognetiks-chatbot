@@ -79,7 +79,7 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
         // Wipe the Context
         update_option( 'chatbot_chatgpt_conversation_context' ,'' , true);
         // Delete transient data - Assistants
-        delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id, $session_id);
+        // delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id, $session_id);
         // Delete the threads
         delete_chatbot_chatgpt_threads($user_id, $page_id);
         wp_send_json_success('Conversation cleared - Assistant.');

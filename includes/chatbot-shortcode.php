@@ -122,7 +122,18 @@ function chatbot_chatgpt_shortcode($atts) {
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
     $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+
     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
+
+    // FIXME - NOT WORKING YET - Ver 1.9.0
+    // if (empty($chatbot_chatgpt_hot_bot_prompt)) {
+    //     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
+    //     error_log('chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
+    // } else {
+    //     $chatbot_chatgpt_bot_prompt = $chatbot_chatgpt_hot_bot_prompt;
+    //     error_log('chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
+    // }
+
     $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
     // If assistant is set to 'original' then do not allow file uploads - Ver 1.7.9
@@ -152,13 +163,12 @@ function chatbot_chatgpt_shortcode($atts) {
             <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
         </div> -->
         <div id="chatbot-chatgpt-conversation"></div>
-        <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 20px; width: 95%;">
+        <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
             <div style="flex-grow: 1; max-width: 95%;">
                 <label for="chatbot-chatgpt-message"></label>
                 <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea>
-            </div>
-            
-            <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            </div>          
+            <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;">
                 <button id="chatbot-chatgpt-submit">
                     <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                 </button>
@@ -196,13 +206,12 @@ function chatbot_chatgpt_shortcode($atts) {
                 <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
-                <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
+            <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
                     <div style="flex-grow: 1; max-width: 95%;">
                         <label for="chatbot-chatgpt-message"></label>
                         <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea>
                     </div>
-                    
-                    <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;">
                         <button id="chatbot-chatgpt-submit">
                             <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                         </button>

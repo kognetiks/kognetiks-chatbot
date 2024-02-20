@@ -138,7 +138,6 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
 function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page_id = null, $session_id = null): void {
 
     // FIXME - DECIDE - Should we delete the transients
-    return;
 
     global $session_id;
     global $user_id;
