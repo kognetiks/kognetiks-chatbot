@@ -76,12 +76,17 @@ if (empty($session_id)) {
     // error_log('Session ID: ' . $session_id);
 }
 
-// Include necessary files
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
-
-// Include necessary files - ChatGPT API and GPT Assistant API - Ver 1.6.9
+// Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
+
+// Include necessary files - Appearance - Ver 1.8.1
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-dimensions.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-text.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-user-css.php';
 
 // Include necessary files - Knowledge Navigator
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire.php'; // Knowledge Navigator Acquisition - Ver 1.6.3
@@ -93,17 +98,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
 
-// Include necessary files
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-file-upload.php'; // Functions - Ver 1.7.6
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-erase-conversation.php'; // Functions - Ver 1.8.6
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-threads.php'; // Ver 1.7.2.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-transients.php'; // Ver 1.7.2
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-utilities.php'; // Ver 1.8.6
-
-// Incdlue necessary files - Settings - Ver 1.5.0
+// Incdlue necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-model.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
@@ -120,13 +115,16 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reg
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reporting.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-support.php';
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
-// Include necessary files - Appearance - Ver 1.8.1
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-dimensions.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-text.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-user-css.php';
+// Include necessary files - Utilities - Ver 1.9.0
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php'; // Ver 1.7.2.1
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php'; // Ver 1.6.7
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php'; // Ver 1.8.6
 
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start(): void {
