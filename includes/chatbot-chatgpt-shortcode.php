@@ -92,7 +92,7 @@ function chatbot_chatgpt_shortcode($atts) {
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
-    $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Chatbot'));
+    $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
     $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 

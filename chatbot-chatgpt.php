@@ -77,50 +77,52 @@ if (empty($session_id)) {
 }
 
 // Include necessary files
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
 
 // Include necessary files - ChatGPT API and GPT Assistant API - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
 
 // Include necessary files - Knowledge Navigator
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire.php'; // Knowledge Navigator Acquisition - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-word-pairs.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-analysis.php'; // Knowledge Navigator Analysis- Ver 1.6.2
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-enhance-response.php'; // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire.php'; // Knowledge Navigator Acquisition - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-word-pairs.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-analysis.php'; // Knowledge Navigator Analysis- Ver 1.6.2
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-response.php'; // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-erase-conversation.php'; // Functions - Ver 1.8.6
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-buttons.php'; // Refactoring Settings - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-custom-gpts.php'; // Refactoring Settings - Ver 1.7.2
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-diagnostics.php'; // Refactoring Settings - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localization.php'; // Refactoring Settings - Ver 1.7.2.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-notices.php'; // Notices - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-registration.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-reporting.php'; // Reporting - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setup.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-utilities.php'; // Ver 1.8.6
 
+// Incdlue necessary files - Settings - Ver 1.5.0
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-model.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-avatar.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-buttons.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-custom-gpts.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-diagnostics.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-links.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-localization.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-localize.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-notices.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-premium.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reporting.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-support.php';
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-settings.php';
+
 // Include necessary files - Appearance - Ver 1.8.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-appearance.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-dimensions.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-text.php';
@@ -229,7 +231,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     
     // Defaults for Ver 1.6.1
     $defaults = array(
-        'chatbot_chatgpt_bot_name' => 'Chatbot',
+        'chatbot_chatgpt_bot_name' => 'Kognetiks Chatbot',
         // TODO IDEA - Add a setting to fix or randomize the bot prompt
         'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
         'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',

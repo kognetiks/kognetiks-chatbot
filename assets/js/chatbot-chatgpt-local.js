@@ -6,7 +6,7 @@ jQuery(document).ready(function ($) {
         // console.log('Entering chatbot_chatgpt_localize');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
-        var chatbotChatgptBotNameInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_name) ? chatbotSettings.chatbot_chatgpt_bot_name : 'Chatbot';
+        var chatbotChatgptBotNameInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_name) ? chatbotSettings.chatbot_chatgpt_bot_name : 'Kognetiks Chatbot';
         var chatbotChatgptBotPromptInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_prompt) ? chatbotSettings.chatbot_chatgpt_bot_prompt : 'Enter your question ...';
 
         var chatgptInitialGreetingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.initial_greeting) ? chatbotSettings.initial_greeting : 'Hello! How can I help you today?';

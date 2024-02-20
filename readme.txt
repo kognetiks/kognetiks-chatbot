@@ -1,4 +1,4 @@
-=== AI Powered Chatbot for WordPress ===
+=== Kognetiks Chatbot for WordPress ===
 Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assistants, custom GPTs
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
@@ -9,15 +9,15 @@ Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-== Introducing an AI Powered Chatbot for WordPress: Revolutionizing Digital Interactions ==
+== Introducing the Kognetiks Chatbot for WordPress: Revolutionizing Digital Interactions ==
 
-Welcome to the future of website interaction with **AI Powered Chatbot for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Assistants.
+Welcome to the future of website interaction with **Kognetiks Chatbot for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Assistants.
 
 **🌐 Harnessing Large Language Models for Enhanced Engagement**
 Dive into the world of advanced AI with Large Language Models at the core of the Chatbot. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
 **🌟 Assistants: Tailored Conversational Experiences**
-Dive into the world of advanced AI with the **AI Powered Chatbot for WordPress**.  At the core, the Chatbot takes adavantage of API access to Large Language Models such as those powered by OpenAI. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
+Dive into the world of advanced AI with the **Kognetiks Chatbot for WordPress**.  At the core, the Chatbot takes adavantage of API access to Large Language Models such as those powered by OpenAI. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
 **🔀 Multiple Assistants, Multiple Roles**
 Unlock the potential of personalized digital interaction. Use the Assistants you develop, trained with your specific knowledge and skills, are here to revolutionize your website. From handling FAQs to managing bookings and offering customized suggestions, these Assistants are seamlessly integrated into your WordPress site, promising a dynamic and engaging user experience.
@@ -43,7 +43,7 @@ Add a creative touch with customizable avatars. Reflect your site's personality 
 **📊 Direct Traffic with Customizable Buttons**
 Guide your visitors where you want them. Customizable buttons can link directly to specific pages, forms, or contact information, facilitating smoother navigation and enhanced user engagement.
 
-**🤖 Why An AI Powered Chatbot for WordPress?**
+**🤖 Why the Kognetiks Chatbot for WordPress?**
 ▪ **Natural Conversations:** Experience human-like interactions, thanks to Large Language Model APIs from companies like OpenAI.
 ▪ **Always Available:** Provide round-the-clock assistance in various domains, from healthcare to education.
 ▪ **Seamless Integration:** Effortlessly bring your WordPress site to life with an easy-to-use plugin.
@@ -54,9 +54,9 @@ Guide your visitors where you want them. Customizable buttons can link directly 
 ▪ GPT-4 Turbo ('gpt-4-1106-preview')
 
 **🚀 Elevate Your Website Experience**
-An AI Powered Chatbot for WordPress is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
+The Kognetiks Chatbot for WordPress is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
 
-Get your AI Powered Chatbot for WordPress today and redefine your WordPress site with intelligence and a personal touch.
+Get your Kognetiks Chatbot for WordPress today and redefine your WordPress site with intelligence and a personal touch.
 
 **Note:** This plugin requires an API key from OpenAI. Obtain yours at [OpenAI API Keys](https://platform.openai.com/account/api-keys).
 
@@ -72,19 +72,19 @@ Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chat
 ▪ **Persistent Memory:** The chatbot remembers interactions, offering continuity across pages.
 ▪ **In-depth Content Analysis:** Knowledge Navigator ensures contextually relevant interactions.
 
-== Experience the Evolution of Website Interaction with AI Powered Chatbot for WordPress! ==
+== Experience the Evolution of Website Interaction with the Kognetiks Chatbot for WordPress! ==
 
 == Getting Started ==
 
 1. Obtain your API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
-2. Install and activate the AI Powered Chatbot for WordPress plugin.
+2. Install and activate the Kognetiks Chatbot for WordPress plugin.
 3. Navigate to the settings page (Settings > API/Model) and enter your API key.
 4. Customize the chatbot appearance and other parameters as needed.
 5. For a floating chatbot add the shortcode to your theme's footer: [chatbot] or [chatbot style=floating]
 6. For an embedded chatbot on any page add the shortcode: [chatbot style=embedded]
 7. Use [chatbot style=floating|embedded assistant=primary|alternate] to display the chatbot as a floating chatbot or embedded chatbot with a primary or alternate assistant.
 
-Now your website visitors can enjoy a seamless and personalized chat experience an AI Powered Chatbot for WordPress.
+Now your website visitors can enjoy a seamless and personalized chat experience the Kognetiks Chatbot for WordPress.
 
 == Plugin Support and FAQs ==
 
@@ -157,7 +157,7 @@ You can also customize the name of the chatbot, as well as changing the initial 
 
 = Is the chatbot available in multiple languages? =
 
-Yes, the AI Powered Chatbot for WordPress and the ChatGPT API support many different languages. Set the 'Site Language' option in WordPress to your preference.
+Yes, the Kognetiks Chatbot for WordPress and OpenAI's ChatGPT API support many different languages. Set the 'Site Language' option in WordPress to your preference.
 
 = Which OpenAI models does the plugin use? =
 
@@ -191,7 +191,8 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 == Changelog ==
 
 = 1.9.0 =
-* Promoted custom CSS to load after the plugin's CSS to allow for easier customization.
+* Changed the name of the chatbot to Kognetiks Chatbot for WordPress
+* Resequenced user's custom CSS to load for precedence over the plugin's CSS to allow for easier customization.
 
 = 1.8.9 =
 * Allow custom Avatar - see Settings > Avatars for more information.
@@ -290,7 +291,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Added output buffering.
 
 = 1.6.7 =
-* The AI Powered Chatbot for WordPress now supports Custom GPTs developed in the OpenAI Playground.
+* The Kognetiks Chatbot for WordPress now supports Custom GPTs developed in the OpenAI Playground.
 * See [https://platform.openai.com/docs/assistants/overview](https://platform.openai.com/docs/assistants/overview) to learn more about Assistants.
 * Added an expanded selection of seasonal avatars celebrating Chinese New Year, Christmas, Fall, Halloween, Spring, Summer, Thanksgiving, and Winter.
 * Enhanced CSS adaptation to improve compatibility across different themes.

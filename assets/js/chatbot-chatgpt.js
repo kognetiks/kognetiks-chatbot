@@ -15,7 +15,7 @@ jQuery(document).ready(function ($) {
     uploadfileButton = $('#chatbot-chatgpt-upload-file');
     chatGptOpenButton = $('#chatgpt-open-btn');
 
-    chatbotChatgptBotName = localStorage.getItem('chatbot_chatgpt_bot_name') || 'Chatbot';
+    chatbotChatgptBotName = localStorage.getItem('chatbot_chatgpt_bot_name') || 'Kognetiks Chatbot';
     chatbotChatgptBotPrompt = localStorage.getItem('chatbot_chatgpt_bot_prompt') || 'Enter your question ...';
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
