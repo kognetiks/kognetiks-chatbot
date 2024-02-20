@@ -35,31 +35,31 @@ jQuery(document).ready(function ($) {
     chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
 
     // Add variables for the timeout setting - Ver 1.8.8
-    timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 30;
+    timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 120;
     // console.log('Chatbot: NOTICE: timeout_setting: ' + timeout_setting);
     // Convert the timeout setting to a number
     timeout_setting = parseInt(timeout_setting);
     // Convert the timeout setting to milliseconds
     timeout_setting = timeout_setting * 1000;
 
-    pluginUrl = plugin_vars.pluginUrl;
+    plugins_url = plugin_vars.plugins_url;
 
     // Get an open icon for the chatbot - Ver 1.8.6
-    chatbotopenicon = pluginUrl + '/assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    chatbotopenicon = plugins_url + '/assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
     chatbotopenicon = $('<img>')
     .attr('id', 'chatbot-open-icon')
     .attr('class', 'chatbot-open-icon')
     .attr('src', chatbotopenicon);
 
     // Get a collapse icon for the chatbot - Ver 1.8.6
-    chatbotcollapseicon = pluginUrl + '/assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
+    chatbotcollapseicon = plugins_url + '/assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
     chatbotcollapseicon = $('<img>')
     .attr('id', 'chatbot-collapse-icon')
     .attr('class', 'chatbot-collapse-icon')
     .attr('src', chatbotcollapseicon);
 
     // Get am erase icon for the chatbot - Ver 1.8.6
-    chatboteraseicon = pluginUrl + '/assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
+    chatboteraseicon = plugins_url + '/assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
     chatboteraseicon = $('<img>')
     .attr('id', 'chatbot-erase-icon')
     .attr('class', 'chatbot-erase-icon')
@@ -226,7 +226,7 @@ jQuery(document).ready(function ($) {
 
         if (chatbot_chatgpt_custom_avatar_icon_setting === '') {
             // Construct the path to the avatar
-            avatarPath = pluginUrl + '/assets/icons/' + selectedAvatar;
+            avatarPath = plugins_url + '/assets/icons/' + selectedAvatar;
         } else {
             // Construct the path to the avatar
             avatarPath = chatbot_chatgpt_custom_avatar_icon_setting; // Use the custom URL
@@ -477,7 +477,8 @@ jQuery(document).ready(function ($) {
 
                     // Check for double asterisks suggesting a "bold" response
                     // Check for linefeeds suggesting paragraphs response
-                    botResponse = botResponse.replace(/\n/g, "<br>");
+                    botResponse = botResponse.replace(/\r\n/g, "<br><br>");
+                    botResponse = botResponse.replace(/\n/g, "<br><br>");
                     botResponse = botResponse.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
                 }
             },

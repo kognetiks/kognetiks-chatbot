@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - ChatGPT API - Ver 1.6.9
+ * Kognetiks Chatbot for WordPress - ChatGPT API - Ver 1.6.9
  *
  * This file contains the code for table actions for reporting
  * to display the Chatbot on the website.
@@ -25,11 +25,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     // $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -56,7 +56,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
     // DIAG Diagnostics - Ver 1.6.1
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
+    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
     
     // IDEA Strip any href links and text from the $chatgpt_last_response
     $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
@@ -84,7 +84,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     // DIAG Diagnostics - Ver 1.6.1
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$context: ' . $context);
 
     // Added Role, System, Content Static Variable - Ver 1.6.0
     $body = array(
@@ -104,9 +104,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     addEntry('chatbot_chatgpt_context_history', $message);
 
     // DIAG Diagnostics - Ver 1.6.1
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$context: ' . $context);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$message: ' . $message);  
+    // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
+    // back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$message: ' . $message);  
 
     $args = array(
         'headers' => $headers,
@@ -118,7 +118,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     $response = wp_remote_post($api_url, $args);
     // DIAG - Diagnostics - Ver 1.6.7
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$response: ' . $response);
+    // back_trace( 'NOTICE', '$response: ' . $response);
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -126,7 +126,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', print_r($response, true));
+    // back_trace( 'NOTICE', print_r($response, true));
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
@@ -138,7 +138,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$response_body: ' . print_r($response_body))
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body))
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -156,17 +156,17 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
+    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // DIAG - Diagnostics - Ver 1.8.1
     // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);

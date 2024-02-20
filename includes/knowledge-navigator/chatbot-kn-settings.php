@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Knowledge Navigator - Settings
+ * Kognetiks Chatbot for WordPress - Knowledge Navigator - Settings
  *
  * This file contains the code for the Chatbot settings page.
  * These are all the options for the Knowledge Navigator.
@@ -23,7 +23,7 @@ $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)
 function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     // DIAG - Diagnostic - Ver 1.6.3
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_knowledge_navigator_section_callback');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_knowledge_navigator_section_callback');
 
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
     // update_option('chatbot_chatgpt_knowledge_navigator', 'No');
@@ -40,18 +40,18 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
     if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Cancel'])) {
 
         // DIAG - Diagnostic - Ver 1.6.3
-        // chatbot_chatgpt_back_trace( 'NOTICE', "$run_scanner: " . $run_scanner);
-        // chatbot_chatgpt_back_trace( 'NOTICE', "max_top_words: " . serialize($GLOBALS['max_top_words']));
-        // chatbot_chatgpt_back_trace( 'NOTICE', "domain: " . serialize($GLOBALS['domain']));
-        // chatbot_chatgpt_back_trace( 'NOTICE', "start_url: " . serialize($GLOBALS['start_url']));
+        // back_trace( 'NOTICE', "$run_scanner: " . $run_scanner);
+        // back_trace( 'NOTICE', "max_top_words: " . serialize($GLOBALS['max_top_words']));
+        // back_trace( 'NOTICE', "domain: " . serialize($GLOBALS['domain']));
+        // back_trace( 'NOTICE', "start_url: " . serialize($GLOBALS['start_url']));
 
         $no_of_items_analyzed = 0;
         update_option('no_of_items_analyzed', $no_of_items_analyzed);
 
         // WP Cron Scheduler - VER 1.6.2
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'BEFORE wp_clear_scheduled_hook');
+        // back_trace( 'NOTICE', 'BEFORE wp_clear_scheduled_hook');
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear before rescheduling
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER wp_clear_scheduled_hook');
+        // back_trace( 'NOTICE', 'AFTER wp_clear_scheduled_hook');
 
         if ($run_scanner === 'Cancel') {
             $run_scanner = 'No';
@@ -69,7 +69,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                 update_option('chatbot_chatgpt_kn_status', 'In Process');
 
                 // Log action to debug.log
-                // chatbot_chatgpt_back_trace( 'NOTICE', 'BEFORE crawl_schedule_event_hook');
+                // back_trace( 'NOTICE', 'BEFORE crawl_schedule_event_hook');
 
                 // IDEA WP Cron Scheduler - VER 1.6.2
                 // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
@@ -99,7 +99,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
                 }
                 
                 // DIAG - Log action to debug.log
-                // chatbot_chatgpt_back_trace( 'NOTICE', 'AFTER crawl_schedule_event_hook');
+                // back_trace( 'NOTICE', 'AFTER crawl_schedule_event_hook');
 
                 // Log scan interval - Ver 1.6.3
                 if ($interval === 'Now') {
@@ -156,7 +156,7 @@ function chatbot_chatgpt_knowledge_navigator_callback($args) {
 function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
 
     // DIAG - Diagnostic - Ver 1.6.3
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_kn_maximum_top_words_callback');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_maximum_top_words_callback');
 
     $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 25));
     ?>

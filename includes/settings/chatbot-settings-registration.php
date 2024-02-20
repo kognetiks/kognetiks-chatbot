@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Registration
+ * Kognetiks Chatbot for WordPress - Registration
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the registration of settings and other parameters.
@@ -141,13 +141,11 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_bot_name');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_start_status');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_start_status_new_visitor');
-    // Added in Ver 1.6.6
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_bot_prompt');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_initial_greeting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_subsequent_greeting');
-    // Option to remove the OpenAI disclaimer - Ver 1.4.1
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
-    // Option to set diagnotics on/off - Ver 1.5.0
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_diagnostics');
 
     add_settings_section(
@@ -159,7 +157,7 @@ function chatbot_chatgpt_settings_init() {
 
     add_settings_field(
         'chatbot_chatgpt_bot_name',
-        'Bot Name',
+        'Chatbot Name',
         'chatbot_chatgpt_bot_name_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
@@ -210,6 +208,15 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_disclaimer_setting',
         'Include "As an AI language model" disclaimer',
         'chatgpt_disclaimer_setting_callback',
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_settings_section'
+    );
+
+    // Audience setting - Ver 1.9.0
+    add_settings_field(
+        'chatbot_chatgpt_audience_choice',
+        'Audience for Chatbot',
+        'chatbot_chatgpt_audience_choice_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
     );

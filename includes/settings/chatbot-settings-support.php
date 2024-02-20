@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Settings - Support Page
+ * Kognetiks Chatbot for WordPress - Settings - Support Page
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the support settings and other parameters.
@@ -19,9 +19,9 @@ function chatbot_chatgpt_support_section_callback() {
     ?>
     <div id='overview'>
         <h3>Overview</h3>
-        <p>AI Powered Chatbot for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.</p>
+        <p>Kognetiks Chatbot for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.</p>
         <p>ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner. It is designed to answer questions, provide suggestions, and engage in conversations with users. ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, ChatGPT can be used in various fields such as healthcare, education, finance, and many more.</p>
-        <p>The AI Powered Chatbot for WordPress leverages the OpenAI platform using the gpt-3.5-turbo, gpt-4, or gpt-4-turbo model to bring artificial intelligence to life within your WordPress website.</p>
+        <p>The Kognetiks Chatbot for WordPress leverages the OpenAI platform using the gpt-3.5-turbo, gpt-4, or gpt-4-turbo model to bring artificial intelligence to life within your WordPress website.</p>
         <p><b>Important Note:</b> This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.<p>
         <h3>Official Sites:</h3>
             <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -84,7 +84,7 @@ function chatbot_chatgpt_support_section_callback() {
             <li>ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner.</li>
             <li>It is designed to answer questions, provide suggestions, and engage in conversations with users.</li>
             <li>ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited.</li>
-            <li>Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, AI Powered Chatbot for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website.</li>
+            <li>Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, Kognetiks Chatbot for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website.</li>
             <li>This provides a powerful, AI-driven chatbot for enhanced user experience and personalized support.</li>
             <li>For more information on using assistants, see <a href="https://beta.openai.com/docs/guides/assistants" rel="nofollow ugc" target="_blank">https://beta.openai.com/docs/guides/assistants</a>.</li>
             <li>Additional integration information can be found at <a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/" rel="nofollow ugc" target="_blank">https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/</a>.</li>
@@ -193,7 +193,7 @@ function chatbot_chatgpt_support_section_callback() {
     </div>
     <hr style="border-top: 2px solid black;">
     <div id="thank-you">
-        <h2><i>Thank you for using AI Powered Chatbot for WordPress</i></h2>
+        <h2><i>Thank you for using Kognetiks Chatbot for WordPress</i></h2>
     </div>
     <?php
 }

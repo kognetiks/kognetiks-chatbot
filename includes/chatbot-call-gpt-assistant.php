@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Custom GPT - Ver 1.6.9
+ * Kognetiks Chatbot for WordPress - Custom GPT - Ver 1.6.9
  *
  * This file contains the code for table actions for reporting
  * to display the Chatbot on the website.
@@ -62,15 +62,15 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     }
 
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));
+    // back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
+    // back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
+    // back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));
 
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id: ' . $file_id);
+    // back_trace( 'NOTICE', '$file_id: ' . $file_id);
 
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace('NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
+    // back_trace('NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
 
     // Initialize cURL session
     $ch = curl_init();
@@ -86,12 +86,12 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     $response = curl_exec($ch);
 
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r($response, true));
 
     // Check for cURL errors
     if (curl_errno($ch)) {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'ERROR', 'Curl error: ' . curl_error($ch));
+        // back_trace( 'ERROR', 'Curl error: ' . curl_error($ch));
         curl_close($ch);
         return null;
     }
@@ -100,7 +100,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     curl_close($ch);
 
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r(json_decode($response, true)));
+    // back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r(json_decode($response, true)));
     
     // Return the API response
     return json_decode($response, true);
@@ -134,14 +134,14 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     // Check for false response
     if ($response === FALSE) {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'ERROR', 'Error unable to fetch response');
+        // back_trace( 'ERROR', 'Error unable to fetch response');
         return "Error: Unable to fetch response.";
     }
 
     // Check HTTP response code
     if (http_response_code() != 200) {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code()));
+        // back_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code()));
         return "Error: HTTP response code " . http_response_code();
     }
 
@@ -175,12 +175,12 @@ function getTheRunsStatus($thread_id, $runId, $api_key): void {
             // Handle error here
             $status = "failed";
             // DIAG - Diagnostics
-            // chatbot_chatgpt_back_trace( 'ERROR', "Error - GPT Assistant - Step 5");
+            // back_trace( 'ERROR', "Error - GPT Assistant - Step 5");
             exit;
         }
 
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray));
+        // back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray));
         
         if ($status != "completed") {
             // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
@@ -237,7 +237,7 @@ function getTheStepsStatus($thread_id, $runId, $api_key): void {
             // DIAG - Handle error here
             $status = "failed";
             // DIAG - Diagnostics
-            // chatbot_chatgpt_back_trace( 'ERROR', "Error - GPT Assistant - Step 7.");
+            // back_trace( 'ERROR', "Error - GPT Assistant - Step 7.");
             exit;
         }
 
@@ -288,11 +288,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
@@ -302,19 +302,19 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // If the threadId is not set, create a new thread
     if (empty($thread_id)) {
         // Step 1: Create an Assistant
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 1: Create an Assistant');
+        // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
         $assistants_response = createAnAssistant($api_key);
         // DIAG - Print the response
-        // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+        // back_trace( 'NOTICE', $assistants_response);
 
         // Step 2: Get The Thread ID
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
+        // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
         $thread_id = $assistants_response["id"];
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id ' . $assistant_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
+        // back_trace( 'NOTICE', '$assistant_id ' . $assistant_id);
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
         set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
     }
 
@@ -331,16 +331,16 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     );
 
     // Step 1: Create an Assistant
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 1: Create an Assistant');
+    // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
     // $assistants_response = createAnAssistant($api_key);
     // DIAG - Print the response
-    // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+    // back_trace( 'NOTICE', $assistants_response);
 
     // Step 2: Get The Thread ID
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
+    // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
     // $thread_id = $assistants_response["id"];
     // DIAG - Print the threadId
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id ' . $thread_id);
+    // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
     // set_chatbot_chatgpt_threads($thread_id, $assistant_id);
 
     // Conversation Context - Ver 1.7.2.1
@@ -350,7 +350,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // // Context History - Ver 1.6.1 - Added here for Ver 1.7.2.1
     //  $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
     // // DIAG Diagnostics - Ver 1.6.1
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$chatgpt_last_response ' . $chatgpt_last_response);
+    // back_trace( 'NOTICE', '$chatgpt_last_response ' . $chatgpt_last_response);
     
     // // IDEA Strip any href links and text from the $chatgpt_last_response
     // $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
@@ -368,60 +368,60 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     // Step 3: Add a Message to a Thread
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 3: Add a Message to a Thread');
+    // back_trace( 'NOTICE', 'Step 3: Add a Message to a Thread');
     $prompt = $message;
     
     // Fetch the file id - Ver 1.7.9
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
 
     if (empty($file_id)) {
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'No file to retrieve');
+        // back_trace( 'NOTICE', 'No file to retrieve');
         $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key);
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'File to retrieve');
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$file_id ' . $file_id);
+        // back_trace( 'NOTICE', 'File to retrieve');
+        // back_trace( 'NOTICE', '$file_id ' . $file_id);
         $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, $file_id);
         // DIAG - Print the response
-        // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+        // back_trace( 'NOTICE', $assistants_response);
     }
 
     // Step 4: Run the Assistant
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 4: Run the Assistant');
+    // back_trace( 'NOTICE', 'Step 4: Run the Assistant');
     $assistants_response = runTheAssistant($thread_id, $assistant_id, $context, $api_key);
 
     // Check if the response is not an array or is a string indicating an error
     if (!is_array($assistants_response) || is_string($assistants_response)) {
-        // chatbot_chatgpt_back_trace( 'ERROR', 'Invalid response format or error occurred');
+        // back_trace( 'ERROR', 'Invalid response format or error occurred');
         return "Error: Invalid response format or error occurred.";
     }
     // Check if the 'id' key exists in the response
     if (isset($assistants_response["id"])) {
         $runId = $assistants_response["id"];
     } else {
-        // chatbot_chatgpt_back_trace( 'ERROR', '\'$runId\' key not found in response');
+        // back_trace( 'ERROR', '\'$runId\' key not found in response');
         return "Error: 'id' key not found in response.";
     }
     // DIAG - Print the response
-    // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+    // back_trace( 'NOTICE', $assistants_response);
 
     // Step 5: Get the Run's Status
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 5: Get the Run\'s Status');
+    // back_trace( 'NOTICE', 'Step 5: Get the Run\'s Status');
     getTheRunsStatus($thread_id, $runId, $api_key);
 
     // Step 6: Get the Run's Steps
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 6: Get the Run\'s Steps');
+    // back_trace( 'NOTICE', 'Step 6: Get the Run\'s Steps');
     $assistants_response = getTheRunsSteps($thread_id, $runId, $api_key);
     // DIAG - Print the response
-    // chatbot_chatgpt_back_trace( 'NOTICE', $assistants_response);
+    // back_trace( 'NOTICE', $assistants_response);
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $assistants_response["data"][0]["usage"]["completion_tokens"]);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $assistants_response["data"][0]["usage"]["completion_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
@@ -429,20 +429,23 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Step 7: Get the Step's Status
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 7: Get the Step\'s Status');
+    // back_trace( 'NOTICE', 'Step 7: Get the Step\'s Status');
     getTheStepsStatus($thread_id, $runId, $api_key);
 
     // Step 8: Get the Message
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Step 8: Get the Message');
+    // back_trace( 'NOTICE', 'Step 8: Get the Message');
     $assistants_response = getTheMessage($thread_id, $api_key);
 
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();
 
     // Remove citations from the response
-    $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
-
-    return $assistants_response["data"][0]["content"][0]["text"]["value"];
+    if (!isset($assistants_response["data"][0]["content"][0]["text"]["value"]) && !is_null($assistants_response["data"][0]["content"][0]["text"]["value"])) {
+        $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
+        return $assistants_response["data"][0]["content"][0]["text"]["value"];
+    } else {
+        return "Error: No response from the assistant.";
+    }
 
 }
 
@@ -483,7 +486,7 @@ function chatbot_chatgpt_retrieve_file_id() {
     $file_id = get_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id' );
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_assistant_file_id: ' . $file_id);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_assistant_file_id: ' . $file_id);
 
     // If the file id is empty, return an empty string
     if (empty($file_id)) {
@@ -538,13 +541,13 @@ function deleteUploadedFile($file_id) {
     
     if ($http_status_code == 200 || $http_status_code == 204) {
         // DIAG - Diagnostics - Ver 1.7.9
-        // chatbot_chatgpt_back_trace( 'SUCCESS', "File deleted successfully.\n");
+        // back_trace( 'SUCCESS', "File deleted successfully.\n");
     } else {
         // If the request was not successful, you may want to handle it differently,
         // such as logging an error or retrying the request.
         // DIAG - Diagnostics - Ver 1.7.9
-        // chatbot_chatgpt_back_trace( 'ERROR', "HTTP status code: $http_status_code\n");
-        // chatbot_chatgpt_back_trace( 'ERROR', "Response: $response\n");
+        // back_trace( 'ERROR', "HTTP status code: $http_status_code\n");
+        // back_trace( 'ERROR', "Response: $response\n");
     }
 
 }

@@ -1,5 +1,5 @@
 /* 
- * AI Powered Chatbot for WordPress - Stylesheet
+ * Kognetiks Chatbot for WordPress - Stylesheet
  * 
  * This CSS file contains styles for the Chatbot plugin.
  * It includes styles for the chatbot interface, messages, and other UI elements.
@@ -219,7 +219,7 @@
 .chat-message {
     margin: 5px;
     padding: 5px;
-    max-width: 100%;
+    max-width: 95%;
     word-wrap: break-word;
 }
 

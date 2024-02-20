@@ -26,10 +26,10 @@ The latest version of the plugin allows for virtually unlimited Assistants, allo
 
 Unlock enhanced functionality with the latest feature - **now you can upload files directly to each Assistant**, providing an even more dynamic and tailored user experience across your platforms.
 
-Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/ai-powered-chatbot-for-wordpress/) and [OpenAI's Playground](https://platform.openai.com/assistants).
+Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
 **🔄 Choose Your Style: Embedded or Floating Chatbots**
-Flexibility is key. Display your AI Powered Chatbot as an embedded feature on pages or let it float across your site. With simple shortcodes, adapt the chatbot's presence to match your website's design and user needs.
+Flexibility is key. Display your AI powered chatbot as an embedded feature on pages or let it float across your site. With simple shortcodes, adapt the chatbot's presence to match your website's design and user needs.
 
 **🔍 Knowledge Navigator: Unearthing Your Content's Essence**
 At the heart of the plugin lies the Knowledge Navigator. This powerful tool delves deep into your website, mapping its architecture and content, enabling the chatbot to deliver precise and contextually relevant responses. Enhanced by TF-IDF analysis, the Knowledge Navigator ensures your content's unique keywords shine through, making interactions more meaningful.
@@ -193,6 +193,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 = 1.9.0 =
 * Changed the name of the chatbot to Kognetiks Chatbot for WordPress
 * Resequenced user's custom CSS to load for precedence over the plugin's CSS to allow for easier customization.
+* Added functionality to set the audience choice for the chatbot: All Audiences, Logged-in Only, or Visitors Only
 
 = 1.8.9 =
 * Allow custom Avatar - see Settings > Avatars for more information.

@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Settings - API/Model Test
+ * Kognetiks Chatbot for WordPress - Settings - API/Model Test
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the API key and other parameters
@@ -63,12 +63,12 @@ if ( ! defined( 'WPINC' ) ) {
     if (is_wp_error($response)) {
         return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your OpenAI account for additional information.';
             // DIAG - Log the response body
-            // chatbot_chatgpt_back_trace( 'ERROR', $response->get_error_message());
+            // back_trace( 'ERROR', $response->get_error_message());
     }
 
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
     // DIAG - Log the response body
-    // chatbot_chatgpt_back_trace( 'NOTICE', $response_body);
+    // back_trace( 'NOTICE', $response_body);
 
     // Check for API-specific errors
     //
@@ -80,16 +80,16 @@ if ( ! defined( 'WPINC' ) ) {
         $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
     } elseif (!empty($response_body['choices'])) {
         $updated_status = 'Success: Connection to ChatGPT API was successful!';
-        // chatbot_chatgpt_back_trace( 'SUCCESS', 'chatbot_chatgpt_api_status' . $updated_status);
+        // back_trace( 'SUCCESS', 'chatbot_chatgpt_api_status' . $updated_status);
     } else {
         $updated_status = 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';
-        // chatbot_chatgpt_back_trace( 'ERROR', $updated_status);
+        // back_trace( 'ERROR', $updated_status);
     }
 
     update_option('chatbot_chatgpt_api_status', $updated_status);
     $updated_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
     // TODO - Monitor the chatbot_chatgpt_api_status option for changes
-    // chatbot_chatgpt_back_trace( 'WARNING', 'chatbot_chatgpt_api_status: ' . esc_html($updated_status));
+    // back_trace( 'WARNING', 'chatbot_chatgpt_api_status: ' . esc_html($updated_status));
 
     return $updated_status;
 
@@ -108,12 +108,12 @@ function chatgpt_option_updated($option_name, $old_value, $new_value): void {
     }
 
     // DIAG - Log Function Call
-    // chatbot_chatgpt_back_trace( 'NOTICE, 'chatgpt_option_updated() called');
+    // back_trace( 'NOTICE, 'chatgpt_option_updated() called');
 
     // FIXME Retrieve the current value of the chatbot_chatgpt_api_status option
     $chatbot_chatgpt_api_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
     // DIAG - Log the current value of the chatbot_chatgpt_api_status option
-    // chatbot_chatgpt_back_trace( 'NOTICE', $chatbot_chatgpt_api_status);
+    // back_trace( 'NOTICE', $chatbot_chatgpt_api_status);
     
     // Check if the option updated is related to your plugin settings
     // if ($option_name === 'chatbot_chatgpt_model_choice' || $option_name === 'chatbot_chatgpt_api_key' || empty($chatbot_chatgpt_api_status)) {
@@ -123,7 +123,7 @@ function chatgpt_option_updated($option_name, $old_value, $new_value): void {
         // Call your test function
         $test_result = test_chatgpt_api($api_key);
         // DIAG - Log the test result
-        // chatbot_chatgpt_back_trace( 'WARNING', '$test_result' . $test_result);        
+        // back_trace( 'WARNING', '$test_result' . $test_result);        
 
         // DIAG - Set the option in the admin_notice function uses to display messages
         update_option('chatbot_chatgpt_api_status', $test_result);

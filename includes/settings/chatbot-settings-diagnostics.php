@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Settings - Diagnostics
+ * Kognetiks Chatbot for WordPress - Settings - Diagnostics
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the reporting and other parameters
@@ -107,13 +107,13 @@ function chatbot_chatgpt_suppress_attribution_callback($args) {
 }
 
 // Enhanced Error Logging if Diagnostic Mode is On - Ver 1.6.9
-// Call this function using chatbot_chatgpt_back_trace( 'NOTICE', $message);
+// Call this function using back_trace( 'NOTICE', $message);
 // [ERROR], [WARNING], [NOTICE], or [SUCCESS]
-// chatbot_chatgpt_back_trace( 'ERROR', 'Some message');
-// chatbot_chatgpt_back_trace( 'WARNING', 'Some message');
-// chatbot_chatgpt_back_trace( 'NOTICE', 'Some message');
-// chatbot_chatgpt_back_trace( 'SUCCESS', 'Some message');
-function chatbot_chatgpt_back_trace($message_type = "NOTICE", $message = "No message") {
+// back_trace( 'ERROR', 'Some message');
+// back_trace( 'WARNING', 'Some message');
+// back_trace( 'NOTICE', 'Some message');
+// back_trace( 'SUCCESS', 'Some message');
+function back_trace($message_type = "NOTICE", $message = "No message") {
 
     // Check if diagnostics is On
     $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'ERROR'));

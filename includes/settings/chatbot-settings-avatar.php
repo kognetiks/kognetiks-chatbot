@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Settings - Avatar Page
+ * Kognetiks Chatbot for WordPress - Settings - Avatar Page
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the select avatar of choice and other parameters.
@@ -117,7 +117,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
                                 $iconName = sprintf(strtolower(str_replace(' ', '-', $setName)) . "-%03d.png", $iconIndex);
                                 $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
                                 echo '<td style="padding: 15px;">';
-                                echo '<img src="' . plugins_url('../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:60px;height:60px;cursor:pointer;"/>';
+                                echo '<img src="' . plugins_url('../../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:60px;height:60px;cursor:pointer;"/>';
                                 echo '</td>';
                                 $iconIndex++;
                             }

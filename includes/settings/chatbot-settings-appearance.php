@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Settings - Appearance - Ver 1.8.1
+ * Kognetiks Chatbot for WordPress - Settings - Appearance - Ver 1.8.1
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the appearance settings and other parameters.
@@ -166,7 +166,7 @@ function chatbot_chatgpt_appearance_reset_callback(): void {
 function chatbot_chatgpt_appearance_restore_default_settings(): void {
 
     // DIAG - Enter function
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_restore_default_settings()');
+    // back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_restore_default_settings()');
 
     $chatbot_chatgpt_appearance_reset = 'No';
     update_option('chatbot_chatgpt_appearance_reset', $chatbot_chatgpt_appearance_reset);
@@ -193,7 +193,7 @@ function chatbot_chatgpt_appearance_restore_default_settings(): void {
     // update_option ('chatbot_chatgpt_width_setting', 'Narrow');
 
     // DIAG - Exit function
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Exit function: chatbot_chatgpt_appearance_restore_default_settings()');
+    // back_trace( 'NOTICE', 'Exit function: chatbot_chatgpt_appearance_restore_default_settings()');
 
 }
 
@@ -224,8 +224,8 @@ function chatbot_chatgpt_appearance_custom_css_settings(): void {
 function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
 
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Injecting custom CSS settings...');
-    // chatbot_chatgpt_back_trace( 'NOTICE', print_r($GLOBALS['chatbotChatGPTAppearanceCSS'], true));
+    // back_trace( 'NOTICE', 'Injecting custom CSS settings...');
+    // back_trace( 'NOTICE', print_r($GLOBALS['chatbotChatGPTAppearanceCSS'], true));
 
     // Prepend any user CSS settings
     $chatbot_chatgpt_appearance_user_css_setting = esc_attr(get_option('chatbot_chatgpt_appearance_user_css_setting', ''));
@@ -240,7 +240,7 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
 
     // DIAG - Diagnostics - Ver 1.8.6
     // foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
-    //     chatbot_chatgpt_back_trace( 'NOTICE', 'cssRule: ' . $cssRule);
+    //     back_trace( 'NOTICE', 'cssRule: ' . $cssRule);
     // }
 
     // Inject the custom css settings

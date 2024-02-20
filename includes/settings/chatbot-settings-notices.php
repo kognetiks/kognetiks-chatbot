@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Notices
+ * Kognetiks Chatbot for WordPress - Notices
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the notices and other parameters.
@@ -44,7 +44,7 @@ function display_option_value_admin_notice() {
             '_chatgpt_dismiss_nonce'
         );
             echo '<div class="notice notice-success is-dismissible"><p><b>Knowledge Navigator Outcome:</b> ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Knowledge Navigator Outcome: ' . $kn_results);
+            // back_trace( 'NOTICE', 'Knowledge Navigator Outcome: ' . $kn_results);
     }
 
     // FIXME - NOT CURRENTLY WORKING WITH API-TEST.PHP
@@ -57,7 +57,7 @@ function display_option_value_admin_notice() {
     //     );
     //         echo '<div class="notice notice-success is-dismissible"><p>' . $api_status . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
     //         // DIAG - Diagnostics
-    //         // chatbot_chatgpt_back_trace( 'NOTICE', 'API Status: ' . $api_status);
+    //         // back_trace( 'NOTICE', 'API Status: ' . $api_status);
     // }
 
     $kn_status = get_option('chatbot_chatgpt_kn_status');
@@ -69,7 +69,7 @@ function display_option_value_admin_notice() {
         );
             echo '<div class="notice notice-success is-dismissible"><p>Please visit the <b>Knowledge Navigator</b> settings, select a <b>Run Schedule</b>, then <b>Save Settings</b>. <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
             // DIAG - Diagnostics
-            // chatbot_chatgpt_back_trace( 'NOTICE', '$kn_status: ' . $kn_status);
+            // back_trace( 'NOTICE', '$kn_status: ' . $kn_status);
     }
 
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Settings - Knowledge Navigator - Acquire Words
+ * Kognetiks Chatbot for WordPress - Settings - Knowledge Navigator - Acquire Words
  *
  * This file contains the code for the Chatbot Knowledge Navigator.
  * 
@@ -31,16 +31,16 @@ function kn_acquire_just_the_words( $content ) {
     global $totalWordCount;
 
     // DIAG - Diagnostic - Ver 1.6.3
-    // chatbot_chatgpt_back_trace( 'NOTICE', "FUNCTION - kn_acquire_just_the_words");
+    // back_trace( 'NOTICE', "FUNCTION - kn_acquire_just_the_words");
 
     // Before beginning, translate the $stopWords array into the language of the website
     if (get_locale() !== "en_US") {
         // DIAG - Diagnostic - Ver 1.7.2.1
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'get_locale()' . get_locale());
+        // back_trace( 'NOTICE', 'get_locale()' . get_locale());
         // $localized_stopWords = localize_global_stopwords(get_locale(), $stopWords);
         $localized_stopWords = get_localized_stopwords(get_locale(), $stopWords);
         // DIAG - Diagnostic - Ver 1.7.2.1
-        // chatbot_chatgpt_back_trace( 'NOTICE',  '$localized_stopWords ' . $localized_stopWords);
+        // back_trace( 'NOTICE',  '$localized_stopWords ' . $localized_stopWords);
     } else {
         $localized_stopWords = $stopWords;
     }

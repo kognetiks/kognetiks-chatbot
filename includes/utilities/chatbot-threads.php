@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Threads
+ * Kognetiks Chatbot for WordPress - Threads
  *
  * This file contains the code for managing the threads used
  * to display the Chatbot on the website.
@@ -23,11 +23,11 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    chatbot_chatgpt_back_trace( 'NOTICE', 'SET $user_id: ' . $user_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'SET $page_id: ' . $page_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'SET $session_id: ' . $session_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'SET $thread_id: ' . $thread_id);
-    chatbot_chatgpt_back_trace( 'NOTICE', 'SET $assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', 'SET $user_id: ' . $user_id);
+    back_trace( 'NOTICE', 'SET $page_id: ' . $page_id);
+    back_trace( 'NOTICE', 'SET $session_id: ' . $session_id);
+    back_trace( 'NOTICE', 'SET $thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', 'SET $assistant_id: ' . $assistant_id);
 
     $script_data_array = array(
         'user_id' => $user_id,
@@ -59,11 +59,11 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 1 $user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 1 $page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 1 $session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 1 $thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 1 $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'GET PART 1 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'GET PART 1 $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'GET PART 1 $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'GET PART 1 $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'GET PART 1 $assistant_id: ' . $assistant_id);
 
     $script_data_array = array(
         'user_id' => $user_id,
@@ -100,11 +100,11 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 2 $user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 2 $page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 2 $session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 2 $thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'GET PART 2 $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'GET PART 2 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'GET PART 2 $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'GET PART 2 $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'GET PART 2 $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'GET PART 2 $assistant_id: ' . $assistant_id);
 
     $script_data_array = array(
         'user_id' => $user_id,
@@ -127,11 +127,11 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'DEL $user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'DEL $page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'DEL $session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'DEL $thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'DEL $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'DEL $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'DEL $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'DEL $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'DEL $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'DEL $assistant_id: ' . $assistant_id);
 
     $script_data_array = array(
         'user_id' => $user_id,
@@ -150,11 +150,11 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
     delete_transient($assistant_id_thread_key);
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     $script_data_array = array(
         'user_id' => $user_id,

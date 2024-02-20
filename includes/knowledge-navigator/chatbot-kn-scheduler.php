@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Knowledge Navigator - Scheduler - Ver 1.6.3
+ * Kognetiks Chatbot for WordPress - Knowledge Navigator - Scheduler - Ver 1.6.3
  *
  * This is the file that schedules the Knowledge Navigator.
  * Scheduled can be now, daily, weekly, etc.
@@ -21,7 +21,7 @@ function knowledge_navigator_scan(): void {
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'ENTERING knowledge_navigator_scan()');
+    // back_trace( 'NOTICE', 'ENTERING knowledge_navigator_scan()');
     
     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
 
@@ -59,7 +59,7 @@ function knowledge_navigator_scan(): void {
     update_option('chatbot_chatgpt_kn_status', $status_message);
 
     // DIAG - Diagnostic - Ver 1.6.3
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'EXITING knowledge_navigator_scan()');
+    // back_trace( 'NOTICE', 'EXITING knowledge_navigator_scan()');
 
 }
 add_action('knowledge_navigator_scan_hook', 'knowledge_navigator_scan');

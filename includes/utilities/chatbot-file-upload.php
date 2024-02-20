@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - File Uploads - Ver 1.7.6
+ * Kognetiks Chatbot for WordPress - File Uploads - Ver 1.7.6
  *
  * This file contains the code for uploading files as part
  * in support of Custom GPT Assistants via the Chatbot.
@@ -19,14 +19,14 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
     global $session_id;
 
     // DIAG - Diagnostic - Ver 1.7.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
+    // back_trace( 'NOTICE', "Entering chatbot_chatgpt_upload_file_to_assistant()" );
 
     $upload_dir = WP_CONTENT_DIR . '/plugins/chatbot-chatgpt/uploads/';
     $file_path = $upload_dir . basename($_FILES['file']['name']);
 
     // DIAG - Diagnostic - Ver 1.7.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', $upload_dir );
-    // chatbot_chatgpt_back_trace( 'NOTICE', $file_path );
+    // back_trace( 'NOTICE', $upload_dir );
+    // back_trace( 'NOTICE', $file_path );
 
     if (!file_exists($upload_dir)) {
         mkdir($upload_dir, 0777, true); // Create directory if it doesn't exist
@@ -35,7 +35,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
     // Check if there was an error during the file upload
     if ($_FILES['file']['error'] > 0) {
         // DIAG - Diagnostic - Ver 1.7.9
-        // chatbot_chatgpt_back_trace('ERROR', "Error during file upload: " . $_FILES['file']['error']);
+        // back_trace('ERROR', "Error during file upload: " . $_FILES['file']['error']);
         return array(
             'status' => 'error',
             'message' => 'Oops! Something went wrong during the upload. Please try again later.'
@@ -44,11 +44,11 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
         if (move_uploaded_file($_FILES['file']['tmp_name'], $file_path)) {
             // File is successfully uploaded
             // DIAG - Diagnostic - Ver 1.7.9
-            // chatbot_chatgpt_back_trace( 'SUCCESS', "File is successfully uploaded" );
+            // back_trace( 'SUCCESS', "File is successfully uploaded" );
         } else {
             // Handle error
             // DIAG - Diagnostic - Ver 1.7.9
-            // chatbot_chatgpt_back_trace( 'ERROR', "Error uploading file" );
+            // back_trace( 'ERROR', "Error uploading file" );
             return array(
                 'status' => 'error',
                 'message' => 'Oops! Something went wrong during the upload. Please try again later.'
@@ -108,7 +108,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
         // Retrieve the error message before closing the cURL handle
         $errorMessage = 'Error:' . curl_error($ch);
         // DIAG - Diagnostic - Ver 1.7.6
-        // chatbot_chatgpt_back_trace( 'ERROR', $errorMessage );
+        // back_trace( 'ERROR', $errorMessage );
         curl_close($ch); // Make sure to close the cURL session after getting the error message
         return array(
             'status' => 'error',
@@ -127,7 +127,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
     if ($http_status != 200 || isset($responseData['error'])) {
         $errorMessage = $responseData['error']['message'] ?? 'Unknown error occurred.';
         // DIAG - Diagnostic - Ver 1.7.6
-        // chatbot_chatgpt_back_trace( 'ERROR', $errorMessage );
+        // back_trace( 'ERROR', $errorMessage );
         return array(
             'status' => 'error',
             'http_status' => $http_status,
@@ -135,8 +135,8 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
         );
     } else {
         // DIAG - Diagnostic - Ver 1.7.6
-        // chatbot_chatgpt_back_trace( 'SUCCESS', "File uploaded successfully" );
-        // chatbot_chatgpt_back_trace( 'SUCCESS', 'asst_file_id ' . $responseData['id'] );
+        // back_trace( 'SUCCESS', "File uploaded successfully" );
+        // back_trace( 'SUCCESS', 'asst_file_id ' . $responseData['id'] );
         // Set the transient for the file id
         set_chatbot_chatgpt_transients('chatbot_chatgpt_assistant_file_id', $responseData['id'], null, null, $session_id, null);
 

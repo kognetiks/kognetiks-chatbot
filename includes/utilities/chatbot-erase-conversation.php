@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Clear Conversation - Ver 1.8.6
+ * Kognetiks Chatbot for WordPress - Clear Conversation - Ver 1.8.6
  *
  * This file contains the code for uploading files as part
  * in support of Custom GPT Assistants via the Chatbot.
@@ -32,31 +32,31 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // $user_id = get_current_user_id();
     if ( $user_id !== '' ) {
         // DIAG = Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
+        // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     } else {
         // DIAG = Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'No user is currently logged in.');
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+        // back_trace( 'NOTICE', 'No user is currently logged in.');
+        // back_trace( 'NOTICE', '$session_id: ' . $session_id);
         // Removed - Ver 1.9.0
         // $user_id = $session_id;
     }
 
     if ( $page_id !== '') {
         // DIAG = Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
+        // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     } else {
         // DIAG = Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'No page is currently set.');
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$post: ' . $post);
+        // back_trace( 'NOTICE', 'No page is currently set.');
+        // back_trace( 'NOTICE', '$post: ' . $post);
         $page_id = $_POST['page_id'];
     }
 
@@ -86,12 +86,12 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$reset_type: ' . $reset_type);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$transient_type: ' . $transient_type);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$reset_type: ' . $reset_type);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$transient_type: ' . $transient_type);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     wp_send_json_error('Conversation not cleared.');
 

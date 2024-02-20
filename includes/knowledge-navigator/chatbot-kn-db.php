@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Knowledge Navigator - Database and File Management - Ver 1.6.3
+ * Kognetiks Chatbot for WordPress - Knowledge Navigator - Database and File Management - Ver 1.6.3
  *
  * This file contains the code for table actions for database and file management.
  * 
@@ -109,7 +109,7 @@ function output_results() {
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'ENTER: output_results()');
+    // back_trace( 'NOTICE', 'ENTER: output_results()');
 
     // Generate the directory path
     $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
@@ -117,7 +117,7 @@ function output_results() {
     // Create the directory if it doesn't exist
     if (!file_exists($results_dir_path)) {
         if (!mkdir($results_dir_path, 0755, true)) {
-            // chatbot_chatgpt_back_trace( 'ERROR', 'Failed to create results directory');
+            // back_trace( 'ERROR', 'Failed to create results directory');
             return;
         }
     }
@@ -134,7 +134,7 @@ function output_results() {
             $f->fputcsv([$word, $tfidf]);
         }
     } catch (RuntimeException $e) {
-        // chatbot_chatgpt_back_trace( 'ERROR', 'Failed to open CSV file for writing: ' . $e->getMessage());
+        // back_trace( 'ERROR', 'Failed to open CSV file for writing: ' . $e->getMessage());
     }
 
     // Write JSON
@@ -143,7 +143,7 @@ function output_results() {
             throw new Exception("Failed to write to JSON file.");
         }
     } catch (Exception $e) {
-        // chatbot_chatgpt_back_trace( 'ERROR', $e->getMessage());
+        // back_trace( 'ERROR', $e->getMessage());
     }
 
     return;

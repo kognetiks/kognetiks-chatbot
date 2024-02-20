@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Settings - Setup Page
+ * Kognetiks Chatbot for WordPress - Settings - Setup Page
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the setup settings and other parameters.
@@ -82,3 +82,14 @@ function chatgpt_disclaimer_setting_callback($args) {
     <?php    
 }
 
+// Audience Choice - Ver 1.9.0
+function chatbot_chatgpt_audience_choice_callback($args) {
+    $chatbot_chatgpt_audience_choice = esc_attr(get_option('chatbot_chatgpt_audience_choice', 'all'));
+    ?>
+    <select id="chatbot_chatgpt_audience_choice" name="chatbot_chatgpt_audience_choice">
+        <option value="all" <?php selected( $chatbot_chatgpt_audience_choice, 'all' ); ?>><?php echo esc_html( 'All Audiences' ); ?></option>
+        <option value="logged-in" <?php selected( $chatbot_chatgpt_audience_choice, 'logged-in' ); ?>><?php echo esc_html( 'Logged-in Only' ); ?></option>
+        <option value="visitors" <?php selected( $chatbot_chatgpt_audience_choice, 'visitors' ); ?>><?php echo esc_html( 'Visitors Only' ); ?></option>
+    </select>
+    <?php
+}

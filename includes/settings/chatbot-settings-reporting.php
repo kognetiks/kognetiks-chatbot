@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Settings - Reporting Page
+ * Kognetiks Chatbot for WordPress - Settings - Reporting Page
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the reporting settings and other parameters.
@@ -64,7 +64,7 @@ function chatbot_chatgpt_reporting_period_callback($args) {
     // Get the saved chatbot_chatgpt_reporting_period value or default to "Daily"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_reporting_period', 'Daily'));
     // DIAG - Log the output choice
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_reporting_period' . $output_choice);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_reporting_period' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_reporting_period" name="chatbot_chatgpt_reporting_period">
         <option value="<?php echo esc_attr( 'Daily' ); ?>" <?php selected( $output_choice, 'Daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
@@ -80,7 +80,7 @@ function  chatbot_chatgpt_enable_conversation_logging_callback($args) {
     // Get the saved chatbot_chatgpt_enable_conversation_logging value or default to "Off"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_enable_conversation_logging', 'Off'));
     // DIAG - Log the output choice
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_enable_conversation_logging' . $output_choice);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_enable_conversation_logging' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_enable_conversation_logging" name="chatbot_chatgpt_enable_conversation_logging">
         <option value="<?php echo esc_attr( 'On' ); ?>" <?php selected( $output_choice, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
@@ -94,7 +94,7 @@ function chatbot_chatgpt_conversation_log_days_to_keep_callback($args) {
     // Get the saved chatbot_chatgpt_conversation_log_days_to_keep value or default to "30"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_conversation_log_days_to_keep', '30'));
     // DIAG - Log the output choice
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log_days_to_keep' . $output_choice);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log_days_to_keep' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_conversation_log_days_to_keep" name="chatbot_chatgpt_conversation_log_days_to_keep">
         <option value="<?php echo esc_attr( '1' ); ?>" <?php selected( $output_choice, '7' ); ?>><?php echo esc_html( '1' ); ?></option>
@@ -210,10 +210,10 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
     if (!extension_loaded('gd')) {
         // GD Library is installed and loaded
         // DIAG - Log the output choice
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is installed and loaded.');
+        // back_trace( 'NOTICE', 'GD Library is installed and loaded.');
         chatbot_chatgpt_general_admin_notice('Chatbot requires the GD Library to function correctly, but it is not installed or enabled on your server. Please install or enable the GD Library.');
         // DIAG - Log the output choice
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
+        // back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
         // Disable the shortcode functionality
         return;
     }
@@ -253,7 +253,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
         if(!empty($wpdb->last_error)) {
             // DIAG - Handle the error
-            // chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
+            // back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
             return;
         } else if(!empty($results)) {
             $labels = [];
@@ -325,7 +325,7 @@ function chatbot_chatgpt_interactions_table() {
 
         if(!empty($wpdb->last_error)) {
             // DIAG - Handle the error
-            // chatbot_chatgpt_back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
+            // back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
             return;
         } else if(!empty($results)) {
             $labels = [];

@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Database Management for Reporting - Ver 1.6.3
+ * Kognetiks Chatbot for WordPress - Database Management for Reporting - Ver 1.6.3
  *
  * This file contains the code for table actions for reporting
  * to display the Chatbot on the website.
@@ -31,12 +31,12 @@ function create_chatbot_chatgpt_interactions_table() {
     // Log errors or notify admin if there was an error
     if (!empty($wpdb->last_error)) {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'ERROR', 'Error creating chatbot_chatgpt_interactions table ' . $wpdb->last_error);
+        // back_trace( 'ERROR', 'Error creating chatbot_chatgpt_interactions table ' . $wpdb->last_error);
         return;
     }
 
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'SUCCESS', 'Successfully created chatbot_chatgpt_interactions table');
+    // back_trace( 'SUCCESS', 'Successfully created chatbot_chatgpt_interactions table');
     return;
 
 }
@@ -93,16 +93,16 @@ function create_conversation_logging_table(): void {
     // Check if the table already exists
     if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace('NOTICE', 'Table already exists: ' . $table_name);
+        // back_trace('NOTICE', 'Table already exists: ' . $table_name);
         // Directly execute the ALTER TABLE command without prepare()
         $sql = "ALTER TABLE $table_name MODIFY COLUMN user_type ENUM('Chatbot', 'Visitor', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens')";
         $result = $wpdb->query($sql);
         if ($result === false) {
             // If there was an error, log it
-            // chatbot_chatgpt_back_trace('ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+            // back_trace('ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
         } else {
             // If the operation was successful, log the success
-            // chatbot_chatgpt_back_trace('SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
+            // back_trace('SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
         }
 
         // Fetch rows where user_type is missing
@@ -125,19 +125,19 @@ function create_conversation_logging_table(): void {
 
             if ($update_result === false) {
                 // If there was an error, log it
-                // chatbot_chatgpt_back_trace('ERROR', 'Error updating missing chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+                // back_trace('ERROR', 'Error updating missing chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
             } else {
                 // If the operation was successful, log the success
-                // chatbot_chatgpt_back_trace('SUCCESS', 'Successfully updated missing values in chatbot_chatgpt_conversation_log table');
+                // back_trace('SUCCESS', 'Successfully updated missing values in chatbot_chatgpt_conversation_log table');
             }
         }
         
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace('SUCCESS', 'Successfully updated chatbot_chatgpt_conversation_log table');
+        // back_trace('SUCCESS', 'Successfully updated chatbot_chatgpt_conversation_log table');
 
     } else {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace('NOTICE', 'Table does not exist: ' . $table_name);
+        // back_trace('NOTICE', 'Table does not exist: ' . $table_name);
         // SQL to create the conversation logging table
         $sql = "CREATE TABLE $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -160,11 +160,11 @@ function create_conversation_logging_table(): void {
 
     // Log errors or notify admin if there was an error
     if (!empty($wpdb->last_error)) {
-        // chatbot_chatgpt_back_trace( 'ERROR', 'Error creating/modifying chatbot_chatgpt_conversation_log table' . $wpdb->last_error);
+        // back_trace( 'ERROR', 'Error creating/modifying chatbot_chatgpt_conversation_log table' . $wpdb->last_error);
         return;
     }
 
-    // chatbot_chatgpt_back_trace( 'SUCCESS', 'Successfully created/updated chatbot_chatgpt_conversation_log table');
+    // back_trace( 'SUCCESS', 'Successfully created/updated chatbot_chatgpt_conversation_log table');
     return;
     
 }
@@ -206,7 +206,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
     // Check if the insert was successful
     if ($insert_result === false) {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'ERROR', "Failed to insert chat message: " . $wpdb->last_error);
+        // back_trace( 'ERROR', "Failed to insert chat message: " . $wpdb->last_error);
         return false;
     }
 
@@ -275,7 +275,7 @@ function chatbot_chatgpt_conversation_log_cleanup() {
     // Check if delete was successful
     if ($delete_result === false) {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'ERROR', "Failed to delete conversation log entries: " . $wpdb->last_error);
+        // back_trace( 'ERROR', "Failed to delete conversation log entries: " . $wpdb->last_error);
         return false;
     }
 

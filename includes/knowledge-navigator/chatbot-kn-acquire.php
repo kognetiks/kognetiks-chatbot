@@ -1,6 +1,6 @@
 <?php
 /**
- * AI Powered Chatbot for WordPress - Settings - Knowledge Navigator - Acquire
+ * Kognetiks Chatbot for WordPress - Settings - Knowledge Navigator - Acquire
  *
  * This file contains the code for the Chatbot Knowledge Navigator.
  * 
@@ -54,7 +54,7 @@ function chatbot_chatgpt_kn_acquire(): void {
     }
 
     // DIAG - Log directory path for debugging
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'Directory path: ' . $results_dir_path);
+    // back_trace( 'NOTICE', 'Directory path: ' . $results_dir_path);
 
     // Prepare log file for posts
     $log_file_posts = $results_dir_path . 'results-posts.log';
@@ -96,7 +96,7 @@ function chatbot_chatgpt_kn_acquire(): void {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     chatbot_chatgpt_back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        
 
         // Directly use the post content
@@ -115,7 +115,7 @@ function chatbot_chatgpt_kn_acquire(): void {
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
+            // back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
         }
         
         // Construct the URL for the post
@@ -170,7 +170,7 @@ function chatbot_chatgpt_kn_acquire(): void {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     // chatbot_chatgpt_back_trace( 'NOTICE', "Key: $key, Value: $value");
+        //     // back_trace( 'NOTICE', "Key: $key, Value: $value");
         // }
 
         // Directly use the post content
@@ -189,7 +189,7 @@ function chatbot_chatgpt_kn_acquire(): void {
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
+            // back_trace( 'NOTICE', 'Post ID ' . $result['ID'] . ' has empty content.');
         }    
 
         // Construct the URL for the page
@@ -244,7 +244,7 @@ function chatbot_chatgpt_kn_acquire(): void {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     // chatbot_chatgpt_back_trace( 'NOTICE', "Key: $key, Value: $value");
+        //     // back_trace( 'NOTICE', "Key: $key, Value: $value");
         // }        
 
         // Directly use the post content
@@ -263,7 +263,7 @@ function chatbot_chatgpt_kn_acquire(): void {
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Post ID ' . $result['id'] . ' has empty content.');
+            // back_trace( 'NOTICE', 'Post ID ' . $result['id'] . ' has empty content.');
         }
         
         // Construct the URL for the comments
@@ -314,7 +314,7 @@ function chatbot_chatgpt_kn_acquire(): void {
     }
 
     // DIAG - Error log $max_top_words
-    // chatbot_chatgpt_back_trace( 'NOTICE', "$max_top_words: " . $max_top_words);
+    // back_trace( 'NOTICE', "$max_top_words: " . $max_top_words);
 
     // slice off the top max_top_words
     $topWords = array_slice($topWords, 0, $max_top_words);
