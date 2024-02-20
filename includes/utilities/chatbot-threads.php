@@ -23,11 +23,11 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'SET $user_id: ' . $user_id);
-    back_trace( 'NOTICE', 'SET $page_id: ' . $page_id);
-    back_trace( 'NOTICE', 'SET $session_id: ' . $session_id);
-    back_trace( 'NOTICE', 'SET $thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', 'SET $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'SET $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'SET $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'SET $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'SET $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'SET $assistant_id: ' . $assistant_id);
 
     $script_data_array = array(
         'user_id' => $user_id,

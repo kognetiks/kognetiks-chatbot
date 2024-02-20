@@ -81,10 +81,10 @@ function chatbot_chatgpt_shortcode($atts) {
     $chatbot_chatgpt_hot_bot_prompt = array_key_exists('prompt', $atts) ? sanitize_text_field($atts['prompt']) : '';
 
     // DIAG - Diagnostics - Ver 1.9.0
-    back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
-    back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
-    back_trace( 'NOTICE', '$chatbot_chatgpt_audience_choice: ' . $chatbot_chatgpt_audience_choice);
-    back_trace( 'NOTICE', '$chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_audience_choice: ' . $chatbot_chatgpt_audience_choice);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
 
     // Determine if the user is logged in
     $user_logged_in = is_user_logged_in();
@@ -93,7 +93,7 @@ function chatbot_chatgpt_shortcode($atts) {
             // Ok to proceed
         } else {
             // Not ok to proceed
-            back_trace( 'NOTICE', 'User is logged in but the audience choice is not set to "all"');
+            // back_trace( 'NOTICE', 'User is logged in but the audience choice is not set to "all"');
             return;
         }
     } else {
@@ -101,7 +101,7 @@ function chatbot_chatgpt_shortcode($atts) {
             // Ok to proceed
         } else {
             // Not ok to proceed
-            back_trace( 'NOTICE', 'User is not logged in but the audience choice is not set to "all"');
+            // back_trace( 'NOTICE', 'User is not logged in but the audience choice is not set to "all"');
             return;
         }
     }

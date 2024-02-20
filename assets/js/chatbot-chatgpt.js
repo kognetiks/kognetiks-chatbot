@@ -489,7 +489,7 @@ jQuery(document).ready(function ($) {
                     botResponse = '';
                 } else {
                     // DIAG - Log the error - Ver 1.6.7
-                    console.log('Chatbot: ERROR: ' + JSON.stringify(response));
+                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
                     appendMessage('Error: ' + errorThrown, 'error');
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
                     botResponse = '';
