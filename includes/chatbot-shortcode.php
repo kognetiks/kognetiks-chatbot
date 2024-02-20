@@ -46,7 +46,7 @@ function chatbot_chatgpt_shortcode($atts) {
     // [chatbot style="embedded" assistant="alternate"] - Embedded style, GPT Assistant as set in Alternate setting
     // [chatbot style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Floating style using a GPT Assistant ID
     // [chatbot style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] - Embedded style using a GPT Assistant ID
-    // [chatbot style="embedded" assistant="original" prompt="How do I install this pluging"] - Floating style, uses OpenAI's ChatGPT
+    // [chatbot style="embedded" assistant="original" prompt="How do I install this plugin?"] - Floating style, uses OpenAI's ChatGPT
     // [chatbot style="floating" audience="all"] - Floating style for all audiences
     // [chatbot style="floating" audience="logged-in"] - Floating style for logged-in users only
     // [chatbot style="floating" audience="visitors"] - Floating style for visitors only
@@ -141,7 +141,7 @@ function chatbot_chatgpt_shortcode($atts) {
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
         ob_start();
         ?>
-        <div id="chatbot-chatgpt" name="chatbot-chatgpt" style="display: flex;" class="embedded-style chatbot-full">
+        <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
         <!-- <script>
             $(document).ready(function() {
                 $('#chatbot-chatgpt').removeClass('floating-style').addClass('embedded-style');

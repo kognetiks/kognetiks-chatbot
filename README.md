@@ -8,7 +8,7 @@ Welcome to the future of website interaction with **Kognetiks Chatbot for WordPr
 
 **🌐 Harnessing OpenAI's Large Language Models for Enhanced Engagement**
 
-Dive into the world of advanced AI with the **Kognetiks Chatbot for WordPress**.  At the core, the Chatbot takes adavantage of API access to Large Language Models such as those powered by OpenAI. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
+Dive into the world of advanced AI with the **Kognetiks Chatbot for WordPress**.  At the core, the Chatbot takes advantage of API access to Large Language Models such as those powered by OpenAI. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
 **🌟 Assistants: Tailored Conversational Experiences**
 
@@ -83,7 +83,7 @@ Get your Kognetiks Chatbot for WordPress today and redefine your WordPress site 
 6. For an embedded chatbot on any page add the shortcode: `[chatbot style=embedded]`
 7. Use `[chatbot style=floating|embedded assistant=primary|alternate]` to display the chatbot as a floating chatbot or embedded chatbot with a primary or alternate assistant.
 
-Now your website visitors can enjoy a seamless and personalized chat experience an Kognetiks Chatbot for WordPress.
+Now your website visitors can enjoy a seamless and personalized chat experience with the Kognetiks Chatbot for WordPress.
 
 ## Installing the Chatbot on Your WordPress Website
 
@@ -170,5 +170,11 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 💬 Looking for **plugin support**, please visit [https://kognetiks.com/wordpress-plugins/plugin-support/](https://kognetiks.com/wordpress-plugins/plugin-support/).
 
 📜 For **frequently asked questions**, please visit [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
+
+## Disclaimer
+
+OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetiks is not a partner of, endorsed by, or sponsored by OpenAI.
+
+## Thank you for using Kognetiks Chatbot for WordPress
 
 Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/ai-powered-chatbot-for-wordpress/) for more information.

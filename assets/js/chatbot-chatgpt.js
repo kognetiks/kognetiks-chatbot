@@ -256,8 +256,8 @@ jQuery(document).ready(function ($) {
         // If no avatar is selected or the selected avatar is 'icon-000.png', use the dashicon
         // Remove the avatar-icon class (if it was previously added) and add the dashicon class
         // chatGptOpenButton.empty().removeClass('avatar-icon').addClass('dashicons dashicons-format-chat dashicon');
-        // chatGptOpenButton.empty().removeClass('avatar-icon').addClass('dashicons chatbot-open-icon chatbotopenicon'); // Add a open button
-        chatGptOpenButton.empty().removeClass('avatar-icon').addClass('chatbot-open-icon').append(chatbotopenicon); // Add a open button
+        // chatGptOpenButton.empty().removeClass('avatar-icon').addClass('dashicons chatbot-open-icon chatbotopenicon'); // Add an open button
+        chatGptOpenButton.empty().removeClass('avatar-icon').addClass('chatbot-open-icon').append(chatbotopenicon); // Add an open button
     }
     
     // Append the collapse button and collapsed chatbot icon to the chatbot container

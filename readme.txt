@@ -17,7 +17,7 @@ Welcome to the future of website interaction with **Kognetiks Chatbot for WordPr
 Dive into the world of advanced AI with Large Language Models at the core of the Chatbot. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
 **🌟 Assistants: Tailored Conversational Experiences**
-Dive into the world of advanced AI with the **Kognetiks Chatbot for WordPress**.  At the core, the Chatbot takes adavantage of API access to Large Language Models such as those powered by OpenAI. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
+Dive into the world of advanced AI with the **Kognetiks Chatbot for WordPress**.  At the core, the Chatbot takes advantage of API access to Large Language Models such as those powered by OpenAI. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
 **🔀 Multiple Assistants, Multiple Roles**
 Unlock the potential of personalized digital interaction. Use the Assistants you develop, trained with your specific knowledge and skills, are here to revolutionize your website. From handling FAQs to managing bookings and offering customized suggestions, these Assistants are seamlessly integrated into your WordPress site, promising a dynamic and engaging user experience.
@@ -64,7 +64,7 @@ Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chat
 
 **🌐 Features at a Glance**
 ▪ **Quick Setup:** Integrate easily with API from companies like OpenAI.
-▪ **Advanced AI Models:** Includes support for the latest models liek GPT-4 Turbo from OpenAI.
+▪ **Advanced AI Models:** Includes support for the latest models like GPT-4 Turbo from OpenAI.
 ▪ **Customizable Interfaces:** Choose between floating and embedded chatbot styles.
 ▪ **User-Friendly Settings:** Easily manage your API key and other settings.
 ▪ **Intelligent Design:** Smart collapsible chatbot for a cleaner website interface.
@@ -84,7 +84,7 @@ Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chat
 6. For an embedded chatbot on any page add the shortcode: [chatbot style=embedded]
 7. Use [chatbot style=floating|embedded assistant=primary|alternate] to display the chatbot as a floating chatbot or embedded chatbot with a primary or alternate assistant.
 
-Now your website visitors can enjoy a seamless and personalized chat experience the Kognetiks Chatbot for WordPress.
+Now your website visitors can enjoy a seamless and personalized chat experience with the Kognetiks Chatbot for WordPress.
 
 == Plugin Support and FAQs ==
 
@@ -169,6 +169,10 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo (i.e., 'gpt-4-1106
 
 You can find more frequently asked questions at [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
 
+= Disclaimer =
+
+OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetiks is not a partner of, endorsed by, or sponsored by OpenAI.
+
 == Screenshots ==
 
 1. Initial Chatbot display
@@ -192,7 +196,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 
 = 1.9.0 =
 * Changed the name of the chatbot to Kognetiks Chatbot for WordPress
-* Resequenced user's custom CSS to load for precedence over the plugin's CSS to allow for easier customization.
+* Re-sequenced user's custom CSS to load for precedence over the plugin's CSS to allow for easier customization.
 * Added functionality to set the audience choice for the chatbot: All Audiences, Logged-in Only, or Visitors Only
 
 = 1.8.9 =
@@ -200,7 +204,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Resolved IOS and Chrome mobile issues with the chatbot.
 
 = 1.8.8 =
-* Add an adjustable timeout settings to the chatbot to prevent long running queries.
+* Add an adjustable timeout settings to the chatbot to prevent long-running queries.
 
 = 1.8.7 =
 * Quick fix for collapse button
@@ -218,7 +222,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Additional adjustments to css and appearance settings.
 
 = 1.8.4 =
-* Removed unnecesary styling.
+* Removed unnecessary styling.
 
 = 1.8.3 =
 * Removed font family inheritance from the body tag to prevent conflicts with themes.
@@ -256,7 +260,7 @@ You can find more frequently asked questions at [https://kognetiks.com/wordpress
 * Corrected with GPT Assistant not being selected correctly when using the assistant parameter in the shortcode.
 
 = 1.7.4 =
-* Enhanced handling for multi-threaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
+* Enhanced handling for multithreaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
 
 = 1.7.3 =
 * Added support for unlimited Assistants in addition to 'original', 'primary' and 'alternate' shortcode parameters.

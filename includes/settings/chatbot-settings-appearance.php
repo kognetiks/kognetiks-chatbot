@@ -248,7 +248,7 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
     $chatbotChatGPTAppearanceCSS = implode("\n", $chatbotChatGPTAppearanceCSS); // Prepend spaces for indentation
 
     ?>
-    <style type="text/css">
+    <style>
         <?php
         echo "\t\t" . $chatbot_chatgpt_appearance_user_css_setting . "\n"; // Put user CSS settings at the top
         // Loop through each CSS rule and output it with indentation

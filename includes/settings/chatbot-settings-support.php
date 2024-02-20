@@ -20,8 +20,8 @@ function chatbot_chatgpt_support_section_callback() {
     <div id='overview'>
         <h3>Overview</h3>
         <p>Kognetiks Chatbot for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.</p>
-        <p>ChatGPT is a conversational AI platform that uses natural language processing and machine learning algorithms to interact with users in a human-like manner. It is designed to answer questions, provide suggestions, and engage in conversations with users. ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, ChatGPT can be used in various fields such as healthcare, education, finance, and many more.</p>
-        <p>The Kognetiks Chatbot for WordPress leverages the OpenAI platform using the gpt-3.5-turbo, gpt-4, or gpt-4-turbo model to bring artificial intelligence to life within your WordPress website.</p>
+        <p>Conversational AI platforms - like those from OpenAI - use natural language processing and machine learning algorithms to interact with users in a human-like manner.  They are designed to answer questions, provide suggestions, and engage in conversations with users. This is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, these platforms can be used in various fields such as healthcare, education, finance, and many more.</p>
+        <p>The Kognetiks Chatbot for WordPress is powered by OpenAI, via it's API and Models to bring artificial intelligence to life within your WordPress website.</p>
         <p><b>Important Note:</b> This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.<p>
         <h3>Official Sites:</h3>
             <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -190,6 +190,11 @@ function chatbot_chatgpt_support_section_callback() {
             <li>Turning on WordPress debugging will cause all PHP errors, notices, and warnings to be displayed. This is useful for debugging and development purposes.</li>
             <li><b><i>NOTE: It is not recommended to enable WordPress debugging on a production site.</i></b></li>
         </ul>
+    </div>
+    <hr style="border-top: 2px solid black;">
+    <div id="disclaimer">
+        <h3>Disclaimer</h3>
+        <p>OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetiks is not a partner of, endorsed by, or sponsored by OpenAI.</p>
     </div>
     <hr style="border-top: 2px solid black;">
     <div id="thank-you">

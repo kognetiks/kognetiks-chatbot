@@ -35,7 +35,7 @@ function createAnAssistant($api_key) {
     return json_decode($response, true);
 }
 
-// Setp 2: EMPTY STEP
+// Step 2: EMPTY STEP
 
 // Step 3: Add a Message to a Thread
 function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {

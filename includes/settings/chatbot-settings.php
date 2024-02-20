@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Setup the Setting Pages - Ver 1.9.0
+// Set up the Setting Pages - Ver 1.9.0
 function chatbot_chatgpt_settings_page(): void {
     add_options_page('Chatbot Settings', 'Kognetiks Chatbot', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
 }
