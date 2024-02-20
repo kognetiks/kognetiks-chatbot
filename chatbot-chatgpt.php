@@ -121,10 +121,10 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-utilities.php
 
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-appearance.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-body.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-dimensions.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-text.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-user-css.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-dimensions.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-text.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-user-css.php';
 
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start(): void {
