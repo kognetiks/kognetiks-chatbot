@@ -6,7 +6,7 @@ jQuery(document).ready(function ($) {
         // console.log('Entering chatbot_chatgpt_localize');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
-        var chatbotChatgptBotNameInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_name) ? chatbotSettings.chatbot_chatgpt_bot_name : 'Chatbot ChatGPT';
+        var chatbotChatgptBotNameInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_name) ? chatbotSettings.chatbot_chatgpt_bot_name : 'Kognetiks Chatbot';
         var chatbotChatgptBotPromptInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_prompt) ? chatbotSettings.chatbot_chatgpt_bot_prompt : 'Enter your question ...';
 
         var chatgptInitialGreetingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.initial_greeting) ? chatbotSettings.initial_greeting : 'Hello! How can I help you today?';
@@ -16,6 +16,7 @@ jQuery(document).ready(function ($) {
         var chatbotChatgptAssistantAliasInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_assistant_alias) ? chatbotSettings.chatbot_chatgpt_assistant_alias : 'primary';
 
         var chatgptStartStatusInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbotStartStatus) ? chatbotSettings.chatbotStartStatus : 'closed';
+        var chatbotChatgptAudienceChoiceInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_audience_choice) ? chatbotSettings.chatbot_chatgpt_audience_choice : 'all';
         var chatbotChatgptStartStatusNewVisitorInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_start_status_new_visitor) ? chatbotSettings.chatbot_chatgpt_start_status_new_visitor : 'closed';
 
         var chatgptDisclaimerSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_disclaimer_setting) ? chatbotSettings.chatbot_chatgpt_disclaimer_setting : 'Yes';
@@ -38,7 +39,7 @@ jQuery(document).ready(function ($) {
         var chatgptAllowFileUploadsInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_allow_file_uploads) ? chatbotSettings.chatbot_chatgpt_allow_file_uploads : 'No';
 
         // Timeout Setting - Ver 1.8.8
-        var chatgptTimeoutSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_timeout_setting) ? chatbotSettings.chatbot_chatgpt_timeout_setting : '30';
+        var chatgptTimeoutSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_timeout_setting) ? chatbotSettings.chatbot_chatgpt_timeout_setting : '240';
     
         // DIAG - Diagnostics - Ver 1.8.5
         // console.log('Before localStorage.set Item loop');
@@ -69,6 +70,7 @@ jQuery(document).ready(function ($) {
         var chatbotChatgptStartStatusNewVisitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
 
         var chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
+        var chatbotChatgptAudienceChoiceInput = document.getElementById('chatbot_chatgpt_audience_choice');
         var chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
         var chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
 
@@ -129,6 +131,12 @@ jQuery(document).ready(function ($) {
         if(chatgptDisclaimerSettingInput) {
             chatgptDisclaimerSettingInput.addEventListener('change', function() {
                 localStorage.setItem('chatbot_chatgpt_disclaimer_setting', this.options[this.selectedIndex].value);
+            });
+        }
+
+        if(chatbotChatgptAudienceChoiceInput) {
+            chatbotChatgptAudienceChoiceInput.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_audience_choice', this.options[this.selectedIndex].value);
             });
         }
 
@@ -266,6 +274,7 @@ jQuery(document).ready(function ($) {
                 var chatbotChatgptAssistantAliasInput = document.getElementById('chatbot_chatgpt_assistant_alias');
 
                 var chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
+                var chatbotChatgptAudienceChoiceInput = document.getElementById('chatbot_chatgpt_audience_choice');
                 var chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
                 var chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
 
@@ -284,9 +293,6 @@ jQuery(document).ready(function ($) {
 
                 // Allow file uploads - Ver 1.7.6
                 var chatgptAllowFileUploadsInput = document.getElementById('chatbot_chatgpt_allow_file_uploads');
-
-                // Timeout Setting - Ver 1.8.8
-                var chatgptTimeoutSettingInput = document.getElementById('chatbot_chatgpt_timeout_setting');
 
                 // Timeout Setting - Ver 1.8.8
                 var chatgptTimeoutSettingInput = document.getElementById('chatbot_chatgpt_timeout_setting');
@@ -317,6 +323,10 @@ jQuery(document).ready(function ($) {
 
                 if(chatgptDisclaimerSettingInput) {
                     localStorage.setItem('chatbot_chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
+                }
+
+                if(chatbotChatgptAudienceChoiceInput) {
+                    localStorage.setItem('chatbot_chatgpt_audience_choice', chatbotChatgptAudienceChoiceInput.value);
                 }
 
                 if(chatgptWidthSettingInput) {

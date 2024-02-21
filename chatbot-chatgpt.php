@@ -1,9 +1,9 @@
 <?php
 /*
- * Plugin Name: Chatbot ChatGPT
- * Plugin URI:  https://github.com/kognetiks/chatbot-chatgpt
- * Description: A simple plugin to add a Chatbot ChatGPT to your WordPress Website.
- * Version:     1.8.9
+ * Plugin Name: Kognetiks Chatbot
+ * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
+ * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
+ * Version:     1.9.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv2 or later
@@ -17,33 +17,29 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Chatbot ChatGPT. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
+ * along with Kognetiks Chatbot for WordPress. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
  * 
 */
-
-// DIAG - Diagnostics
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
 
 // If this file is called directly, die.
 defined( 'WPINC' ) || die;
 
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.8.9');
-
-// If this file is called directly, die.
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-// Main plugin file - Ver 1.8.0
+// Define the plugin version
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.0');
+
+// Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
 
-// Declare Globals here - Ver 1.6.3
-global $wpdb; // Declare the global $wpdb object
+// Declare Globals
+global $wpdb;
 
-// Uniquely Identify the Visitor - Ver 1.7.4
-global $session_id; // Declare the global $session_id variable
+// Uniquely Identify the Visitor
+global $session_id;
+
 // Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
 ob_start();
 
@@ -73,58 +69,58 @@ if (empty($session_id)) {
 
     $session_id = session_id();
     session_write_close();
-    // error_log('Session ID: ' . $session_id);
+
 }
 
-// Include necessary files
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-globals.php'; // Globals - Ver 1.6.5
-
-// Include necessary files - ChatGPT API and GPT Assistant API - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
-
-// Include necessary files - Knowledge Navigator
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire.php'; // Knowledge Navigator Acquisition - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-acquire-word-pairs.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-analysis.php'; // Knowledge Navigator Analysis- Ver 1.6.2
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-enhance-response.php'; // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
-
-// Include necessary files
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-db-management.php'; // Database Management for Reporting - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-file-upload.php'; // Functions - Ver 1.7.6
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-erase-conversation.php'; // Functions - Ver 1.8.6
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings.php';
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-model.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-api-test.php'; // Refactoring Settings - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-avatar.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-buttons.php'; // Refactoring Settings - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-custom-gpts.php'; // Refactoring Settings - Ver 1.7.2
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-diagnostics.php'; // Refactoring Settings - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-links.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localization.php'; // Refactoring Settings - Ver 1.7.2.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-localize.php'; // Fixing localStorage - Ver 1.6.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-notices.php'; // Notices - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-premium.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-registration.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-reporting.php'; // Reporting - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-setup.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-support.php'; // Refactoring Settings - Ver 1.5.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-shortcode.php';
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-threads.php'; // Ver 1.7.2.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-transients.php'; // Ver 1.7.2
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-upgrade.php'; // Ver 1.6.7
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-utilities.php'; // Ver 1.8.6
+// Include necessary files - Main files
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
 
 // Include necessary files - Appearance - Ver 1.8.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-chatgpt-settings-appearance.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-body.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-dimensions.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-text.php';
-require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-chatgpt-settings-appearance-user-css.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-dimensions.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-text.php';
+require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-user-css.php';
+
+// Include necessary files - Knowledge Navigator
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire.php'; // Knowledge Navigator Acquisition - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-word-pairs.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-analysis.php'; // Knowledge Navigator Analysis- Ver 1.6.2
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-response.php'; // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
+
+// Incdlue necessary files - Settings
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-model.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-avatar.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-buttons.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-custom-gpts.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-diagnostics.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-links.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-localization.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-localize.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-notices.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-premium.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reporting.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-support.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
+
+// Include necessary files - Utilities - Ver 1.9.0
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php'; // Ver 1.7.2.1
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php'; // Ver 1.6.7
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php'; // Ver 1.8.6
 
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start(): void {
@@ -221,15 +217,15 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     
     // Defaults for Ver 1.6.1
     $defaults = array(
-        'chatbot_chatgpt_bot_name' => 'Chatbot ChatGPT',
+        'chatbot_chatgpt_bot_name' => 'Kognetiks Chatbot',
         // TODO IDEA - Add a setting to fix or randomize the bot prompt
         'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
         'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
@@ -239,6 +235,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_start_status' => 'closed',
         'chatbot_chatgpt_start_status_new_visitor' => 'closed',
         'chatbot_chatgpt_disclaimer_setting' => 'No',
+        'chatbot_chatgpt_audience_choice' => 'all',
         'chatbot_chatgpt_max_tokens_setting' => '150',
         'chatbot_chatgpt_width_setting' => 'Narrow',
         'chatbot_chatgpt_diagnostics' => 'Off',
@@ -254,7 +251,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_custom_button_name_2' => '',
         'chatbot_chatgpt_custom_button_url_2' => '',
         'chatbot_chatgpt_allow_file_uploads' => 'No',
-        'chatbot_chatgpt_timeout_setting' => '30',
+        'chatbot_chatgpt_timeout_setting' => '240',
     );
 
     // Revised for Ver 1.5.0 
@@ -268,6 +265,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_start_status',
         'chatbot_chatgpt_start_status_new_visitor',
         'chatbot_chatgpt_disclaimer_setting',
+        'chatbot_chatgpt_audience_choice',
         'chatbot_chatgpt_max_tokens_setting',
         'chatbot_chatgpt_width_setting',
         'chatbot_chatgpt_diagnostics',
@@ -284,38 +282,33 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_timeout_setting',
     );
 
-    // $chatbot_settings = array();
-    // foreach ($option_keys as $key) {
-    //     $default_value = $defaults[$key] ?? '';
-    //     $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
-    // }
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
-    $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( 'assets/icons/', __FILE__ );
+    $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( '/assets/icons/', __FILE__ );
 
     // Localize the data for javascript
     wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
 
     wp_localize_script('chatbot-chatgpt-js', 'plugin_vars', array(
-        'pluginUrl' => plugins_url('', __FILE__ ),
+        'plugins_url' => plugins_url('', __FILE__ ),
     ));
 
     wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
 
     wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
-        'pluginUrl' => plugins_url('', __FILE__ ),
+        'plugins_url' => plugins_url('', __FILE__ ),
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
 
     // Upload files - Ver 1.7.6
     wp_localize_script('chatbot-chatgpt-upload-trigger-js', 'chatbot_chatgpt_params', array(
-        'pluginUrl' => plugins_url('', __FILE__ ),
+        'plugins_url' => plugins_url('', __FILE__ ),
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
 
@@ -325,7 +318,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     //     $default_value = $defaults[$key] ?? '';
     //     $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
     //     // DIAG - Diagnostics
-    //     // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+    //     // back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     // }
 
 }
@@ -372,7 +365,7 @@ function chatbot_chatgpt_send_message(): void {
         $model = 'gpt-4-1106-preview';
     }
     // DIAG - Diagnostics
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Retrieve the Max tokens - Ver 1.4.2
     $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 150));
@@ -397,8 +390,8 @@ function chatbot_chatgpt_send_message(): void {
     $page_id = intval($_POST['page_id']);
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $page_id: ' . $page_id);
 
     $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
@@ -410,11 +403,11 @@ function chatbot_chatgpt_send_message(): void {
     $thread_Id = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // chatbot_chatgpt_back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
@@ -426,60 +419,60 @@ function chatbot_chatgpt_send_message(): void {
     if ($chatbot_chatgpt_assistant_alias == 'original') {
         $use_assistant_id = 'No';
         // DIAG - Diagnostics - Ver 1.8.1
-        // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using Original GPT Assistant ID');
+        // back_trace( 'NOTICE' , 'Using Original GPT Assistant ID');
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
-        // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
+        // back_trace( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
         // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
-            // chatbot_chatgpt_back_trace ( 'NOTICE' ,'Falling back to ChatGPT API' );
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API' );
         }
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
-        // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
+        // back_trace( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
         // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
-            // chatbot_chatgpt_back_trace ( 'NOTICE' ,'Falling back to ChatGPT API' );
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API' );
         }
     } else {
         // Reference GPT Assistant IDs directly - Ver 1.7.3
         if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_')) {
             // DIAG - Diagnostics
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
+            // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
             // Override the $assistant_id with the GPT Assistant ID
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
             // DIAG - Diagnostics - Ver 1.8.1
-            // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Using GPT Assistant Id ' . $assistant_id);
+            // back_trace( 'NOTICE' , 'Using GPT Assistant Id ' . $assistant_id);
         } else {
             // DIAG - Diagnostics
-            // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
+            // back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
-            // chatbot_chatgpt_back_trace ( 'NOTICE' , 'Falling back to ChatGPT API');
+            // back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
         }
     }
 
     // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7
     if ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
 
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$message ' . $message);
+        // back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
         // Send message to Custom GPT API - Ver 1.6.7
@@ -489,13 +482,14 @@ function chatbot_chatgpt_send_message(): void {
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
 
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Clean (erase) the output buffer - Ver 1.6.8
         ob_clean();
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
             // Return response
+            // back_trace( 'NOTICE', '$response ' . print_r($response,true));
             wp_send_json_error('Oops! Something went wrong on our end. Please try again later');
         } else {
             // Return response
@@ -503,27 +497,27 @@ function chatbot_chatgpt_send_message(): void {
         }
     } else {
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', 'Using ChatGPT');
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$user_id ' . $user_id);
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // back_trace( 'NOTICE', 'Using ChatGPT');
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
 
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$message ' . $message);
+        // back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_api($api_key, $message);
         
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
+        // back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
         
         // Use TF-IDF to enhance response
         $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);
+        // back_trace( 'NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);
 
         // DIAG - Diagnostics
-        // chatbot_chatgpt_back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Return response
@@ -624,7 +618,7 @@ function concatenateHistory($transient_name): string {
 function enqueue_greetings_script(): void {
 
     // DIAG - Diagnostics - Ver 1.6.1
-    // chatbot_chatgpt_back_trace( 'NOTICE', "enqueue_greetings_script() called");
+    // back_trace( 'NOTICE', "enqueue_greetings_script() called");
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
@@ -639,7 +633,7 @@ function enqueue_greetings_script(): void {
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
 
 
-// Function to add the adaptive appearance settings to the Chatbot ChatGPT settings page
+// Function to add the adaptive appearance settings to the Chatbot settings page
 function chatbot_chatgpt_settings_appearance(): void {
 
     // Register the settings
@@ -671,3 +665,20 @@ function enqueue_color_picker($hook_suffix): void {
     wp_enqueue_script('my-script-handle', plugin_dir_url(__FILE__) . 'assets/js/chatbot-chatgpt-color-picker.js', array('wp-color-picker'), false, true);
 }
 add_action('admin_enqueue_scripts', 'enqueue_color_picker');
+
+// Determine if the plugin is installed
+function get_plugin_version() {
+
+    if (!function_exists('get_plugin_data')) {
+        require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+    }
+
+    $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
+    $plugin_version = $plugin_data['Version'];
+    update_option('chatbot_chatgpt_plugin_version', $plugin_version);
+    // DIAG - Log the plugin version
+    // back_trace( 'NOTICE', 'Plugin version '. $plugin_version);
+
+    return $plugin_version;
+
+}
