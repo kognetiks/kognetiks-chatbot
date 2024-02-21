@@ -128,10 +128,10 @@ function chatbot_chatgpt_shortcode($atts) {
     // FIXME - NOT WORKING YET - Ver 1.9.0
     // if (empty($chatbot_chatgpt_hot_bot_prompt)) {
     //     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
-    //     error_log('chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
+    //     back_trace ( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
     // } else {
     //     $chatbot_chatgpt_bot_prompt = $chatbot_chatgpt_hot_bot_prompt;
-    //     error_log('chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
+    //     back_trace ( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
     // }
 
     $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));

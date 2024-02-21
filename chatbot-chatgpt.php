@@ -21,29 +21,24 @@
  * 
 */
 
-// DIAG - Diagnostics
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
-
 // If this file is called directly, die.
 defined( 'WPINC' ) || die;
-
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.0');
-
-// If this file is called directly, die.
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-// Main plugin file - Ver 1.8.0
+// Define the plugin version
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.0');
+
+// Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
 
-// Declare Globals here - Ver 1.6.3
+// Declare Globals
 global $wpdb; // Declare the global $wpdb object
 
-// Uniquely Identify the Visitor - Ver 1.7.4
-global $session_id; // Declare the global $session_id variable
+// Uniquely Identify the Visitor
+global $session_id;
+
 // Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
 ob_start();
 
@@ -73,7 +68,7 @@ if (empty($session_id)) {
 
     $session_id = session_id();
     session_write_close();
-    // error_log('Session ID: ' . $session_id);
+
 }
 
 // Include necessary files - Main files
@@ -493,7 +488,7 @@ function chatbot_chatgpt_send_message(): void {
         ob_clean();
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
             // Return response
-            error_log('Chatbot ChatGPT: ' . $response);
+            // back_trace( 'NOTICE', '$response ' . print_r($response,true));
             wp_send_json_error('Oops! Something went wrong on our end. Please try again later');
         } else {
             // Return response
