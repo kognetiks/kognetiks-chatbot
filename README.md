@@ -4,11 +4,11 @@ The **Kognetiks ChatGPT for WordPress** plugin project is centered around revolu
 
 ## Features
 
-Welcome to the future of website interaction with **Chatbot ChatGPT for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and GPT Assistants.
+Welcome to the future of website interaction with **Kognetiks Chatbot for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and GPT Assistants.
 
 **🌐 Harnessing OpenAI's Large Language Models for Enhanced Engagement**
 
-Dive into the world of advanced AI with OpenAI's Large Language Models at the core of our Chatbot ChatGPT. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
+Dive into the world of advanced AI with OpenAI's Large Language Models at the core of our Kognetiks Chatbot. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
 **🌟 GPT Assistants: Tailored Conversational Experiences**
 
@@ -26,7 +26,7 @@ Discover more about these innovative features at [Kognetiks.com](https://kogneti
 
 **🔄 Choose Your Style: Embedded or Floating Chatbots**
 
-Flexibility is key. Display your Chatbot ChatGPT as an embedded feature on pages or let it float across your site. With simple shortcodes, adapt the chatbot's presence to match your website's design and user needs.
+Flexibility is key. Display your Kognetiks Chatbot as an embedded feature on pages or let it float across your site. With simple shortcodes, adapt the chatbot's presence to match your website's design and user needs.
 
 **🔍 Knowledge Navigator: Unearthing Your Content's Essence**
 
@@ -44,7 +44,7 @@ Add a creative touch with customizable avatars. Reflect your site's personality 
 
 Guide your visitors where you want them. Our customizable buttons can link directly to specific pages, forms, or contact information, facilitating smoother navigation and enhanced user engagement.
 
-**🤖 Why Chatbot ChatGPT?**
+**🤖 Why Kognetiks Chatbot?**
 
 - **Natural Conversations:** Experience human-like interactions, thanks to OpenAI's Large Language Model API.
 - **Always Available:** Provide round-the-clock assistance in various domains, from healthcare to education.
@@ -57,9 +57,9 @@ Guide your visitors where you want them. Our customizable buttons can link direc
 - GPT-4 Turbo ('gpt-4-1106-preview')
 
 **🚀 Elevate Your Website Experience**
-Chatbot ChatGPT is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
+Kognetiks Chatbot is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
 
-Get Chatbot ChatGPT today and redefine your WordPress site with intelligence and a personal touch.
+Get Kognetiks Chatbot today and redefine your WordPress site with intelligence and a personal touch.
 
 **Note:** This plugin requires an API key from OpenAI. Obtain yours at [OpenAI API Keys](https://platform.openai.com/account/api-keys).
 
@@ -76,7 +76,7 @@ Get Chatbot ChatGPT today and redefine your WordPress site with intelligence and
 ## Getting Started
 
 1. Obtain your API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
-2. Install and activate the Chatbot ChatGPT plugin.
+2. Install and activate the Kognetiks Chatbot plugin.
 3. Navigate to the settings page (Settings > API/Model) and enter your API key.
 4. Customize the chatbot appearance and other parameters as needed.
 5. For a floating chatbot add the shortcode to your theme's footer: `[chatbot_chatgpt]` or `[chatbot_chatgpt style=floating]`
@@ -85,9 +85,9 @@ Get Chatbot ChatGPT today and redefine your WordPress site with intelligence and
 
 Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI's ChatGPT API.
 
-## Installing Chatbot ChatGPT on Your WordPress Website
+## Installing Kognetiks Chatbot on Your WordPress Website
 
-Embark on a journey to elevate your website's interactivity with our Chatbot ChatGPT plugin. Here's how to get started:
+Embark on a journey to elevate your website's interactivity with our Kognetiks Chatbot plugin. Here's how to get started:
 
 1. **Plugin Upload**
    - Begin by downloading the 'chatbot-chatgpt' plugin folder.
@@ -100,7 +100,7 @@ Embark on a journey to elevate your website's interactivity with our Chatbot Cha
    - Once the installation is complete, activate the plugin by clicking 'Activate Plugin'.
 
 3. **API Key Configuration**
-   - After activation, head to 'Settings > Chatbot ChatGPT' in your dashboard.
+   - After activation, head to 'Settings > Kognetiks Chatbot' in your dashboard.
    - Enter your OpenAI API key here. (You can obtain this key from [OpenAI API Keys](https://platform.openai.com/account/api-keys) if you haven't already.)
 
 4. **Customizing Your Chatbot**
@@ -113,7 +113,7 @@ Embark on a journey to elevate your website's interactivity with our Chatbot Cha
    - If you prefer an embedded chatbot, use `[chatbot_chatgpt style=embedded]`.
 
 6. **Knowledge Navigator Setup**
-   - To fully utilize the capabilities of Chatbot ChatGPT, go back to 'Settings > Chatbot ChatGPT' and click on the 'Knowledge Navigator' tab.
+   - To fully utilize the capabilities of Kognetiks Chatbot, go back to 'Settings > Kognetiks Chatbot' and click on the 'Knowledge Navigator' tab.
    - Initiate a site scan to allow the Knowledge Navigator to map and understand your site's content.
 
 7. **Scheduling Knowledge Navigator**
@@ -121,7 +121,7 @@ Embark on a journey to elevate your website's interactivity with our Chatbot Cha
 
 ## Your Journey Towards an Interactive Website Begins!
 
-With Chatbot ChatGPT installed, you're now equipped to offer a more dynamic, engaging, and responsive experience to your website visitors.
+With Kognetiks Chatbot installed, you're now equipped to offer a more dynamic, engaging, and responsive experience to your website visitors.
 
 ## Frequently Asked Questions
 
@@ -137,7 +137,7 @@ You can also customize the name of the chatbot, as well as changing the initial 
 
 **Is the chatbot available in multiple languages?**
 
-Yes, Chatbot ChatGPT and the ChatGPT API support many different languages. Set the 'Site Language' option in WordPress to your preference.
+Yes, Kognetiks Chatbot and the ChatGPT API support many different languages. Set the 'Site Language' option in WordPress to your preference.
 
 **Which OpenAI models does the plugin use?**
 
