@@ -35,7 +35,7 @@ jQuery(document).ready(function ($) {
     chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
 
     // Add variables for the timeout setting - Ver 1.8.8
-    timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 120;
+    timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 240;
     // console.log('Chatbot: NOTICE: timeout_setting: ' + timeout_setting);
     // Convert the timeout setting to a number
     timeout_setting = parseInt(timeout_setting);
@@ -477,8 +477,8 @@ jQuery(document).ready(function ($) {
 
                     // Check for double asterisks suggesting a "bold" response
                     // Check for linefeeds suggesting paragraphs response
-                    botResponse = botResponse.replace(/\r\n/g, "<br><br>");
-                    botResponse = botResponse.replace(/\n/g, "<br><br>");
+                    // botResponse = botResponse.replace(/\r\n/g, "<br>");
+                    botResponse = botResponse.replace(/\n/g, "<br>");
                     botResponse = botResponse.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
                 }
             },
@@ -489,8 +489,9 @@ jQuery(document).ready(function ($) {
                     botResponse = '';
                 } else {
                     // DIAG - Log the error - Ver 1.6.7
-                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
-                    appendMessage('Error: ' + errorThrown, 'error');
+                    console.log('Chatbot ChatGPT: ERROR: ' + JSON.stringify(response));
+                    // appendMessage('Error: ' + errorThrown, 'error');
+                    appendMessage('Error: ' + error, 'error')
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
                     botResponse = '';
                 }

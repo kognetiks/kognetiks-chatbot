@@ -49,7 +49,7 @@ function display_option_value_admin_notice() {
 
     // FIXME - NOT CURRENTLY WORKING WITH API-TEST.PHP
     // $api_status = get_option('chatbot_chatgpt_api_status');
-    // if ($api_status != 'Success: Connection to ChatGPT API was successful!') {
+    // if ($api_status != 'Success: Connection to OpenAI API was successful!') {
     //     $dismiss_url = wp_nonce_url(
     //         add_query_arg('dismiss_api_status_notice', '1'),
     //         'dismiss_api_status_notice',

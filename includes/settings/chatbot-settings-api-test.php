@@ -79,7 +79,7 @@ if ( ! defined( 'WPINC' ) ) {
         $error_message = $response_body['error']['message'] ?? 'No additional information.';
         $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
     } elseif (!empty($response_body['choices'])) {
-        $updated_status = 'Success: Connection to ChatGPT API was successful!';
+        $updated_status = 'Success: Connection to the OpenAI API was successful!';
         // back_trace( 'SUCCESS', 'chatbot_chatgpt_api_status' . $updated_status);
     } else {
         $updated_status = 'Error: Unable to fetch response from ChatGPT API. Please check Settings for a valid API key or your OpenAI account for additional information.';

@@ -71,8 +71,8 @@ function chatbot_chatgpt_support_section_callback() {
             <li>Customize the chatbot appearance and other parameters as needed.</li>
             <li>Add the chatbot to any page or post using the provided shortcode: <b>&#91;chatbot_chatgpt&#93;<b></li>
             <li><b>Chatbot</b> now support either an embedded chatbot or floating chatbot.</li>
-            <li>Use <b>&#91;chatbot_chatgpt&#93;</b> or <b>&#91;chatbot_chatgpt style="floating"&#93;</b> to display the chatbot as a floating chatbot.</li>
-            <li>Use <b>&#91;chatbot_chatgpt style="embedded"&#93;</b> to display the chatbot as an embedded chatbot.</li>
+            <li>Use <b>&#91;chatbot_chatgpt&#93;</b> or <b>&#91;chatbot style="floating"&#93;</b> to display the chatbot as a floating chatbot.</li>
+            <li>Use <b>&#91;chatbot style="embedded"&#93;</b> to display the chatbot as an embedded chatbot.</li>
             <li>By default, the chatbot will appear in the lower right corner of the page. This is adjustable in the .css file but not recommended for the causal site builders.</li>
             </ol>
     </div>
@@ -99,10 +99,10 @@ function chatbot_chatgpt_support_section_callback() {
         <p>Use the following format to invoke the primary or alternate assistant:</p>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><b>&#91;chatbot_chatgpt&#93;</b> - Default values, floating style, uses OpenAI's ChatGPT</li>
-            <li><b>&#91;chatbot_chatgpt style="floating"&#93;</b> - Floating style, uses OpenAI's ChatGPT</li>
-            <li><b>&#91;chatbot_chatgpt style="embedded"&#93;</b> - Embedded style, uses OpenAI's ChatGPT</li>
-            <li><b>&#91;chatbot_chatgpt style="floating" assistant="primary"&#93;</b> - Floating style, GPT Assistant as set in Primary setting</li>
-            <li><b>&#91;chatbot_chatgpt style="embedded" assistant="alternate"&#93;</b> - Embedded style, GPT Assistant as set in Alternate setting</li>
+            <li><b>&#91;chatbot style="floating"&#93;</b> - Floating style, uses OpenAI's ChatGPT</li>
+            <li><b>&#91;chatbot style="embedded"&#93;</b> - Embedded style, uses OpenAI's ChatGPT</li>
+            <li><b>&#91;chatbot style="floating" assistant="primary"&#93;</b> - Floating style, GPT Assistant as set in Primary setting</li>
+            <li><b>&#91;chatbot style="embedded" assistant="alternate"&#93;</b> - Embedded style, GPT Assistant as set in Alternate setting</li>
         </ul>
     </div>
     <hr style="border-top: 2px solid black;">

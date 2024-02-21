@@ -440,12 +440,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     update_interaction_tracking();
 
     // Remove citations from the response
-    if (!isset($assistants_response["data"][0]["content"][0]["text"]["value"]) && !is_null($assistants_response["data"][0]["content"][0]["text"]["value"])) {
-        $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
-        return $assistants_response["data"][0]["content"][0]["text"]["value"];
-    } else {
-        return "Error: No response from the assistant.";
-    }
+    $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
+
+    return $assistants_response["data"][0]["content"][0]["text"]["value"];
 
 }
 

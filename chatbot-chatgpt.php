@@ -255,7 +255,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_custom_button_name_2' => '',
         'chatbot_chatgpt_custom_button_url_2' => '',
         'chatbot_chatgpt_allow_file_uploads' => 'No',
-        'chatbot_chatgpt_timeout_setting' => '120',
+        'chatbot_chatgpt_timeout_setting' => '240',
     );
 
     // Revised for Ver 1.5.0 
@@ -493,6 +493,7 @@ function chatbot_chatgpt_send_message(): void {
         ob_clean();
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
             // Return response
+            error_log('Chatbot ChatGPT: ' . $response);
             wp_send_json_error('Oops! Something went wrong on our end. Please try again later');
         } else {
             // Return response
@@ -676,7 +677,7 @@ function get_plugin_version() {
         require_once(ABSPATH . 'wp-admin/includes/plugin.php');
     }
 
-    $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . '../chatbot-chatgpt.php');
+    $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
     $plugin_version = $plugin_data['Version'];
     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
     // DIAG - Log the plugin version

@@ -248,7 +248,12 @@ function chatbot_chatgpt_kn_acquire(): void {
         // }        
 
         // Directly use the post content
-        $postContent = $result['post_content'];
+        if (array_key_exists('post_content', $result)) {
+            $postContent = $result['post_content'];
+        } else {
+            // Handle the case where the key does not exist
+            $postContent = ""; // or some default value
+        }
 
         // Check if the post content is not empty
         if (!empty($postContent)) {
@@ -267,7 +272,12 @@ function chatbot_chatgpt_kn_acquire(): void {
         }
         
         // Construct the URL for the comments
-        $url = get_permalink($result['id']);
+        if (array_key_exists('id', $result)) {
+            $url = get_permalink($result['id']);
+        } else {
+            // Handle the case where the key does not exist
+            $url = ""; // or some default value
+        }
         // Construct the Title for the post
         $title = 'Comment';
         // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table

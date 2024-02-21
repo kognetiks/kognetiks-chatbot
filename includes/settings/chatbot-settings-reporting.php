@@ -181,7 +181,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
         $data_value_y = (int)($data_value_y);
 
         // https://fonts.google.com/specimen/Roboto - Ver 1.6.7
-        $fontFile = plugin_dir_path(__FILE__) . '../assets/fonts/roboto/Roboto-Black.ttf';
+        $fontFile = plugin_dir_path(__FILE__) . 'assets/fonts/roboto/Roboto-Black.ttf';
 
         imagettftext($image, $font_size, 0, $data_value_x, $data_value_y, $black, $fontFile, $data[$i]);
 
@@ -193,7 +193,7 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
     }
 
     // Save the image
-    $img_path = plugin_dir_path(__FILE__) . '../assets/images/' . $name . '.png';
+    $img_path = plugin_dir_path(__FILE__) . 'assets/images/' . $name . '.png';
     imagepng($image, $img_path);
 
     // Free memory
@@ -275,7 +275,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     // Generate the chart
     $img_path = generate_gd_bar_chart($a['labels'], $atts['data'], $atts['color'] ?? null, $a['name']);
-    $img_url = plugin_dir_url(__FILE__) . '../assets/images/' . $a['name'] . '.png';
+    $img_url = plugin_dir_url(__FILE__) . 'assets/images/' . $a['name'] . '.png';
 
     wp_schedule_single_event(time() + 60, 'chatbot_chatgpt_delete_chart', array($img_path)); // 60 seconds delay
 
@@ -289,7 +289,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
 // Clean up ../image subdirectory - Ver 1.6.3
 function chatbot_chatgpt_delete_chart() {
-    $img_dir_path = plugin_dir_path(__FILE__) . '../assets/images/'; // Replace with your actual directory path
+    $img_dir_path = plugin_dir_path(__FILE__) . 'assets/images/'; // Replace with your actual directory path
     $png_files = glob($img_dir_path . '*.png'); // Search for .png files in the directory
 
     foreach ($png_files as $png_file) {
