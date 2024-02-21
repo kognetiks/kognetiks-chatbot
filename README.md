@@ -1,6 +1,6 @@
-# Chatbot ChatGPT for WordPress
+# Kognetiks ChatGPT for WordPress
 
-The **Chatbot ChatGPT for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites by deploying OpenAI's ChatGPT Large Language Models (LLMs) and GPT Assistants. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
+The **Kognetiks ChatGPT for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites by deploying OpenAI's ChatGPT Large Language Models (LLMs) and GPT Assistants. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
 ## Features
 
