@@ -22,7 +22,7 @@ The latest version of the plugin allows for virtually unlimited Assistants, allo
 
 Unlock enhanced functionality with the latest feature - **now you can upload files directly to each GPT Assistant**, providing an even more dynamic and tailored user experience across your platforms.
 
-Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/ai-powered-chatbot-for-wordpress/) and [OpenAI's Playground](https://platform.openai.com/assistants).
+Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/ai-powered-chatbot-for-wordpress/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
 **🔄 Choose Your Style: Embedded or Floating Chatbots**
 
@@ -177,4 +177,4 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 ## Thank you for using Kognetiks Chatbot for WordPress
 
-Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/ai-powered-chatbot-for-wordpress/) for more information.
+Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/ai-powered-chatbot-for-wordpress/) for more information.

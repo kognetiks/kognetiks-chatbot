@@ -60,7 +60,7 @@ Get your Kognetiks Chatbot for WordPress today and redefine your WordPress site 
 
 **Note:** This plugin requires an API key from OpenAI. Obtain yours at [OpenAI API Keys](https://platform.openai.com/account/api-keys).
 
-Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/) for more information.
+Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/) for more information.
 
 **🌐 Features at a Glance**
 ▪ **Quick Setup:** Integrate easily with API from companies like OpenAI.

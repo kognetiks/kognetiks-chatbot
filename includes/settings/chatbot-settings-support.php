@@ -25,16 +25,16 @@ function chatbot_chatgpt_support_section_callback() {
         <p><b>Important Note:</b> This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" rel="nofollow ugc" target="_blank">https://platform.openai.com/account/api-keys</a>.<p>
         <h3>Official Sites:</h3>
             <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li><a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/" rel="nofollow ugc" target="_blank">Kognetiks.com</a></li>
-            <li><a href="https://github.com/kognetiks/chatbot-chatgpt" target="_blank">https://github.com/kognetiks/chatbot-chatgpt</a></li>
-            <li><a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/ai-powered-chatbot-for-wordpress/" target="_blank">https://wordpress.org/plugins/chatbot-chatgpt/</a></li>
+            <li><a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/" rel="nofollow ugc" target="_blank">Kognetiks.com</a></li>
+            <li><a href="https://github.com/kognetiks/kognetiks-chatbot" target="_blank">https://github.com/kognetiks/kognetiks-chatbot</a></li>
+            <li><a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/ai-powered-chatbot-for-wordpress/" target="_blank">https://wordpress.org/plugins/chatbot-chatgpt/</a></li>
         </ul>
         <h3>Support:</h3>
             <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><a href="https://discord.gg/nXRzxUKvya" rel="nofollow ugc" target="_blank">Support @ Discord</a></li>
             <li><a href="https://kognetiks.com/wordpress-plugins/plugin-support/" rel="nofollow ugc" target="_blank">Support @ Kognetiks.com</a></li>
             <li><a href="https://wordpress.org/support/plugin/chatbot-chatgpt/" target="_blank">Support @ WordPress.org</a></li>
-            <li><a href="https://github.com/kognetiks/chatbot-chatgpt/issues" target="_blank">Support @ GitHub.com</a></li>
+            <li><a href="https://github.com/kognetiks/kognetiks-chatbot/issues" target="_blank">Support @ GitHub.com</a></li>
         </ul>
         <h3>Features</h3>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -87,7 +87,7 @@ function chatbot_chatgpt_support_section_callback() {
             <li>Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, Kognetiks Chatbot for WordPress is a plugin that allows you to effortlessly integrate OpenAI&#8217;s ChatGPT API into your website.</li>
             <li>This provides a powerful, AI-driven chatbot for enhanced user experience and personalized support.</li>
             <li>For more information on using assistants, see <a href="https://beta.openai.com/docs/guides/assistants" rel="nofollow ugc" target="_blank">https://beta.openai.com/docs/guides/assistants</a>.</li>
-            <li>Additional integration information can be found at <a href="https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/" rel="nofollow ugc" target="_blank">https://kognetiks.com/wordpress-plugins/chatbot-chatgpt/chatbot-chatgpt-for-wordpress-assistants-and-custom-gpts/</a>.</li>
+            <li>Additional integration information can be found at <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/chatbot-setup-and-configuration/" rel="nofollow ugc" target="_blank">https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/chatbot-setup-and-configuration/</a>.</li>
         </ul>
         <h2>Using Multiple Custom GPT Assistants</h2>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
