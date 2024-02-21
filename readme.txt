@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.3
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -193,6 +193,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 16. Settings and Options
 
 == Changelog ==
+
+= 1.9.1 =
+* TBD
 
 = 1.9.0 =
 * Changed the name of the chatbot to Kognetiks Chatbot for WordPress
