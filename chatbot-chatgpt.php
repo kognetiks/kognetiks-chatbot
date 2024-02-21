@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Kognetiks Chatbot for WordPress
+ * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
  * Version:     1.9.0
@@ -23,6 +23,7 @@
 
 // If this file is called directly, die.
 defined( 'WPINC' ) || die;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
@@ -34,7 +35,7 @@ defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.0
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
 
 // Declare Globals
-global $wpdb; // Declare the global $wpdb object
+global $wpdb;
 
 // Uniquely Identify the Visitor
 global $session_id;
