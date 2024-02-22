@@ -32,9 +32,8 @@ function knowledge_navigator_scan(): void {
         $run_scanner = 'No';
     }
 
-    $result = "";
     // Reset the results message
-    update_option('chatbot_chatgpt_kn_results', $result);
+    update_option('chatbot_chatgpt_kn_results', '');
 
     // Make sure the results table exists before proceeding - Ver 1.6.3
     dbKNStore();

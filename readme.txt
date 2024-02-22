@@ -43,6 +43,10 @@ Add a creative touch with customizable avatars. Reflect your site's personality 
 **📊 Direct Traffic with Customizable Buttons**
 Guide your visitors where you want them. Customizable buttons can link directly to specific pages, forms, or contact information, facilitating smoother navigation and enhanced user engagement.
 
+🤖 Tailored Audience Engagement
+
+Customize accessibility with three audience settings: All Audiences, Logged-in Only, or Visitors Only. Additionally, control presentation to specific audiences. Whether floating or embedded, tailor the chatbot's visibility for a seamless user experience across platforms.
+
 **🤖 Why the Kognetiks Chatbot for WordPress?**
 ▪ **Natural Conversations:** Experience human-like interactions, thanks to Large Language Model APIs from companies like OpenAI.
 ▪ **Always Available:** Provide round-the-clock assistance in various domains, from healthcare to education.
@@ -141,7 +145,7 @@ Embark on a journey to elevate your website's interactivity with the Chatbot plu
 
 == Your Journey Towards an Interactive Website Begins! ==
 
-With Chatbot installed, you're now equipped to offer a more dynamic, engaging, and responsive experience to your website visitors.
+With the Kognetiks Chatbot installed, you're now equipped to offer a more dynamic, engaging, and responsive experience to your website visitors.
 
 == Frequently Asked Questions ==
 

@@ -293,8 +293,10 @@ function chatbot_chatgpt_shortcode($atts) {
     }
 
 }
-add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
+add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
+
 
 // Fix Updating failed. The response is not a valid JSON response. - Version 1.7.3
 // Function to output the script

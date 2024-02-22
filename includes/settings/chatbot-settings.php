@@ -200,7 +200,8 @@ function chatbot_chatgpt_settings_page_html(): void {
             } elseif ($active_tab == 'kn_acquire') {
                 settings_fields('chatbot_chatgpt_knowledge_navigator');
                 do_settings_sections('chatbot_chatgpt_knowledge_navigator');
-
+                settings_fields('chatbot_chatgpt_kn_settings_section');
+                do_settings_sections('chatbot_chatgpt_kn_settings_section');
             } elseif ($active_tab == 'kn_analysis') {
                 settings_fields('chatbot_chatgpt_kn_analysis');
                 do_settings_sections('chatbot_chatgpt_kn_analysis');
