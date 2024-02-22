@@ -199,7 +199,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 1.9.1 =
-* TBD
+* Knowledge Navigator now allows for including/excluding posts, pages, products and/or comments.
+* Knowledge Navigator only consider published posts and pages, and only consider approved comments.
 
 = 1.9.0 =
 * Changed the name of the chatbot to Kognetiks Chatbot for WordPress

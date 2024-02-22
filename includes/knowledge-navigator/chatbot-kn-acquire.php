@@ -57,7 +57,10 @@ function chatbot_chatgpt_kn_acquire(): void {
     dbKNStore();
     
     // Generate directory path
-    $results_dir_path = plugin_dir_path(__FILE__) . '../../results/';
+    // $results_dir_path = plugin_dir_path(__FILE__) . '../../results/';
+    back_trace( 'NOTICE', 'CHATBOT_CHATGPT_PLUGIN_DIR_PATH: ' . CHATBOT_CHATGPT_PLUGIN_DIR_PATH);
+    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
+    back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
 
     // Create directory if it doesn't exist
     if (!file_exists($results_dir_path)) {
@@ -195,10 +198,16 @@ function chatbot_chatgpt_kn_acquire(): void {
     }
 
     // Query WordPress database for page content
-    $results = $wpdb->get_results(
-        "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE post_type='page' AND post_status='publish'", 
-        ARRAY_A
-    );
+    if ( $chatbot_chatgpt_kn_include_pages === 'Yes') {
+        back_trace( 'NOTICE', 'Include pages');
+        $results = $wpdb->get_results(
+            "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE post_type='page' AND post_status='publish'", 
+            ARRAY_A
+        );
+    } else {
+        back_trace( 'NOTICE', 'Exclude pages');
+        $results = [];
+    }
 
     // Loop through query results
     foreach ($results as $result) {
@@ -269,10 +278,16 @@ function chatbot_chatgpt_kn_acquire(): void {
     }
 
     // Query WordPress database for comment content
-    $results = $wpdb->get_results(
-        "SELECT comment_post_ID, comment_content FROM {$wpdb->prefix}comments WHERE comment_approved='1'", 
-        ARRAY_A
-    );
+    if ( $chatbot_chatgpt_kn_include_comments === 'Yes') {
+        back_trace( 'NOTICE', 'Include comments');
+        $results = $wpdb->get_results(
+            "SELECT comment_post_ID, comment_content FROM {$wpdb->prefix}comments WHERE comment_approved='1'", 
+            ARRAY_A
+        );
+    } else {
+        back_trace( 'NOTICE', 'Exclude comments');
+        $results = [];
+    }
 
     // Loop through query results
     foreach ($results as $result) {
