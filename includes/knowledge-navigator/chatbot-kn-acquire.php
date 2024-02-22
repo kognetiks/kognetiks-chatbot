@@ -57,7 +57,7 @@ function chatbot_chatgpt_kn_acquire(): void {
     dbKNStore();
     
     // Generate directory path
-    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
+    $results_dir_path = plugin_dir_path(__FILE__) . '../../results/';
 
     // Create directory if it doesn't exist
     if (!file_exists($results_dir_path)) {
