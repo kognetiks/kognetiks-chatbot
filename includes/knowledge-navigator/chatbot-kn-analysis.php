@@ -45,9 +45,9 @@ function chatbot_chatgpt_kn_analysis_output_callback($args) {
 function chatbot_chatgpt_kn_analysis_download_csv(): void {
     // Generate the results directory path
     // $results_dir_path = plugin_dir_path(__FILE__) . '../../results/';
-    back_trace( 'NOTICE', 'CHATBOT_CHATGPT_PLUGIN_DIR_PATH: ' . CHATBOT_CHATGPT_PLUGIN_DIR_PATH);
+    // back_trace( 'NOTICE', 'CHATBOT_CHATGPT_PLUGIN_DIR_PATH: ' . CHATBOT_CHATGPT_PLUGIN_DIR_PATH);
     $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
-    back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
+    // back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
 
     // Specify the output file's path
     $results_csv_file = $results_dir_path . 'results.csv';
