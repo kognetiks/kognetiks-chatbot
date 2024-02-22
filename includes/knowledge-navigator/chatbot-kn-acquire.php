@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Knowledge Navigator - Acquire
+ * Kognetiks Chatbot for WordPress - Settings - Knowledge Navigator - Acquire Content Awareness
  *
  * This file contains the code for the Chatbot Knowledge Navigator.
  * 
@@ -30,6 +30,17 @@ function chatbot_chatgpt_kn_acquire(): void {
     global $topWordPairs;
     global $max_top_words;
 
+    // What to scan
+    $chatbot_chatgpt_kn_include_posts = esc_attr(get_option('chatbot_chatgpt_kn_include_posts', 'Yes'));
+    $chatbot_chatgpt_kn_include_pages = esc_attr(get_option('chatbot_chatgpt_kn_include_pages', 'Yes'));
+    $chatbot_chatgpt_kn_include_products = esc_attr(get_option('chatbot_chatgpt_kn_include_products', 'Yes'));
+    $chatbot_chatgpt_kn_include_comments = esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'Yes'));
+
+    back_trace( 'NOTICE', 'chatbot_chatgpt_kn_include_posts: ' . $chatbot_chatgpt_kn_include_posts);
+    back_trace( 'NOTICE', 'chatbot_chatgpt_kn_include_pages: ' . $chatbot_chatgpt_kn_include_pages);
+    back_trace( 'NOTICE', 'chatbot_chatgpt_kn_include_products: ' . $chatbot_chatgpt_kn_include_products);
+    back_trace( 'NOTICE', 'chatbot_chatgpt_kn_include_comments: ' . $chatbot_chatgpt_kn_include_comments);
+    
     $url = '';
     $words = [];
     $no_of_items_analyzed = 0;
@@ -58,6 +69,7 @@ function chatbot_chatgpt_kn_acquire(): void {
 
     // Prepare log file for posts
     $log_file_posts = $results_dir_path . 'results-posts.log';
+    back_trace( 'NOTICE', 'Log file for posts: ' . $log_file_posts);
 
     // Delete post log file if it already exists
     if (file_exists($log_file_posts)) {
@@ -66,6 +78,7 @@ function chatbot_chatgpt_kn_acquire(): void {
 
     // Prepare log file for pages
     $log_file_pages = $results_dir_path . 'results-pages.log';
+    back_trace( 'NOTICE', 'Log file for pages: ' . $log_file_pages);
 
     // Delete log file if it already exists
     if (file_exists($log_file_pages)) {
@@ -74,6 +87,7 @@ function chatbot_chatgpt_kn_acquire(): void {
 
     // Prepare log file for comments
     $log_file_comments = $results_dir_path . 'results-comments.log';
+    back_trace( 'NOTICE', 'Log file for comments: ' . $log_file_comments);
 
     // Delete log file if it already exists
     if (file_exists($log_file_comments)) {
@@ -87,10 +101,30 @@ function chatbot_chatgpt_kn_acquire(): void {
     // Added support for WooCommerce product post_type - Ver 1.7.5
     // https://github.com/woocommerce/woocommerce/wiki/Database-Description
     // https://woo.com/document/installed-taxonomies-post-types/
-    $results = $wpdb->get_results(
-        "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE (post_type='post' OR post_type='epkb_post_type_1' OR post_type='product') AND post_status='publish'", 
-        ARRAY_A
-    );
+
+    // Decide what to include in the search - posts only, products only, or both
+    if ( $chatbot_chatgpt_kn_include_posts === 'Yes' && $chatbot_chatgpt_kn_include_products === 'Yes') {
+        back_trace( 'NOTICE', 'Include both posts and products');
+        $results = $wpdb->get_results(
+            "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE (post_type='post' OR post_type='product' OR post_type='epkb_post_type_1') AND post_status='publish'", 
+            ARRAY_A
+        );
+    } elseif ( $chatbot_chatgpt_kn_include_posts === 'Yes' && $chatbot_chatgpt_kn_include_products === 'No') {
+        back_trace( 'NOTICE', 'Include posts only');
+        $results = $wpdb->get_results(
+            "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE (post_type='post' OR post_type='epkb_post_type_1') AND post_status='publish'", 
+            ARRAY_A
+        );
+    } elseif ( $chatbot_chatgpt_kn_include_posts === 'No' && $chatbot_chatgpt_kn_include_products === 'Yes') {
+        back_trace( 'NOTICE', 'Include products only');
+        $results = $wpdb->get_results(
+            "SELECT ID, post_name, post_content FROM {$wpdb->prefix}posts WHERE (post_type='product' OR post_type='epkb_post_type_1') AND post_status='publish'", 
+            ARRAY_A
+        );
+    } else {
+        back_trace( 'NOTICE', 'Include neither posts nor products');
+        $results = [];
+    }
 
     // Loop through query results
     foreach ($results as $result) {
