@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Register settings
-function chatbot_chatgpt_settings_init() {
+function chatbot_chatgpt_settings_init(): void {
 
     // API/Model settings tab - Ver 1.3.0
     // register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key');
