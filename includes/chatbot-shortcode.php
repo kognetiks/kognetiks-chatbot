@@ -79,12 +79,15 @@ function chatbot_chatgpt_shortcode($atts) {
     }
     // Sanitize the 'prompt' attribute to ensure it contains safe data
     $chatbot_chatgpt_hot_bot_prompt = array_key_exists('prompt', $atts) ? sanitize_text_field($atts['prompt']) : '';
+    if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
+        $chatbot_chatgpt_hot_bot_prompt = esc_attr($chatbot_chatgpt_hot_bot_prompt);
+    }
 
     // DIAG - Diagnostics - Ver 1.9.0
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_audience_choice: ' . $chatbot_chatgpt_audience_choice);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+    back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    back_trace( 'NOTICE', '$chatbot_chatgpt_audience_choice: ' . $chatbot_chatgpt_audience_choice);
+    back_trace( 'NOTICE', '$chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
 
     // Determine if the user is logged in
     $user_logged_in = is_user_logged_in();
@@ -127,12 +130,19 @@ function chatbot_chatgpt_shortcode($atts) {
 
     // FIXME - NOT WORKING YET - Ver 1.9.0
     // if (empty($chatbot_chatgpt_hot_bot_prompt)) {
-    //     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
+    //     // $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
     //     back_trace ( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
     // } else {
     //     $chatbot_chatgpt_bot_prompt = $chatbot_chatgpt_hot_bot_prompt;
     //     back_trace ( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
     // }
+
+    // Localize the $chatbot_chatgpt_bot_prompt - Ver 1.9.0
+    // Now push $chatbot_chatgpt_bot_prompt to the JavaScript
+    // wp_localize_script('chatbot-chatgpt', 'chatbot_chatgpt_bot_prompt', array('chatbot_chatgpt_bot_prompt' => $chatbot_chatgpt_bot_prompt));
+
+    // Maybe instead of localizing the data, I can append the the prompt to the css element (#chatbot-chatgpt-message)
+    wp_add_inline_script('chatbot-chatgpt', 'document.getElementById("chatbot-chatgpt-message").placeholder = "' . $chatbot_chatgpt_bot_prompt . '";');
 
     $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
@@ -166,8 +176,29 @@ function chatbot_chatgpt_shortcode($atts) {
         <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
             <div style="flex-grow: 1; max-width: 95%;">
                 <label for="chatbot-chatgpt-message"></label>
-                <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea>
-            </div>          
+                <?php
+                    // Preload with a prompt if it is set - Ver 1.9.0
+                    if (!empty($chatbot_chatgpt_bot_prompt)) {
+                        echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
+                        echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var textarea = document.getElementById('chatbot-chatgpt-message');
+                            textarea.value += '\\n';
+                            textarea.focus();
+
+                            setTimeout(function() {
+                                var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                                if (submitButton) {
+                                    submitButton.click();
+                                }
+                            }, 1000); // Delay of 1 second
+                        });
+                        </script>";
+                    } else {
+                        echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
+                    }
+                ?>
+            </div>   
             <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;">
                 <button id="chatbot-chatgpt-submit">
                     <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
@@ -209,7 +240,29 @@ function chatbot_chatgpt_shortcode($atts) {
             <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
                     <div style="flex-grow: 1; max-width: 95%;">
                         <label for="chatbot-chatgpt-message"></label>
-                        <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea>
+                        <!-- <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea> -->
+                        <?php
+                            // Preload with a prompt if it is set - Ver 1.9.0
+                            if (!empty($chatbot_chatgpt_bot_prompt)) {
+                                echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
+                                echo "<script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    var textarea = document.getElementById('chatbot-chatgpt-message');
+                                    textarea.value += '\\n';
+                                    textarea.focus();
+
+                                    setTimeout(function() {
+                                        var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                                        if (submitButton) {
+                                            submitButton.click();
+                                        }
+                                    }, 1000); // Delay of 1 second
+                                });
+                                </script>";
+                            } else {
+                                echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
+                            }
+                        ?>
                     </div>
                     <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;">
                         <button id="chatbot-chatgpt-submit">
