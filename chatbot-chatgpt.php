@@ -325,11 +325,14 @@ function chatbot_chatgpt_enqueue_scripts(): void {
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
 // Settings and Deactivation Links - Ver - 1.5.0
-function enqueue_jquery_ui(): void {
-    wp_enqueue_style('wp-jquery-ui-dialog');
-    wp_enqueue_script('jquery-ui-dialog');
+if (!function_exists('enqueue_jquery_ui')) {
+    function enqueue_jquery_ui(): void {
+        wp_enqueue_style('wp-jquery-ui-dialog');
+        wp_enqueue_script('jquery-ui-dialog');
+    }
+    add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 }
-add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
+
 
 // Schedule Cleanup of Expired Transients
 if (!wp_next_scheduled('chatbot_chatgpt_cleanup_event')) {
@@ -667,7 +670,7 @@ function enqueue_color_picker($hook_suffix): void {
 add_action('admin_enqueue_scripts', 'enqueue_color_picker');
 
 // Determine if the plugin is installed
-function get_plugin_version() {
+function kchat_get_plugin_version() {
 
     if (!function_exists('get_plugin_data')) {
         require_once(ABSPATH . 'wp-admin/includes/plugin.php');

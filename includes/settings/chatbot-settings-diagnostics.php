@@ -30,7 +30,7 @@ function chatbot_chatgpt_diagnostics_section_callback($args): void {
 
     echo '<p>PHP Version: <b>' . $php_version . '</b><br>';
     echo 'WordPress Version: <b>' . $wp_version . '</b><br>';
-    echo 'Chatbot Version: <b>' . get_plugin_version() . '</b><br>';
+    echo 'Chatbot Version: <b>' . kchat_get_plugin_version() . '</b><br>';
     echo 'WordPress Language Code: <b>' . get_locale() . '</b></p>';
     echo '<h2>API Status and Other Settings</h2>';
 }
