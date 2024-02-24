@@ -98,7 +98,7 @@ function chatbot_chatgpt_support_section_callback() {
         </ul>
         <p>Use the following format to invoke the primary or alternate assistant:</p>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li><b>&#91;chatbot_chatgpt&#93;</b> - Default values, floating style, uses OpenAI's ChatGPT</li>
+            <li><b>&#91;chatbot&#93;</b> - Default values, floating style, uses OpenAI's ChatGPT</li>
             <li><b>&#91;chatbot style="floating"&#93;</b> - Floating style, uses OpenAI's ChatGPT</li>
             <li><b>&#91;chatbot style="embedded"&#93;</b> - Embedded style, uses OpenAI's ChatGPT</li>
             <li><b>&#91;chatbot style="floating" assistant="primary"&#93;</b> - Floating style, GPT Assistant as set in Primary setting</li>
@@ -182,11 +182,11 @@ function chatbot_chatgpt_support_section_callback() {
     </div>
     <hr style="border-top: 2px solid black;">
     <div id="chatbot-diagnostics">
-        <h3>Chatbot Diagnostics - For Developers</h3>
+        <h3>Kognetiks Chatbot Diagnostics - For Developers</h3>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li>By default, the <b>Chatbot Diagnostics</b> setting is disabled. When enabled, the plugin provides useful information about the <b>Chatbot's</b> operation. This information can be used to troubleshoot issues and to better understand how it is functioning.</li>
+            <li>By default, the <b>Kognetiks Chatbot Diagnostics</b> setting is disabled. When enabled, the plugin provides useful information about the <b>Chatbot's</b> operation. This information can be used to troubleshoot issues and to better understand how it is functioning.</li>
             <li>The plugin supports Success, Notice, Warning, Failure, and Error, i.e., increasing levels of severity. The default level is Success. The higher the level, the more information is provided.</li>
-            <li>In addition to setting the <b>Chatbot's</b> diagnostics reporting level, you will also need to enable WordPress debugging. This can be done by setting the <b>WP_DEBUG</b> constant to true in your wp-config.php file.</li>
+            <li>In addition to setting the <b>Kognetiks Chatbot's</b> diagnostics reporting level, you will also need to enable WordPress debugging. This can be done by setting the <b>WP_DEBUG</b> constant to true in your wp-config.php file.</li>
             <li>Turning on WordPress debugging will cause all PHP errors, notices, and warnings to be displayed. This is useful for debugging and development purposes.</li>
             <li><b><i>NOTE: It is not recommended to enable WordPress debugging on a production site.</i></b></li>
         </ul>

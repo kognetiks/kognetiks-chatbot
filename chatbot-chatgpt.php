@@ -6,18 +6,18 @@
  * Version:     1.9.1
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
- * License:     GPLv2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * License:     GPLv3 or later
+ * License URI: https://www.gnu.org/licenses/gpl-30.html
  *  
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU
- * General Public License version 2, as published by the Free Software Foundation. You may NOT assume
+ * General Public License version 3, as published by the Free Software Foundation. You may NOT assume
  * that you can use any other version of the GPL.
  * 
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Kognetiks Chatbot for WordPress. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
+ * along with Kognetiks Chatbot for WordPress. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
 */
 

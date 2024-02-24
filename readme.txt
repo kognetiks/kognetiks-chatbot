@@ -173,7 +173,7 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo (i.e., 'gpt-4-1106
 
 You can find more frequently asked questions at [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
 
-= Disclaimer =
+== Disclaimer ==
 
 OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetiks is not a partner of, endorsed by, or sponsored by OpenAI.
 
