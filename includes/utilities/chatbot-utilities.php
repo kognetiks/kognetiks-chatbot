@@ -46,3 +46,35 @@ function chatbot_chatgpt_dump_options_to_file() {
     file_put_contents($file, print_r($options, true));
 
 }
+
+// Fuction to confirm if curl is enabled
+function can_use_curl_for_file_protocol() {
+
+    // DIAG - Diagnostic - Ver 1.9.1
+    // back_trace( 'NOTICE', 'can_use_curl_for_file_protocol');
+
+    // Check if cURL extension is loaded
+    if (!function_exists('curl_init')) {
+        return false;
+    }
+    
+    // Initialize a cURL session to test settings
+    $curl = curl_init();
+    if (!$curl) {
+        return false;
+    }
+    
+    // Attempt to set CURLOPT_PROTOCOLS to include CURLPROTO_FILE
+    // This is a "trial" setting to see if setting fails
+    $result = @curl_setopt($curl, CURLOPT_PROTOCOLS, CURLPROTO_FILE | CURLPROTO_HTTP | CURLPROTO_HTTPS);
+    
+    // Close the cURL session
+    curl_close($curl);
+
+    // DIAG - Diagnostic - Ver 1.9.1
+    back_trace( 'NOTICE', 'result: ' . print_r($result, true));
+
+    // Check if setting the option was successful - true if successful, false if failed
+    return $result;
+    
+}
