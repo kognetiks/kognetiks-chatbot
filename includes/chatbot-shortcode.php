@@ -77,10 +77,17 @@ function chatbot_chatgpt_shortcode($atts) {
     if (empty($chatbot_chatgpt_audience_choice)) {
         $chatbot_chatgpt_audience_choice = $chatbot_chatgpt_audience_choice_global;
     }
+    
     // Sanitize the 'prompt' attribute to ensure it contains safe data
     $chatbot_chatgpt_hot_bot_prompt = array_key_exists('prompt', $atts) ? sanitize_text_field($atts['prompt']) : '';
     if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
         $chatbot_chatgpt_hot_bot_prompt = esc_attr($chatbot_chatgpt_hot_bot_prompt);
+    }
+
+    // Prompt passed as a parameter to the page - Ver 1.9.1
+    if (isset($_GET['chatbot_prompt'])) {
+        $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($_GET['chatbot_prompt']);
+        back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
     }
 
     // DIAG - Diagnostics - Ver 1.9.0
@@ -142,8 +149,10 @@ function chatbot_chatgpt_shortcode($atts) {
     // wp_localize_script('chatbot-chatgpt', 'chatbot_chatgpt_bot_prompt', array('chatbot_chatgpt_bot_prompt' => $chatbot_chatgpt_bot_prompt));
 
     // Maybe instead of localizing the data, I can append the the prompt to the css element (#chatbot-chatgpt-message)
-    wp_add_inline_script('chatbot-chatgpt', 'document.getElementById("chatbot-chatgpt-message").placeholder = "' . $chatbot_chatgpt_bot_prompt . '";');
-
+    if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
+        wp_add_inline_script('chatbot-chatgpt', 'document.getElementById("chatbot-chatgpt-message").placeholder = "' . $chatbot_chatgpt_hot_bot_prompt . '";');
+    }
+    
     $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
     // If assistant is set to 'original' then do not allow file uploads - Ver 1.7.9
@@ -178,7 +187,7 @@ function chatbot_chatgpt_shortcode($atts) {
                 <label for="chatbot-chatgpt-message"></label>
                 <?php
                     // Preload with a prompt if it is set - Ver 1.9.0
-                    if (!empty($chatbot_chatgpt_bot_prompt)) {
+                    if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
                         echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -243,7 +252,7 @@ function chatbot_chatgpt_shortcode($atts) {
                         <!-- <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea> -->
                         <?php
                             // Preload with a prompt if it is set - Ver 1.9.0
-                            if (!empty($chatbot_chatgpt_bot_prompt)) {
+                            if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
                                 echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
                                 echo "<script>
                                 document.addEventListener('DOMContentLoaded', function() {

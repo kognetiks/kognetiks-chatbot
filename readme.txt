@@ -201,6 +201,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 = 1.9.1 =
 * Knowledge Navigator now allows for including/excluding posts, pages, products and/or comments.
 * Knowledge Navigator only consider published posts and pages, and only consider approved comments.
+* Added an option to call the chatbot with a 'hot prompt' that will kickoff a chat session based on the supplied prompt
+* Use a shortcode with this format: [chatbot prompt="What happended on this day in history?"]
+* Hot prompts can be used with floating/embedded and with assistants, i.e., where ever you can add a shortcode.
 
 = 1.9.0 =
 * Changed the name of the chatbot to Kognetiks Chatbot for WordPress
