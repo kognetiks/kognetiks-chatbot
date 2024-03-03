@@ -72,7 +72,7 @@ function can_use_curl_for_file_protocol() {
     curl_close($curl);
 
     // DIAG - Diagnostic - Ver 1.9.1
-    back_trace( 'NOTICE', 'result: ' . print_r($result, true));
+    // back_trace( 'NOTICE', 'result: ' . print_r($result, true));
 
     // Check if setting the option was successful - true if successful, false if failed
     return $result;

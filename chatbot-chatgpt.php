@@ -497,7 +497,7 @@ function chatbot_chatgpt_send_message(): void {
             wp_send_json_error('Oops! Something went wrong on our end. Please try again later');
         } else {
             // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Check for links and images in response before returning');
+            // back_trace( 'NOTICE', 'Check for links and images in response before returning');
             $response = chatbot_chatgpt_check_for_links_and_images($response);
             // Return response
             wp_send_json_success($response);
@@ -528,7 +528,7 @@ function chatbot_chatgpt_send_message(): void {
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Check for links and images in response before returning');
+        // back_trace( 'NOTICE', 'Check for links and images in response before returning');
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
         // Return response

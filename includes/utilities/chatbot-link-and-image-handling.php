@@ -16,19 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_check_for_links_and_images( $response ) {
 
     // DIAG - Diagnostic - Ver 1.9.1
-    back_trace( 'NOTICE', "Entering chatbot_chatgpt_check_for_links_and_images()" );
-    back_trace( 'NOTICE', "Response: " . print_r($response, true) );
-
-    // Check if $response contains image markdown syntax
-    // $response = preg_replace_callback('/(!)?\[([^\]]+)\]\(([^)]+)\)/', function($matches) {
-    //     // If the first character is "!", it's an image
-    //     if ($matches[1] === "!") {
-    //         return "<span><img src=\'' . $matches[3] . '\' alt=\'' . $matches[2] . '\' style=\'max-width: 95%;\' /></span>";
-    //     } else {
-    //         // Otherwise, it's a link
-    //         return "<span><a href=\'' . $matches[3] . '\' target=\'_blank\'>' . $matches[2] . '</a></span>";
-    //     }
-    // }, $response);
+    // back_trace( 'NOTICE', "Entering chatbot_chatgpt_check_for_links_and_images()" );
+    // back_trace( 'NOTICE', "Response: " . print_r($response, true) );
 
     $response = preg_replace_callback('/(!)?\[([^\]]+)\]\(([^)]+)\)/', function($matches) {
         // If the first character is "!", it's an image
