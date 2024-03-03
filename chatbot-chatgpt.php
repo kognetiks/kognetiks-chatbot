@@ -117,6 +117,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php'; // Ver 1.6.7
@@ -495,6 +496,9 @@ function chatbot_chatgpt_send_message(): void {
             // back_trace( 'NOTICE', '$response ' . print_r($response,true));
             wp_send_json_error('Oops! Something went wrong on our end. Please try again later');
         } else {
+            // DIAG - Diagnostics
+            back_trace( 'NOTICE', 'Check for links and images in response before returning');
+            $response = chatbot_chatgpt_check_for_links_and_images($response);
             // Return response
             wp_send_json_success($response);
         }
@@ -522,6 +526,10 @@ function chatbot_chatgpt_send_message(): void {
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', 'Check for links and images in response before returning');
+        $response = chatbot_chatgpt_check_for_links_and_images($response);
 
         // Return response
         wp_send_json_success($response);

@@ -347,8 +347,26 @@ jQuery(document).ready(function ($) {
         // Use HTML for the response so that links are clickable - Ver 1.6.3
         // textElement = $('<span></span>').html(message);
         // Fix for XSS vulnerability - Ver 1.8.1
-        let sanitizedMessage = DOMPurify.sanitize(message);
-        textElement = $('<span></span>').html(sanitizedMessage);
+        // REMOVED FROM VER 1.9.1
+        // let sanitizedMessage = DOMPurify.sanitize(message);
+        // textElement = $('<span></span>').html(sanitizedMessage);
+        // ADDED TO VER 1.9.1
+        // textElement = $('<span></span>').html(message);
+
+        // Convert HTML entities back to their original form
+        var decodedMessage = $('<textarea/>').html(message).text();
+
+        // Parse the HTML string
+        var parsedHtml = $.parseHTML(decodedMessage);
+
+        // Create a new span element
+        var textElement = $('<span></span>');
+
+        // Iterate over the parsed elements
+        $.each(parsedHtml, function(i, el) {
+            // Append each element to the textElement as HTML
+            textElement.append(el);
+        });
 
         // Add initial greetings if first time
         if (cssClass) {
