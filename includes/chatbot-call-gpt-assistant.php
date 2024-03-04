@@ -286,6 +286,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $script_data_array;
 
     // DIAG - Diagnostics - Ver 1.8.6
     back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );

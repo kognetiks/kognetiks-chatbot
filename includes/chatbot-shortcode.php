@@ -22,6 +22,7 @@ function chatbot_chatgpt_shortcode($atts) {
     global $assistant_id;
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
+    global $script_data_array;
 
     $script_data_array = array(
         'user_id' => $user_id,

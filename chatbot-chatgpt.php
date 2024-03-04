@@ -183,6 +183,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $script_data_array;
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
