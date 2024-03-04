@@ -13,7 +13,9 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_shortcode($atts) {
+function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
+
+    echo '<pre>SHORTCODE ATTS: '; print_r($atts); echo '</pre>';
 
     global $session_id;
     global $user_id;
@@ -131,6 +133,15 @@ function chatbot_chatgpt_shortcode($atts) {
     if (empty($page_id)) {
         $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
     }
+
+    if ( $chatbot_chatgpt_assistant_alias == 'original' ) {
+        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', ''));
+    } elseif ( $chatbot_chatgpt_assistant_alias == 'alternate' ) {
+        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate', ''));
+    } else {
+        // Do nothing as either the assistant_id is set to the GPT Assistant ID or it is not set at all
+    }
+
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
 
