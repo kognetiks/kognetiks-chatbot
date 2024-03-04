@@ -25,7 +25,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    bacl_trace( 'NOTICE', 'chatbot_chatgpt_call_api()');
+    back_trace( 'NOTICE', 'chatbot_chatgpt_call_api()');
     back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
