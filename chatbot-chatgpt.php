@@ -219,11 +219,11 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     
     // Defaults for Ver 1.6.1
     $defaults = array(

@@ -15,7 +15,9 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
-    echo '<pre>SHORTCODE ATTS: '; print_r($atts); echo '</pre>';
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
+    // back_trace( 'NOTICE', 'SHORTCODE ATTS: ' .  print_r($atts,true));
 
     global $session_id;
     global $user_id;
@@ -44,14 +46,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
-    back_trace( 'NOTICE', 'Shortcode Attributes: ' . print_r($atts, true));
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    // back_trace( 'NOTICE', 'Shortcode Attributes: ' . print_r($atts, true));
 
     // EXAMPLE - Shortcode Attributes
     // [chatbot] - Default values, floating style, uses OpenAI's ChatGPT
@@ -94,7 +96,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Prompt passed as a parameter to the page - Ver 1.9.1
     if (isset($_GET['chatbot_prompt'])) {
         $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($_GET['chatbot_prompt']);
-        back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+        // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
     }
 
     // DIAG - Diagnostics - Ver 1.9.0
@@ -155,13 +157,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 152 of the function');
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 152 of the function');
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
