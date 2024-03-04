@@ -24,12 +24,21 @@ function chatbot_chatgpt_shortcode($atts) {
     global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
 
+    // Script Attributes
     $script_data_array = array(
         'user_id' => $user_id,
         'page_id' => $page_id,
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id
+    );
+
+    // Shortcode Attributes
+    $chatbot_chatgpt_default_atts = array(
+        'style' => 'floating', // Default value
+        'assistant' => 'original', // Default value
+        'audience' => '', // If not passed then default value
+        'prompt' => '', // If not passed then default value
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -40,6 +49,7 @@ function chatbot_chatgpt_shortcode($atts) {
     back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    back_trace( 'NOTICE', 'Shortcode Attributes: ' . print_r($atts, true));
 
     // EXAMPLE - Shortcode Attributes
     // [chatbot] - Default values, floating style, uses OpenAI's ChatGPT
@@ -53,22 +63,6 @@ function chatbot_chatgpt_shortcode($atts) {
     // [chatbot style="floating" audience="all"] - Floating style for all audiences
     // [chatbot style="floating" audience="logged-in"] - Floating style for logged-in users only
     // [chatbot style="floating" audience="visitors"] - Floating style for visitors only
-
-    // DIAG - Diagnostics - Ver 1.9.1
-    $atts_string = print_r($atts, true);
-    error_log('Shortcode Attributes: ' . $atts_string);
-    // if ($content !== null) {
-    //     error_log('Shortcode Content: ' . $content);
-    // }
-    echo '<pre>Shortcode Attributes: ' . $atts_string . '</pre>';
-
-    // Shortcode Attributes
-    $chatbot_chatgpt_default_atts = array(
-        'style' => 'floating', // Default value
-        'assistant' => 'original', // Default value
-        'audience' => '', // If not passed then default value
-        'prompt' => '', // If not passed then default value
-    );
 
     // Combine user attributes with default attributes
     $atts = shortcode_atts($chatbot_chatgpt_default_atts, $atts, 'chatbot_chatgpt');
@@ -140,7 +134,7 @@ function chatbot_chatgpt_shortcode($atts) {
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
 
-    // DUPLCIATE ADDED THIS HERE - VER 1.9.1
+    // DUPLICATE ADDED THIS HERE - VER 1.9.1
     $script_data_array = array(
         'user_id' => $user_id,
         'page_id' => $page_id,

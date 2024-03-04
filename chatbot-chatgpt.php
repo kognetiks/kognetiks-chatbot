@@ -357,6 +357,9 @@ function chatbot_chatgpt_send_message(): void {
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
+    global $script_data_array;
 
     $api_key = '';
 
@@ -430,8 +433,8 @@ function chatbot_chatgpt_send_message(): void {
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
-        // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
+        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
+        if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
@@ -442,8 +445,8 @@ function chatbot_chatgpt_send_message(): void {
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
-        // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
+        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
+        if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
