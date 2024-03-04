@@ -347,10 +347,10 @@ jQuery(document).ready(function ($) {
         // Use HTML for the response so that links are clickable - Ver 1.6.3
         // textElement = $('<span></span>').html(message);
         // Fix for XSS vulnerability - Ver 1.8.1
-        // REMOVED FROM VER 1.9.1
+        // REMOVED FROM VER 1.9.1 - 2023 03 03
         // let sanitizedMessage = DOMPurify.sanitize(message);
         // textElement = $('<span></span>').html(sanitizedMessage);
-        // ADDED TO VER 1.9.1
+        // ADDED TO VER 1.9.1 - 2023 03 03
         // textElement = $('<span></span>').html(message);
 
         // Convert HTML entities back to their original form
@@ -616,6 +616,9 @@ jQuery(document).ready(function ($) {
         let session_id = php_vars.session_id;
         let assistant_id = php_vars.assistant_id;
         let thread_id = php_vars.thread_id;
+
+        // DIAG - Diagnostics - Ver 1.9.1
+        console.log('Chatbot: NOTICE: assistant_id: ' + assistant_id);
     
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
@@ -787,10 +790,12 @@ jQuery(document).ready(function ($) {
             // }
 
             // Check if current conversation is different from stored conversation
+            // FIXME - ADDED THIS BACK IN VER 1.9.1 - 2024 03 04
             // if (conversation.html() !== storedConversation) {
             //     conversation.html(storedConversation);  // Set the conversation HTML to stored conversation
             // }
             // Fix for XSS vulnerability - Ver 1.8.1
+            // FIXME - REMOVED THIS MAY BE BREAKING VER 1.9.1 - 2024 03 04
             if (conversation.html() !== storedConversation) {
                 let sanitizedConversation = DOMPurify.sanitize(storedConversation);
                 conversation.html(sanitizedConversation);  // Set the conversation HTML to sanitized stored conversation

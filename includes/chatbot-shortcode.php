@@ -51,6 +51,14 @@ function chatbot_chatgpt_shortcode($atts) {
     // [chatbot style="floating" audience="logged-in"] - Floating style for logged-in users only
     // [chatbot style="floating" audience="visitors"] - Floating style for visitors only
 
+    // DIAG - Diagnostics - Ver 1.9.1
+    $atts_string = print_r($atts, true);
+    error_log('Shortcode Attributes: ' . $atts_string);
+    // if ($content !== null) {
+    //     error_log('Shortcode Content: ' . $content);
+    // }
+    echo '<pre>Shortcode Attributes: ' . $atts_string . '</pre>';
+
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
         'style' => 'floating', // Default value

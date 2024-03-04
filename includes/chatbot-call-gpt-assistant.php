@@ -288,16 +288,19 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
     global $errorResponses;
     global $stopWords;
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    echo '<pre>$assistant_id: ' . print_r($assistant_id, true) . '</pre>';
 
     // If the threadId is not set, create a new thread
     if (empty($thread_id)) {
