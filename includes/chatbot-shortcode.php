@@ -33,11 +33,13 @@ function chatbot_chatgpt_shortcode($atts) {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // EXAMPLE - Shortcode Attributes
     // [chatbot] - Default values, floating style, uses OpenAI's ChatGPT
@@ -137,6 +139,24 @@ function chatbot_chatgpt_shortcode($atts) {
     }
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
+
+    // DUPLCIATE ADDED THIS HERE - VER 1.9.1
+    $script_data_array = array(
+        'user_id' => $user_id,
+        'page_id' => $page_id,
+        'session_id' => $session_id,
+        'thread_id' => $thread_id,
+        'assistant_id' => $assistant_id
+    );
+
+    // DIAG - Diagnostics - Ver 1.8.6
+    back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 152 of the function');
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
