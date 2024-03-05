@@ -258,7 +258,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                 </button>
                 <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
-                    <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                    <!-- <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" /> -->
+                    <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                     <button id="chatbot-chatgpt-upload-file">
                         <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                     </button>
@@ -323,7 +324,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                         </button>
                         <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
-                            <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                            <!-- <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" /> -->
+                            <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                             <button id="chatbot-chatgpt-upload-file">
                                 <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                             </button>

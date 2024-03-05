@@ -546,41 +546,43 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    // Add the change event listener to the file input field
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
-
         // console.log('Chatbot: NOTICE: File selected');
-  
+      
         // showTypingIndicator();
         
         let fileField = e.target;
-
-        // Check if a file is selected
+    
+        // Check if any files are selected
         if (!fileField.files.length) {
             // console.log('Chatbot: WARNING: No file selected');
             return;
         }
-
+    
         let formData = new FormData();
-        formData.append('file', fileField.files[0]);
-        // console.log('Chatbot: NOTICE: File selected ', fileField.files[0]);
+        // Append each file to the formData object
+        for (let i = 0; i < fileField.files.length; i++) {
+            // The 'files[]' name here is important for PHP to recognize it as an array of files
+            formData.append('file[]', fileField.files[i]);
+        }
+        // console.log('Chatbot: NOTICE: Files selected ', fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
-
+    
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
-            timeout: timeout_setting, // Example: 10,000ms = 10 seconds
+            timeout: timeout_setting, // Example timeout_setting value: 10000 for 10 seconds
             data: formData,
-            processData: false,  // tell jQuery not to process the data
-            contentType: false,  // tell jQuery not to set contentType
+            processData: false,  // Tell jQuery not to process the data
+            contentType: false,  // Tell jQuery not to set contentType
             beforeSend: function () {
                 showTypingIndicator();
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
                 // console.log('Chatbot: NOTICE: Response from server', response);
-                $('#chatbot-chatgpt-upload-file-input').val('');
-                appendMessage('File successfully uploaded.', 'bot');
+                $('#chatbot-chatgpt-upload-file-input').val(''); // Clear the file input after successful upload
+                appendMessage('File(s) successfully uploaded.', 'bot');
             },
             error: function(jqXHR, status, error) {
                 if(status === "timeout") {
@@ -598,11 +600,8 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', false);
             },
         });
-        
-        // Belt & Suspenders - Ver 1.8.6
-        // removeTypingIndicator();
-
     });
+    
 
     // Add the click event listener to the clear button - Ver 1.8.6
     $('#chatbot-chatgpt-erase-btn').on('click', function() {
