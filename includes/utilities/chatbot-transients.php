@@ -29,6 +29,7 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
+    // Check if the user ID and page ID are set
     if (empty($user_id)) {
         $user_id = get_current_user_id(); // Get current user ID
     
@@ -42,6 +43,10 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
             $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
         }
     }
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 48 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 49 $page_id: ' . $page_id);
 
     // Set the transient based on the type
     if ( $transient_type == 'display_style' ) {
@@ -84,6 +89,7 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
+    // Check if the user ID and page ID are set
     if (empty($user_id)) {
         $user_id = get_current_user_id(); // Get current user ID
     
@@ -97,6 +103,10 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
             $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
         }
     }
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 108 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 109 $page_id: ' . $page_id);
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Transient GET - Begin');
@@ -152,6 +162,7 @@ function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $p
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
+    // Check for $user_id and $page_id
     if (empty($user_id)) {
         $user_id = get_current_user_id(); // Get current user ID
     
@@ -165,6 +176,10 @@ function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $p
             $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
         }
     }
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 181 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 182 $page_id: ' . $page_id);
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Transient DELETE - BEGIN');

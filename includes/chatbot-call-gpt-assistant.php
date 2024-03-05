@@ -320,8 +320,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     }
 
     // Localize the data for user id and page id
-    $user_id = get_current_user_id();
-    $page_id = get_the_id();
+    // REMOVED FOR TESTING - VER 1.9.1 - 2024 03 04
+    // $user_id = get_current_user_id();
+    // $page_id = get_the_id();
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 327 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 328 $page_id: ' . $page_id);
     
     $script_data_array = array(
         'user_id' => $user_id,

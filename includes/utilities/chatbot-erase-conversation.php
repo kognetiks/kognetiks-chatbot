@@ -31,6 +31,10 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
         $page_id = $_POST['page_id'];
     }
 
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 35 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 36 $page_id: ' . $page_id);
+
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
@@ -59,6 +63,10 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
         // back_trace( 'NOTICE', '$post: ' . $post);
         $page_id = $_POST['page_id'];
     }
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 68 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 69 $page_id: ' . $page_id);
 
     $transient_type = 'assistant_alias';
     

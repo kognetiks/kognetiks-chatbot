@@ -68,6 +68,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // [chatbot style="floating" audience="logged-in"] - Floating style for logged-in users only
     // [chatbot style="floating" audience="visitors"] - Floating style for visitors only
 
+    // normalize attribute keys, lowercase
+    $atts = array_change_key_case((array)$atts, CASE_LOWER);
+
     // Combine user attributes with default attributes
     $atts = shortcode_atts($chatbot_chatgpt_default_atts, $atts, 'chatbot_chatgpt');
 
@@ -133,8 +136,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
     $page_id = get_the_id(); // Get current page ID
     if (empty($page_id)) {
-        $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
+        // $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
+        // CHANGED - Ver 1.9.1 - 2024 03 05
+        $page_id = get_the_id(); // Get current page ID
     }
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 145 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 146 $page_id: ' . $page_id);
 
     if ( $chatbot_chatgpt_assistant_alias == 'original' ) {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', ''));
