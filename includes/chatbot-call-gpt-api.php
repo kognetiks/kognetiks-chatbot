@@ -25,6 +25,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
@@ -151,7 +152,9 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     if (empty($page_id)) {
         $page_id = get_the_id(); // Get current page ID
         if (empty($page_id)) {
-            $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
+            // $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
+            // Changed - Ver 1.9.1 - 2024 03 05
+            $page_id = get_the_ID(); // Get the ID of the queried object if $page_id is not set
         }
     }
 

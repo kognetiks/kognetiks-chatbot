@@ -43,39 +43,57 @@ function chatbot_chatgpt_kn_analysis_output_callback($args) {
 
 // Download the TF-IDF data
 function chatbot_chatgpt_kn_analysis_download_csv(): void {
+
     // Generate the results directory path
-    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
+    // $results_dir_path = plugin_dir_path(__FILE__) . '../../results/';
+    // back_trace( 'NOTICE', 'CHATBOT_CHATGPT_PLUGIN_DIR_PATH: ' . CHATBOT_CHATGPT_PLUGIN_DIR_PATH);
+    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
+    // back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
 
     // Specify the output file's path
     $results_csv_file = $results_dir_path . 'results.csv';
 
     // Exit early if the file doesn't exist
     if (!file_exists($results_csv_file)) {
+        // DIAG - Diagnostic - Ver 1.9.1
+        // back_trace( 'NOTICE', 'File not found!');
         wp_die('File not found!');
     }
 
-    // Initialize a cURL session
-    $curl = curl_init();
+    if (can_use_curl_for_file_protocol()) {
 
-    // Set the cURL options
-    curl_setopt($curl, CURLOPT_URL, 'file://' . realpath($results_csv_file));
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        // Initialize a cURL session
+        $curl = curl_init();
 
-    // Execute the cURL session
-    $csv_data = curl_exec($curl);
+        // Set the cURL options
+        curl_setopt($curl, CURLOPT_URL, 'file://' . realpath($results_csv_file));
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 
-    // Check for errors
-    if ($csv_data === false) {
-        wp_die('Error reading file: ' . curl_error($curl));
+        // Execute the cURL session
+        $csv_data = curl_exec($curl);
+
+        // Check for errors
+        if ($csv_data === false) {
+            wp_die('Error reading file: ' . curl_error($curl));
+        }
+
+        // Close the cURL session
+        curl_close($curl);
+
+        // Deliver the file for download
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment;filename=Knowledge Navigator Results.csv');
+        echo $csv_data;
+        exit;
+
+    } else {
+
+        // DIAG - Diagnostic - Ver 1.9.1
+        // back_trace( 'NOTICE', 'cURL is not enabled for the file protocol!');
+        chatbot_chatgpt_general_admin_notice('cURL is not enabled for the file protocol!');
+        // wp_die('cURL is not enabled for the file protocol!');
+
     }
 
-    // Close the cURL session
-    curl_close($curl);
-
-    // Deliver the file for download
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=Knowledge Navigator Results.csv');
-    echo $csv_data;
-    exit;
 }
 add_action('admin_post_chatbot_chatgpt_kn_analysis_download_csv', 'chatbot_chatgpt_kn_analysis_download_csv');

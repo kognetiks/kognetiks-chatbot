@@ -491,9 +491,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     $filename = $t_file_name . '-' . date('Y-m-d') . '.csv';
     // Replace spaces with - in the filename
     $filename = str_replace(' ', '-', $filename);
-    // $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '/results/';
-    // $results_dir_path = str_replace('\\', '/', $results_dir_path);
-    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
+    $results_dir_path = plugin_dir_path(__FILE__) . '../../results/';
 
     // Create results directory if it doesn't exist
     if (!file_exists($results_dir_path)) {
@@ -520,7 +518,8 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     } else {
         $class = 'notice notice-error';
         $message = __( 'Chatbot No data in the file. Please enable conversation logging if currently off.', 'chatbot-chatgpt' );
-        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        chatbot_chatgpt_general_admin_notice($message);
         return;
     }
 
@@ -536,42 +535,55 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     if (!file_exists($results_csv_file)) {
         $class = 'notice notice-error';
         $message = __( 'File not found!' . $results_csv_file, 'chatbot-chatgpt' );
-        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+        chatbot_chatgpt_general_admin_notice($message);
         return;
     }
 
-    // Initialize a cURL session
-    $curl = curl_init();
+    if (can_use_curl_for_file_protocol()) {
 
-    // Set the cURL options
-    curl_setopt($curl, CURLOPT_URL, 'file://' . realpath($results_csv_file));
-    // curl_setopt($curl, CURLOPT_URL, 'http://' . realpath($results_csv_file));
-    // curl_setopt($curl, CURLOPT_URL, $results_csv_file);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        // Initialize a cURL session
+        $curl = curl_init();
 
-    // Execute the cURL session
-    $csv_data = curl_exec($curl);
+        // Set the cURL options
+        curl_setopt($curl, CURLOPT_URL, 'file://' . realpath($results_csv_file));
+        // curl_setopt($curl, CURLOPT_URL, 'http://' . realpath($results_csv_file));
+        // curl_setopt($curl, CURLOPT_URL, $results_csv_file);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 
-    // Check for errors
-    if ($csv_data === false) {
-        $class = 'notice notice-error';
-        $message = __( 'Error reading file: ' . curl_error($curl), 'chatbot-chatgpt' );
-        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
-        return;
-    }
+        // Execute the cURL session
+        $csv_data = curl_exec($curl);
 
-    // Close the cURL session
-    curl_close($curl);
+        // Check for errors
+        if ($csv_data === false) {
+            $class = 'notice notice-error';
+            $message = __( 'Error reading file: ' . curl_error($curl), 'chatbot-chatgpt' );
+            // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+            chatbot_chatgpt_general_admin_notice($message);
+            return;
+        }
 
-    // Deliver the file for download
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=' . $filename);
-    echo $csv_data;
+        // Close the cURL session
+        curl_close($curl);
 
-    // Delete the file
-    unlink($results_csv_file);
-    exit;
+        // Deliver the file for download
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment;filename=' . $filename);
+        echo $csv_data;
 
+        // Delete the file
+        unlink($results_csv_file);
+        exit;
+
+    } else {
+            
+            $class = 'notice notice-error';
+            $message = __( 'cURL is not enabled for the file protocol!', 'chatbot-chatgpt' );
+            // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+            chatbot_chatgpt_general_admin_notice($message);
+            return;
+    
+        }
 
 }
 add_action('admin_post_chatbot_chatgpt_download_conversation_data', 'chatbot_chatgpt_download_conversation_data');

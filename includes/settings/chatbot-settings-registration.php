@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Register settings
-function chatbot_chatgpt_settings_init() {
+function chatbot_chatgpt_settings_init(): void {
 
     // API/Model settings tab - Ver 1.3.0
     // register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key');
@@ -380,16 +380,33 @@ function chatbot_chatgpt_settings_init() {
     );
 
     // Knowledge Navigator settings tab - Ver 1.6.1
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_knowledge_navigator');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_maximum_top_words');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_results');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_conversation_context');
+    register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_schedule'); // Schedule Daily, Weekly, Monthly,etc.
+    register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_maximum_top_words');
+    register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_include_posts');
+    register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_include_pages');
+    register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_include_products');
+    register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_include_comments');
 
     add_settings_section(
-        'chatbot_chatgpt_knowledge_navigator_section',
+        'chatbot_chatgpt_knowledge_navigator_settings_section',
         'Knowledge Navigator',
         'chatbot_chatgpt_knowledge_navigator_section_callback',
         'chatbot_chatgpt_knowledge_navigator'
+    );
+
+    add_settings_section(
+        'chatbot_chatgpt_kn_settings_section',
+        '<hr style="border-top: 2px solid;">Knowledge Navigator Settings',
+        'chatbot_chatgpt_kn_settings_section_callback',
+        'chatbot_chatgpt_knowledge_navigator'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_schedule',
+        'Select Run Schedule',
+        'chatbot_chatgpt_kn_schedule_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_settings_section'
     );
 
     add_settings_field(
@@ -397,15 +414,39 @@ function chatbot_chatgpt_settings_init() {
         'Maximum Top Words',
         'chatbot_chatgpt_kn_maximum_top_words_callback',
         'chatbot_chatgpt_knowledge_navigator',
-        'chatbot_chatgpt_knowledge_navigator_section'
+        'chatbot_chatgpt_kn_settings_section'
     );
 
     add_settings_field(
+        'chatbot_chatgpt_kn_include_posts',
+        'Include Published Posts',
+        'chatbot_chatgpt_kn_include_posts_callback',
         'chatbot_chatgpt_knowledge_navigator',
-        'Select Run Schedule',
-        'chatbot_chatgpt_knowledge_navigator_callback',
+        'chatbot_chatgpt_kn_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_include_pages',
+        'Include Published Pages',
+        'chatbot_chatgpt_kn_include_pages_callback',
         'chatbot_chatgpt_knowledge_navigator',
-        'chatbot_chatgpt_knowledge_navigator_section'
+        'chatbot_chatgpt_kn_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_include_products',
+        'Include Published Products',
+        'chatbot_chatgpt_kn_include_products_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_include_comments',
+        'Include Approved Comments',
+        'chatbot_chatgpt_kn_include_comments_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_settings_section'
     );
 
     // Knowledge Navigator Analysis settings tab - Ver 1.6.1

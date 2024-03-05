@@ -5,11 +5,11 @@ jQuery(document).ready(function ($) {
     //     console.log('Chatbot: NOTICE: Entering chatbot-chatgpt.js');
     // }
 
-    var chatGptChatBot = $('#chatbot-chatgpt').hide();
+    let chatGptChatBot = $('#chatbot-chatgpt').hide();
 
     messageInput = $('#chatbot-chatgpt-message');
     
-    var conversation = $('#chatbot-chatgpt-conversation');
+    let conversation = $('#chatbot-chatgpt-conversation');
 
     submitButton = $('#chatbot-chatgpt-submit');
     uploadfileButton = $('#chatbot-chatgpt-upload-file');
@@ -222,7 +222,7 @@ jQuery(document).ready(function ($) {
     if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
 
         // FIXME - Add option for custom Avatar - Ver 1.8.6
-        var chatbot_chatgpt_custom_avatar_icon_setting = localStorage.getItem('chatbot_chatgpt_custom_avatar_icon_setting') || '';
+        let chatbot_chatgpt_custom_avatar_icon_setting = localStorage.getItem('chatbot_chatgpt_custom_avatar_icon_setting') || '';
 
         if (chatbot_chatgpt_custom_avatar_icon_setting === '') {
             // Construct the path to the avatar
@@ -347,8 +347,26 @@ jQuery(document).ready(function ($) {
         // Use HTML for the response so that links are clickable - Ver 1.6.3
         // textElement = $('<span></span>').html(message);
         // Fix for XSS vulnerability - Ver 1.8.1
-        var sanitizedMessage = DOMPurify.sanitize(message);
-        textElement = $('<span></span>').html(sanitizedMessage);
+        // REMOVED FROM VER 1.9.1 - 2023 03 03
+        // let sanitizedMessage = DOMPurify.sanitize(message);
+        // textElement = $('<span></span>').html(sanitizedMessage);
+        // ADDED TO VER 1.9.1 - 2023 03 03
+        // textElement = $('<span></span>').html(message);
+
+        // Convert HTML entities back to their original form
+        var decodedMessage = $('<textarea/>').html(message).text();
+
+        // Parse the HTML string
+        var parsedHtml = $.parseHTML(decodedMessage);
+
+        // Create a new span element
+        var textElement = $('<span></span>');
+
+        // Iterate over the parsed elements
+        $.each(parsedHtml, function(i, el) {
+            // Append each element to the textElement as HTML
+            textElement.append(el);
+        });
 
         // Add initial greetings if first time
         if (cssClass) {
@@ -413,8 +431,8 @@ jQuery(document).ready(function ($) {
         messageInput.val('');
         appendMessage(message, 'user');
 
-        var user_id = php_vars.user_id;
-        var page_id = php_vars.page_id;
+        let user_id = php_vars.user_id;
+        let page_id = php_vars.page_id;
 
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
@@ -535,7 +553,7 @@ jQuery(document).ready(function ($) {
   
         // showTypingIndicator();
         
-        var fileField = e.target;
+        let fileField = e.target;
 
         // Check if a file is selected
         if (!fileField.files.length) {
@@ -543,7 +561,7 @@ jQuery(document).ready(function ($) {
             return;
         }
 
-        var formData = new FormData();
+        let formData = new FormData();
         formData.append('file', fileField.files[0]);
         // console.log('Chatbot: NOTICE: File selected ', fileField.files[0]);
         formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
@@ -593,11 +611,14 @@ jQuery(document).ready(function ($) {
         
         // showTypingIndicator();
 
-        var user_id = php_vars.user_id;
-        var page_id = php_vars.page_id;
-        var session_id = php_vars.session_id;
-        var assistant_id = php_vars.assistant_id;
-        var thread_id = php_vars.thread_id;
+        let user_id = php_vars.user_id;
+        let page_id = php_vars.page_id;
+        let session_id = php_vars.session_id;
+        let assistant_id = php_vars.assistant_id;
+        let thread_id = php_vars.thread_id;
+
+        // DIAG - Diagnostics - Ver 1.9.1
+        console.log('Chatbot: NOTICE: assistant_id: ' + assistant_id);
     
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
@@ -769,12 +790,14 @@ jQuery(document).ready(function ($) {
             // }
 
             // Check if current conversation is different from stored conversation
+            // FIXME - ADDED THIS BACK IN VER 1.9.1 - 2024 03 04
             // if (conversation.html() !== storedConversation) {
             //     conversation.html(storedConversation);  // Set the conversation HTML to stored conversation
             // }
             // Fix for XSS vulnerability - Ver 1.8.1
+            // FIXME - REMOVED THIS MAY BE BREAKING VER 1.9.1 - 2024 03 04
             if (conversation.html() !== storedConversation) {
-                var sanitizedConversation = DOMPurify.sanitize(storedConversation);
+                let sanitizedConversation = DOMPurify.sanitize(storedConversation);
                 conversation.html(sanitizedConversation);  // Set the conversation HTML to sanitized stored conversation
             }          
 

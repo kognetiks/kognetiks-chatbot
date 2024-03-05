@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assis
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.3
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -42,6 +42,10 @@ Add a creative touch with customizable avatars. Reflect your site's personality 
 
 **📊 Direct Traffic with Customizable Buttons**
 Guide your visitors where you want them. Customizable buttons can link directly to specific pages, forms, or contact information, facilitating smoother navigation and enhanced user engagement.
+
+🤖 Tailored Audience Engagement
+
+Customize accessibility with three audience settings: All Audiences, Logged-in Only, or Visitors Only. Additionally, control presentation to specific audiences. Whether floating or embedded, tailor the chatbot's visibility for a seamless user experience across platforms.
 
 **🤖 Why the Kognetiks Chatbot for WordPress?**
 ▪ **Natural Conversations:** Experience human-like interactions, thanks to Large Language Model APIs from companies like OpenAI.
@@ -141,7 +145,7 @@ Embark on a journey to elevate your website's interactivity with the Chatbot plu
 
 == Your Journey Towards an Interactive Website Begins! ==
 
-With Chatbot installed, you're now equipped to offer a more dynamic, engaging, and responsive experience to your website visitors.
+With the Kognetiks Chatbot installed, you're now equipped to offer a more dynamic, engaging, and responsive experience to your website visitors.
 
 == Frequently Asked Questions ==
 
@@ -169,7 +173,7 @@ The plugin now supports the latest OpenAI model **gpt-4-turbo (i.e., 'gpt-4-1106
 
 You can find more frequently asked questions at [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
 
-= Disclaimer =
+== Disclaimer ==
 
 OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetiks is not a partner of, endorsed by, or sponsored by OpenAI.
 
@@ -193,6 +197,13 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 16. Settings and Options
 
 == Changelog ==
+
+= 1.9.1 =
+* Knowledge Navigator now allows for including/excluding posts, pages, products and/or comments.
+* Knowledge Navigator only consider published posts and pages, and only consider approved comments.
+* Added an option to call the chatbot with a 'hot prompt' that will kickoff a chat session based on the supplied prompt
+* Use a shortcode with this format: [chatbot prompt="What happended on this day in history?"]
+* Hot prompts can be used with floating/embedded and with assistants, i.e., where ever you can add a shortcode.
 
 = 1.9.0 =
 * Changed the name of the chatbot to Kognetiks Chatbot for WordPress

@@ -243,7 +243,6 @@ function getTheStepsStatus($thread_id, $runId, $api_key): void {
 
         foreach ($data as $item) {
             if ($item["status"] == "completed") {
-                // echo "Step completed\n";
                 $status = true;
                 break;
             }
@@ -286,8 +285,10 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $script_data_array;
 
     // DIAG - Diagnostics - Ver 1.8.6
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
@@ -319,8 +320,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     }
 
     // Localize the data for user id and page id
-    $user_id = get_current_user_id();
-    $page_id = get_the_id();
+    // REMOVED FOR TESTING - VER 1.9.1 - 2024 03 04
+    // $user_id = get_current_user_id();
+    // $page_id = get_the_id();
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 327 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 328 $page_id: ' . $page_id);
     
     $script_data_array = array(
         'user_id' => $user_id,

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Upgrade the chatbot-chatgpt plugin
+ * Kognetiks Chatbot for WordPress - Upgrade the kognetiks-chatbot plugin
  *
  * This file contains the code for upgrading the plugin.
  * It should run with the plugin is activated, deactivated, or updated.
@@ -307,7 +307,7 @@ function chatbot_chatgpt_upgrade() {
     // FIXME - DETERMINE WHAT OPTION NAMES NEED TO BE CHANGED (DELETE, THEN REPLACE)
 
     // Add/update the option - chatbot_chatgpt_plugin_version
-    $plugin_version = get_plugin_version();
+    $plugin_version = kchat_get_plugin_version();
     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
     // DIAG - Log the plugin version
     // back_trace('NOTICE', 'chatbot_chatgpt_plugin_version option created');

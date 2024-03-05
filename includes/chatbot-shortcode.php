@@ -13,7 +13,11 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_shortcode($atts) {
+function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
+    // back_trace( 'NOTICE', 'SHORTCODE ATTS: ' .  print_r($atts,true));
 
     global $session_id;
     global $user_id;
@@ -22,7 +26,9 @@ function chatbot_chatgpt_shortcode($atts) {
     global $assistant_id;
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
+    global $script_data_array;
 
+    // Script Attributes
     $script_data_array = array(
         'user_id' => $user_id,
         'page_id' => $page_id,
@@ -31,12 +37,23 @@ function chatbot_chatgpt_shortcode($atts) {
         'assistant_id' => $assistant_id
     );
 
+    // Shortcode Attributes
+    $chatbot_chatgpt_default_atts = array(
+        'style' => 'floating', // Default value
+        'assistant' => 'original', // Default value
+        'audience' => '', // If not passed then default value
+        'prompt' => '', // If not passed then default value
+    );
+
     // DIAG - Diagnostics - Ver 1.8.6
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    // back_trace( 'NOTICE', 'Shortcode Attributes: ' . print_r($atts, true));
 
     // EXAMPLE - Shortcode Attributes
     // [chatbot] - Default values, floating style, uses OpenAI's ChatGPT
@@ -51,13 +68,8 @@ function chatbot_chatgpt_shortcode($atts) {
     // [chatbot style="floating" audience="logged-in"] - Floating style for logged-in users only
     // [chatbot style="floating" audience="visitors"] - Floating style for visitors only
 
-    // Shortcode Attributes
-    $chatbot_chatgpt_default_atts = array(
-        'style' => 'floating', // Default value
-        'assistant' => 'original', // Default value
-        'audience' => '', // If not passed then default value
-        'prompt' => '', // If not passed then default value
-    );
+    // normalize attribute keys, lowercase
+    $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
     // Combine user attributes with default attributes
     $atts = shortcode_atts($chatbot_chatgpt_default_atts, $atts, 'chatbot_chatgpt');
@@ -77,8 +89,18 @@ function chatbot_chatgpt_shortcode($atts) {
     if (empty($chatbot_chatgpt_audience_choice)) {
         $chatbot_chatgpt_audience_choice = $chatbot_chatgpt_audience_choice_global;
     }
+    
     // Sanitize the 'prompt' attribute to ensure it contains safe data
     $chatbot_chatgpt_hot_bot_prompt = array_key_exists('prompt', $atts) ? sanitize_text_field($atts['prompt']) : '';
+    if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
+        $chatbot_chatgpt_hot_bot_prompt = esc_attr($chatbot_chatgpt_hot_bot_prompt);
+    }
+
+    // Prompt passed as a parameter to the page - Ver 1.9.1
+    if (isset($_GET['chatbot_prompt'])) {
+        $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($_GET['chatbot_prompt']);
+        // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+    }
 
     // DIAG - Diagnostics - Ver 1.9.0
     // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
@@ -114,10 +136,43 @@ function chatbot_chatgpt_shortcode($atts) {
     }
     $page_id = get_the_id(); // Get current page ID
     if (empty($page_id)) {
-        $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
+        // $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
+        // CHANGED - Ver 1.9.1 - 2024 03 05
+        $page_id = get_the_id(); // Get current page ID
     }
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 145 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 146 $page_id: ' . $page_id);
+
+    if ( $chatbot_chatgpt_assistant_alias == 'original' ) {
+        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', ''));
+    } elseif ( $chatbot_chatgpt_assistant_alias == 'alternate' ) {
+        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate', ''));
+    } else {
+        // Do nothing as either the assistant_id is set to the GPT Assistant ID or it is not set at all
+    }
+
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
+
+    // DUPLICATE ADDED THIS HERE - VER 1.9.1
+    $script_data_array = array(
+        'user_id' => $user_id,
+        'page_id' => $page_id,
+        'session_id' => $session_id,
+        'thread_id' => $thread_id,
+        'assistant_id' => $assistant_id
+    );
+
+    // DIAG - Diagnostics - Ver 1.8.6
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 152 of the function');
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // Retrieve the bot name - Ver 1.1.0
     // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
@@ -127,13 +182,22 @@ function chatbot_chatgpt_shortcode($atts) {
 
     // FIXME - NOT WORKING YET - Ver 1.9.0
     // if (empty($chatbot_chatgpt_hot_bot_prompt)) {
-    //     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
+    //     // $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
     //     back_trace ( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
     // } else {
     //     $chatbot_chatgpt_bot_prompt = $chatbot_chatgpt_hot_bot_prompt;
     //     back_trace ( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
     // }
 
+    // Localize the $chatbot_chatgpt_bot_prompt - Ver 1.9.0
+    // Now push $chatbot_chatgpt_bot_prompt to the JavaScript
+    // wp_localize_script('chatbot-chatgpt', 'chatbot_chatgpt_bot_prompt', array('chatbot_chatgpt_bot_prompt' => $chatbot_chatgpt_bot_prompt));
+
+    // Maybe instead of localizing the data, I can append the the prompt to the css element (#chatbot-chatgpt-message)
+    if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
+        wp_add_inline_script('chatbot-chatgpt', 'document.getElementById("chatbot-chatgpt-message").placeholder = "' . $chatbot_chatgpt_hot_bot_prompt . '";');
+    }
+    
     $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
     // If assistant is set to 'original' then do not allow file uploads - Ver 1.7.9
@@ -166,8 +230,29 @@ function chatbot_chatgpt_shortcode($atts) {
         <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
             <div style="flex-grow: 1; max-width: 95%;">
                 <label for="chatbot-chatgpt-message"></label>
-                <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea>
-            </div>          
+                <?php
+                    // Preload with a prompt if it is set - Ver 1.9.0
+                    if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
+                        echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
+                        echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var textarea = document.getElementById('chatbot-chatgpt-message');
+                            textarea.value += '\\n';
+                            textarea.focus();
+
+                            setTimeout(function() {
+                                var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                                if (submitButton) {
+                                    submitButton.click();
+                                }
+                            }, 1000); // Delay of 1 second
+                        });
+                        </script>";
+                    } else {
+                        echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
+                    }
+                ?>
+            </div>   
             <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;">
                 <button id="chatbot-chatgpt-submit">
                     <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
@@ -209,7 +294,29 @@ function chatbot_chatgpt_shortcode($atts) {
             <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
                     <div style="flex-grow: 1; max-width: 95%;">
                         <label for="chatbot-chatgpt-message"></label>
-                        <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea>
+                        <!-- <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea> -->
+                        <?php
+                            // Preload with a prompt if it is set - Ver 1.9.0
+                            if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
+                                echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
+                                echo "<script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    var textarea = document.getElementById('chatbot-chatgpt-message');
+                                    textarea.value += '\\n';
+                                    textarea.focus();
+
+                                    setTimeout(function() {
+                                        var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                                        if (submitButton) {
+                                            submitButton.click();
+                                        }
+                                    }, 1000); // Delay of 1 second
+                                });
+                                </script>";
+                            } else {
+                                echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
+                            }
+                        ?>
                     </div>
                     <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;">
                         <button id="chatbot-chatgpt-submit">
@@ -293,8 +400,10 @@ function chatbot_chatgpt_shortcode($atts) {
     }
 
 }
-add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
+add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
+
 
 // Fix Updating failed. The response is not a valid JSON response. - Version 1.7.3
 // Function to output the script

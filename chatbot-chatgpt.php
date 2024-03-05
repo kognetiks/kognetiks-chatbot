@@ -3,21 +3,21 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     1.9.0
+ * Version:     1.9.1
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
- * License:     GPLv2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * License:     GPLv3 or later
+ * License URI: https://www.gnu.org/licenses/gpl-30.html
  *  
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU
- * General Public License version 2, as published by the Free Software Foundation. You may NOT assume
+ * General Public License version 3, as published by the Free Software Foundation. You may NOT assume
  * that you can use any other version of the GPL.
  * 
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Kognetiks Chatbot for WordPress. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
+ * along with Kognetiks Chatbot for WordPress. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
 */
 
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.0');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.1');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -117,6 +117,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php'; // Ver 1.6.7
@@ -182,6 +183,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $script_data_array;
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
@@ -208,6 +210,11 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
     $page_id = get_the_id();
+
+    // DIAG - Diagnostics - Ver 1.9.1
+    // back_trace( 'NOTICE', 'LINE 215 $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'LINE 216 $page_id: ' . $page_id);
+
     $script_data_array = array(
         'user_id' => $user_id,
         'page_id' => $page_id,
@@ -325,11 +332,14 @@ function chatbot_chatgpt_enqueue_scripts(): void {
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
 // Settings and Deactivation Links - Ver - 1.5.0
-function enqueue_jquery_ui(): void {
-    wp_enqueue_style('wp-jquery-ui-dialog');
-    wp_enqueue_script('jquery-ui-dialog');
+if (!function_exists('enqueue_jquery_ui')) {
+    function enqueue_jquery_ui(): void {
+        wp_enqueue_style('wp-jquery-ui-dialog');
+        wp_enqueue_script('jquery-ui-dialog');
+    }
+    add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 }
-add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
+
 
 // Schedule Cleanup of Expired Transients
 if (!wp_next_scheduled('chatbot_chatgpt_cleanup_event')) {
@@ -352,6 +362,9 @@ function chatbot_chatgpt_send_message(): void {
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
+    global $script_data_array;
 
     $api_key = '';
 
@@ -425,8 +438,8 @@ function chatbot_chatgpt_send_message(): void {
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
-        // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
+        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
+        if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
@@ -437,8 +450,8 @@ function chatbot_chatgpt_send_message(): void {
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
-        // Check if the GPT Assistant ID is blank, null, or "Please provide the Customer GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the Customer GPT Assistant Id.") {
+        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
+        if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             // DIAG - Diagnostics - Ver 1.8.1
@@ -492,6 +505,9 @@ function chatbot_chatgpt_send_message(): void {
             // back_trace( 'NOTICE', '$response ' . print_r($response,true));
             wp_send_json_error('Oops! Something went wrong on our end. Please try again later');
         } else {
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Check for links and images in response before returning');
+            $response = chatbot_chatgpt_check_for_links_and_images($response);
             // Return response
             wp_send_json_success($response);
         }
@@ -519,6 +535,10 @@ function chatbot_chatgpt_send_message(): void {
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Check for links and images in response before returning');
+        $response = chatbot_chatgpt_check_for_links_and_images($response);
 
         // Return response
         wp_send_json_success($response);
@@ -667,7 +687,7 @@ function enqueue_color_picker($hook_suffix): void {
 add_action('admin_enqueue_scripts', 'enqueue_color_picker');
 
 // Determine if the plugin is installed
-function get_plugin_version() {
+function kchat_get_plugin_version() {
 
     if (!function_exists('get_plugin_data')) {
         require_once(ABSPATH . 'wp-admin/includes/plugin.php');
