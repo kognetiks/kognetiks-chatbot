@@ -199,7 +199,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 1.9.2 =
-* TBD
+* Enabled mulitple file uploads to Assistants
 
 = 1.9.1 =
 * Knowledge Navigator now allows for including/excluding posts, pages, products and/or comments.
