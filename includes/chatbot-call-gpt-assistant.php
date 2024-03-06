@@ -535,7 +535,7 @@ function chatbot_chatgpt_retrieve_file_id() {
 
     // Join the file ids into a comma-separated string and return it
     // DIAG - Diagnostics - Ver 1.9.2
-    back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . print_r($file_ids, true));
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . print_r($file_ids, true));
 
     return $file_ids;
 

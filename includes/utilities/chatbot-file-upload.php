@@ -17,12 +17,8 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_upload_file_to_assistant(): array {
     
     // DIAG - Diagnostic - Ver 1.9.2
-    // error_reporting(E_ALL);
-    // ini_set('display_errors', 1);
-
-    // DIAG - Diagnostic - Ver 1.9.2
-    back_trace( 'NOTICE', 'Entering chatbot_chatgpt_upload_file_to_assistant()' );
-    back_trace( 'NOTICE', '$_FILES', print_r($_FILES, true));
+    // back_trace( 'NOTICE', 'Entering chatbot_chatgpt_upload_file_to_assistant()' );
+    // back_trace( 'NOTICE', '$_FILES', print_r($_FILES, true));
 
     global $session_id;
 
@@ -105,7 +101,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
                     set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $responseData['id'], $session_id, $i);
 
                     // DIAG - Diagnostic - Ver 1.9.2
-                    back_trace( 'NOTICE', 'asst_file_id ' . $responseData['id'] );
+                    // back_trace( 'NOTICE', 'asst_file_id ' . $responseData['id'] );
 
                     unlink($file_path); // Optionally delete the file after successful upload
 
@@ -117,7 +113,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
                     );
 
                     // DIAG - Diagnostic - Ver 1.9.2
-                    back_trace( 'NOTICE', 'responses', print_r($responses, true));
+                    // back_trace( 'NOTICE', 'responses', print_r($responses, true));
 
                 }
             }
@@ -126,7 +122,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
         }
 
         // DIAG - Diagnostic - Ver 1.9.2
-        back_trace( 'NOTICE', '$responses', print_r($responses, true));
+        // back_trace( 'NOTICE', '$responses', print_r($responses, true));
 
         return $responses;
 
