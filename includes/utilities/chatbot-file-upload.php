@@ -102,7 +102,11 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
                     );
                 } else {
                     // Assuming the API does not support batch uploads, each successful upload will be recorded individually
-                    set_chatbot_chatgpt_transients('chatbot_chatgpt_assistant_file_id', $responseData['id'], null, null, $session_id, null);
+                    set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $responseData['id'], $session_id, $i);
+
+                    // DIAG - Diagnostic - Ver 1.9.2
+                    back_trace( 'NOTICE', 'asst_file_id ' . $responseData['id'] );
+
                     unlink($file_path); // Optionally delete the file after successful upload
 
                     $responses[] = array(
@@ -260,7 +264,7 @@ function chatbot_chatgpt_upload_file_to_assistant_OLD(): array {
         // back_trace( 'SUCCESS', "File uploaded successfully" );
         // back_trace( 'SUCCESS', 'asst_file_id ' . $responseData['id'] );
         // Set the transient for the file id
-        set_chatbot_chatgpt_transients('chatbot_chatgpt_assistant_file_id', $responseData['id'], null, null, $session_id, null);
+        set_chatbot_chatgpt_transients('chatbot_chatgpt_assistant_file_id', $responseData['id'], $session_id);
 
         // Delete the file locally now that it has been uploaded to the Assistant
         unlink($file_path);

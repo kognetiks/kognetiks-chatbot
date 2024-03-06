@@ -56,6 +56,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     ];
 
     // Add the file reference if file_id is provided
+    // FIXME - ADD MULIPLE FILES HERE - Ver 1.9.2 - 2024 03 06
     if (!empty($file_id)) {
         // $data['file'] = $file_id;
         $data['file_ids'] = [$file_id];
@@ -378,6 +379,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $prompt = $message;
     
     // Fetch the file id - Ver 1.7.9
+    // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 1.9.2 - 2024 03 06
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 1.8.1
@@ -482,8 +484,133 @@ function fetchDataUsingCurl($url, $context) {
 
 }
 
+// Retrieve the first file id - Ver 1.9.2
+$file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+
+while (!empty($file_id)) {
+    // Delete the transient
+    // delete_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_id', $session_id, $counter);
+
+    // Delete the file
+    // deleteUploadedFile($file_id);
+
+    // Set a transient that expires in 2 hours
+    $timeFrameForDelete = time() + 2 * 60 * 60;
+    set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
+
+    // Set a cron job to delete the file in 1 hour 45 minutes
+    $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+    if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
+        wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
+    }
+
+    // Add the file id to the list
+    $file_ids[] = $file_id;
+
+    // Increment the counter
+    $counter++;
+
+    // Retrieve the next file id
+    $file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+}
+
+// Retrieve the file id - Ver 1.9.2
+function chatbot_chatgpt_retrieve_file_id_OLD_OLD() {
+    
+    global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+
+    $counter = 0;
+    $file_ids = [];
+
+    do {
+        // Retrieve the file ids
+        $new_file_ids = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+
+        // If the file ids are not an array, make it an array
+        if (!is_array($new_file_ids)) {
+            $new_file_ids = [$new_file_ids];
+        }
+
+        // If the file ids are empty, break the loop
+        if (empty($new_file_ids)) {
+            break;
+        }
+
+        foreach ($new_file_ids as $file_id) {
+            // Delete the transient
+            // delete_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_id', $session_id, $counter);
+
+            // Delete the file
+            // deleteUploadedFile($file_id);
+
+            // Set a transient that expires in 2 hours
+            $timeFrameForDelete = time() + 2 * 60 * 60;
+            set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
+
+            // Set a cron job to delete the file in 1 hour 45 minutes
+            $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+            if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
+                wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
+            }
+        }
+
+        // Add the new file ids to the list
+        $file_ids = array_merge($file_ids, $new_file_ids);
+
+        // Increment the counter
+        $counter++;
+
+    } while (!empty($new_file_ids));
+
+    // Join the file ids into a comma-separated string and return it
+    // DIAG - Diagnostics - Ver 1.9.2
+    back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . implode(',', $file_ids));
+
+    return implode(',', $file_ids);
+}
+
+// Retrieve the file id - Ver 1.9.2
+function chatbot_chatgpt_retrieve_file_id_OLD_1_9_1() {
+
+    // Retrieve the file ids
+    $file_ids = get_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_ids' );
+
+    // If the file ids are empty, return an empty string
+    if (empty($file_ids)) {
+        return '';
+    }
+
+    foreach ($file_ids as $file_id) {
+        // Delete the transient
+        // delete_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
+
+        // Delete the file
+        // deleteUploadedFile($file_id);
+
+        // Set a transient that expires in 2 hours
+        $timeFrameForDelete = time() + 2 * 60 * 60;
+        set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
+
+        // Set a cron job to delete the file in 1 hour 45 minutes
+        $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+        if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
+            wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
+        }
+    }
+
+    // Join the file ids into a comma-separated string and return it
+    // DIAG - Diagnostics - Ver 1.9.2
+    back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . implode(',', $file_ids));
+
+    return implode(',', $file_ids);
+}
+
 // Retrieve the file id - Ver 1.7.9
-function chatbot_chatgpt_retrieve_file_id() {
+function chatbot_chatgpt_retrieve_file_id_OLD() {
 
     // Retrieve the file
     $file_id = get_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id' );
