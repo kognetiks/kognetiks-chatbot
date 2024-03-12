@@ -43,6 +43,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'assistant' => 'original', // Default value
         'audience' => '', // If not passed then default value
         'prompt' => '', // If not passed then default value
+        'sequence' => '' // If not passed then default value
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -101,6 +102,38 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($_GET['chatbot_prompt']);
         // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
     }
+
+    // Check for KFlow parameters - Ver 1.9.2
+    $kflow_sequence_id = array_key_exists('sequence', $atts) ? sanitize_text_field($atts['sequence']) : '';
+    if (!empty($kflow_sequence_id)) {
+        back_trace( 'NOTICE', 'kflow_sequence_id: ' . $kflow_sequence_id);
+        // Check to see if KFlow is enabled
+        $kflow_enabled = esc_attr(get_option( 'kflow_flow_mode', false ));
+        back_trace( 'NOTICE', 'kflow_enabled: ' . $kflow_enabled);
+        if ( $kflow_enabled == true ) {
+            // If KFlow is enabled, then get the sequence ID and assemble the sequence, prompts, and template
+            $kflow_data = fetchAndOrganizeData($kflow_sequence_id);
+            if ( $kflow_data[$kflow_sequence_id]['SequenceStatus'] == 'active' ) {
+                // If the sequence is active, then proceed to assemble the sequence, prompts, and template
+                // Assemble the sequence, prompts, and template
+                $kflow_sequence = $kflow_data[$kflow_sequence_id];
+                $kflow_prompts = $kflow_data[$kflow_sequence_id]['Prompts'];
+                $kflow_template = $kflow_data[$kflow_sequence_id]['Templates'];
+            } else {
+                // If the sequence is not active, then do not proceed
+                back_trace( 'NOTICE', 'The sequence is not active');
+                $kflow_sequence = '';
+                $kflow_prompts = '';
+                $kflow_template = '';
+            }
+        } else {
+            // If KFlow is not enabled, then do not proceed
+            back_trace( 'NOTICE', 'KFlow is not enabled');
+            $kflow_sequence = '';
+            $kflow_prompts = '';
+            $kflow_template = '';
+        }
+    } 
 
     // DIAG - Diagnostics - Ver 1.9.0
     // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
