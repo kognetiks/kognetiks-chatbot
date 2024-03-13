@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Shortcode to display the chatbot conversation history for the logged in user
+// Shortcode to display the chatbot conversation history for the logged-in user
 // Usage: [chat_history] or [chatbot_conversation] or [chatbot_chatgpt_history]
 function interactive_chat_history() {
 

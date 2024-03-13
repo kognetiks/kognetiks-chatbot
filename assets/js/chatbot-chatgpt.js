@@ -353,6 +353,9 @@ jQuery(document).ready(function ($) {
         // ADDED TO VER 1.9.1 - 2023 03 03
         // textElement = $('<span></span>').html(message);
 
+        // DIAG - Diagnostics - Ver 1.9.2
+        // console.log('Chatbot: NOTICE: message: ' + message);
+
         // Convert HTML entities back to their original form
         var decodedMessage = $('<textarea/>').html(message).text();
 
@@ -492,13 +495,18 @@ jQuery(document).ready(function ($) {
                     botResponse.appendChild(linkElement);
                     botResponse.innerHTML += '.';
                     botResponse = botResponse.outerHTML;
-
-                    // Check for double asterisks suggesting a "bold" response
-                    // Check for linefeeds suggesting paragraphs response
-                    // botResponse = botResponse.replace(/\r\n/g, "<br>");
-                    botResponse = botResponse.replace(/\n/g, "<br>");
-                    botResponse = botResponse.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
                 }
+                // Moved this outside the check for URL - Ver 1.9.2
+                // Check for double asterisks suggesting a "bold" response
+                // Check for linefeeds suggesting paragraphs response
+                // botResponse = botResponse.replace(/\r\n/g, "<br>");
+                // botResponse = botResponse.replace(/\n/g, "<br>");
+                botResponse = botResponse.replace(/\r\n|\r|\n/g, "<br>");
+                // Replace Markdown **bold** with <b>...</b>
+                // botResponse = botResponse.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+                botResponse = botResponse.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+                // Replace Markdown ### headings with <h2>...</h2>
+                botResponse = botResponse.replace(/###\s(.+)/g, '<h3>$1</h3>');
             },
             error: function (jqXHR, status, error) {
                 if(status === "timeout") {
@@ -617,7 +625,7 @@ jQuery(document).ready(function ($) {
         let thread_id = php_vars.thread_id;
 
         // DIAG - Diagnostics - Ver 1.9.1
-        console.log('Chatbot: NOTICE: assistant_id: ' + assistant_id);
+        // console.log('Chatbot: NOTICE: assistant_id: ' + assistant_id);
     
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,

@@ -1,6 +1,6 @@
 === Kognetiks Chatbot for WordPress ===
 Contributors: Kognetiks
-Tags: chatbot, chatgpt, openai, ai, customer-support, conversational chat, assistants, custom GPTs
+Tags: chatbot, chatgpt, openai, ai, customer-support
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.3
@@ -200,6 +200,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 1.9.2 =
 * Enabled mulitple file uploads to Assistants
+* Added Conversation History shortcode [chat_history] to retrieve logged-in user's conversation history.
+* Chat history is retrieve for Logged-in users
 
 = 1.9.1 =
 * Knowledge Navigator now allows for including/excluding posts, pages, products and/or comments.
