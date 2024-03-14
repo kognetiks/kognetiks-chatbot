@@ -13,7 +13,8 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
+// function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
+function chatbot_chatgpt_shortcode( $atts ) {
 
     // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
@@ -51,7 +52,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 55 of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
@@ -163,10 +164,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     } 
 
     // DIAG - Diagnostics - Ver 1.9.0
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 167 of the function');
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_audience_choice: ' . $chatbot_chatgpt_audience_choice);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // Determine if the user is logged in
     $user_logged_in = is_user_logged_in();
@@ -226,7 +232,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 152 of the function');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 234 of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
