@@ -113,13 +113,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if (!empty($kflow_sequence_id)) {
     
         // DIAG - Diagnostics - Ver 1.9.2
-        back_trace( 'NOTICE', 'kflow_sequence_id: ' . $kflow_sequence_id);
+        // back_trace( 'NOTICE', 'kflow_sequence_id: ' . $kflow_sequence_id);
     
         // Check to see if KFlow is enabled
         $kflow_enabled = esc_attr(get_option( 'kflow_flow_mode', false ));
     
         // DIAG - Diagnostics - Ver 1.9.2
-        back_trace( 'NOTICE', 'kflow_enabled: ' . $kflow_enabled);
+        // back_trace( 'NOTICE', 'kflow_enabled: ' . $kflow_enabled);
     
         if ( $kflow_enabled == true ) {
             // If KFlow is enabled, then get the sequence ID and assemble the sequence, prompts, and template
@@ -144,7 +144,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
             } else {
                 // If the sequence is not active, then do not proceed
-                back_trace( 'NOTICE', 'The sequence is not active');
+                // back_trace( 'NOTICE', 'The sequence is not active');
                 $kflow_sequence = '';
                 $kflow_prompts = '';
                 $kflow_template = '';
@@ -153,7 +153,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         } else {
     
             // If KFlow is not enabled, then do not proceed
-            back_trace( 'NOTICE', 'KFlow is not enabled');
+            // back_trace( 'NOTICE', 'KFlow is not enabled');
             $kflow_sequence = '';
             $kflow_prompts = '';
             $kflow_template = '';

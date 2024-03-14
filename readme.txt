@@ -201,7 +201,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 = 1.9.2 =
 * Enabled mulitple file uploads to Assistants
 * Added Conversation History shortcode [chat_history] to retrieve logged-in user's conversation history.
-* Chat history is retrieve for Logged-in users
+* Chat history may be retrieved by Logged-in users.
+* Corrected problems with and improved the handling of HTML Markup in responses.
 
 = 1.9.1 =
 * Knowledge Navigator now allows for including/excluding posts, pages, products and/or comments.

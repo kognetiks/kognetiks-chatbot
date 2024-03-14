@@ -27,6 +27,20 @@ function fetchAndOrganizeData($sequenceID = null) {
 
     global $wpdb;
 
+    $tables = [
+        "{$wpdb->prefix}kognetiks_kflow_sequences",
+        "{$wpdb->prefix}kognetiks_kflow_steps",
+        "{$wpdb->prefix}kognetiks_kflow_prompts",
+        "{$wpdb->prefix}kognetiks_kflow_templates"
+    ];
+    
+    foreach ($tables as $table) {
+        if($wpdb->get_var("SHOW TABLES LIKE '$table'") != $table) {
+            // Table doesn't exist, handle it here
+            return;
+        }
+    }
+
     // Prepare the basic SQL query
     $sql = "SELECT
             seq.SequenceID,

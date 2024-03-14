@@ -421,6 +421,59 @@ jQuery(document).ready(function ($) {
         $('.typing-indicator').remove();
     }
 
+    // markdownToHtml - Ver 1.9.2
+    function markdownToHtml(markdown) {
+
+        // Escape HTML outside of code blocks
+        markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
+            return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
+        }).join('');
+    
+        // Headers
+        markdown = markdown.replace(/^#### (.*$)/gim, '<h4>$1</h4>')
+                           .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                           .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                           .replace(/^# (.*$)/gim, '<h1>$1</h1>');
+    
+        // Bold, Italic, Strikethrough
+        markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                           .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                           .replace(/\~\~(.*?)\~\~/g, '<del>$1</del>');
+    
+        // Multi-line code blocks
+        markdown = markdown.replace(/```([\s\S]*?)```/gm, '<pre><code>$1</code></pre>');
+    
+        // Inline code - after handling multi-line to prevent conflicts
+        markdown = markdown.replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+        // Images
+        markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">');
+    
+        // Links
+        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+    
+        // Lists - You would need to refine this for nested lists
+        markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
+                           .replace(/<\/li><li>/g, '</li>\n<li>')
+                           .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>')
+                           .replace(/<ul>\s*<li>/g, '<ul>\n<li>')
+                           .replace(/<\/li>\s*<\/ul>/g, '</li>\n</ul>');
+    
+        // Improved blockquote handling
+        markdown = markdown.replace(/^(>+\s?)(.*)$/gm, (match, p1, p2) => {
+            return `<blockquote>${p2}</blockquote>`;
+        });
+    
+        // Convert line breaks to <br>, except for code blocks
+        markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>)/g).map((chunk, index) => {
+            // Only convert newlines to <br> outside of code blocks and blockquotes
+            return index % 2 === 0 ? chunk.replace(/\n/g, '<br>') : chunk;
+        }).join('');
+    
+        return markdown.trim();
+    
+    }
+
     submitButton.on('click', function () {
         
         // showTypingIndicator();
@@ -471,42 +524,38 @@ jQuery(document).ready(function ($) {
                         }
                     }
                 }
-                // IDEA Check for a URL
-                if (botResponse.includes('[URL: ')) {
-                    // DIAG - Diagnostics - Ver 1.6.3
-                    // console.error('Chatbot: ERROR: URL found in bot response');
-                    link = '';
-                    urlRegex = /\[URL: (.*?)\]/g;
-                    match = botResponse.match(urlRegex);
-                    if (match && match.length > 0) {
-                        link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
-                        // DIAG - Diagnostics - Ver 1.6.3
-                        // console.log('Chatbot: NOTICE: link: ' + link);
-                    }
+                // IDEA Check for a URL - REMOVED Ver 1.9.2
+                // if (botResponse.includes('[URL: ')) {
+                //     // DIAG - Diagnostics - Ver 1.6.3
+                //     // console.error('Chatbot: ERROR: URL found in bot response');
+                //     link = '';
+                //     urlRegex = /\[URL: (.*?)\]/g;
+                //     match = botResponse.match(urlRegex);
+                //     if (match && match.length > 0) {
+                //         link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
+                //         // DIAG - Diagnostics - Ver 1.6.3
+                //         // console.log('Chatbot: NOTICE: link: ' + link);
+                //     }
 
-                    linkElement = document.createElement('a');
-                    linkElement.href = link;
-                    linkElement.textContent = 'here';
-                    text = botResponse.replace(urlRegex, '');
-                    textElement = document.createElement('span');
-                    textElement.textContent = text;
-                    botResponse = document.createElement('div');
-                    botResponse.appendChild(textElement);
-                    botResponse.appendChild(linkElement);
-                    botResponse.innerHTML += '.';
-                    botResponse = botResponse.outerHTML;
-                }
+                //     linkElement = document.createElement('a');
+                //     linkElement.href = link;
+                //     linkElement.textContent = 'here';
+                //     text = botResponse.replace(urlRegex, '');
+                //     textElement = document.createElement('span');
+                //     textElement.textContent = text;
+                //     botResponse = document.createElement('div');
+                //     botResponse.appendChild(textElement);
+                //     botResponse.appendChild(linkElement);
+                //     botResponse.innerHTML += '.';
+                //     botResponse = botResponse.outerHTML;
+                // }
                 // Moved this outside the check for URL - Ver 1.9.2
-                // Check for double asterisks suggesting a "bold" response
-                // Check for linefeeds suggesting paragraphs response
-                // botResponse = botResponse.replace(/\r\n/g, "<br>");
-                // botResponse = botResponse.replace(/\n/g, "<br>");
-                botResponse = botResponse.replace(/\r\n|\r|\n/g, "<br>");
-                // Replace Markdown **bold** with <b>...</b>
-                // botResponse = botResponse.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
-                botResponse = botResponse.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-                // Replace Markdown ### headings with <h2>...</h2>
-                botResponse = botResponse.replace(/###\s(.+)/g, '<h3>$1</h3>');
+                // botResponse = botResponse.replace(/\r\n|\r|\n/g, "<br>");
+                // botResponse = botResponse.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+                // botResponse = botResponse.replace(/###\s(.+)/g, '<h3>$1</h3>');
+                
+                // markdownToHtml - Ver 1.9.2
+                botResponse = markdownToHtml(botResponse);
             },
             error: function (jqXHR, status, error) {
                 if(status === "timeout") {
