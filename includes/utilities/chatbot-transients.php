@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set the transients based on the type - Ver 1.8.1
-function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null, $thread_id = null): void {
+function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null, $thread_id = null ): void {
 
     global $session_id;
     global $user_id;
@@ -142,10 +142,8 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
    
 }
 
-
-
 // Delete the transients - Ver 1.7.9
-function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page_id = null, $session_id = null): void {
+function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page_id = null, $session_id = null ): void {
 
     // FIXME - DECIDE - Should we delete the transients
 
@@ -196,7 +194,7 @@ function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $p
         $assistant_transient_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
         delete_transient($assistant_transient_key);
     } elseif ( $transient_type == 'chatbot_chatgpt_file_id' ) {
-        $file_transient_key = 'chatbot_chatgpt_file_id_' . $session_id;
+        $file_transient_key = 'chatbot_chatgpt_file_id_' . $session_id . '_' . $file_no;
         delete_transient($file_transient_key);
     } elseif ( $transient_type == 'chatbot_chatgpt_assistant_file_id') {
         $asst_file_transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id;

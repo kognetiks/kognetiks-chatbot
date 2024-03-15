@@ -13,7 +13,8 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
+// function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
+function chatbot_chatgpt_shortcode( $atts ) {
 
     // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
@@ -27,6 +28,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
+
+    // KFlow - Ver 1.9.2
+    global $kflow_data;
+
 
     // Script Attributes
     $script_data_array = array(
@@ -43,10 +48,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'assistant' => 'original', // Default value
         'audience' => '', // If not passed then default value
         'prompt' => '', // If not passed then default value
+        'sequence' => '' // If not passed then default value
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 55 of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
@@ -102,11 +108,71 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
     }
 
+    // Check for KFlow parameters - Ver 1.9.2
+    $kflow_sequence_id = array_key_exists('sequence', $atts) ? sanitize_text_field($atts['sequence']) : '';
+
+    if (!empty($kflow_sequence_id)) {
+    
+        // DIAG - Diagnostics - Ver 1.9.2
+        // back_trace( 'NOTICE', 'kflow_sequence_id: ' . $kflow_sequence_id);
+    
+        // Check to see if KFlow is enabled
+        $kflow_enabled = esc_attr(get_option( 'kflow_flow_mode', false ));
+    
+        // DIAG - Diagnostics - Ver 1.9.2
+        // back_trace( 'NOTICE', 'kflow_enabled: ' . $kflow_enabled);
+    
+        if ( $kflow_enabled == true ) {
+            // If KFlow is enabled, then get the sequence ID and assemble the sequence, prompts, and template
+            $kflow_data = fetchAndOrganizeData($kflow_sequence_id);
+    
+            if ( $kflow_data[$kflow_sequence_id]['SequenceStatus'] == 'active' ) {
+                // If the sequence is active, then proceed to assemble the sequence, prompts, and template
+                // Assemble the sequence, prompts, and template
+                $kflow_sequence = $kflow_data[$kflow_sequence_id];
+                $kflow_prompts = $kflow_data[$kflow_sequence_id]['Prompts'];
+                $kflow_steps = $kflow_data[$kflow_sequence_id]['Steps'];
+                $kflow_template = $kflow_data[$kflow_sequence_id]['Templates'];
+
+                // Pass the values to the JavaScript
+                wp_localize_script('chatbot-kflow-localize', 'kflow_data', array(
+                    'kflow_enabled' => $kflow_enabled,
+                    'kflow_sequence' => $kflow_sequence,
+                    'kflow_prompts' => $kflow_prompts,
+                    'kflow_steps' => $kflow_steps,
+                    'kflow_template' => $kflow_template
+                ));
+
+            } else {
+                // If the sequence is not active, then do not proceed
+                // back_trace( 'NOTICE', 'The sequence is not active');
+                $kflow_sequence = '';
+                $kflow_prompts = '';
+                $kflow_template = '';
+            }
+    
+        } else {
+    
+            // If KFlow is not enabled, then do not proceed
+            // back_trace( 'NOTICE', 'KFlow is not enabled');
+            $kflow_sequence = '';
+            $kflow_prompts = '';
+            $kflow_template = '';
+    
+        }
+    
+    } 
+
     // DIAG - Diagnostics - Ver 1.9.0
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 167 of the function');
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_audience_choice: ' . $chatbot_chatgpt_audience_choice);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // Determine if the user is logged in
     $user_logged_in = is_user_logged_in();
@@ -166,7 +232,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 152 of the function');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 234 of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
@@ -258,7 +324,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                 </button>
                 <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
-                    <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                    <!-- <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" /> -->
+                    <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                     <button id="chatbot-chatgpt-upload-file">
                         <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                     </button>
@@ -323,7 +390,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                         </button>
                         <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
-                            <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" />
+                            <!-- <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" /> -->
+                            <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                             <button id="chatbot-chatgpt-upload-file">
                                 <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                             </button>

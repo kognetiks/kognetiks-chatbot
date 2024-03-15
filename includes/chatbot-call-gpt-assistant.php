@@ -56,9 +56,12 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     ];
 
     // Add the file reference if file_id is provided
+    // FIXME - ADD MULIPLE FILES HERE - Ver 1.9.2 - 2024 03 06
     if (!empty($file_id)) {
-        // $data['file'] = $file_id;
-        $data['file_ids'] = [$file_id];
+        // PRIOR TO VER 1.9.2
+        // $data['file_ids'] = [$file_id];
+        // VER 1.9.2
+        $data['file_ids'] = $file_id;
     }
 
     // DIAG - Diagnostics
@@ -378,7 +381,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $prompt = $message;
     
     // Fetch the file id - Ver 1.7.9
-    $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
+    // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 1.9.2 - 2024 03 06
+    $file_id[] = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 1.8.1
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
@@ -482,44 +486,62 @@ function fetchDataUsingCurl($url, $context) {
 
 }
 
-// Retrieve the file id - Ver 1.7.9
+// Retrieve the first file id - Ver 1.9.2
 function chatbot_chatgpt_retrieve_file_id() {
 
-    // Retrieve the file
-    $file_id = get_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id' );
+    global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
 
-    // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_assistant_file_id: ' . $file_id);
+    $counter = 0;
+    $file_ids = [];
 
-    // If the file id is empty, return an empty string
-    if (empty($file_id)) {
-        return '';
+    $file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+
+    while (!empty($file_id)) {
+        // Delete the transient
+        // delete_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_id', $session_id, $counter);
+
+        // Delete the file
+        // deleteUploadedFile($file_id);
+
+        // Set a transient that expires in 2 hours
+        $timeFrameForDelete = time() + 2 * 60 * 60;
+        set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
+
+        // Set a cron job to delete the file in 1 hour 45 minutes
+        $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+        if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
+            wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
+        }
+
+        // Add the file id to the list
+        $file_ids[] = $file_id;
+
+        // Increment the counter
+        $counter++;
+
+        // Retrieve the next file id
+        $file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
     }
 
-    // Delete the transient
-    // FIXME - DECIDE - SHOULD WE DELETE THE TRANSIENT OR JUST LET IT EXPIRE
-    // delete_chatbot_chatgpt_transients( 'chatbot_chatgpt_assistant_file_id', $user_id, $page_id);
+    // Join the file ids into a comma-separated string and return it
+    // DIAG - Diagnostics - Ver 1.9.2
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . implode(',', $file_ids));
 
-    // Delete the file
-    // deleteUploadedFile($file_id);
+    // return implode(',', $file_ids);
 
-    // Set a transient that expires in 2 hours
-    $timeFrameForDelete = time() + 2 * 60 * 60;
-    // FIXME - SHORTEST TIME FRAME FOR DELETE
-    $timeFrameForDelete = time() + 60 + 60;
-    set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
+    // Join the file ids into a comma-separated string and return it
+    // DIAG - Diagnostics - Ver 1.9.2
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . print_r($file_ids, true));
 
-    // Set a cron job to delete the file in 1 hour 45 minutes
-    $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
-    // FIXME - SHORTEST TIME FRAME FOR DELETE
-    $shorterTimeFrameForDelete = time() + 45 + 60;
-    if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
-        wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
-    }
-
-    return $file_id;
+    return $file_ids;
 
 }
+
+
 
 // Cleanup in Aisle 4 on OpenAI - Ver 1.7.9
 function deleteUploadedFile($file_id) {

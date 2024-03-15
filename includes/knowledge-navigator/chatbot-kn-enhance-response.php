@@ -137,7 +137,9 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
             } elseif ('Custom' == $chatbot_chatgpt_suppress_learnings) {
                 $enhanced_response .= "\n\n" . $chatbot_chatgpt_custom_learnings_message . " ";
             }
-            $enhanced_response .= "[URL: " . $highest_score_url . "]";
+            // Aligned URL with markdown - Ver 1.9.2
+            // $enhanced_response .= "[URL: " . $highest_score_url . "]";
+            $enhanced_response .= "[here](" . $highest_score_url . ")";
         }
     } else {
         // If no match is found, return a generic response
@@ -152,10 +154,11 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // }
     }
    
+    // REMOVED IN VER 1.9.2
     // Strip out any <strong></strong> tags in $response_body['choices'][0]['message']['content'] - Ver 1.6.3
-    $enhanced_response = preg_replace('/<strong>(.*?)<\/strong>/', '$1', $enhanced_response);
-    // Strip out any <b></b> tags in $response_body['choices'][0]['message']['content'] - Ver 1.6.3
-    $enhanced_response = preg_replace('/<b>(.*?)<\/b>/', '$1', $enhanced_response);
+    // $enhanced_response = preg_replace('/<strong>(.*?)<\/strong>/', '$1', $enhanced_response);
+    // // Strip out any <b></b> tags in $response_body['choices'][0]['message']['content'] - Ver 1.6.3
+    // $enhanced_response = preg_replace('/<b>(.*?)<\/b>/', '$1', $enhanced_response);
 
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', '$match_found: ' . $match_found);
