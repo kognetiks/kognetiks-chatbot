@@ -835,6 +835,17 @@ jQuery(document).ready(function ($) {
    
     // Load conversation from local storage if available - Ver 1.2.0
     function loadConversation() {
+
+        // Check if there's been a change in the page and therefore the conversation - Ver 1.9.3
+        $chatbotChatGPTLoadPriorConversation = localStorage.getItem('chatbot_chatgpt_load_prior_conversation');
+        if ($chatbotChatGPTLoadPriorConversation === 'No') {
+            // DIAG - Diagnostics - Ver 1.9.3
+            console.log('Chatbot: NOTICE: loadConversation - No');
+            localStorage.setItem('chatbot_chatgpt_load_prior_conversation', 'Yes');
+            // Clear the conversation from local storage
+            sessionStorage.removeItem('chatbot_chatgpt_conversation');
+        }
+
         storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
 

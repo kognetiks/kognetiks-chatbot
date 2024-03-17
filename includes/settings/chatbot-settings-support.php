@@ -98,12 +98,22 @@ function chatbot_chatgpt_support_section_callback() {
         </ul>
         <p>Use the following format to invoke the primary or alternate assistant:</p>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li><b>&#91;chatbot&#93;</b> - Default values, floating style, uses OpenAI's ChatGPT</li>
-            <li><b>&#91;chatbot style="floating"&#93;</b> - Floating style, uses OpenAI's ChatGPT</li>
-            <li><b>&#91;chatbot style="embedded"&#93;</b> - Embedded style, uses OpenAI's ChatGPT</li>
-            <li><b>&#91;chatbot style="floating" assistant="primary"&#93;</b> - Floating style, GPT Assistant as set in Primary setting</li>
-            <li><b>&#91;chatbot style="embedded" assistant="alternate"&#93;</b> - Embedded style, GPT Assistant as set in Alternate setting</li>
+            <li>&#91;chatbot&#93; - Default values, floating style, uses OpenAI's ChatGPT</li>
+            <li>&#91;chatbot style="floating"&#93; - Floating style, uses OpenAI's ChatGPT</li>
+            <li>&#91;chatbot style="embedded"&#93; - Embedded style, uses OpenAI's ChatGPT</li>
+            <li>&#91;chatbot style="floating" assistant="primary"&#93; - Floating style, GPT Assistant as set in Primary setting</li>
+            <li>&#91;chatbot style="embedded" assistant="alternate"&#93; - Embedded style, GPT Assistant as set in Alternate setting</li>
+            <li>&#91;chatbot style="floating" assistant="asst_...123"&#93; - Floating style, GPT Assistant specified</li>
+            <li>&#91;chatbot style="embedded" assistant="asst_...456"&#93; - Embedded style, GPT Assistant specified</li>
         </ul>
+    </div>
+    <hr style="border-top: 2px solid black;">
+    <div id=conversation-history>
+        <h2>Conversation History</h2>
+        <p>You can now add a shortcode on your site to retrieve the logged in user’s conversation history.</p>
+        <p>Use the following format to invoke the conversation history anywhere you can include a shortcode:</p>
+        <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
+            <li>&#91;chatbot_chatgpt_history&#93;</li>
     </div>
     <hr style="border-top: 2px solid black;">
     <div id="api-key-safety-and-security">

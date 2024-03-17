@@ -32,6 +32,16 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // KFlow - Ver 1.9.2
     global $kflow_data;
 
+    // DIAG - Diagnostics - Ver 1.9.3
+    back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    // back_trace( 'NOTICE', 'Shortcode Attributes: ' . print_r($atts, true));
+    back_trace( 'NOTICE', 'get_the_id(): ' . get_the_id());
 
     // Script Attributes
     $script_data_array = array(
@@ -200,7 +210,29 @@ function chatbot_chatgpt_shortcode( $atts ) {
         // Removed - Ver 1.9.0
         // $user_id = $session_id; // Get the session ID if $user_id is not set
     }
+
+    // // Track pages visited - Ver 1.9.3
+    // back_trace( 'NOTICE', 'LINE 214 $page_id: ' . $page_id);
+
+    // if (!isset($_SESSION['chatbot_chatgpt_visited_pages'])) {
+    //     // If the session variable doesn't exist, create it as an array
+    //     $_SESSION['chatbot_chatgpt_visited_pages'] = array();
+    // }
+
+    // // Get the last page ID visited, if any
+    // $last_page_id = end($_SESSION['chatbot_chatgpt_visited_pages']);
+
+    // // If the current page ID is different from the last visited page ID, add it to the array
+    // if ($last_page_id !== $page_id) {
+    //     $_SESSION['chatbot_chatgpt_visited_pages'][] = $page_id;
+    //     back_trace( 'NOTICE', 'LINE 227 $_SESSION[chatbot_chatgpt_visited_pages]: ' . print_r($_SESSION['chatbot_chatgpt_visited_pages'], true));
+    //     // DON'T LOAD PRIOR CONVERSATION CONTEXT - Ver 1.9.3
+
+    // }
+
     $page_id = get_the_id(); // Get current page ID
+    back_trace( 'NOTICE', 'LINE 216 $page_id: ' . $page_id);
+
     if (empty($page_id)) {
         // $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
         // CHANGED - Ver 1.9.1 - 2024 03 05
@@ -222,6 +254,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
 
+    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
     // DUPLICATE ADDED THIS HERE - VER 1.9.1
     $script_data_array = array(
         'user_id' => $user_id,
@@ -230,6 +263,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id
     );
+    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 234 of the function');
@@ -477,12 +511,59 @@ add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
 // Function to output the script
 function chatbot_chatgpt_shortcode_enqueue_script() {
 
+    // Added these lines to get the global variables - Ver 1.9.3 - 2024 03 16
+    global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
+    global $script_data_array;
+
+    // KFlow - Ver 1.9.2
+    global $kflow_data;
+
+    // These were already here - Ver 1.9.3 - 2024 03 16
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
 
     // Check if the variables are set and not empty
     $style = $chatbot_chatgpt_display_style ?? '';
     $assistant = $chatbot_chatgpt_assistant_alias ?? '';
+
+    // Track pages visited - Ver 1.9.3
+    back_trace( 'NOTICE', 'LINE 536 $assistant: ' . $assistant);
+
+    if (!isset($_SESSION['assistant_history'])) {
+        // If the session variable doesn't exist, create it as an array
+        $_SESSION['assistant_history'] = array();
+    }
+
+    // Get the last page ID visited, if any
+    $last_assistant_history = end($_SESSION['assistant_history']);
+
+    // If the current page ID is different from the last visited page ID, add it to the array
+    if ($last_assistant_history !== $assistant) {
+        $_SESSION['assistant_history'][] = $assistant;
+        back_trace( 'NOTICE', 'LINE 227 $_SESSION[assistant_history]: ' . print_r($_SESSION['assistant_history'], true));
+        // DON'T LOAD PRIOR CONVERSATION CONTEXT - Ver 1.9.3
+        $chatbot_chatgpt_load_prior_conversation = 'Nes';
+    } else {
+        // LOAD PRIOR CONVERSATION CONTEXT - Ver 1.9.3
+        $chatbot_chatgpt_load_prior_conversation = 'Yes';
+    }
+
+    // DIAG - Diagnostics - Ver 1.9.3
+    back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode_enqueue_script - at the beginning of the function');
+    back_trace( 'NOTICE', 'get_the_id(): ' . get_the_id() );
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    back_trace( 'NOTICE', '$chatbot_chatgpt_load_prior_conversation: ' . $chatbot_chatgpt_load_prior_conversation);
 
     ?>
     <script>
@@ -493,6 +574,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
         if ('<?php echo $assistant; ?>' !== '') {
             localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $assistant; ?>');
         }
+        localStorage.setItem('chatbot_chatgpt_load_prior_conversation', '<?php echo $chatbot_chatgpt_load_prior_conversation; ?>');
     </script>
     <?php
 
