@@ -173,7 +173,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 	if (isset($enhanced_response) && !empty($enhanced_response)) {
 		// Handle the response from the chat engine
 		// Context History - Ver 1.6.1
-		addEntry('chatbot_chatgpt_context_history', $enhanced_response);
+		// addEntry('chatbot_chatgpt_context_history', $enhanced_response);
 		return $enhanced_response;
 	} else {
 		// Handle any errors that are returned from the chat engine

@@ -589,6 +589,16 @@ register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
 function addEntry($transient_name, $newEntry): void {
+
+    // If $newEntry contains "Conversation cleared", clear the transient - Ver 1.9.3
+    if (strpos($newEntry, 'Conversation cleared') !== false) {
+        back_trace( 'NOTICE', '$newEntry contains "Conversation cleared"');
+        delete_transient($transient_name);
+        return;
+    } else {
+        back_trace( 'NOTICE', '$newEntry does not contain "Conversation cleared"');
+    }
+
     $context_history = get_transient($transient_name);
     if (!$context_history) {
         $context_history = [];
