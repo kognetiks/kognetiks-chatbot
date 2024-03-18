@@ -491,7 +491,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     $filename = $t_file_name . '-' . date('Y-m-d') . '.csv';
     // Replace spaces with - in the filename
     $filename = str_replace(' ', '-', $filename);
-    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '../../results/';
+    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
 
     // Create results directory if it doesn't exist
     if (!file_exists($results_dir_path)) {
