@@ -49,6 +49,14 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
         'Authorization: Bearer ' . $api_key
     ];
 
+    // DIAG - Diagnostics - Ver 1.9.3
+    back_trace( 'NOTICE', '$url: ' . $url);
+    back_trace( 'NOTICE', '$headers: ' . print_r($headers, true));
+    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', '$prompt: ' . $prompt);
+    back_trace( 'NOTICE', '$context: ' . $context);
+    back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
+
     // Set up the data payload
     $data = [
         'role' => 'user',
@@ -289,14 +297,17 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $thread_id;
     global $assistant_id;
     global $script_data_array;
+    global $additional_instructions;
 
     // DIAG - Diagnostics - Ver 1.8.6
     back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$message: ' . $message);
+    back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
@@ -336,7 +347,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         'page_id' => $page_id,
         'session_id' => $session_id,
         'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id
+        'assistant_id' => $assistant_id,
+        'additional_instructions' => $additional_instructions
     );
 
     // Step 1: Create an Assistant
@@ -378,7 +390,15 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // Step 3: Add a Message to a Thread
     // back_trace( 'NOTICE', 'Step 3: Add a Message to a Thread');
-    $prompt = $message;
+    // Add additional instructions to the prompt - Ver 1.9.3
+    if (empty($additional_instructions)) {
+        $prompt = $message;
+        back_trace ('NOTICE', 'No additional instructions provided: ' . $prompt);
+    } else {
+        $prompt = $additional_instructions . ' ' . $message;
+        back_trace ('NOTICE', 'Additional instructions provided: ' . $prompt);
+    }
+    // $prompt = $message;
     
     // Fetch the file id - Ver 1.7.9
     // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 1.9.2 - 2024 03 06

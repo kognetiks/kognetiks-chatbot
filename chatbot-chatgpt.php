@@ -186,6 +186,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     global $thread_id;
     global $assistant_id;
     global $script_data_array;
+    global $additional_instructions;
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
@@ -222,7 +223,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'page_id' => $page_id,
         'session_id' => $session_id,
         'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id
+        'assistant_id' => $assistant_id,
+        'additional_instructions' => $additional_instructions
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -231,6 +233,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     
     // Defaults for Ver 1.6.1
     $defaults = array(
@@ -367,6 +370,7 @@ function chatbot_chatgpt_send_message(): void {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
+    global $additional_instructions;
 
     $api_key = '';
 
@@ -437,6 +441,7 @@ function chatbot_chatgpt_send_message(): void {
         // back_trace( 'NOTICE' , 'Using Original GPT Assistant ID');
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions'), '');
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
@@ -449,6 +454,7 @@ function chatbot_chatgpt_send_message(): void {
         }
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate'), '');
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);

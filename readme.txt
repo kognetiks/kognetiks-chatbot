@@ -199,7 +199,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 1.9.3 =
-* TBD
+* Additional instructions can be included to send with user prompts
+* See Settings > GPT Assistants > Assistant Insructions and Alternate Assistant Instructions
 
 = 1.9.2 =
 * Enabled mulitple file uploads to Assistants

@@ -24,6 +24,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
+    global $additional_instructions;
 
     // KFlow - Ver 1.9.2
     global $kflow_data;
@@ -45,7 +46,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'page_id' => $page_id,
         'session_id' => $session_id,
         'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id
+        'assistant_id' => $assistant_id,
+        'instructions' => $additional_instructions
     );
 
     // Shortcode Attributes
@@ -54,7 +56,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'assistant' => 'original', // Default value
         'audience' => '', // If not passed then default value
         'prompt' => '', // If not passed then default value
-        'sequence' => '' // If not passed then default value
+        'sequence' => '', // If not passed then default value
+        'instructions' => '' // If not passed then default value
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -219,10 +222,13 @@ function chatbot_chatgpt_shortcode( $atts ) {
 
     if ( $chatbot_chatgpt_assistant_alias == 'original' ) {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', ''));
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_additional_instructions', ''));
     } elseif ( $chatbot_chatgpt_assistant_alias == 'alternate' ) {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate', ''));
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_additional_instructions_alternate', ''));
     } else {
         // Do nothing as either the assistant_id is set to the GPT Assistant ID or it is not set at all
+        $additional_instructions = array_key_exists('instructions', $atts) ? sanitize_text_field($atts['instructions']) : '';
     }
 
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
@@ -235,7 +241,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'page_id' => $page_id,
         'session_id' => $session_id,
         'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id
+        'assistant_id' => $assistant_id,
+        'instructions' => $additional_instructions
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -480,6 +487,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
+    global $additional_instructions;
 
     // KFlow - Ver 1.9.2
     global $kflow_data;
