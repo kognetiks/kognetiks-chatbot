@@ -81,7 +81,7 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
         'additional_instructions' => $additional_instructions
     );
     
-    // if $user_id is empty or zero then set it to $session_id
+    // If $user_id is empty or zero then set it to $session_id
     if (empty($user_id) || $user_id == 0) {
         $user_id = $session_id;
     }

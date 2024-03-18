@@ -52,6 +52,8 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
         // back_trace( 'NOTICE', '$session_id: ' . $session_id);
         // Removed - Ver 1.9.0
         // $user_id = $session_id;
+        // Add back - Ver 1.9.3 - 2024 03 18
+        $user_id = $_POST['user_id'];
     }
 
     if ( $page_id !== '') {
