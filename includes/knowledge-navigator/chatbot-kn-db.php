@@ -112,7 +112,7 @@ function output_results() {
     // back_trace( 'NOTICE', 'ENTER: output_results()');
 
     // Generate the directory path
-    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . 'results/';
+    $results_dir_path = dirname(plugin_dir_path(__FILE__)) . '../../results/';
 
     // Create the directory if it doesn't exist
     if (!file_exists($results_dir_path)) {
