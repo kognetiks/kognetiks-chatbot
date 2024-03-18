@@ -274,6 +274,8 @@ jQuery(document).ready(function ($) {
         // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
         localStorage.removeItem('chatbot_chatgpt_conversation');
 
+        // console.log('Chatbot: NOTICE: isFirstTime: ' + isFirstTime);
+
         if (isFirstTime) {
             // DIAG - Logging for Diagnostics
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
@@ -344,17 +346,6 @@ jQuery(document).ready(function ($) {
     function appendMessage(message, sender, cssClass) {
 
         messageElement = $('<div></div>').addClass('chat-message');
-        // Use HTML for the response so that links are clickable - Ver 1.6.3
-        // textElement = $('<span></span>').html(message);
-        // Fix for XSS vulnerability - Ver 1.8.1
-        // REMOVED FROM VER 1.9.1 - 2023 03 03
-        // let sanitizedMessage = DOMPurify.sanitize(message);
-        // textElement = $('<span></span>').html(sanitizedMessage);
-        // ADDED TO VER 1.9.1 - 2023 03 03
-        // textElement = $('<span></span>').html(message);
-
-        // DIAG - Diagnostics - Ver 1.9.2
-        // console.log('Chatbot: NOTICE: message: ' + message);
 
         // Convert HTML entities back to their original form
         var decodedMessage = $('<textarea/>').html(message).text();
@@ -402,7 +393,15 @@ jQuery(document).ready(function ($) {
         // window.scrollTo(0, document.body.scrollHeight);
 
         // Save the conversation locally between bot sessions - Ver 1.2.0
-        sessionStorage.setItem('chatbot_chatgpt_conversation', conversation.html());
+        // if message starts with "Conversation Clearer" then clear the conversation - Ver 1.9.3
+        if (message.startsWith('Conversation cleared')) {
+            // Clear the conversation from sessionStorage
+            // console.log('Chatbot: NOTICE: Clearing the conversation');
+            sessionStorage.removeItem('chatbot_chatgpt_conversation');
+        } else {
+            // console.log('Chatbot: NOTICE: Saving the conversation');
+            sessionStorage.setItem('chatbot_chatgpt_conversation', conversation.html());
+        }
 
     }
 
@@ -524,36 +523,6 @@ jQuery(document).ready(function ($) {
                         }
                     }
                 }
-                // IDEA Check for a URL - REMOVED Ver 1.9.2
-                // if (botResponse.includes('[URL: ')) {
-                //     // DIAG - Diagnostics - Ver 1.6.3
-                //     // console.error('Chatbot: ERROR: URL found in bot response');
-                //     link = '';
-                //     urlRegex = /\[URL: (.*?)\]/g;
-                //     match = botResponse.match(urlRegex);
-                //     if (match && match.length > 0) {
-                //         link = match[0].replace(/\[URL: /, '').replace(/\]/g, '');
-                //         // DIAG - Diagnostics - Ver 1.6.3
-                //         // console.log('Chatbot: NOTICE: link: ' + link);
-                //     }
-
-                //     linkElement = document.createElement('a');
-                //     linkElement.href = link;
-                //     linkElement.textContent = 'here';
-                //     text = botResponse.replace(urlRegex, '');
-                //     textElement = document.createElement('span');
-                //     textElement.textContent = text;
-                //     botResponse = document.createElement('div');
-                //     botResponse.appendChild(textElement);
-                //     botResponse.appendChild(linkElement);
-                //     botResponse.innerHTML += '.';
-                //     botResponse = botResponse.outerHTML;
-                // }
-                // Moved this outside the check for URL - Ver 1.9.2
-                // botResponse = botResponse.replace(/\r\n|\r|\n/g, "<br>");
-                // botResponse = botResponse.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-                // botResponse = botResponse.replace(/###\s(.+)/g, '<h3>$1</h3>');
-                
                 // markdownToHtml - Ver 1.9.2
                 botResponse = markdownToHtml(botResponse);
             },
@@ -693,10 +662,13 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                sessionStorage.setItem('chatbot_chatgpt_conversation', ''); // Clear the conversation from sessionStorage
+                // sessionStorage.setItem('chatbot_chatgpt_conversation', ''); // Clear the conversation from sessionStorage
+                sessionStorage.removeItem('chatbot_chatgpt_conversation'); // Clear the last response from sessionStorage
                 // DIAG - Log the response
                 // console.log('Success:', response.data);
                 appendMessage( response.data, 'bot');
+                // Force a page reload
+                // location.reload();
             },
             error: function(jqXHR, status, error) {
                 if(status === "timeout") {
@@ -742,6 +714,7 @@ jQuery(document).ready(function ($) {
         chatGptChatBot.show();
         chatGptOpenButton.hide();
         localStorage.setItem('chatbot_chatgpt_start_status', 'open');
+        // Removed in Ver 1.9.3
         loadConversation();
         scrollToBottom();
     }
@@ -815,6 +788,7 @@ jQuery(document).ready(function ($) {
             chatGptChatBot.show();
             chatGptOpenButton.hide();
             // Load the conversation if the chatbot is open on page load
+            // Removed in Ver 1.9.3
             loadConversation();
             scrollToBottom();
         }
@@ -835,7 +809,11 @@ jQuery(document).ready(function ($) {
    
     // Load conversation from local storage if available - Ver 1.2.0
     function loadConversation() {
-        storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
+
+        // Removed in Ver 1.9.3
+        // storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
+        // Reset the conversation - Added in Ver 1.9.3
+        storedConversation = '';
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
 
         // FIXME - IS THIS USED ANYWHERE ??? - Ver 1.8.9

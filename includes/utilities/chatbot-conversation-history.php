@@ -1,9 +1,9 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Chatbot Converation History
+ * Kognetiks Chatbot for WordPress - Chatbot Conversation History
  *
  * This file contains the code for table actions for reporting
- * to display the chatbot converation on a page on the website.
+ * to display the chatbot conversation on a page on the website.
  *
  * @package chatbot-chatgpt
  */

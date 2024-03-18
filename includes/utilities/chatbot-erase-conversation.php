@@ -52,6 +52,8 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
         // back_trace( 'NOTICE', '$session_id: ' . $session_id);
         // Removed - Ver 1.9.0
         // $user_id = $session_id;
+        // Add back - Ver 1.9.3 - 2024 03 18
+        $user_id = $_POST['user_id'];
     }
 
     if ( $page_id !== '') {
@@ -90,6 +92,7 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
         // delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id, $session_id);
         // Delete the threads
         delete_chatbot_chatgpt_threads($user_id, $page_id);
+        delete_any_file_transients($session_id);
         wp_send_json_success('Conversation cleared - Assistant.');
     }
 
@@ -103,4 +106,12 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
 
     wp_send_json_error('Conversation not cleared.');
 
+}
+
+// Delete any file transients - Ver 1.9.3
+// THIS IS VERY AGGRESSIVE - USE WITH CAUTION
+function delete_any_file_transients($session_id): void {
+    global $wpdb;
+    $sql = "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_chatbot_chatgpt_file_id_$session_id%'";
+    $wpdb->query($sql);
 }

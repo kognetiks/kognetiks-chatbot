@@ -184,6 +184,13 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
         return;
     }
 
+        // Belt & Suspenders - Ver 1.9.3 - 20224 03 18
+    // Cannot have a partial user_id based on the number value of the session_id - it trims it
+    // 9ae6a5ebfacc3df8015a42d01bb25fbe becomes 9 - UGH!
+    if ( $user_id == $session_id ) {
+        $user_id = 0;
+    }
+
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
     // Prepare and execute the SQL statement

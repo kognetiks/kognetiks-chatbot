@@ -91,7 +91,9 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allow_file_uploads'); // Ver 1.7.6
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id'); // Ver 1.6.7
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions'); // Ver 1.9.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions_alternate'); // Alternate Assistant - Ver 1.9.3
 
     add_settings_section(
         'chatbot_chatgpt_custom_gpts_section',
@@ -127,11 +129,27 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_custom_gpts_section'
     );
 
+    add_settings_field(
+        'chatbot_chatgpt_assistant_instructions',
+        'Assistant Instructions',
+        'chatbot_chatgpt_assistant_instructions_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
     // CustomGPT Assistant Id Alternate - Ver 1.7.2
     add_settings_field(
         'chatbot_chatgpt_assistant_id_alternate',
         'Alternate GPT Assistant Id',
         'chatbot_chatgpt_assistant_id_alternate_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_assistant_instructions_alternate',
+        'Alternate Assistant Instructions',
+        'chatbot_chatgpt_assistant_instructions_alternate_callback',
         'chatbot_chatgpt_custom_gpts',
         'chatbot_chatgpt_custom_gpts_section'
     );

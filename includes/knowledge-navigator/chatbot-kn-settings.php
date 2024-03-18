@@ -20,7 +20,7 @@ $domain = parse_url($start_url, PHP_URL_HOST);
 $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)); // Default to 25
 
 // Knowledge Navigator Results
-function chatbot_chatgpt_kn_results_callback($run_scanner): void {
+function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_results_callback');

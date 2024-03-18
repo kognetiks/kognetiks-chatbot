@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     1.9.2
+ * Version:     1.9.3
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.2');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.3');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -68,7 +68,7 @@ if (empty($session_id)) {
     }
 
     $session_id = session_id();
-    session_write_close();
+    // session_write_close();
 
 }
 
@@ -140,7 +140,8 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
 // Dump the chatbot settings - Ver 1.8.6
-// chatbot_chatgpt_dump_options_to_file();
+// 
+chatbot_chatgpt_dump_options_to_file();
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
 $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
@@ -186,6 +187,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     global $thread_id;
     global $assistant_id;
     global $script_data_array;
+    global $additional_instructions;
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
@@ -217,16 +219,13 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     $user_id = get_current_user_id();
     $page_id = get_the_id();
 
-    // DIAG - Diagnostics - Ver 1.9.1
-    // back_trace( 'NOTICE', 'LINE 215 $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'LINE 216 $page_id: ' . $page_id);
-
     $script_data_array = array(
         'user_id' => $user_id,
         'page_id' => $page_id,
         'session_id' => $session_id,
         'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id
+        'assistant_id' => $assistant_id,
+        'additional_instructions' => $additional_instructions
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -235,6 +234,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     
     // Defaults for Ver 1.6.1
     $defaults = array(
@@ -371,6 +371,7 @@ function chatbot_chatgpt_send_message(): void {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
+    global $additional_instructions;
 
     $api_key = '';
 
@@ -441,6 +442,7 @@ function chatbot_chatgpt_send_message(): void {
         // back_trace( 'NOTICE' , 'Using Original GPT Assistant ID');
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions'), '');
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
@@ -453,6 +455,7 @@ function chatbot_chatgpt_send_message(): void {
         }
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate'), '');
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
@@ -593,6 +596,7 @@ register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
 function addEntry($transient_name, $newEntry): void {
+
     $context_history = get_transient($transient_name);
     if (!$context_history) {
         $context_history = [];

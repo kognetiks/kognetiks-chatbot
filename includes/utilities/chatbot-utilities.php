@@ -30,8 +30,6 @@ function is_mobile_device() {
 // Dump DB options to file
 function chatbot_chatgpt_dump_options_to_file() {
 
-    // $debug_dir_path = dirname(plugin_dir_path(__FILE__)) . '/debug/';
-    // back_trace( 'NOTICE', 'CHATBOT_CHATGPT_PLUGIN_DIR_PATH: ' . CHATBOT_CHATGPT_PLUGIN_DIR_PATH);
     $debug_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'debug/';
     // back_trace( 'NOTICE', 'results_dir_path: ' . $debug_dir_path);
 

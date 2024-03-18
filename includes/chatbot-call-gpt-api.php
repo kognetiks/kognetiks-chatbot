@@ -144,10 +144,6 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Get the user ID and page ID
     if (empty($user_id)) {
         $user_id = get_current_user_id(); // Get current user ID
-        // Removed - Ver 1.9.0
-        // if (0 === $user_id) { // If user is not logged in, get_current_user_id() will return 0
-        //     $user_id = $session_id; // Use session ID instead
-        // }
     }
     if (empty($page_id)) {
         $page_id = get_the_id(); // Get current page ID

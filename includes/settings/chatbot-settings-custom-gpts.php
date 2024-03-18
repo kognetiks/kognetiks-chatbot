@@ -94,3 +94,19 @@ function chatbot_chatgpt_assistant_id_alternate_callback($args) {
     <input type="text" id="chatbot_chatgpt_assistant_id_alternate" name="chatbot_chatgpt_assistant_id_alternate" value="<?php echo esc_attr( $assistant_id_alternate ); ?>" class="regular-text">
     <?php
 }
+
+// GPT Assistant Instructions field callback - Ver 1.9.3
+function chatbot_chatgpt_assistant_instructions_callback ($args) {
+    $chatbot_chatgpt_assistant_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions', ''));
+    ?>
+    <textarea id="chatbot_chatgpt_assistant_instructions" name="chatbot_chatgpt_assistant_instructions" placeholder="Added instructions to assistant if needed ...." rows="5" cols="50"><?php echo esc_attr( $chatbot_chatgpt_assistant_instructions ); ?></textarea>
+    <?php
+}
+
+// GPT Assistant Instructions Alternate field callback - Ver 1.9.3
+function chatbot_chatgpt_assistant_instructions_alternate_callback ($args) {
+    $chatbot_chatgpt_assistant_instructions_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate', ''));
+    ?>
+    <textarea id="chatbot_chatgpt_assistant_instructions_alternate" name="chatbot_chatgpt_assistant_instructions_alternate" placeholder="Added instructions to assistant if needed ...." rows="5" cols="50"><?php echo esc_attr( $chatbot_chatgpt_assistant_instructions_alternate ); ?></textarea>
+    <?php
+}
