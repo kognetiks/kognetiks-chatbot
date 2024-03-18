@@ -50,12 +50,12 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     ];
 
     // DIAG - Diagnostics - Ver 1.9.3
-    back_trace( 'NOTICE', '$url: ' . $url);
-    back_trace( 'NOTICE', '$headers: ' . print_r($headers, true));
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', '$prompt: ' . $prompt);
-    back_trace( 'NOTICE', '$context: ' . $context);
-    back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
+    // back_trace( 'NOTICE', '$url: ' . $url);
+    // back_trace( 'NOTICE', '$headers: ' . print_r($headers, true));
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$prompt: ' . $prompt);
+    // back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     // Set up the data payload
     $data = [
@@ -63,9 +63,18 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
         'content' => $prompt,
     ];
 
+    // Test if the file_id is empty
+    // if (!empty($file_id)) {
+    //     back_trace( 'NOTICE', 'LINE 68 - $file_id is empty');
+    // } else {
+    //     back_trace( 'NOTICE', 'LINE 70 - $file_id is not empty');
+    // }
+
+    // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
+    unset($data['file_ids']);
     // Add the file reference if file_id is provided
-    // FIXME - ADD MULIPLE FILES HERE - Ver 1.9.2 - 2024 03 06
-    if (!empty($file_id)) {
+    // FIXME - ADD MULITPLE FILES HERE - Ver 1.9.2 - 2024 03 06
+    if (!empty($file_id) && !empty($file_id[0])) {
         // PRIOR TO VER 1.9.2
         // $data['file_ids'] = [$file_id];
         // VER 1.9.2
@@ -76,11 +85,6 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
     // back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
     // back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));
-
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$file_id: ' . $file_id);
-
-    // DIAG - Diagnostics
     // back_trace('NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
 
     // Initialize cURL session
@@ -111,7 +115,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     curl_close($ch);
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r(json_decode($response, true)));
+    // back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r($response, true));
     
     // Return the API response
     return json_decode($response, true);
@@ -300,14 +304,14 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $additional_instructions;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$message: ' . $message);
-    back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$message: ' . $message);
+    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
@@ -393,23 +397,30 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Add additional instructions to the prompt - Ver 1.9.3
     if (empty($additional_instructions)) {
         $prompt = $message;
-        back_trace ('NOTICE', 'No additional instructions provided: ' . $prompt);
+        // back_trace ('NOTICE', 'No additional instructions provided: ' . $prompt);
     } else {
         $prompt = $additional_instructions . ' ' . $message;
-        back_trace ('NOTICE', 'Additional instructions provided: ' . $prompt);
+        // back_trace ('NOTICE', 'Additional instructions provided: ' . $prompt);
     }
     // $prompt = $message;
     
     // Fetch the file id - Ver 1.7.9
     // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 1.9.2 - 2024 03 06
-    $file_id[] = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
+    $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 1.8.1
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
 
+    // if (empty($file_id)) {
+    //     back_trace( 'NOTICE', 'LINE 419 - No file to retrieve');
+    // } else {
+    //     back_trace( 'NOTICE', 'LINE 421 - File to retrieve');
+    //     back_trace( 'NOTICE', '$file_id ' . print_r($file_id, true));
+    // }
+
     if (empty($file_id)) {
         // back_trace( 'NOTICE', 'No file to retrieve');
-        $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key);
+        $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, '');
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
         // back_trace( 'NOTICE', 'File to retrieve');

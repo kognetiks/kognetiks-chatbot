@@ -234,7 +234,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
 
-    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
     // DUPLICATE ADDED THIS HERE - VER 1.9.1
     $script_data_array = array(
         'user_id' => $user_id,

@@ -200,10 +200,12 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 1.9.3 =
 * Additional instructions can be included to send with user prompts
-* See Settings > GPT Assistants > Assistant Insructions and Alternate Assistant Instructions
+* See Settings > GPT Assistants > Assistant Instructions and Alternate Assistant Instructions
+* Improved conversation clearing (trashcan)
+* Improved interpage handling of conversations
 
 = 1.9.2 =
-* Enabled mulitple file uploads to Assistants
+* Enabled multiple file uploads to Assistants
 * Added Conversation History shortcode [chat_history] to retrieve logged-in user's conversation history.
 * Chat history may be retrieved by Logged-in users.
 * Corrected problems with and improved the handling of HTML Markup in responses.
@@ -212,7 +214,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Knowledge Navigator now allows for including/excluding posts, pages, products and/or comments.
 * Knowledge Navigator only consider published posts and pages, and only consider approved comments.
 * Added an option to call the chatbot with a 'hot prompt' that will kickoff a chat session based on the supplied prompt
-* Use a shortcode with this format: [chatbot prompt="What happended on this day in history?"]
+* Use a shortcode with this format: [chatbot prompt="What happened on this day in history?"]
 * Hot prompts can be used with floating/embedded and with assistants, i.e., where ever you can add a shortcode.
 
 = 1.9.0 =
@@ -281,7 +283,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Corrected with GPT Assistant not being selected correctly when using the assistant parameter in the shortcode.
 
 = 1.7.4 =
-* Enhanced handling for multithreaded processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
+* Enhanced handling for multithreading processing has been implemented to efficiently manage simultaneous interactions from multiple chatbot visitors, ensuring an improved experience for each chatter.
 
 = 1.7.3 =
 * Added support for unlimited Assistants in addition to 'original', 'primary' and 'alternate' shortcode parameters.

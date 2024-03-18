@@ -274,6 +274,8 @@ jQuery(document).ready(function ($) {
         // Remove any legacy conversations that might be store in local storage for increased privacy - Ver 1.4.2
         localStorage.removeItem('chatbot_chatgpt_conversation');
 
+        // console.log('Chatbot: NOTICE: isFirstTime: ' + isFirstTime);
+
         if (isFirstTime) {
             // DIAG - Logging for Diagnostics
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
@@ -394,10 +396,10 @@ jQuery(document).ready(function ($) {
         // if message starts with "Conversation Clearer" then clear the conversation - Ver 1.9.3
         if (message.startsWith('Conversation cleared')) {
             // Clear the conversation from sessionStorage
-            console.log('Chatbot: NOTICE: Clearing the conversation');
+            // console.log('Chatbot: NOTICE: Clearing the conversation');
             sessionStorage.removeItem('chatbot_chatgpt_conversation');
         } else {
-            console.log('Chatbot: NOTICE: Saving the conversation');
+            // console.log('Chatbot: NOTICE: Saving the conversation');
             sessionStorage.setItem('chatbot_chatgpt_conversation', conversation.html());
         }
 
@@ -663,10 +665,10 @@ jQuery(document).ready(function ($) {
                 // sessionStorage.setItem('chatbot_chatgpt_conversation', ''); // Clear the conversation from sessionStorage
                 sessionStorage.removeItem('chatbot_chatgpt_conversation'); // Clear the last response from sessionStorage
                 // DIAG - Log the response
-                console.log('Success:', response.data);
+                // console.log('Success:', response.data);
                 appendMessage( response.data, 'bot');
                 // Force a page reload
-                location.reload();
+                // location.reload();
             },
             error: function(jqXHR, status, error) {
                 if(status === "timeout") {
@@ -712,6 +714,7 @@ jQuery(document).ready(function ($) {
         chatGptChatBot.show();
         chatGptOpenButton.hide();
         localStorage.setItem('chatbot_chatgpt_start_status', 'open');
+        // Removed in Ver 1.9.3
         loadConversation();
         scrollToBottom();
     }
@@ -785,6 +788,7 @@ jQuery(document).ready(function ($) {
             chatGptChatBot.show();
             chatGptOpenButton.hide();
             // Load the conversation if the chatbot is open on page load
+            // Removed in Ver 1.9.3
             loadConversation();
             scrollToBottom();
         }
@@ -806,7 +810,10 @@ jQuery(document).ready(function ($) {
     // Load conversation from local storage if available - Ver 1.2.0
     function loadConversation() {
 
-        storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
+        // Removed in Ver 1.9.3
+        // storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
+        // Reset the conversation - Added in Ver 1.9.3
+        storedConversation = '';
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
 
         // FIXME - IS THIS USED ANYWHERE ??? - Ver 1.8.9
