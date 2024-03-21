@@ -388,7 +388,9 @@ jQuery(document).ready(function ($) {
         }
 
         // Ver 1.2.4
-        conversation[0].scrollTop = conversation[0].scrollHeight;
+        if (conversation && conversation[0]) {
+            conversation[0].scrollTop = conversation[0].scrollHeight;
+        }
         // Scroll to bottom if embedded - Ver 1.7.1
         // window.scrollTo(0, document.body.scrollHeight);
 
@@ -413,7 +415,9 @@ jQuery(document).ready(function ($) {
         
         typingIndicator.append(dot1, dot2, dot3);
         conversation.append(typingIndicator);
-        conversation.scrollTop(conversation[0].scrollHeight);
+        if (conversation && conversation[0]) {
+            conversation.scrollTop(conversation[0].scrollHeight);
+        }
     }
 
     function removeTypingIndicator() {
@@ -802,7 +806,9 @@ jQuery(document).ready(function ($) {
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
             //     console.log('Chatbot: NOTICE: scrollToBottom");
             // }
-            conversation.scrollTop(conversation[0].scrollHeight);
+            if (conversation && conversation.length > 0) {
+                conversation.scrollTop(conversation[0].scrollHeight);
+            }
         }, 100);  // delay of 100 milliseconds  
 
     }

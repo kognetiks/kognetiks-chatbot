@@ -199,7 +199,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 1.9.4 =
-* TBD
+* Resolved very minor JavaScript error/bug
 
 = 1.9.3 =
 * Additional instructions can be included to send with user prompts
