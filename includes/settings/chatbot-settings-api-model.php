@@ -46,23 +46,80 @@ function chatbot_chatgpt_api_key_callback($args) {
 
 // OpenAI Models
 // https://platform.openai.com/docs/models
+
+function get_openai_models($api_key) {
+    // API endpoint URL
+    $url = "https://api.openai.com/v1/models";
+
+    // Set up cURL request
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer $api_key"
+    ]);
+
+    // Execute the request
+    $response = curl_exec($ch);
+
+    // Check for errors
+    if (curl_errno($ch)) {
+        $error_msg = curl_error($ch);
+        curl_close($ch);
+        return "Error: $error_msg";
+    }
+
+    // Close cURL session
+    curl_close($ch);
+
+    // Decode the JSON response
+    $data = json_decode($response, true);
+
+    // Check for API errors
+    if (isset($data['error'])) {
+        return "Error: " . $data['error']['message'];
+    }
+
+    // Extract the models from the response
+    $models = $data['data'];
+
+    // Return the list of models
+    return $models;
+}
 // TODO EXPAND THE LIST OF MODELS
 // https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
-    // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
-    $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    if ($model_choice == 'gpt-4-1106-preview') {
-        $model_choice = 'gpt-4-turbo';
+    // Get the API key
+    $api_key = get_option('chatbot_chatgpt_api_key');
+
+    // Fetch models from the API
+    $models = get_openai_models($api_key);
+
+    // Check for errors
+    if (is_string($models) && strpos($models, 'Error:') === 0) {
+        // If there's an error, display the hardcoded list
+        $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        if ($model_choice == 'gpt-4-1106-preview') {
+            $model_choice = 'gpt-4-turbo';
+        }
+        ?>
+        <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
+            <option value="<?php echo esc_attr( 'gpt-4-turbo' ); ?>" <?php selected( $model_choice, 'gpt-4-turbo' ); ?>><?php echo esc_html( 'gpt-4-turbo' ); ?></option>
+            <!-- <option value="<?php echo esc_attr( 'gpt-4-1106-preview' ); ?>" <?php selected( $model_choice, 'gpt-4-1106-preview' ); ?>><?php echo esc_html( 'gpt-4-1106-preview' ); ?></option> -->
+            <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
+            <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
+        </select>
+        <?php
+    } else {
+        // If models are fetched successfully, display them dynamically
+        ?>
+        <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
+            <?php foreach ($models as $model): ?>
+                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_model_choice'), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <?php
     }
-    ?>
-    <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
-        <option value="<?php echo esc_attr( 'gpt-4-turbo' ); ?>" <?php selected( $model_choice, 'gpt-4-turbo' ); ?>><?php echo esc_html( 'gpt-4-turbo' ); ?></option>
-        <!-- <option value="<?php echo esc_attr( 'gpt-4-1106-preview' ); ?>" <?php selected( $model_choice, 'gpt-4-1106-preview' ); ?>><?php echo esc_html( 'gpt-4-1106-preview' ); ?></option> -->
-        <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
-        <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
-    </select>
-    <?php
 }
 
 // Max Tokens choice - Ver 1.4.2
