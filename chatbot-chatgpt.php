@@ -717,9 +717,84 @@ function enqueue_greetings_script(): void {
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
+    // If user is logged in, then modify greeting if greeting contains "[...]" or remove if not logged in - Ver 1.9.4
+    if (is_user_logged_in()) {
+
+        $current_user_id = get_current_user_id();
+        $current_user = get_userdata($current_user_id);
+
+        if ($current_user) {
+            $display_name = $current_user->display_name;
+            back_trace ( 'NOTICE', 'User Display Name: ' . $display_name);
+        } else {
+            back_trace('NOTICE', 'No user is currently logged in.');
+        }
+
+        //Do this for Initial Greeting
+        $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+
+        // Determine what the field name is between the brackets
+        $user_field_name = '';
+        $user_field_name = substr($initial_greeting, strpos($initial_greeting, '[') + 1, strpos($initial_greeting, ']') - strpos($initial_greeting, '[') - 1);
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', 'User Field Name: ' . $user_field_name);
+
+        // If $initial_greeting contains "[$user_field_name]" then replace with field from DB
+        if (strpos($initial_greeting, '[' . $user_field_name . ']') !== false) {
+            $initial_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $initial_greeting);
+                       
+            // DIAG - Diagnostics
+            back_trace( 'NOTICE', 'User Field Name: ' . $user_field_name);
+            back_trace( 'NOTICE', 'User Field Value: ' . $current_user->$user_field_name);
+
+        } else {
+            $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
+        }
+
+        // Do this for Subsequent Greeting
+        $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+
+        // Determine what the field name is between the brackets
+        $user_field_name = '';
+        $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', 'User Field Name: ' . $user_field_name);
+
+        // If $subsequent_greeting contains "[$user_field_name]" then replace with field from DB
+        if (strpos($subsequent_greeting, '[' . $user_field_name . ']') !== false) {
+            $subsequent_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $subsequent_greeting);
+            
+            // DIAG - Diagnostics
+            back_trace( 'NOTICE', 'User Field Name: ' . $user_field_name);
+            back_trace( 'NOTICE', 'User Field Value: ' . $current_user->$user_field_name);
+
+        } else {
+            $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
+        }
+
+    } else {
+
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', "User is not logged in");
+
+        $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+
+        $user_field_name = '';
+        $user_field_name = substr($initial_greeting, strpos($initial_greeting, '[') + 1, strpos($initial_greeting, ']') - strpos($initial_greeting, '[') - 1 );
+
+        $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
+
+        $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+
+        $user_field_name = '';
+        $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
+
+        $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
+    }
+
     $greetings = array(
-        'initial_greeting' => esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?')),
-        'subsequent_greeting' => esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?')),
+        'initial_greeting' => $initial_greeting,
+        'subsequent_greeting' => $subsequent_greeting,
     );
 
     wp_localize_script('greetings', 'greetings_data', $greetings);
