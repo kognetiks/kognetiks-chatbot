@@ -199,11 +199,11 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 1.9.4 =
-* Resolved very minor JavaScript error/bug
-* Added option to display the name of the Assistant from the OpenAI platform
+* Enable personalization for intial and subsequent greetings for chatbot
+* Added option to display the name of the Assistant sourced from the OpenAI platform
 * See Setting > Kognetiks Chatbot > GPT Assistants > Display GPT Assistant Name
-* Expanded the list of support models
-* The chatbot now includes image generation using DALL-E and text-to-speech using TTS
+* Expanded the list of support models to now include image and speech
+* The chatbot now can generate images using DALL-E models and convert text to speek using TTS models
 
 = 1.9.3 =
 * Additional instructions can be included to send with user prompts
