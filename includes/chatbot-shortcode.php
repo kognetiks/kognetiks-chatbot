@@ -82,6 +82,11 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // [chatbot style="floating" audience="all"] - Floating style for all audiences
     // [chatbot style="floating" audience="logged-in"] - Floating style for logged-in users only
     // [chatbot style="floating" audience="visitors"] - Floating style for visitors only
+    // [chatbot style="floating" prompt="How do I install this plugin?"] - Floating style with a prompt
+    // [chatbot style="embbeded" prompt="How do I install this plugin?"] - Embedded style with a prompt
+    // [chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx" instructions="Please ensure that you ... "] - Floating style with additional instructions
+    // [chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx" instructions="Please ensure that you ... "] - Embedded style with additional instructions
+
 
     // normalize attribute keys, lowercase
     $atts = array_change_key_case((array)$atts, CASE_LOWER);

@@ -52,8 +52,15 @@ function chatbot_chatgpt_api_key_callback($args) {
 function chatbot_chatgpt_model_choice_callback($args) {
     // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    if ($model_choice == 'gpt-4-1106-preview') {
-        $model_choice = 'gpt-4-turbo';
+
+    // Starting with V1.9.4 the model choice "gpt-4-turbo" is replaced with "gpt-4-1106-preview"
+
+    // if ($model_choice == 'gpt-4-1106-preview') {
+    //     $model_choice = 'gpt-4-turbo';
+    // }
+
+    if ($model_choice == 'gpt-4-turbo') {
+        $model_choice = 'gpt-4-1106-preview';
     }
 
     // Fetch models from the API

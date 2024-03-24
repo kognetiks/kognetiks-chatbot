@@ -58,7 +58,7 @@ function localize_global_stopwords($language_code, $stopWords) {
 
     // Model and message for testing
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
+    // FIXME - For now switch gpt-4-turbo back to gpt-4-1106-preview
     if ($model == 'gpt-4-turbo') {
         $model = 'gpt-4-1106-preview';
     }
@@ -161,7 +161,7 @@ function localize_global_learningMessages($language_code, $learningMessages) {
 
     // Model and message for testing
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
+    // FIXME - For now switch gpt-4-turbo back to gpt-4-1106-preview
     if ($model == 'gpt-4-turbo') {
         $model = 'gpt-4-1106-preview';
     }
@@ -267,7 +267,7 @@ function localize_global_errorResponses($language_code, $errorResponses) {
 
     // Model and message for testing
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
+    // FIXME - For now switch gpt-4-turbo back to gpt-4-1106-preview
     if ($model == 'gpt-4-turbo') {
         $model = 'gpt-4-1106-preview';
     }
