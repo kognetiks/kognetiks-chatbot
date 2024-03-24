@@ -13,8 +13,8 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
-function chatbot_chatgpt_shortcode( $atts ) {
+function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
+// function chatbot_chatgpt_shortcode( $atts ) {
 
     global $session_id;
     global $user_id;
@@ -54,6 +54,9 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'model' => $model
     );
 
+    // BELT & SUSPENDERS - Ver 1.9.4
+    $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
         'style' => 'floating', // Default value
@@ -62,7 +65,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'prompt' => '', // If not passed then default value
         'sequence' => '', // If not passed then default value
         'instructions' => '', // If not passed then default value
-        'model' => 'gpt-3.5-turbo' // If not passed then default value
+        'model' => $model_choice // If not passed then default value
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -112,8 +115,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
     $assistant_id = $chatbot_chatgpt_assistant_alias;
 
     // DIAG - Diagnostics - Ver 1.9.4
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
     if ( $assistant_id == 'original' ) {
         // No need to do anything
     }
@@ -136,19 +139,26 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // Prompt passed as a parameter to the page - Ver 1.9.1
     if (isset($_GET['chatbot_prompt'])) {
         $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($_GET['chatbot_prompt']);
+        // DIAG - Diagnostics - Ver 1.9.1
         // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
     }
 
-    // Model Selection - Ver 1.9.4
-    if ( isset($atts['model']) ) {
-        $model = sanitize_text_field($atts['model']);
+    // Model not passed as parameter - Ver 1.9.4
+    if (!isset($atts['model'])) {
+        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        $script_data_array['model'] = $model;
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace( 'NOTICE', 'Model passed as a parameter: ' . $model);
+        // back_trace('NOTICE', 'Model not passed as a parameter: ' . $model);
     } else {
-        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', $model));
+        $model = sanitize_text_field($atts['model']);
+        $script_data_array['model'] = $model;
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace( 'NOTICE', 'Model from the settings: ' . $model);
+        // back_trace('NOTICE', 'Model passed as a parameter: ' . $model);
     }
+
+    // DIAG - Diagnostics - Ver 1.9.4
+    // back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // Check for KFlow parameters - Ver 1.9.2
     $kflow_sequence_id = array_key_exists('sequence', $atts) ? sanitize_text_field($atts['sequence']) : '';
@@ -286,7 +296,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // Retrieve the bot name - Ver 1.1.0
     // Get the Assistant's name - Ver 1.9.4

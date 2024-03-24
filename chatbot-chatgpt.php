@@ -155,7 +155,7 @@ if (!empty($model)) {
 } else {
     // FIXME - ERROR - SHOULDN'T THE MODEL BE SET - DO NOTHING
     // DIAG - Diagnostics
-    back_trace ( 'NOTICE', 'Model not set global!!!');
+    // back_trace ( 'NOTICE', 'Model not set global!!!');
 }
 // Starting with V1.9.4 the model choice "gpt-4-turbo" is replaced with "gpt-4-1106-preview"
 if ($model == 'gpt-4-turbo') {
