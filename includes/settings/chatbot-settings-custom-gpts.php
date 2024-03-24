@@ -27,8 +27,8 @@ function chatbot_chatgpt_gpt_assistants_section_callback($args) {
     <p>You can integrate GPT Assistants into your platform using one of shortcode configurations below.</p>
     <p>Each configuration requires either 'primary', 'alternate' or a GPT Assistant ID, denoted as 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'.</p>
     <p>GPT Assistants work with both 'floating' and 'embedded' styles.</p>
-    <p><b>NOTE:</b>The 'primary' and 'alternate' assistants are set in the ChatGPT settings page.</p>
-    <p><b>NOTE:</b>For best results ensure that the shortcode appears only once on the page.</p>
+    <p><b>NOTE:</b> The 'primary' and 'alternate' assistants are set in the ChatGPT settings page.</p>
+    <p><b>NOTE:</b> For best results ensure that the shortcode appears only once on the page.</p>
     <p>Use the following format to invoke the primary or alternate assistant:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><b>&#91;chatbot style="floating" assistant="primary"&#93;</b> - Floating style, GPT Assistant as set in Primary setting</li>
@@ -37,7 +37,7 @@ function chatbot_chatgpt_gpt_assistants_section_callback($args) {
         <li><b>&#91;chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Embedded style, GPT Assistant as set in GPT Assistant ID setting</li>
         <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li>
     </ul>
-    <p><b>NOTE: </b>When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
+    <p><b>NOTE:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
     <?php
 }
 
@@ -108,5 +108,16 @@ function chatbot_chatgpt_assistant_instructions_alternate_callback ($args) {
     $chatbot_chatgpt_assistant_instructions_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate', ''));
     ?>
     <textarea id="chatbot_chatgpt_assistant_instructions_alternate" name="chatbot_chatgpt_assistant_instructions_alternate" placeholder="Added instructions to assistant if needed ...." rows="5" cols="50"><?php echo esc_attr( $chatbot_chatgpt_assistant_instructions_alternate ); ?></textarea>
+    <?php
+}
+
+// Use GPT Assistant Names field callback - Ver 1.9.4
+function chatbot_chatgpt_use_gpt_assistant_name_callback($args) {
+    $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_display_custom_gpt_assistant_name" name="chatbot_chatgpt_display_custom_gpt_assistant_name">
+        <option value="Yes" <?php selected( $use_assistant_name, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $use_assistant_name, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
     <?php
 }

@@ -200,6 +200,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 1.9.4 =
 * Resolved very minor JavaScript error/bug
+* Added option to display the name of the Assistant from the OpenAI platform
+* See Setting > Kognetiks Chatbot > GPT Assistants > Display GPT Assistant Name
 
 = 1.9.3 =
 * Additional instructions can be included to send with user prompts

@@ -75,6 +75,8 @@ if (empty($session_id)) {
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; // Image API - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
 
@@ -119,6 +121,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-manageme
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-file.php'; // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
@@ -530,8 +534,21 @@ function chatbot_chatgpt_send_message(): void {
         // back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
-        // Send message to ChatGPT API - Ver 1.6.7
-        $response = chatbot_chatgpt_call_api($api_key, $message);
+        // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
+        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        if (str_starts_with($model, 'gpt')) {
+            // Send message to ChatGPT API - Ver 1.6.7
+            $response = chatbot_chatgpt_call_api($api_key, $message);
+        } elseif (str_starts_with($model, 'dall')) {
+            // Send message to Image API - Ver 1.9.4
+            $response = chatbot_chatgpt_call_image_api($api_key, $message);
+        } elseif (str_starts_with($model, 'tts')) {
+            // Send message to TTS API - Ver 1.9.4
+            $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+        } else {
+            // Send message to ChatGPT API - Ver 1.6.7
+            $response = chatbot_chatgpt_call_api($api_key, $message);
+        }
         
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);

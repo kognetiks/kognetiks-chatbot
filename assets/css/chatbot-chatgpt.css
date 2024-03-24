@@ -147,6 +147,18 @@
     justify-content: space-between;
 }
 
+#chatbot-chatgpt-header-embedded {
+    background-color: #222222;
+    color: #ffffff;
+    padding: 10px;
+    font-size: 16px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 #chatbot-chatgpt-conversation {
     flex-grow: 1;
     padding: 10px;

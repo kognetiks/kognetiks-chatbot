@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // General function to display the message - Ver 1.8.1
-function chatbot_chatgpt_general_admin_notice($message) {
+function chatbot_chatgpt_general_admin_notice($message = null) {
     if (!empty($message)) {
         printf('<div class="%1$s"><p><b>Kognetiks Kchat: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
         return;

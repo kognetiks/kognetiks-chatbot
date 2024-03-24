@@ -80,6 +80,7 @@ function chatbot_chatgpt_appearance_header_background_custom_css_settings(): voi
 
     // Define CSS styles as global variables
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-header'] = "#chatbot-chatgpt-header { background-color: {$chatbot_chatgpt_appearance_header_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-header-embedded'] = "#chatbot-chatgpt-header-embedded { background-color: {$chatbot_chatgpt_appearance_header_background_color} !important; }";
 
 }
 add_action('wp_head', 'chatbot_chatgpt_appearance_header_background_custom_css_settings');

@@ -96,6 +96,13 @@ function chatbot_chatgpt_shortcode( $atts ) {
     $chatbot_chatgpt_assistant_alias = array_key_exists('assistant', $atts) ? sanitize_text_field($atts['assistant']) : 'original';
     $assistant_id = $chatbot_chatgpt_assistant_alias;
 
+    // DIAG - Diagnostics - Ver 1.9.4
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    if ( $assistant_id == 'original' ) {
+        // No need to do anything
+    }
+    
     // Sanitize the 'audience' attribute to ensure it contains safe data
     $chatbot_chatgpt_audience_choice = array_key_exists('audience', $atts) ? sanitize_text_field($atts['audience']) : ''; // if not set, it will be set later
 
@@ -220,7 +227,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // back_trace( 'NOTICE', 'LINE 145 $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'LINE 146 $page_id: ' . $page_id);
 
-    if ( $chatbot_chatgpt_assistant_alias == 'original' ) {
+    if ( $chatbot_chatgpt_assistant_alias == 'primary' ) {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', ''));
         $additional_instructions = esc_attr(get_option('chatbot_chatgpt_additional_instructions', ''));
     } elseif ( $chatbot_chatgpt_assistant_alias == 'alternate' ) {
@@ -252,11 +259,21 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // Retrieve the bot name - Ver 1.1.0
-    // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
-    $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+    // Get the Assistant's name - Ver 1.9.4
+    $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'No'));
+    if ($use_assistant_name == 'Yes' && $assistant_id != ''){
+        $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
+        if (!empty($assistant_name)) {
+            $bot_name = $assistant_name;
+        } else {
+            $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+        }
+    } else {
+        $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+    }
 
     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
 
@@ -290,9 +307,15 @@ function chatbot_chatgpt_shortcode( $atts ) {
             });
         </script> -->
         <!-- REMOVED FOR EMBEDDED -->
-        <!-- <div id="chatbot-chatgpt-header">
-            <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
-        </div> -->
+        <?php
+        if ( $use_assistant_name == 'Yes' ) {
+            echo '<div id="chatbot-chatgpt-header-embedded">';
+            echo '<div id="chatgptTitle" class="title">' . $bot_name . '</div>';
+            echo '</div>';
+        } else {
+            // DO NOTHING
+        }
+        ?>
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
             <div style="flex-grow: 1; max-width: 95%;">
@@ -351,7 +374,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
