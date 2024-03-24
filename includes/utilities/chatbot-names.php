@@ -22,10 +22,12 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $chatbot_chatgpt_display_style;
-    global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
+
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
 
     $api_key = '';
 

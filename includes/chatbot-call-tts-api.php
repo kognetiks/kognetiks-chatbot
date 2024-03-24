@@ -21,6 +21,10 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $script_data_array;
+    global $additional_instructions;
+    global $model;
+
     global $learningMessages;
     global $errorResponses;
 
@@ -34,7 +38,11 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         mkdir($audio_dir_path, 0755, true);
     }
 
-    $audio_file = $audio_dir_path . $session_id . '_' . time() . '.mp3';
+    $audio_file_name = $session_id . '_' . time() . '.mp3';
+    $audio_file = $audio_dir_path . $audio_file_name;
+    // $audio_file_url = str_replace(CHATBOT_CHATGPT_PLUGIN_DIR_PATH, $base_url, $audio_file_name);
+    $audio_file_url = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/' . $audio_file_name;
+
     $audio_output = null;
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -45,9 +53,17 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
-    // Specify the model you want to use
+    // Select the OpenAI Model
     // One of tts-1-1106, tts-1-hd, tts-1-hd-1106
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'tts-1-1106'));
+    if ( !empty($script_data_array['model']) ) {
+        $model = $script_data_array['model'];
+        // DIAG - Diagnostics - Ver 1.9.4
+        back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
+    } else {
+        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'tts-1-1106'));
+        // DIAG - Diagnostics - Ver 1.9.4
+        back_trace( 'NOTICE', '$model from get_option: ' . $model);
+    }
 
     // Specify the voice you want to use
     // One of: alloy, echo, fable, onyx, nova, or shimmer
@@ -94,7 +110,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         echo 'Error in cURL: ' . curl_error($ch);
     } else {
         // Process the response
-        $audio_output = "[Listen here](" . $audio_file .")";
+        $audio_output = "[Listen here](" . $audio_file_url .")";
     }
     
     // Close the cURL session

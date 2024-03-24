@@ -46,22 +46,12 @@ function chatbot_chatgpt_api_key_callback($args) {
 
 // OpenAI Models
 // https://platform.openai.com/docs/models
-// TODO EXPAND THE LIST OF MODELS
+// EXPAND THE LIST OF MODELS STARTING WITH V1.9.4 - 2024 03 24
 // https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
     // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-
-    // Starting with V1.9.4 the model choice "gpt-4-turbo" is replaced with "gpt-4-1106-preview"
-
-    // if ($model_choice == 'gpt-4-1106-preview') {
-    //     $model_choice = 'gpt-4-turbo';
-    // }
-
-    if ($model_choice == 'gpt-4-turbo') {
-        $model_choice = 'gpt-4-1106-preview';
-    }
 
     // Fetch models from the API
     $models = get_openai_models();
@@ -70,13 +60,9 @@ function chatbot_chatgpt_model_choice_callback($args) {
     if (is_string($models) && strpos($models, 'Error:') === 0) {
         // If there's an error, display the hardcoded list
         $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-        if ($model_choice == 'gpt-4-1106-preview') {
-            $model_choice = 'gpt-4-turbo';
-        }
         ?>
         <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
-            <option value="<?php echo esc_attr( 'gpt-4-turbo' ); ?>" <?php selected( $model_choice, 'gpt-4-turbo' ); ?>><?php echo esc_html( 'gpt-4-turbo' ); ?></option>
-            <!-- <option value="<?php echo esc_attr( 'gpt-4-1106-preview' ); ?>" <?php selected( $model_choice, 'gpt-4-1106-preview' ); ?>><?php echo esc_html( 'gpt-4-1106-preview' ); ?></option> -->
+            <option value="<?php echo esc_attr( 'gpt-4-1106-preview' ); ?>" <?php selected( $model_choice, 'gpt-4-1106-preview' ); ?>><?php echo esc_html( 'gpt-4-1106-preview' ); ?></option>
             <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
             <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
         </select>

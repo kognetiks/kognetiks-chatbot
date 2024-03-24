@@ -21,10 +21,12 @@ function chatbot_chatgpt_shortcode( $atts ) {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $chatbot_chatgpt_display_style;
-    global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
+
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
 
     // KFlow - Ver 1.9.2
     global $kflow_data;
@@ -39,6 +41,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
     // back_trace( 'NOTICE', 'Shortcode Attributes: ' . print_r($atts, true));
     // back_trace( 'NOTICE', 'get_the_id(): ' . get_the_id());
+    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Script Attributes
     $script_data_array = array(
@@ -47,7 +50,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'instructions' => $additional_instructions
+        'instructions' => $additional_instructions,
+        'model' => $model
     );
 
     // Shortcode Attributes
@@ -57,7 +61,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'audience' => '', // If not passed then default value
         'prompt' => '', // If not passed then default value
         'sequence' => '', // If not passed then default value
-        'instructions' => '' // If not passed then default value
+        'instructions' => '', // If not passed then default value
+        'model' => 'gpt-3.5-turbo' // If not passed then default value
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -86,6 +91,11 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // [chatbot style="embbeded" prompt="How do I install this plugin?"] - Embedded style with a prompt
     // [chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx" instructions="Please ensure that you ... "] - Floating style with additional instructions
     // [chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx" instructions="Please ensure that you ... "] - Embedded style with additional instructions
+    //
+    // Model Selection
+    //
+    // [chatbot style="floating" model="gpt-4-turbo-preview"] - Floating style using the GPT-4 Turbo Preview model
+    // [chatbot style="embedded" model="dall-e-3"] - Embedded style using the DALL-E 3 model
 
 
     // normalize attribute keys, lowercase
@@ -127,6 +137,17 @@ function chatbot_chatgpt_shortcode( $atts ) {
     if (isset($_GET['chatbot_prompt'])) {
         $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($_GET['chatbot_prompt']);
         // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+    }
+
+    // Model Selection - Ver 1.9.4
+    if ( isset($atts['model']) ) {
+        $model = sanitize_text_field($atts['model']);
+        // DIAG - Diagnostics - Ver 1.9.4
+        back_trace( 'NOTICE', 'Model passed as a parameter: ' . $model);
+    } else {
+        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', $model));
+        // DIAG - Diagnostics - Ver 1.9.4
+        back_trace( 'NOTICE', 'Model from the settings: ' . $model);
     }
 
     // Check for KFlow parameters - Ver 1.9.2
@@ -245,8 +266,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
 
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
+    set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
 
-    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
     // DUPLICATE ADDED THIS HERE - VER 1.9.1
     $script_data_array = array(
         'user_id' => $user_id,
@@ -254,7 +275,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'instructions' => $additional_instructions
+        'instructions' => $additional_instructions,
+        'model' => $model
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -302,7 +324,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
@@ -380,6 +403,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -512,10 +536,12 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $chatbot_chatgpt_display_style;
-    global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
+
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
 
     // KFlow - Ver 1.9.2
     global $kflow_data;
@@ -536,6 +562,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$model: ' . $model);
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     ?>
@@ -551,6 +578,5 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     <?php
 
 }
-
 // Hook this function into the 'wp_footer' action
 add_action('wp_footer', 'chatbot_chatgpt_shortcode_enqueue_script');

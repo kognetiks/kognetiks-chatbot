@@ -144,8 +144,26 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
 // Dump the chatbot settings - Ver 1.8.6
-// 
-chatbot_chatgpt_dump_options_to_file();
+// chatbot_chatgpt_dump_options_to_file();
+
+// Model choice - Ver 1.9.4
+global $model;
+if (!empty($model)) {
+    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+    // DIAG - Diagnostics
+    back_trace ( 'NOTICE', 'Model from options: ' . $model);
+} else {
+    // FIXME - ERROR - SHOULDN'T THE MODEL BE SET - DO NOTHING
+    // DIAG - Diagnostics
+    back_trace ( 'NOTICE', 'Model not set global!!!');
+}
+// Starting with V1.9.4 the model choice "gpt-4-turbo" is replaced with "gpt-4-1106-preview"
+if ($model == 'gpt-4-turbo') {
+    $model = 'gpt-4-1106-preview';
+    update_option('chatbot_chatgpt_model_choice', $model);
+    // DIAG - Diagnostics
+    back_trace ( 'NOTICE', 'Model upgraded: ' . $model);
+}
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
 $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
@@ -192,6 +210,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     global $assistant_id;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
@@ -229,7 +248,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions
+        'additional_instructions' => $additional_instructions,
+        'model' => $model
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -239,6 +259,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    // back_trace( 'NOTICE', '$model: ' . $model);
     
     // Defaults for Ver 1.6.1
     $defaults = array(
@@ -350,7 +371,6 @@ if (!function_exists('enqueue_jquery_ui')) {
     add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 }
 
-
 // Schedule Cleanup of Expired Transients
 if (!wp_next_scheduled('chatbot_chatgpt_cleanup_event')) {
     wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_cleanup_event');
@@ -376,20 +396,30 @@ function chatbot_chatgpt_send_message(): void {
     global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
     $api_key = '';
 
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
-    // Retrieve the Use GPT Assistant ID
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - If gpt-4-turbo is selected, set the API model to gpt-4-1106-preview, i.e., the API name for the model
-    if ($model == 'gpt-4-turbo') {
-        $model = 'gpt-4-1106-preview';
+    // Retrieve the GPT Model
+    if (!empty($model)) {
+        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        // DIAG - Diagnostics
+        back_trace ( 'NOTICE', 'Model from options: ' . $model);
+    } else {
+        // SEE IF $script_data_array HAS THE MODEL
+        if ( isset($script_data_array['model'])) {
+            $model = $script_data_array['model'];
+            // DIAG - Diagnostics
+            back_trace ( 'NOTICE', 'Model set in global: ' . $model);
+        } else {
+            // FIXME - I SHOULDN'T BE FALLING THRU HERE - DO NOTHING
+            // DIAG - Diagnostics
+            back_trace ( 'ERROR', 'Model not set!!!');
+        }
     }
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Retrieve the Max tokens - Ver 1.4.2
     $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 150));
@@ -419,12 +449,20 @@ function chatbot_chatgpt_send_message(): void {
 
     $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
+    $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
 
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
+
+    $temp_model = $chatbot_settings['model']; // Store the model in a temporary variable before overwriting $chatbot_settings
+
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
+
+    $chatbot_settings['model'] = $temp_model; // Restore the model after overwriting $chatbot_settings
+
     $assistant_id = isset($chatbot_settings['assistantID']) ? $chatbot_settings['assistantID'] : '';
     $thread_Id = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
+    $model = isset($chatbot_settings['model']) ? $chatbot_settings['model'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -432,6 +470,7 @@ function chatbot_chatgpt_send_message(): void {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$model: ' . $model);
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
@@ -535,17 +574,26 @@ function chatbot_chatgpt_send_message(): void {
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
         // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
-        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        // TRY NOT TO FETCH MODEL AGAIN
+        // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         if (str_starts_with($model, 'gpt')) {
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_api($api_key, $message);
         } elseif (str_starts_with($model, 'dall')) {
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
             // Send message to Image API - Ver 1.9.4
             $response = chatbot_chatgpt_call_image_api($api_key, $message);
         } elseif (str_starts_with($model, 'tts')) {
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
             // Send message to TTS API - Ver 1.9.4
             $response = chatbot_chatgpt_call_tts_api($api_key, $message);
         } else {
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_api($api_key, $message);
         }

@@ -33,10 +33,7 @@ if ( ! defined( 'WPINC' ) ) {
 
     // Model and message for testing
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
-    if ($model == 'gpt-4-turbo') {
-        $model = 'gpt-4-1106-preview';
-    } 
+
     // $message = 'Translate the following English text to French: "Hello, world!"';
     $message = 'Test message.';
 

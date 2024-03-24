@@ -203,7 +203,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Added option to display the name of the Assistant from the OpenAI platform
 * See Setting > Kognetiks Chatbot > GPT Assistants > Display GPT Assistant Name
 * Expanded the list of support models
-* The app now includes image generation using DALL-E and text-to-speech using TTS
+* The chatbot now includes image generation using DALL-E and text-to-speech using TTS
 
 = 1.9.3 =
 * Additional instructions can be included to send with user prompts

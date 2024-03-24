@@ -23,6 +23,7 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
     global $assistant_id;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'set_chatbot_chatgpt_threads');
@@ -38,7 +39,8 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions
+        'additional_instructions' => $additional_instructions,
+        'model' => $model
     );
 
     // Create unique keys for transients
@@ -63,6 +65,7 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
     global $assistant_id;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'get_chatbot_chatgpt_thread');
@@ -71,6 +74,7 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
     // back_trace( 'NOTICE', 'GET PART 1 $session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'GET PART 1 $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'GET PART 1 $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'GET PART 1 $additional_instructions: ' . $additional_instructions);
 
     $script_data_array = array(
         'user_id' => $user_id,
@@ -78,7 +82,8 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions
+        'additional_instructions' => $additional_instructions,
+        'model' => $model
     );
     
     // If $user_id is empty or zero then set it to $session_id
@@ -120,6 +125,7 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
     global $assistant_id;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'delete_chatbot_chatgpt_threads');
@@ -128,6 +134,7 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
     // back_trace( 'NOTICE', 'DEL $session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'DEL $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'DEL $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'DEL $additional_instructions: ' . $additional_instructions);
 
     $script_data_array = array(
         'user_id' => $user_id,
@@ -135,7 +142,8 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions
+        'additional_instructions' => $additional_instructions,
+        'model' => $model
     );
 
     // Construct the unique keys
@@ -160,7 +168,8 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions
+        'additional_instructions' => $additional_instructions,
+        'model' => $model
     );
     
 }
