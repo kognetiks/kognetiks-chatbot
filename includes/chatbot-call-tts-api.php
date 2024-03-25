@@ -40,8 +40,12 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
 
     $audio_file_name = $session_id . '_' . time() . '.mp3';
     $audio_file = $audio_dir_path . $audio_file_name;
-    // $audio_file_url = str_replace(CHATBOT_CHATGPT_PLUGIN_DIR_PATH, $base_url, $audio_file_name);
-    $audio_file_url = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/' . $audio_file_name;
+
+    // Get the URL of the plugins directory
+    $plugins_url = plugins_url();
+
+    // Generate the URL of the audio file
+    $audio_file_url = $plugins_url . '/chatbot-chatgpt/audio/' . $audio_file_name;
 
     $audio_output = null;
 
