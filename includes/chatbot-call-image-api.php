@@ -49,11 +49,11 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     if ( !empty($script_data_array['model']) ) {
         $model = $script_data_array['model'];
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
+        // back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
     } else {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'dall-e-2'));
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace( 'NOTICE', '$model from get_option: ' . $model);
+        // back_trace( 'NOTICE', '$model from get_option: ' . $model);
     }
 
     // Prepare the request body

@@ -58,11 +58,11 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     if ( !empty($script_data_array['model']) ) {
         $model = $script_data_array['model'];
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
+        // back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
     } else {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'tts-1-1106'));
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace( 'NOTICE', '$model from get_option: ' . $model);
+        // back_trace( 'NOTICE', '$model from get_option: ' . $model);
     }
 
     // Specify the voice you want to use
@@ -101,12 +101,12 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     $result = file_put_contents($audio_file, $response);
 
     // DIAG - Diagnostics - Ver 1.9.4
-    back_trace( 'NOTICE', '$response: ' . $response );
+    // back_trace( 'NOTICE', '$response: ' . $response );
     
     // Check for errors
     if (curl_errno($ch)) {
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace( 'NOTICE', 'Error: ' . curl_error($ch));
+        // back_trace( 'NOTICE', 'Error: ' . curl_error($ch));
         echo 'Error in cURL: ' . curl_error($ch);
     } else {
         // Process the response
@@ -166,12 +166,15 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         // } else {
         //     echo "File not found.";
         // }
+        
+        // Set transient to delete the audio file after 2 hours
+        chatbot_chatgpt_delete_audio_file_id( $audio_file_url );
 
         return $audio_output;
 
     } else {
         // FIXME - Decide what to return here - it's an error
-        back_trace( 'ERROR', 'API ERROR ' . print_r($response_body, true));
+        // back_trace( 'ERROR', 'API ERROR ' . print_r($response_body, true));
         if (get_locale() !== "en_US") {
             $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
         } else {
@@ -182,3 +185,65 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     }
 
 }
+
+// Setup the cron job to delete the audio file after 2 hours
+function chatbot_chatgpt_delete_audio_file_id( $file_id ) {
+
+    global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+
+    // DIAG - Diagnostics - Ver 1.9.2
+    // back_trace( 'NOTICE', 'Setup deleting audio file after 2 hours: ' . $file_id);
+
+    // Set a transient that expires in 2 hours
+    $timeFrameForDelete = time() + 2 * 60 * 60;
+    // FIXME - Override the transient to expire in 2 minutes
+    // $timeFrameForDelete = time() + 2 * 60;
+    set_transient('chatbot_chatgpt_delete_audio_file_' . $file_id, $file_id, $timeFrameForDelete);
+
+    // Set a cron job to delete the file in 1 hour 45 minutes
+    $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+    // FIXME - Override the cron job to delete the file in 1 minute 45 seconds
+    // $shorterTimeFrameForDelete = time() + 1 * 60 + 45;
+    if (!wp_next_scheduled('delete_audio_file', $file_id)) {
+        wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_audio_file', array($file_id));
+    }
+
+}
+
+// Cleanup in Aisle 4 on OpenAI - Ver 1.7.9
+function deleteAudioFile($file_id) {
+
+    global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+
+    // DIAG - Diagnostics - Ver 1.9.2
+    // back_trace( 'NOTICE', 'Delete the audio file: ' . $file_id);
+
+    // Which file on the server
+    // $audio_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/';
+    // $audio_file = $audio_dir_path . $file_id;
+    // Now delete the file
+    if (file_exists($file_id)) {
+        unlink($file_id);
+    }
+    
+    // if ($http_status_code == 200 || $http_status_code == 204) {
+    //     // DIAG - Diagnostics - Ver 1.7.9
+    //     // back_trace( 'SUCCESS', "File deleted successfully.\n");
+    // } else {
+    //     // If the request was not successful, you may want to handle it differently,
+    //     // such as logging an error or retrying the request.
+    //     // DIAG - Diagnostics - Ver 1.7.9
+    //     // back_trace( 'ERROR', "HTTP status code: $http_status_code\n");
+    //     // back_trace( 'ERROR', "Response: $response\n");
+    // }
+
+}
+add_action( 'delete_audio_file', 'deleteAudioFile' );

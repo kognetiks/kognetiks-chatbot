@@ -96,7 +96,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
 
-// Incdlue necessary files - Settings
+// Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-model.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
@@ -151,7 +151,7 @@ global $model;
 if (!empty($model)) {
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     // DIAG - Diagnostics
-    back_trace ( 'NOTICE', 'Model from options: ' . $model);
+    // back_trace ( 'NOTICE', 'Model from options: ' . $model);
 } else {
     // FIXME - ERROR - SHOULDN'T THE MODEL BE SET - DO NOTHING
     // DIAG - Diagnostics
@@ -162,7 +162,7 @@ if ($model == 'gpt-4-turbo') {
     $model = 'gpt-4-1106-preview';
     update_option('chatbot_chatgpt_model_choice', $model);
     // DIAG - Diagnostics
-    back_trace ( 'NOTICE', 'Model upgraded: ' . $model);
+    // back_trace ( 'NOTICE', 'Model upgraded: ' . $model);
 }
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -407,17 +407,17 @@ function chatbot_chatgpt_send_message(): void {
     if (!empty($model)) {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         // DIAG - Diagnostics
-        back_trace ( 'NOTICE', 'Model from options: ' . $model);
+        // back_trace ( 'NOTICE', 'Model from options: ' . $model);
     } else {
         // SEE IF $script_data_array HAS THE MODEL
         if ( isset($script_data_array['model'])) {
             $model = $script_data_array['model'];
             // DIAG - Diagnostics
-            back_trace ( 'NOTICE', 'Model set in global: ' . $model);
+            // back_trace ( 'NOTICE', 'Model set in global: ' . $model);
         } else {
             // FIXME - I SHOULDN'T BE FALLING THRU HERE - DO NOTHING
             // DIAG - Diagnostics
-            back_trace ( 'ERROR', 'Model not set!!!');
+            // back_trace ( 'ERROR', 'Model not set!!!');
         }
     }
 
@@ -470,7 +470,7 @@ function chatbot_chatgpt_send_message(): void {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
