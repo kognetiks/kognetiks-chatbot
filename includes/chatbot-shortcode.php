@@ -100,7 +100,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // [chatbot style="floating" model="gpt-4-turbo-preview"] - Floating style using the GPT-4 Turbo Preview model
     // [chatbot style="embedded" model="dall-e-3"] - Embedded style using the DALL-E 3 model
 
-
     // normalize attribute keys, lowercase
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
 

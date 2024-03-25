@@ -148,17 +148,8 @@ $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics'
 
 // Model choice - Ver 1.9.4
 global $model;
-if (!empty($model)) {
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // DIAG - Diagnostics
-    // back_trace ( 'NOTICE', 'Model from options: ' . $model);
-} else {
-    // FIXME - ERROR - SHOULDN'T THE MODEL BE SET - DO NOTHING
-    // DIAG - Diagnostics
-    // back_trace ( 'NOTICE', 'Model not set global!!!');
-}
 // Starting with V1.9.4 the model choice "gpt-4-turbo" is replaced with "gpt-4-1106-preview"
-if ($model == 'gpt-4-turbo') {
+if (get_option('chatbot_chatgpt_model_choice') == 'gpt-4-turbo') {
     $model = 'gpt-4-1106-preview';
     update_option('chatbot_chatgpt_model_choice', $model);
     // DIAG - Diagnostics
