@@ -80,6 +80,11 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; //
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
 
+// Include necessary files - Flow Integration
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-flow-shortcode.php'; // Flow Integration - Ver 1.9.4
+
+
+
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-dimensions.php';
@@ -224,10 +229,6 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
     // https://chat.openai.com/c/275770c1-fa72-404b-97c2-2dad2e8a0230
     wp_enqueue_script( 'dompurify', plugin_dir_url(__FILE__) . 'assets/js/purify.min.js', array(), '1.0.0', true );
-
-    // Enqueue the KFlow script - Ver 1.9.2
-    global $kflow_data;
-    wp_enqueue_script('chatbot-kflow-localize', plugins_url('assets/js/chatbot-kflow-localize.js', __FILE__), array('jquery'), '1.0', true);
 
     // Localize the data for user id and page id
     $user_id = get_current_user_id();

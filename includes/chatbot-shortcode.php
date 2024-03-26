@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Shortcode Registration
+ * Kognetiks Chatbot for WordPress - [chatbot_chatgpt] Shortcode Registration
  *
  * This file contains the code for registering the shortcode used
  * to display the Chatbot on the website.
@@ -27,9 +27,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
-
-    // KFlow - Ver 1.9.2
-    global $kflow_data;
 
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
@@ -154,65 +151,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // DIAG - Diagnostics - Ver 1.9.4
         // back_trace('NOTICE', 'Model passed as a parameter: ' . $model);
     }
-
-    // DIAG - Diagnostics - Ver 1.9.4
-    // back_trace( 'NOTICE', '$model: ' . $model);
-    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
-
-    // Check for KFlow parameters - Ver 1.9.2
-    $kflow_sequence_id = array_key_exists('sequence', $atts) ? sanitize_text_field($atts['sequence']) : '';
-
-    if (!empty($kflow_sequence_id)) {
-    
-        // DIAG - Diagnostics - Ver 1.9.2
-        // back_trace( 'NOTICE', 'kflow_sequence_id: ' . $kflow_sequence_id);
-    
-        // Check to see if KFlow is enabled
-        $kflow_enabled = esc_attr(get_option( 'kflow_flow_mode', false ));
-    
-        // DIAG - Diagnostics - Ver 1.9.2
-        // back_trace( 'NOTICE', 'kflow_enabled: ' . $kflow_enabled);
-    
-        if ( $kflow_enabled == true ) {
-            // If KFlow is enabled, then get the sequence ID and assemble the sequence, prompts, and template
-            $kflow_data = fetchAndOrganizeData($kflow_sequence_id);
-    
-            if ( $kflow_data[$kflow_sequence_id]['SequenceStatus'] == 'active' ) {
-                // If the sequence is active, then proceed to assemble the sequence, prompts, and template
-                // Assemble the sequence, prompts, and template
-                $kflow_sequence = $kflow_data[$kflow_sequence_id];
-                $kflow_prompts = $kflow_data[$kflow_sequence_id]['Prompts'];
-                $kflow_steps = $kflow_data[$kflow_sequence_id]['Steps'];
-                $kflow_template = $kflow_data[$kflow_sequence_id]['Templates'];
-
-                // Pass the values to the JavaScript
-                wp_localize_script('chatbot-kflow-localize', 'kflow_data', array(
-                    'kflow_enabled' => $kflow_enabled,
-                    'kflow_sequence' => $kflow_sequence,
-                    'kflow_prompts' => $kflow_prompts,
-                    'kflow_steps' => $kflow_steps,
-                    'kflow_template' => $kflow_template
-                ));
-
-            } else {
-                // If the sequence is not active, then do not proceed
-                // back_trace( 'NOTICE', 'The sequence is not active');
-                $kflow_sequence = '';
-                $kflow_prompts = '';
-                $kflow_template = '';
-            }
-    
-        } else {
-    
-            // If KFlow is not enabled, then do not proceed
-            // back_trace( 'NOTICE', 'KFlow is not enabled');
-            $kflow_sequence = '';
-            $kflow_prompts = '';
-            $kflow_template = '';
-    
-        }
-    
-    } 
 
     // DIAG - Diagnostics - Ver 1.9.0
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 167 of the function');
@@ -551,9 +489,6 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
 
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
-
-    // KFlow - Ver 1.9.2
-    global $kflow_data;
 
     // These were already here - Ver 1.9.3 - 2024 03 16
     global $chatbot_chatgpt_display_style;
