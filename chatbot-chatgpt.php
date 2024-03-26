@@ -80,11 +80,6 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; //
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
 
-// Include necessary files - Flow Integration
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-flow-shortcode.php'; // Flow Integration - Ver 1.9.4
-
-
-
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-dimensions.php';
