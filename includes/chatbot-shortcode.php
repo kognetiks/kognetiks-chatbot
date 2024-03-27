@@ -66,7 +66,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 55 of the function');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 69 of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
@@ -227,7 +227,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 234 of the function');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 230 of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
@@ -266,6 +266,18 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
     // $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
+    // KFlow - Call kflow_prompt_and_response() - Ver 1.9.5
+    if (function_exists('kflow_prompt_and_response')) {
+        $prompt = kflow_prompt_and_response($atts);
+        // DIAG - Diagnostics - Ver 1.9.5
+        back_trace( 'NOTICE', 'kflow prompt: ' . $prompt);
+    } else {
+        // Handle the case where the function does not exist
+        // Throw an error or return a default value, etc.
+        // DIAG - Diagnostics - Ver 1.9.5
+        back_trace( 'WARNING', 'kflow modules not installed');
+    }
+
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
@@ -273,6 +285,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
+
         ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
