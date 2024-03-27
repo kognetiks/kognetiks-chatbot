@@ -260,5 +260,5 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
     <?php
     
 }
-// Hook into wp_head
+// Hook into wp_footer
 add_action('wp_footer', 'chatbot_chatgpt_appearance_inject_custom_css_settings');

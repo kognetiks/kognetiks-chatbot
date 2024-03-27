@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Shortcode Registration
+ * Kognetiks Chatbot for WordPress - [chatbot_chatgpt] Shortcode Registration
  *
  * This file contains the code for registering the shortcode used
  * to display the Chatbot on the website.
@@ -13,21 +13,20 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
-function chatbot_chatgpt_shortcode( $atts ) {
+function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
+// function chatbot_chatgpt_shortcode( $atts ) {
 
     global $session_id;
     global $user_id;
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $chatbot_chatgpt_display_style;
-    global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
-    // KFlow - Ver 1.9.2
-    global $kflow_data;
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
 
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
@@ -39,6 +38,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
     // back_trace( 'NOTICE', 'Shortcode Attributes: ' . print_r($atts, true));
     // back_trace( 'NOTICE', 'get_the_id(): ' . get_the_id());
+    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Script Attributes
     $script_data_array = array(
@@ -47,8 +47,12 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'instructions' => $additional_instructions
+        'instructions' => $additional_instructions,
+        'model' => $model
     );
+
+    // BELT & SUSPENDERS - Ver 1.9.4
+    $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
 
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
@@ -57,7 +61,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'audience' => '', // If not passed then default value
         'prompt' => '', // If not passed then default value
         'sequence' => '', // If not passed then default value
-        'instructions' => '' // If not passed then default value
+        'instructions' => '', // If not passed then default value
+        'model' => $model_choice // If not passed then default value
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -82,6 +87,15 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // [chatbot style="floating" audience="all"] - Floating style for all audiences
     // [chatbot style="floating" audience="logged-in"] - Floating style for logged-in users only
     // [chatbot style="floating" audience="visitors"] - Floating style for visitors only
+    // [chatbot style="floating" prompt="How do I install this plugin?"] - Floating style with a prompt
+    // [chatbot style="embbeded" prompt="How do I install this plugin?"] - Embedded style with a prompt
+    // [chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx" instructions="Please ensure that you ... "] - Floating style with additional instructions
+    // [chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx" instructions="Please ensure that you ... "] - Embedded style with additional instructions
+    //
+    // Model Selection
+    //
+    // [chatbot style="floating" model="gpt-4-turbo-preview"] - Floating style using the GPT-4 Turbo Preview model
+    // [chatbot style="embedded" model="dall-e-3"] - Embedded style using the DALL-E 3 model
 
     // normalize attribute keys, lowercase
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
@@ -96,6 +110,13 @@ function chatbot_chatgpt_shortcode( $atts ) {
     $chatbot_chatgpt_assistant_alias = array_key_exists('assistant', $atts) ? sanitize_text_field($atts['assistant']) : 'original';
     $assistant_id = $chatbot_chatgpt_assistant_alias;
 
+    // DIAG - Diagnostics - Ver 1.9.4
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    if ( $assistant_id == 'original' ) {
+        // No need to do anything
+    }
+    
     // Sanitize the 'audience' attribute to ensure it contains safe data
     $chatbot_chatgpt_audience_choice = array_key_exists('audience', $atts) ? sanitize_text_field($atts['audience']) : ''; // if not set, it will be set later
 
@@ -114,63 +135,22 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // Prompt passed as a parameter to the page - Ver 1.9.1
     if (isset($_GET['chatbot_prompt'])) {
         $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($_GET['chatbot_prompt']);
+        // DIAG - Diagnostics - Ver 1.9.1
         // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
     }
 
-    // Check for KFlow parameters - Ver 1.9.2
-    $kflow_sequence_id = array_key_exists('sequence', $atts) ? sanitize_text_field($atts['sequence']) : '';
-
-    if (!empty($kflow_sequence_id)) {
-    
-        // DIAG - Diagnostics - Ver 1.9.2
-        // back_trace( 'NOTICE', 'kflow_sequence_id: ' . $kflow_sequence_id);
-    
-        // Check to see if KFlow is enabled
-        $kflow_enabled = esc_attr(get_option( 'kflow_flow_mode', false ));
-    
-        // DIAG - Diagnostics - Ver 1.9.2
-        // back_trace( 'NOTICE', 'kflow_enabled: ' . $kflow_enabled);
-    
-        if ( $kflow_enabled == true ) {
-            // If KFlow is enabled, then get the sequence ID and assemble the sequence, prompts, and template
-            $kflow_data = fetchAndOrganizeData($kflow_sequence_id);
-    
-            if ( $kflow_data[$kflow_sequence_id]['SequenceStatus'] == 'active' ) {
-                // If the sequence is active, then proceed to assemble the sequence, prompts, and template
-                // Assemble the sequence, prompts, and template
-                $kflow_sequence = $kflow_data[$kflow_sequence_id];
-                $kflow_prompts = $kflow_data[$kflow_sequence_id]['Prompts'];
-                $kflow_steps = $kflow_data[$kflow_sequence_id]['Steps'];
-                $kflow_template = $kflow_data[$kflow_sequence_id]['Templates'];
-
-                // Pass the values to the JavaScript
-                wp_localize_script('chatbot-kflow-localize', 'kflow_data', array(
-                    'kflow_enabled' => $kflow_enabled,
-                    'kflow_sequence' => $kflow_sequence,
-                    'kflow_prompts' => $kflow_prompts,
-                    'kflow_steps' => $kflow_steps,
-                    'kflow_template' => $kflow_template
-                ));
-
-            } else {
-                // If the sequence is not active, then do not proceed
-                // back_trace( 'NOTICE', 'The sequence is not active');
-                $kflow_sequence = '';
-                $kflow_prompts = '';
-                $kflow_template = '';
-            }
-    
-        } else {
-    
-            // If KFlow is not enabled, then do not proceed
-            // back_trace( 'NOTICE', 'KFlow is not enabled');
-            $kflow_sequence = '';
-            $kflow_prompts = '';
-            $kflow_template = '';
-    
-        }
-    
-    } 
+    // Model not passed as parameter - Ver 1.9.4
+    if (!isset($atts['model'])) {
+        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        $script_data_array['model'] = $model;
+        // DIAG - Diagnostics - Ver 1.9.4
+        // back_trace('NOTICE', 'Model not passed as a parameter: ' . $model);
+    } else {
+        $model = sanitize_text_field($atts['model']);
+        $script_data_array['model'] = $model;
+        // DIAG - Diagnostics - Ver 1.9.4
+        // back_trace('NOTICE', 'Model passed as a parameter: ' . $model);
+    }
 
     // DIAG - Diagnostics - Ver 1.9.0
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 167 of the function');
@@ -220,7 +200,7 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // back_trace( 'NOTICE', 'LINE 145 $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'LINE 146 $page_id: ' . $page_id);
 
-    if ( $chatbot_chatgpt_assistant_alias == 'original' ) {
+    if ( $chatbot_chatgpt_assistant_alias == 'primary' ) {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', ''));
         $additional_instructions = esc_attr(get_option('chatbot_chatgpt_additional_instructions', ''));
     } elseif ( $chatbot_chatgpt_assistant_alias == 'alternate' ) {
@@ -233,8 +213,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
 
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
+    set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
 
-    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
     // DUPLICATE ADDED THIS HERE - VER 1.9.1
     $script_data_array = array(
         'user_id' => $user_id,
@@ -242,7 +222,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'instructions' => $additional_instructions
+        'instructions' => $additional_instructions,
+        'model' => $model
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -255,8 +236,18 @@ function chatbot_chatgpt_shortcode( $atts ) {
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     // Retrieve the bot name - Ver 1.1.0
-    // Add styling to the bot to ensure that it is not shown before it is needed Ver 1.2.0
-    $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+    // Get the Assistant's name - Ver 1.9.4
+    $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'No'));
+    if ($use_assistant_name == 'Yes' && $assistant_id != ''){
+        $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
+        if (!empty($assistant_name)) {
+            $bot_name = $assistant_name;
+        } else {
+            $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+        }
+    } else {
+        $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+    }
 
     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
 
@@ -280,7 +271,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
@@ -290,9 +282,15 @@ function chatbot_chatgpt_shortcode( $atts ) {
             });
         </script> -->
         <!-- REMOVED FOR EMBEDDED -->
-        <!-- <div id="chatbot-chatgpt-header">
-            <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
-        </div> -->
+        <?php
+        if ( $use_assistant_name == 'Yes' ) {
+            echo '<div id="chatbot-chatgpt-header-embedded">';
+            echo '<div id="chatgptTitle" class="title">' . $bot_name . '</div>';
+            echo '</div>';
+        } else {
+            // DO NOTHING
+        }
+        ?>
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
             <div style="flex-grow: 1; max-width: 95%;">
@@ -351,7 +349,8 @@ function chatbot_chatgpt_shortcode( $atts ) {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );   
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -484,13 +483,12 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $chatbot_chatgpt_display_style;
-    global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
-    // KFlow - Ver 1.9.2
-    global $kflow_data;
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
 
     // These were already here - Ver 1.9.3 - 2024 03 16
     global $chatbot_chatgpt_display_style;
@@ -508,6 +506,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$model: ' . $model);
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     ?>
@@ -523,6 +522,5 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     <?php
 
 }
-
 // Hook this function into the 'wp_footer' action
 add_action('wp_footer', 'chatbot_chatgpt_shortcode_enqueue_script');

@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     1.9.3
+ * Version:     1.9.4
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.3');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.4');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -75,6 +75,8 @@ if (empty($session_id)) {
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; // Image API - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
 
@@ -94,7 +96,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
 
-// Incdlue necessary files - Settings
+// Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-model.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
@@ -119,6 +121,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-manageme
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-file.php'; // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
@@ -140,8 +144,17 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
 // Dump the chatbot settings - Ver 1.8.6
-// 
-chatbot_chatgpt_dump_options_to_file();
+// chatbot_chatgpt_dump_options_to_file();
+
+// Model choice - Ver 1.9.4
+global $model;
+// Starting with V1.9.4 the model choice "gpt-4-turbo" is replaced with "gpt-4-1106-preview"
+if (get_option('chatbot_chatgpt_model_choice') == 'gpt-4-turbo') {
+    $model = 'gpt-4-1106-preview';
+    update_option('chatbot_chatgpt_model_choice', $model);
+    // DIAG - Diagnostics
+    // back_trace ( 'NOTICE', 'Model upgraded: ' . $model);
+}
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
 $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
@@ -188,6 +201,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     global $assistant_id;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
@@ -211,10 +225,6 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     // https://chat.openai.com/c/275770c1-fa72-404b-97c2-2dad2e8a0230
     wp_enqueue_script( 'dompurify', plugin_dir_url(__FILE__) . 'assets/js/purify.min.js', array(), '1.0.0', true );
 
-    // Enqueue the KFlow script - Ver 1.9.2
-    global $kflow_data;
-    wp_enqueue_script('chatbot-kflow-localize', plugins_url('assets/js/chatbot-kflow-localize.js', __FILE__), array('jquery'), '1.0', true);
-
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
     $page_id = get_the_id();
@@ -225,7 +235,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions
+        'additional_instructions' => $additional_instructions,
+        'model' => $model
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -235,6 +246,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    // back_trace( 'NOTICE', '$model: ' . $model);
     
     // Defaults for Ver 1.6.1
     $defaults = array(
@@ -346,7 +358,6 @@ if (!function_exists('enqueue_jquery_ui')) {
     add_action( 'admin_enqueue_scripts', 'enqueue_jquery_ui' );
 }
 
-
 // Schedule Cleanup of Expired Transients
 if (!wp_next_scheduled('chatbot_chatgpt_cleanup_event')) {
     wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_cleanup_event');
@@ -372,20 +383,30 @@ function chatbot_chatgpt_send_message(): void {
     global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
     $api_key = '';
 
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
-    // Retrieve the Use GPT Assistant ID
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - If gpt-4-turbo is selected, set the API model to gpt-4-1106-preview, i.e., the API name for the model
-    if ($model == 'gpt-4-turbo') {
-        $model = 'gpt-4-1106-preview';
+    // Retrieve the GPT Model
+    if (!empty($model)) {
+        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        // DIAG - Diagnostics
+        // back_trace ( 'NOTICE', 'Model from options: ' . $model);
+    } else {
+        // SEE IF $script_data_array HAS THE MODEL
+        if ( isset($script_data_array['model'])) {
+            $model = $script_data_array['model'];
+            // DIAG - Diagnostics
+            // back_trace ( 'NOTICE', 'Model set in global: ' . $model);
+        } else {
+            // FIXME - I SHOULDN'T BE FALLING THRU HERE - DO NOTHING
+            // DIAG - Diagnostics
+            // back_trace ( 'ERROR', 'Model not set!!!');
+        }
     }
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Retrieve the Max tokens - Ver 1.4.2
     $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 150));
@@ -415,12 +436,20 @@ function chatbot_chatgpt_send_message(): void {
 
     $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
+    $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
 
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
+
+    $temp_model = $chatbot_settings['model']; // Store the model in a temporary variable before overwriting $chatbot_settings
+
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
+
+    $chatbot_settings['model'] = $temp_model; // Restore the model after overwriting $chatbot_settings
+
     $assistant_id = isset($chatbot_settings['assistantID']) ? $chatbot_settings['assistantID'] : '';
     $thread_Id = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
+    $model = isset($chatbot_settings['model']) ? $chatbot_settings['model'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -428,6 +457,7 @@ function chatbot_chatgpt_send_message(): void {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
@@ -530,8 +560,30 @@ function chatbot_chatgpt_send_message(): void {
         // back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
-        // Send message to ChatGPT API - Ver 1.6.7
-        $response = chatbot_chatgpt_call_api($api_key, $message);
+        // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
+        // TRY NOT TO FETCH MODEL AGAIN
+        // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        if (str_starts_with($model, 'gpt')) {
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
+            // Send message to ChatGPT API - Ver 1.6.7
+            $response = chatbot_chatgpt_call_api($api_key, $message);
+        } elseif (str_starts_with($model, 'dall')) {
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
+            // Send message to Image API - Ver 1.9.4
+            $response = chatbot_chatgpt_call_image_api($api_key, $message);
+        } elseif (str_starts_with($model, 'tts')) {
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
+            // Send message to TTS API - Ver 1.9.4
+            $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+        } else {
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
+            // Send message to ChatGPT API - Ver 1.6.7
+            $response = chatbot_chatgpt_call_api($api_key, $message);
+        }
         
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
@@ -652,9 +704,62 @@ function enqueue_greetings_script(): void {
 
     wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
+    // If user is logged in, then modify greeting if greeting contains "[...]" or remove if not logged in - Ver 1.9.4
+    if (is_user_logged_in()) {
+
+        $current_user_id = get_current_user_id();
+        $current_user = get_userdata($current_user_id);
+
+        //Do this for Initial Greeting
+        $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+
+        // Determine what the field name is between the brackets
+        $user_field_name = '';
+        $user_field_name = substr($initial_greeting, strpos($initial_greeting, '[') + 1, strpos($initial_greeting, ']') - strpos($initial_greeting, '[') - 1);
+
+        // If $initial_greeting contains "[$user_field_name]" then replace with field from DB
+        if (strpos($initial_greeting, '[' . $user_field_name . ']') !== false) {
+            $initial_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $initial_greeting);
+        } else {
+            $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
+        }
+
+        // Do this for Subsequent Greeting
+        $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+
+        // Determine what the field name is between the brackets
+        $user_field_name = '';
+        $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
+
+        // If $subsequent_greeting contains "[$user_field_name]" then replace with field from DB
+        if (strpos($subsequent_greeting, '[' . $user_field_name . ']') !== false) {
+            $subsequent_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $subsequent_greeting);
+        } else {
+            $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
+        }
+
+    } else {
+
+        $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+
+        $user_field_name = '';
+        $user_field_name = substr($initial_greeting, strpos($initial_greeting, '[') + 1, strpos($initial_greeting, ']') - strpos($initial_greeting, '[') - 1 );
+
+        // $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
+        $initial_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $initial_greeting);
+
+        $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+
+        $user_field_name = '';
+        $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
+
+        // $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
+        $subsequent_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $subsequent_greeting);
+    }
+
     $greetings = array(
-        'initial_greeting' => esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?')),
-        'subsequent_greeting' => esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?')),
+        'initial_greeting' => $initial_greeting,
+        'subsequent_greeting' => $subsequent_greeting,
     );
 
     wp_localize_script('greetings', 'greetings_data', $greetings);

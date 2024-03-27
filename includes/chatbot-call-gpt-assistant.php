@@ -73,7 +73,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
     unset($data['file_ids']);
     // Add the file reference if file_id is provided
-    // FIXME - ADD MULITPLE FILES HERE - Ver 1.9.2 - 2024 03 06
+    // FIXME - ADD MULTIPLE FILES HERE - Ver 1.9.2 - 2024 03 06
     if (!empty($file_id) && !empty($file_id[0])) {
         // PRIOR TO VER 1.9.2
         // $data['file_ids'] = [$file_id];
@@ -302,6 +302,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $assistant_id;
     global $script_data_array;
     global $additional_instructions;
+    global $model;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
@@ -312,6 +313,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$message: ' . $message);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
@@ -352,7 +354,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions
+        'additional_instructions' => $additional_instructions,
+        'model' => $model
     );
 
     // Step 1: Create an Assistant
@@ -571,8 +574,6 @@ function chatbot_chatgpt_retrieve_file_id() {
     return $file_ids;
 
 }
-
-
 
 // Cleanup in Aisle 4 on OpenAI - Ver 1.7.9
 function deleteUploadedFile($file_id) {

@@ -133,7 +133,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_api_key' );
         update_option( 'chatbot_chatgpt_api_key', $chatbot_chatgpt_api_key );
         // DIAG - Log the old option deletion
-        // back_trace('NOTICE', 'hatgpt_api_key option deleted');
+        // back_trace('NOTICE', 'chatgpt_api_key option deleted');
     }
 
     // Replace option - chatbot_chatgpt_avatar_greeting_setting
@@ -352,4 +352,3 @@ function chatbot_chatgpt_uninstall(){
 
         return;
 }
-

@@ -45,7 +45,7 @@ function chatbot_chatgpt_dump_options_to_file() {
 
 }
 
-// Fuction to confirm if curl is enabled
+// Function to confirm if curl is enabled
 function can_use_curl_for_file_protocol() {
 
     // DIAG - Diagnostic - Ver 1.9.1

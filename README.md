@@ -2,6 +2,20 @@
 
 The **Kognetiks Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
+## The Newest Features
+
+Version 1.9.4 of the **Kognetiks Chatbot for WordPress** plugin introduces personalized greeting options, displays the Assistant's name sourced from OpenAI, expands support to include image and speech models, and integrates DALL-E for image generation alongside Text-to-Speech functionalities for an enriched user interaction.
+
+- **Personalized Greetings:** Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users table in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [display_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
+
+- **Display Assistant's Name:** We've introduced a feature that allows the display of the Assistant's name, which is sourced directly from the OpenAI platform. This can be found and adjusted under Settings > Kognetiks Chatbot > GPT Assistants > Display GPT Assistant Name.
+
+- **Support for Additional Models:** Our support model range has been expanded to include not just text but also image and speech functionalities. This broadens the chatbot's application in various interactive scenarios.  You can call the Chatbot using the "model" parameter in the shortcode.
+
+- **Image Generation with DALL-E:** The chatbot is now equipped to generate images using OpenAI's DALL-E models, offering users a new dimension of creativity and visual interaction. To generate images using the "dall-e-3" model, use the shortcode **[chatbot style=embedded model=dall-e-3]**.
+
+- **Text-to-Speech Conversion:** With the integration of Text-to-Speech (TTS) models, the chatbot can now convert text inputs into spoken word, making it accessible for auditory communication and enhancing user engagement through speech. To generate speech from text, use the shortcode **[chatbot style=embedded model=tts-1-1106]**.
+
 ## Features
 
 Welcome to the future of website interaction with **Kognetiks Chatbot for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Assistants.

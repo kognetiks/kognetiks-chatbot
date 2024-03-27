@@ -22,6 +22,10 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     global $thread_id;
     global $assistant_id;
     global $learningMessages;
+    global $script_data_array;
+    global $additional_instructions;
+    global $model;
+    
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -44,10 +48,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // Select the OpenAI Model
     // Get the saved model from the settings or default to "gpt-3.5-turbo"
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
-    if ($model == 'gpt-4-turbo') {
-        $model = 'gpt-4-1106-preview';
-    }    
+ 
     // Max tokens - Ver 1.4.2
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')));
 

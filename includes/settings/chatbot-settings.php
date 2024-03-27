@@ -226,7 +226,7 @@ function chatbot_chatgpt_settings_page_html(): void {
             } elseif ($active_tab == 'support') {
                 settings_fields('chatbot_chatgpt_support');
                 do_settings_sections('chatbot_chatgpt_support');
-       }
+            }
 
             submit_button('Save Settings');
             ?>

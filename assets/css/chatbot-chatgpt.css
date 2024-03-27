@@ -16,7 +16,6 @@
 
 #chatgpt-open-btn.avatar-icon {
     width: 70px;
-    width: 70px;
     padding: 5px 5px;
 }
 
@@ -43,7 +42,7 @@
     white-space: normal;
     display: inline-block;
     font: inherit !important;
-    font-family: inherit !important;
+    /*font-family: inherit !important;*/
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
     box-sizing: border-box;
     min-width: 300px; /* Minimum width */
@@ -136,6 +135,18 @@
 }
 
 #chatbot-chatgpt-header {
+    background-color: #222222;
+    color: #ffffff;
+    padding: 10px;
+    font-size: 16px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#chatbot-chatgpt-header-embedded {
     background-color: #222222;
     color: #ffffff;
     padding: 10px;
@@ -350,7 +361,7 @@
     font: inherit !important;
     /* Removed font-family - Ver 1.8.6 */
     /* font-family: dashicons, inherit !important; */
-    font-family: inherit !important;
+    /*font-family: inherit !important;*/
     display: flex; 
     justify-content: center; 
     align-items: center;

@@ -56,12 +56,8 @@ function localize_global_stopwords($language_code, $stopWords) {
         'Content-Type' => 'application/json',
     );
 
-    // Model and message for testing
+    // Model and Message for testing
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
-    if ($model == 'gpt-4-turbo') {
-        $model = 'gpt-4-1106-preview';
-    }
 
     $stopWords_string = implode(", ", $stopWords);
     $stopWords = "Translate the global variables into " . $language_code . ":\n\n" . $stopWords_string;
@@ -159,12 +155,9 @@ function localize_global_learningMessages($language_code, $learningMessages) {
         'Content-Type' => 'application/json',
     );
 
-    // Model and message for testing
+    // Model and Message for testing
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
-    if ($model == 'gpt-4-turbo') {
-        $model = 'gpt-4-1106-preview';
-    }
+    // FIXME - For now switch gpt-4-turbo back to gpt-4-1106-preview
 
     $learningMessages_string = implode("\n", $learningMessages);
     $learningMessages = "Translate the global variables into " . $language_code . ":\n\n" . $learningMessages_string;
@@ -265,12 +258,8 @@ function localize_global_errorResponses($language_code, $errorResponses) {
         'Content-Type' => 'application/json',
     );
 
-    // Model and message for testing
+    // Model and Message for testing
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    // FIXME - For now switch gpt-4-turbo back got gpt-4-1106-preview
-    if ($model == 'gpt-4-turbo') {
-        $model = 'gpt-4-1106-preview';
-    }
 
     $errorResponses_string = implode("\n", $errorResponses);
     $errorResponses = "Translate the global variables into " . $language_code . ":\n\n" . $errorResponses_string;

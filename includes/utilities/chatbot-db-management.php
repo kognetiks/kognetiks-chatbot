@@ -223,6 +223,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 
 // Function to delete specific expired transients - Ver 1.7.6
 function clean_specific_expired_transients(): void {
+
     global $wpdb;
 
     // Prefix for transients in the database.
@@ -249,6 +250,7 @@ function clean_specific_expired_transients(): void {
         // Delete the transient.
         delete_transient( $transient_name );
     }
+    
 }
 
 // Function to purge conversation log entries that are older than the specified number of days - Ver 1.7.6
