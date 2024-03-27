@@ -6,7 +6,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 Version 1.9.4 of the **Kognetiks Chatbot for WordPress** plugin introduces personalized greeting options, displays the Assistant's name sourced from OpenAI, expands support to include image and speech models, and integrates DALL-E for image generation alongside Text-to-Speech functionalities for an enriched user interaction.
 
-- **Personalized Greetings:** Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users table in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [display_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
+- **Personalized Greetings:** Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users or _usermeta tables in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [first_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
 
 - **Display Assistant's Name:** We've introduced a feature that allows the display of the Assistant's name, which is sourced directly from the OpenAI platform. This can be found and adjusted under Settings > Kognetiks Chatbot > GPT Assistants > Display GPT Assistant Name.
 

@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.4.3
-Stable tag: 1.9.4
+Stable tag: 1.9.5
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -47,7 +47,7 @@ Guide your visitors where you want them. Customizable buttons can link directly 
 Customize accessibility with three audience settings: All Audiences, Logged-in Only, or Visitors Only. Additionally, control presentation to specific audiences. Whether floating or embedded, tailor the chatbot's visibility for a seamless user experience across platforms.
 
 **🎭Personalized Greetings:**
-Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users table in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [display_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
+Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users or _usersmeta table in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [first_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
 
 **🤖Display Assistant's Name:**
 We've introduced a feature that allows the display of the Assistant's name, which is sourced directly from the OpenAI platform. This can be found and adjusted under Settings > Kognetiks Chatbot > GPT Assistants > Display GPT Assistant Name.
@@ -211,6 +211,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 16. Settings and Options
 
 == Changelog ==
+
+= 1.9.5 =
+* TBD
 
 = 1.9.4 =
 * Enable personalization for initial and subsequent greetings for chatbot
