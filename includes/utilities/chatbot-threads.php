@@ -48,9 +48,9 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
     $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
 
     // Store the style and the assistant value with unique keys
-    // Store transients for 1 day
-    set_transient($thread_id_thread_key, $thread_id, 60*60*4); // Store for 4 hours
-    set_transient($assistant_id_thread_key, $assistant_id, 60*60*4); // Store for 4 hours
+    // Store transients for 1 day 12 hours (60 seconds * 60 minutes * 36 hours)
+    set_transient($thread_id_thread_key, $thread_id, 60*60*36); // Store for 36 hours
+    set_transient($assistant_id_thread_key, $assistant_id, 60*60*36); // Store for 36 hours
 
 }
 
