@@ -268,9 +268,23 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // KFlow - Call kflow_prompt_and_response() - Ver 1.9.5
     if (function_exists('kflow_prompt_and_response')) {
-        $prompt = kflow_prompt_and_response($atts);
+        $kflow_prompt = kflow_prompt_and_response($atts);
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', 'kflow prompt: ' . $prompt);
+        back_trace( 'NOTICE', 'kflow prompt: ' . $kflow_prompt);
+        if ( $kflow_prompt != '' ) {
+            // A prompt was returned
+            // Pass to the Chatbot
+            // To ask the visitor to complete
+            // the prompt
+            $chatbot_chatgpt_kflow_prompt = $kflow_prompt;
+            // Override the $model and set it to 'flow'
+            $model = 'flow';
+            $response = chatbot_chatgpt_send_message();
+        } else {
+            // No prompt was returned
+            // Use the default prompt
+            $chatbot_chatgpt_kflow_prompt = '';
+        }
     } else {
         // Handle the case where the function does not exist
         // Throw an error or return a default value, etc.
@@ -279,7 +293,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // Depending on the style, adjust the output - Ver 1.7.1
-    if ($chatbot_chatgpt_display_style == 'embedded') {
+    if ($chatbot_chatgpt_display_style == 'embedded' and $chatbot_chatgpt_kflow_prompt == '') {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
@@ -358,7 +372,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         </button>
         <?php
         return ob_get_clean();
-    } else {
+    } elseif ($chatbot_chatgpt_display_style == 'floating' and $chatbot_chatgpt_kflow_prompt == '') {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
@@ -471,6 +485,69 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <?php
             }
             ?>
+        </div>
+        <button id="chatgpt-open-btn" style="display: none;">
+        <!-- <i class="dashicons dashicons-format-chat"></i> -->
+        <i class="chatbot-open-icon"></i>
+        </button>
+        <?php
+        return ob_get_clean();
+    } elseif ($chatbot_chatgpt_display_style == 'embedded' and $chatbot_chatgpt_kflow_prompt != '') {
+        // Code for embed style ('embedded' is the alternative style)
+        // Store the style and the assistant value - Ver 1.7.2
+        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
+        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
+
+        ob_start();
+        ?>
+        <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
+        <!-- <script>
+            $(document).ready(function() {
+                $('#chatbot-chatgpt').removeClass('floating-style').addClass('embedded-style');
+            });
+        </script> -->
+        <!-- REMOVED FOR EMBEDDED -->
+        <?php
+        if ( $use_assistant_name == 'Yes' ) {
+            echo '<div id="chatbot-chatgpt-header-embedded">';
+            echo '<div id="chatgptTitle" class="title">' . $bot_name . '</div>';
+            echo '</div>';
+        } else {
+            // DO NOTHING
+        }
+        ?>
+        <div id="chatbot-chatgpt-conversation"></div>
+            <div class="chat-message bot-message">
+                <span class="bot-text"> <?php echo $chatbot_chatgpt_kflow_prompt ?> </span>
+            </div>
+        <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
+        <div style="flex-grow: 1; max-width: 95%;">
+                <label for="chatbot-chatgpt-message"></label>
+                <?php
+                    echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
+                ?>
+            </div>
+            <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                <button id="chatbot-chatgpt-submit">
+                    <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
+                </button>
+                <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
+                    <!-- <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" /> -->
+                    <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
+                    <button id="chatbot-chatgpt-upload-file">
+                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+                    </button>
+                    <script type="text/javascript">
+                        document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
+                            document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                        });
+                    </script>
+                <?php endif; ?>
+                <button id="chatbot-chatgpt-erase-btn">
+                    <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
+                </button>
+            </div>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
         <!-- <i class="dashicons dashicons-format-chat"></i> -->

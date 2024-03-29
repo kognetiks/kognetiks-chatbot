@@ -80,6 +80,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; //
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
 
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-flow-api.php'; // ChatGPT API - Ver 1.9.5
+
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-dimensions.php';
@@ -578,6 +580,13 @@ function chatbot_chatgpt_send_message(): void {
             $script_data_array['model'] = $model;
             // Send message to TTS API - Ver 1.9.4
             $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+        } elseif ($model = 'flow') {
+            // DIAG - Diagnostics
+            back_trace( 'NOTICE', 'Using Flow');
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
+            // Send message to ChatGPT API - Ver 1.6.7
+            $response = chatbot_chatgpt_call_flow_api($api_key, $message);
         } else {
             // Reload the model - BELT & SUSPENDERS
             $script_data_array['model'] = $model;
