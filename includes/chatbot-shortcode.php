@@ -28,6 +28,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
 
+    global $kflow_data;
+
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -47,7 +49,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'instructions' => $additional_instructions,
+        'additiona_instructions' => $additional_instructions,
         'model' => $model
     );
 
@@ -61,7 +63,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'audience' => '', // If not passed then default value
         'prompt' => '', // If not passed then default value
         'sequence' => '', // If not passed then default value
-        'instructions' => '', // If not passed then default value
+        'additional_instructions' => '', // If not passed then default value
         'model' => $model_choice // If not passed then default value
     );
 
@@ -222,7 +224,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        'instructions' => $additional_instructions,
+        '_additional_instructions' => $additional_instructions,
         'model' => $model
     );
 
@@ -267,33 +269,68 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
     // KFlow - Call kflow_prompt_and_response() - Ver 1.9.5
-    if (function_exists('kflow_prompt_and_response')) {
-        $kflow_prompt = kflow_prompt_and_response($atts);
+    if (function_exists('kflow_prompt_and_response') and !empty($atts['sequence'])) {
+
+        // Get the sequence ID
+        $sequence_id = array_key_exists('sequence', $atts) ? sanitize_text_field($atts['sequence']) : '';
+
+        // Fetch the KFlow data
+        $kflow_data = kflow_get_sequence_data($sequence_id);
+
+        // FIXME - REPLACED BY TRANSIENTS - Ver 1.9.5
+        // Setup the sequence
+        $script_data_array['sequence_id'] = $sequence_id;
+        $script_data_array['next_step'] = 1;
+        $script_data_array['total_steps'] = count($kflow_data['Steps']);
+
+        // Set transients
+        set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id);
+        set_chatbot_chatgpt_transients('kflow_step', 0, null, null, $session_id);
+
+        // Get the first prompt
+        $kflow_prompt = $kflow_data['Prompts'][0];
+
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', 'kflow prompt: ' . $kflow_prompt);
+        back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
+        back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+        back_trace( 'NOTICE', '$kflow_prompt: ' . $kflow_prompt);
+
+        // Add +1 to the next step
+        // $script_data_array['next_step'] = $script_data_array['next_step'] + 1;
+
         if ( $kflow_prompt != '' ) {
+
             // A prompt was returned
             // Pass to the Chatbot
-            // To ask the visitor to complete
-            // the prompt
-            $chatbot_chatgpt_kflow_prompt = $kflow_prompt;
+            // To ask the visitor to complete the prompt
+            $chatbot_chatgpt_hot_bot_prompt = $kflow_prompt;
+
             // Override the $model and set it to 'flow'
             $model = 'flow';
-            $response = chatbot_chatgpt_send_message();
+
         } else {
+
             // No prompt was returned
             // Use the default prompt
-            $chatbot_chatgpt_kflow_prompt = '';
+            $chatbot_chatgpt_hot_bot_prompt = '';
+
+            // BELT & SUSPENDERS - Ver 1.9.5
+            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+            $script_data_array['model'] = $model;
+
         }
+
     } else {
+
         // Handle the case where the function does not exist
         // Throw an error or return a default value, etc.
         // DIAG - Diagnostics - Ver 1.9.5
         back_trace( 'WARNING', 'kflow modules not installed');
+
     }
 
     // Depending on the style, adjust the output - Ver 1.7.1
-    if ($chatbot_chatgpt_display_style == 'embedded' and $chatbot_chatgpt_kflow_prompt == '') {
+    if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
@@ -372,7 +409,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         </button>
         <?php
         return ob_get_clean();
-    } elseif ($chatbot_chatgpt_display_style == 'floating' and $chatbot_chatgpt_kflow_prompt == '') {
+    } elseif ($chatbot_chatgpt_display_style == 'floating') {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
@@ -485,69 +522,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <?php
             }
             ?>
-        </div>
-        <button id="chatgpt-open-btn" style="display: none;">
-        <!-- <i class="dashicons dashicons-format-chat"></i> -->
-        <i class="chatbot-open-icon"></i>
-        </button>
-        <?php
-        return ob_get_clean();
-    } elseif ($chatbot_chatgpt_display_style == 'embedded' and $chatbot_chatgpt_kflow_prompt != '') {
-        // Code for embed style ('embedded' is the alternative style)
-        // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
-        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
-
-        ob_start();
-        ?>
-        <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
-        <!-- <script>
-            $(document).ready(function() {
-                $('#chatbot-chatgpt').removeClass('floating-style').addClass('embedded-style');
-            });
-        </script> -->
-        <!-- REMOVED FOR EMBEDDED -->
-        <?php
-        if ( $use_assistant_name == 'Yes' ) {
-            echo '<div id="chatbot-chatgpt-header-embedded">';
-            echo '<div id="chatgptTitle" class="title">' . $bot_name . '</div>';
-            echo '</div>';
-        } else {
-            // DO NOTHING
-        }
-        ?>
-        <div id="chatbot-chatgpt-conversation"></div>
-            <div class="chat-message bot-message">
-                <span class="bot-text"> <?php echo $chatbot_chatgpt_kflow_prompt ?> </span>
-            </div>
-        <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
-        <div style="flex-grow: 1; max-width: 95%;">
-                <label for="chatbot-chatgpt-message"></label>
-                <?php
-                    echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
-                ?>
-            </div>
-            <div id="chatbot-chatgpt-buttons-container" style="flex-grow: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                <button id="chatbot-chatgpt-submit">
-                    <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
-                </button>
-                <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
-                    <!-- <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" /> -->
-                    <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
-                    <button id="chatbot-chatgpt-upload-file">
-                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
-                    </button>
-                    <script type="text/javascript">
-                        document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                            document.getElementById('chatbot-chatgpt-upload-file-input').click();
-                        });
-                    </script>
-                <?php endif; ?>
-                <button id="chatbot-chatgpt-erase-btn">
-                    <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
-                </button>
-            </div>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
         <!-- <i class="dashicons dashicons-format-chat"></i> -->

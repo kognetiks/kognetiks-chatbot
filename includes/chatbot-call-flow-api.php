@@ -28,6 +28,8 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     
     global $errorResponses;
 
+    global $kflow_data;
+
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_call_flow_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
@@ -36,27 +38,76 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
+    // Fetch the KFlow data
+    // $sequence_id = $script_data_array['sequence_id'];
+    $kflow_sequence = get_chatbot_chatgpt_transients('kflow_sequence', null, null, $session_id);
+    $kflow_step = (int) get_chatbot_chatgpt_transients('kflow_step', null, null, $session_id);
+
+    $kflow_data = kflow_get_sequence_data($kflow_sequence);
+
+    // DIAG - Diagnostics - Ver 1.9.5
+    // back_trace ( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    back_trace ( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
+
+    // Add +1 to $script_data_array['next_step']
+    // $script_data_array['next_step'] = $script_data_array['next_step'] + 1;
+    $kflow_step = $kflow_step + 1;
+
+    // Check if $script_data_array['next_step'] is greater than $script_data_array['total_steps']
+    // if ($script_data_array['next_step'] > $kflow_data['total_steps']) {
+
+    // Count the number of 'Steps' in the KFlow data
+    $kflow_data['total_steps'] = count($kflow_data['Steps']);
+    
+    if ($kflow_step > (int) $kflow_data['total_steps']) {
+
+        // REPLACE THE PLACEHOLDERS IN THE TEMPLATE WITH THE ANSWERS
+        // [ANSWER_1], [ANSWER_2], [ANSWER_3], [ANSWER_4], [ANSWER_5], [ANSWER_6], [ANSWER_7], [ANSWER_8], [ANSWER_9], [ANSWER_10]
+
+        // Get the template for the end of the script
+        $message = $kflow_data['Templates'][1];
+
+        // Call the ChatGPT Assistant API
+        $message = chatbot_chatgpt_assistant_api($api_key, $message, $session_id, $user_id, $page_id, $thread_id, $assistant_id, $model);
+
+    } else {
+
+        // Get the next step in the script
+        // $message = $kflow_data[$sequence_id]['next_step'];
+        $kflow_prompt_id = $kflow_data['Steps'][$kflow_step];
+        $message = $kflow_data['Prompts'][$kflow_prompt_id];
+
+        // Update the transients
+        set_chatbot_chatgpt_transients('kflow_sequence', $kflow_sequence, null, null, $session_id);
+        set_chatbot_chatgpt_transients('kflow_step', $kflow_step, null, null, $session_id);
+
+        // Call the ChatGPT Assistant API
+
+    }
+
     // Context History
     addEntry('chatbot_chatgpt_context_history', $message);
 
     // DIAG Diagnostics
-    // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', '$message: ' . $message);  
+    back_trace( 'NOTICE', '$message: ' . $message);  
+
+    // Add message to converation log
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $message);
 
     // Post the kflow message to the UI as if it were a response
-    $response_body['message'] = $message;
-    $response_body['choices'][0]['message']['content'] = $message;
+    // $response_body['message'] = $message;
+    // $response_body['choices'][0]['message']['content'] = $message;
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
-    $response_body = json_decode(wp_remote_retrieve_body($response), true);
-    if (isset($response_body['message'])) {
-        $response_body['message'] = trim($response_body['message']);
-        if (!str_ends_with($response_body['message'], '.')) {
-            $response_body['message'] .= '.';
-        }
-    }
+    // $response_body = json_decode(wp_remote_retrieve_body($response), true);
+    // if (isset($response_body['message'])) {
+    //     $response_body['message'] = trim($response_body['message']);
+    //     if (!str_ends_with($response_body['message'], '.')) {
+    //         $response_body['message'] .= '.';
+    //     }
+    // }
 
     // DIAG - Diagnostics - Ver 1.8.1
     // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body))
@@ -97,20 +148,23 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
 
-    if (!empty($response_body['choices'])) {
-        // Handle the response from the chat engine
-        // Context History - Ver 1.6.1
-        addEntry('chatbot_chatgpt_context_history', $response_body['choices'][0]['message']['content']);
-        return $response_body['choices'][0]['message']['content'];
-    } else {
-        // FIXME - Decide what to return here - it's an error
-        if (get_locale() !== "en_US") {
-            $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-        } else {
-            $localized_errorResponses = $errorResponses;
-        }
-        // Return a random error message
-        return $localized_errorResponses[array_rand($localized_errorResponses)];
-    }
+    // if (!empty($response_body['choices'])) {
+    //     // Handle the response from the chat engine
+    //     // Context History - Ver 1.6.1
+    //     addEntry('chatbot_chatgpt_context_history', $response_body['choices'][0]['message']['content']);
+    //     return $response_body['choices'][0]['message']['content'];
+    // } else {
+    //     // FIXME - Decide what to return here - it's an error
+    //     if (get_locale() !== "en_US") {
+    //         $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+    //     } else {
+    //         $localized_errorResponses = $errorResponses;
+    //     }
+    //     // Return a random error message
+    //     return $localized_errorResponses[array_rand($localized_errorResponses)];
+    // }
+
+    // Set success and return $message
+    return $message;
     
 }

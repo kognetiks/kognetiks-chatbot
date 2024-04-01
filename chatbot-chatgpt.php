@@ -387,6 +387,8 @@ function chatbot_chatgpt_send_message(): void {
     global $additional_instructions;
     global $model;
 
+    global $flow_data;
+
     $api_key = '';
 
     // Retrieve the API key
@@ -518,8 +520,24 @@ function chatbot_chatgpt_send_message(): void {
         }
     }
 
-    // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7
-    if ($use_assistant_id == 'Yes') {
+    // Decide whether to use an Flow, Assistant or original ChatGPT
+    if ($model == 'flow'){
+        
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', 'Using ChatGPT Flow');
+
+        // Reload the model - BELT & SUSPENDERS
+        $script_data_array['model'] = $model;
+
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', '$message: ' . $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+
+        // Send message to ChatGPT API - Ver 1.6.7
+        $response = chatbot_chatgpt_call_flow_api($api_key, $message);
+        wp_send_json_success($response);
+
+    } elseif ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
@@ -580,13 +598,6 @@ function chatbot_chatgpt_send_message(): void {
             $script_data_array['model'] = $model;
             // Send message to TTS API - Ver 1.9.4
             $response = chatbot_chatgpt_call_tts_api($api_key, $message);
-        } elseif ($model = 'flow') {
-            // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Using Flow');
-            // Reload the model - BELT & SUSPENDERS
-            $script_data_array['model'] = $model;
-            // Send message to ChatGPT API - Ver 1.6.7
-            $response = chatbot_chatgpt_call_flow_api($api_key, $message);
         } else {
             // Reload the model - BELT & SUSPENDERS
             $script_data_array['model'] = $model;

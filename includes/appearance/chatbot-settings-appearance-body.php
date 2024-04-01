@@ -43,12 +43,13 @@ function chatbot_chatgpt_appearance_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_greeting_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_greeting_text_color', '#ffffff'));
 
     // Define CSS styles as global variables
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bubble'] = ".chatbot-bubble { background-color: {$chatbot_chatgpt_appearance_background_color} !important; color: {$chatbot_chatgpt_appearance_greeting_text_color} !important;";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['floating-style'] = ".floating-style { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['embedded-style'] = ".embedded-style { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-submit'] = "#chatbot-chatgpt-submit { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-upload-file'] = "#chatbot-chatgpt-upload-file { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-erase-conversation'] = "#chatbot-chatgpt-erase-btn { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt'] = "#chatbot-chatgpt { background: {$chatbot_chatgpt_appearance_background_color} !important; color: {$chatbot_chatgpt_appearance_greeting_text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bubble'] = ".chatbot-bubble { background: {$chatbot_chatgpt_appearance_background_color} !important; color: {$chatbot_chatgpt_appearance_greeting_text_color} !important;";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['floating-style'] = ".floating-style { background: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['embedded-style'] = ".embedded-style { background: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-submit'] = "#chatbot-chatgpt-submit { background: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-upload-file'] = "#chatbot-chatgpt-upload-file { background: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-erase-conversation'] = "#chatbot-chatgpt-erase-btn { background: {$chatbot_chatgpt_appearance_background_color} !important; }";
     
 }
 add_action('wp_head', 'chatbot_chatgpt_appearance_background_custom_css_settings');
