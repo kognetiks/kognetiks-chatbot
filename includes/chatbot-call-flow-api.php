@@ -16,6 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 // Call the ChatGPT API
 function chatbot_chatgpt_call_flow_api($api_key, $message) {
 
+    global $wpdb;
+
     global $session_id;
     global $user_id;
     global $page_id;
@@ -46,71 +48,72 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     $kflow_data = kflow_get_sequence_data($kflow_sequence);
 
     // DIAG - Diagnostics - Ver 1.9.5
-    // back_trace ( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
-    back_trace ( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
-
-    // Add +1 to $script_data_array['next_step']
-    // $script_data_array['next_step'] = $script_data_array['next_step'] + 1;
-    $kflow_step = $kflow_step + 1;
-
-    // Check if $script_data_array['next_step'] is greater than $script_data_array['total_steps']
-    // if ($script_data_array['next_step'] > $kflow_data['total_steps']) {
+    // back_trace ( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
 
     // Count the number of 'Steps' in the KFlow data
     $kflow_data['total_steps'] = count($kflow_data['Steps']);
-    
-    if ($kflow_step > (int) $kflow_data['total_steps']) {
+
+    // Minus 1 from the total steps to get the last step
+    if ($kflow_step > (int) $kflow_data['total_steps'] - 1) {
 
         // REPLACE THE PLACEHOLDERS IN THE TEMPLATE WITH THE ANSWERS
-        // [ANSWER_1], [ANSWER_2], [ANSWER_3], [ANSWER_4], [ANSWER_5], [ANSWER_6], [ANSWER_7], [ANSWER_8], [ANSWER_9], [ANSWER_10]
+        // [ANSWER_1], [ANSWER_2], ..., [ANSWER_nn]
 
         // Get the template for the end of the script
-        $message = $kflow_data['Templates'][1];
+        $template = $kflow_data['Templates'][1];
+
+        // Get the answers from the conversation log
+        $answers = [];
+        $answers = chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assistant_id);
+
+        // Parse the template inserting the answers
+        $message = chatbot_chatgpt_parse_template($template, $answers);
 
         // Call the ChatGPT Assistant API
-        $message = chatbot_chatgpt_assistant_api($api_key, $message, $session_id, $user_id, $page_id, $thread_id, $assistant_id, $model);
+        $api_key = ''; // Not needed as this is stored in the assistant
+        $thread_id = ''; // Not needed as this is the end of the script so no thread_id
+        $message = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);
 
     } else {
 
         // Get the next step in the script
         // $message = $kflow_data[$sequence_id]['next_step'];
         $kflow_prompt_id = $kflow_data['Steps'][$kflow_step];
-        $message = $kflow_data['Prompts'][$kflow_prompt_id];
+        $message = $kflow_data['Prompts'][$kflow_prompt_id - 1];
+
+        // $thread_id
+        $thread_id = '[answer=' . $kflow_step . ']';
+        
+        // Add +1 to $script_data_array['next_step']
+        $kflow_step = $kflow_step + 1;
 
         // Update the transients
         set_chatbot_chatgpt_transients('kflow_sequence', $kflow_sequence, null, null, $session_id);
         set_chatbot_chatgpt_transients('kflow_step', $kflow_step, null, null, $session_id);
 
         // Call the ChatGPT Assistant API
+        // Return from more answers
 
     }
 
+    // There is no usage in the response
+    $response_body["usage"]["prompt_tokens"] = 0;
+    $response_body["usage"]["completion_tokens"] = 0;
+    $response_body["usage"]["total_tokens"] = 0;
+
+    // Add the usage to the conversation tracker
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
+    
     // Context History
     addEntry('chatbot_chatgpt_context_history', $message);
 
-    // DIAG Diagnostics
-    back_trace( 'NOTICE', '$message: ' . $message);  
-
     // Add message to converation log
+    // DIAG Diagnostics
+    back_trace( 'NOTICE', '$message: ' . $message);
+
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $message);
-
-    // Post the kflow message to the UI as if it were a response
-    // $response_body['message'] = $message;
-    // $response_body['choices'][0]['message']['content'] = $message;
-
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
-
-    // $response_body = json_decode(wp_remote_retrieve_body($response), true);
-    // if (isset($response_body['message'])) {
-    //     $response_body['message'] = trim($response_body['message']);
-    //     if (!str_ends_with($response_body['message'], '.')) {
-    //         $response_body['message'] .= '.';
-    //     }
-    // }
-
-    // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body))
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -125,46 +128,81 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
         }
     }
 
-    // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
-
-    // DIAG - Diagnostics - Ver 1.8.1
-    // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
-
-    // There is no usage in the response
-    $response_body["usage"]["prompt_tokens"] = 0;
-    $response_body["usage"]["completion_tokens"] = 0;
-    $response_body["usage"]["total_tokens"] = 0;
-
-    // Add the usage to the conversation tracker
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
-
-    // if (!empty($response_body['choices'])) {
-    //     // Handle the response from the chat engine
-    //     // Context History - Ver 1.6.1
-    //     addEntry('chatbot_chatgpt_context_history', $response_body['choices'][0]['message']['content']);
-    //     return $response_body['choices'][0]['message']['content'];
-    // } else {
-    //     // FIXME - Decide what to return here - it's an error
-    //     if (get_locale() !== "en_US") {
-    //         $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-    //     } else {
-    //         $localized_errorResponses = $errorResponses;
-    //     }
-    //     // Return a random error message
-    //     return $localized_errorResponses[array_rand($localized_errorResponses)];
-    // }
-
     // Set success and return $message
     return $message;
     
+}
+
+// Get the Answers from the Conversation Log
+function chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assistant_id) {
+
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+
+    $max_answers = 10; // FIXME - PASS AS PARAMETER
+
+    // Get the answers from the conversation log
+    $answers = $wpdb->get_results("SELECT message_text
+                                    FROM $table_name
+                                    WHERE session_id = '4bagmh57b80i3ls03pg75vtaet'
+                                    AND user_id = '1'
+                                    AND page_id = '37'
+                                    AND assistant_id = 'asst_o19G0LVazMQhLnZXinQYZwCh'
+                                    AND user_type = 'Visitor'
+                                    ORDER BY thread_id DESC
+                                    LIMIT $max_answers;
+                                ");
+
+    // Initialize the answers array
+    $answers_array = array();
+
+    // if $answers is empty, return an empty array
+    if (empty($answers)) {
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_answers() - $answers is empty');
+        return $answers_array;
+    }
+
+    // if $answer is an error, return an empty array
+    if (is_wp_error($answers)) {
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_answers() - $answers is an error' . $answers->get_error_message());
+        return $answers_array;
+    }
+
+    // Loop through the answers and add them to the answers array
+    foreach ($answers as $answer) {
+        $answers_array[] = $answer->message_text;
+    }
+
+    // Return the answers array
+    return $answers_array;
+
+}
+
+// Parse template and replace placeholders with answers
+function chatbot_chatgpt_parse_template($template, $answers) {
+
+    // Initialize the message
+    $message = '';
+
+    // if $template is empty, return an empty string
+    if (empty($template)) {
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', 'chatbot_chatgpt_parse_template() - $template is empty');
+        return $message;
+    }
+
+    // Replace the placeholders in the template with the answers
+    $message = $template;
+    $i = 1;
+    foreach ($answers as $answer) {
+        $message = str_replace('[answer=' . $i . ']', $answer, $message);
+        $i++;
+    }
+
+    // Return the message
+    return $message;
+
 }

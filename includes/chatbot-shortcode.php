@@ -277,11 +277,16 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // Fetch the KFlow data
         $kflow_data = kflow_get_sequence_data($sequence_id);
 
+        // Set up the sequence
+        set_transient('kflow_sequence', $sequence_id);
+        set_transient('kflow_step', 0);
+
+        // FIXME - REMOVED 2024 04 01
         // FIXME - REPLACED BY TRANSIENTS - Ver 1.9.5
         // Setup the sequence
-        $script_data_array['sequence_id'] = $sequence_id;
-        $script_data_array['next_step'] = 1;
-        $script_data_array['total_steps'] = count($kflow_data['Steps']);
+        // $script_data_array['sequence_id'] = $sequence_id;
+        // $script_data_array['next_step'] = 1;
+        // $script_data_array['total_steps'] = count($kflow_data['Steps']);
 
         // Set transients
         set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id);
@@ -291,14 +296,33 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $kflow_prompt = $kflow_data['Prompts'][0];
 
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
-        back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
-        back_trace( 'NOTICE', '$kflow_prompt: ' . $kflow_prompt);
+        // back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
+        // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+        // back_trace( 'NOTICE', '$kflow_prompt: ' . $kflow_prompt);
 
+        // FIXME - REMOVED 2024 04 01
         // Add +1 to the next step
         // $script_data_array['next_step'] = $script_data_array['next_step'] + 1;
 
         if ( $kflow_prompt != '' ) {
+
+            // Set up the sequence
+            set_transient('kflow_sequence', $sequence_id);
+            set_transient('kflow_step', 0);
+
+            // FIXME - REMOVED 2024 04 01
+            // FIXME - REPLACED BY TRANSIENTS - Ver 1.9.5
+            // Setup the sequence
+            // $script_data_array['sequence_id'] = $sequence_id;
+            // $script_data_array['next_step'] = 1;
+            // $script_data_array['total_steps'] = count($kflow_data['Steps']);
+
+            // Set transients
+            set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id);
+            set_chatbot_chatgpt_transients('kflow_step', 0, null, null, $session_id);
+
+            // Get the first prompt
+            $kflow_prompt = $kflow_data['Prompts'][0];
 
             // A prompt was returned
             // Pass to the Chatbot
@@ -360,6 +384,23 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <div style="flex-grow: 1; max-width: 95%;">
                 <label for="chatbot-chatgpt-message"></label>
                 <?php
+                    // Kick off Flow - Ver 1.9.5
+                    if (!empty($sequence_id)){
+                        echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var textarea = document.getElementById('chatbot-chatgpt-message');
+                            textarea.value += '\\n';
+                            textarea.focus();
+
+                            setTimeout(function() {
+                                var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                                if (submitButton) {
+                                    submitButton.click();
+                                }
+                            }, 1000); // Delay of 1 second
+                        });
+                        </script>";
+                    }
                     // Preload with a prompt if it is set - Ver 1.9.0
                     if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
                         echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";

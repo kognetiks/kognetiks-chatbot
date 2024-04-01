@@ -305,15 +305,15 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $model;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    // back_trace( 'NOTICE', '$message: ' . $message);
-    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
-    // back_trace( 'NOTICE', '$model: ' . $model);
+    back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$message: ' . $message);
+    back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    back_trace( 'NOTICE', '$model: ' . $model);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
