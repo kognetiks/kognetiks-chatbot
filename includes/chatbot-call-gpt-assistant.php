@@ -324,6 +324,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     if (empty($thread_id)) {
         // Step 1: Create an Assistant
         // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
+        $api_key = get_option('chatbot_chatgpt_api_key', '');
         $assistants_response = createAnAssistant($api_key);
         // DIAG - Print the response
         // back_trace( 'NOTICE', $assistants_response);

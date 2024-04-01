@@ -52,9 +52,10 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
 
     // Count the number of 'Steps' in the KFlow data
     $kflow_data['total_steps'] = count($kflow_data['Steps']);
+    $max_answers = (int) $kflow_data['total_steps'] - 1;
 
     // Minus 1 from the total steps to get the last step
-    if ($kflow_step > (int) $kflow_data['total_steps'] - 1) {
+    if ($kflow_step > $max_answers) {
 
         // REPLACE THE PLACEHOLDERS IN THE TEMPLATE WITH THE ANSWERS
         // [ANSWER_1], [ANSWER_2], ..., [ANSWER_nn]
@@ -64,7 +65,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
 
         // Get the answers from the conversation log
         $answers = [];
-        $answers = chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assistant_id);
+        $answers = chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assistant_id, $max_answers);
 
         // Parse the template inserting the answers
         $message = chatbot_chatgpt_parse_template($template, $answers);
@@ -82,10 +83,10 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
         $message = $kflow_data['Prompts'][$kflow_prompt_id - 1];
 
         // $thread_id
-        $thread_id = '[answer=' . $kflow_step . ']';
+        // $thread_id = '[answer=' . $kflow_step . ']';
         
         // Add +1 to $script_data_array['next_step']
-        $kflow_step = $kflow_step + 1;
+        // $kflow_step = $kflow_step + 1;
 
         // Update the transients
         set_chatbot_chatgpt_transients('kflow_sequence', $kflow_sequence, null, null, $session_id);
@@ -134,21 +135,19 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
 }
 
 // Get the Answers from the Conversation Log
-function chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assistant_id) {
+function chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assistant_id, $max_answers) {
 
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
-    $max_answers = 10; // FIXME - PASS AS PARAMETER
-
     // Get the answers from the conversation log
     $answers = $wpdb->get_results("SELECT message_text
                                     FROM $table_name
-                                    WHERE session_id = '4bagmh57b80i3ls03pg75vtaet'
-                                    AND user_id = '1'
-                                    AND page_id = '37'
-                                    AND assistant_id = 'asst_o19G0LVazMQhLnZXinQYZwCh'
+                                    WHERE session_id = '$session_id'
+                                    AND user_id = '$user_id'
+                                    AND page_id = '$page_id'
+                                    AND assistant_id = '$assistant_id'
                                     AND user_type = 'Visitor'
                                     ORDER BY thread_id DESC
                                     LIMIT $max_answers;

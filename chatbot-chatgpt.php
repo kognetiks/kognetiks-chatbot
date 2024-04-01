@@ -529,9 +529,27 @@ function chatbot_chatgpt_send_message(): void {
         // Reload the model - BELT & SUSPENDERS
         $script_data_array['model'] = $model;
 
+        // Get the step from the transient
+        $kflow_step = get_chatbot_chatgpt_transients( 'kflow_step', null, null, $session_id);
+        if (empty($kflow_step)) {
+            $kflow_step = 0; // FIXME - Set to 1 or to zero?
+        }
+
+        // $thread_id
+        $thread_id = '[answer=' . $kflow_step + 1 . ']';
+        
+        // Add +1 to $script_data_array['next_step']
+        $kflow_step = $kflow_step + 1;
+
+        // Set the next step
+        set_chatbot_chatgpt_transients( 'kflow_step', $kflow_step, null, null, $session_id);
+
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$message: ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+
+        // BELT & SUSPENDERS
+        $thread_id = '';
 
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_flow_api($api_key, $message);

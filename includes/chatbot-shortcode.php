@@ -306,9 +306,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
         if ( $kflow_prompt != '' ) {
 
+            // FIXME - REMOVED 2024 04 01
             // Set up the sequence
-            set_transient('kflow_sequence', $sequence_id);
-            set_transient('kflow_step', 0);
+            // set_transient('kflow_sequence', $sequence_id);
+            // set_transient('kflow_step', 0);
 
             // FIXME - REMOVED 2024 04 01
             // FIXME - REPLACED BY TRANSIENTS - Ver 1.9.5
@@ -319,7 +320,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
             // Set transients
             set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id);
-            set_chatbot_chatgpt_transients('kflow_step', 0, null, null, $session_id);
+            set_chatbot_chatgpt_transients('kflow_step', -1, null, null, $session_id); // Start at -1 not 0
 
             // Get the first prompt
             $kflow_prompt = $kflow_data['Prompts'][0];
