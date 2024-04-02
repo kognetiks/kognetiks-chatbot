@@ -38,7 +38,10 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         mkdir($audio_dir_path, 0755, true);
     }
 
-    $audio_file_name = $session_id . '_' . time() . '.mp3';
+    // Get the audio format option
+    $audio_format = esc_attr(get_option('chatbot_chatgpt_audio_output_format', 'mp3'));
+
+    $audio_file_name = $session_id . '_' . time() . '.' . $audio_format;
     $audio_file = $audio_dir_path . $audio_file_name;
 
     // Get the URL of the plugins directory
@@ -69,10 +72,15 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         // back_trace( 'NOTICE', '$model from get_option: ' . $model);
     }
 
-    // Specify the voice you want to use
+    // Get the audio voice option
     // One of: alloy, echo, fable, onyx, nova, or shimmer
-    $voice = "alloy"; // Specified voice
-    
+    $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+
+    // DIAG - Diagnostics - Ver 1.9.5
+    back_trace( 'NOTICE', '$model: ' . $model);
+    back_trace( 'NOTICE', '$voice: ' . $voice);
+    back_trace( 'NOTICE', '$audio_format: ' . $audio_format);
+
     // API URL for the TTS service
     $api_url = 'https://api.openai.com/v1/audio/speech';
     
@@ -113,8 +121,10 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         // back_trace( 'NOTICE', 'Error: ' . curl_error($ch));
         echo 'Error in cURL: ' . curl_error($ch);
     } else {
+        // Play on page
+        $audio_output = "<div><center><audio controls><source src='" . $audio_file_url . "' type='audio/mpeg'></audio></center></div>";
         // Process the response
-        $audio_output = "[Listen here](" . $audio_file_url .")";
+        $audio_output .= "[Listen here](" . $audio_file_url .")";
     }
     
     // Close the cURL session

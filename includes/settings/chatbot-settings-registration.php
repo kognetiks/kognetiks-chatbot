@@ -26,6 +26,8 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context'); // Conversation Context - Ver 1.6.1
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_base_url'); // Ver 1.8.1
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_timeout_setting'); // Ver 1.8.8
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_voice_option'); // Ver 1.9.5
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_audio_output_format'); // Ver 1.9.5
 
     add_settings_section(
         'chatbot_chatgpt_api_model_section',
@@ -86,6 +88,23 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_api_model_section'
     );
 
+    // Voice Option
+    add_settings_field(
+        'chatbot_chatgpt_voice_option',
+        'Voice Option',
+        'chatbot_chatgpt_voice_option_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
+
+    // Audio Output Options
+    add_settings_field(
+        'chatbot_chatgpt_audio_output_format',
+        'Audio Output Option',
+        'chatbot_chatgpt_audio_output_format_callback',
+        'chatbot_chatgpt_api_model',
+        'chatbot_chatgpt_api_model_section'
+    );
     
     // Settings Custom GPTs tab - Ver 1.7.2
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7

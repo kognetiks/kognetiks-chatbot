@@ -279,6 +279,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_custom_button_url_2' => '',
         'chatbot_chatgpt_allow_file_uploads' => 'No',
         'chatbot_chatgpt_timeout_setting' => '240',
+        'chatbot_chatgpt_voice_option' => 'alloy',
+        'chatbot_chatgpt_audio_output_format' => 'mp3',
     );
 
     // Revised for Ver 1.5.0 
@@ -307,6 +309,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_custom_button_url_2',
         'chatbot_chatgpt_allow_file_uploads',
         'chatbot_chatgpt_timeout_setting',
+        'chatbot_chatgpt_voice_option',
+        'chatbot_chatgpt_audio_output_format',
     );
 
     $chatbot_settings = array();

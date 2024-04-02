@@ -70,9 +70,12 @@ Customize accessibility with three audience settings: All Audiences, Logged-in O
 
 **✨ Supported Models from OpenAI**
 
-- GPT-3.5 (gpt-3.5-turbo)
-- GPT-4 (gpt-4 models)
-- GPT-4 Turbo ('gpt-4-1106-preview')
+- GPT-3 series of models
+- GPT-4 series of models
+- dall-e series of models
+- tts series of models
+
+For a full list of models, please see [OpenAI's Model Overview](https://platform.openai.com/docs/models/overview).
 
 **🚀 Elevate Your Website Experience**
 A Kognetiks Chatbot for WordPress is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.

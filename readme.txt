@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.4.3
+Tested up to: 6.5
 Stable tag: 1.9.5
 Requires PHP: 7.0
 License: GPLv3 or later
@@ -67,9 +67,12 @@ With the integration of Text-to-Speech (TTS) models, the chatbot can now convert
 ▪ **Seamless Integration:** Effortlessly bring your WordPress site to life with an easy-to-use plugin.
 
 **✨ Supported Models from OpenAI**
-▪ GPT-3.5 (gpt-3.5-turbo)
-▪ GPT-4 (gpt-4 models)
-▪ GPT-4 Turbo ('gpt-4-1106-preview')
+▪ GPT-3 series of models
+▪ GPT-4 series of models
+▪ dall-e series of models
+▪ tts series of models
+
+For a full list of models, please see [OpenAI's Model Overview](https://platform.openai.com/docs/models/overview).
 
 **🚀 Elevate Your Website Experience**
 The Kognetiks Chatbot for WordPress is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
@@ -213,7 +216,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 1.9.5 =
-* TBD
+* Added voice options including: Allow, Echo, Fable, Onyx, Nova, and Shimmer
+* Added voice output options including: MP3, Opus, AAC, FLAC, WAV, and PCM
+* Added 'inline' playback controls for text-to-speech output
 
 = 1.9.4 =
 * Enable personalization for initial and subsequent greetings for chatbot

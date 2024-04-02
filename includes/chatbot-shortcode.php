@@ -265,11 +265,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_file_uploads = 'No';
     }
 
+    // Assume that the chatbot is NOT using KFlow - Ver 1.9.5
+    $use_flow = 'No';
+
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
     // $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
     // KFlow - Call kflow_prompt_and_response() - Ver 1.9.5
     if (function_exists('kflow_prompt_and_response') and !empty($atts['sequence'])) {
+
+        // BELT & SUSPENDERS - Ver 1.9.5
+        $use_flow = 'Yes';
 
         // Get the sequence ID
         $sequence_id = array_key_exists('sequence', $atts) ? sanitize_text_field($atts['sequence']) : '';
@@ -328,12 +334,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             // A prompt was returned
             // Pass to the Chatbot
             // To ask the visitor to complete the prompt
-            $chatbot_chatgpt_hot_bot_prompt = $kflow_prompt;
+            $chatbot_chatgpt_hot_bot_prompt = '[Chatbot]' . $kflow_prompt;
 
             // Override the $model and set it to 'flow'
             $model = 'flow';
 
         } else {
+
+            // BELT & SUSPENDERS - Ver 1.9.5
+            $use_flow = 'No';
 
             // No prompt was returned
             // Use the default prompt
@@ -361,7 +370,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
-
         ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
@@ -385,25 +393,38 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <div style="flex-grow: 1; max-width: 95%;">
                 <label for="chatbot-chatgpt-message"></label>
                 <?php
+                    // FIXME - ADD THIS TO FLOATING STYLE BELOW - Ver 1.9.5
                     // Kick off Flow - Ver 1.9.5
-                    if (!empty($sequence_id)){
+                    if ($use_flow == 'Yes' and !empty($sequence_id)) {
+                        back_trace( 'NOTICE', 'Kick off Flow');
+                        back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+                        // Store the prompt in a hidden input instead of directly in the textarea
+                        echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
+                        // echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
-                            var textarea = document.getElementById('chatbot-chatgpt-message');
-                            textarea.value += '\\n';
-                            textarea.focus();
-
-                            setTimeout(function() {
-                                var submitButton = document.getElementById('chatbot-chatgpt-submit');
-                                if (submitButton) {
+                            var hiddenInput = document.getElementById('chatbot-chatgpt-message');
+                            var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                            if (submitButton) {
+                                submitButton.addEventListener('click', function() {
+                                    // Use the value from the hidden input when submitting
+                                    var promptToSubmit = hiddenInput.value;
+                                    // Now, add your logic here to handle promptToSubmit
+                                    // For example, you might want to call an AJAX function and pass promptToSubmit as data
+                                });
+                    
+                                // Optionally trigger the click if you need to automatically submit on page load
+                                setTimeout(function() {
                                     submitButton.click();
-                                }
-                            }, 1000); // Delay of 1 second
+                                }, 500); // Delay of 1 second
+                            }
                         });
                         </script>";
                     }
-                    // Preload with a prompt if it is set - Ver 1.9.0
-                    if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
+                    // Preload with a prompt if it is set - Ver 1.9.5
+                    if ($use_flow != 'Yes' and !empty($chatbot_chatgpt_hot_bot_prompt)) {
+                        // DIAG - Diagnostics - Ver 1.9.0
+                        back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                         echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -416,10 +437,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                                 if (submitButton) {
                                     submitButton.click();
                                 }
-                            }, 1000); // Delay of 1 second
+                            }, 500); // Delay of 1 second
                         });
                         </script>";
                     } else {
+                        // DIAG - Diagnostics - Ver 1.9.5
+                        back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
                         echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
                     }
                 ?>
@@ -469,8 +492,35 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         <label for="chatbot-chatgpt-message"></label>
                         <!-- <textarea id="chatbot-chatgpt-message" rows="3" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea> -->
                         <?php
-                            // Preload with a prompt if it is set - Ver 1.9.0
-                            if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
+                            // Kick off Flow - Ver 1.9.5
+                            if ($use_flow == 'Yes' and !empty($sequence_id)) {
+                                back_trace( 'NOTICE', 'Kick off Flow');
+                                back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+                                // Store the prompt in a hidden input instead of directly in the textarea
+                                echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
+                                // echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
+                                echo "<script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    var hiddenInput = document.getElementById('chatbot-chatgpt-message');
+                                    var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                                    if (submitButton) {
+                                        submitButton.addEventListener('click', function() {
+                                            // Use the value from the hidden input when submitting
+                                            var promptToSubmit = hiddenInput.value;
+                                            // Now, add your logic here to handle promptToSubmit
+                                            // For example, you might want to call an AJAX function and pass promptToSubmit as data
+                                        });
+                            
+                                        // Optionally trigger the click if you need to automatically submit on page load
+                                        setTimeout(function() {
+                                            submitButton.click();
+                                        }, 500); // Delay of 1 second
+                                    }
+                                });
+                                </script>";
+                            }
+                            // Preload with a prompt if it is set - Ver 1.9.5
+                            if ($use_flow != 'Yes' and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                                 echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
                                 echo "<script>
                                 document.addEventListener('DOMContentLoaded', function() {
@@ -483,7 +533,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                                         if (submitButton) {
                                             submitButton.click();
                                         }
-                                    }, 1000); // Delay of 1 second
+                                    }, 500); // Delay of 1 second
                                 });
                                 </script>";
                             } else {

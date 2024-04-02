@@ -154,3 +154,43 @@ function chatbot_chatgpt_timeout_setting_callback($args) {
     </select>
     <?php
 }
+
+// Voice Options Callback - Ver 1.9.5
+function chatbot_chatgpt_voice_option_callback($args) {
+
+    // https://platform.openai.com/docs/guides/text-to-speech
+    // Options include Alloy, Echo, Fable, Onyx, Nova, and Shimmer
+
+    // Get the saved chatbot_chatgpt_voice_options value or default to "Alloy"
+    $voice_option = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+    ?>
+    <select id="chatbot_chatgpt_voice_option" name="chatbot_chatgpt_voice_option">
+        <option value="alloy" <?php selected($voice_option, 'alloy'); ?>>Alloy</option>
+        <option value="echo" <?php selected($voice_option, 'echo'); ?>>Echo</option>
+        <option value="fable" <?php selected($voice_option, 'fable'); ?>>Fable</option>
+        <option value="onyx" <?php selected($voice_option, 'onyx'); ?>>Onyx</option>
+        <option value="nova" <?php selected($voice_option, 'nova'); ?>>Nova</option>
+        <option value="shimmer" <?php selected($voice_option, 'shimmer'); ?>>Shimmer</option>
+    </select>
+    <?php
+}
+
+// Voice Output Options Callback - Ver 1.9.5
+function chatbot_chatgpt_audio_output_format_callback($args) {
+
+    // https://platform.openai.com/docs/guides/text-to-speech
+    // Options include mp3, opus, aac, flac, wav, and pcm
+
+    // Get the saved chatbot_chatgpt_voice_output_options value or default to "mp3"
+    $audio_output_format = esc_attr(get_option('chatbot_chatgpt_audio_output_format', 'mp3'));
+    ?>
+    <select id="chatbot_chatgpt_audio_output_format" name="chatbot_chatgpt_audio_output_format">
+        <option value="mp3" <?php selected($audio_output_format, 'mp3'); ?>>MP3</option>
+        <option value="opus" <?php selected($audio_output_format, 'opus'); ?>>OPUS</option>
+        <option value="aac" <?php selected($audio_output_format, 'aac'); ?>>AAC</option>
+        <option value="flac" <?php selected($audio_output_format, 'flac'); ?>>FLAC</option>
+        <option value="wav" <?php selected($audio_output_format, 'wav'); ?>>WAV</option>
+        <option value="pcm" <?php selected($audio_output_format, 'pcm'); ?>>PCM</option>
+    </select>
+    <?php
+}

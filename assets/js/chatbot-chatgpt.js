@@ -482,13 +482,27 @@ jQuery(document).ready(function ($) {
         // showTypingIndicator();
 
         message = messageInput.val().trim();
+        console.log('Chatbot: NOTICE: Message: ' + message);
 
         if (!message) {
             return;
         }
-            
+
+        input_type = 'user';
+
+        // Check to see if the message starts with [Chatbot] - Ver 1.9.5
+        if (message.startsWith('[Chatbot]')) {
+            console.log('Chatbot: NOTICE: Message starts with [Chatbot]');
+            input_type = 'chatbot';
+        }
+          
         messageInput.val('');
-        appendMessage(message, 'user');
+        if (input_type === 'user') {
+            appendMessage(message, 'user');
+        } else {
+            // DO NOTHING
+        }
+        // appendMessage(message, 'user');
 
         let user_id = php_vars.user_id;
         let page_id = php_vars.page_id;
