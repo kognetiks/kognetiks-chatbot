@@ -350,6 +350,12 @@ jQuery(document).ready(function ($) {
         // Convert HTML entities back to their original form
         var decodedMessage = $('<textarea/>').html(message).text();
 
+        // Check if the message contains an audio tag
+        if (decodedMessage.includes('<audio')) {
+            // Add the autoplay attribute to the audio tag
+            decodedMessage = decodedMessage.replace('<audio', '<audio autoplay');
+        }
+
         // Parse the HTML string
         var parsedHtml = $.parseHTML(decodedMessage);
 
@@ -595,7 +601,7 @@ jQuery(document).ready(function ($) {
 
         console.log('Chatbot: NOTICE: Text-to-Speech button clicked');
 
-        showTypingIndicator();
+        // showTypingIndicator();
 
         // Read out loud the last bot response
         let lastMessage = $('#chatbot-chatgpt-conversation .bot-message:last .bot-text').text();
@@ -625,6 +631,7 @@ jQuery(document).ready(function ($) {
                 if (typeof response === 'string') {
                     response = JSON.parse(response);
                 }
+                response.data = markdownToHtml(response.data);
                 appendMessage('Text-to-Speech: ' + response.data, 'bot');
             },
             error: function(jqXHR, status, error) {
@@ -637,11 +644,14 @@ jQuery(document).ready(function ($) {
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! Failed to convert text to speech. Please try again.', 'error');
                 }
-            }
-            
+            },
+            complete: function () {
+                removeTypingIndicator();
+                submitButton.prop('disabled', false);
+            },
         });
 
-        removeTypingIndicator();
+        // removeTypingIndicator();
 
     });
 

@@ -58,7 +58,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     if ($kflow_step > $max_answers) {
 
         // REPLACE THE PLACEHOLDERS IN THE TEMPLATE WITH THE ANSWERS
-        // [ANSWER_1], [ANSWER_2], ..., [ANSWER_nn]
+        // [ANSWER=1], [ANSWER=2], ..., [ANSWER=nn]
 
         // Get the template for the end of the script
         $template = $kflow_data['Templates'][1];
@@ -95,12 +95,11 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
         set_chatbot_chatgpt_transients('kflow_sequence', $kflow_sequence, null, null, $session_id);
         set_chatbot_chatgpt_transients('kflow_step', $kflow_step, null, null, $session_id);
 
-        // Call the ChatGPT Assistant API
         // Return from more answers
 
     }
 
-    // There is no usage in the response
+    // This function doesn't use any tokens - so set them to 0 and log them anyway
     $response_body["usage"]["prompt_tokens"] = 0;
     $response_body["usage"]["completion_tokens"] = 0;
     $response_body["usage"]["total_tokens"] = 0;

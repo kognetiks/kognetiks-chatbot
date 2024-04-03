@@ -424,7 +424,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     // Preload with a prompt if it is set - Ver 1.9.5
                     if ($use_flow != 'Yes' and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                         // DIAG - Diagnostics - Ver 1.9.0
-                        back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+                        back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
                         echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -453,7 +453,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
             </button>
             <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
-                <!-- <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" /> -->
                 <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                 <button id="chatbot-chatgpt-upload-file">
                     <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
@@ -468,14 +467,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
             </button>
             <button id="chatbot-chatgpt-text-to-speech-btn">
-                <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Text to Speech">
+                <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
             </button>
-            <!-- Listen for text-to-speech -->
-            <!-- <script type="text/javascript">
-                document.getElementById('chatbot-chatgpt-text-to-speech-btn').addEventListener('click', function() {
-                    document.getElementById('chatbot-chatgpt-text-to-speech-btn').click();
-                });
-            </script> -->
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
         <!-- <i class="dashicons dashicons-format-chat"></i> -->
@@ -556,29 +549,22 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                 </button>
                 <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
-                    <!-- <input type="file" id="chatbot-chatgpt-upload-file-input" style="display: none;" /> -->
                     <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                     <button id="chatbot-chatgpt-upload-file">
                         <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                     </button>
-                    <!-- <script type="text/javascript">
-                        document.getElementById('chatbot-chatgpt-text-to-speech-btn').addEventListener('click', function() {
-                            document.getElementById('chatbot-chatgpt-text-to-speech-btn').click();
+                    <script type="text/javascript">
+                        document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
+                            document.getElementById('chatbot-chatgpt-upload-file-input').click();
                         });
-                    </script> -->
+                    </script>
                 <?php endif; ?>
                 <button id="chatbot-chatgpt-erase-btn">
                     <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
                 </button>
                 <button id="chatbot-chatgpt-text-to-speech-btn">
-                    <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Aloud">
+                    <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
                 </button>
-                <!-- Listen for text-to-speech -->
-                <script type="text/javascript">
-                    document.getElementById('chatbot-chatgpt-text-to-speech-btn').addEventListener('click', function() {
-                    document.getElementById('chatbot-chatgpt-text-to-speech-btn').click();
-                    });
-                </script>
             </div>
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php
