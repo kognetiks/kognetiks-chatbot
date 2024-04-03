@@ -219,6 +219,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Added voice options including: Allow, Echo, Fable, Onyx, Nova, and Shimmer
 * Added voice output options including: MP3, Opus, AAC, FLAC, WAV, and PCM
 * Added 'inline' audio playback controls for text-to-speech output
+* Move the chatbot controls (submit, file upload, erase, text-to-speech) buttons below the input box
 
 = 1.9.4 =
 * Enable personalization for initial and subsequent greetings for chatbot

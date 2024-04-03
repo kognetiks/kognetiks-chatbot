@@ -29,6 +29,28 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     global $errorResponses;
 
 
+    // DIAG - Diagnostics - Ver 1.8.6
+    back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
+    back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+
+    // Check for the API key
+    if (empty($api_key) or $api_key == '[private]') {
+        $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+        if (empty($api_key)) {
+            // Return an error message if the API key is not set
+            if (get_locale() !== "en_US") {
+                $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+            } else {
+                $localized_errorResponses = $errorResponses;
+            }
+            return $localized_errorResponses[array_rand($localized_errorResponses)];
+        }
+    }
+
     // Generate directory path
     $audio_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/';
     // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
@@ -52,14 +74,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
 
     $audio_output = null;
 
-    // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_api()');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
-
     // Select the OpenAI Model
     // One of tts-1-1106, tts-1-hd, tts-1-hd-1106
     if ( !empty($script_data_array['model']) ) {
@@ -81,12 +95,20 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     back_trace( 'NOTICE', '$voice: ' . $voice);
     back_trace( 'NOTICE', '$audio_format: ' . $audio_format);
 
+    // FIXME - SET DEFAULT TEXT-TO-SPEECH MODEL IN OPTIONS
+    $t_model = 'tts-1-1106'; // TEMPORARY - Ver 1.9.5
+
+    // If $model is not equal to one of the three options, set it to tts-1-1106
+    if ($t_model !== 'tts-1-1106' && $t_model !== 'tts-1-hd' && $t_model !== 'tts-1-hd-1106') {
+        $t_model = 'tts-1-1106';
+    }    
+
     // API URL for the TTS service
     $api_url = 'https://api.openai.com/v1/audio/speech';
     
     // Creating the array to be converted to JSON
     $body = array(
-      'model' => $model,
+      'model' => $t_model,
       'voice' => $voice,
       'input' => $message
     );
@@ -160,29 +182,12 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
 
         // FIXME - BEFORE RETURNING THE AUDIO FILE
         // FIXME - ADD TRANSIENT TO DELETE AUDIO FILE AFTER 2 HOURS
-
-        // FIXME - TRY TO PLAY IT HERE
-        // $file = $audio_file; // Specify the path to your MP3 file
-        // $mime = 'audio/mpeg'; // MIME type of the audio file. For MP3, it's audio/mpeg
-
-        // if (file_exists($file)) {
-        //     header('Content-Type: '.$mime);
-        //     header('Content-Length: ' . filesize($file));
-        //     header('Content-Disposition: inline; filename="' . basename($file) . '"');
-        //     header('X-Pad: avoid browser bug');
-        //     header('Cache-Control: no-cache');
-        //     header('Accept-Ranges: bytes');
-        //     if (ob_get_level()) {
-        //         ob_end_clean();
-        //     }
-        //     @readfile($file); // @ is used to suppress errors, you might want to handle errors differently
-        //     exit;
-        // } else {
-        //     echo "File not found.";
-        // }
-        
+       
         // Set transient to delete the audio file after 2 hours
         chatbot_chatgpt_delete_audio_file_id( $audio_file_url );
+
+        // DIAG - Diagnostics - Ver 1.9.5
+        back_trace( 'NOTICE', '$audio_output: ' . $audio_output);
 
         return $audio_output;
 
@@ -199,6 +204,32 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     }
 
 }
+
+// Call the Text-to-Speech API
+function chatbot_chatgpt_read_aloud($message) {
+
+    // FIXME - GET THE DEFULT TEXT-TO-SPEECH API KEY
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+
+    // Get the text to be read aloud
+    $message = $_POST['message'];
+
+    // Call the Text-to-Speech API
+    $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+
+    // DIAG - Diagnostics - Ver 1.9.5
+    back_trace( 'NOTICE', '$response: ' . $response);
+
+    // Return the response
+    wp_send_json_success($response);
+
+    // Don't forget to stop execution afterward.
+    wp_die();
+
+}
+// Add action to read text aloud - Ver 1.9.5
+add_action('wp_ajax_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
 
 // Setup the cron job to delete the audio file after 2 hours
 function chatbot_chatgpt_delete_audio_file_id( $file_id ) {

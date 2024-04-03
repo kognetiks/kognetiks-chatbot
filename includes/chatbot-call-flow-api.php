@@ -82,6 +82,9 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
         $kflow_prompt_id = $kflow_data['Steps'][$kflow_step];
         $message = $kflow_data['Prompts'][$kflow_prompt_id - 1];
 
+        // Strip $message of any escaped characters
+        $message = stripslashes($message);
+
         // $thread_id
         // $thread_id = '[answer=' . $kflow_step . ']';
         

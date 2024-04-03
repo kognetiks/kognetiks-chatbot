@@ -8,6 +8,8 @@
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
  * License URI: https://www.gnu.org/licenses/gpl-30.html
+ * 
+ * Copyright (c) 2024 Stephen Howell
  *  
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU
  * General Public License version 3, as published by the Free Software Foundation. You may NOT assume
@@ -375,6 +377,7 @@ if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
     wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_conversation_log_cleanup_event');
 }
 add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_conversation_log_cleanup');
+
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message(): void {

@@ -187,7 +187,7 @@
 }
 
 #chatbot-chatgpt-submit {
-    background-color: #f1f1f1 !important;
+    background-color: #f1f1f1;
     border: none;
     border-radius: 1px;
     padding: 1px 1px;
@@ -201,7 +201,7 @@
 
 /* File Upload Button - Ver 1.7.6 */
 #chatbot-chatgpt-upload-file {
-    background-color: #f1f1f1 !important;
+    background-color: #f1f1f1;
     border: none;
     border-radius: 1px;
     padding: 1px 1px;
@@ -214,7 +214,7 @@
 }
 
 #chatbot-chatgpt-erase-btn {
-    background-color: #f1f1f1 !important;
+    background-color: #f1f1f1;
     border: none;
     border-radius: 1px;
     padding: 1px 1px;
@@ -223,6 +223,20 @@
 }
 
 #chatbot-chatgpt-erase-btn:hover {
+    background-color: #dcdcdc !important;    
+}
+
+/* Text to Speech Button - Ver 1.7.6 */
+#chatbot-chatgpt-text-to-speech-btn {
+    background-color: #f1f1f1;
+    border: none;
+    border-radius: 1px;
+    padding: 1px 1px;
+    margin-left: 1px;
+    cursor: pointer;
+}
+
+#chatbot-chatgpt-text-to-speech-btn:hover {
     background-color: #dcdcdc !important;    
 }
 
