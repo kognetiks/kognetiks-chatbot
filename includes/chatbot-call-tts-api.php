@@ -45,7 +45,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     $plugins_url = plugins_url();
 
     // Generate the URL of the audio file
-    $audio_file_url = $plugins_url . '/chatbot-chatgpt/audio/' . $audio_file_name;
+    $audio_file_url = $plugins_url . '/kognetiks-chatbot-1.9.4/audio/' . $audio_file_name;
 
     $audio_output = null;
 
@@ -114,7 +114,9 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         echo 'Error in cURL: ' . curl_error($ch);
     } else {
         // Process the response
-        $audio_output = "[Listen here](" . $audio_file_url .")";
+        $audio_output = '<audio controls autoplay><source src="' . $audio_file_url . '" type="audio/mpeg">Your browser does not support the audio element.</audio>';
+
+
     }
     
     // Close the cURL session
