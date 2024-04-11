@@ -15,10 +15,23 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set up the Setting Pages - Ver 1.9.0
-function chatbot_chatgpt_settings_page(): void {
-    add_options_page('Chatbot Settings', 'Kognetiks Chatbot', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
+// function chatbot_chatgpt_settings_page(): void {
+//     add_options_page('Chatbot Settings', 'Kognetiks Chatbot', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
+// }
+// add_action('admin_menu', 'chatbot_chatgpt_settings_page');
+
+// Set up the Chatbot Main Menu Page - Ver 1.9.0
+function chatbot_chatgpt_menu_page(): void {
+    add_menu_page(
+        'Chatbot Settings',         // Page title
+        'Kognetiks Chatbot',        // Menu title
+        'manage_options',           // Capability
+        'chatbot-chatgpt',          // Menu slug
+        'chatbot_chatgpt_settings_page_html', // Callback function
+        'dashicons-format-chat' // Icon URL (optional)
+    );
 }
-add_action('admin_menu', 'chatbot_chatgpt_settings_page');
+add_action('admin_menu', 'chatbot_chatgpt_menu_page');
 
 // Settings page HTML - Ver 1.3.0
 function chatbot_chatgpt_settings_page_html(): void {
@@ -183,7 +196,32 @@ function chatbot_chatgpt_settings_page_html(): void {
 
             } elseif ($active_tab == 'api_model') {
                 settings_fields('chatbot_chatgpt_api_model');
-                do_settings_sections('chatbot_chatgpt_api_model');
+                do_settings_sections('chatbot_chatgpt_model_settings_general');
+
+                // API Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_api_model_general');
+                echo '</div>';
+
+                // ChatGPT API Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_api_model_chat');
+                echo '</div>';
+
+                // Voice Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_api_model_voice');
+                echo '</div>';
+
+                // Image Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_api_model_image');
+                echo '</div>';
+
+                // Advanced Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_api_model_advanced');
+                echo '</div>';
 
             } elseif ($active_tab == 'gpt_assistants') {
                 settings_fields('chatbot_chatgpt_custom_gpts');

@@ -143,10 +143,19 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         // back_trace( 'NOTICE', 'Error: ' . curl_error($ch));
         echo 'Error in cURL: ' . curl_error($ch);
     } else {
+
+        // VERSION WITH CONTROLS AND LINK
         // Play on page
-        $audio_output = "<div><center><audio controls><source src='" . $audio_file_url . "' type='audio/mpeg'></audio></center></div>";
+        // $audio_output = "<div><center><audio controls autoplay><source src='" . $audio_file_url . "' type='audio/mpeg'></audio></center></div>";
         // Process the response
-        $audio_output .= "[Listen here](" . $audio_file_url .")";
+        // $audio_output .= "[Listen here](" . $audio_file_url .")";
+
+        // VERSION WITHOUT CONTROL AND LINK
+        // Play on page
+        $audio_output = "<div><center><audio autoplay><source src='" . $audio_file_url . "' type='audio/mpeg'></audio></center></div>";
+        // Process the response
+        $audio_output .= "[Listen](" . $audio_file_url .")";
+
     }
     
     // Close the cURL session

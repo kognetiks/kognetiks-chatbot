@@ -224,7 +224,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'session_id' => $session_id,
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
-        '_additional_instructions' => $additional_instructions,
+        'additional_instructions' => $additional_instructions,
         'model' => $model
     );
 

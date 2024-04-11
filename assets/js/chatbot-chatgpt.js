@@ -459,7 +459,7 @@ jQuery(document).ready(function ($) {
         markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">');
     
         // Links
-        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
     
         // Lists - You would need to refine this for nested lists
         markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
@@ -632,7 +632,8 @@ jQuery(document).ready(function ($) {
                     response = JSON.parse(response);
                 }
                 response.data = markdownToHtml(response.data);
-                appendMessage('Text-to-Speech: ' + response.data, 'bot');
+                // appendMessage('Text-to-Speech: ' + response.data, 'bot');
+                appendMessage(response.data, 'bot');
             },
             error: function(jqXHR, status, error) {
                 if(status === "timeout") {

@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // API/Model settings section callback - Ver 1.3.0
-function chatbot_chatgpt_api_model_section_callback($args) {
+function chatbot_chatgpt_model_settings_section_callback($args) {
     ?>
     <p>Configure the settings for the Chatbot plugin by adding your API key and selecting the GPT model of your choice.</p>
     <h3>ChatGPT API Key</h3>
@@ -35,6 +35,35 @@ function chatbot_chatgpt_api_model_section_callback($args) {
     <?php
 }
 
+function chatbot_chatgpt_api_model_general_section_callback($args) {
+    ?>
+    <p>Configure the settings for the plugin by adding your API key.</p>
+    <?php
+}
+
+function chatbot_chatgpt_api_model_chat_section_callback($args) {
+    ?>
+    <p>Configure the settings for the plugin when using chat models.</p>
+    <?php
+}
+
+function chatbot_chatgpt_api_model_image_section_callback($args) {
+    ?>
+    <p>Configure the settings for the plugin when using image models.</p>
+    <?php
+}
+
+function chatbot_chatgpt_api_model_voice_section_callback($args) {
+    ?>
+    <p>Configure the settings for the plugin when using audio models.</p>
+    <?php
+}
+
+function chatbot_chatgpt_api_model_advanced_section_callback($args) {
+    ?>
+    <p>CAUTION: Configure the advanced settings for the plugin.</p>
+    <?php
+}
 
 // API key field callback
 function chatbot_chatgpt_api_key_callback($args) {
@@ -155,10 +184,52 @@ function chatbot_chatgpt_timeout_setting_callback($args) {
     <?php
 }
 
+// Voice Model Options Callback - Ver 1.9.5
+function chatbot_chatgpt_voice_model_option_callback($args) {
+
+    // https://platform.openai.com/docs/guides/voice-models
+    // https://platform.openai.com/docs/models/tts
+
+    // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
+    $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
+
+    // Fetch models from the API
+    $voice_models = get_openai_models();
+
+    // Limit the models to voice models
+    $voice_models = array_filter($voice_models, function($voice_model) {
+        return strpos($voice_model['id'], 'tts') !== false;
+    });
+    
+    // Check for errors
+    if (is_string($voice_models) && strpos($voice_models, 'Error:') === 0) {
+        // If there's an error, display the hardcoded list
+        $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
+        ?>
+        <select id="chatbot_chatgpt_voice_model_option" name="chatbot_chatgpt_voice_model_option">
+            <option value="<?php echo esc_attr( 'tts-1' ); ?>" <?php selected( $voice_model_option, 'tts-1' ); ?>><?php echo esc_html( 'tts-1' ); ?></option>
+            <option value="<?php echo esc_attr( 'tts-1-1106' ); ?>" <?php selected( $voice_model_option, 'tts-1-1106' ); ?>><?php echo esc_html( 'tts-1-1106' ); ?></option>
+            <option value="<?php echo esc_attr( 'tts-1-hd' ); ?>" <?php selected( $voice_model_option, 'tts-1-hd' ); ?>><?php echo esc_html( 'tts-1-hd' ); ?></option>
+            <option value="<?php echo esc_attr( 'tts-1-hd-1106' ); ?>" <?php selected( $voice_model_option, 'tts-1-hd-1106' ); ?>><?php echo esc_html( 'tts-1-hd-1106' ); ?></option>
+        </select>
+        <?php
+    } else {
+        // If models are fetched successfully, display them dynamically
+        ?>
+        <select id="chatbot_chatgpt_voice_model_option" name="chatbot_chatgpt_voice_model_option">
+            <?php foreach ($voice_models as $voice_model): ?>
+                <option value="<?php echo esc_attr($voice_model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_voice_model_option'), $voice_model['id']); ?>><?php echo esc_html($voice_model['id']); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <?php  
+    }
+
+}
+
 // Voice Options Callback - Ver 1.9.5
 function chatbot_chatgpt_voice_option_callback($args) {
 
-    // https://platform.openai.com/docs/guides/text-to-speech
+    // https://platform.openai.com/docs/guides/speech-to-text
     // Options include Alloy, Echo, Fable, Onyx, Nova, and Shimmer
 
     // Get the saved chatbot_chatgpt_voice_options value or default to "Alloy"
@@ -193,4 +264,119 @@ function chatbot_chatgpt_audio_output_format_callback($args) {
         <option value="pcm" <?php selected($audio_output_format, 'pcm'); ?>>PCM</option>
     </select>
     <?php
+}
+
+// Image Model Options Callback - Ver 1.9.5
+function chatbot_chatgpt_image_model_option_callback($args) {
+
+    // https://platform.openai.com/docs/guides/images
+    // https://platform.openai.com/docs/models/dall-e
+
+    // Get the saved chatbot_chatgpt_model_option value or default to "dall-e-3"
+    $image_model_option = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-3'));
+
+    // Fetch models from the API
+    $image_models = get_openai_models();
+
+    // Limit the models to image models
+    $image_models = array_filter($image_models, function($image_model) {
+        return strpos($image_model['id'], 'dall-e') !== false;
+    });
+    
+    // Check for errors
+    if (is_string($image_models) && strpos($image_models, 'Error:') === 0) {
+        // If there's an error, display the hardcoded list
+        $image_model_option = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-3'));
+        ?>
+        <select id="chatbot_chatgpt_image_model_option" name="chatbot_chatgpt_image_model_option">
+            <option value="<?php echo esc_attr( 'dall-e-2' ); ?>" <?php selected( $image_model_option, 'dall-e-2' ); ?>><?php echo esc_html( 'dall-e-2' ); ?></option>
+            <option value="<?php echo esc_attr( 'dall-e-3' ); ?>" <?php selected( $image_model_option, 'dall-e-3' ); ?>><?php echo esc_html( 'dall-e-3' ); ?></option>
+        </select>
+        <?php
+    } else {
+        // If models are fetched successfully, display them dynamically
+        ?>
+        <select id="chatbot_chatgpt_image_model_option" name="chatbot_chatgpt_image_model_option">
+            <?php foreach ($image_models as $image_model): ?>
+                <option value="<?php echo esc_attr($image_model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_image_model_option'), $image_model['id']); ?>><?php echo esc_html($image_model['id']); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <?php  
+    }
+
+}
+
+// Image Output Format Options Callback - Ver 1.9.5
+function chatbot_chatgpt_image_output_format_callback($args) {
+
+    // https://platform.openai.com/docs/guides/images
+    // Options include png
+
+    // Get the saved chatbot_chatgpt_image_output_format value or default to "png"
+    $image_output_format = esc_attr(get_option('chatbot_chatgpt_image_output_format', 'png'));
+    ?>
+    <select id="chatbot_chatgpt_image_output_format" name="chatbot_chatgpt_image_output_format">
+        <option value="png" <?php selected($image_output_format, 'png'); ?>>PNG</option>
+    </select>
+    <?php
+
+}
+
+// Image Output Size Options Callback - Ver 1.9.5
+function chatbot_chatgpt_image_output_size_callback($args) {
+
+    // https://platform.openai.com/docs/guides/images
+    // Options include 256, 512, 1024, 2048
+
+    // Get the saved chatbot_chatgpt_image_output_size value or default to "1024x1024"
+    $image_output_size = esc_attr(get_option('chatbot_chatgpt_image_output_size', '1024x1024'));
+    ?>
+    <select id="chatbot_chatgpt_image_output_size" name="chatbot_chatgpt_image_output_size">
+        <option value="1024x1024" <?php selected($image_output_size, '1024x1024'); ?>>1024x1024</option>
+    </select>
+    <?php
+
+}
+
+// Image Output Quantity Options Callback - Ver 1.9.5
+function chatbot_chatgpt_image_output_quantity_callback($args) {
+
+    // https://platform.openai.com/docs/guides/images
+    // Options include 1, 2, 3, or 4
+    // n integer or null Optional Defaults to 1
+    // The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1 is supported.
+
+    // Get the saved chatbot_chatgpt_image_output_quantity value or default to "3"
+    $image_output_quantity = esc_attr(get_option('chatbot_chatgpt_image_output_quantity', '1'));
+    ?>
+    <select id="chatbot_chatgpt_image_output_quantity" name="chatbot_chatgpt_image_output_quantity">
+        <option value="1" <?php selected($image_output_quantity, '1'); ?>>1</option>
+        <option value="2" <?php selected($image_output_quantity, '2'); ?>>2</option>
+        <option value="3" <?php selected($image_output_quantity, '3'); ?>>3</option>
+        <option value="4" <?php selected($image_output_quantity, '4'); ?>>4</option>
+        <option value="5" <?php selected($image_output_quantity, '5'); ?>>5</option>
+        <option value="6" <?php selected($image_output_quantity, '6'); ?>>6</option>
+        <option value="7" <?php selected($image_output_quantity, '7'); ?>>7</option>
+        <option value="8" <?php selected($image_output_quantity, '8'); ?>>8</option>
+        <option value="9" <?php selected($image_output_quantity, '9'); ?>>9</option>
+        <option value="10" <?php selected($image_output_quantity, '10'); ?>>10</option>
+    </select>
+    <?php
+
+}
+
+// Image Output Quality Options Callback - Ver 1.9.5
+function chatbot_chatgpt_image_output_quality_callback($args) {
+
+    // https://platform.openai.com/docs/guides/images
+    // Options include standard
+
+    // Get the saved chatbot_chatgpt_image_output_quality value or default to "3"
+    $image_output_quality = esc_attr(get_option('chatbot_chatgpt_image_output_quality', 'standard'));
+    ?>
+    <select id="chatbot_chatgpt_image_output_quality" name="chatbot_chatgpt_image_output_quality">
+        <option value="standard" <?php selected($image_output_quality, 'standard'); ?>>Standard</option>
+    </select>
+    <?php
+
 }

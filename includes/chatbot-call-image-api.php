@@ -49,18 +49,24 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     if ( !empty($script_data_array['model']) ) {
         $model = $script_data_array['model'];
         // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
+        back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
     } else {
-        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'dall-e-2'));
+        $model = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-2'));
         // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', '$model from get_option: ' . $model);
+        back_trace( 'NOTICE', '$model from get_option: ' . $model);
+    }
+
+    $quantity = intval(esc_attr(get_option('chatbot_chatgpt_image_output_quantity', '1')));
+    // The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1 is supported.
+    if ($model == 'dall-e-3') {
+        $quantity = 1;
     }
 
     // Prepare the request body
     $body = json_encode(array(
         'model' => $model,
         'prompt' => $message,
-        'n' => 1, // Number of images to generate
+        'n' => $quantity, // Number of images to generate
         'size' => '1024x1024' // Optional: specify size (for DALL-E 2)
     ));
 

@@ -139,7 +139,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
             }
             // Aligned URL with markdown - Ver 1.9.2
             // $enhanced_response .= "[URL: " . $highest_score_url . "]";
-            $enhanced_response .= "[here](" . $highest_score_url . ")";
+            $enhanced_response .= "[here](" . $highest_score_url . ").";
         }
     } else {
         // If no match is found, return a generic response
