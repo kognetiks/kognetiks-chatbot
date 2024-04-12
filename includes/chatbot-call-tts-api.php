@@ -31,12 +31,12 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
 
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
-    back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
+    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Check for the API key
     if (empty($api_key) or $api_key == '[private]') {
@@ -93,23 +93,23 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     if ( !empty($t_voice) ) {
         $voice = $t_voice;
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', '$voice from transient: ' . $voice);
+        // back_trace( 'NOTICE', '$voice from transient: ' . $voice);
     } elseif ($script_data_array['voice']) {
         $voice = $script_data_array['voice'];
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', '$voice from script_data_array: ' . $voice);
+        // back_trace( 'NOTICE', '$voice from script_data_array: ' . $voice);
     } else {
         // Get the voice option from the settings (default is alloy)
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', '$voice from get_option: ' . $voice);
+        // back_trace( 'NOTICE', '$voice from get_option: ' . $voice);
     }
 
     // DIAG - Diagnostics - Ver 1.9.5
-    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
-    back_trace( 'NOTICE', '$model: ' . $model);
-    back_trace( 'NOTICE', '$voice: ' . $voice);
-    back_trace( 'NOTICE', '$audio_format: ' . $audio_format);
+    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    // back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$voice: ' . $voice);
+    // back_trace( 'NOTICE', '$audio_format: ' . $audio_format);
 
     // API URL for the TTS service
     $api_url = 'https://api.openai.com/v1/audio/speech';
@@ -204,7 +204,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         chatbot_chatgpt_delete_audio_file_id( $audio_file_url );
 
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', '$audio_output: ' . $audio_output);
+        // back_trace( 'NOTICE', '$audio_output: ' . $audio_output);
 
         return $audio_output;
 
@@ -235,7 +235,7 @@ function chatbot_chatgpt_read_aloud($message) {
     $response = chatbot_chatgpt_call_tts_api($api_key, $message);
 
     // DIAG - Diagnostics - Ver 1.9.5
-    back_trace( 'NOTICE', '$response: ' . $response);
+    // back_trace( 'NOTICE', '$response: ' . $response);
 
     // Return the response
     wp_send_json_success($response);

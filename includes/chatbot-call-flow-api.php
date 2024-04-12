@@ -115,7 +115,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
 
     // Add message to converation log
     // DIAG Diagnostics
-    back_trace( 'NOTICE', '$message: ' . $message);
+    // back_trace( 'NOTICE', '$message: ' . $message);
 
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $message);
 
@@ -162,14 +162,14 @@ function chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assi
     // if $answers is empty, return an empty array
     if (empty($answers)) {
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_answers() - $answers is empty');
+        // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_answers() - $answers is empty');
         return $answers_array;
     }
 
     // if $answer is an error, return an empty array
     if (is_wp_error($answers)) {
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_answers() - $answers is an error' . $answers->get_error_message());
+        // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_answers() - $answers is an error' . $answers->get_error_message());
         return $answers_array;
     }
 
@@ -192,7 +192,7 @@ function chatbot_chatgpt_parse_template($template, $answers) {
     // if $template is empty, return an empty string
     if (empty($template)) {
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'chatbot_chatgpt_parse_template() - $template is empty');
+        // back_trace( 'NOTICE', 'chatbot_chatgpt_parse_template() - $template is empty');
         return $message;
     }
 

@@ -63,13 +63,6 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
         'content' => $prompt,
     ];
 
-    // Test if the file_id is empty
-    // if (!empty($file_id)) {
-    //     back_trace( 'NOTICE', 'LINE 68 - $file_id is empty');
-    // } else {
-    //     back_trace( 'NOTICE', 'LINE 70 - $file_id is not empty');
-    // }
-
     // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
     unset($data['file_ids']);
     // Add the file reference if file_id is provided
@@ -306,15 +299,15 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $voice;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$message: ' . $message);
-    back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
-    back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$message: ' . $message);
+    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
@@ -416,13 +409,6 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // DIAG - Diagnostics - Ver 1.8.1
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
-
-    // if (empty($file_id)) {
-    //     back_trace( 'NOTICE', 'LINE 419 - No file to retrieve');
-    // } else {
-    //     back_trace( 'NOTICE', 'LINE 421 - File to retrieve');
-    //     back_trace( 'NOTICE', '$file_id ' . print_r($file_id, true));
-    // }
 
     if (empty($file_id)) {
         // back_trace( 'NOTICE', 'No file to retrieve');

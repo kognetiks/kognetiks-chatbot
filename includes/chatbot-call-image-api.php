@@ -50,11 +50,11 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     if ( !empty($script_data_array['model']) ) {
         $model = $script_data_array['model'];
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
+        // back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
     } else {
         $model = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-2'));
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace( 'NOTICE', '$model from get_option: ' . $model);
+        // back_trace( 'NOTICE', '$model from get_option: ' . $model);
     }
 
     // Rules
@@ -96,13 +96,13 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     $user_tracking = $session_id . '-' . $user_id . '-' . $page_id . '-' . $thread_id . '-' . $assistant_id;
 
     // Diagnostic - Ver 1.9.5
-    back_trace( 'NOTICE', 'chatbot_chatgpt_call_image_api()');
-    back_trace( 'NOTICE', 'BEGIN $message: ' . $message);
-    back_trace( 'NOTICE', 'BEGIN $model: ' . $model);
-    back_trace( 'NOTICE', 'BEGIN $quantity: ' . $quantity);
-    back_trace( 'NOTICE', 'BEGIN $size: ' . $size);
-    back_trace( 'NOTICE', 'BEGIN $quality: ' . $quality);
-    back_trace( 'NOTICE', 'BEGIN $style: ' . $style);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_image_api()');
+    // back_trace( 'NOTICE', 'BEGIN $message: ' . $message);
+    // back_trace( 'NOTICE', 'BEGIN $model: ' . $model);
+    // back_trace( 'NOTICE', 'BEGIN $quantity: ' . $quantity);
+    // back_trace( 'NOTICE', 'BEGIN $size: ' . $size);
+    // back_trace( 'NOTICE', 'BEGIN $quality: ' . $quality);
+    // back_trace( 'NOTICE', 'BEGIN $style: ' . $style);
 
 
     if ( $model = 'dall-e-2' ) {
@@ -199,7 +199,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
         for ($i = 0; $i < $quantity; $i++) {
             if (isset($response_body['data'][$i]['url'])) {
                 // DIAG - Diagnostics - Ver 1.9.5
-                back_trace( 'NOTICE', 'Generated Image URL: ' . $response_body['data'][0]['url']);
+                // back_trace( 'NOTICE', 'Generated Image URL: ' . $response_body['data'][0]['url']);
                 $image_url = $response_body['data'][$i]['url'];
                 $image_urls .= "![Your generated image]($image_url)\n";
             }
@@ -207,7 +207,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
         return $image_urls;
     } else {
         // FIXME - Decide what to return here - it's an error
-        back_trace( 'ERROR', 'API ERROR ' . print_r($response_body, true));
+        // back_trace( 'ERROR', 'API ERROR ' . print_r($response_body, true));
         if (get_locale() !== "en_US") {
             $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
         } else {

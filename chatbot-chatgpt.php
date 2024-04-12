@@ -150,8 +150,8 @@ $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics'
 
 // Dump the chatbot settings - Ver 1.8.6
 // DIAG - Diagnostics
-back_trace('NOTICE', 'chatbot-chatgpt.php: Dump Options to File is ON');
-chatbot_chatgpt_dump_options_to_file();
+// back_trace('NOTICE', 'chatbot-chatgpt.php: Dump Options to File is ON');
+// chatbot_chatgpt_dump_options_to_file();
 
 // Model choice - Ver 1.9.4
 global $model;
@@ -359,15 +359,6 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
 
-    // Populate the chatbot settings array with values from the database, using default values where necessary
-    // $chatbot_settings = array();
-    // foreach ($option_keys as $key) {
-    //     $default_value = $defaults[$key] ?? '';
-    //     $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
-    //     // DIAG - Diagnostics
-    //     // back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
-    // }
-
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
@@ -547,7 +538,7 @@ function chatbot_chatgpt_send_message(): void {
     if ($model == 'flow'){
         
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Using ChatGPT Flow');
+        // back_trace( 'NOTICE', 'Using ChatGPT Flow');
 
         // Reload the model - BELT & SUSPENDERS
         $script_data_array['model'] = $model;

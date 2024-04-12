@@ -164,12 +164,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
         $script_data_array['voice'] = $voice;
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace('NOTICE', 'Voice not passed as a parameter: ' . $voice);
+        // back_trace('NOTICE', 'Voice not passed as a parameter: ' . $voice);
     } else {
         $voice = sanitize_text_field($atts['voice']);
         $script_data_array['voice'] = $voice;
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace('NOTICE', 'Voice passed as a parameter: ' . $voice);
+        // back_trace('NOTICE', 'Voice passed as a parameter: ' . $voice);
     }
 
     // DIAG - Diagnostics - Ver 1.9.0
@@ -417,8 +417,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     // FIXME - ADD THIS TO FLOATING STYLE BELOW - Ver 1.9.5
                     // Kick off Flow - Ver 1.9.5
                     if ($use_flow == 'Yes' and !empty($sequence_id)) {
-                        back_trace( 'NOTICE', 'Kick off Flow');
-                        back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+                        // back_trace( 'NOTICE', 'Kick off Flow');
+                        // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                         // Store the prompt in a hidden input instead of directly in the textarea
                         echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
                         // echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
@@ -445,7 +445,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     // Preload with a prompt if it is set - Ver 1.9.5
                     if ($use_flow != 'Yes' and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                         // DIAG - Diagnostics - Ver 1.9.0
-                        back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
+                        // back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
                         echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -518,8 +518,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <?php
                         // Kick off Flow - Ver 1.9.5
                         if ($use_flow == 'Yes' and !empty($sequence_id)) {
-                            back_trace( 'NOTICE', 'Kick off Flow');
-                            back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+                            // back_trace( 'NOTICE', 'Kick off Flow');
+                            // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                             // Store the prompt in a hidden input instead of directly in the textarea
                             echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
                             // echo "<textarea id='chatbot-chatgpt-message' rows='3' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
