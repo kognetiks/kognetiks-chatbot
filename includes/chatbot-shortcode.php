@@ -102,7 +102,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // [chatbot style="floating" model="gpt-4-turbo-preview"] - Floating style using the GPT-4 Turbo Preview model
     // [chatbot style="embedded" model="dall-e-3"] - Embedded style using the DALL-E 3 model
     // [chatbot style="embedded" model="tts-1"] - Embedded style using the TTS 1 model
-    // [chatbot style="embedded" model="tts-1-1106" voice="fable"] - Embedded style using the TTS 1 model with the voice ofFable
+    // [chatbot style="embedded" model="tts-1-1106" voice="fable"] - Embedded style using the TTS 1 model with the voice of Fable
 
     // normalize attribute keys, lowercase
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
