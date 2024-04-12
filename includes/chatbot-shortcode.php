@@ -24,6 +24,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
@@ -50,7 +51,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additiona_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => $voice,
     );
 
     // BELT & SUSPENDERS - Ver 1.9.4
@@ -64,7 +66,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'prompt' => '', // If not passed then default value
         'sequence' => '', // If not passed then default value
         'additional_instructions' => '', // If not passed then default value
-        'model' => $model_choice // If not passed then default value
+        'model' => $model_choice, // If not passed then default value
+        'voice' => 'alloy', // If not passed then default value
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -98,6 +101,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     //
     // [chatbot style="floating" model="gpt-4-turbo-preview"] - Floating style using the GPT-4 Turbo Preview model
     // [chatbot style="embedded" model="dall-e-3"] - Embedded style using the DALL-E 3 model
+    // [chatbot style="embedded" model="tts-1"] - Embedded style using the TTS 1 model
+    // [chatbot style="embedded" model="tts-1-1106" voice="fable"] - Embedded style using the TTS 1 model with the voice ofFable
 
     // normalize attribute keys, lowercase
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
@@ -152,6 +157,19 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $script_data_array['model'] = $model;
         // DIAG - Diagnostics - Ver 1.9.4
         // back_trace('NOTICE', 'Model passed as a parameter: ' . $model);
+    }
+
+    // Voice not passed as parameter - Ver 1.9.4
+    if (!isset($atts['voice'])) {
+        $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+        $script_data_array['voice'] = $voice;
+        // DIAG - Diagnostics - Ver 1.9.4
+        back_trace('NOTICE', 'Voice not passed as a parameter: ' . $voice);
+    } else {
+        $voice = sanitize_text_field($atts['voice']);
+        $script_data_array['voice'] = $voice;
+        // DIAG - Diagnostics - Ver 1.9.4
+        back_trace('NOTICE', 'Voice passed as a parameter: ' . $voice);
     }
 
     // DIAG - Diagnostics - Ver 1.9.0
@@ -216,6 +234,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
+    set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
 
     // DUPLICATE ADDED THIS HERE - VER 1.9.1
     $script_data_array = array(
@@ -225,7 +244,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => $voice,
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -370,6 +390,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
+        set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
@@ -482,6 +503,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
+        set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -646,6 +668,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;

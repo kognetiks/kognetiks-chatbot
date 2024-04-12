@@ -57,6 +57,8 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
         $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id;
     } elseif ( $transient_type == 'model' ) {
         $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $user_id;
+    } elseif ( $transient_type == 'voice') {
+        $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $user_id;
     } elseif ( $transient_type == 'kflow_sequence' ) {
         $transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id;
     } elseif ( $transient_type == 'kflow_step' ) {
@@ -131,6 +133,8 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
         $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id;
     } elseif ($transient_type == 'model') {
         $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $user_id;
+    } elseif ($transient_type == 'voice') {
+        $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $user_id;
     } elseif ($transient_type == 'kflow_sequence') {
         $transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id;
     } elseif ($transient_type == 'kflow_step') {
@@ -208,6 +212,9 @@ function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $p
     } elseif ( $transient_type == 'model' ) {
         $model_transient_key = 'chatbot_chatgpt_model_' . $user_id . '_' . $page_id;
         delete_transient($model_transient_key);
+    } elseif ( $transient_type == 'voice' ) {
+        $voice_transient_key = 'chatbot_chatgpt_voice_' . $user_id . '_' . $page_id;
+        delete_transient($voice_transient_key);
     } elseif ( $transient_type == 'kflow_sequence' ) {
         $kflow_sequence_transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id;
         delete_transient($kflow_sequence_transient_key);

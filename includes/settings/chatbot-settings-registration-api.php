@@ -19,7 +19,7 @@ function chatbot_chatgpt_api_settings_init(): void {
 
     add_settings_section(
         'chatbot_chatgpt_model_settings_section',
-        'Settings Summary',
+        'API/Model Settings',
         'chatbot_chatgpt_model_settings_section_callback',
         'chatbot_chatgpt_model_settings_general'
     );

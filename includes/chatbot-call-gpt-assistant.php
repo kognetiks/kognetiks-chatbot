@@ -303,6 +303,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     // DIAG - Diagnostics - Ver 1.8.6
     back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
@@ -356,7 +357,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => $voice,
     );
 
     // Step 1: Create an Assistant

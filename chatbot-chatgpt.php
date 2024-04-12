@@ -149,7 +149,9 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
 // Dump the chatbot settings - Ver 1.8.6
-// chatbot_chatgpt_dump_options_to_file();
+// DIAG - Diagnostics
+back_trace('NOTICE', 'chatbot-chatgpt.php: Dump Options to File is ON');
+chatbot_chatgpt_dump_options_to_file();
 
 // Model choice - Ver 1.9.4
 global $model;
@@ -159,6 +161,15 @@ if (get_option('chatbot_chatgpt_model_choice') == 'gpt-4-turbo') {
     update_option('chatbot_chatgpt_model_choice', $model);
     // DIAG - Diagnostics
     // back_trace ( 'NOTICE', 'Model upgraded: ' . $model);
+}
+
+// Voice choice - Ver 1.9.5
+global $voice;
+if (get_option('chatbot_chatgpt_voice_option') == 'alloy') {
+    $voice = 'alloy';
+    update_option('chatbot_chatgpt_voice_option', $voice);
+    // DIAG - Diagnostics
+    // back_trace ( 'NOTICE', 'Voice upgraded: ' . $voice);
 }
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -207,6 +218,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
@@ -241,7 +253,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => 'alloy',
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -394,6 +407,7 @@ function chatbot_chatgpt_send_message(): void {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     global $flow_data;
 
@@ -449,6 +463,7 @@ function chatbot_chatgpt_send_message(): void {
     $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
     $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
+    $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
 
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
@@ -622,8 +637,12 @@ function chatbot_chatgpt_send_message(): void {
         } elseif (str_starts_with($model, 'tts')) {
             // Reload the model - BELT & SUSPENDERS
             $script_data_array['model'] = $model;
-            // Send message to TTS API - Ver 1.9.4
+            // Send message to TTS API - Text-to-speech - Ver 1.9.5
             $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+        } elseif (str_starts_with($model,"whisper")) {
+            $script_data_array['model'] = $model;
+            // Send message to STT API - Speech-to-text - Ver 1.9.6
+            $response = chatbot_chatgpt_call_stt_api($api_key, $message);
         } else {
             // Reload the model - BELT & SUSPENDERS
             $script_data_array['model'] = $model;

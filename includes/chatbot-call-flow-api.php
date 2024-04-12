@@ -27,6 +27,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
     
     global $errorResponses;
 

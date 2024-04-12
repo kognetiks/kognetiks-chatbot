@@ -24,6 +24,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     global $learningMessages;
     global $errorResponses;
@@ -86,29 +87,36 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         // back_trace( 'NOTICE', '$model from get_option: ' . $model);
     }
 
-    // Get the audio voice option
-    // One of: alloy, echo, fable, onyx, nova, or shimmer
-    $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+    // Get the audio voice transient if it exists - Ver 1.9.5
+    $t_voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+
+    if ( !empty($t_voice) ) {
+        $voice = $t_voice;
+        // DIAG - Diagnostics - Ver 1.9.5
+        back_trace( 'NOTICE', '$voice from transient: ' . $voice);
+    } elseif ($script_data_array['voice']) {
+        $voice = $script_data_array['voice'];
+        // DIAG - Diagnostics - Ver 1.9.5
+        back_trace( 'NOTICE', '$voice from script_data_array: ' . $voice);
+    } else {
+        // Get the voice option from the settings (default is alloy)
+        $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+        // DIAG - Diagnostics - Ver 1.9.5
+        back_trace( 'NOTICE', '$voice from get_option: ' . $voice);
+    }
 
     // DIAG - Diagnostics - Ver 1.9.5
+    back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
     back_trace( 'NOTICE', '$model: ' . $model);
     back_trace( 'NOTICE', '$voice: ' . $voice);
     back_trace( 'NOTICE', '$audio_format: ' . $audio_format);
-
-    // FIXME - SET DEFAULT TEXT-TO-SPEECH MODEL IN OPTIONS
-    $t_model = 'tts-1-1106'; // TEMPORARY - Ver 1.9.5
-
-    // If $model is not equal to one of the three options, set it to tts-1-1106
-    if ($t_model !== 'tts-1-1106' && $t_model !== 'tts-1-hd' && $t_model !== 'tts-1-hd-1106') {
-        $t_model = 'tts-1-1106';
-    }    
 
     // API URL for the TTS service
     $api_url = 'https://api.openai.com/v1/audio/speech';
     
     // Creating the array to be converted to JSON
     $body = array(
-      'model' => $t_model,
+      'model' => $model,
       'voice' => $voice,
       'input' => $message
     );

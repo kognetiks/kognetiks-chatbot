@@ -17,51 +17,55 @@ if ( ! defined( 'WPINC' ) ) {
 // API/Model settings section callback - Ver 1.3.0
 function chatbot_chatgpt_model_settings_section_callback($args) {
     ?>
-    <p>Configure the settings for the Chatbot plugin by adding your API key and selecting the GPT model of your choice.</p>
-    <h3>ChatGPT API Key</h3>
-    <p>This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p>
-    <h3>ChatGPT Model Choice</h3>
-    <p>Enter your ChatGPT API key below and select the OpenAI model of your choice.</p>
-    <p>As soon as the API for new models become available for general use, you will be able to select from the list of latest available models.</p>
-    <h3>Maximum Tokens</h3>
-    <p>Depending on the OpenAI model you choose, the maximum tokens may be as high as 4097. The default is 150.</p>
-    <p>For more information about the maximum tokens parameter, please see <a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank">https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them</a>.</p>
-    <h3>Conversation Context</h3>
-    <p>Enter a conversation context to help the model understand the conversation.  See the default for ideas.</p>
-    <h3>Base URL</h3>
-    <p>Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
-    <h3>More Information</h3>
+    <p>Configure the default settings for the Chatbot plugin for chat, voice, and imaage generation.  Start by adding your API key then selecting your choices below.  Don't forgert to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <?php
 }
 
 function chatbot_chatgpt_api_model_general_section_callback($args) {
     ?>
-    <p>Configure the settings for the plugin by adding your API key.</p>
+    <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p></p>
     <?php
 }
 
 function chatbot_chatgpt_api_model_chat_section_callback($args) {
     ?>
-    <p>Configure the settings for the plugin when using chat models.</p>
+    <p>Configure the settings for the plugin when using chat models. Depending on the OpenAI model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank">https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
+    <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
+        <li>&#91;chatbot&#93; - Default chat model, style is floating</li>
+        <li>&#91;chatbot style=floating model="gpt-4-1106-preview"&#93; - Style is floating, specific model</li>
+        <li>&#91;chatbot style=embedded model=chat&#93; - Style is embedded, default chat model</li>
+    </ul>
     <?php
 }
 
 function chatbot_chatgpt_api_model_image_section_callback($args) {
     ?>
-    <p>Configure the settings for the plugin when using image models.</p>
+    <p>Configure the settings for the plugin when using image models. Some example shortcodes include:</p>
+    <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
+        <li>&#91;chatbot style=floating model="dall-e-2"&#93; - Style is floating, specific model</li>
+        <li>&#91;chatbot style=embedded model="dall-e-3"&#93; - Style is embedded, default image model</li>
+        <li>&#91;chatbot style=embedded model=image&#93; - Style is embedded, default image model</li>
+    </ul>
     <?php
 }
 
 function chatbot_chatgpt_api_model_voice_section_callback($args) {
     ?>
-    <p>Configure the settings for the plugin when using audio models.</p>
+    <p>Configure the settings for the plugin when using audio models. Some example shortcodes include:</p>
+    <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
+        <li>&#91;chatbot style=floating model="tts-1-1106"&#93; - Style is floating, specific model</li>
+        <li>&#91;chatbot style=embedded model="tts-1-hd-1106"&#93; - Style is embedded, default image model</li>
+        <li>&#91;chatbot style=embedded model=speech&#93; - Style is embedded, default image model</li>
+        <li>&#91;chatbot style=floating model="tts-1-1106" voice="nova"&#93; - Style is floating, specific model, specific voice</li>
+    </ul>
+    <p>There are also the default options for the "read aloud" button on the chatbot interface</p>
     <?php
 }
 
 function chatbot_chatgpt_api_model_advanced_section_callback($args) {
     ?>
-    <p>CAUTION: Configure the advanced settings for the plugin.</p>
+    <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
     <?php
 }
 
@@ -84,6 +88,11 @@ function chatbot_chatgpt_model_choice_callback($args) {
 
     // Fetch models from the API
     $models = get_openai_models();
+
+    // Limit the models to chat models
+    $models = array_filter($models, function($model) {
+        return strpos($model['id'], 'gpt') !== false;
+    });
 
     // Check for errors
     if (is_string($models) && strpos($models, 'Error:') === 0) {

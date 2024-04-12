@@ -24,6 +24,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     global $learningMessages;
     global $errorResponses;

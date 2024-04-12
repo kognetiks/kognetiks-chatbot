@@ -24,6 +24,7 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'set_chatbot_chatgpt_threads');
@@ -40,7 +41,8 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => $voice,
     );
 
     // Create unique keys for transients
@@ -66,6 +68,7 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'get_chatbot_chatgpt_thread');
@@ -83,7 +86,8 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => $voice,
     );
     
     // If $user_id is empty or zero then set it to $session_id
@@ -126,6 +130,7 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'delete_chatbot_chatgpt_threads');
@@ -143,7 +148,8 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => $voice,
     );
 
     // Construct the unique keys
@@ -169,7 +175,8 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => $voice,
     );
     
 }

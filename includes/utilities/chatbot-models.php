@@ -25,6 +25,7 @@ function get_openai_models() {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
