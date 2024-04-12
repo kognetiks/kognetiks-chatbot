@@ -326,13 +326,40 @@ function chatbot_chatgpt_image_output_format_callback($args) {
 function chatbot_chatgpt_image_output_size_callback($args) {
 
     // https://platform.openai.com/docs/guides/images
-    // Options include 256, 512, 1024, 2048
+    // The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2.
+    // Must be one of 1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models.
+
+    // Get the saved chatbot_chatgpt_image_model_option value or default to "dall-e-3"
+    $model = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-3')); 
 
     // Get the saved chatbot_chatgpt_image_output_size value or default to "1024x1024"
     $image_output_size = esc_attr(get_option('chatbot_chatgpt_image_output_size', '1024x1024'));
+
+    // If the $model is dall-e-2, then size muss be one of 256x256, 512x512, or 1024x1024
+    if ($model == 'dall-e-2') {
+        if ($image_output_size != '256x256' && $image_output_size != '512x512' && $image_output_size != '1024x1024') {
+            $image_output_size = '1024x1024';
+        }
+    }
+    // If the $model is dall-e-3, then size muss be one of 1024x1024, 1792x1024, or 1024x1792
+    if ($model == 'dall-e-3') {
+        if ($image_output_size != '1024x1024' && $image_output_size != '1792x1024' && $image_output_size != '1024x1792') {
+            $image_output_size = '1024x1024';
+        }
+    }
+
+    // Display the options based on model selection
     ?>
     <select id="chatbot_chatgpt_image_output_size" name="chatbot_chatgpt_image_output_size">
-        <option value="1024x1024" <?php selected($image_output_size, '1024x1024'); ?>>1024x1024</option>
+        <?php if ($model == 'dall-e-2'): ?>
+            <option value="256x256" <?php selected($image_output_size, '256x256'); ?>>256x256</option>
+            <option value="512x512" <?php selected($image_output_size, '512x512'); ?>>512x512</option>
+            <option value="1024x1024" <?php selected($image_output_size, '1024x1024'); ?>>1024x1024</option>
+        <?php elseif ($model == 'dall-e-3'): ?>
+            <option value="1024x1024" <?php selected($image_output_size, '1024x1024'); ?>>1024x1024</option>
+            <option value="1792x1024" <?php selected($image_output_size, '1792x1024'); ?>>1792x1024</option>
+            <option value="1024x1792" <?php selected($image_output_size, '1024x1792'); ?>>1024x1792</option>
+        <?php endif; ?>
     </select>
     <?php
 
@@ -346,22 +373,29 @@ function chatbot_chatgpt_image_output_quantity_callback($args) {
     // n integer or null Optional Defaults to 1
     // The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1 is supported.
 
-    // Get the saved chatbot_chatgpt_image_output_quantity value or default to "3"
     $image_output_quantity = esc_attr(get_option('chatbot_chatgpt_image_output_quantity', '1'));
+
+    $model = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-3'));
+    
+    // Display the options based on model selection
     ?>
-    <select id="chatbot_chatgpt_image_output_quantity" name="chatbot_chatgpt_image_output_quantity">
-        <option value="1" <?php selected($image_output_quantity, '1'); ?>>1</option>
-        <option value="2" <?php selected($image_output_quantity, '2'); ?>>2</option>
-        <option value="3" <?php selected($image_output_quantity, '3'); ?>>3</option>
-        <option value="4" <?php selected($image_output_quantity, '4'); ?>>4</option>
-        <option value="5" <?php selected($image_output_quantity, '5'); ?>>5</option>
-        <option value="6" <?php selected($image_output_quantity, '6'); ?>>6</option>
-        <option value="7" <?php selected($image_output_quantity, '7'); ?>>7</option>
-        <option value="8" <?php selected($image_output_quantity, '8'); ?>>8</option>
-        <option value="9" <?php selected($image_output_quantity, '9'); ?>>9</option>
-        <option value="10" <?php selected($image_output_quantity, '10'); ?>>10</option>
-    </select>
-    <?php
+        <select id="chatbot_chatgpt_image_output_quantity" name="chatbot_chatgpt_image_output_quantity">
+        <?php if ($model == 'dall-e-3'): ?>
+            <option value="1" <?php selected($image_output_quantity, '1'); ?>>1</option>
+        <?php elseif ($model = 'dall-e-2'): ?>
+            <option value="1" <?php selected($image_output_quantity, '1'); ?>>1</option>
+            <option value="2" <?php selected($image_output_quantity, '2'); ?>>2</option>
+            <option value="3" <?php selected($image_output_quantity, '3'); ?>>3</option>
+            <option value="4" <?php selected($image_output_quantity, '4'); ?>>4</option>
+            <option value="5" <?php selected($image_output_quantity, '5'); ?>>5</option>
+            <option value="6" <?php selected($image_output_quantity, '6'); ?>>6</option>
+            <option value="7" <?php selected($image_output_quantity, '7'); ?>>7</option>
+            <option value="8" <?php selected($image_output_quantity, '8'); ?>>8</option>
+            <option value="9" <?php selected($image_output_quantity, '9'); ?>>9</option>
+            <option value="10" <?php selected($image_output_quantity, '10'); ?>>10</option>
+        <?php endif; ?>
+        </select>
+        <?php
 
 }
 
@@ -376,7 +410,25 @@ function chatbot_chatgpt_image_output_quality_callback($args) {
     ?>
     <select id="chatbot_chatgpt_image_output_quality" name="chatbot_chatgpt_image_output_quality">
         <option value="standard" <?php selected($image_output_quality, 'standard'); ?>>Standard</option>
+        <option value="hd" <?php selected($image_output_quality, 'hd'); ?>>HD</option>
     </select>
     <?php
 
 }
+
+// Image Style Options Callback - Ver 1.9.5
+function chatbot_chatgpt_image_style_output_callback($args) {
+
+    // https://platform.openai.com/docs/guides/images
+    // Options include standard
+
+    // Get the saved chatbot_chatgpt_image_style_output value or default to "3"
+    $image_style_output = esc_attr(get_option('chatbot_chatgpt_image_style_output', 'vivid'));
+    ?>
+    <select id="chatbot_chatgpt_image_style_output" name="chatbot_chatgpt_image_style_output">
+        <option value="vivid" <?php selected($image_style_output, 'vivid'); ?>>Vivid</option>
+        <option value="natural" <?php selected($image_style_output, 'natura'); ?>>Natural</option>
+    </select>
+    <?php
+
+}   
