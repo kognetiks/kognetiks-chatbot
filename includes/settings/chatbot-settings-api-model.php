@@ -33,8 +33,9 @@ function chatbot_chatgpt_api_model_chat_section_callback($args) {
     <p>Configure the settings for the plugin when using chat models. Depending on the OpenAI model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank">https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li>&#91;chatbot&#93; - Default chat model, style is floating</li>
-        <li>&#91;chatbot style=floating model="gpt-4-1106-preview"&#93; - Style is floating, specific model</li>
-        <li>&#91;chatbot style=embedded model=chat&#93; - Style is embedded, default chat model</li>
+        <li>&#91;chatbot style="floating" model="gpt-4"&#93; - Style is floating, specific model</li>
+        <li>&#91;chatbot style="embedded" model="gpt-4-1106-preview"&#93; - Style is embedded, default chat model</li>
+        <!-- <li>&#91;chatbot style=embedded model=chat&#93; - Style is embedded, default chat model</li> -->
     </ul>
     <?php
 }
@@ -43,9 +44,9 @@ function chatbot_chatgpt_api_model_image_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using image models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-        <li>&#91;chatbot style=floating model="dall-e-2"&#93; - Style is floating, specific model</li>
-        <li>&#91;chatbot style=embedded model="dall-e-3"&#93; - Style is embedded, default image model</li>
-        <li>&#91;chatbot style=embedded model=image&#93; - Style is embedded, default image model</li>
+        <li>&#91;chatbot style="floating" model="dall-e-2"&#93; - Style is floating, specific model</li>
+        <li>&#91;chatbot style="embedded" model="dall-e-3"&#93; - Style is embedded, default image model</li>
+        <!-- <li>&#91;chatbot style=embedded model=image&#93; - Style is embedded, default image model</li> -->
     </ul>
     <?php
 }
@@ -54,10 +55,10 @@ function chatbot_chatgpt_api_model_voice_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using audio models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-        <li>&#91;chatbot style=floating model="tts-1-1106"&#93; - Style is floating, specific model</li>
-        <li>&#91;chatbot style=embedded model="tts-1-hd-1106"&#93; - Style is embedded, default image model</li>
-        <li>&#91;chatbot style=embedded model=speech&#93; - Style is embedded, default image model</li>
-        <li>&#91;chatbot style=floating model="tts-1-1106" voice="nova"&#93; - Style is floating, specific model, specific voice</li>
+        <li>&#91;chatbot style="floating" model="tts-1-1106"&#93; - Style is floating, specific model</li>
+        <li>&#91;chatbot style="embedded" model="tts-1-hd-1106"&#93; - Style is embedded, default image model</li>
+        <li>&#91;chatbot style="floating" model="tts-1-1106" voice="nova"&#93; - Style is floating, specific model, specific voice</li>
+        <!-- <li>&#91;chatbot style=embedded model=speech&#93; - Style is embedded, default image model</li> -->
     </ul>
     <p>There are also the default options for the "read aloud" button on the chatbot interface</p>
     <?php

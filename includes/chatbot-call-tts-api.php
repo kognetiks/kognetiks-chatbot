@@ -225,14 +225,40 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
 // Call the Text-to-Speech API
 function chatbot_chatgpt_read_aloud($message) {
 
+    global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+    global $script_data_array;
+    global $additional_instructions;
+    global $model;
+    global $voice;
+
     // FIXME - GET THE DEFULT TEXT-TO-SPEECH API KEY
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
     // Get the text to be read aloud
     $message = $_POST['message'];
 
+    // Hold the model
+    $t_model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
+    // DIAG - Diagnostics - Ver 1.9.5
+    // back_trace( 'NOTICE', '$t_model: ' . $t_model);
+
+    set_chatbot_chatgpt_transients( 'model', esc_attr(get_option( 'chatbot_chatgpt_voice_model_option')), $user_id, $page_id);
+    $script_data_array['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option'));
+    // DIAG - Diagnostics - Ver 1.9.5
+    // back_trace( 'NOTICE', 'esc_attr(get_option( chatbot_chatgpt_voice_model_option)): ' . esc_attr(get_option( 'chatbot_chatgpt_voice_model_option')));
+    
     // Call the Text-to-Speech API
     $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+
+    // Reset the model
+    set_chatbot_chatgpt_transients( 'model', $t_model, $user_id, $page_id);
+    $script_data_array['model'] = $t_model;
+    // DIAG - Diagnostics - Ver 1.9.5
+    // back_trace( 'NOTICE', '$t_model: ' . $t_model);
 
     // DIAG - Diagnostics - Ver 1.9.5
     // back_trace( 'NOTICE', '$response: ' . $response);
