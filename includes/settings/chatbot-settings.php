@@ -28,7 +28,7 @@ function chatbot_chatgpt_menu_page(): void {
         'manage_options',           // Capability
         'chatbot-chatgpt',          // Menu slug
         'chatbot_chatgpt_settings_page_html', // Callback function
-        'dashicons-format-chat' // Icon URL (optional)
+        'dashicons-format-chat'     // Icon URL (optional)
     );
 }
 add_action('admin_menu', 'chatbot_chatgpt_menu_page');
@@ -44,10 +44,17 @@ function chatbot_chatgpt_settings_page_html(): void {
 
     $active_tab = $_GET['tab'] ?? 'bot_settings';
 
-    if (isset($_GET['settings-updated'])) {
-        add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
-    }
+    // if (isset($_GET['settings-updated'])) {
+    //     // DIAG - Diagnostics - Ver 1.9.5
+    //     back_trace( 'NOTICE', 'Settings Updated: ' . $_GET['settings-updated']);
+    //     add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
+    // }
     
+    if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
+        add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
+        settings_errors('chatbot_chatgpt_messages');
+    }
+
     // Check reminderCount in local storage - Ver 1.8.1
     $reminderCount = intval(esc_attr(get_option('chatbot_chatgpt_reminder_count', 0)));
     if ($reminderCount % 100 === 0 && $reminderCount <= 500) {

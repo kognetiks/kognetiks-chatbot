@@ -194,6 +194,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
         // return "![Your generated image]($image_url)";
 
         $image_url = '';
+        $image_urls = '';
 
         // Check the array for the number of images generated
         for ($i = 0; $i < $quantity; $i++) {

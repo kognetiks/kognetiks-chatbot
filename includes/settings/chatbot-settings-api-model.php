@@ -141,7 +141,7 @@ function chatgpt_max_tokens_setting_callback($args) {
 // Conversation Context - Ver 1.6.1
 function chatbot_chatgpt_conversation_context_callback($args) {
     // Get the value of the setting we've registered with register_setting()
-    $chatbot_chatgpt_conversation_context = get_option('chatbot_chatgpt_conversation_context');
+    $chatbot_chatgpt_conversation_context = esc_attr(get_option('chatbot_chatgpt_conversation_context'));
 
     // Check if the option has been set, if not, use a default value
     if (empty($chatbot_chatgpt_conversation_context)) {
@@ -440,7 +440,7 @@ function chatbot_chatgpt_image_style_output_callback($args) {
     ?>
     <select id="chatbot_chatgpt_image_style_output" name="chatbot_chatgpt_image_style_output">
         <option value="vivid" <?php selected($image_style_output, 'vivid'); ?>>Vivid</option>
-        <option value="natural" <?php selected($image_style_output, 'natura'); ?>>Natural</option>
+        <option value="natural" <?php selected($image_style_output, 'natural'); ?>>Natural</option>
     </select>
     <?php
 
