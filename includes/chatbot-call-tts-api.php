@@ -108,6 +108,16 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         // back_trace( 'NOTICE', '$voice from get_option: ' . $voice);
     }
 
+    // Belt and Suspender - Ver 1.9.5
+    if ( empty($model) ) {
+        $model = 'tts-1-1106';
+        update_option( 'chatbot_chatgpt_model_choice', 'tts-1-1106');
+    }
+    if ( empty($voice) ) {
+        $voice = 'alloy';
+        update_option( 'chatbot_chatgpt_voice_option', 'alloy');
+    }
+
     // DIAG - Diagnostics - Ver 1.9.5
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
     // back_trace( 'NOTICE', '$model: ' . $model);
@@ -248,9 +258,12 @@ function chatbot_chatgpt_read_aloud($message) {
     $t_model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
     // DIAG - Diagnostics - Ver 1.9.5
     // back_trace( 'NOTICE', '$t_model: ' . $t_model);
+    if ( empty($t_model) ) {
+        $t_model = 'tts-1-1106';
+    }
 
-    set_chatbot_chatgpt_transients( 'model', esc_attr(get_option( 'chatbot_chatgpt_voice_model_option')), $user_id, $page_id);
-    $script_data_array['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option'));
+    set_chatbot_chatgpt_transients( 'model', esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106')), $user_id, $page_id);
+    $script_data_array['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
     // DIAG - Diagnostics - Ver 1.9.5
     // back_trace( 'NOTICE', 'esc_attr(get_option( chatbot_chatgpt_voice_model_option)): ' . esc_attr(get_option( 'chatbot_chatgpt_voice_model_option')));
     

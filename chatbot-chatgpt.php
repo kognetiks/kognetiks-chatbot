@@ -74,6 +74,8 @@ if (empty($session_id)) {
 
 }
 
+ob_end_flush(); // End output buffering and send the buffer to the browser
+
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
