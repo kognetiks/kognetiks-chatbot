@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, customer-support
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.5.2
-Stable tag: 1.9.5
+Stable tag: 1.9.6
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -214,6 +214,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 16. Settings and Options
 
 == Changelog ==
+
+= 1.9.6 =
+* TBD
 
 = 1.9.5 =
 * Added voice options including: Allow, Echo, Fable, Onyx, Nova, and Shimmer
