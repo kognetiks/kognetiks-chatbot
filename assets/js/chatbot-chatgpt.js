@@ -350,6 +350,12 @@ jQuery(document).ready(function ($) {
         // Convert HTML entities back to their original form
         var decodedMessage = $('<textarea/>').html(message).text();
 
+        // Check if the message contains an audio tag
+        if (decodedMessage.includes('<audio')) {
+            // Add the autoplay attribute to the audio tag
+            decodedMessage = decodedMessage.replace('<audio', '<audio autoplay');
+        }
+
         // Parse the HTML string
         var parsedHtml = $.parseHTML(decodedMessage);
 
@@ -453,7 +459,7 @@ jQuery(document).ready(function ($) {
         markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">');
     
         // Links
-        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
     
         // Lists - You would need to refine this for nested lists
         markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
@@ -482,13 +488,27 @@ jQuery(document).ready(function ($) {
         // showTypingIndicator();
 
         message = messageInput.val().trim();
+        console.log('Chatbot: NOTICE: Message: ' + message);
 
         if (!message) {
             return;
         }
-            
+
+        input_type = 'user';
+
+        // Check to see if the message starts with [Chatbot] - Ver 1.9.5
+        if (message.startsWith('[Chatbot]')) {
+            console.log('Chatbot: NOTICE: Message starts with [Chatbot]');
+            input_type = 'chatbot';
+        }
+          
         messageInput.val('');
-        appendMessage(message, 'user');
+        if (input_type === 'user') {
+            appendMessage(message, 'user');
+        } else {
+            // DO NOTHING
+        }
+        // appendMessage(message, 'user');
 
         let user_id = php_vars.user_id;
         let page_id = php_vars.page_id;
@@ -574,6 +594,66 @@ jQuery(document).ready(function ($) {
             $response = chatbot_chatgpt_upload_file_to_assistant();
             $('#chatbot-chatgpt-upload-file-input').click();
         }
+    });
+
+    // Read Out Loud - Ver 1.9.5
+    $('#chatbot-chatgpt-text-to-speech-btn').on('click', function(e) {
+
+        console.log('Chatbot: NOTICE: Text-to-Speech button clicked');
+
+        // showTypingIndicator();
+
+        // Read out loud the last bot response
+        let lastMessage = $('#chatbot-chatgpt-conversation .bot-message:last .bot-text').text();
+
+        console.log('Chatbot: NOTICE: lastMessage: ' + lastMessage);
+
+        // Check if the bot response is empty
+        if (!lastMessage) {
+            appendMessage('Oops! There is no response to read out loud.', 'error');
+            return;
+        }
+
+        // Call function "chatbot_chatgpt_call_tts_api" to convert the text to speech
+        $.ajax({
+            url: chatbot_chatgpt_params.ajax_url,
+            method: 'POST',
+            timeout: timeout_setting, // Example timeout_setting value: 10000 for 10 seconds
+            data: {
+                action: 'chatbot_chatgpt_read_aloud',
+                message: lastMessage,
+            },
+            beforeSend: function () {
+                showTypingIndicator();
+                submitButton.prop('disabled', true);
+            },
+            success: function(response) {
+                if (typeof response === 'string') {
+                    response = JSON.parse(response);
+                }
+                response.data = markdownToHtml(response.data);
+                // appendMessage('Text-to-Speech: ' + response.data, 'bot');
+                appendMessage(response.data, 'bot');
+            },
+            error: function(jqXHR, status, error) {
+                if(status === "timeout") {
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! This request timed out. Please try again.', 'error');
+                } else {
+                    // DIAG - Log the error - Ver 1.6.7
+                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! Failed to convert text to speech. Please try again.', 'error');
+                }
+            },
+            complete: function () {
+                removeTypingIndicator();
+                submitButton.prop('disabled', false);
+            },
+        });
+
+        // removeTypingIndicator();
+
     });
 
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {

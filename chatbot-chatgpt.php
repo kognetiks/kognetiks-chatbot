@@ -3,11 +3,13 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     1.9.4
+ * Version:     1.9.5
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
  * License URI: https://www.gnu.org/licenses/gpl-30.html
+ * 
+ * Copyright (c) 2024 Stephen Howell
  *  
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU
  * General Public License version 3, as published by the Free Software Foundation. You may NOT assume
@@ -29,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.4');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.5');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -72,6 +74,8 @@ if (empty($session_id)) {
 
 }
 
+ob_end_flush(); // End output buffering and send the buffer to the browser
+
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
@@ -79,6 +83,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; 
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
+
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-flow-api.php'; // ChatGPT API - Ver 1.9.5
 
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
@@ -109,6 +115,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-loc
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-localize.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-notices.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-premium.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-api.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reporting.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
@@ -144,6 +151,8 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
 // Dump the chatbot settings - Ver 1.8.6
+// DIAG - Diagnostics
+// back_trace('NOTICE', 'chatbot-chatgpt.php: Dump Options to File is ON');
 // chatbot_chatgpt_dump_options_to_file();
 
 // Model choice - Ver 1.9.4
@@ -154,6 +163,15 @@ if (get_option('chatbot_chatgpt_model_choice') == 'gpt-4-turbo') {
     update_option('chatbot_chatgpt_model_choice', $model);
     // DIAG - Diagnostics
     // back_trace ( 'NOTICE', 'Model upgraded: ' . $model);
+}
+
+// Voice choice - Ver 1.9.5
+global $voice;
+if (get_option('chatbot_chatgpt_voice_option') == 'alloy') {
+    $voice = 'alloy';
+    update_option('chatbot_chatgpt_voice_option', $voice);
+    // DIAG - Diagnostics
+    // back_trace ( 'NOTICE', 'Voice upgraded: ' . $voice);
 }
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -202,6 +220,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
@@ -236,7 +255,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => 'alloy',
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -277,6 +297,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_custom_button_url_2' => '',
         'chatbot_chatgpt_allow_file_uploads' => 'No',
         'chatbot_chatgpt_timeout_setting' => '240',
+        'chatbot_chatgpt_voice_option' => 'alloy',
+        'chatbot_chatgpt_audio_output_format' => 'mp3',
     );
 
     // Revised for Ver 1.5.0 
@@ -305,6 +327,8 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_custom_button_url_2',
         'chatbot_chatgpt_allow_file_uploads',
         'chatbot_chatgpt_timeout_setting',
+        'chatbot_chatgpt_voice_option',
+        'chatbot_chatgpt_audio_output_format',
     );
 
     $chatbot_settings = array();
@@ -337,15 +361,6 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
 
-    // Populate the chatbot settings array with values from the database, using default values where necessary
-    // $chatbot_settings = array();
-    // foreach ($option_keys as $key) {
-    //     $default_value = $defaults[$key] ?? '';
-    //     $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
-    //     // DIAG - Diagnostics
-    //     // back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
-    // }
-
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
@@ -370,6 +385,7 @@ if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
 }
 add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_conversation_log_cleanup');
 
+
 // Handle Ajax requests
 function chatbot_chatgpt_send_message(): void {
 
@@ -384,6 +400,9 @@ function chatbot_chatgpt_send_message(): void {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
+
+    global $flow_data;
 
     $api_key = '';
 
@@ -437,6 +456,7 @@ function chatbot_chatgpt_send_message(): void {
     $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
     $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
+    $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
 
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
@@ -516,8 +536,42 @@ function chatbot_chatgpt_send_message(): void {
         }
     }
 
-    // Decide whether to use an Assistant or ChatGPT - Ver 1.6.7
-    if ($use_assistant_id == 'Yes') {
+    // Decide whether to use an Flow, Assistant or original ChatGPT
+    if ($model == 'flow'){
+        
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Using ChatGPT Flow');
+
+        // Reload the model - BELT & SUSPENDERS
+        $script_data_array['model'] = $model;
+
+        // Get the step from the transient
+        $kflow_step = get_chatbot_chatgpt_transients( 'kflow_step', null, null, $session_id);
+        if (empty($kflow_step)) {
+            $kflow_step = 0; // FIXME - Set to 1 or to zero?
+        }
+
+        // $thread_id
+        $thread_id = '[answer=' . $kflow_step + 1 . ']';
+        
+        // Add +1 to $script_data_array['next_step']
+        $kflow_step = $kflow_step + 1;
+
+        // Set the next step
+        set_chatbot_chatgpt_transients( 'kflow_step', $kflow_step, null, null, $session_id);
+
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', '$message: ' . $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+
+        // BELT & SUSPENDERS
+        $thread_id = '';
+
+        // Send message to ChatGPT API - Ver 1.6.7
+        $response = chatbot_chatgpt_call_flow_api($api_key, $message);
+        wp_send_json_success($response);
+
+    } elseif ($use_assistant_id == 'Yes') {
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
@@ -576,8 +630,12 @@ function chatbot_chatgpt_send_message(): void {
         } elseif (str_starts_with($model, 'tts')) {
             // Reload the model - BELT & SUSPENDERS
             $script_data_array['model'] = $model;
-            // Send message to TTS API - Ver 1.9.4
+            // Send message to TTS API - Text-to-speech - Ver 1.9.5
             $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+        } elseif (str_starts_with($model,"whisper")) {
+            $script_data_array['model'] = $model;
+            // Send message to STT API - Speech-to-text - Ver 1.9.6
+            $response = chatbot_chatgpt_call_stt_api($api_key, $message);
         } else {
             // Reload the model - BELT & SUSPENDERS
             $script_data_array['model'] = $model;

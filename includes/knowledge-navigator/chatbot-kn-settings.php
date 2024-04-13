@@ -131,7 +131,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args): void {
             <p>And how does the <b>Knowledge Navigator</b> do all this? It employs a clever technique known as TF-IDF (Term Frequency-Inverse Document Frequency) to unearth the keywords that really matter. The keywords are ranked by their TF-IDF scores, where the score represents the keyword's relevance to your site. This score is a fine balance between the term's frequency on your site and its inverse document frequency (which is essentially the log of total instances divided by the number of documents containing the term). In simpler words, it's a sophisticated measure of how special a keyword is to your content.</p>
             <hr style="border-top: 2px solid;">
             <h2>Knowledge Navigator Status</h2>
-            <p><b><i>When you're ready to scan you website, set the 'Run Schedule' to 'Yes', then click 'Save Settings'.</i></b></p>
+            <p><b><i>When you're ready to scan you website, set the 'Run Schedule' to one of 'Now', 'Hourly', 'Twice Daily', 'Daily', or 'Weekly', then click 'Save Settings'.</i></b></p>
             <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
                 <p><b>Knowledge Navigator Status</b></p>
                 <p><b>Scheduled to Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_scan_interval', 'No Schedule')); ?></p>

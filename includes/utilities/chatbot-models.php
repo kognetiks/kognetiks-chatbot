@@ -25,6 +25,7 @@ function get_openai_models() {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
@@ -56,7 +57,34 @@ function get_openai_models() {
 
     // Check for API errors
     if (isset($data['error'])) {
-        return "Error: " . $data['error']['message'];
+        // return "Error: " . $data['error']['message'];
+        // On 1st install needs an API key
+        // So return a short list of the base models until an API key is entered
+        $data = '';
+
+        $data = array(
+            array(
+                'id' => 'dall-e-3',
+                'object' => 'model',
+                'created' => 1698785189,
+                'owned_by' => 'system'
+            ),
+            array(
+                'id' => 'gpt-4-1106-preview',
+                'object' => 'model',
+                'created' => 1698957206,
+                'owned_by' => 'system'
+            ),
+            array(
+                'id' => 'tts-1-1106',
+                'object' => 'model',
+                'created' => 1699053241,
+                'owned_by' => 'system'
+            )
+        );
+
+        return $data;
+
     }
 
     // Extract the models from the response

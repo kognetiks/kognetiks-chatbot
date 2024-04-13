@@ -63,13 +63,6 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
         'content' => $prompt,
     ];
 
-    // Test if the file_id is empty
-    // if (!empty($file_id)) {
-    //     back_trace( 'NOTICE', 'LINE 68 - $file_id is empty');
-    // } else {
-    //     back_trace( 'NOTICE', 'LINE 70 - $file_id is not empty');
-    // }
-
     // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
     unset($data['file_ids']);
     // Add the file reference if file_id is provided
@@ -303,6 +296,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
@@ -324,6 +318,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     if (empty($thread_id)) {
         // Step 1: Create an Assistant
         // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
+        $api_key = get_option('chatbot_chatgpt_api_key', '');
         $assistants_response = createAnAssistant($api_key);
         // DIAG - Print the response
         // back_trace( 'NOTICE', $assistants_response);
@@ -355,7 +350,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         'thread_id' => $thread_id,
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
-        'model' => $model
+        'model' => $model,
+        'voice' => $voice,
     );
 
     // Step 1: Create an Assistant
@@ -413,13 +409,6 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // DIAG - Diagnostics - Ver 1.8.1
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
-
-    // if (empty($file_id)) {
-    //     back_trace( 'NOTICE', 'LINE 419 - No file to retrieve');
-    // } else {
-    //     back_trace( 'NOTICE', 'LINE 421 - File to retrieve');
-    //     back_trace( 'NOTICE', '$file_id ' . print_r($file_id, true));
-    // }
 
     if (empty($file_id)) {
         // back_trace( 'NOTICE', 'No file to retrieve');

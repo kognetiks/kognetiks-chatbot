@@ -25,6 +25,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     global $script_data_array;
     global $additional_instructions;
     global $model;
+    global $voice;
     
     global $errorResponses;
 
@@ -83,7 +84,10 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
 
     // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
-    $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+    // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+    // Added "We previously have been talking about the following things: " - Ver 1.9.5 - 2024 04 12
+    $sys_message = 'We previously have been talking about the following things: ';
+    $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     // DIAG Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', '$context: ' . $context);

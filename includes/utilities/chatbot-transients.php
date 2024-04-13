@@ -14,13 +14,15 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set the transients based on the type - Ver 1.8.1
-function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null, $thread_id = null ): void {
+function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null, $thread_id = null, $sequence_id = null, $step_id = null): void {
 
     global $session_id;
     global $user_id;
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $sequence_id;
+    global $step_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -55,10 +57,18 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
         $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id;
     } elseif ( $transient_type == 'model' ) {
         $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $user_id;
+    } elseif ( $transient_type == 'voice') {
+        $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $user_id;
+    } elseif ( $transient_type == 'kflow_sequence' ) {
+        $transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id;
+    } elseif ( $transient_type == 'kflow_step' ) {
+        $transient_key = 'chatbot_chatgpt_kflow_step_' . $session_id;
+    } else {
+        return;
     }
 
     // Store the transient
-    set_transient($transient_key, $transient_value, 60*60*4); // Store for 4 hours
+    set_transient($transient_key, $transient_value, 60*60*24); // Store for 24 hours
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', '$transient_type ' . $transient_type);
@@ -77,6 +87,8 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $sequence_id;
+    global $step_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -121,6 +133,12 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
         $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id;
     } elseif ($transient_type == 'model') {
         $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $user_id;
+    } elseif ($transient_type == 'voice') {
+        $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $user_id;
+    } elseif ($transient_type == 'kflow_sequence') {
+        $transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id;
+    } elseif ($transient_type == 'kflow_step') {
+        $transient_key = 'chatbot_chatgpt_kflow_step_' . $session_id;
     } else {
         return '';
     }
@@ -146,6 +164,8 @@ function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $p
     global $page_id;
     global $thread_id;
     global $assistant_id;
+    global $sequence_id;
+    global $step_id;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -192,6 +212,15 @@ function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $p
     } elseif ( $transient_type == 'model' ) {
         $model_transient_key = 'chatbot_chatgpt_model_' . $user_id . '_' . $page_id;
         delete_transient($model_transient_key);
+    } elseif ( $transient_type == 'voice' ) {
+        $voice_transient_key = 'chatbot_chatgpt_voice_' . $user_id . '_' . $page_id;
+        delete_transient($voice_transient_key);
+    } elseif ( $transient_type == 'kflow_sequence' ) {
+        $kflow_sequence_transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id;
+        delete_transient($kflow_sequence_transient_key);
+    } elseif ( $transient_type == 'kflow_step' ) {
+        $kflow_step_transient_key = 'chatbot_chatgpt_kflow_step_' . $session_id;
+        delete_transient($kflow_step_transient_key);
     } else {
         return;
     }

@@ -3,8 +3,8 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, customer-support
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.4.3
-Stable tag: 1.9.4
+Tested up to: 6.5.2
+Stable tag: 1.9.5
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -47,7 +47,7 @@ Guide your visitors where you want them. Customizable buttons can link directly 
 Customize accessibility with three audience settings: All Audiences, Logged-in Only, or Visitors Only. Additionally, control presentation to specific audiences. Whether floating or embedded, tailor the chatbot's visibility for a seamless user experience across platforms.
 
 **🎭Personalized Greetings:**
-Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users table in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [display_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
+Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users or _usersmeta table in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [first_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
 
 **🤖Display Assistant's Name:**
 We've introduced a feature that allows the display of the Assistant's name, which is sourced directly from the OpenAI platform. This can be found and adjusted under Settings > Kognetiks Chatbot > GPT Assistants > Display GPT Assistant Name.
@@ -67,9 +67,12 @@ With the integration of Text-to-Speech (TTS) models, the chatbot can now convert
 ▪ **Seamless Integration:** Effortlessly bring your WordPress site to life with an easy-to-use plugin.
 
 **✨ Supported Models from OpenAI**
-▪ GPT-3.5 (gpt-3.5-turbo)
-▪ GPT-4 (gpt-4 models)
-▪ GPT-4 Turbo ('gpt-4-1106-preview')
+▪ GPT-3 series of models
+▪ GPT-4 series of models
+▪ dall-e series of models
+▪ tts series of models
+
+For a full list of models, please see [OpenAI's Model Overview](https://platform.openai.com/docs/models/overview).
 
 **🚀 Elevate Your Website Experience**
 The Kognetiks Chatbot for WordPress is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
@@ -211,6 +214,12 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 16. Settings and Options
 
 == Changelog ==
+
+= 1.9.5 =
+* Added voice options including: Allow, Echo, Fable, Onyx, Nova, and Shimmer
+* Added voice output options including: MP3, Opus, AAC, FLAC, WAV, and PCM
+* Moved the chatbot controls (submit, file upload, erase, text-to-speech) buttons below the input box
+* Redesigned the API/Model setting page for chat, image and speech generation parameters and tuning
 
 = 1.9.4 =
 * Enable personalization for initial and subsequent greetings for chatbot

@@ -211,7 +211,7 @@ function chatbot_chatgpt_kn_acquire(): void {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     // back_trace( 'NOTICE', "Key: $key, Value: $value");
+        //     back_trace( 'NOTICE', "Key: $key, Value: $value");
         // }
 
         // Directly use the post content
@@ -291,7 +291,7 @@ function chatbot_chatgpt_kn_acquire(): void {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     // back_trace( 'NOTICE', "Key: $key, Value: $value");
+        //     back_trace( 'NOTICE', "Key: $key, Value: $value");
         // }        
 
         // Directly use the post content
