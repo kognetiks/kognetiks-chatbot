@@ -40,7 +40,7 @@ function chatbot_chatgpt_appearance_background_color_callback(): void {
 // Now override the css with the color chosen by the user
 function chatbot_chatgpt_appearance_background_custom_css_settings(): void {
     $chatbot_chatgpt_appearance_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_background_color', '#f1f1f1'));
-    $chatbot_chatgpt_appearance_greeting_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_greeting_text_color', '#ffffff'));
+    $chatbot_chatgpt_appearance_greeting_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_greeting_text_color', '#000000'));
 
     // Define CSS styles as global variables
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt'] = "#chatbot-chatgpt { background: {$chatbot_chatgpt_appearance_background_color} !important; color: {$chatbot_chatgpt_appearance_greeting_text_color} !important; }";
