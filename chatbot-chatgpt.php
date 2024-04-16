@@ -56,21 +56,16 @@ ob_start();
 // Start the session if it has not been started, set the global, then close the session
 if (empty($session_id)) {
     if (session_status() == PHP_SESSION_NONE) {
-        // Set the session cookie parameters
-        session_set_cookie_params([
-            'lifetime' => 0, // Lifetime of the session cookie, defined in seconds.
-            'path' => '/', // Path where the cookie is accessible.
-            'domain' => $_SERVER['HTTP_HOST'], // Domain which the cookie is available.
-            'secure' => true, // If true the cookie will only be sent over secure connections.
-            'httponly' => true, // If true the cookie will only be accessible through the HTTP protocol.
-            'samesite' => 'Strict' // Prevents the browser from sending this cookie along with cross-site requests.
+        session_start([
+            'cookie_lifetime' => 0,
+            'cookie_path' => '/',
+            'cookie_domain' => $_SERVER['HTTP_HOST'],
+            'cookie_secure' => true,
+            'cookie_httponly' => true,
+            'cookie_samesite' => 'Strict'
         ]);
-
-        session_start();
     }
-
     $session_id = session_id();
-    // session_write_close();
 
 }
 
@@ -135,6 +130,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php'; // Ver 1.6.7
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php'; // Ver 1.8.6
+
+// Sample data generator - Ver 1.9.6
+require_once plugin_dir_path(__FILE__) . 'sample-data-generator.php';
 
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start(): void {

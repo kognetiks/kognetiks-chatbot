@@ -195,6 +195,14 @@ function chatbot_chatgpt_kn_acquire(): void {
         update_option('no_of_items_analyzed', $no_of_items_analyzed);
     }
 
+    // Memory cleanup - free up the variable mmediately after use - Ver 1.9.6
+    foreach ($results as $result) {
+        // processing
+        unset($result);
+    }
+    // DIAG - Diagnostic - Ver 1.9.6
+    back_trace( 'NOTICE', 'Memory cleanup - Completed');
+
     // Query WordPress database for page content
     if ( $chatbot_chatgpt_kn_include_pages === 'Yes') {
         // back_trace( 'NOTICE', 'Include pages');
@@ -262,6 +270,14 @@ function chatbot_chatgpt_kn_acquire(): void {
                 )
             );
         }
+
+        // Memory cleanup - free up the variable mmediately after use - Ver 1.9.6
+        foreach ($results as $result) {
+            // processing
+            unset($result);
+        }
+        // DIAG - Diagnostic - Ver 1.9.6
+        back_trace( 'NOTICE', 'Memory cleanup - Completed');
 
         // Log the URL and the $words array
         error_log($url . "\n", 3, $log_file_pages);
@@ -352,6 +368,14 @@ function chatbot_chatgpt_kn_acquire(): void {
                 )
             );
         }
+
+        // Memory cleanup - free up the variable mmediately after use - Ver 1.9.6
+        foreach ($results as $result) {
+            // processing
+            unset($result);
+        }
+        // DIAG - Diagnostic - Ver 1.9.6
+        back_trace( 'NOTICE', 'Memory cleanup - Completed');
 
         // Log the URL and the $words array
         error_log($url . "\n", 3, $log_file_comments);
