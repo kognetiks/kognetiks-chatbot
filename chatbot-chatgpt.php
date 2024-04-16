@@ -131,9 +131,6 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php'; // Ver 1.6.7
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php'; // Ver 1.8.6
 
-// Sample data generator - Ver 1.9.6
-require_once plugin_dir_path(__FILE__) . 'sample-data-generator.php';
-
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start(): void {
     ob_start();
