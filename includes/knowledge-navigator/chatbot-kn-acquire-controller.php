@@ -138,9 +138,12 @@ function chatbot_kn_reinitialization() {
     // DIAG - Diagnostics - Ver 1.9.6
     back_trace( 'NOTICE', 'chatbot_kn_phase_2_initialization' );
 
+    update_option('chatbot_chatgpt_kn_item_count', 1);
+
     update_option('chatbot_chatgpt_kn_action', 'phase 3');
 
-    update_option('chatbot_chatgpt_kn_item_count', 1);
+    // Schedule the next action
+    wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
 
 }
 
