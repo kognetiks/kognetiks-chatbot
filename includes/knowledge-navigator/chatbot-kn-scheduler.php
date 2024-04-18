@@ -38,8 +38,16 @@ function knowledge_navigator_scan(): void {
     // Make sure the results table exists before proceeding - Ver 1.6.3
     dbKNStore();
 
-    // Call the kn-acquire.php script
-    chatbot_chatgpt_kn_acquire();
+    // Call the kn-acquire.php script - REPLACED - Ver 1.9.6 - 2024 04 18
+    // chatbot_chatgpt_kn_acquire();
+
+    // New method to acquire the content - Ver 1.9.6 - 2024 04 18
+    // DIAG - Diagnostic - Ver 1.9.6
+    back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action - schedule kicked off' );
+    update_option( 'chatbot_chatgpt_kn_action', 'initialize' );
+    chatbot_kn_acquire_controller();
+
+    // FIXME - MOVE THIS TO PHASE 4 COMPLETED
 
     // Save the results message value into the option
     $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';

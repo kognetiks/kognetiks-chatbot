@@ -149,7 +149,6 @@ function chatbot_chatgpt_kn_settings_section_callback($args) {
     <p><i>Select the Run schedule (frequency, i.e., hourly, daily, weekly, etc.) and maximum number of top words to index.</i></p>
     <p><i>Choose the content types you want to include in the Knowledge Navigator's indexing process. This will help the Kognetiks Chatbot plugin to understand your website's content better and provide more accurate responses.</i></p>
     <?php
-
 }
 
 // Select Frequency of Scan - Ver 1.6.2
