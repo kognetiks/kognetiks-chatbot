@@ -52,6 +52,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
         // WP Cron Scheduler - VER 1.6.2
         // back_trace( 'NOTICE', 'BEFORE wp_clear_scheduled_hook');
+
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear before rescheduling
         // back_trace( 'NOTICE', 'AFTER wp_clear_scheduled_hook');
 

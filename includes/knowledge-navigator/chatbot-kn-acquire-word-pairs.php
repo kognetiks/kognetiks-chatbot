@@ -100,13 +100,13 @@ function kn_acquire_word_pairs( $content ) {
 
     // Remove 's' and 'â' at end of any words - Ver 1.6.5 - 2023 10 11
     $words = array_map(function($word) {
-        return rtrim($word, 'sâÃ¢£Â²°');
+        return rtrim($word, 'sâÃ¢£Â²°Ã±');
     }, $words);
 
     // Filter out any $words that are equal to a blank space
     $words = array_filter($words, function($word) {
         // return $word that do not start with "asst_" and is not in the specified array or a blank space
-        return substr($word, 0, 5) !== 'asst_' && !in_array($word, ['â', 'Ã¢', 'Ã°', '']) && $word !== ' ';
+        return substr($word, 0, 5) !== 'asst_' && !in_array($word, ['â', 'Ã¢', 'Ã°', 'Ã±', '']) && $word !== ' ';
     });
 
     // Initialize the arrays

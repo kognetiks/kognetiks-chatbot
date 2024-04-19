@@ -216,7 +216,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 1.9.6 =
-* TBD
+* Revised Knowledge Navigator process to sites with large numbers of pages, posts and comments
 
 = 1.9.5 =
 * Added voice options including: Allow, Echo, Fable, Onyx, Nova, and Shimmer

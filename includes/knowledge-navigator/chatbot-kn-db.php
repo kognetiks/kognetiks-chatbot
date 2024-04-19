@@ -15,7 +15,9 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Database Management - drop the table if it exists, then add it if it doesn't exist - Ver 1.6.3
 function dbKNStore(): bool {
+
     global $wpdb;
+
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
 
@@ -28,7 +30,8 @@ function dbKNStore(): bool {
         url TEXT NOT NULL,
         title TEXT,
         word TEXT,
-        score FLOAT NOT NULL
+        score FLOAT NOT NULL,
+        cardinality INT NOT NULL
     ) $charset_collate;";
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -44,7 +47,9 @@ function dbKNStore(): bool {
 
 // Database Management - drop a table if it exists, then add it if it doesn't exist to store the TF-IDF words and score - Ver 1.6.3
 function dbKNStoreTFIDF(): bool {
+
     global $wpdb;
+
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
@@ -106,6 +111,7 @@ function store_top_words(): void {
 
 // Save the results to a file
 function output_results() {
+    
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
