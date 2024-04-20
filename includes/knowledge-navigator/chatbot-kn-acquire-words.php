@@ -130,13 +130,22 @@ function kn_acquire_just_the_words( $content ) {
     // Update the totalWordCount with the sum of the $words array
     $totalWordCount = $totalWordCount + array_sum($words);
 
-    // Before computer the TF-IDF for the $words array, trim the $words array to the top 10 words
-    $words = array_slice($words, 0, 100);
+    // Before computer the TF-IDF for the $words array, trim the $words array to the top 100 words
+    // MAYBE THIS SHOULD BE AFTER THE COMPUTE TF-IDF - Ver 1.9.6 - 2024 04 20
+    // $words = array_slice($words, 0, 100);
 
     // Computer the TF-IDF for the $words array
     foreach ($words as $word => $count) {
         $words[$word] = computeTFIDF($word);
-    } 
+    }
+
+    // NEW - Ver 1.9.6 - 2024 04 20
+    // Sort the $words based on their score, highest to lowest
+    arsort($words);
+    // Count the number of words in the $words array
+    $wordCount = count($words);
+    // Trim the $words array to the top 10% of the words
+    $words = array_slice($words, 0, ceil($wordCount * 0.10));
 
     return $words;
 

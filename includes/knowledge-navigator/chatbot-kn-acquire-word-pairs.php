@@ -138,12 +138,21 @@ function kn_acquire_word_pairs( $content ) {
     $totalWordPairCount = $totalWordPairCount + array_sum($wordPairs);
 
     // Before computing the TF-IDF for the $wordPairs array, trim the $wordPairs array to the top 10 word pairs
-    $wordPairs = array_slice($wordPairs, 0, 100);
+    // MAYBE THIS SHOULD BE AFTER THE COMPUTE TF-IDF - Ver 1.9.6 - 2024 04 20
+    // $wordPairs = array_slice($wordPairs, 0, 100);
 
     // Compute the TF-IDF for the $wordPairs array
     foreach ($wordPairs as $wordPair => $count) {
         $wordPairs[$wordPair] = computePairedTFIDF($wordPair);
     }
+
+    // NEW - Ver 1.9.6 - 2024 04 20
+    // Sort the $words based on their score, highest to lowest
+    arsort($words);
+    // Count the number of words in the $words array
+    $wordCount = count($words);
+    // Trim the $words array to the top 10% of the words
+    $words = array_slice($words, 0, ceil($wordCount * 0.10));
 
     return $wordPairs;
 }
