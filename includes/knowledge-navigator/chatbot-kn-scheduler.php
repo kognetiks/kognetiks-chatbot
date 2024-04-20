@@ -22,7 +22,7 @@ function knowledge_navigator_scan(): void {
     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
     
     // DIAG - Diagnostic - Ver 1.9.6
-    back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner );
+    // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner );
 
     // The second parameter is the default value if the option is not set.
     update_option('chatbot_chatgpt_kn_status', 'In Process');
@@ -41,7 +41,7 @@ function knowledge_navigator_scan(): void {
 
     // New process to acquire the content - Ver 1.9.6 - 2024 04 18
     // DIAG - Diagnostic - Ver 1.9.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action - schedule kicked off' );
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action - schedule kicked off' );
 
     update_option( 'chatbot_chatgpt_kn_action', 'initialize' );
 

@@ -690,36 +690,36 @@ function chatbot_kn_output_the_results() {
     // Unset large variables to free memory
     unset($results);
 
-    // Now write the .log files
-    $tfidf_results = $results_dir_path . 'tfidf_results.csv';
-    // back_trace( 'NOTICE', 'Log file: ' . $tfidf_results);
+    // // Now write the .log files
+    // $tfidf_results = $results_dir_path . 'tfidf_results.csv';
+    // // back_trace( 'NOTICE', 'Log file: ' . $tfidf_results);
 
-    // Delete log file if it already exists
-    if (file_exists($tfidf_results)) {
-        unlink($tfidf_results);
-    }
+    // // Delete log file if it already exists
+    // if (file_exists($tfidf_results)) {
+    //     unlink($tfidf_results);
+    // }
 
-    // Retrieve the words and the scores for each URL in the knowledge base table
-    $results = $wpdb->get_results(
-        "SELECT id, url, title, word, score FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base ORDER BY title, url, score DESC"
-    );
+    // // Retrieve the words and the scores for each URL in the knowledge base table
+    // $results = $wpdb->get_results(
+    //     "SELECT id, url, title, word, score FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base ORDER BY title, url, score DESC"
+    // );
 
-    // Write the log file
-    try {
-        $f = new SplFileObject($tfidf_results, 'w');
-        $f->fputcsv(['ID', 'URL', 'Title', 'Word', 'Score']);
-        foreach ($results as $result) {
-            $f->fputcsv([$result->id, $result->url, $result->title, $result->word, $result->score]);
-        }
-    } catch (RuntimeException $e) {
-        // back_trace( 'ERROR', 'Failed to open log file for writing: ' . $e->getMessage());
-    }
+    // // Write the log file
+    // try {
+    //     $f = new SplFileObject($tfidf_results, 'w');
+    //     $f->fputcsv(['ID', 'URL', 'Title', 'Word', 'Score']);
+    //     foreach ($results as $result) {
+    //         $f->fputcsv([$result->id, $result->url, $result->title, $result->word, $result->score]);
+    //     }
+    // } catch (RuntimeException $e) {
+    //     // back_trace( 'ERROR', 'Failed to open log file for writing: ' . $e->getMessage());
+    // }
 
-    // Close the file
-    $f = null;
+    // // Close the file
+    // $f = null;
 
-    // Unset large variables to free memory
-    unset($results);
+    // // Unset large variables to free memory
+    // unset($results);
 
     // chatbot_kn_schedule_batch_acquisition();
     update_option( 'chatbot_chatgpt_kn_action', 'phase 6' );

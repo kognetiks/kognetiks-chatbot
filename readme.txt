@@ -1,6 +1,6 @@
 === Kognetiks Chatbot for WordPress ===
 Contributors: Kognetiks
-Tags: chatbot, chatgpt, openai, ai, customer-support
+Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.5.2
@@ -9,7 +9,11 @@ Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-== Introducing the Kognetiks Chatbot for WordPress: Revolutionizing Digital Interactions ==
+Easily integrate OpenAI's ChatGPT API into your WordPress website with this powerful AI-driven chatbot plugin for personalized support and engagement
+
+== Description ==
+
+**Introducing the Kognetiks Chatbot for WordPress: Revolutionizing Digital Interactions**
 
 Welcome to the future of website interaction with **Kognetiks Chatbot for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Assistants.
 
