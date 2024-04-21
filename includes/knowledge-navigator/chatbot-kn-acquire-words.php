@@ -33,6 +33,10 @@ function kn_acquire_just_the_words( $content ) {
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', "FUNCTION - kn_acquire_just_the_words");
 
+    // Initialize the $topWords array - Ver 1.9.6
+    $topWords = [];
+    $totalWordCount = 0;
+
     // Before beginning, translate the $stopWords array into the language of the website
     if (get_locale() !== "en_US") {
         // DIAG - Diagnostic - Ver 1.7.2.1
@@ -128,7 +132,8 @@ function kn_acquire_just_the_words( $content ) {
     arsort($topWords);
 
     // Update the totalWordCount with the sum of the $words array
-    $totalWordCount = $totalWordCount + array_sum($words);
+    // $totalWordCount = $totalWordCount + array_sum($words);
+    $totalWordCount = array_sum($words);
 
     // Before computer the TF-IDF for the $words array, trim the $words array to the top 100 words
     // MAYBE THIS SHOULD BE AFTER THE COMPUTE TF-IDF - Ver 1.9.6 - 2024 04 20

@@ -217,6 +217,7 @@ function chatbot_kn_reinitialization() {
     global $topWords;
     global $topWordPairs;
     global $max_top_words;
+    global $document_count;
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', 'chatbot_kn_phase_2_initialization' );
@@ -232,8 +233,46 @@ function chatbot_kn_reinitialization() {
 
     update_option('chatbot_chatgpt_kn_action', 'phase 3');
 
+    // Get teh number of posts, pages, and products
+    chatbot_kn_count_documents();
+
     // Schedule the next action
     wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+
+}
+
+// Count the number of posts, pages, and products
+function chatbot_kn_count_documents() {
+    
+        global $wpdb;
+
+        $totalNumberOfDocuments = 0;
+    
+        // Count the number of published pages
+        $page_count = $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}posts WHERE post_type = 'page' AND post_status = 'publish'"
+        );
+    
+        // Count the number of published posts
+        $post_count = $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}posts WHERE post_type = 'post' AND post_status = 'publish'"
+        );
+    
+        // Count the number of published products
+        $product_count = $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}posts WHERE post_type = 'product' AND post_status = 'publish'"
+        );
+    
+        // Count the number of approved comments
+        $comment_count = $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}comments WHERE comment_approved = '1'"
+        );
+    
+        // Sum the count
+        $document_count = $page_count + $post_count + $product_count + $comment_count;
+
+        // Update the total number of documents
+        update_option('chatbot_chatgpt_kn_document_count', $document_count);
 
 }
 
@@ -591,8 +630,8 @@ function chatbot_kn_determine_top_words() {
     }
 
     // DIAG - Diagnostics - Ver 1.9.6
-    back_trace( 'NOTICE', 'Total Word Count: ' . $totalWordCount );
-    back_trace( 'NOTICE', 'Top Words: ' . print_r($topWords, true) );
+    // back_trace( 'NOTICE', 'Total Word Count: ' . $totalWordCount );
+    // back_trace( 'NOTICE', 'Top Words: ' . print_r($topWords, true) );
     
     // Count the total number of words
     $totalWordCount = array_sum($topWords);

@@ -32,6 +32,10 @@ function kn_acquire_word_pairs( $content ) {
     
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', "FUNCTION - kn_acquire_just_the_words");
+
+    // Initialize the $topWords array - Ver 1.9.6
+    $topWordPairs = [];
+    $totalWordPairCount = 0;
     
     // Before beginning, translate the $stopWords array into the language of the website
     if (get_locale() !== "en_US") {
@@ -135,7 +139,8 @@ function kn_acquire_word_pairs( $content ) {
     arsort($topWordPairs);
 
     // Update the totalWordPairCount with the sum of the $wordPairs array
-    $totalWordPairCount = $totalWordPairCount + array_sum($wordPairs);
+    // $totalWordPairCount = $totalWordPairCount + array_sum($wordPairs);
+    $totalWordPairCount = array_sum($wordPairs);
 
     // Before computing the TF-IDF for the $wordPairs array, trim the $wordPairs array to the top 10 word pairs
     // MAYBE THIS SHOULD BE AFTER THE COMPUTE TF-IDF - Ver 1.9.6 - 2024 04 20
