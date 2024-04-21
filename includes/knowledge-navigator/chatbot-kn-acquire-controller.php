@@ -348,8 +348,8 @@ function chatbot_kn_run_phase_1() {
             // Ensure the post content is treated as UTF-8
             $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', mb_detect_encoding($Content));
 
-            // Now call kn_acquire_words_at_scale with the UTF-8 encoded content
-            kn_acquire_words_at_scale( $ContentUtf8 );
+            // Now call kn_acquire_words with the UTF-8 encoded content
+            kn_acquire_words( $ContentUtf8 );
 
         } else {
             // Handle the case where content is empty
@@ -489,8 +489,8 @@ function chatbot_kn_run_phase_3() {
             // Ensure the post content is treated as UTF-8
             $commentContentUtf8 = mb_convert_encoding($commentContent, 'UTF-8', mb_detect_encoding($commentContent));
 
-            // Now call kn_acquire_words_at_scale with the UTF-8 encoded content
-            kn_acquire_words_at_scale( $commentContentUtf8 );
+            // Now call kn_acquire_words with the UTF-8 encoded content
+            kn_acquire_words( $commentContentUtf8 );
 
         } else {
             // Handle the case where content is empty

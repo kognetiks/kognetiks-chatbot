@@ -14,17 +14,10 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-global $max_top_words, $chatbot_chatgpt_diagnostics, $frequencyData, $totalWordCount, $totalWordPairCount ;
-$max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 100)); // Default to 100
-$topWords = [];
-$topWordPairs = [];
-$frequencyData = [];
-$totalWordCount = 0;
-$totalWordPairCount = 0;
-
 // Knowledge Navigator - Acquire Top Words using TF-IDF - Ver 1.6.5
-function kn_acquire_just_the_words( $content ) {
+function kn_acquire_words( $content ) {
 
+    global $wpdb;
     global $stopWords;
     global $max_top_words;
     global $topWords;
@@ -104,6 +97,7 @@ function kn_acquire_just_the_words( $content ) {
     $words = array_diff($words, $localized_stopWords);
 
     // Remove 's' and 'â' at end of any words - Ver 1.6.5 - 2023 10 11
+    // FIXME - Determine if word ends in an s then leave the s else if the word is plural then remove the s
     $words = array_map(function($word) {
         return rtrim($word, 'sâÃ¢£Â²°Ã±');
     }, $words);
@@ -114,81 +108,29 @@ function kn_acquire_just_the_words( $content ) {
         return substr($word, 0, 5) !== 'asst_' && !in_array($word, ['â', 'Ã¢', 'Ã°', 'Ã±', '']) && $word !== ' ';
     });
 
-    // Compute the TF-IDF for the $words array, and return the max top words
+    // Insert the word into the database
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_word_count';
+
+    // Compress the $words array to the unique words and their counts
     $words = array_count_values($words);
-    arsort($words);
-    $words = array_slice($words, 0, $max_top_words);
 
-    // Find the $words in the $topWords array, update the count, and sort the array
     foreach ($words as $word => $count) {
-        if (array_key_exists($word, $topWords)) {
-            $topWords[$word] += $count;
-        } else {
-            $topWords[$word] = $count;
-        }
+        $prepared_word = $wpdb->prepare('%s', $word);
+        $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO $table_name (word, word_count, document_count) VALUES (%s, %d, 1)
+                ON DUPLICATE KEY UPDATE word_count = word_count + %d, document_count = document_count + 1",
+                $prepared_word, $count, $count
+            )
+        );
     }
 
-    // Sort the $topWords array
-    arsort($topWords);
+    // Count the number of words and add to the chatbot_chatgpt_kn_total_word_count
+    $totalWordCount = count($words);
+    $chatbot_chatgpt_kn_total_word_count = get_option('chatbot_chatgpt_kn_total_word_count');
+    $chatbot_chatgpt_kn_total_word_count += $totalWordCount;
+    update_option('chatbot_chatgpt_kn_total_word_count', $chatbot_chatgpt_kn_total_word_count);
 
-    // Update the totalWordCount with the sum of the $words array
-    // $totalWordCount = $totalWordCount + array_sum($words);
-    $totalWordCount = array_sum($words);
-
-    // Before computer the TF-IDF for the $words array, trim the $words array to the top 100 words
-    // MAYBE THIS SHOULD BE AFTER THE COMPUTE TF-IDF - Ver 1.9.6 - 2024 04 20
-    // $words = array_slice($words, 0, 100);
-
-    // Computer the TF-IDF for the $words array
-    foreach ($words as $word => $count) {
-        $words[$word] = computeTFIDF($word);
-    }
-
-    // NEW - Ver 1.9.6 - 2024 04 20
-    // Sort the $words based on their score, highest to lowest
-    arsort($words);
-    // Count the number of words in the $words array
-    $wordCount = count($words);
-    // Trim the $words array to the top 10% of the words
-    $words = array_slice($words, 0, ceil($wordCount * 0.10));
-
-    return $words;
-
-}
-
-function computeTFIDF($term) {
-
-    global $topWords;
-    global $totalWordCount;
-
-    $tf = $topWords[$term] / $totalWordCount;
-    $idf = computeInverseDocumentFrequency($term);
-
-    return $tf * $idf;
-
-}
-
-
-function computeTermFrequency($term) {
-
-    global $topWords;
-
-    return $topWords[$term] / count($topWords);
-
-}
-
-
-function computeInverseDocumentFrequency($term) {
-
-    global $topWords;
-
-    $numDocumentsWithTerm = 0;
-    foreach ($topWords as $word => $frequency) {
-        if ($word === $term) {
-            $numDocumentsWithTerm++;
-        }
-    }
-
-    return log(count($topWords) / ($numDocumentsWithTerm + 1));
+    return;
 
 }

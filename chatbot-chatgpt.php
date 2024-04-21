@@ -90,9 +90,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-a
 // Include necessary files - Knowledge Navigator
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire.php'; // Knowledge Navigator Acquisition - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-controller.php'; // Knowledge Navigator Acquisition - Ver 1.9.6
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words-at-scale.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-word-pairs.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-analysis.php'; // Knowledge Navigator Analysis- Ver 1.6.2
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-response.php'; // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
