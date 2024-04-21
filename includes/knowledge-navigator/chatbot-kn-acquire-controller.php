@@ -14,20 +14,6 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-global $max_top_words;
-
-global $frequencyData;
-global $totalWordCount;
-global $totalWordPairCount;
-
-$max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 100)); // Default to 100
-
-$topWords = [];
-$topWordPairs = [];
-$frequencyData = [];
-$totalWordCount = 0;
-$totalWordPairCount = 0;
-
 // Batch the acquisition of site content
 //
 // This process is intended to scale to large sites with many pages, posts and products.
@@ -80,7 +66,7 @@ function chatbot_kn_acquire_controller() {
             // DIAG - Diagnostics - Ver 1.9.6
             back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
 
-            chatbot_kn_run_post_acquisition();
+            chatbot_kn_run_phase_1();
 
             // DIAG - Diagnostics - Ver 1.9.6
             back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
@@ -102,7 +88,7 @@ function chatbot_kn_acquire_controller() {
             // DIAG - Diagnostics - Ver 1.9.6
             back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
 
-            chatbot_kn_run_comment_acquisition();
+            chatbot_kn_run_phase_3();
 
             // DIAG - Diagnostics - Ver 1.9.6
             back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
@@ -114,7 +100,7 @@ function chatbot_kn_acquire_controller() {
             back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
 
             // Determine the top words and word pairs
-            chatbot_kn_determine_top_words();
+            chatbot_kn_run_phase_4();
 
             // DIAG - Diagnostics - Ver 1.9.6
             back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
@@ -179,9 +165,6 @@ add_action( 'chatbot_kn_acquire_controller', 'chatbot_kn_acquire_controller' );
 function chatbot_kn_initalization() {
 
     global $wpdb;
-    global $topWords;
-    global $topWordPairs;
-    global $max_top_words;
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', 'chatbot_kn_phase_1_initalization' );
@@ -193,15 +176,23 @@ function chatbot_kn_initalization() {
     // FIXME - This should be set in the settings and default to 100
     update_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
 
-    // Initialize the $topWords array
-    $topWords = [];
-    $topWordPairs = [];
-
     // Reset the chatbot_chatgpt_knowledge_base table
     dbKNStore();
 
+    // Reset the chatbot_chatgpt_knowledge_base_word_count table
+    dbKNStoreWordCount();
+
+    // Reset the chatbot_chatgpt_knowledge_base_tfidf table
+    dbKNStoreTFIDF();
+
     // chatbot_kn_schedule_batch_acquisition();
     update_option( 'chatbot_chatgpt_kn_action', 'phase 1' );
+
+    // Reset chatbot_chatgpt_kn_total_word_count to 0
+    update_option('chatbot_chatgpt_kn_total_word_count', 0);
+
+    // Reset chatbot_chatgpt_kn_document_count to 0
+    update_option('chatbot_chatgpt_kn_document_count', 0);
 
     // Reset the number of items analyzed
     update_option('no_of_items_analyzed', 0);
@@ -226,9 +217,6 @@ function chatbot_kn_reinitialization() {
     $topWords = [];
     $topWordPairs = [];
 
-    // Reset the chatbot_chatgpt_knowledge_base_tfidf table
-    dbKNStoreTFIDF();
-
     update_option('chatbot_chatgpt_kn_item_count', 0);
 
     update_option('chatbot_chatgpt_kn_action', 'phase 3');
@@ -250,22 +238,22 @@ function chatbot_kn_count_documents() {
     
         // Count the number of published pages
         $page_count = $wpdb->get_var(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}posts WHERE post_type = 'page' AND post_status = 'publish'"
+            "SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'page' AND post_status = 'publish'"
         );
     
         // Count the number of published posts
         $post_count = $wpdb->get_var(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}posts WHERE post_type = 'post' AND post_status = 'publish'"
+            "SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'post' AND post_status = 'publish'"
         );
     
         // Count the number of published products
         $product_count = $wpdb->get_var(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}posts WHERE post_type = 'product' AND post_status = 'publish'"
+            "SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'product' AND post_status = 'publish'"
         );
     
         // Count the number of approved comments
         $comment_count = $wpdb->get_var(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}comments WHERE comment_approved = '1'"
+            "SELECT COUNT(comment_post_ID) FROM {$wpdb->prefix}comments WHERE comment_approved = '1'"
         );
     
         // Sum the count
@@ -274,10 +262,13 @@ function chatbot_kn_count_documents() {
         // Update the total number of documents
         update_option('chatbot_chatgpt_kn_document_count', $document_count);
 
+        // DIAG - Diagnostics - Ver 1.9.6
+        back_trace( 'NOTICE', 'chatbot_kn_count_documents: ' . $document_count );
+
 }
 
 // Acquire the content for each page, post, or product in the run
-function chatbot_kn_run_post_acquisition() {
+function chatbot_kn_run_phase_1() {
 
     global $wpdb;
     global $topWords;
@@ -285,7 +276,7 @@ function chatbot_kn_run_post_acquisition() {
     global $max_top_words;
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_run_post_acquisition' );
+    // back_trace( 'NOTICE', 'chatbot_kn_run_phase_1' );
 
     // Get the item count
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
@@ -334,6 +325,7 @@ function chatbot_kn_run_post_acquisition() {
         // DIAG - Diagnostics - Ver 1.9.6
         // back_trace( 'NOTICE', 'No more items to process' );
         update_option( 'chatbot_chatgpt_kn_action', 'phase 2' );
+
         // Schedule the next action
         wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
         return;
@@ -349,60 +341,20 @@ function chatbot_kn_run_post_acquisition() {
         // }        
 
         // Directly use the post content
-        $postContent = $result->post_content;
+        $Content = $result->post_content;
 
         // Check if the post content is not empty
-        if (!empty($postContent)) {
+        if ( !empty($Content) ) {
             // Ensure the post content is treated as UTF-8
-            $postContentUtf8 = mb_convert_encoding($postContent, 'UTF-8', mb_detect_encoding($postContent));
+            $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', mb_detect_encoding($Content));
 
-            // Now call kn_acquire_just_the_words with the UTF-8 encoded post content and return $words
-            $words = kn_acquire_just_the_words($postContentUtf8);
+            // Now call kn_acquire_words_at_scale with the UTF-8 encoded content
+            kn_acquire_words_at_scale( $ContentUtf8 );
 
-            // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs
-            // REMOVED - 2024 04 20
-            // $word_pairs = kn_acquire_word_pairs($postContentUtf8);
         } else {
-            // Handle the case where post content is empty
-            // DIAG - Diagnostics - Ver 1.9.6
-            // back_trace( 'NOTICE', 'Post has empty content.');
+            // Handle the case where content is empty
             continue;
         }
-        
-        // Construct the URL for the post
-        $url = get_permalink($result->ID);
-        
-        // Construct the Title for the post
-        $title = get_the_title($result->ID);
-
-        // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
-        foreach ($words as $word => $score) {
-            $wpdb->insert(
-                $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
-                array(
-                    'url' => $url,
-                    'title' => $title,
-                    'word' => $word,
-                    'score' => $score,
-                    'cardinality' => 1
-                )
-            );
-        }
-
-        // Store each url, title, word pair and score in the chatbot_chatgpt_knowledge_base table
-        // REMOVED - 2024 04 20
-        // foreach ($word_pairs as $word => $score) {
-        //     $wpdb->insert(
-        //         $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
-        //         array(
-        //             'url' => $url,
-        //             'title' => $title,
-        //             'word' => $word,
-        //             'score' => $score,
-        //             'cardinality' => 2
-        //         )
-        //     );
-        // }
 
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;
@@ -423,8 +375,32 @@ function chatbot_kn_run_post_acquisition() {
 
 }
 
+// STASH
+function stash() {
+
+    // Construct the URL for the post
+    $url = get_permalink($result->ID);
+    
+    // Construct the Title for the post
+    $title = get_the_title($result->ID);
+
+    // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
+    foreach ($words as $word => $score) {
+        $wpdb->insert(
+            $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
+            array(
+                'url' => $url,
+                'title' => $title,
+                'word' => $word,
+                'score' => $score
+            )
+        );
+    }
+
+}
+
 // Acquire the content for each comment in the run
-function chatbot_kn_run_comment_acquisition() {
+function chatbot_kn_run_phase_3() {
 
     global $wpdb;
     global $topWords;
@@ -432,7 +408,7 @@ function chatbot_kn_run_comment_acquisition() {
     global $max_top_words;
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_run_comment_acquisition' );
+    // back_trace( 'NOTICE', 'chatbot_kn_run_phase_3' );
 
     // Get the item count
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
@@ -507,71 +483,23 @@ function chatbot_kn_run_comment_acquisition() {
             // back_trace( 'NOTICE', 'Comment has empty content.');
             continue;
         }
-
-        // Check if the post content is not empty
-        if (!empty($commentContent)) {
+       
+        // Check if the comment content is not empty
+        if ( !empty($commentContent) ) {
             // Ensure the post content is treated as UTF-8
             $commentContentUtf8 = mb_convert_encoding($commentContent, 'UTF-8', mb_detect_encoding($commentContent));
 
-            // Now call kn_acquire_just_the_words with the UTF-8 encoded comment content and return $words
-            $words = kn_acquire_just_the_words($commentContentUtf8);
+            // Now call kn_acquire_words_at_scale with the UTF-8 encoded content
+            kn_acquire_words_at_scale( $commentContentUtf8 );
 
-            // Now call kn_acquire_word_pairs with the UTF-8 encoded comment content and return $word_pairs
-            // REMOVED - 2024 04 20
-            // $word_pairs = kn_acquire_word_pairs($commentContentUtf8);
         } else {
-            // Handle the case where post content is empty
-            // DIAG - Diagnostics - Ver 1.9.6
-            // back_trace( 'NOTICE', 'Comment has empty content.');
+            // Handle the case where content is empty
             continue;
         }
-        
-        // Construct the URL for the comments
-        if (array_key_exists('comment_post_ID', $result)) {
-            $url = get_permalink($result['comment_post_ID']);
-        } else {
-            // Handle the case where the key does not exist
-            $url = "";
-            // DIAG - Diagnostics - Ver 1.9.6
-            // back_trace( 'NOTICE', 'Comment has empty content.');
-            continue;
-        }
-
-        // Construct the Title for the comments
-        $title = 'Comment';
-
-        // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
-        foreach ($words as $word => $score) {
-            $wpdb->insert(
-                $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
-                array(
-                    'url' => $url,
-                    'title' => $title,
-                    'word' => $word,
-                    'score' => $score,
-                    'cardinality' => 1
-                )
-            );
-        }
-
-        // Store each url, title, word pairs and score in the chatbot_chatgpt_knowledge_base table
-        // REMOVED - 2024 04 20
-        // foreach ($word_pairs as $word => $score) {
-        //     $wpdb->insert(
-        //         $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
-        //         array(
-        //             'url' => $url,
-        //             'title' => $title,
-        //             'word' => $word,
-        //             'score' => $score,
-        //             'cardinality' => 2
-        //         )
-        //     );
-        // }
 
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;
-
+    
     }
 
     // Update the number of items analyzed
@@ -588,68 +516,68 @@ function chatbot_kn_run_comment_acquisition() {
 
 }
 
-// Determine the top words
-function chatbot_kn_determine_top_words() {
+// STASH
+function stash_comment() {
 
-    global $wpdb;
-    global $topWords;
-    global $topWordPairs;
-    global $max_top_words;
-    global $totalWordCount;
+    // Construct the Title for the comments
+    $title = 'Comment';
 
-    // Get the maximum number of top words
-    $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 100)); // Default to 100
-
-    // Retrieve the list of words where the cardinality = 1 and count the number of occurrences
-    // $results = $wpdb->get_results(
-    //     "SELECT word, COUNT(DISTINCT word) AS total_count FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base 
-    //     WHERE cardinality = 1 GROUP BY word ORDER BY total_count DESC LIMIT $max_top_words"
-    // );
-
-    // Retrieve the list of words where the cardinality = 1 or 2 and count the number of occurrences
-    // $results = $wpdb->get_results(
-    //     "SELECT word, COUNT(DISTINCT word) AS total_count FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base 
-    //     GROUP BY word ORDER BY total_count DESC LIMIT $max_top_words"
-    // );
-
-    // NEW APPROACH - Ver 1.9.6 - 2024 04 20
-    $results = $wpdb->get_results(
-        "SELECT word, score
-        FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base
-        ORDER BY score DESC
-        LIMIT $max_top_words"
-    );
-
-    // Store the top words in the $topWords array
-    // REMOVED - Ver 1.9.6 - 2024 04 20
-    // foreach ($results as $result) {
-    //     $topWords[$result->word] = $result->total_count;
-    // }
-    foreach ($results as $result) {
-        $topWords[$result->word] = $result->score;
+    // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
+    foreach ($words as $word => $score) {
+        $wpdb->insert(
+            $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
+            array(
+                'url' => $url,
+                'title' => $title,
+                'word' => $word,
+                'score' => $score
+            )
+        );
     }
 
-    // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'Total Word Count: ' . $totalWordCount );
-    // back_trace( 'NOTICE', 'Top Words: ' . print_r($topWords, true) );
-    
-    // Count the total number of words
-    $totalWordCount = array_sum($topWords);
-   
-    // Now computer the TF-IDF for the $topWords array
-    // REMOVED - Ver 1.9.6 - 2024 04 20
-    // foreach ($topWords as $word => $count) {
-    //     $topWords[$word] = computeTFIDF($word);
-    // }
+}
 
-    // Sort the $topWords array by score descending
-    arsort($topWords);
-    
-    // Slice the $topWords array to the maximum number of top words
-    $topWords = array_slice($topWords, 0, $max_top_words, true);
+// Compute the TF-IDF
+function chatbot_kn_run_phase_4 () {
 
-    // Store the top words in the chatbot_chatgpt_knowledge_base_tfidf table
-    foreach ($topWords as $word => $tfidf) {
+    global $wpdb;
+
+    // Maximum number of top words
+    $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 100)); // Default to 100
+    
+    // SQL query to fetch top words based on their document count
+    $results = $wpdb->get_results(
+        "SELECT word, word_count, document_count FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base_word_count 
+        ORDER BY document_count DESC LIMIT $max_top_words"
+    );
+    
+    // Total number of documents in the corpus
+    $ocumentCount = get_option('chatbot_chatgpt_kn_document_count', 0); // Total documents in the corpus
+    
+    // Total number of words in the corpus
+    $totalWordCount = get_option('chatbot_chatgpt_kn_total_word_count', 0); // Total words across documents
+
+    foreach ($results as $result) {
+
+        $word = $result->word;
+    
+        $wordCount = $result->word_count;  // Using 'count' directly from the query
+    
+        $documentCount = $result->document_count;  // Using 'document_count' directly from the query
+    
+        $wordCount = $result->word_count;
+    
+        // Calculate the Term Frequency (TF) for the $word
+        // This should be the total occurrences of the word divided by the total number of words, if available
+        $tf = $wordCount / $totalWordCount;
+    
+        // Calculate Inverse Document Frequency (IDF)
+        $idf = log($documentCount / $wordCount);
+    
+        // Calculate the TF-IDF
+        $tfidf = $tf * $idf;
+    
+        // Store the TF-IDF in the chatbot_chatgpt_knowledge_base_tfidf table
         $wpdb->insert(
             $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf',
             array(
@@ -658,7 +586,7 @@ function chatbot_kn_determine_top_words() {
             )
         );
     }
-
+    
     // Unset large variables to free memory
     unset($results);
 
@@ -670,7 +598,7 @@ function chatbot_kn_determine_top_words() {
 
     // Unset large variables to free memory
     unset($results);
-    
+
 }
 
 // Output the results
@@ -797,6 +725,11 @@ function chatbot_kn_wrap_up() {
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', 'chatbot_kn_wrap_up' );
+
+    // FIXME - Drop the chatbot_chatgpt_knowledge_base_word_count table
+    // DIAG - Diagnostics - Ver 1.9.6
+    back_trace ( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
+    // dbKNClean();
 
     // Save the results message value into the option
     $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';
