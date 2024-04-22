@@ -73,7 +73,7 @@ function dbKNStoreTFIDF(): bool {
 
 }
 
-// Database Management - drop a table if it exists, then add it if it doesn't exist to store the word pairs and score - Ver 1.9.6
+// Database Management - drop a table if it exists, then add it if it doesn't exist to store the words and score - Ver 1.9.6
 function dbKNStoreWordCount(): bool {
     
         global $wpdb;

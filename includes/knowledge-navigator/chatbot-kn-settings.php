@@ -222,3 +222,16 @@ function chatbot_chatgpt_kn_include_comments_callback($args): void {
     </select>
     <?php
 }
+
+function chatbot_chatgpt_enhanced_response_limit_callback($args): void {
+    $chatbot_chatgpt_enhanced_response_limit = intval(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
+    ?>
+    <select id="chatbot_chatgpt_enhanced_response_limit" name="chatbot_chatgpt_enhanced_response_limit">
+        <?php
+        for ($i = 1; $i <= 10; $i++) {
+            echo '<option value="' . $i . '"' . selected($chatbot_chatgpt_enhanced_response_limit, $i, false) . '>' . $i . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}

@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Knowledge Navigator - Acquire Top Words using TF-IDF - Ver 1.6.5
-function kn_acquire_words( $content ) {
+function kn_acquire_words( $content, $option = null ) {
 
     global $wpdb;
     global $stopWords;
@@ -112,25 +112,36 @@ function kn_acquire_words( $content ) {
     // Compress the $words array to the unique words and their counts
     $words = array_count_values($words);
 
-    foreach ($words as $word => $count) {
+    // Check the $option to determine if the $words should be added to the database
+    if ($option === 'add') {
 
-        $escaped_word = esc_sql($word);
-        $wpdb->query(
-            $wpdb->prepare(
-                "INSERT INTO $table_name (word, word_count, document_count) VALUES (%s, %d, 1)
-                ON DUPLICATE KEY UPDATE word_count = word_count + %d, document_count = document_count + 1",
-                $escaped_word, $count, $count
-            )
-        );
-        
+        foreach ($words as $word => $count) {
+
+            $escaped_word = esc_sql($word);
+            $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO $table_name (word, word_count, document_count) VALUES (%s, %d, 1)
+                    ON DUPLICATE KEY UPDATE word_count = word_count + %d, document_count = document_count + 1",
+                    $escaped_word, $count, $count
+                )
+            );
+            
+        }
+
+        // Count the number of words and add to the chatbot_chatgpt_kn_total_word_count
+        $totalWordCount = count($words);
+        $chatbot_chatgpt_kn_total_word_count = get_option('chatbot_chatgpt_kn_total_word_count');
+        $chatbot_chatgpt_kn_total_word_count += $totalWordCount;
+        update_option('chatbot_chatgpt_kn_total_word_count', $chatbot_chatgpt_kn_total_word_count);
+
     }
 
-    // Count the number of words and add to the chatbot_chatgpt_kn_total_word_count
-    $totalWordCount = count($words);
-    $chatbot_chatgpt_kn_total_word_count = get_option('chatbot_chatgpt_kn_total_word_count');
-    $chatbot_chatgpt_kn_total_word_count += $totalWordCount;
-    update_option('chatbot_chatgpt_kn_total_word_count', $chatbot_chatgpt_kn_total_word_count);
-
-    return;
+    if ($option === 'add') {
+        // Just return
+        return;
+    } else {
+        // Return the $words array
+        return $words;
+    }
 
 }

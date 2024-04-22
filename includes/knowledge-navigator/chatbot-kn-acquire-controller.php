@@ -304,7 +304,7 @@ function chatbot_kn_count_documents() {
         // FIXME - EXCLUDE COMMENTS FOR NOW
         update_option('chatbot_chatgpt_kn_include_comments', 'No');
         $comment_count = 0;
-        if ( esc_attr(get_option(chatbot_chatgpt_kn_include_comments, 'No')) === 'Yes') {
+        if ( esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'No')) === 'Yes') {
             $comment_count = $wpdb->get_var(
                 "SELECT COUNT(comment_post_ID) FROM {$wpdb->prefix}comments WHERE comment_approved = '1'"
             );
@@ -398,7 +398,7 @@ function chatbot_kn_run_phase_1() {
             $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', mb_detect_encoding($Content));
 
             // Now call kn_acquire_words with the UTF-8 encoded content
-            kn_acquire_words( $ContentUtf8 );
+            kn_acquire_words( $ContentUtf8, 'add' );
 
         } else {
             // Handle the case where content is empty
@@ -516,7 +516,7 @@ function chatbot_kn_run_phase_3() {
             $commentContentUtf8 = mb_convert_encoding($commentContent, 'UTF-8', mb_detect_encoding($commentContent));
 
             // Now call kn_acquire_words with the UTF-8 encoded content
-            kn_acquire_words( $commentContentUtf8 );
+            kn_acquire_words( $commentContentUtf8 , 'add' );
 
         } else {
             // Handle the case where content is empty
@@ -707,21 +707,14 @@ function chatbot_kn_run_phase_6 () {
             // Ensure the post content is treated as UTF-8
             $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', mb_detect_encoding($Content));
 
-            // FIXME - PROBABLY NEED TO GET ALL THE WORDS AGAIN
-            // FIXME - AND I PROBABLY ONLY WANT THE TOP 10% OF THE WORDS IN THE DOCUMENT
-
             // Now call kn_acquire_words with the UTF-8 encoded content
-            // kn_acquire_words( $ContentUtf8 );
-
-            // Convert to lower case
-            // $textContentLower = mb_strtolower($contentWithoutTags, 'UTF-8');
-            $textContentLower = mb_strtolower($ContentUtf8, 'UTF-8');
-
-            // Split the text into words based on spaces
-            $words = explode(' ', $textContentLower);
+            $words = kn_acquire_words( $ContentUtf8 , 'skip');
 
             // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table if the word is found in the TF-IDF table
-            foreach ($words as $word => $score) {
+            foreach ( $words as $key => $word ) {
+
+                $tfidf = 0;
+
                 // Check if the word is in the TF-IDF table
                 $tfidf = $wpdb->get_var(
                     $wpdb->prepare(
@@ -730,16 +723,23 @@ function chatbot_kn_run_phase_6 () {
                     )
                 );
 
-                if (empty($tfidf)) {
-                    continue;
-                }
+                // Add the $tfidf to the $words array
+                $words[$key] = $tfidf;
 
-                $score = $tfidf;
+            }
 
-                // If the word is not in the TF-IDF table, then skip it
-                if (empty($tfidf)) {
-                    continue;
-                }
+            // Sort the $words array by $tfidf in descending order
+            arsort($words);
+
+            // Count the number of words in the $words array
+            $word_count = count($words);
+
+            // Trim the $words array to the top 10% of the words
+            // FIXME - This should be set in the settings and default to 10%
+            $top_words = array_slice($words, 0, ceil($word_count / 10), true);
+
+            // Store the top words in the chatbot_chatgpt_knowledge_base table
+            foreach ($top_words as $word => $score) {
 
                 // Construct the URL for the post
                 $url = get_permalink($result->ID);
@@ -757,6 +757,7 @@ function chatbot_kn_run_phase_6 () {
                         'score' => $score
                     )
                 );
+
             }
 
         } else {
@@ -909,7 +910,7 @@ function chatbot_kn_wrap_up() {
     // FIXME - Drop the chatbot_chatgpt_knowledge_base_word_count table
     // DIAG - Diagnostics - Ver 1.9.6
     back_trace ( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
-    // dbKNClean();
+    dbKNClean();
 
     // Save the results message value into the option
     $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';
