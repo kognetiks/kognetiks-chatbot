@@ -275,6 +275,9 @@ function chatbot_chatgpt_kn_acquire(): void {
         update_option('no_of_items_analyzed', $no_of_items_analyzed);
     }
 
+    // Query WordPress database for comments
+    $chatbot_chatgpt_kn_include_comments = esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'No'));
+
     // Query WordPress database for comment content
     if ( $chatbot_chatgpt_kn_include_comments === 'Yes') {
         // back_trace( 'NOTICE', 'Include comments');

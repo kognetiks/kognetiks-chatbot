@@ -57,8 +57,10 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
         // back_trace( 'NOTICE', 'AFTER wp_clear_scheduled_hook');
 
         if ($run_scanner === 'Cancel') {
-            update_option('chatbot_chatgpt_kn_schedule', 'No');
-            update_option('chatbot_chatgpt_scan_interval', 'No Schedule');
+            update_option( 'chatbot_chatgpt_kn_schedule', 'No' );
+            update_option( 'chatbot_chatgpt_scan_interval', 'No Schedule' );
+            update_option( 'chatbot_chatgpt_kn_action', 'cancel' );
+            update_option( 'chatbot_chatgpt_kn_status', 'Cancelled' );
         } else {
             if (!wp_next_scheduled('knowledge_navigator_scan_hook')) {
 

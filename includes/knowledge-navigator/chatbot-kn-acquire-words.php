@@ -19,9 +19,7 @@ function kn_acquire_words( $content ) {
 
     global $wpdb;
     global $stopWords;
-    global $max_top_words;
     global $topWords;
-    global $totalWordCount;
 
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', "FUNCTION - kn_acquire_just_the_words");
@@ -115,14 +113,16 @@ function kn_acquire_words( $content ) {
     $words = array_count_values($words);
 
     foreach ($words as $word => $count) {
-        $prepared_word = $wpdb->prepare('%s', $word);
+
+        $escaped_word = esc_sql($word);
         $wpdb->query(
             $wpdb->prepare(
                 "INSERT INTO $table_name (word, word_count, document_count) VALUES (%s, %d, 1)
                 ON DUPLICATE KEY UPDATE word_count = word_count + %d, document_count = document_count + 1",
-                $prepared_word, $count, $count
+                $escaped_word, $count, $count
             )
         );
+        
     }
 
     // Count the number of words and add to the chatbot_chatgpt_kn_total_word_count
