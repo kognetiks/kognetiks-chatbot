@@ -710,33 +710,32 @@ function chatbot_kn_run_phase_6 () {
             // Now call kn_acquire_words with the UTF-8 encoded content
             $words = kn_acquire_words( $ContentUtf8 , 'skip');
 
+            $wordScores = array();
+
             // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table if the word is found in the TF-IDF table
-            foreach ( $words as $key => $word ) {
-
-                $tfidf = 0;
-
-                // Check if the word is in the TF-IDF table
+            foreach ( $words as $word ) {
                 $tfidf = $wpdb->get_var(
                     $wpdb->prepare(
                         "SELECT score FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base_tfidf WHERE word = %s",
                         $word
                     )
                 );
-
-                // Add the $tfidf to the $words array
-                $words[$key] = $tfidf;
-
+            
+                $wordScores[$word] = $tfidf;
             }
 
             // Sort the $words array by $tfidf in descending order
-            arsort($words);
-
+            rsort($wordScores);
+            
             // Count the number of words in the $words array
-            $word_count = count($words);
+            $word_count = count($wordScores);
+
+            // Get the tuning percentage from the options table - Stored as an integer between 0 and 100, so divide by 100
+            $tuning_percentage = esc_attr(get_option('chatbot_chatgpt_kn_tuning_percentage', 25)) / 100;
 
             // Trim the $words array to the top 10% of the words
             // FIXME - This should be set in the settings and default to 10%
-            $top_words = array_slice($words, 0, ceil($word_count / 10), true);
+            $top_words = array_slice( $wordScores, 0, ceil($word_count * $tuning_percentage ), true);
 
             // Store the top words in the chatbot_chatgpt_knowledge_base table
             foreach ($top_words as $word => $score) {
@@ -757,9 +756,7 @@ function chatbot_kn_run_phase_6 () {
                         'score' => $score
                     )
                 );
-
             }
-
         } else {
             // Handle the case where content is empty
             continue;

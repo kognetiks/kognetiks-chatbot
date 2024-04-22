@@ -345,6 +345,7 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_include_products');
     register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_include_comments');
     register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_enhanced_response_limit');
+    register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_tuning_percentage');
 
     add_settings_section(
         'chatbot_chatgpt_knowledge_navigator_settings_section',
@@ -412,6 +413,14 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_enhanced_response_limit',
         'Enhanced Response Limit',
         'chatbot_chatgpt_enhanced_response_limit_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_tuning_percentage',
+        'Tuning Percentage',
+        'chatbot_chatgpt_kn_tuning_percentage_callback',
         'chatbot_chatgpt_knowledge_navigator',
         'chatbot_chatgpt_kn_settings_section'
     );

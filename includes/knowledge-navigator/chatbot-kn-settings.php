@@ -235,3 +235,16 @@ function chatbot_chatgpt_enhanced_response_limit_callback($args): void {
     </select>
     <?php
 }
+
+function chatbot_chatgpt_kn_tuning_percentage_callback($args): void {
+    $chatbot_chatgpt_kn_tuning_percentage = intval(get_option('chatbot_chatgpt_kn_tuning_percentage', 25));
+    ?>
+    <select id="chatbot_chatgpt_kn_tuning_percentage" name="chatbot_chatgpt_kn_tuning_percentage">
+        <?php
+        for ($i = 10; $i <= 100; $i += 5) {
+            echo '<option value="' . $i . '"' . selected($chatbot_chatgpt_kn_tuning_percentage, $i, false) . '>' . $i . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
