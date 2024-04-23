@@ -140,8 +140,8 @@ function kn_acquire_words( $content, $option = null ) {
         // Just return
         return;
     } else {
-        // Return the $words array
-        return $words;
+        // Return the $words array for use in the TF-IDF calculation
+        return array_keys($words);
     }
 
 }

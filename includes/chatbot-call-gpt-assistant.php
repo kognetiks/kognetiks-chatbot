@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Step 1: Create an Assistant
 function createAnAssistant($api_key) {
 
-    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v1'));
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
     if ( $assistant_beta_version == 'v2' ) {
         $beta_version = "assistants=v2";
     } else {

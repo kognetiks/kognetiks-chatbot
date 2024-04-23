@@ -542,7 +542,7 @@ function chatbot_kn_run_phase_3() {
 
 }
 
-// Compute the TF-IDF
+// Phase 4 - Compute the TF-IDF
 function chatbot_kn_run_phase_4 () {
 
     global $wpdb;
@@ -606,7 +606,7 @@ function chatbot_kn_run_phase_4 () {
 
 }
 
-// Phase 5
+// Phase 5 - Reinitialize the batch acquisition for pages, posts, and products
 function chatbot_kn_run_phase_5 () {
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -629,7 +629,7 @@ function chatbot_kn_run_phase_5 () {
 
 }
 
-// Phase 6
+// Phase 6 - Assign scores to the top 10% of the words in pages, posts, and products
 function chatbot_kn_run_phase_6 () {
 
     global $wpdb;
@@ -725,8 +725,8 @@ function chatbot_kn_run_phase_6 () {
             }
 
             // Sort the $words array by $tfidf in descending order
-            rsort($wordScores);
-            
+            arsort($wordScores);
+
             // Count the number of words in the $words array
             $word_count = count($wordScores);
 
@@ -739,23 +739,25 @@ function chatbot_kn_run_phase_6 () {
 
             // Store the top words in the chatbot_chatgpt_knowledge_base table
             foreach ($top_words as $word => $score) {
-
                 // Construct the URL for the post
                 $url = get_permalink($result->ID);
                 
                 // Construct the Title for the post
                 $title = get_the_title($result->ID);
 
-                // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
-                $wpdb->insert(
-                    $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
-                    array(
-                        'url' => $url,
-                        'title' => $title,
-                        'word' => $word,
-                        'score' => $score
-                    )
-                );
+                // Check if score is not null
+                if ($score !== null) {
+                    // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
+                    $wpdb->insert(
+                        $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
+                        array(
+                            'url' => $url,
+                            'title' => $title,
+                            'word' => $word,
+                            'score' => $score
+                        )
+                    );
+                }
             }
         } else {
             // Handle the case where content is empty
