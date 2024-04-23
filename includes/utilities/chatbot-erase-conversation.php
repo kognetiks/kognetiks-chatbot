@@ -81,21 +81,33 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
         $reset_type = 'assistant';
     }
     
-    if ( $reset_type == 'original') {
-        // Delete transient data
-        delete_transient( 'chatbot_chatgpt_context_history' );
-        wp_send_json_success('Conversation cleared - Original.');
-    } else {
-        $thread_id = ''; // Nullify the thread_id
-        // Wipe the Context
-        update_option( 'chatbot_chatgpt_conversation_context' ,'' , true);
-        // Delete transient data - Assistants
-        // delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id, $session_id);
-        // Delete the threads
-        delete_chatbot_chatgpt_threads($user_id, $page_id);
-        delete_any_file_transients($session_id);
-        wp_send_json_success('Conversation cleared - Assistant.');
-    }
+    // if ( $reset_type == 'original') {
+    //     // Delete transient data
+    //     delete_transient( 'chatbot_chatgpt_context_history' );
+    //     wp_send_json_success('Conversation cleared - Original.');
+    // } else {
+    //     $thread_id = ''; // Nullify the thread_id
+    //     // Wipe the Context
+    //     update_option( 'chatbot_chatgpt_conversation_context' ,'' , true);
+    //     // Delete transient data - Assistants
+    //     // delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id, $session_id);
+    //     // Delete the threads
+    //     delete_chatbot_chatgpt_threads($user_id, $page_id);
+    //     delete_any_file_transients($session_id);
+    //     wp_send_json_success('Conversation cleared - Assistant.');
+    // }
+
+    delete_transient( 'chatbot_chatgpt_context_history' );
+
+    $thread_id = ''; // Nullify the thread_id
+    // Wipe the Context
+    update_option( 'chatbot_chatgpt_conversation_context' ,'' , true);
+
+    delete_chatbot_chatgpt_threads($user_id, $page_id);
+    delete_any_file_transients($session_id);
+
+    wp_send_json_success('Conversation cleared.');
+
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$reset_type: ' . $reset_type);

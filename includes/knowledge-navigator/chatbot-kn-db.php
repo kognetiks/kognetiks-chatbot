@@ -30,7 +30,8 @@ function dbKNStore(): bool {
         url TEXT NOT NULL,
         title TEXT,
         word TEXT,
-        score FLOAT NOT NULL
+        score FLOAT NOT NULL,
+        pid BIGINT UNSIGNED
     ) $charset_collate;";
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

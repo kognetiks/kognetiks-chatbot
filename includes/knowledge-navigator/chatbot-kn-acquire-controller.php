@@ -754,7 +754,8 @@ function chatbot_kn_run_phase_6 () {
                             'url' => $url,
                             'title' => $title,
                             'word' => $word,
-                            'score' => $score
+                            'score' => $score,
+                            'pid' => $result->ID
                         )
                     );
                 }

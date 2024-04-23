@@ -22,6 +22,10 @@ $frequencyData = [];
 $totalWordCount = 0;
 $totalWordPairCount = 0;
 
+//
+// THIS IS NOW BEEN OBSOLETED - Ver 1.9.6
+//
+
 // Output Knowledge Navigator Data to log files for pages, posts and comments - Ver 1.6.3
 function chatbot_chatgpt_kn_acquire(): void {
 
@@ -139,6 +143,7 @@ function chatbot_chatgpt_kn_acquire(): void {
 
         // Check if the post content is not empty
         if (!empty($postContent)) {
+
             // Ensure the post content is treated as UTF-8
             $postContentUtf8 = mb_convert_encoding($postContent, 'UTF-8', mb_detect_encoding($postContent));
 
@@ -146,7 +151,8 @@ function chatbot_chatgpt_kn_acquire(): void {
             $words = kn_acquire_just_the_words($postContentUtf8);
 
             // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs
-            $word_pairs = kn_acquire_word_pairs($postContentUtf8);
+            // $word_pairs = kn_acquire_word_pairs($postContentUtf8);
+
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
@@ -157,6 +163,8 @@ function chatbot_chatgpt_kn_acquire(): void {
         $url = get_permalink($result['ID']);
         // Construct the Title for the post
         $title = get_the_title($result['ID']);
+        // Store the record id
+        $pid = $result['ID'];
         // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
         foreach ($words as $word => $score) {
             $wpdb->insert(
@@ -165,30 +173,31 @@ function chatbot_chatgpt_kn_acquire(): void {
                     'url' => $url,
                     'title' => $title,
                     'word' => $word,
-                    'score' => $score
+                    'score' => $score,
+                    'pid' => $pid,
                 )
             );
         }
 
         // Store each url, title, word pair and score in the chatbot_chatgpt_knowledge_base table
-        foreach ($word_pairs as $word => $score) {
-            $wpdb->insert(
-                $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
-                array(
-                    'url' => $url,
-                    'title' => $title,
-                    'word' => $word,
-                    'score' => $score
-                )
-            );
-        }
+        // foreach ($word_pairs as $word => $score) {
+        //     $wpdb->insert(
+        //         $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
+        //         array(
+        //             'url' => $url,
+        //             'title' => $title,
+        //             'word' => $word,
+        //             'score' => $score
+        //         )
+        //     );
+        // }
 
         // Log the URL and the $words array
         error_log($url . "\n", 3, $log_file_posts);
         error_log(print_r($words, true) . "\n", 3, $log_file_posts);
 
-        error_log($url . "\n", 3, $log_file_posts);
-        error_log(print_r($word_pairs, true) . "\n", 3, $log_file_posts);
+        // error_log($url . "\n", 3, $log_file_posts);
+        // error_log(print_r($word_pairs, true) . "\n", 3, $log_file_posts);
 
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;
@@ -226,7 +235,7 @@ function chatbot_chatgpt_kn_acquire(): void {
             $words = kn_acquire_just_the_words($postContentUtf8);
 
             // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs
-            $word_pairs = kn_acquire_word_pairs($postContentUtf8);
+            // $word_pairs = kn_acquire_word_pairs($postContentUtf8);
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
@@ -237,6 +246,8 @@ function chatbot_chatgpt_kn_acquire(): void {
         $url = get_permalink($result['ID']);
         // Construct the Title for the post
         $title = get_the_title($result['ID']);
+        // Store the record id
+        $pid = $result['ID'];
         // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
         foreach ($words as $word => $score) {
             $wpdb->insert(
@@ -245,30 +256,31 @@ function chatbot_chatgpt_kn_acquire(): void {
                     'url' => $url,
                     'title' => $title,
                     'word' => $word,
-                    'score' => $score
+                    'score' => $score,
+                    'pid' => $pid,
                 )
             );
         }
 
         // Store each url, title, word pair and score in the chatbot_chatgpt_knowledge_base table
-        foreach ($word_pairs as $word => $score) {
-            $wpdb->insert(
-                $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
-                array(
-                    'url' => $url,
-                    'title' => $title,
-                    'word' => $word,
-                    'score' => $score
-                )
-            );
-        }
+        // foreach ($word_pairs as $word => $score) {
+        //     $wpdb->insert(
+        //         $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
+        //         array(
+        //             'url' => $url,
+        //             'title' => $title,
+        //             'word' => $word,
+        //             'score' => $score
+        //         )
+        //     );
+        // }
 
         // Log the URL and the $words array
         error_log($url . "\n", 3, $log_file_pages);
         error_log(print_r($words, true) . "\n", 3, $log_file_pages);
 
-        error_log($url . "\n", 3, $log_file_pages);
-        error_log(print_r($word_pairs, true) . "\n", 3, $log_file_pages);
+        // error_log($url . "\n", 3, $log_file_pages);
+        // error_log(print_r($word_pairs, true) . "\n", 3, $log_file_pages);
         
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;
@@ -314,7 +326,7 @@ function chatbot_chatgpt_kn_acquire(): void {
             $words = kn_acquire_just_the_words($postContentUtf8);
 
             // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs
-            $word_pairs = kn_acquire_word_pairs($postContentUtf8);
+            // $word_pairs = kn_acquire_word_pairs($postContentUtf8);
         } else {
             // Handle the case where post content is empty
             // For example, log an error, skip this post, etc.
@@ -322,14 +334,16 @@ function chatbot_chatgpt_kn_acquire(): void {
         }
         
         // Construct the URL for the comments
-        if (array_key_exists('id', $result)) {
-            $url = get_permalink($result['id']);
+        if (array_key_exists('comment_post_ID', $result)) {
+            $url = get_permalink($result['comment_post_ID']);
         } else {
             // Handle the case where the key does not exist
             $url = ""; // or some default value
         }
         // Construct the Title for the post
         $title = 'Comment';
+        // Store the record id
+        $pid = $result['comment_post_ID'];
         // Store each url, title, word and score in the chatbot_chatgpt_knowledge_base table
         foreach ($words as $word => $score) {
             $wpdb->insert(
@@ -338,30 +352,31 @@ function chatbot_chatgpt_kn_acquire(): void {
                     'url' => $url,
                     'title' => $title,
                     'word' => $word,
-                    'score' => $score
+                    'score' => $score,
+                    'pid' => $result['comment_post_ID'],
                 )
             );
         }
 
         // Store each url, title, word pairs and score in the chatbot_chatgpt_knowledge_base table
-        foreach ($word_pairs as $word => $score) {
-            $wpdb->insert(
-                $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
-                array(
-                    'url' => $url,
-                    'title' => $title,
-                    'word' => $word,
-                    'score' => $score
-                )
-            );
-        }
+        // foreach ($word_pairs as $word => $score) {
+        //     $wpdb->insert(
+        //         $wpdb->prefix . 'chatbot_chatgpt_knowledge_base',
+        //         array(
+        //             'url' => $url,
+        //             'title' => $title,
+        //             'word' => $word,
+        //             'score' => $score
+        //         )
+        //     );
+        // }
 
         // Log the URL and the $words array
         error_log($url . "\n", 3, $log_file_comments);
         error_log(print_r($words, true) . "\n", 3, $log_file_comments);
 
-        error_log($url . "\n", 3, $log_file_comments);
-        error_log(print_r($word_pairs, true) . "\n", 3, $log_file_comments);
+        // error_log($url . "\n", 3, $log_file_comments);
+        // error_log(print_r($word_pairs, true) . "\n", 3, $log_file_comments);
         
         // Increment the number of items analyzed by one
         $no_of_items_analyzed++;

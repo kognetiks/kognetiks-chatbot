@@ -87,10 +87,26 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
     // Added "We previously have been talking about the following things: " - Ver 1.9.5 - 2024 04 12
     $sys_message = 'We previously have been talking about the following things: ';
-    $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
-    // DIAG Diagnostics - Ver 1.6.1
+        // DIAG Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', '$context: ' . $context);
+
+    //
+    // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
+    //
+    $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context', 'No'));
+
+    // DIAG Diagnostics - Ver 1.9.6
+    back_trace( 'NOTICE', '$useEnhancedContext: ' . $useEnhancedContext);
+
+    if ($useEnhancedContext == 'Yes') {
+        $enhancedContext = kn_enhance_context($message);
+        $context = $sys_message . ' ' . $enhancedContext . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+        // DIAG Diagnostics - Ver 1.9.6
+        back_trace( 'NOTICE', '$context: ' . $context);
+    } else {
+        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+    }
 
     // Added Role, System, Content Static Variable - Ver 1.6.0
     $body = array(

@@ -15,6 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Enhance the response with TF-IDF - Ver 1.6.9
 function chatbot_chatgpt_enhance_with_tfidf($message) {
+
     global $wpdb;
     global $learningMessages;
     global $stopWords;
@@ -83,4 +84,5 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     }
 
     return !empty($enhanced_response) ? $enhanced_response : null;
+    
 }

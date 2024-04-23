@@ -93,6 +93,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-analysis.php'; // Knowledge Navigator Analysis- Ver 1.6.2
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-context.php'; // Knowledge Navigator - Enhance Context - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-response.php'; // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
@@ -122,6 +123,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversatio
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
