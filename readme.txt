@@ -221,8 +221,11 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 1.9.6 =
 * Revised Knowledge Navigator process to sites with large numbers of pages, posts and products
+* Add a turing parameter for the Knowledge Navigator to set the depth of TF-IDF scoring based on page, post, or product content length
 * Expanded the enhanced responses from only one to a selectable number between 1 and 10
 * Enhanced responses are links to your site's pages, posts, and products with the highest match to visitor input
+* Added an option to select either v1: OpenAI-Beta: assistants=v1 or v2: OpenAI-Beta: assistants=v2 (v2 is the default)
+* See [OpenAI Migration Guide](https://platform.openai.com/docs/assistants/migration/accessing-v1-data-in-v2) for details on what is changing
 
 = 1.9.5 =
 * Added voice options including: Allow, Echo, Fable, Onyx, Nova, and Shimmer
