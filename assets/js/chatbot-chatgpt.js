@@ -494,6 +494,27 @@ jQuery(document).ready(function ($) {
             return;
         }
 
+        // Reset message count daily
+        let lastReset = localStorage.getItem('chatbot_chatgpt_last_reset');
+        let today = new Date().toDateString();
+
+        if (lastReset !== today) {
+            localStorage.setItem('chatbot_chatgpt_message_count', 0); // Reset the counter
+            localStorage.setItem('chatbot_chatgpt_last_reset', today); // Update last reset date
+        }
+
+        // Add +1 to the message count - Ver 1.9.6
+        let messageCount = localStorage.getItem('chatbot_chatgpt_message_count') || 0;
+        messageCount++;
+        localStorage.setItem('chatbot_chatgpt_message_count', messageCount);
+        
+        // If messageCount is greater than  messageLimit then don't send the message - Ver 1.9.6
+        let messageLimit = localStorage.getItem('chatbot_chatgpt_message_limit_setting') || 999999;
+        if (messageCount > messageLimit) {
+            appendMessage('Oops! You have reached the message limit. Please try again later.', 'error');
+            return;
+        }
+
         input_type = 'user';
 
         // Check to see if the message starts with [Chatbot] - Ver 1.9.5

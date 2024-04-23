@@ -226,6 +226,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Enhanced responses are links to your site's pages, posts, and products with the highest match to visitor input
 * Added an option to select either v1: OpenAI-Beta: assistants=v1 or v2: OpenAI-Beta: assistants=v2 (v2 is the default)
 * See [OpenAI Migration Guide](https://platform.openai.com/docs/assistants/migration/accessing-v1-data-in-v2) for details on what is changing
+* Added a daily chatbot message limit, defaults to 999 daily messages, resets daily.  See Chatbot Settings > Chatbot Daily Mesage Limit
 
 = 1.9.5 =
 * Added voice options including: Allow, Echo, Fable, Onyx, Nova, and Shimmer

@@ -28,6 +28,7 @@ function chatbot_chatgpt_api_settings_init(): void {
     // register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key');
     // Obfuscate the API key in settings registration - Ver 1.5.0
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key', 'sanitize_api_key');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_message_limit_setting');
 
     add_settings_section(
         'chatbot_chatgpt_api_model_general_section',
@@ -40,6 +41,14 @@ function chatbot_chatgpt_api_settings_init(): void {
         'chatbot_chatgpt_api_key',
         'ChatGPT API Key',
         'chatbot_chatgpt_api_key_callback',
+        'chatbot_chatgpt_api_model_general',
+        'chatbot_chatgpt_api_model_general_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_message_limit_setting',
+        'Chatbot Daily Message Limit',
+        'chatbot_chatgpt_message_limit_setting_callback',
         'chatbot_chatgpt_api_model_general',
         'chatbot_chatgpt_api_model_general_section'
     );
