@@ -200,22 +200,26 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Screenshots ==
 
-1. Initial Chatbot display
-2. Ask Chatbot any question
-3. Get a response from Chatbot
-4. Chatbot running in the embedded mode
-5. Mobile Experience - Initial Chatbot display
-6. Mobile Experience - Ask Chatbot ChatGTP any question
-7. Mobile Experience - Get a response from Chatbot
-8. Mobile Experience - Chatbot minimize (Lower Right)
-9. Chatbot shown in Wide mode
-10. Optional custom Avatars to greet visitors with a configurable message
-11. Avatar greeting with message
-12. Knowledge Navigator Settings
-13. Chatbot response after running Knowledge Navigator
-14. Chatbot is now more context responsive after running Knowledge Navigator
-15. Chatbot has a deep understanding of your site after running Knowledge Navigator
-16. Settings and Options
+1. Floating Chatbot - Howdy!
+2. Floating Chatbot - Open example
+3. Floating Chatbot - Open with intereaction
+4. Floating Chatbot - Shortcode example
+5. Embedded Chatbot - Open example
+6. Embedded Chatbot - Shortcode example
+7. Mobile Chatbot - Minimized
+8. Mobile Chatbot - Open example
+9. Mobile Chatbot - Open example
+10. Chatbot Setting - Main settings
+11. Chatbot Setting - API/Model settings
+12. Chatbot Setting - GPT Assistant settings
+13. Chatbot Setting - Avatar settings
+14. Chatbot Setting - Appearance settings
+15. Chatbot Setting - Custom button settings
+16. Chatbot Setting - Knowledge Navigator settings
+17. Chatbot Setting - Knowledge Navigator Analysis settings
+18. Chatbot Setting - Reporting settings
+19. Chatbot Setting - Diagnostic settings
+20. Chatbot Setting - Support
 
 == Changelog ==
 
