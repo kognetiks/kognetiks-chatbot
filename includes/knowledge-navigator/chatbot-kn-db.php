@@ -15,7 +15,9 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Database Management - drop the table if it exists, then add it if it doesn't exist - Ver 1.6.3
 function dbKNStore(): bool {
+
     global $wpdb;
+
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
 
@@ -28,7 +30,8 @@ function dbKNStore(): bool {
         url TEXT NOT NULL,
         title TEXT,
         word TEXT,
-        score FLOAT NOT NULL
+        score FLOAT NOT NULL,
+        pid BIGINT UNSIGNED
     ) $charset_collate;";
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -44,7 +47,9 @@ function dbKNStore(): bool {
 
 // Database Management - drop a table if it exists, then add it if it doesn't exist to store the TF-IDF words and score - Ver 1.6.3
 function dbKNStoreTFIDF(): bool {
+
     global $wpdb;
+
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
@@ -66,6 +71,48 @@ function dbKNStoreTFIDF(): bool {
     } else {
         return false;  // Table creation failed
     }
+
+}
+
+// Database Management - drop a table if it exists, then add it if it doesn't exist to store the words and score - Ver 1.9.6
+function dbKNStoreWordCount(): bool {
+    
+        global $wpdb;
+    
+        $charset_collate = $wpdb->get_charset_collate();
+        $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_word_count';
+    
+        // Drop table if it exists
+        $wpdb->query("DROP TABLE IF EXISTS $table_name");
+    
+        // SQL to create a new table
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            word VARCHAR(255) NOT NULL UNIQUE,
+            word_count INT NOT NULL,
+            document_count INT NOT NULL
+        ) $charset_collate;";
+    
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    
+        // Execute SQL query and create the table
+        if(dbDelta($sql)) {
+            return true;  // Table created successfully
+        } else {
+            return false;  // Table creation failed
+        }
+    
+}
+
+// Database Management - drop a table if it exists to clean up the database - Ver 1.9.6
+function dbKNClean(): bool {
+
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_word_count';
+    $wpdb->query("DROP TABLE IF EXISTS $table_name");
+
+    return true;
 
 }
 
@@ -106,6 +153,7 @@ function store_top_words(): void {
 
 // Save the results to a file
 function output_results() {
+    
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3

@@ -15,11 +15,22 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Step 1: Create an Assistant
 function createAnAssistant($api_key) {
+
     // $url = "https://api.openai.com/v1/threads";
     $url = get_threads_api_url();
+
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+    if ( $assistant_beta_version == 'v2' ) {
+        $beta_version = "assistants=v2";
+    } else {
+        $beta_version = "assistants=v1";
+    }
+    // DIAG - Diagnostics - Ver 1.9.6
+    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+
     $headers = array(
         "Content-Type: application/json",
-        "OpenAI-Beta: assistants=v1",
+        "OpenAI-Beta: " . $beta_version,
         "Authorization: Bearer " . $api_key
     );
 
@@ -43,9 +54,18 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // Set the URL
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
 
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+    if ( $assistant_beta_version == 'v2' ) {
+        $beta_version = "assistants=v2";
+    } else {
+        $beta_version = "assistants=v1";
+    }
+    // DIAG - Diagnostics - Ver 1.9.6
+    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+
     $headers = [
         'Content-Type: application/json',
-        'OpenAI-Beta: assistants=v1',
+        'OpenAI-Beta: ' . $beta_version,
         'Authorization: Bearer ' . $api_key
     ];
 
@@ -64,14 +84,28 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     ];
 
     // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
-    unset($data['file_ids']);
-    // Add the file reference if file_id is provided
-    // FIXME - ADD MULTIPLE FILES HERE - Ver 1.9.2 - 2024 03 06
-    if (!empty($file_id) && !empty($file_id[0])) {
-        // PRIOR TO VER 1.9.2
-        // $data['file_ids'] = [$file_id];
-        // VER 1.9.2
-        $data['file_ids'] = $file_id;
+    // unset($data['file_ids']);
+
+    if ( !empty($file_id && !empty($file_id[0]) )) {
+        if ( $beta_version == 'assistants=v1' ) {
+            // assistants=v1 - Ver 1.9.6 - 20224 04 24
+            $data['file_ids'] = $file_id;
+        } else {
+            // assistants=v2 - Ver 1.9.6 - 2024 04 24
+            $data = $data + [
+                "attachments" => [],
+            ];
+            foreach ($file_id as $file_item) {
+                $attachment = [
+                    "file_id" => $file_item,
+                    "tools" => [
+                        ["type" => "file_search"]
+                    ]
+                ];
+                // Add each attachment to the attachments array in the main data structure
+                $data['attachments'][] = $attachment;
+            }
+        }
     }
 
     // DIAG - Diagnostics
@@ -117,11 +151,22 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
 // Step 4: Run the Assistant
 function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
+    
     // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs";
     $url = get_threads_api_url() . '/' . $thread_id . '/runs';
+
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+    if ( $assistant_beta_version == 'v2' ) {
+        $beta_version = "assistants=v2";
+    } else {
+        $beta_version = "assistants=v1";
+    }
+    // DIAG - Diagnostics - Ver 1.9.6
+    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+
     $headers = array(
         "Content-Type: application/json",
-        "OpenAI-Beta: assistants=v1",
+        "OpenAI-Beta: " . $beta_version,
         "Authorization: Bearer " . $api_key
     );
     $data = array(
@@ -158,13 +203,26 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
 // Step 5: Get the Run's Status
 function getTheRunsStatus($thread_id, $runId, $api_key): void {
+
     $status = "";
+
     while ($status != "completed") {
+    
         // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/".$runId;
         $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId;
+
+        $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+        if ( $assistant_beta_version == 'v2' ) {
+            $beta_version = "assistants=v2";
+        } else {
+            $beta_version = "assistants=v1";
+        }
+        // DIAG - Diagnostics - Ver 1.9.6
+        // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+    
         $headers = array(
             "Content-Type: application/json",
-            "OpenAI-Beta: assistants=v1",
+            "OpenAI-Beta: " . $beta_version,
             "Authorization: Bearer " . $api_key
         );
 
@@ -200,11 +258,22 @@ function getTheRunsStatus($thread_id, $runId, $api_key): void {
 
 // Step 6: Get the Run's Steps
 function getTheRunsSteps($thread_id, $runId, $api_key) {
+
     // $url = "https://api.openai.com/v1/threads/" . $thread_id ."/runs/" . $runId ."/steps";
     $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
+
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+    if ( $assistant_beta_version == 'v2' ) {
+        $beta_version = "assistants=v2";
+    } else {
+        $beta_version = "assistants=v1";
+    }
+    // DIAG - Diagnostics - Ver 1.9.6
+    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+
     $headers = array(
         "Content-Type: application/json",
-        "OpenAI-Beta: assistants=v1",
+        "OpenAI-Beta: " . $beta_version,
         "Authorization: Bearer " . $api_key
     );
 
@@ -220,13 +289,26 @@ function getTheRunsSteps($thread_id, $runId, $api_key) {
 
 // Step 7: Get the Step's Status
 function getTheStepsStatus($thread_id, $runId, $api_key): void {
+
     $status = false;
+
     while (!$status) {
+
         // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/" . $runId . "/steps";
         $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
+
+        $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+        if ( $assistant_beta_version == 'v2' ) {
+            $beta_version = "assistants=v2";
+        } else {
+            $beta_version = "assistants=v1";
+        }
+        // DIAG - Diagnostics - Ver 1.9.6
+        // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+        
         $headers = array(
             "Content-Type: application/json",
-            "OpenAI-Beta: assistants=v1",
+            "OpenAI-Beta: " . $beta_version,
             "Authorization: Bearer " . $api_key
         );
 
@@ -267,11 +349,22 @@ function getTheStepsStatus($thread_id, $runId, $api_key): void {
 
 // Step 8: Get the Message
 function getTheMessage($thread_id, $api_key) {
+
     // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/messages";
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
+
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+    if ( $assistant_beta_version == 'v2' ) {
+        $beta_version = "assistants=v2";
+    } else {
+        $beta_version = "assistants=v1";
+    }
+    // DIAG - Diagnostics - Ver 1.9.6
+    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+
     $headers = array(
         "Content-Type: application/json",
-        "OpenAI-Beta: assistants=v1",
+        "OpenAI-Beta: " . $beta_version,
         "Authorization: Bearer " . $api_key
     );
 
@@ -321,7 +414,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         $api_key = get_option('chatbot_chatgpt_api_key', '');
         $assistants_response = createAnAssistant($api_key);
         // DIAG - Print the response
-        // back_trace( 'NOTICE', $assistants_response);
+        // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
         // Step 2: Get The Thread ID
         // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');

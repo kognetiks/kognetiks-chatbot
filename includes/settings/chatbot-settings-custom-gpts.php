@@ -121,3 +121,15 @@ function chatbot_chatgpt_use_gpt_assistant_name_callback($args) {
     </select>
     <?php
 }
+
+// Set Assistant Beta Version - Ver 1.9.6
+function chatbot_chatgpt_assistant_beta_version_callback($args) {
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+    ?>
+    <select id="chatbot_chatgpt_assistant_beta_version" name="chatbot_chatgpt_assistant_beta_version">
+        <option value="v1" <?php selected( $assistant_beta_version, 'v1' ); ?>><?php echo esc_html( 'v1' ); ?></option>
+        <option value="v2" <?php selected( $assistant_beta_version, 'v2' ); ?>><?php echo esc_html( 'v2' ); ?></option>
+    </select>
+    <?php
+}
+

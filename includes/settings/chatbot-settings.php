@@ -98,6 +98,7 @@ function chatbot_chatgpt_settings_page_html(): void {
                         let chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
                         // New options for max tokens and width - Ver 1.4.2
                         let chatgptMaxTokensSettingInput = document.getElementById('chatbot_chatgpt_max_tokens_setting');
+                        let chatgptMessageLimitSettingInput = document.getElementById('chatbot_chatgpt_message_limit_setting');
                         let chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
                         // New options for diagnostics on/off - Ver 1.5.0
                         let chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
@@ -124,6 +125,7 @@ function chatbot_chatgpt_settings_page_html(): void {
                         if(chatgptDisclaimerSettingInput) localStorage.setItem('chatbot_chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
                         // New options for max tokens and width - Ver 1.4.2
                         if(chatgptMaxTokensSettingInput) localStorage.setItem('chatbot_chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
+                        if(chatgptMessageLimitSettingInput) localStorage.setItem('chatbot_chatgpt_message_limit_setting', chatgptMessageLimitSettingInput.value);
                         if(chatgptWidthSettingInput) localStorage.setItem('chatbot_chatgpt_width_setting', chatgptWidthSettingInput.value);
                         // Avatar Settings - Ver 1.5.0
                         if(chatgptAvatarIconSettingInput) localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', chatgptAvatarIconSettingInput.value);

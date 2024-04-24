@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     1.9.5
+ * Version:     1.9.6
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.5');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.6');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -56,21 +56,16 @@ ob_start();
 // Start the session if it has not been started, set the global, then close the session
 if (empty($session_id)) {
     if (session_status() == PHP_SESSION_NONE) {
-        // Set the session cookie parameters
-        session_set_cookie_params([
-            'lifetime' => 0, // Lifetime of the session cookie, defined in seconds.
-            'path' => '/', // Path where the cookie is accessible.
-            'domain' => $_SERVER['HTTP_HOST'], // Domain which the cookie is available.
-            'secure' => true, // If true the cookie will only be sent over secure connections.
-            'httponly' => true, // If true the cookie will only be accessible through the HTTP protocol.
-            'samesite' => 'Strict' // Prevents the browser from sending this cookie along with cross-site requests.
+        session_start([
+            'cookie_lifetime' => 0,
+            'cookie_path' => '/',
+            'cookie_domain' => $_SERVER['HTTP_HOST'],
+            'cookie_secure' => true,
+            'cookie_httponly' => true,
+            'cookie_samesite' => 'Strict'
         ]);
-
-        session_start();
     }
-
     $session_id = session_id();
-    // session_write_close();
 
 }
 
@@ -94,10 +89,11 @@ require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-a
 
 // Include necessary files - Knowledge Navigator
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire.php'; // Knowledge Navigator Acquisition - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-word-pairs.php'; // Knowledge Navigator Acquisition - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-controller.php'; // Knowledge Navigator Acquisition - Ver 1.9.6
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-analysis.php'; // Knowledge Navigator Analysis- Ver 1.6.2
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-context.php'; // Knowledge Navigator - Enhance Context - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-response.php'; // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
@@ -127,6 +123,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversatio
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
@@ -282,6 +279,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_disclaimer_setting' => 'No',
         'chatbot_chatgpt_audience_choice' => 'all',
         'chatbot_chatgpt_max_tokens_setting' => '150',
+        'chatbot_chatgpt_message_limit_setting' => '999',
         'chatbot_chatgpt_width_setting' => 'Narrow',
         'chatbot_chatgpt_diagnostics' => 'Off',
         'chatbot_chatgpt_avatar_icon_setting' => 'icon-001.png',
@@ -314,6 +312,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_disclaimer_setting',
         'chatbot_chatgpt_audience_choice',
         'chatbot_chatgpt_max_tokens_setting',
+        'chatbot_chatgpt_message_limit_setting',
         'chatbot_chatgpt_width_setting',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_avatar_icon_setting',

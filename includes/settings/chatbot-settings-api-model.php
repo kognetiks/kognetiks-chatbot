@@ -78,6 +78,23 @@ function chatbot_chatgpt_api_key_callback($args) {
     <?php
 }
 
+// Message Limit - Ver 1.9.6
+function chatbot_chatgpt_message_limit_setting_callback($args) {
+    // Get the saved chatbot_chatgpt_message_limit_setting value or default to 999
+    $message_limit = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
+    // Allow for a range of message limits between 1 and 999 in 1-step increments - Ver 1.9.6
+    ?>
+    <select id="chatbot_chatgpt_message_limit_setting" name="chatbot_chatgpt_message_limit_setting">
+        <?php
+        for ($i=1; $i<=999; $i++) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($message_limit, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+
+}
+
 // OpenAI Models
 // https://platform.openai.com/docs/models
 // EXPAND THE LIST OF MODELS STARTING WITH V1.9.4 - 2024 03 24

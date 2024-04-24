@@ -226,7 +226,7 @@ function clean_specific_expired_transients(): void {
 
     global $wpdb;
 
-    // Prefix for transients in the database.
+    // Prefix for transients in the options table.
     $prefix = '_transient_';
 
     // The pattern to match in the transient's name.
@@ -249,8 +249,10 @@ function clean_specific_expired_transients(): void {
 
         // Delete the transient.
         delete_transient( $transient_name );
+
+        // Delete the transient timeout.
+        $wpdb->delete($wpdb->options, ['option_name' => $transient]);
     }
-    
 }
 
 // Function to purge conversation log entries that are older than the specified number of days - Ver 1.7.6

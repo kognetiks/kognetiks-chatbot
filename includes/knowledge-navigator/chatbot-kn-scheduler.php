@@ -13,17 +13,16 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-global $topWords;
-
 // Handle long-running scripts with a scheduled event function - Ver 1.6.1
 function knowledge_navigator_scan(): void {
-
-    global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', 'ENTERING knowledge_navigator_scan()');
     
     $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
+    
+    // DIAG - Diagnostic - Ver 1.9.6
+    // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner );
 
     // The second parameter is the default value if the option is not set.
     update_option('chatbot_chatgpt_kn_status', 'In Process');
@@ -32,30 +31,21 @@ function knowledge_navigator_scan(): void {
         $run_scanner = 'No';
     }
 
+    // FIXME - Handle the case where the scanner is already running
+
+    // FIXME - Handle the case where the user wants to stop the scanner
+    // 'Cancel' the scheduled event
+
     // Reset the results message
     update_option('chatbot_chatgpt_kn_results', '');
 
-    // Make sure the results table exists before proceeding - Ver 1.6.3
-    dbKNStore();
+    // New process to acquire the content - Ver 1.9.6 - 2024 04 18
+    // DIAG - Diagnostic - Ver 1.9.6
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action - schedule kicked off' );
 
-    // Call the kn-acquire.php script
-    chatbot_chatgpt_kn_acquire();
+    update_option( 'chatbot_chatgpt_kn_action', 'initialize' );
 
-    // Save the results message value into the option
-    $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';
-    update_option('chatbot_chatgpt_kn_results', $kn_results);
-
-    // Notify outcome for up to 3 minutes
-    set_transient('chatbot_chatgpt_kn_results', $kn_results);
-
-    // Get the current date and time.
-    $date_time_completed = date("Y-m-d H:i:s");
-
-    // Concatenate the status message with the date and time.
-    $status_message = 'Completed on ' . $date_time_completed;
-
-    // Update the option with the new status message.
-    update_option('chatbot_chatgpt_kn_status', $status_message);
+    chatbot_kn_acquire_controller();
 
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', 'EXITING knowledge_navigator_scan()');

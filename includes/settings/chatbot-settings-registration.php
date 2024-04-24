@@ -25,6 +25,7 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions'); // Ver 1.9.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions_alternate'); // Alternate Assistant - Ver 1.9.3
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_beta_version'); // Beta Assistant - Ver 1.9.3
 
     add_settings_section(
         'chatbot_chatgpt_custom_gpts_section',
@@ -90,6 +91,14 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_assistant_instructions_alternate',
         'Alternate Assistant Instructions',
         'chatbot_chatgpt_assistant_instructions_alternate_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_assistant_beta_version',
+        'Beta Assistant Version',
+        'chatbot_chatgpt_assistant_beta_version_callback',
         'chatbot_chatgpt_custom_gpts',
         'chatbot_chatgpt_custom_gpts_section'
     );
@@ -344,6 +353,8 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_include_pages');
     register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_include_products');
     register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_include_comments');
+    register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_enhanced_response_limit');
+    register_setting('chatbot_chatgpt_kn_settings_section', 'chatbot_chatgpt_kn_tuning_percentage');
 
     add_settings_section(
         'chatbot_chatgpt_knowledge_navigator_settings_section',
@@ -403,6 +414,22 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_kn_include_comments',
         'Include Approved Comments',
         'chatbot_chatgpt_kn_include_comments_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_enhanced_response_limit',
+        'Enhanced Response Limit',
+        'chatbot_chatgpt_enhanced_response_limit_callback',
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_kn_tuning_percentage',
+        'Tuning Percentage',
+        'chatbot_chatgpt_kn_tuning_percentage_callback',
         'chatbot_chatgpt_knowledge_navigator',
         'chatbot_chatgpt_kn_settings_section'
     );

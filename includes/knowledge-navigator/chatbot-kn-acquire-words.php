@@ -14,24 +14,19 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-global $max_top_words, $chatbot_chatgpt_diagnostics, $frequencyData, $totalWordCount, $totalWordPairCount ;
-$max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 100)); // Default to 100
-$topWords = [];
-$topWordPairs = [];
-$frequencyData = [];
-$totalWordCount = 0;
-$totalWordPairCount = 0;
+// Knowledge Navigator - Acquire Top Words using TF-IDF - Ver 1.9.6
+function kn_acquire_words( $content, $option = null ) {
 
-// Knowledge Navigator - Acquire Top Words using TF-IDF - Ver 1.6.5
-function kn_acquire_just_the_words( $content ) {
-
+    global $wpdb;
     global $stopWords;
-    global $max_top_words;
     global $topWords;
-    global $totalWordCount;
 
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', "FUNCTION - kn_acquire_just_the_words");
+
+    // Initialize the $topWords array - Ver 1.9.6
+    $topWords = [];
+    $totalWordCount = 0;
 
     // Before beginning, translate the $stopWords array into the language of the website
     if (get_locale() !== "en_US") {
@@ -45,136 +40,60 @@ function kn_acquire_just_the_words( $content ) {
         $localized_stopWords = $stopWords;
     }
 
-    $dom = new DOMDocument();
-    @$dom->loadHTML($content);
-
-    // Remove script and style elements
-    foreach ($dom->getElementsByTagName('script') as $script) {
-        $script->parentNode->removeChild($script);
-    }
-    foreach ($dom->getElementsByTagName('style') as $style) {
-        $style->parentNode->removeChild($style);
-    }
-
-    // Updated sequence of processing to remove extraneous contents before TF-IDF - Ver 1.6.5
-    $textContent = '';
-
-    // Added additional HTML tags for removal - Ver 1.7.2.1
-    foreach (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'a', 'div', 'span', 'ul', 'ol', 'table', 'tr', 'td', 'th', 'img', 'figcaption', 'figure', 'blockquote', 'pre', 'code', 'nav', 'header', 'footer', 'article', 'section', 'aside', 'main', 'body'] as $tagName) {
-        $elements = $dom->getElementsByTagName($tagName);
-        foreach ($elements as $element) {
-            $textContent .= $element->textContent . ' ';
-        }
-    }
-
-    // Handle New Line and Carriage Return characters
-    // Belt
-    $textContent = preg_replace('/\r?\n/', ' ', $textContent);
-    // Suspenders
-    $textContent = preg_replace('/\r?\n/u', ' ', $textContent);
-    // And Braces
-    $textContent = str_replace("\\r\\n", ' ', $textContent);
-
-    // Remove Comments
-    $textContent = preg_replace('/<!--(.*?)-->/', ' ', $textContent);
-
-    // Remove URLs
-    $textContent = preg_replace('!https?://\S+!', ' ', $textContent);
-
-    // Replace new line characters with a space
-    $textContent = str_replace("\n", ' ', $textContent);
-        
-    // Ensure $textContent is in UTF-8
-    $textContentUtf8 = mb_convert_encoding($textContent, 'UTF-8', mb_detect_encoding($textContent));
-
-    // Replace all non-word characters with a space, preserving Unicode characters
-    $contentWithoutTags = preg_replace('/[^\p{L}\p{N}_]+/u', ' ', $textContentUtf8);
-
-    // Convert to lower case
-    $textContentLower = mb_strtolower($contentWithoutTags, 'UTF-8');
-
-    // Split the text into words based on spaces
-    $words = explode(' ', $textContentLower);
+    // Filter out HTML tags
+    $words = chatbot_chatgpt_filter_out_html_tags($content);
 
     // Filter out stop words
     $words = array_diff($words, $localized_stopWords);
 
     // Remove 's' and 'â' at end of any words - Ver 1.6.5 - 2023 10 11
+    // FIXME - Determine if word ends in an s then leave the s else if the word is plural then remove the s
     $words = array_map(function($word) {
-        return rtrim($word, 'sâÃ¢£Â²°');
+        return rtrim($word, 'sâÃ¢£Â²°Ã±');
     }, $words);
 
     // Filter out any $words that are equal to a blank space
     $words = array_filter($words, function($word) {
         // return $word that do not start with "asst_" and is not in the specified array or a blank space
-        return substr($word, 0, 5) !== 'asst_' && !in_array($word, ['â', 'Ã¢', 'Ã°', '']) && $word !== ' ';
+        return substr($word, 0, 5) !== 'asst_' && !in_array($word, ['â', 'Ã¢', 'Ã°', 'Ã±', '']) && $word !== ' ';
     });
 
-    // Compute the TF-IDF for the $words array, and return the max top words
+    // Insert the word into the database
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_word_count';
+
+    // Compress the $words array to the unique words and their counts
     $words = array_count_values($words);
-    arsort($words);
-    $words = array_slice($words, 0, $max_top_words);
 
-    // Find the $words in the $topWords array, update the count, and sort the array
-    foreach ($words as $word => $count) {
-        if (array_key_exists($word, $topWords)) {
-            $topWords[$word] += $count;
-        } else {
-            $topWords[$word] = $count;
+    // Check the $option to determine if the $words should be added to the database
+    if ($option === 'add') {
+
+        foreach ($words as $word => $count) {
+
+            $escaped_word = esc_sql($word);
+            $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO $table_name (word, word_count, document_count) VALUES (%s, %d, 1)
+                    ON DUPLICATE KEY UPDATE word_count = word_count + %d, document_count = document_count + 1",
+                    $escaped_word, $count, $count
+                )
+            );
+            
         }
+
+        // Count the number of words and add to the chatbot_chatgpt_kn_total_word_count
+        $totalWordCount = count($words);
+        $chatbot_chatgpt_kn_total_word_count = get_option('chatbot_chatgpt_kn_total_word_count');
+        $chatbot_chatgpt_kn_total_word_count += $totalWordCount;
+        update_option('chatbot_chatgpt_kn_total_word_count', $chatbot_chatgpt_kn_total_word_count);
+
     }
 
-    // Sort the $topWords array
-    arsort($topWords);
-
-    // Update the totalWordCount with the sum of the $words array
-    $totalWordCount = $totalWordCount + array_sum($words);
-
-    // Before computer the TF-IDF for the $words array, trim the $words array to the top 10 words
-    $words = array_slice($words, 0, 100);
-
-    // Computer the TF-IDF for the $words array
-    foreach ($words as $word => $count) {
-        $words[$word] = computeTFIDF($word);
-    } 
-
-    return $words;
-
-}
-
-function computeTFIDF($term) {
-
-    global $topWords;
-    global $totalWordCount;
-
-    $tf = $topWords[$term] / $totalWordCount;
-    $idf = computeInverseDocumentFrequency($term);
-
-    return $tf * $idf;
-
-}
-
-
-function computeTermFrequency($term) {
-
-    global $topWords;
-
-    return $topWords[$term] / count($topWords);
-
-}
-
-
-function computeInverseDocumentFrequency($term) {
-
-    global $topWords;
-
-    $numDocumentsWithTerm = 0;
-    foreach ($topWords as $word => $frequency) {
-        if ($word === $term) {
-            $numDocumentsWithTerm++;
-        }
+    if ($option === 'add') {
+        // Just return
+        return;
+    } else {
+        // Return the $words array for use in the TF-IDF calculation
+        return array_keys($words);
     }
-
-    return log(count($topWords) / ($numDocumentsWithTerm + 1));
 
 }

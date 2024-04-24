@@ -1,15 +1,19 @@
 === Kognetiks Chatbot for WordPress ===
 Contributors: Kognetiks
-Tags: chatbot, chatgpt, openai, ai, customer-support
+Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.5.2
-Stable tag: 1.9.5
+Stable tag: 1.9.6
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-== Introducing the Kognetiks Chatbot for WordPress: Revolutionizing Digital Interactions ==
+Easily integrate OpenAI's ChatGPT API into your WordPress website with this powerful AI-driven chatbot plugin for personalized support and engagement
+
+== Description ==
+
+**Introducing the Kognetiks Chatbot for WordPress: Revolutionizing Digital Interactions**
 
 Welcome to the future of website interaction with **Kognetiks Chatbot for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Assistants.
 
@@ -196,24 +200,37 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Screenshots ==
 
-1. Initial Chatbot display
-2. Ask Chatbot any question
-3. Get a response from Chatbot
-4. Chatbot running in the embedded mode
-5. Mobile Experience - Initial Chatbot display
-6. Mobile Experience - Ask Chatbot ChatGTP any question
-7. Mobile Experience - Get a response from Chatbot
-8. Mobile Experience - Chatbot minimize (Lower Right)
-9. Chatbot shown in Wide mode
-10. Optional custom Avatars to greet visitors with a configurable message
-11. Avatar greeting with message
-12. Knowledge Navigator Settings
-13. Chatbot response after running Knowledge Navigator
-14. Chatbot is now more context responsive after running Knowledge Navigator
-15. Chatbot has a deep understanding of your site after running Knowledge Navigator
-16. Settings and Options
+1. Floating Chatbot - Howdy!
+2. Floating Chatbot - Open example
+3. Floating Chatbot - Open with intereaction
+4. Floating Chatbot - Shortcode example
+5. Embedded Chatbot - Open example
+6. Embedded Chatbot - Shortcode example
+7. Mobile Chatbot - Minimized
+8. Mobile Chatbot - Open example
+9. Mobile Chatbot - Open example
+10. Chatbot Setting - Main settings
+11. Chatbot Setting - API/Model settings
+12. Chatbot Setting - GPT Assistant settings
+13. Chatbot Setting - Avatar settings
+14. Chatbot Setting - Appearance settings
+15. Chatbot Setting - Custom button settings
+16. Chatbot Setting - Knowledge Navigator settings
+17. Chatbot Setting - Knowledge Navigator Analysis settings
+18. Chatbot Setting - Reporting settings
+19. Chatbot Setting - Diagnostic settings
+20. Chatbot Setting - Support
 
 == Changelog ==
+
+= 1.9.6 =
+* Revised Knowledge Navigator process to sites with large numbers of pages, posts and products
+* Add a turing parameter for the Knowledge Navigator to set the depth of TF-IDF scoring based on page, post, or product content length
+* Expanded the enhanced responses from only one to a selectable number between 1 and 10
+* Enhanced responses are links to your site's pages, posts, and products with the highest match to visitor input
+* Added an option to select either v1: OpenAI-Beta: assistants=v1 or v2: OpenAI-Beta: assistants=v2 (v2 is the default)
+* See [OpenAI Migration Guide](https://platform.openai.com/docs/assistants/migration/accessing-v1-data-in-v2) for details on what is changing
+* Added a daily chatbot message limit, defaults to 999 daily messages, resets daily.  See Chatbot Settings > Chatbot Daily Mesage Limit
 
 = 1.9.5 =
 * Added voice options including: Allow, Echo, Fable, Onyx, Nova, and Shimmer

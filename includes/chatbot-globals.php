@@ -47,13 +47,13 @@ $stopWords = [
 // Declare the $learningMessages array as global
 global $learningMessages;
 $learningMessages = [
-    " Also know that I'm still learning, but more information could be found ",
-    " Please be aware that I'm in the process of learning, but more information could be found ",
-    " Just a heads up, I'm continuously improving, in the meantime check ",
-    " Keep in mind that I'm still learning the ropes, but don't hesitate to check out ",
-    " I'm in a state of constant learning, for now check out ",
-    " Remember, I'm on a learning journey, so you can revisit anytime you'd like. However, you might try ",
-    " I'm in the learning phase, so your patience is appreciated. However you might find help here "
+    " Please note that I'm continuously enhancing my abilities. In the meantime, you can find more information here: ",
+    " I am currently in the process of expanding my knowledge. For additional details, please check: ",
+    " Just a heads up - I am actively improving each day. Meanwhile, you can explore more information at: ",
+    " As I am still mastering the ropes, I encourage you to visit: ",
+    " I am constantly evolving and learning. For now, you can check out: ",
+    " Keep in mind, I'm on a journey of continuous learning. Feel free to revisit any time. Meanwhile, you might find this useful: ",
+    " I'm still in the learning phase, so your patience is greatly appreciated. You might find what you're looking for here: "
 ];
 
 // Declare the $errorResponses array as global

@@ -52,12 +52,15 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
         // WP Cron Scheduler - VER 1.6.2
         // back_trace( 'NOTICE', 'BEFORE wp_clear_scheduled_hook');
+
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear before rescheduling
         // back_trace( 'NOTICE', 'AFTER wp_clear_scheduled_hook');
 
         if ($run_scanner === 'Cancel') {
-            update_option('chatbot_chatgpt_kn_schedule', 'No');
-            update_option('chatbot_chatgpt_scan_interval', 'No Schedule');
+            update_option( 'chatbot_chatgpt_kn_schedule', 'No' );
+            update_option( 'chatbot_chatgpt_scan_interval', 'No Schedule' );
+            update_option( 'chatbot_chatgpt_kn_action', 'cancel' );
+            update_option( 'chatbot_chatgpt_kn_status', 'Cancelled' );
         } else {
             if (!wp_next_scheduled('knowledge_navigator_scan_hook')) {
 
@@ -149,7 +152,6 @@ function chatbot_chatgpt_kn_settings_section_callback($args) {
     <p><i>Select the Run schedule (frequency, i.e., hourly, daily, weekly, etc.) and maximum number of top words to index.</i></p>
     <p><i>Choose the content types you want to include in the Knowledge Navigator's indexing process. This will help the Kognetiks Chatbot plugin to understand your website's content better and provide more accurate responses.</i></p>
     <?php
-
 }
 
 // Select Frequency of Scan - Ver 1.6.2
@@ -217,6 +219,32 @@ function chatbot_chatgpt_kn_include_comments_callback($args): void {
     <select id="chatbot_chatgpt_kn_include_comments" name="chatbot_chatgpt_kn_include_comments">
         <option value="No" <?php selected($chatbot_chatgpt_kn_include_comments, 'No'); ?>><?php echo esc_html('No'); ?></option>
         <option value="Yes" <?php selected($chatbot_chatgpt_kn_include_comments, 'Yes'); ?>><?php echo esc_html('Yes'); ?></option>
+    </select>
+    <?php
+}
+
+function chatbot_chatgpt_enhanced_response_limit_callback($args): void {
+    $chatbot_chatgpt_enhanced_response_limit = intval(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
+    ?>
+    <select id="chatbot_chatgpt_enhanced_response_limit" name="chatbot_chatgpt_enhanced_response_limit">
+        <?php
+        for ($i = 1; $i <= 10; $i++) {
+            echo '<option value="' . $i . '"' . selected($chatbot_chatgpt_enhanced_response_limit, $i, false) . '>' . $i . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
+function chatbot_chatgpt_kn_tuning_percentage_callback($args): void {
+    $chatbot_chatgpt_kn_tuning_percentage = intval(get_option('chatbot_chatgpt_kn_tuning_percentage', 25));
+    ?>
+    <select id="chatbot_chatgpt_kn_tuning_percentage" name="chatbot_chatgpt_kn_tuning_percentage">
+        <?php
+        for ($i = 10; $i <= 100; $i += 5) {
+            echo '<option value="' . $i . '"' . selected($chatbot_chatgpt_kn_tuning_percentage, $i, false) . '>' . $i . '</option>';
+        }
+        ?>
     </select>
     <?php
 }
