@@ -107,14 +107,16 @@
 /* Removed CSS from JS file - Ver 1.7.3 */
 .chatbot-wide {
     width: 500px !important;
-    height: 450px !important;
+    /* height: 450px !important; */
+    height: 45vh !important; /* Adjust as needed */
     overflow: visible;
 }
 
 /* Removed CSS from JS file - Ver 1.7.3 */
 .chatbot-narrow {
     width: 300px !important;
-    height: 450px !important;
+    /* height: 450px !important; */
+    height: 45vh !important; /* Adjust as needed */
     overflow: visible;
 }
 
