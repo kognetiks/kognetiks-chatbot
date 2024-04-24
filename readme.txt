@@ -4,12 +4,12 @@ Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.5.2
-Stable tag: 1.9.6
+Stable tag: 1.9.7
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Easily integrate OpenAI's ChatGPT API into your WordPress website with this powerful AI-driven chatbot plugin for personalized support and engagement
+Easily integrate OpenAI's ChatGPT API into your WordPress website with this powerful AI-driven chatbot plugin for support and engagement.
 
 == Description ==
 
@@ -222,6 +222,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 20. Chatbot Setting - Support
 
 == Changelog ==
+
+= 1.9.7 =
+* TBD
 
 = 1.9.6 =
 * Revised Knowledge Navigator process to sites with large numbers of pages, posts and products
