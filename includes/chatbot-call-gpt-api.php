@@ -97,13 +97,13 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context', 'No'));
 
     // DIAG Diagnostics - Ver 1.9.6
-    back_trace( 'NOTICE', '$useEnhancedContext: ' . $useEnhancedContext);
+    // back_trace( 'NOTICE', '$useEnhancedContext: ' . $useEnhancedContext);
 
     if ($useEnhancedContext == 'Yes') {
         $enhancedContext = kn_enhance_context($message);
         $context = $sys_message . ' ' . $enhancedContext . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
         // DIAG Diagnostics - Ver 1.9.6
-        back_trace( 'NOTICE', '$context: ' . $context);
+        // back_trace( 'NOTICE', '$context: ' . $context);
     } else {
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
     }

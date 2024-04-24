@@ -49,153 +49,54 @@ function chatbot_kn_acquire_controller() {
     // Get the current action
     $action = esc_attr( get_option( 'chatbot_chatgpt_kn_action', 'initialize' ) ); // Default to run to kickoff the process
 
+    // DIAG - Diagnostics - Ver 1.9.6
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
+
     switch ( $action ) {
         case 'initialize':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             // Initialize the knowledge acquisition process
             chatbot_kn_initalization();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
             break;
-
         case 'phase 1':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             chatbot_kn_run_phase_1();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
             break;
-
         case 'phase 2':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             // Reinitialize the batch acquisition for comments
             chatbot_kn_reinitialization();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
             break;
-
         case 'phase 3':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             chatbot_kn_run_phase_3();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
             break;
-
         case 'phase 4':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             // Determine the top words and word pairs
             chatbot_kn_run_phase_4();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
             break;
-
         case 'phase 5':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             // Reinitialize the batch acquisition for pages, posts, and products
             chatbot_kn_run_phase_5();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
             break;
-
         case 'phase 6':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             chatbot_kn_run_phase_6();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
             break;
-
         case 'phase TBD':
-
-            // THERE PROBABLY NEEDS TO BE A REINITIALIZATION BEFORE THIS PHASE
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             // Assign scores to the top 10% of the words in comments
-
-            // TBD - Analyze the acquired content
             // chatbot_kn_run_phase_TBD();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
             break;
-
         case 'phase 7':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             chatbot_kn_output_the_results();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-            break;
-    
+            break;    
         case 'phase 8':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             // Wrap up the knowledge acquisition process
             chatbot_kn_wrap_up();
-           
             update_option( 'chatbot_chatgpt_kn_action', 'completed' );
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-            break;
-            
+            break;            
         case 'completed':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action: ' . $action );
-
             return;
-
         case 'cancel':
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'START chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
-
             // chatbot_kn_cancel_batch_acquisition();
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'NOTICE', 'FINISH chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
             break;
-
         default:
-
-            // DIAG - Diagnostics - Ver 1.9.6
-            back_trace( 'ERROR', 'chatbot_chatgpt_kn_action: ' . $action );
             break;
-
     }
 
 }
@@ -315,7 +216,7 @@ function chatbot_kn_count_documents() {
         update_option('chatbot_chatgpt_kn_document_count', $document_count);
 
         // DIAG - Diagnostics - Ver 1.9.6
-        back_trace( 'NOTICE', 'chatbot_kn_count_documents: ' . $document_count );
+        // back_trace( 'NOTICE', 'chatbot_kn_count_documents: ' . $document_count );
 
 }
 
