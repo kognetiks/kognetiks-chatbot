@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     1.9.6
+ * Version:     1.9.7
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.6');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.7');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -584,7 +584,10 @@ function chatbot_chatgpt_send_message(): void {
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);
 
         // Use TF-IDF to enhance response
-        $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+        $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
+        if ( $chatbot_chatgpt_suppress_learnings != 'None') {
+            $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+        }
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$response ' . print_r($response,true));
@@ -646,7 +649,10 @@ function chatbot_chatgpt_send_message(): void {
         // back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
         
         // Use TF-IDF to enhance response
-        $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+        $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
+        if ( $chatbot_chatgpt_suppress_learnings != 'None') {
+            $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+        }
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);
 
