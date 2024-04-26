@@ -19,7 +19,8 @@ function chatbot_chatgpt_diagnostics_section_callback($args): void {
     ?>
     <p>The Diagnostics tab checks the API status and set options for diagnostics and notices.</p>
     <p>You can turn on/off console and error logging (as of Version 1.6.5 most are now commented out).</p>
-    <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
+    <!-- <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p> -->
+    <p>You can also suppress attribution ('Chatbot WordPress plugin by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
     <h2>System and Plugin Information</h2>
     <?php
     // Get PHP version

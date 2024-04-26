@@ -209,22 +209,25 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 7. Mobile Chatbot - Minimized
 8. Mobile Chatbot - Open example
 9. Mobile Chatbot - Open example
-10. Chatbot Setting - Main settings
-11. Chatbot Setting - API/Model settings
-12. Chatbot Setting - GPT Assistant settings
-13. Chatbot Setting - Avatar settings
-14. Chatbot Setting - Appearance settings
-15. Chatbot Setting - Custom button settings
-16. Chatbot Setting - Knowledge Navigator settings
-17. Chatbot Setting - Knowledge Navigator Analysis settings
-18. Chatbot Setting - Reporting settings
-19. Chatbot Setting - Diagnostic settings
-20. Chatbot Setting - Support
+10. Mobile Chatbot - Table Minimized
+11. Mobile Chatbot - Table Open example
+12. Mobile Chatbot - Table Landscape example
+13. Chatbot Setting - Main settings
+14. Chatbot Setting - API/Model settings
+15. Chatbot Setting - GPT Assistant settings
+16. Chatbot Setting - Avatar settings
+17. Chatbot Setting - Appearance settings
+18. Chatbot Setting - Custom button settings
+19. Chatbot Setting - Knowledge Navigator settings
+20. Chatbot Setting - Knowledge Navigator Analysis settings
+21. Chatbot Setting - Reporting settings
+22. Chatbot Setting - Diagnostic settings
+23. Chatbot Setting - Support
 
 == Changelog ==
 
 = 1.9.7 =
-* TBD
+* Removed "here, here, here" when Suppress Learning Messages is set to None.
 
 = 1.9.6 =
 * Revised Knowledge Navigator process to sites with large numbers of pages, posts and products
