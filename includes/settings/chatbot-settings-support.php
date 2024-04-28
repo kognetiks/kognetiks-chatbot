@@ -60,7 +60,7 @@ function chatbot_chatgpt_support_section_callback() {
             <li>Install and activate the Chatbot plugin.</li>
             <li>Navigate to the settings page (Settings &gt; API/Model) and enter your API key.</li>
             <li>Customize the chatbot appearance and other parameters as needed.</li>
-        <li>Add the chatbot to any page or post using the provided shortcode: <b>&#91;chatbot_chatgpt&#93;</b></li>
+        <li>Add the chatbot to any page or post using the provided shortcode: <b><code>&#91;chatbot_chatgpt&#93;</code></b></li>
         </ol>
         <p>Now your website visitors can enjoy a seamless and personalized chat experience powered by OpenAI&#8217;s ChatGPT API.</p>
         <h3>Installation</h3>
@@ -69,10 +69,10 @@ function chatbot_chatgpt_support_section_callback() {
             <li>Activate the plugin through the &#8216;Plugins&#8217; menu in WordPress.</li>
             <li>Go to the &#8216;Settings &gt; Chatbot&#8217; page and enter your OpenAI API key.</li>
             <li>Customize the chatbot appearance and other parameters as needed.</li>
-            <li>Add the chatbot to any page or post using the provided shortcode: <b>&#91;chatbot_chatgpt&#93;<b></li>
+            <li>Add the chatbot to any page or post using the provided shortcode: <b><code>&#91;chatbot_chatgpt&#93;</code><b></li>
             <li><b>Chatbot</b> now support either an embedded chatbot or floating chatbot.</li>
-            <li>Use <b>&#91;chatbot_chatgpt&#93;</b> or <b>&#91;chatbot style="floating"&#93;</b> to display the chatbot as a floating chatbot.</li>
-            <li>Use <b>&#91;chatbot style="embedded"&#93;</b> to display the chatbot as an embedded chatbot.</li>
+            <li>Use <b><code>&#91;chatbot_chatgpt&#93;</code></b> or <b><code>&#91;chatbot style="floating"&#93;</code></b> to display the chatbot as a floating chatbot.</li>
+            <li>Use <b><code>&#91;chatbot style="embedded"&#93;</code></b> to display the chatbot as an embedded chatbot.</li>
             <li>By default, the chatbot will appear in the lower right corner of the page. This is adjustable in the .css file but not recommended for the causal site builders.</li>
             </ol>
     </div>
@@ -94,17 +94,17 @@ function chatbot_chatgpt_support_section_callback() {
             <li>In Settings > API/Model, you can select to use ChatGPT (i.e., original) or use one of two different Custom GPT Assistants you've created.</li>
             <li>As explain above, build your custom GPT assistants in the OpenAI Playground.</li>
             <li>Decide which one of your assistants will be 'primary' and which one will be 'alternate'.</li>
-            <li>Incorporate your assistants in one of several different ways using the <b>&#91;chatbot_chatgpt&#93;</B> shortcode.</li>
+            <li>Incorporate your assistants in one of several different ways using the <b><code>&#91;chatbot_chatgpt&#93;</code></B> shortcode.</li>
         </ul>
         <p>Use the following format to invoke the primary or alternate assistant:</p>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li>&#91;chatbot&#93; - Default values, floating style, uses OpenAI's ChatGPT</li>
-            <li>&#91;chatbot style="floating"&#93; - Floating style, uses OpenAI's ChatGPT</li>
-            <li>&#91;chatbot style="embedded"&#93; - Embedded style, uses OpenAI's ChatGPT</li>
-            <li>&#91;chatbot style="floating" assistant="primary"&#93; - Floating style, GPT Assistant as set in Primary setting</li>
-            <li>&#91;chatbot style="embedded" assistant="alternate"&#93; - Embedded style, GPT Assistant as set in Alternate setting</li>
-            <li>&#91;chatbot style="floating" assistant="asst_...123"&#93; - Floating style, GPT Assistant specified</li>
-            <li>&#91;chatbot style="embedded" assistant="asst_...456"&#93; - Embedded style, GPT Assistant specified</li>
+            <li><code>&#91;chatbot&#93;</code> - Default values, floating style, uses OpenAI's ChatGPT</li>
+            <li><code>&#91;chatbot style="floating"&#93;</code> - Floating style, uses OpenAI's ChatGPT</li>
+            <li><code>&#91;chatbot style="embedded"&#93;</code> - Embedded style, uses OpenAI's ChatGPT</li>
+            <li><code>&#91;chatbot style="floating" assistant="primary"&#93;</code> - Floating style, GPT Assistant as set in Primary setting</li>
+            <li><code>&#91;chatbot style="embedded" assistant="alternate"&#93;</code> - Embedded style, GPT Assistant as set in Alternate setting</li>
+            <li><code>&#91;chatbot style="floating" assistant="asst_...123"&#93;</code> - Floating style, GPT Assistant specified</li>
+            <li><code>&#91;chatbot style="embedded" assistant="asst_...456"&#93;</code> - Embedded style, GPT Assistant specified</li>
         </ul>
     </div>
     <hr style="border-top: 2px solid black;">
@@ -113,7 +113,7 @@ function chatbot_chatgpt_support_section_callback() {
         <p>You can now add a shortcode on your site to retrieve the logged in user’s conversation history.</p>
         <p>Use the following format to invoke the conversation history anywhere you can include a shortcode:</p>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-            <li>&#91;chatbot_chatgpt_history&#93;</li>
+            <li><code>&#91;chatbot_chatgpt_history&#93;</code></li>
     </div>
     <hr style="border-top: 2px solid black;">
     <div id="api-key-safety-and-security">

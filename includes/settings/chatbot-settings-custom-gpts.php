@@ -31,10 +31,10 @@ function chatbot_chatgpt_gpt_assistants_section_callback($args) {
     <p><b>NOTE:</b> For best results ensure that the shortcode appears only once on the page.</p>
     <p>Use the following format to invoke the primary or alternate assistant:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-        <li><b>&#91;chatbot style="floating" assistant="primary"&#93;</b> - Floating style, GPT Assistant as set in Primary setting</li>
-        <li><b>&#91;chatbot style="embedded" assistant="alternate"&#93;</b> - Embedded style, GPT Assistant as set in Alternate setting</li>
-        <li><b>&#91;chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Floating style, GPT Assistant as set in GPT Assistant ID setting</li>
-        <li><b>&#91;chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</b> - Embedded style, GPT Assistant as set in GPT Assistant ID setting</li>
+        <li><b><code>&#91;chatbot style="floating" assistant="primary"&#93;</code></b> - Floating style, GPT Assistant as set in Primary setting</li>
+        <li><b><code>&#91;chatbot style="embedded" assistant="alternate"&#93;</code></b> - Embedded style, GPT Assistant as set in Alternate setting</li>
+        <li><b><code>&#91;chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</code></b> - Floating style, GPT Assistant as set in GPT Assistant ID setting</li>
+        <li><b><code>&#91;chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</code></b> - Embedded style, GPT Assistant as set in GPT Assistant ID setting</li>
         <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li>
     </ul>
     <p><b>NOTE:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
