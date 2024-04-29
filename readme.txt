@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.5.2
-Stable tag: 1.9.7
+Stable tag: 1.9.8
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -225,6 +225,10 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 23. Chatbot Setting - Support
 
 == Changelog ==
+
+= 1.9.8 =
+* Wrap shortcode examples with a code tag
+* Close the open php session after acquiring a session id
 
 = 1.9.7 =
 * Removed "here, here, here" when Suppress Learning Messages is set to None.

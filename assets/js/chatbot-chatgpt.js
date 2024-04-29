@@ -544,6 +544,11 @@ jQuery(document).ready(function ($) {
                 user_id: user_id, // pass the user ID here
                 page_id: page_id, // pass the page ID here
             },
+            headers: {  // Adding headers to prevent caching
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            },        
             beforeSend: function () {
                 showTypingIndicator();
                 submitButton.prop('disabled', true);
@@ -592,6 +597,7 @@ jQuery(document).ready(function ($) {
                 }
                 submitButton.prop('disabled', false);
             },
+            cache: false, // This ensures jQuery does not cache the result
         });
 
         // Belt & Suspenders - Ver 1.8.6
