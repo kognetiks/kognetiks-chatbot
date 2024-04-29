@@ -2,6 +2,28 @@
 
 The **Kognetiks Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
+## What's New in Version 1.9.8
+
+- **Improved Shortcode Display:** We've enhanced the readability of shortcode examples by wrapping them in \<code>\</code> tags, making them clearer and more accessible within the documentation.
+
+- **Session Handling Enhancements:** We now ensure that PHP sessions are properly closed after acquiring a session ID, improving resource management and security
+
+## What's New in Version 1.9.7
+
+- **UI Text Streamlining:** The repeated "here, here, here" text has been removed when the Suppress Learning Messages option is set to None.
+
+## What's New in Version 1.9.6
+
+- **Optimized Knowledge Navigator:** The Knowledge Navigator has been revised to efficiently handle sites with large numbers of pages, posts, and products, ensuring faster and more accurate search capabilities.
+
+- **Customizable Depth for TF-IDF Scoring:** A new Turing parameter allows users to set the depth of TF-IDF scoring based on the content length of pages, posts, or products, enhancing the relevance of search results.
+
+- **Flexible Enhanced Responses:** Users can now select between 1 and 10 enhanced responses, which link to the highest matching pages, posts, or products on your site based on visitor input.
+
+- **API Version Selection:** Added the option to select between OpenAI-Beta API versions: v1 (assistants=v1) and v2 (assistants=v2, default setting). Refer to the OpenAI Migration Guide for detailed information on the changes.
+
+- **Daily Chatbot Message Limit:** A new setting has been introduced to limit the visitor interactions with thechatbot to 999 messages per day, which resets daily. This can be configured in the Chatbot Settings under Chatbot Daily Message Limit.
+
 ## What's New in Verion 1.9.5
 
 The latest update for the Kognetiks Chatbot for WordPress plugin, Version 1.9.5, brings an array of new voice options and output formats, alongside improved audio playback controls and enhanced user interface adjustments for a more streamlined experience.
