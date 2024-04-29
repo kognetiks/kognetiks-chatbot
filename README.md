@@ -4,39 +4,39 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's New in Version 1.9.8
 
-- **Improved Shortcode Display:** We've enhanced the readability of shortcode examples by wrapping them in \<code>\</code> tags, making them clearer and more accessible within the documentation.
+- **Improved Shortcode Documentation:** We've enhanced the readability of shortcode examples by wrapping them in \<code>\</code> tags, making them clearer and more accessible within the documentation.
 
-- **Session Handling Enhancements:** We now ensure that PHP sessions are properly closed after acquiring a session ID, improving resource management and security
+- **Corrected Session Handling:** We now ensure that PHP sessions are properly closed after acquiring a session ID, improving resource management and security
 
 ## What's New in Version 1.9.7
 
-- **UI Text Streamlining:** The repeated "here, here, here" text has been removed when the Suppress Learning Messages option is set to None.
+- **Corrected Enhanced Responses Append:** The repeated "here, here, here" text has been removed when the Suppress Learning Messages option is set to None.
 
 ## What's New in Version 1.9.6
 
-- **Optimized Knowledge Navigator:** The Knowledge Navigator has been revised to efficiently handle sites with large numbers of pages, posts, and products, ensuring faster and more accurate search capabilities.
+- **Optimized Knowledge Navigator:** The Knowledge Navigator has been revised to efficiently handle sites with large numbers of pages, posts, and products, ensuring more accurate search capabilities.
 
-- **Customizable Depth for TF-IDF Scoring:** A new Turing parameter allows users to set the depth of TF-IDF scoring based on the content length of pages, posts, or products, enhancing the relevance of search results.
+- **Customizable Depth for TF-IDF Scoring:** A new turing parameter allows you to set the depth of TF-IDF scoring based on the content length of pages, posts, or products, enhancing the relevance of search results.
 
-- **Flexible Enhanced Responses:** Users can now select between 1 and 10 enhanced responses, which link to the highest matching pages, posts, or products on your site based on visitor input.
+- **Flexible Enhanced Responses:** You can now select between 1 and 10 enhanced responses, which link to the highest matching pages, posts, or products on your site based on visitor input based on matches to the TF-IDF scores.
 
-- **API Version Selection:** Added the option to select between OpenAI-Beta API versions: v1 (assistants=v1) and v2 (assistants=v2, default setting). Refer to the OpenAI Migration Guide for detailed information on the changes.
+- **API Version Migration:** Added the option to select between OpenAI-Beta API versions: v1 (assistants=v1) and v2 (assistants=v2, default setting). Refer to the [OpenAI Migration Guide](https://platform.openai.com/docs/assistants/migration/accessing-v1-data-in-v2) for detailed information on the changes.
 
-- **Daily Chatbot Message Limit:** A new setting has been introduced to limit the visitor interactions with thechatbot to 999 messages per day, which resets daily. This can be configured in the Chatbot Settings under Chatbot Daily Message Limit.
+- **Daily Interaction Message Limit:** A new setting has been introduced to limit visitor interactions with the chatbot from 1 to 999 (the default is 999 messages per day and resets daily). This can be configured in the Chatbot Settings using the Chatbot Daily Message Limit option.
 
 ## What's New in Verion 1.9.5
 
 The latest update for the Kognetiks Chatbot for WordPress plugin, Version 1.9.5, brings an array of new voice options and output formats, alongside improved audio playback controls and enhanced user interface adjustments for a more streamlined experience.
 
-- **Expanded Voice Options:** We've introduced six new voice options for Text-to-Speech functionalities to cater to diverse preferences and applications. The new voices, including Allow, Echo, Fable, Onyx, Nova, and Shimmer, can be selected to personalize the auditory output of the chatbot. This variety ensures users can choose voices that best fit their brand or personal style.
+- **Expanded Voice Options:** We've introduced six new voice options for Text-to-Speech functionalities to cater to diverse preferences and applications. The new voices, including Allow, Echo, Fable, Onyx, Nova, and Shimmer, can be selected to personalize the auditory output of the chatbot. This variety ensures you can choose voices that best fit your brand or personal style.
 
 - **Enhanced Voice Output Formats:** To accommodate various technical needs and quality preferences, we have expanded our range of output formats. Users can now choose from MP3, Opus, AAC, FLAC, WAV, and PCM formats to optimize the audio quality and compatibility of the Text-to-Speech outputs.
 
-- **Repositioned Chatbot Controls:** For an improved user interface, we have moved essential chatbot controls—such as submit, file upload, erase, and text-to-speech buttons—below the input box. This rearrangement enhances accessibility and makes the chat interface cleaner and more intuitive.
+- **Repositioned Chatbot Controls:** For an improved user interface, we have moved essential chatbot controls — such as submit, file upload, erase, and text-to-speech buttons — below the input box. This rearrangement enhances accessibility and makes the chat interface cleaner and more intuitive.
 
-- **Redesigned API/Model Settings Page:** The settings page for chat, image, and speech generation parameters has been redesigned for better usability. Users can now more easily adjust and tune their settings, ensuring the chatbot performs optimally across all integrated models.
+- **Redesigned API/Model Settings Page:** The settings page for chat, image, and speech generation parameters has been redesigned for better usability. You can now more easily adjust and tune your settings, ensuring the chatbot performs optimally across all integrated models.
 
-These updates aim to enhance the versatility and user experience of the Kognetiks Chatbot for WordPress, continuing our commitment to deliver cutting-edge, customizable, and accessible technology solutions.
+These updates aim to enhance the versatility and visitor experience of the Kognetiks Chatbot for WordPress, continuing our commitment to deliver cutting-edge, customizable, and accessible technology solutions.
 
 ## What's New in Verion 1.9.4
 
