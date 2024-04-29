@@ -55,7 +55,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $links = [];
 
     foreach ($results as $result) {
-        $links[] = "* [here](" . $result['url'] . ")";
+        $links[] = "[here](" . $result['url'] . ")";
     }
 
     if (!empty($links)) {
