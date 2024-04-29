@@ -66,6 +66,7 @@ if (empty($session_id)) {
         ]);
     }
     $session_id = session_id();
+    session_write_close();  // Close the session after setting the session id
 
 }
 

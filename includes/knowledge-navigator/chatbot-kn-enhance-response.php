@@ -55,10 +55,12 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $links = [];
 
     foreach ($results as $result) {
-        $links[] = "[here](" . $result['url'] . ")";
+        $links[] = "* [here](" . $result['url'] . ")";
     }
 
     if (!empty($links)) {
+
+        // FIXME - ADD FORMATTING OPTION HERE, e.g. BULLET POINTS, NUMBERED LIST, etc.
         $links_string = implode(", ", $links);
         $links_string = ltrim($links_string, ',');
         $links_string = $links_string . ".";

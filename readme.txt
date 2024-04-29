@@ -227,7 +227,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 1.9.8 =
-* TBD
+* Wrap shortcode examples with a code tag
+* Close the open php session after acquiring a session id
 
 = 1.9.7 =
 * Removed "here, here, here" when Suppress Learning Messages is set to None.
