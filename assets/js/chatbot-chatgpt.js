@@ -625,61 +625,51 @@ jQuery(document).ready(function ($) {
 
     // Add the click event listener to the download transcript button - Ver 1.9.9
     $('#chatbot-chatgpt-download-transcript-btn').on('click', function(e) {
-        e.preventDefault();  // Prevents the default action of the button (if needed)
-        console.log('Button clicked: Dowloading transcript');  // Optional: Log to console
-
-        let user_id = php_vars.user_id;
-        let page_id = php_vars.page_id;
-
-        // What I need to do here is get the content that is in the <div id="chatbot-chatgpt-conversation"> element and download it to a user selected location
-        // I will need to send the content to the server and then have the server send it back as a download
-
-        // Get the content of the conversation
-        let conversationContent = $('#chatbot-chatgpt-conversation').html();
-
-        // console.log('Chatbot: NOTICE: conversationContent: ' + conversationContent);
-
-        // Call function "chatbot_chatgpt_call_tts_api" to convert the text to speech
+        e.preventDefault();  // Prevent the default action of the button (if needed)
+        console.log('Button clicked: Downloading transcript');  // Optional: Log to console
+    
+        let conversationContent = $('#chatbot-chatgpt-conversation').html();  // Get the HTML content
+    
         $.ajax({
-            url: chatbot_chatgpt_params.ajax_url,
+            url: chatbot_chatgpt_params.ajax_url,  // URL to WordPress AJAX handler
             method: 'POST',
             data: {
                 action: 'chatbot_chatgpt_download_transcript',
                 user_id: php_vars.user_id,
                 page_id: php_vars.page_id,
-                conversation_content: conversationContent
+                conversation_content: conversationContent  // Send the conversation content
             },
             beforeSend: function () {
                 // Show typing indicator and disable submit button
                 // Replace these functions with your own
                 showTypingIndicator();
-                submitButton.prop('disabled', true);
+                $('#submit-button').prop('disabled', true);
             },
             success: function(response) {
-                // If the response is a string, assume it's HTML
-                if (typeof response === 'string') {
-                    // Append the response to the conversation
-                    appendMessage(response, 'bot');
+                if (response.success && response.data) {
+                    var link = document.createElement('a');
+                    link.href = response.data;
+                    link.download = ''; // Optionally set the filename
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    console.error('Error: Download URL not provided or error in response.');
+                    console.error(response.data || 'No additional error data.');
                 }
             },
             error: function(jqXHR, status, error) {
-                if(status === "timeout") {
-                    appendMessage('Error: ' + error, 'error');
-                    appendMessage('Oops! This request timed out. Please try again.', 'error');
-                } else {
-                    appendMessage('Error: ' + error, 'error');
-                    appendMessage('Oops! Failed to download transcript. Please try again.', 'error');
-                }
+                // Handle AJAX errors
+                console.error('AJAX error: ' + error);
             },
             complete: function () {
                 // Remove typing indicator and enable submit button
                 // Replace these functions with your own
                 removeTypingIndicator();
-                submitButton.prop('disabled', false);
+                $('#submit-button').prop('disabled', false);
             },
         });
-
-    });    
+    });
 
     // Read Out Loud - Ver 1.9.5
     $('#chatbot-chatgpt-text-to-speech-btn').on('click', function(e) {
