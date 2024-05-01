@@ -148,7 +148,7 @@ function chatbot_chatgpt_support_section_callback() {
         <p>Each interaction with the chatbot is logged in real-time, capturing all relevant information into the table. This includes automatic and direct data sources for fields like interaction time and message text.</p>
 
         <h3>Application</h3>
-        <p>The conversation log maybe used for:</p>
+        <p>The conversation log may be used for:</p>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><strong>Analysis and Reporting:</strong> Generate reports on user interactions and queries.</li>
             <li><strong>Bot Improvement:</strong> Refine chatbot responses based on logged data.</li>

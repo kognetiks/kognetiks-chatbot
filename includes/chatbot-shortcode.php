@@ -391,6 +391,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
+        set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
         ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
@@ -470,12 +471,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             </div>
         </div>
         <div id="chatbot-chatgpt-buttons-container" style="justify-content: center; flex-grow: 0; display: flex; flex-direction: row; align-items: center; gap: 5px;">
-            <button id="chatbot-chatgpt-submit">
+            <button id="chatbot-chatgpt-submit" title="Send Message">
                 <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
             </button>
             <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
                 <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
-                <button id="chatbot-chatgpt-upload-file">
+                <button id="chatbot-chatgpt-upload-file" title="Upload Files">
                     <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                 </button>
                 <script type="text/javascript">
@@ -484,11 +485,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     });
                 </script>
             <?php endif; ?>
-            <button id="chatbot-chatgpt-erase-btn">
+            <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
                 <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
             </button>
-            <button id="chatbot-chatgpt-text-to-speech-btn">
+            <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
                 <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
+            </button>
+            <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
             </button>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
@@ -504,6 +508,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
+        set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
@@ -567,12 +572,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </div>
             </div>
             <div id="chatbot-chatgpt-buttons-container" style="justify-content: center; flex-grow: 0; display: flex; flex-direction: row; align-items: center; gap: 5px;">
-                <button id="chatbot-chatgpt-submit">
+                <button id="chatbot-chatgpt-submit" title="Send Message">
                     <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                 </button>
                 <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
                     <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
-                    <button id="chatbot-chatgpt-upload-file">
+                    <button id="chatbot-chatgpt-upload-file" title="Upload Files">
                         <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                     </button>
                     <script type="text/javascript">
@@ -581,11 +586,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         });
                     </script>
                 <?php endif; ?>
-                <button id="chatbot-chatgpt-erase-btn">
+                <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
                     <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
                 </button>
-                <button id="chatbot-chatgpt-text-to-speech-btn">
+                <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
                     <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
+                </button>
+                <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                    <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
                 </button>
             </div>
             <!-- Custom buttons - Ver 1.6.5 -->

@@ -27,30 +27,23 @@ function interactive_chat_history() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log'; // Adjust the table name as necessary
 
     // New query with subquery for correct sorting
-    $query = $wpdb->prepare("SELECT c.message_text, c.user_type, c.thread_id, c.interaction_time
-                            FROM $table_name c
-                            INNER JOIN (
-                                SELECT thread_id, MIN(interaction_time) as first_interaction_time
-                                FROM $table_name 
-                                WHERE user_id = %d 
-                                AND user_type IN ('Chatbot', 'Visitor')
-                                GROUP BY thread_id
-                            ) t ON c.thread_id = t.thread_id
-                            WHERE c.user_id = %d 
-                            AND c.user_type IN ('Chatbot', 'Visitor')
-                            ORDER BY t.first_interaction_time DESC, c.interaction_time ASC", 
-                            $current_user_id, $current_user_id);
+    $query = $wpdb->prepare("SELECT c.message_text, c.user_type, c.thread_id, c.interaction_time, c.assistant_id, c.assistant_name, DATE(c.interaction_time) as interaction_date
+    FROM $table_name c
+    WHERE c.user_id = %d 
+    AND c.user_type IN ('Chatbot', 'Visitor')
+    ORDER BY interaction_date DESC, c.interaction_time ASC", 
+    $current_user_id);
 
     $conversations = $wpdb->get_results($query);
 
     if (empty($conversations)) {
-        return 'No conversations found.';
+    return 'No conversations found.';
     }
 
-    // Group messages by thread_id
+    // Group messages by interaction_date
     $grouped_conversations = [];
     foreach ($conversations as $conversation) {
-        $grouped_conversations[$conversation->thread_id][] = $conversation;
+    $grouped_conversations[$conversation->interaction_date][] = $conversation;
     }
 
     $output = '<div class="chatbot-chatgpt-chatbot-history">';
@@ -62,8 +55,16 @@ function interactive_chat_history() {
         $output .= '<a href="#" onclick="toggleThread(\'' . esc_attr($thread_id) . '\');return false;">' . esc_html($date_label) . '</a>';
         $output .= '<div class="thread-messages" style="display:none;">';
         foreach ($messages as $message) {
+            $assistant_name = $message->assistant_name;
+            if (empty($assistant_name)) {
+                $assistant_name = esc_attr(get_option('chatbot_chatgpt_bot_name'));
+            }
             $user_type = $message->user_type === 'Chatbot' ? 'Chatbot' : 'You';
-            $output .= sprintf('<b>%s</b><br>%s<br>', esc_html($user_type), stripslashes(esc_html($message->message_text)));
+            if ($user_type == 'You') {
+                $output .= sprintf('<b>%s</b><br>%s<br>', esc_html($user_type), stripslashes(esc_html($message->message_text)));
+            } else {
+                $output .= sprintf('<b>%s</b><br>%s<br>', esc_html($assistant_name), stripslashes(esc_html($message->message_text)));
+            }
         }
         $output .= '</div></div>';
     }

@@ -26,6 +26,7 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions_alternate'); // Alternate Assistant - Ver 1.9.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_beta_version'); // Beta Assistant - Ver 1.9.3
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_thread_retention_period'); // Thread Retention Period - Ver 1.9.9
 
     add_settings_section(
         'chatbot_chatgpt_custom_gpts_section',
@@ -91,6 +92,15 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_assistant_instructions_alternate',
         'Alternate Assistant Instructions',
         'chatbot_chatgpt_assistant_instructions_alternate_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    // Thread Retention Period - Ver 1.9.9
+    add_settings_field(
+        'chatbot_chatgpt_thread_retention_period',
+        'Thread Retention Period (hrs)',
+        'chatbot_chatgpt_thread_retention_period_callback',
         'chatbot_chatgpt_custom_gpts',
         'chatbot_chatgpt_custom_gpts_section'
     );

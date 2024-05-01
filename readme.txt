@@ -227,7 +227,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 1.9.9 =
-* TBD
+* Added thread retention periods (default = 36 hours with 720 hours or 30 days) for Assistant conversation continuity
+* Added either the chatbot name or the assistant name to the conversation log
+* Upgraded conversation history shortcode (see Support for details [chatbot_chatgpt_history]) include the assistant or bot's name
 
 = 1.9.8 =
 * Wrap shortcode examples with a code tag

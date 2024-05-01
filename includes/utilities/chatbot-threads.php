@@ -49,10 +49,13 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
     $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
 
+    // Retrieve the chatbot_chatgpt_thread_retention_period option
+    $thread_retention_period = (int) get_option('chatbot_chatgpt_thread_retention_period', 36);
+
     // Store the style and the assistant value with unique keys
     // Store transients for 1 day 12 hours (60 seconds * 60 minutes * 36 hours)
-    set_transient($thread_id_thread_key, $thread_id, 60*60*36); // Store for 36 hours
-    set_transient($assistant_id_thread_key, $assistant_id, 60*60*36); // Store for 36 hours
+    set_transient($thread_id_thread_key, $thread_id, 60*60*$thread_retention_period); // Store for 36 hours
+    set_transient($assistant_id_thread_key, $assistant_id, 60*60*$thread_retention_period); // Store for 36 hours
 
 }
 
