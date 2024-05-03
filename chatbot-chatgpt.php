@@ -386,6 +386,11 @@ if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
 }
 add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_conversation_log_cleanup');
 
+// Schedule the transcript file cleanup event if it's not already scheduled - Ver 1.9.9
+// Schedule the cleanup event if it's not already scheduled
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_transcripts')) {
+    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_transcripts');
+}
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message(): void {

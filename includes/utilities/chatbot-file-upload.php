@@ -103,7 +103,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
                     // DIAG - Diagnostic - Ver 1.9.2
                     // back_trace( 'NOTICE', 'asst_file_id ' . $responseData['id'] );
 
-                    unlink($file_path); // Optionally delete the file after successful upload
+                    // unlink($file_path); // Optionally delete the file after successful upload
 
                     $responses[] = array(
                         'status' => 'success',
@@ -117,6 +117,10 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
 
                 }
             }
+
+            // DELETE THE FILE AFTER UPLOAD - VER 1.9.9
+            // b2711c63-b1d9-430e-bbab-d077d93442c8
+            unlink($file_path); // Optionally delete the file after successful upload
 
             curl_close($ch);
         }

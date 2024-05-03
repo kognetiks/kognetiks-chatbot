@@ -124,6 +124,7 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_diagnostics');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_input_rows');
 
     add_settings_section(
         'chatbot_chatgpt_settings_section',
@@ -194,6 +195,15 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_audience_choice',
         'Audience for Chatbot',
         'chatbot_chatgpt_audience_choice_callback',
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_settings_section'
+    );
+
+    // Input rows setting - Ver 1.9.9
+    add_settings_field(
+        'chatbot_chatgpt_input_rows',
+        'Input Rows',
+        'chatbot_chatgpt_input_rows_callback',
         'chatbot_chatgpt_settings',
         'chatbot_chatgpt_settings_section'
     );

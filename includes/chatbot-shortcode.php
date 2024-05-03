@@ -110,6 +110,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Combine user attributes with default attributes
     $atts = shortcode_atts($chatbot_chatgpt_default_atts, $atts, 'chatbot_chatgpt');
 
+    // For each $atts, sanitize the shortcode data - Ver 1.9.9
+    // Cross Site Scripting (XSS) vulnerability patch for 62801a58-b1ba-4c5a-bf93-7315d3553bb8
+    foreach ($atts as $key => $value) {
+        $atts[$key] = sanitize_text_field($value);
+        $atts[$key] = htmlspecialchars(strip_tags($atts[$key]), ENT_QUOTES, 'UTF-8');
+    }
+
     // Sanitize the 'style' attribute to ensure it contains safe data
     $chatbot_chatgpt_display_style = array_key_exists('style', $atts) ? sanitize_text_field($atts['style']) : 'floating';
 
@@ -447,7 +454,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     if ($use_flow != 'Yes' and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                         // DIAG - Diagnostics - Ver 1.9.0
                         // back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
-                        echo "<textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
+                        $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
+                        $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
+                        $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
+                        echo "<textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
                             var textarea = document.getElementById('chatbot-chatgpt-message');
@@ -465,7 +475,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     } else {
                         // DIAG - Diagnostics - Ver 1.9.5
                         // back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
-                        echo "<center><textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea></center>";
+                        $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
+                        $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
+                        $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
+                        echo "<center><textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea></center>";
                     }
                 ?>
             </div>
@@ -550,7 +563,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         }
                         // Preload with a prompt if it is set - Ver 1.9.5
                         if ($use_flow != 'Yes' and !empty($chatbot_chatgpt_hot_bot_prompt)) {
-                            echo "<center><textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea></center>";
+                            $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
+                            $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
+                            $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
+                            echo "<center><textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea></center>";
                             echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 var textarea = document.getElementById('chatbot-chatgpt-message');
@@ -566,7 +582,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             });
                             </script>";
                         } else {
-                            echo "<center><textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea></center>";
+                            $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
+                            echo "<center><textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea></center>";
                         }
                     ?>
                 </div>

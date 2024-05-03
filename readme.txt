@@ -230,6 +230,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Added thread retention periods (default = 36 hours with 720 hours or 30 days) for Assistant conversation continuity
 * Added either the chatbot name or the assistant name to the conversation log
 * Upgraded conversation history shortcode (see Support for details [chatbot_chatgpt_history]) include the assistant or bot's name
+* Added option to download transcript to text file on chatter's computer
+* Added option to set the number of rows for chatter's message input - from 1 to 10 rows
 
 = 1.9.8 =
 * Wrap shortcode examples with a code tag
