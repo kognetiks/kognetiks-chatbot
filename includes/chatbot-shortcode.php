@@ -117,7 +117,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Cross Site Scripting (XSS) vulnerability patch for 62801a58-b1ba-4c5a-bf93-7315d3553bb8
     foreach ($atts as $key => $value) {
         $atts[$key] = sanitize_text_field($value);
-        $atts[$key] = htmlspecialchars(strip_tags($atts[$key]), ENT_QUOTES, 'UTF-8');
+        $atts[$key] = htmlspecialchars(strip_tags($atts[$key] ?? ''), ENT_QUOTES, 'UTF-8');
     }
 
     // Validate and sanitize the style parameter - Ver 1.9.9

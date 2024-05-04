@@ -107,6 +107,18 @@ function chatbot_chatgpt_suppress_attribution_callback($args) {
     <?php
 }
 
+// Delete Plugin Data on Uninstall - Ver 1.9.9
+function chatbot_chatgpt_delete_data_callback($args) {
+    global $chatbot_chatgpt_delete_data;
+    $chatbot_chatgpt_delete_data = esc_attr(get_option('chatbot_chatgpt_delete_data', 'no'));
+    ?>
+    <select id="chatbot_chatgpt_delete_data_setting" name = "chatbot_chatgpt_delete_data">
+        <option value="no" <?php selected( $chatbot_chatgpt_delete_data, 'no' ); ?>><?php echo esc_html( 'No' ); ?></option>
+        <option value="yes" <?php selected( $chatbot_chatgpt_delete_data, 'yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+    </select>
+    <?php
+}
+
 // Enhanced Error Logging if Diagnostic Mode is On - Ver 1.6.9
 // Call this function using back_trace( 'NOTICE', $message);
 // [ERROR], [WARNING], [NOTICE], or [SUCCESS]

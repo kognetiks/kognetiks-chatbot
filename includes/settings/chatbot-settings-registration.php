@@ -208,16 +208,6 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_settings_section'
     );
 
-    // Moved to Appearance tab in Ver 1.8.1
-    // Option to change the width of the bot from narrow to wide - Ver 1.4.2
-    // add_settings_field(
-    //     'chatbot_chatgpt_width_setting',
-    //     'Chatbot Width Setting',
-    //     'chatbot_chatgpt_width_setting_callback',
-    //     'chatbot_chatgpt_settings',
-    //     'chatbot_chatgpt_settings_section'
-    // );
-
     // Diagnostics settings tab - Ver 1.6.5
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
     // Suppress Notices and Warnings
@@ -225,6 +215,7 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_learnings');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_learnings_message');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_delete_data');
 
     add_settings_section(
         'chatbot_chatgpt_diagnostics_section',
@@ -283,6 +274,15 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_suppress_attribution',
         'Suppress Attribution',
         'chatbot_chatgpt_suppress_attribution_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to delete data on uninstall - Ver 1.9.9
+    add_settings_field(
+        'chatbot_chatgpt_delete_data',
+        'Delete Plugin Data on Uninstall',
+        'chatbot_chatgpt_delete_data_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
     );

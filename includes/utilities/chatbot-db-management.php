@@ -90,6 +90,27 @@ function create_conversation_logging_table(): void {
     // Check if the table already exists
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
+    if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
+        // DIAG - Diagnostics
+        // back_trace('NOTICE', 'Table already exists: ' . $table_name);
+
+        if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'assistant_name')) === 'assistant_name') {
+            // DIAG - Diagnostics
+            // back_trace('NOTICE', 'Column user_type already exists in table: ' . $table_name);
+        } else {
+            // Directly execute the ALTER TABLE command without prepare()
+            $sql = "ALTER TABLE $table_name ADD COLUMN assistant_name VARCHAR(255) AFTER assistant_id";
+            $result = $wpdb->query($sql);
+            if ($result === false) {
+                // If there was an error, log it
+                // back_trace('ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+            } else {
+                // If the operation was successful, log the success
+                // back_trace('SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
+            }
+        }
+    }
+
     // Check if the table already exists
     if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
         // DIAG - Diagnostics
@@ -130,16 +151,6 @@ function create_conversation_logging_table(): void {
                 // If the operation was successful, log the success
                 // back_trace('SUCCESS', 'Successfully updated missing values in chatbot_chatgpt_conversation_log table');
             }
-        }
-
-        $sql = "ALTER TABLE $table_name ADD COLUMN assistant_name VARCHAR(255) AFTER assistant_id";
-        $result = $wpdb->query($sql);
-        if ($result === false) {
-            // If there was an error, log it
-            back_trace('ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
-        } else {
-            // If the operation was successful, log the success
-            back_trace('SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
         }
         
         // DIAG - Diagnostics - Ver 1.9.9
