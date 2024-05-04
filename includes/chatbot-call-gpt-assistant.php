@@ -433,8 +433,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // $page_id = get_the_id();
 
     // DIAG - Diagnostics - Ver 1.9.1
-    // back_trace( 'NOTICE', 'LINE 327 $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'LINE 328 $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     
     $script_data_array = array(
         'user_id' => $user_id,

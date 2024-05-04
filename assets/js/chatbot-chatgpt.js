@@ -1021,7 +1021,7 @@ jQuery(document).ready(function ($) {
 
     // Detect mobile device - Ver 1.8.1
     function isMobile() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 800);
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Silk|Kindle|Symbian/i.test(navigator.userAgent) || (window.innerWidth <= 800);
     }
 
     function updateChatbotStyles() {

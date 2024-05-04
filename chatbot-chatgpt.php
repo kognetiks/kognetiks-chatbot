@@ -392,6 +392,18 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_transcripts')) {
     wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_transcripts');
 }
 
+// Schedule the audio file cleanup event if it's not already scheduled - Ver 1.9.9
+// Schedule the cleanup event if it's not already scheduled
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_audio_files')) {
+    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_audio_files');
+}
+
+// Schedule the upload file cleanup event if it's not already scheduled - Ver 1.9.9
+// Schedule the cleanup event if it's not already scheduled
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_upload_files')) {
+    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_upload_files');
+}
+
 // Handle Ajax requests
 function chatbot_chatgpt_send_message(): void {
 

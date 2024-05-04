@@ -103,6 +103,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
                     // DIAG - Diagnostic - Ver 1.9.2
                     // back_trace( 'NOTICE', 'asst_file_id ' . $responseData['id'] );
 
+                    // MOVED TO OUTSIDE THE IF TEST - VER 1.9.9
                     // unlink($file_path); // Optionally delete the file after successful upload
 
                     $responses[] = array(
@@ -123,6 +124,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
             unlink($file_path); // Optionally delete the file after successful upload
 
             curl_close($ch);
+            
         }
 
         // DIAG - Diagnostic - Ver 1.9.2
@@ -278,3 +280,15 @@ function chatbot_chatgpt_upload_file_to_assistant_OLD(): array {
     }
 
 }
+
+// Delete old audio files - Ver 1.9.9
+function chatbot_chatgpt_cleanup_old_file_uploads() {
+    $audio_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
+    foreach (glob($audio_dir . '*') as $file) {
+        // Delete files older than 1 hour
+        if (filemtime($file) < time() - 60 * 60 * 1) {
+            unlink($file);
+        }
+    }
+}
+add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_old_file_uploads');
