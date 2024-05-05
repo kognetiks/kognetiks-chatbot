@@ -440,10 +440,11 @@ function chatbot_chatgpt_send_message(): void {
             // DIAG - Diagnostics
             // back_trace ( 'NOTICE', 'Model set in global: ' . $model);
         } else {
-
+            // Set the model to the default
+            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
             // DIAG - Diagnostics
             // back_trace ( 'ERROR', 'Model not set!!!');
-            wp_send_json_error('Invalid Model. Please set the model in the plugin settings.');
+            // wp_send_json_error('Invalid Model. Please set the model in the plugin settings.');
         }
     }
 
