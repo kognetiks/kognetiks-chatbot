@@ -2,8 +2,8 @@
 /**
  * Kognetiks Chatbot for WordPress - ChatGPT TTS API - Ver 1.9.4
  *
- * This file contains the code for generating images using the 
- * the DALL-2 or DALL-3 API.
+ * This file contains the code for generating images using
+ * the text-to-speech API.
  *
  * @package chatbot-chatgpt
  */
@@ -248,7 +248,7 @@ function chatbot_chatgpt_read_aloud($message) {
     global $model;
     global $voice;
 
-    // FIXME - GET THE DEFULT TEXT-TO-SPEECH API KEY
+    // FIXME - GET THE DEFAULT TEXT-TO-SPEECH API KEY
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
     // Get the text to be read aloud
@@ -300,7 +300,7 @@ function chatbot_chatgpt_delete_audio_file_id( $file_id ) {
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
-    back_trace( 'NOTICE', 'Setup deleting audio file after 2 hours: ' . $file_id);
+    // back_trace( 'NOTICE', 'Setup deleting audio file after 2 hours: ' . $file_id);
 
     // Set a transient that expires in 2 hours
     $timeFrameForDelete = time() + 2 * 60 * 60;
@@ -324,7 +324,7 @@ function deleteAudioFile($file_id) {
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
-    back_trace( 'NOTICE', 'Delete the audio file: ' . print_r($file_id, true));
+    // back_trace( 'NOTICE', 'Delete the audio file: ' . print_r($file_id, true));
 
     // Generate directory path
     $audio_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/';
@@ -344,19 +344,19 @@ function deleteAudioFile($file_id) {
     // Check if the file exists
     if (!file_exists($file_id)) {
         // DIAG - Diagnostics - Ver 1.9.9
-        back_trace( 'ERROR', 'File does not exist: ' . $file_id);
+        // back_trace( 'ERROR', 'File does not exist: ' . $file_id);
         return;
     }
 
     // Try to delete the file
     if (!unlink($file_id)) {
         // DIAG - Diagnostics - Ver 1.9.9
-        back_trace( 'ERROR', 'Failed to delete file: ' . $file_id);
+        // back_trace( 'ERROR', 'Failed to delete file: ' . $file_id);
         return;
     }
 
     // DIAG - Diagnostics - Ver 1.9.9
-    back_trace( 'NOTICE', 'File deleted: ' . $file_id);
+    // back_trace( 'NOTICE', 'File deleted: ' . $file_id);
 
 }
 add_action( 'chatbot_chatgpt_delete_audio_file', 'deleteAudioFile' );

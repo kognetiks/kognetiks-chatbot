@@ -2,8 +2,8 @@
 /**
  * Kognetiks Chatbot for WordPress - ChatGPT IMAGE API - Ver 1.9.4
  *
- * This file contains the code for generating images using the 
- * the DALL-2 or DALL-3 API.
+ * This file contains the code for generating images using
+ * the image API.
  *
  * @package chatbot-chatgpt
  */
@@ -219,5 +219,3 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     }
     
 }
-
-

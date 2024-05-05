@@ -133,7 +133,7 @@ function chatbot_chatgpt_assistant_beta_version_callback($args) {
     <?php
 }
 
-// Seet chatbot_chatgpt_thread_retention_period - Ver 1.9.9
+// Set chatbot_chatgpt_thread_retention_period - Ver 1.9.9
 function chatbot_chatgpt_thread_retention_period_callback($args) {
     $chatbot_chatgpt_thread_retention_period = esc_attr(get_option('chatbot_chatgpt_thread_retention_period', 36));
     ?>

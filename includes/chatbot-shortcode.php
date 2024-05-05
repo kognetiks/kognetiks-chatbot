@@ -93,7 +93,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // [chatbot style="floating" audience="logged-in"] - Floating style for logged-in users only
     // [chatbot style="floating" audience="visitors"] - Floating style for visitors only
     // [chatbot style="floating" prompt="How do I install this plugin?"] - Floating style with a prompt
-    // [chatbot style="embbeded" prompt="How do I install this plugin?"] - Embedded style with a prompt
+    // [chatbot style="embedded" prompt="How do I install this plugin?"] - Embedded style with a prompt
     // [chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx" instructions="Please ensure that you ... "] - Floating style with additional instructions
     // [chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx" instructions="Please ensure that you ... "] - Embedded style with additional instructions
     //
@@ -126,9 +126,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if (array_key_exists('style', $atts) && !is_null($atts['style'])) {
         if (in_array($atts['style'], $valid_styles)) {
             $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
-            back_trace('NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+            // back_trace('NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
         } else {
-            back_trace('ERROR', 'Invalid display style: ' . $atts['style']);
+            // back_trace('ERROR', 'Invalid display style: ' . $atts['style']);
         }
     }
 
@@ -139,9 +139,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $sanitized_assistant = sanitize_text_field($atts['assistant']);
         if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0) {
             $chatbot_chatgpt_assistant_alias = $sanitized_assistant;
-            back_trace('NOTICE', '$assistant_id: ' . $chatbot_chatgpt_assistant_alias);
+            // back_trace('NOTICE', '$assistant_id: ' . $chatbot_chatgpt_assistant_alias);
         } else {
-            back_trace('ERROR', 'Invalid $assistant_id: ' . $sanitized_assistant);
+            // back_trace('ERROR', 'Invalid $assistant_id: ' . $sanitized_assistant);
         }
     }
     $assistant_id = $chatbot_chatgpt_assistant_alias;
@@ -154,9 +154,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $sanitized_audience = sanitize_text_field($atts['audience']);
         if (in_array($sanitized_audience, $valid_audiences)) {
             $chatbot_chatgpt_audience_choice = $sanitized_audience;
-            back_trace('NOTICE', '$chatbot_chatgpt_audience_choice: ' . $chatbot_chatgpt_audience_choice);
+            // back_trace('NOTICE', '$chatbot_chatgpt_audience_choice: ' . $chatbot_chatgpt_audience_choice);
         } else {
-            back_trace('ERROR', 'Invalid audience choice: ' . $sanitized_audience);
+            // back_trace('ERROR', 'Invalid audience choice: ' . $sanitized_audience);
         }
     }
     
@@ -164,17 +164,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_chatgpt_hot_bot_prompt = ''; // default value
     if (array_key_exists('prompt', $atts)) {
         $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($atts['prompt']);
-        back_trace('NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+        // back_trace('NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
     } elseif (isset($_GET['chatbot_prompt'])) {
         $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($_GET['chatbot_prompt']);
-        back_trace('NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+        // back_trace('NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
     }
 
     // Validate and sanitize the additional_instructions parameter - Ver 1.9.9
     $additional_instructions = ''; // default value
     if (array_key_exists('additional_instructions', $atts)) {
         $additional_instructions = sanitize_text_field($atts['additional_instructions']);
-        back_trace('NOTICE', '$additional_instructions: ' . $additional_instructions);
+        // back_trace('NOTICE', '$additional_instructions: ' . $additional_instructions);
     }
 
     // Validate and sanitize the model parameter - Ver 1.9.9
@@ -182,12 +182,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         $script_data_array['model'] = $model;
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace('NOTICE', 'Model (defaulting): ' . $model);
+        // back_trace('NOTICE', 'Model (defaulting): ' . $model);
     } else {
         $model = sanitize_text_field($atts['model']);
         $script_data_array['model'] = $model;
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace('NOTICE', 'Model: ' . $model);
+        // back_trace('NOTICE', 'Model: ' . $model);
     }
 
     // Validate and sanitize the voice parameter - Ver 1.9.9
@@ -197,14 +197,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $sanitized_voice = sanitize_text_field($atts['voice']);
         if (in_array($sanitized_voice, $valid_voices)) {
             $voice = $sanitized_voice;
-            back_trace('NOTICE', '$voice: ' . $voice);
+            // back_trace('NOTICE', '$voice: ' . $voice);
         } else {
             $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
-            back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
+            // back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
         }
     } else {
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
-        back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
+        // back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
     }
     $script_data_array['voice'] = $voice;
 

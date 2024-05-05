@@ -20,7 +20,7 @@ function get_localized_stopwords($language_code, $stopWords) {
     $cached_stopwords = get_transient('chatbot_chatgpt_stopwords_' . $language_code);
 
     if ($cached_stopwords === false) {
-        // Stopwords not in cache, so call the function
+        // stopwords not in cache, so call the function
         $cached_stopwords = localize_global_stopwords($language_code, $stopWords);
         // Store the stopwords in the cache, set an appropriate expiration time
         set_transient('chatbot_chatgpt_stopwords_' . $language_code, $cached_stopwords, 31536000);

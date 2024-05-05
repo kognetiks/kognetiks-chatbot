@@ -511,7 +511,7 @@ function chatbot_chatgpt_send_message(): void {
         // back_trace( 'NOTICE' , 'Using Original GPT Assistant ID');
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
-        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions'), '');
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions', ''));
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
@@ -524,7 +524,7 @@ function chatbot_chatgpt_send_message(): void {
         }
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
-        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate'), '');
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate', ''));
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
@@ -544,7 +544,7 @@ function chatbot_chatgpt_send_message(): void {
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
             // DIAG - Diagnostics - Ver 1.8.1
-            // back_trace( 'NOTICE' , 'Using GPT Assistant Id ' . $assistant_id);
+            // back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
         } else {
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
@@ -555,7 +555,7 @@ function chatbot_chatgpt_send_message(): void {
         }
     }
 
-    // Decide whether to use an Flow, Assistant or original ChatGPT
+    // Decide whether to use Flow, Assistant or Original ChatGPT
     if ($model == 'flow'){
         
         // DIAG - Diagnostics

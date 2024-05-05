@@ -1,9 +1,9 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - ChatGPT TTS API - Ver 1.9.4
+ * Kognetiks Chatbot for WordPress - ChatGPT STT API - Ver 1.9.4
  *
- * This file contains the code for generating images using the 
- * the DALL-2 or DALL-3 API.
+ * This file contains the code for generating images using
+ * the speech-to-text API.
  *
  * @package chatbot-chatgpt
  */
@@ -32,5 +32,3 @@ function chatbot_chatgpt_call_stt_api ($api_key, $message) {
     Return 'COMING SOON: STT API is not yet implemented.';
 
 }
-
-

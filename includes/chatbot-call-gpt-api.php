@@ -2,8 +2,8 @@
 /**
  * Kognetiks Chatbot for WordPress - ChatGPT API - Ver 1.6.9
  *
- * This file contains the code for table actions for reporting
- * to display the Chatbot on the website.
+ * This file contains the code for accessing the ChatGPT API.
+ * 
  *
  * @package chatbot-chatgpt
  */

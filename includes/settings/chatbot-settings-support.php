@@ -110,7 +110,7 @@ function chatbot_chatgpt_support_section_callback() {
     <hr style="border-top: 2px solid black;">
     <div id=conversation-history>
         <h2>Conversation History</h2>
-        <p>You can now add a shortcode on your site to retrieve the logged in user’s conversation history.</p>
+        <p>You can now add a shortcode on your site to retrieve the logged-in user’s conversation history.</p>
         <p>Use the following format to invoke the conversation history anywhere you can include a shortcode:</p>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><code>&#91;chatbot_chatgpt_history&#93;</code></li>

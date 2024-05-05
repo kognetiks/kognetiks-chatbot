@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Deactivate and/or Delete the plugin
+ * Kognetiks Chatbot for WordPress - Deactivate and/or Delete the Plugin
  *
  * This file contains the code for deactivating and/or deleting the plugin.
  * 
@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_deactivate() {
 
     // DIAG - Log the activation
-    back_trace( 'NOTICE', 'Plugin deactivation started');
+    // back_trace( 'NOTICE', 'Plugin deactivation started');
 
     // Logic to run during deactivation
     // FIXME - THIS IS NOT DELETING THE PLUGIN - JUST DEACTIVATION
@@ -37,7 +37,7 @@ function chatbot_chatgpt_deactivate() {
     // OPTIONS - *chatbot_chatgpt*
 
     // DIAG - Log the activation
-    back_trace( 'NOTICE', 'Plugin deactivation completed');
+    // back_trace( 'NOTICE', 'Plugin deactivation completed');
 
     return;
 
@@ -49,7 +49,7 @@ function chatbot_chatgpt_admin_notices() {
     $chatbot_chatgpt_delete_data = get_option('chatbot_chatgpt_delete_data');
     if (empty($chatbot_chatgpt_delete_data)) {
         echo '<div class="notice notice-warning is-dismissible">
-            <p><strong>Kognetiks Chatbot:</strong> Remember to set data deletion preferences in the plugin settings on the Messages tab if you plan to uninstall the plugin.</p>
+            <p><strong>Kognetiks Chatbot:</strong> Remember to set your data deletion preferences in the plugin settings on the Messages tab if you plan to uninstall the plugin.</p>
         </div>';
     }
 }
@@ -60,7 +60,7 @@ function chatbot_chatgpt_uninstall(){
     global $wpdb;
 
     // DIAG - Log the uninstall
-    back_trace( 'NOTICE', 'Plugin uninstall started');
+    // back_trace( 'NOTICE', 'Plugin uninstall started');
 
     // Ask if the data should be removed, if not return
     if (get_option('chatbot_chatgpt_delete_data') != 'yes') {
@@ -71,11 +71,11 @@ function chatbot_chatgpt_uninstall(){
     if (get_option('chatbot_chatgpt_delete_data') == 'yes') {
     
         // Delete options
-        back_trace( 'NOTICE', 'Deleting options');
+        // back_trace( 'NOTICE', 'Deleting options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_chatgpt%'");
 
         // Delete tables
-        back_trace( 'NOTICE', 'Deleting tables');
+        // back_trace( 'NOTICE', 'Deleting tables');
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_conversation_log");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_interactions");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_knowledge_base");
@@ -83,11 +83,11 @@ function chatbot_chatgpt_uninstall(){
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_knowledge_base_word_count");
 
         // Delete transients
-        back_trace( 'NOTICE', 'Deleting transients');
+        // back_trace( 'NOTICE', 'Deleting transients');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_chatgpt%' OR option_name LIKE '_transient_timeout_chatbot_chatgpt%'");
 
         // Delete any scheduled cron events
-        back_trace( 'NOTICE', 'Deleting cron events');
+        // back_trace( 'NOTICE', 'Deleting cron events');
         $crons = _get_cron_array();
         foreach ($crons as $timestamp => $cron) {
             foreach ($cron as $hook => $events) {
@@ -100,13 +100,13 @@ function chatbot_chatgpt_uninstall(){
         }
 
         // Delete the cron event called "knowledge_navigator_scan_hook"
-        back_trace( 'NOTICE', 'Deleting cron event: knowledge_navigator_scan_hook');
+        // back_trace( 'NOTICE', 'Deleting cron event: knowledge_navigator_scan_hook');
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook');
 
     }
 
     // DIAG - Log the uninstall
-    back_trace( 'NOTICE', 'Plugin uninstall completed');
+    // back_trace( 'NOTICE', 'Plugin uninstall completed');
 
     return;
 }

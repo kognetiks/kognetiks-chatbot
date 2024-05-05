@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Upgrade the plugin
+ * Kognetiks Chatbot for WordPress - Upgrade the Plugin
  *
  * This file contains the code for upgrading the plugin.
  * It should run with the plugin is activated or updated.
@@ -181,7 +181,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_disclaimer_setting' );
         update_option( 'chatbot_chatgpt_disclaimer_setting', $chatbot_chatgpt_disclaimer_setting );
         // DIAG - Log the old option deletion
-        // back_trace('NOTICE', chatgpt_disclaimer_setting option deleted');
+        // back_trace('NOTICE', 'chatgpt_disclaimer_setting option deleted');
     }
 
     // Replace option - chatgpt_initial_greeting
@@ -298,4 +298,3 @@ function chatbot_chatgpt_upgrade() {
     return;
 
 }
-

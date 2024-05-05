@@ -34,7 +34,7 @@ if ( ! defined( 'WPINC' ) ) {
 //
 // The knowledge acquisition can be cancelled at any time.
 //
-// The knowledge acquisition is completed when all publised pages, posts and products have been analyzed.
+// The knowledge acquisition is completed when all published pages, posts and products have been analyzed.
 //
 // The batch acquisition can be run manually by clicking the setting the "Select Run Schedule" to "Now"
 // in the Chatbot Knowledge Navigator settings.
@@ -47,7 +47,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_kn_acquire_controller() {
 
     // Get the current action
-    $action = esc_attr( get_option( 'chatbot_chatgpt_kn_action', 'initialize' ) ); // Default to run to kickoff the process
+    $action = esc_attr( get_option( 'chatbot_chatgpt_kn_action', 'initialize' ) ); // Default to run to kick off the process
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
@@ -55,7 +55,7 @@ function chatbot_kn_acquire_controller() {
     switch ( $action ) {
         case 'initialize':
             // Initialize the knowledge acquisition process
-            chatbot_kn_initalization();
+            chatbot_kn_initialization();
             break;
         case 'phase 1':
             chatbot_kn_run_phase_1();
@@ -104,12 +104,12 @@ function chatbot_kn_acquire_controller() {
 add_action( 'chatbot_kn_acquire_controller', 'chatbot_kn_acquire_controller' );
 
 // Initialize the knowledge acquisition process
-function chatbot_kn_initalization() {
+function chatbot_kn_initialization() {
 
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_phase_1_initalization' );
+    // back_trace( 'NOTICE', 'chatbot_kn_phase_1_initialization' );
 
     // Since this is the first step, set the item count = 0
     update_option( 'chatbot_chatgpt_kn_item_count', 0 );
@@ -287,7 +287,7 @@ function chatbot_kn_run_phase_1() {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        //     // back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        
 
         // Directly use the post content
@@ -397,7 +397,7 @@ function chatbot_kn_run_phase_3() {
 
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', "Key: $key, Value: $value");
+        //     // back_trace( 'NOTICE', "Key: $key, Value: $value");
         // }        
 
         // Directly use the post content
@@ -597,7 +597,7 @@ function chatbot_kn_run_phase_6 () {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        //     // back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        
 
         // Directly use the post content
@@ -732,7 +732,7 @@ function chatbot_kn_output_the_results() {
         unlink($results_json_file);
     }
 
-    // Retrieve the list of words and the score for each word orded by score descending in the TF-IDF table
+    // Retrieve the list of words and the score for each word ordered by score descending in the TF-IDF table
     $results = $wpdb->get_results(
         "SELECT word, score FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base_tfidf ORDER BY score DESC"
     );
@@ -810,7 +810,7 @@ function chatbot_kn_wrap_up() {
 
     // FIXME - Drop the chatbot_chatgpt_knowledge_base_word_count table
     // DIAG - Diagnostics - Ver 1.9.6
-    back_trace ( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
+    // back_trace ( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
     dbKNClean();
 
     // Save the results message value into the option

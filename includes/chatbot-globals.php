@@ -2,8 +2,8 @@
 /**
  * Kognetiks Chatbot for WordPress - Globals - Ver 1.6.5
  *
- * This file contains the code for table actions for reporting
- * to display the Chatbot on the website.
+ * This file contains the code for global variables used
+ * by the program.
  *
  * @package chatbot-chatgpt
  */

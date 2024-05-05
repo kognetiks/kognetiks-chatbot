@@ -2,8 +2,8 @@
 /**
  * Kognetiks Chatbot for WordPress - Kflow API - Ver 1.9.5
  *
- * This file contains the code for table actions for reporting
- * to display the Chatbot on the website.
+ * This file contains the code accessing the Kflow API.
+ * 
  *
  * @package chatbot-chatgpt
  */
@@ -113,7 +113,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     // Context History
     addEntry('chatbot_chatgpt_context_history', $message);
 
-    // Add message to converation log
+    // Add message to conversation log
     // DIAG Diagnostics
     // back_trace( 'NOTICE', '$message: ' . $message);
 

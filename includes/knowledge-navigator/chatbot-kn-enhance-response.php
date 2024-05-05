@@ -70,7 +70,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     if (!empty($links)) {
 
         if ('no' == $include_title) {
-            // Formating: here, here, and here.
+            // Formatting: here, here, and here.
             $links_string = implode(", ", $links);
             $links_string = ltrim($links_string, ',');
             $links_string = $links_string . ".";

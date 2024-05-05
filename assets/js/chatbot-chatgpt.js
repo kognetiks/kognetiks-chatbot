@@ -348,7 +348,7 @@ jQuery(document).ready(function ($) {
         messageElement = $('<div></div>').addClass('chat-message');
 
         // Convert HTML entities back to their original form
-        var decodedMessage = $('<textarea/>').html(message).text();
+        let decodedMessage = $('<textarea/>').html(message).text();
 
         // Check if the message contains an audio tag
         if (decodedMessage.includes('<audio')) {
@@ -357,10 +357,10 @@ jQuery(document).ready(function ($) {
         }
 
         // Parse the HTML string
-        var parsedHtml = $.parseHTML(decodedMessage);
+        let parsedHtml = $.parseHTML(decodedMessage);
 
         // Create a new span element
-        var textElement = $('<span></span>');
+        let textElement = $('<span></span>');
 
         // Iterate over the parsed elements
         $.each(parsedHtml, function(i, el) {
@@ -646,7 +646,7 @@ jQuery(document).ready(function ($) {
             },
             success: function(response) {
                 if (response.success && response.data) {
-                    var link = document.createElement('a');
+                    let link = document.createElement('a');
                     link.href = response.data;
                     link.download = ''; // Optionally set the filename
                     document.body.appendChild(link);
