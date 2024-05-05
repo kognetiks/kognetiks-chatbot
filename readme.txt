@@ -206,23 +206,24 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 4. Floating Chatbot - Shortcode example
 5. Embedded Chatbot - Open example
 6. Embedded Chatbot - Shortcode example
-7. Mobile Chatbot - Minimized
-8. Mobile Chatbot - Open example
+7. Embedded Chatbot - With enhanced response
+8. Mobile Chatbot - Minimized
 9. Mobile Chatbot - Open example
-10. Mobile Chatbot - Table Minimized
-11. Mobile Chatbot - Table Open example
-12. Mobile Chatbot - Table Landscape example
-13. Chatbot Setting - Main settings
-14. Chatbot Setting - API/Model settings
-15. Chatbot Setting - GPT Assistant settings
-16. Chatbot Setting - Avatar settings
-17. Chatbot Setting - Appearance settings
-18. Chatbot Setting - Custom button settings
-19. Chatbot Setting - Knowledge Navigator settings
-20. Chatbot Setting - Knowledge Navigator Analysis settings
-21. Chatbot Setting - Reporting settings
-22. Chatbot Setting - Diagnostic settings
-23. Chatbot Setting - Support
+10. Mobile Chatbot - Open example
+11. Mobile Chatbot - Table Minimized
+12. Mobile Chatbot - Table Open example
+13. Mobile Chatbot - Table Landscape example
+14. Chatbot Setting - Main settings
+15. Chatbot Setting - API/Model settings
+16. Chatbot Setting - GPT Assistant settings
+17. Chatbot Setting - Avatar settings
+18. Chatbot Setting - Appearance settings
+19. Chatbot Setting - Custom button settings
+20. Chatbot Setting - Knowledge Navigator settings
+21. Chatbot Setting - Knowledge Navigator Analysis settings
+22. Chatbot Setting - Reporting settings
+23. Chatbot Setting - Diagnostic settings
+24. Chatbot Setting - Support
 
 == Changelog ==
 
