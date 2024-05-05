@@ -461,7 +461,7 @@ jQuery(document).ready(function ($) {
         // Links
         markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
     
-        // Lists - You would need to refine this for nested lists
+        // Lists - Needs refining for nested lists
         markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
                            .replace(/<\/li><li>/g, '</li>\n<li>')
                            .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>')
