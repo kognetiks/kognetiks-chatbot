@@ -304,14 +304,10 @@ function chatbot_chatgpt_delete_audio_file_id( $file_id ) {
 
     // Set a transient that expires in 2 hours
     $timeFrameForDelete = time() + 2 * 60 * 60;
-    // FIXME - Override the transient to expire in 2 minutes
-    $timeFrameForDelete = time() + 2 * 60;
     set_transient('chatbot_chatgpt_delete_audio_file_' . $file_id, $file_id, $timeFrameForDelete);
 
     // Set a cron job to delete the file in 1 hour 45 minutes
     $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
-    // FIXME - Override the cron job to delete the file in 1 minute 45 seconds
-    $shorterTimeFrameForDelete = time() + 1 * 60 + 45;
     if (!wp_next_scheduled('delete_audio_file', $file_id)) {
         wp_schedule_single_event($shorterTimeFrameForDelete, 'chatbot_chatgpt_delete_audio_file', array($file_id));
     }

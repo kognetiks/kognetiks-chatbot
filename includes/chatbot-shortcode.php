@@ -128,7 +128,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
             back_trace('NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
         } else {
-            back_trace('ERROR', 'Invalid display style' . $atts['style']);
+            back_trace('ERROR', 'Invalid display style: ' . $atts['style']);
         }
     }
 
@@ -182,12 +182,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         $script_data_array['model'] = $model;
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace('NOTICE', 'Model not passed as a parameter: ' . $model);
+        back_trace('NOTICE', 'Model (defaulting): ' . $model);
     } else {
         $model = sanitize_text_field($atts['model']);
         $script_data_array['model'] = $model;
         // DIAG - Diagnostics - Ver 1.9.4
-        back_trace('NOTICE', 'Model passed as a parameter: ' . $model);
+        back_trace('NOTICE', 'Model: ' . $model);
     }
 
     // Validate and sanitize the voice parameter - Ver 1.9.9
@@ -199,11 +199,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             $voice = $sanitized_voice;
             back_trace('NOTICE', '$voice: ' . $voice);
         } else {
-            back_trace('ERROR', 'Invalid voice: ' . $sanitized_voice);
+            $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+            back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
         }
     } else {
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
-        back_trace('NOTICE', 'Voice not passed as a parameter: ' . $voice);
+        back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
     }
     $script_data_array['voice'] = $voice;
 
@@ -337,13 +338,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_transient('kflow_sequence', $sequence_id);
         set_transient('kflow_step', 0);
 
-        // FIXME - REMOVED 2024 04 01
-        // FIXME - REPLACED BY TRANSIENTS - Ver 1.9.5
-        // Setup the sequence
-        // $script_data_array['sequence_id'] = $sequence_id;
-        // $script_data_array['next_step'] = 1;
-        // $script_data_array['total_steps'] = count($kflow_data['Steps']);
-
         // Set transients
         set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id);
         set_chatbot_chatgpt_transients('kflow_step', 0, null, null, $session_id);
@@ -356,23 +350,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
         // back_trace( 'NOTICE', '$kflow_prompt: ' . $kflow_prompt);
 
-        // FIXME - REMOVED 2024 04 01
-        // Add +1 to the next step
-        // $script_data_array['next_step'] = $script_data_array['next_step'] + 1;
-
+        // A prompt was returned
         if ( $kflow_prompt != '' ) {
-
-            // FIXME - REMOVED 2024 04 01
-            // Set up the sequence
-            // set_transient('kflow_sequence', $sequence_id);
-            // set_transient('kflow_step', 0);
-
-            // FIXME - REMOVED 2024 04 01
-            // FIXME - REPLACED BY TRANSIENTS - Ver 1.9.5
-            // Setup the sequence
-            // $script_data_array['sequence_id'] = $sequence_id;
-            // $script_data_array['next_step'] = 1;
-            // $script_data_array['total_steps'] = count($kflow_data['Steps']);
 
             // Set transients
             set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id);

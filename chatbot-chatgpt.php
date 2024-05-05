@@ -440,9 +440,10 @@ function chatbot_chatgpt_send_message(): void {
             // DIAG - Diagnostics
             // back_trace ( 'NOTICE', 'Model set in global: ' . $model);
         } else {
-            // FIXME - I SHOULDN'T BE FALLING THRU HERE - DO NOTHING
+
             // DIAG - Diagnostics
             // back_trace ( 'ERROR', 'Model not set!!!');
+            wp_send_json_error('Invalid Model. Please set the model in the plugin settings.');
         }
     }
 
@@ -452,10 +453,9 @@ function chatbot_chatgpt_send_message(): void {
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
-    // FIXME - ADD THIS BACK IN AFTER DECIDING WHAT TO DO ABOUT MISSING OR BAD API KEYS
-    // Check API key and message
+    // Check for missing API key or Message
     if (!$api_key || !$message) {
-        wp_send_json_error('Invalid API key or message');
+        wp_send_json_error('Invalid API key or Message. Please check the plugin settings.');
     }
 
     // Removed in Ver 1.8.6 - 2024 02 15
