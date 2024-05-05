@@ -116,7 +116,7 @@ function chatbot_kn_initialization() {
 
     // Define the batch size
     // FIXME - This should be set in the settings and default to 100
-    update_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    update_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
 
     // Reset the chatbot_chatgpt_knowledge_base table
     dbKNStore();
@@ -231,7 +231,7 @@ function chatbot_kn_run_phase_1() {
     // Get the item count
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = get_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
     $no_of_items_analyzed = get_option('no_of_items_analyzed', 0);
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -336,7 +336,7 @@ function chatbot_kn_run_phase_3() {
     // Get the item count
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = get_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
     $no_of_items_analyzed = get_option('no_of_items_analyzed', 0);
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -520,7 +520,7 @@ function chatbot_kn_run_phase_5 () {
 
     // Define the batch size
     // FIXME - This should be set in the settings and default to 100
-    update_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    update_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
 
     // chatbot_kn_schedule_batch_acquisition();
     update_option( 'chatbot_chatgpt_kn_action', 'phase 6' );
@@ -541,7 +541,7 @@ function chatbot_kn_run_phase_6 () {
     // Get the item count
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = get_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
     $no_of_items_analyzed = get_option('no_of_items_analyzed', 0);
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -814,7 +814,7 @@ function chatbot_kn_wrap_up() {
     dbKNClean();
 
     // Save the results message value into the option
-    $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';
+    $kn_results = 'Knowledge Navigator completed! Visit the plugin settings Analysis tab to download the results.';
     update_option('chatbot_chatgpt_kn_results', $kn_results);
 
     // Notify outcome for up to 3 minutes
