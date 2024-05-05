@@ -2,8 +2,8 @@
 /**
  * Kognetiks Chatbot for WordPress - ChatGPT TTS API - Ver 1.9.4
  *
- * This file contains the code for generating images using the 
- * the DALL-2 or DALL-3 API.
+ * This file contains the code for generating images using
+ * the text-to-speech API.
  *
  * @package chatbot-chatgpt
  */
@@ -248,7 +248,7 @@ function chatbot_chatgpt_read_aloud($message) {
     global $model;
     global $voice;
 
-    // FIXME - GET THE DEFULT TEXT-TO-SPEECH API KEY
+    // FIXME - GET THE DEFAULT TEXT-TO-SPEECH API KEY
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
     // Get the text to be read aloud
@@ -304,16 +304,12 @@ function chatbot_chatgpt_delete_audio_file_id( $file_id ) {
 
     // Set a transient that expires in 2 hours
     $timeFrameForDelete = time() + 2 * 60 * 60;
-    // FIXME - Override the transient to expire in 2 minutes
-    // $timeFrameForDelete = time() + 2 * 60;
     set_transient('chatbot_chatgpt_delete_audio_file_' . $file_id, $file_id, $timeFrameForDelete);
 
     // Set a cron job to delete the file in 1 hour 45 minutes
     $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
-    // FIXME - Override the cron job to delete the file in 1 minute 45 seconds
-    // $shorterTimeFrameForDelete = time() + 1 * 60 + 45;
     if (!wp_next_scheduled('delete_audio_file', $file_id)) {
-        wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_audio_file', array($file_id));
+        wp_schedule_single_event($shorterTimeFrameForDelete, 'chatbot_chatgpt_delete_audio_file', array($file_id));
     }
 
 }
@@ -328,26 +324,51 @@ function deleteAudioFile($file_id) {
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
-    // back_trace( 'NOTICE', 'Delete the audio file: ' . $file_id);
+    // back_trace( 'NOTICE', 'Delete the audio file: ' . print_r($file_id, true));
 
-    // Which file on the server
-    // $audio_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/';
-    // $audio_file = $audio_dir_path . $file_id;
-    // Now delete the file
-    if (file_exists($file_id)) {
-        unlink($file_id);
+    // Generate directory path
+    $audio_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/';
+    // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
+
+    // Create directory if it doesn't exist
+    if (!file_exists($audio_dir_path)) {
+        mkdir($audio_dir_path, 0755, true);
     }
-    
-    // if ($http_status_code == 200 || $http_status_code == 204) {
-    //     // DIAG - Diagnostics - Ver 1.7.9
-    //     // back_trace( 'SUCCESS', "File deleted successfully.\n");
-    // } else {
-    //     // If the request was not successful, you may want to handle it differently,
-    //     // such as logging an error or retrying the request.
-    //     // DIAG - Diagnostics - Ver 1.7.9
-    //     // back_trace( 'ERROR', "HTTP status code: $http_status_code\n");
-    //     // back_trace( 'ERROR', "Response: $response\n");
-    // }
+
+    // Strip off just the file name
+    $file_id = basename($file_id);
+
+    // Add the $audio_dir_path to the $file_id
+    $file_id = $audio_dir_path . $file_id;
+
+    // Check if the file exists
+    if (!file_exists($file_id)) {
+        // DIAG - Diagnostics - Ver 1.9.9
+        // back_trace( 'ERROR', 'File does not exist: ' . $file_id);
+        return;
+    }
+
+    // Try to delete the file
+    if (!unlink($file_id)) {
+        // DIAG - Diagnostics - Ver 1.9.9
+        // back_trace( 'ERROR', 'Failed to delete file: ' . $file_id);
+        return;
+    }
+
+    // DIAG - Diagnostics - Ver 1.9.9
+    // back_trace( 'NOTICE', 'File deleted: ' . $file_id);
 
 }
-add_action( 'delete_audio_file', 'deleteAudioFile' );
+add_action( 'chatbot_chatgpt_delete_audio_file', 'deleteAudioFile' );
+
+// Delete old audio files - Ver 1.9.9
+function chatbot_chatgpt_cleanup_old_audio_files() {
+    $audio_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/';
+    foreach (glob($audio_dir . '*') as $file) {
+        // Delete files older than 1 hour
+        if (filemtime($file) < time() - 60 * 60 * 1) {
+            unlink($file);
+        }
+    }
+}
+add_action('chatbot_chatgpt_cleanup_audio_files', 'chatbot_chatgpt_cleanup_old_audio_files');

@@ -242,6 +242,19 @@
     background-color: #dcdcdc !important;    
 }
 
+#chatbot-chatgpt-download-transcript-btn:hover {
+    background-color: #dcdcdc !important; 
+}
+
+#chatbot-chatgpt-download-transcript-btn {
+    background-color: #f1f1f1;
+    border: none;
+    border-radius: 1px;
+    padding: 1px 1px;
+    margin-left: 1px;
+    cursor: pointer;
+}
+
 /* CSS for append message */
 .chat-message {
     margin: 5px;

@@ -90,6 +90,27 @@ function create_conversation_logging_table(): void {
     // Check if the table already exists
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
+    if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
+        // DIAG - Diagnostics
+        // back_trace('NOTICE', 'Table already exists: ' . $table_name);
+
+        if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'assistant_name')) === 'assistant_name') {
+            // DIAG - Diagnostics
+            // back_trace('NOTICE', 'Column user_type already exists in table: ' . $table_name);
+        } else {
+            // Directly execute the ALTER TABLE command without prepare()
+            $sql = "ALTER TABLE $table_name ADD COLUMN assistant_name VARCHAR(255) AFTER assistant_id";
+            $result = $wpdb->query($sql);
+            if ($result === false) {
+                // If there was an error, log it
+                // back_trace('ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+            } else {
+                // If the operation was successful, log the success
+                // back_trace('SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
+            }
+        }
+    }
+
     // Check if the table already exists
     if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
         // DIAG - Diagnostics
@@ -132,7 +153,7 @@ function create_conversation_logging_table(): void {
             }
         }
         
-        // DIAG - Diagnostics
+        // DIAG - Diagnostics - Ver 1.9.9
         // back_trace('SUCCESS', 'Successfully updated chatbot_chatgpt_conversation_log table');
 
     } else {
@@ -184,12 +205,15 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
         return;
     }
 
-        // Belt & Suspenders - Ver 1.9.3 - 20224 03 18
+    // Belt & Suspenders - Ver 1.9.3 - 20224 03 18
     // Cannot have a partial user_id based on the number value of the session_id - it trims it
     // 9ae6a5ebfacc3df8015a42d01bb25fbe becomes 9 - UGH!
     if ( $user_id == $session_id ) {
         $user_id = 0;
     }
+
+    // Get the $assistant_name from the transient
+    $assistant_name = get_chatbot_chatgpt_transients('assistant_name', $user_id, $page_id);
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
@@ -203,6 +227,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
             'user_type' => $user_type,
             'thread_id' => $thread_id,
             'assistant_id' => $assistant_id,
+            'assistant_name' => $assistant_name,
             'message_text' => $message
         ),
         array(

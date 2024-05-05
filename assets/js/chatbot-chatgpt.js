@@ -348,7 +348,7 @@ jQuery(document).ready(function ($) {
         messageElement = $('<div></div>').addClass('chat-message');
 
         // Convert HTML entities back to their original form
-        var decodedMessage = $('<textarea/>').html(message).text();
+        let decodedMessage = $('<textarea/>').html(message).text();
 
         // Check if the message contains an audio tag
         if (decodedMessage.includes('<audio')) {
@@ -357,10 +357,10 @@ jQuery(document).ready(function ($) {
         }
 
         // Parse the HTML string
-        var parsedHtml = $.parseHTML(decodedMessage);
+        let parsedHtml = $.parseHTML(decodedMessage);
 
         // Create a new span element
-        var textElement = $('<span></span>');
+        let textElement = $('<span></span>');
 
         // Iterate over the parsed elements
         $.each(parsedHtml, function(i, el) {
@@ -461,7 +461,7 @@ jQuery(document).ready(function ($) {
         // Links
         markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
     
-        // Lists - You would need to refine this for nested lists
+        // Lists - Needs refining for nested lists
         markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
                            .replace(/<\/li><li>/g, '</li>\n<li>')
                            .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>')
@@ -485,10 +485,8 @@ jQuery(document).ready(function ($) {
 
     submitButton.on('click', function () {
         
-        // showTypingIndicator();
-
         message = messageInput.val().trim();
-        console.log('Chatbot: NOTICE: Message: ' + message);
+        // console.log('Chatbot: NOTICE: Message: ' + message);
 
         if (!message) {
             return;
@@ -519,7 +517,7 @@ jQuery(document).ready(function ($) {
 
         // Check to see if the message starts with [Chatbot] - Ver 1.9.5
         if (message.startsWith('[Chatbot]')) {
-            console.log('Chatbot: NOTICE: Message starts with [Chatbot]');
+            // console.log('Chatbot: NOTICE: Message starts with [Chatbot]');
             input_type = 'chatbot';
         }
           
@@ -599,10 +597,6 @@ jQuery(document).ready(function ($) {
             },
             cache: false, // This ensures jQuery does not cache the result
         });
-
-        // Belt & Suspenders - Ver 1.8.6
-        // removeTypingIndicator();
-
     });
     
     // Add the keydown event listener to the message input - Ver 1.7.6
@@ -618,22 +612,77 @@ jQuery(document).ready(function ($) {
         if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
             // console.log('Chatbot: NOTICE: Enter key pressed on upload file button');
-            $response = chatbot_chatgpt_upload_file_to_assistant();
+            let $response = chatbot_chatgpt_upload_file_to_assistant();
             $('#chatbot-chatgpt-upload-file-input').click();
+            let button = $(this);  // Store a reference to the button
+            setTimeout(function() {
+                button.blur();  // Remove focus from the button
+            }, 0);
         }
+    });
+
+    // Add the click event listener to the download transcript button - Ver 1.9.9
+    $('#chatbot-chatgpt-download-transcript-btn').on('click', function(e) {
+        e.preventDefault();  // Prevent the default action of the button (if needed)
+        // console.log('Button clicked: Downloading transcript');  // Optional: Log to console
+    
+        let conversationContent = $('#chatbot-chatgpt-conversation').html();  // Get the HTML content
+        let button = $(this);  // Store a reference to the button
+    
+        $.ajax({
+            url: chatbot_chatgpt_params.ajax_url,  // URL to WordPress AJAX handler
+            method: 'POST',
+            data: {
+                action: 'chatbot_chatgpt_download_transcript',
+                user_id: php_vars.user_id,
+                page_id: php_vars.page_id,
+                conversation_content: conversationContent  // Send the conversation content
+            },
+            beforeSend: function () {
+                // Show typing indicator and disable submit button
+                // Replace these functions with your own
+                showTypingIndicator();
+                $('#submit-button').prop('disabled', true);
+            },
+            success: function(response) {
+                if (response.success && response.data) {
+                    let link = document.createElement('a');
+                    link.href = response.data;
+                    link.download = ''; // Optionally set the filename
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    // console.error('Error: Download URL not provided or error in response.');
+                    // console.error(response.data || 'No additional error data.');
+                    appendMessage('Oops! There was a problem downloading the transcript. Please try again later.', 'error');
+                }
+            },
+            error: function(jqXHR, status, error) {
+                // Handle AJAX errors
+                appendMessage('Error: ' + error, 'error');
+                appendMessage('Oops! There was a problem downloading the transcript. Please try again late.', 'error');
+            },
+            complete: function () {
+                // Remove typing indicator and enable submit button
+                // Replace these functions with your own
+                removeTypingIndicator();
+                $('#submit-button').prop('disabled', false);
+                button.blur();  // Remove focus from the button
+            },
+        });
     });
 
     // Read Out Loud - Ver 1.9.5
     $('#chatbot-chatgpt-text-to-speech-btn').on('click', function(e) {
 
-        console.log('Chatbot: NOTICE: Text-to-Speech button clicked');
-
-        // showTypingIndicator();
+        // console.log('Chatbot: NOTICE: Text-to-Speech button clicked');
 
         // Read out loud the last bot response
         let lastMessage = $('#chatbot-chatgpt-conversation .bot-message:last .bot-text').text();
+        let button = $(this);  // Store a reference to the button
 
-        console.log('Chatbot: NOTICE: lastMessage: ' + lastMessage);
+        // console.log('Chatbot: NOTICE: lastMessage: ' + lastMessage);
 
         // Check if the bot response is empty
         if (!lastMessage) {
@@ -676,17 +725,14 @@ jQuery(document).ready(function ($) {
             complete: function () {
                 removeTypingIndicator();
                 submitButton.prop('disabled', false);
+                button.blur();  // Remove focus from the button
             },
         });
-
-        // removeTypingIndicator();
-
     });
 
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
+
         // console.log('Chatbot: NOTICE: File selected');
-      
-        // showTypingIndicator();
         
         let fileField = e.target;
     
@@ -744,8 +790,6 @@ jQuery(document).ready(function ($) {
     $('#chatbot-chatgpt-erase-btn').on('click', function() {
 
         // console.log('Chatbot: NOTICE: Erase conversation selected');
-        
-        // showTypingIndicator();
 
         let user_id = php_vars.user_id;
         let page_id = php_vars.page_id;
@@ -797,9 +841,6 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', false);
             },
         });
-
-        // Belt & Suspenders - Ver 1.8.6
-        // removeTypingIndicator();
        
     });
     
@@ -980,7 +1021,7 @@ jQuery(document).ready(function ($) {
 
     // Detect mobile device - Ver 1.8.1
     function isMobile() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 800);
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Silk|Kindle|Symbian/i.test(navigator.userAgent) || (window.innerWidth <= 800);
     }
 
     function updateChatbotStyles() {

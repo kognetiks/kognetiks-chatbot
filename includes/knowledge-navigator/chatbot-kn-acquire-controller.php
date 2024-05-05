@@ -34,7 +34,7 @@ if ( ! defined( 'WPINC' ) ) {
 //
 // The knowledge acquisition can be cancelled at any time.
 //
-// The knowledge acquisition is completed when all publised pages, posts and products have been analyzed.
+// The knowledge acquisition is completed when all published pages, posts and products have been analyzed.
 //
 // The batch acquisition can be run manually by clicking the setting the "Select Run Schedule" to "Now"
 // in the Chatbot Knowledge Navigator settings.
@@ -47,7 +47,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_kn_acquire_controller() {
 
     // Get the current action
-    $action = esc_attr( get_option( 'chatbot_chatgpt_kn_action', 'initialize' ) ); // Default to run to kickoff the process
+    $action = esc_attr( get_option( 'chatbot_chatgpt_kn_action', 'initialize' ) ); // Default to run to kick off the process
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
@@ -55,7 +55,7 @@ function chatbot_kn_acquire_controller() {
     switch ( $action ) {
         case 'initialize':
             // Initialize the knowledge acquisition process
-            chatbot_kn_initalization();
+            chatbot_kn_initialization();
             break;
         case 'phase 1':
             chatbot_kn_run_phase_1();
@@ -104,19 +104,19 @@ function chatbot_kn_acquire_controller() {
 add_action( 'chatbot_kn_acquire_controller', 'chatbot_kn_acquire_controller' );
 
 // Initialize the knowledge acquisition process
-function chatbot_kn_initalization() {
+function chatbot_kn_initialization() {
 
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_phase_1_initalization' );
+    // back_trace( 'NOTICE', 'chatbot_kn_phase_1_initialization' );
 
     // Since this is the first step, set the item count = 0
     update_option( 'chatbot_chatgpt_kn_item_count', 0 );
 
     // Define the batch size
     // FIXME - This should be set in the settings and default to 100
-    update_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    update_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
 
     // Reset the chatbot_chatgpt_knowledge_base table
     dbKNStore();
@@ -231,7 +231,7 @@ function chatbot_kn_run_phase_1() {
     // Get the item count
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = get_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
     $no_of_items_analyzed = get_option('no_of_items_analyzed', 0);
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -287,7 +287,7 @@ function chatbot_kn_run_phase_1() {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        //     // back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        
 
         // Directly use the post content
@@ -336,7 +336,7 @@ function chatbot_kn_run_phase_3() {
     // Get the item count
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = get_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
     $no_of_items_analyzed = get_option('no_of_items_analyzed', 0);
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -397,7 +397,7 @@ function chatbot_kn_run_phase_3() {
 
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', "Key: $key, Value: $value");
+        //     // back_trace( 'NOTICE', "Key: $key, Value: $value");
         // }        
 
         // Directly use the post content
@@ -520,7 +520,7 @@ function chatbot_kn_run_phase_5 () {
 
     // Define the batch size
     // FIXME - This should be set in the settings and default to 100
-    update_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    update_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
 
     // chatbot_kn_schedule_batch_acquisition();
     update_option( 'chatbot_chatgpt_kn_action', 'phase 6' );
@@ -541,7 +541,7 @@ function chatbot_kn_run_phase_6 () {
     // Get the item count
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = get_option('chatbot_kn_items_per_batch', 100); // Fetching 100 items at a time
+    $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
     $no_of_items_analyzed = get_option('no_of_items_analyzed', 0);
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -597,7 +597,7 @@ function chatbot_kn_run_phase_6 () {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        //     // back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        
 
         // Directly use the post content
@@ -732,7 +732,7 @@ function chatbot_kn_output_the_results() {
         unlink($results_json_file);
     }
 
-    // Retrieve the list of words and the score for each word orded by score descending in the TF-IDF table
+    // Retrieve the list of words and the score for each word ordered by score descending in the TF-IDF table
     $results = $wpdb->get_results(
         "SELECT word, score FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base_tfidf ORDER BY score DESC"
     );
@@ -810,11 +810,11 @@ function chatbot_kn_wrap_up() {
 
     // FIXME - Drop the chatbot_chatgpt_knowledge_base_word_count table
     // DIAG - Diagnostics - Ver 1.9.6
-    back_trace ( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
+    // back_trace ( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
     dbKNClean();
 
     // Save the results message value into the option
-    $kn_results = 'Knowledge Navigation completed! Check the Analysis to download or results.csv file in the plugin directory.';
+    $kn_results = 'Knowledge Navigator completed! Visit the plugin settings Analysis tab to download the results.';
     update_option('chatbot_chatgpt_kn_results', $kn_results);
 
     // Notify outcome for up to 3 minutes

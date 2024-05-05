@@ -1,0 +1,74 @@
+<?php
+/**
+ * Kognetiks Chatbot for WordPress - Download Transcript - Ver 1.9.9
+ *
+ * This file contains the code for uploading files as part
+ * in support of Custom GPT Assistants via the Chatbot.
+ *
+ * @package chatbot-chatgpt
+ */
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
+
+function chatbot_chatgpt_download_transcript() {
+    if (!isset($_POST['user_id'], $_POST['page_id'], $_POST['conversation_content'])) {
+        wp_send_json_error('Missing required POST fields');
+        return;
+    }
+
+    $user_id = sanitize_text_field($_POST['user_id']);
+    $page_id = sanitize_text_field($_POST['page_id']);
+
+    // $conversation_content = sanitize_textarea_field($_POST['conversation_content']);
+
+    // Strip HTML tags from the conversation content and replace </div> with \n\n
+    $conversation_content = str_replace('</div>', "\n", $_POST['conversation_content']);
+    $conversation_content = wp_strip_all_tags($conversation_content);
+
+    // Define the path to the transcripts directory
+    $transcriptDir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
+
+    // Ensure directory exists or attempt to create it
+    if (!file_exists($transcriptDir)) {
+        wp_mkdir_p($transcriptDir);
+    }
+
+    // Create the filename
+    $transcriptFileName = 'transcript_' . date('Y-m-d_H-i-s') . '.txt';
+    $transcriptFile = $transcriptDir . $transcriptFileName;
+
+    // DIAG - Diagnostics - Ver 1.9.9
+    // back_trace( 'Notice', 'Transcript File: ' . $transcriptFile );
+
+    // Attempt to write the content to the file
+    if (file_put_contents($transcriptFile, $conversation_content) === false) {
+        wp_send_json_error('Failed to write to file');
+        return;
+    }
+
+    // Construct the URL for download
+    $url = plugins_url('transcripts/' . $transcriptFileName, CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-chatgpt');
+
+    // DIAG - Diagnostics - Ver 1.9.9
+    // back_trace( 'Notice', 'URL: ' . $url );
+
+    wp_send_json_success($url);
+
+}
+add_action('wp_ajax_chatbot_chatgpt_download_transcript', 'chatbot_chatgpt_download_transcript');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_download_transcript', 'chatbot_chatgpt_download_transcript');
+
+// Delete old transcripts - Ver 1.9.9   
+function chatbot_chatgpt_cleanup_old_transcripts() {
+    $transcripts_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
+    foreach (glob($transcripts_dir . '*') as $file) {
+        // Delete files older than 1 hour
+        if (filemtime($file) < time() - 60 * 60 * 1) {
+            unlink($file);
+        }
+    }
+}
+add_action('chatbot_chatgpt_cleanup_transcripts', 'chatbot_chatgpt_cleanup_old_transcripts');

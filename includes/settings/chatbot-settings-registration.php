@@ -26,6 +26,7 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions_alternate'); // Alternate Assistant - Ver 1.9.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_beta_version'); // Beta Assistant - Ver 1.9.3
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_thread_retention_period'); // Thread Retention Period - Ver 1.9.9
 
     add_settings_section(
         'chatbot_chatgpt_custom_gpts_section',
@@ -95,6 +96,15 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_custom_gpts_section'
     );
 
+    // Thread Retention Period - Ver 1.9.9
+    add_settings_field(
+        'chatbot_chatgpt_thread_retention_period',
+        'Thread Retention Period (hrs)',
+        'chatbot_chatgpt_thread_retention_period_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
     add_settings_field(
         'chatbot_chatgpt_assistant_beta_version',
         'Beta Assistant Version',
@@ -114,6 +124,7 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_diagnostics');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_input_rows');
 
     add_settings_section(
         'chatbot_chatgpt_settings_section',
@@ -188,15 +199,14 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_settings_section'
     );
 
-    // Moved to Appearance tab in Ver 1.8.1
-    // Option to change the width of the bot from narrow to wide - Ver 1.4.2
-    // add_settings_field(
-    //     'chatbot_chatgpt_width_setting',
-    //     'Chatbot Width Setting',
-    //     'chatbot_chatgpt_width_setting_callback',
-    //     'chatbot_chatgpt_settings',
-    //     'chatbot_chatgpt_settings_section'
-    // );
+    // Input rows setting - Ver 1.9.9
+    add_settings_field(
+        'chatbot_chatgpt_input_rows',
+        'Input Rows',
+        'chatbot_chatgpt_input_rows_callback',
+        'chatbot_chatgpt_settings',
+        'chatbot_chatgpt_settings_section'
+    );
 
     // Diagnostics settings tab - Ver 1.6.5
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
@@ -205,6 +215,7 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_learnings');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_learnings_message');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_delete_data');
 
     add_settings_section(
         'chatbot_chatgpt_diagnostics_section',
@@ -263,6 +274,15 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_suppress_attribution',
         'Suppress Attribution',
         'chatbot_chatgpt_suppress_attribution_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to delete data on uninstall - Ver 1.9.9
+    add_settings_field(
+        'chatbot_chatgpt_delete_data',
+        'Delete Plugin Data on Uninstall',
+        'chatbot_chatgpt_delete_data_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
     );

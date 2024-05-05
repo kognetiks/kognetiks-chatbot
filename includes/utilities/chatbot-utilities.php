@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Check for device type
 function is_mobile_device() {
     $user_agent = $_SERVER['HTTP_USER_AGENT'];
-    $mobile_agents = array('Mobile', 'Android', 'Silk/', 'Kindle', 'BlackBerry', 'Opera Mini', 'Opera Mobi');
+    $mobile_agents = array('Mobile', 'Android', 'Silk/', 'Kindle', 'BlackBerry', 'Opera Mini', 'Opera Mobi', 'iPhone', 'iPad', 'iPod', 'Windows Phone', 'webOS', 'Symbian', 'IEMobile');
 
     foreach ($mobile_agents as $device) {
         if (strpos($user_agent, $device) !== false) {
@@ -25,6 +25,7 @@ function is_mobile_device() {
     }
 
     return false; // Not a mobile device
+
 }
 
 // Dump DB options to file
@@ -76,3 +77,4 @@ function can_use_curl_for_file_protocol() {
     return $result;
     
 }
+

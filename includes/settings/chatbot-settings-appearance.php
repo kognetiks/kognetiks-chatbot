@@ -240,7 +240,7 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
 
     // DIAG - Diagnostics - Ver 1.8.6
     // foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
-    //     back_trace( 'NOTICE', 'cssRule: ' . $cssRule);
+    //     // back_trace( 'NOTICE', 'cssRule: ' . $cssRule);
     // }
 
     // Inject the custom css settings

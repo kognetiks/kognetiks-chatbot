@@ -1,9 +1,9 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Upgrade the kognetiks-chatbot plugin
+ * Kognetiks Chatbot for WordPress - Upgrade the Plugin
  *
  * This file contains the code for upgrading the plugin.
- * It should run with the plugin is activated, deactivated, or updated.
+ * It should run with the plugin is activated or updated.
  *
  * @package chatbot-chatgpt
  */
@@ -24,36 +24,6 @@ function chatbot_chatgpt_activate() {
 
     // DIAG - Log the activation
     // back_trace( 'NOTICE', 'Plugin activation completed');
-
-    return;
-
-}
-
-// Deactivation Hook - Revised 1.7.6
-function chatbot_chatgpt_deactivate() {
-
-    // DIAG - Log the activation
-    // back_trace( 'NOTICE', 'Plugin deactivation started');
-
-    // Logic to run during deactivation
-    // FIXME - THIS IS NOT DELETING THE PLUGIN - JUST DEACTIVATION
-
-    // FIXME - Asked what data should be removed
-    // 
-    // DB - chatbot_chatgpt_conversation_log
-    // DB - chatbot_chatgpt_interactions
-    // DB - chatbot_chatgpt_knowledge_base
-    // DB - chatbot_chatgpt_knowledge_base_tfidf
-
-    // FIXME - Asked what transients should be removed
-    // 
-
-    // FIXME - Asked what options should be removed
-    //
-    // OPTIONS - *chatbot_chatgpt*
-
-    // DIAG - Log the activation
-    // back_trace( 'NOTICE', 'Plugin deactivation completed');
 
     return;
 
@@ -211,7 +181,7 @@ function chatbot_chatgpt_upgrade() {
         delete_option( 'chatgpt_disclaimer_setting' );
         update_option( 'chatbot_chatgpt_disclaimer_setting', $chatbot_chatgpt_disclaimer_setting );
         // DIAG - Log the old option deletion
-        // back_trace('NOTICE', chatgpt_disclaimer_setting option deleted');
+        // back_trace('NOTICE', 'chatgpt_disclaimer_setting option deleted');
     }
 
     // Replace option - chatgpt_initial_greeting
@@ -302,6 +272,15 @@ function chatbot_chatgpt_upgrade() {
         // DIAG - Log the old option deletion
         // back_trace('NOTICE', 'chatGPTChatBotStatusNewVisitor option deleted');
     }
+
+    // Replace option - chatbot_kn_items_per_batch
+    if (get_option( 'chatbot_kn_items_per_batch' )) {
+        $chatbot_chatgpt_kn_items_per_batch = get_option( 'chatbot_kn_items_per_batch' );
+        delete_option( 'chatbot_kn_items_per_batch' );
+        update_option( 'chatbot_chatgpt_kn_items_per_batch', $chatbot_chatgpt_kn_items_per_batch );
+        // DIAG - Log the old option deletion
+        // back_trace('NOTICE', 'chatbot_kn_items_per_batch option deleted');
+    }
     
     // FIXME - DETERMINE WHAT OTHER 'OLD' OPTIONS SHOULD BE DELETED
     // FIXME - DETERMINE WHAT OPTION NAMES NEED TO BE CHANGED (DELETE, THEN REPLACE)
@@ -327,28 +306,4 @@ function chatbot_chatgpt_upgrade() {
 
     return;
 
-}
-
-// Upgrade Logic - Revised 1.7.6
-function chatbot_chatgpt_uninstall(){
-    
-        // DIAG - Log the uninstall
-        // back_trace( 'NOTICE', 'Plugin uninstall started');
-    
-        // Remove obsolete or replaced options
-        // FIXME - Ask what data should be removed
-        // TBD
-
-        // Remove tables
-        // FIXME - Ask what data should be removed
-        // TBD
-
-        // Remove transients
-        // FIXME - Ask what data should be removed
-        // TBD
-    
-        // DIAG - Log the uninstall
-        // back_trace( 'NOTICE', 'Plugin uninstall completed');
-
-        return;
 }

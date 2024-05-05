@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.5.2
-Stable tag: 1.9.8
+Stable tag: 1.9.9
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -202,29 +202,40 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 1. Floating Chatbot - Howdy!
 2. Floating Chatbot - Open example
-3. Floating Chatbot - Open with intereaction
+3. Floating Chatbot - Open with interaction
 4. Floating Chatbot - Shortcode example
 5. Embedded Chatbot - Open example
 6. Embedded Chatbot - Shortcode example
-7. Mobile Chatbot - Minimized
-8. Mobile Chatbot - Open example
+7. Embedded Chatbot - With enhanced response
+8. Mobile Chatbot - Minimized
 9. Mobile Chatbot - Open example
-10. Mobile Chatbot - Table Minimized
-11. Mobile Chatbot - Table Open example
-12. Mobile Chatbot - Table Landscape example
-13. Chatbot Setting - Main settings
-14. Chatbot Setting - API/Model settings
-15. Chatbot Setting - GPT Assistant settings
-16. Chatbot Setting - Avatar settings
-17. Chatbot Setting - Appearance settings
-18. Chatbot Setting - Custom button settings
-19. Chatbot Setting - Knowledge Navigator settings
-20. Chatbot Setting - Knowledge Navigator Analysis settings
-21. Chatbot Setting - Reporting settings
-22. Chatbot Setting - Diagnostic settings
-23. Chatbot Setting - Support
+10. Mobile Chatbot - Open example
+11. Mobile Chatbot - Table Minimized
+12. Mobile Chatbot - Table Open example
+13. Mobile Chatbot - Table Landscape example
+14. Chatbot Setting - Main settings
+15. Chatbot Setting - API/Model settings
+16. Chatbot Setting - GPT Assistant settings
+17. Chatbot Setting - Avatar settings
+18. Chatbot Setting - Appearance settings
+19. Chatbot Setting - Custom button settings
+20. Chatbot Setting - Knowledge Navigator settings
+21. Chatbot Setting - Knowledge Navigator Analysis settings
+22. Chatbot Setting - Reporting settings
+23. Chatbot Setting - Diagnostic settings
+24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 1.9.9 =
+* Improved the chatbot's response using bullet points for clarity
+* Included titles along with the links to relevant posts, pages, and products to better inform what it's the links about
+* Added thread retention periods (default = 36 hours with 720 hours or 30 days) for Assistant conversation continuity
+* Added either the chatbot name or the assistant name to the conversation log
+* Upgraded conversation history shortcode (see Support for details [chatbot_chatgpt_history]) include the assistant or chatbot's name
+* Added option to download transcript to text file on chatter's computer
+* Added option to set the number of rows for chatter's message input - from 1 to 10 rows
+* Comprehensive cleanup upon uninstalling the plugin
 
 = 1.9.8 =
 * Wrap shortcode examples with a code tag
@@ -240,7 +251,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Enhanced responses are links to your site's pages, posts, and products with the highest match to visitor input
 * Added an option to select either v1: OpenAI-Beta: assistants=v1 or v2: OpenAI-Beta: assistants=v2 (v2 is the default)
 * See [OpenAI Migration Guide](https://platform.openai.com/docs/assistants/migration/accessing-v1-data-in-v2) for details on what is changing
-* Added a daily chatbot message limit, defaults to 999 daily messages, resets daily.  See Chatbot Settings > Chatbot Daily Mesage Limit
+* Added a daily chatbot message limit, defaults to 999 daily messages, resets daily.  See Chatbot Settings > Chatbot Daily Message Limit
 
 = 1.9.5 =
 * Added voice options including: Allow, Echo, Fable, Onyx, Nova, and Shimmer
@@ -259,7 +270,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Additional instructions can be included to send with user prompts
 * See Settings > GPT Assistants > Assistant Instructions and Alternate Assistant Instructions
 * Improved conversation clearing (trashcan)
-* Improved interpage handling of conversations
+* Improved inter-page handling of conversations
 
 = 1.9.2 =
 * Enabled multiple file uploads to Assistants
@@ -270,7 +281,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 = 1.9.1 =
 * Knowledge Navigator now allows for including/excluding posts, pages, products and/or comments.
 * Knowledge Navigator only consider published posts and pages, and only consider approved comments.
-* Added an option to call the chatbot with a 'hot prompt' that will kickoff a chat session based on the supplied prompt
+* Added an option to call the chatbot with a 'hot prompt' that will kick off a chat session based on the supplied prompt
 * Use a shortcode with this format: [chatbot prompt="What happened on this day in history?"]
 * Hot prompts can be used with floating/embedded and with assistants, i.e., where ever you can add a shortcode.
 

@@ -1,9 +1,9 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Custom GPT - Ver 1.6.9
+ * Kognetiks Chatbot for WordPress - Assistants - Ver 1.6.9
  *
- * This file contains the code for table actions for reporting
- * to display the Chatbot on the website.
+ * This file contains the code for access the OpenAI Assistants API.
+ * 
  *
  * @package chatbot-chatgpt
  */
@@ -433,8 +433,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // $page_id = get_the_id();
 
     // DIAG - Diagnostics - Ver 1.9.1
-    // back_trace( 'NOTICE', 'LINE 327 $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'LINE 328 $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     
     $script_data_array = array(
         'user_id' => $user_id,
@@ -603,7 +603,7 @@ function fetchDataUsingCurl($url, $context) {
 }
 
 // Retrieve the first file id - Ver 1.9.2
-function chatbot_chatgpt_retrieve_file_id() {
+function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id) {
 
     global $session_id;
     global $user_id;

@@ -93,3 +93,17 @@ function chatbot_chatgpt_audience_choice_callback($args) {
     </select>
     <?php
 }
+
+// Input Rows - Ver 1.9.9
+function chatbot_chatgpt_input_rows_callback($args) {
+    $chatbot_chatgpt_input_rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
+    // A picklist with a number between 1 and 10
+    ?>
+    <select id="chatbot_chatgpt_input_rows" name="chatbot_chatgpt_input_rows">
+        <?php
+        for ($i = 1; $i <= 10; $i++) {
+            echo '<option value="' . $i . '" ' . selected( $chatbot_chatgpt_input_rows, $i ) . '>' . $i . '</option>';
+        }
+        ?>
+    <?php
+}

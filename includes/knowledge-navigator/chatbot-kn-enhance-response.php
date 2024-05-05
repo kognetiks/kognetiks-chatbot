@@ -36,11 +36,11 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     foreach ($words as $word) {
         $word = rtrim($word, "s.,;:!?");
-        $query = $wpdb->prepare("SELECT score, url FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT $limit", $word);
+        $query = $wpdb->prepare("SELECT score, url, title FROM $table_name WHERE word = %s ORDER BY score DESC LIMIT $limit", $word);
         $rows = $wpdb->get_results($query);
         if (!$wpdb->last_error && !empty($rows)) {
             foreach ($rows as $row) {
-                $results[] = ['score' => $row->score, 'url' => $row->url];
+                $results[] = ['score' => $row->score, 'url' => $row->url, 'title' => $row->title];
             }
         }
     }
@@ -54,16 +54,30 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $results = array_slice($results, 0, $limit);
     $links = [];
 
+    // Option - Include Title in Enhanced Response
+    $include_title = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_title', 'yes'));
+    // FIXME - TEMPORARY - REMOVE THIS
+    // $include_title = 'no';
+
     foreach ($results as $result) {
-        $links[] = "[here](" . $result['url'] . ")";
+        if ('yes' == $include_title) {
+            $links[] = "<li>[" . $result['title'] . "](" . $result['url'] . ")</li>";
+        } else {
+            $links[] = "[here](" . $result['url'] . ")";
+        }
     }
 
     if (!empty($links)) {
 
-        // FIXME - ADD FORMATTING OPTION HERE, e.g. BULLET POINTS, NUMBERED LIST, etc.
-        $links_string = implode(", ", $links);
-        $links_string = ltrim($links_string, ',');
-        $links_string = $links_string . ".";
+        if ('no' == $include_title) {
+            // Formatting: here, here, and here.
+            $links_string = implode(", ", $links);
+            $links_string = ltrim($links_string, ',');
+            $links_string = $links_string . ".";
+        } else {
+            // Formatting: bullet list
+            $links_string = implode("", $links);
+        }
 
         // Determine the pre-message based on the settings
         if (get_locale() !== "en_US") {
@@ -82,7 +96,12 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         }
 
         // Append the links to the enhanced response
-        $enhanced_response .= $links_string;
+        if ('yes' == $include_title) {
+            $enhanced_response .= '<ul>' . $links_string . '</ul>';
+        } else {
+            $enhanced_response .= $links_string;
+        }
+
     }
 
     return !empty($enhanced_response) ? $enhanced_response : null;

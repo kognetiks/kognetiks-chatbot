@@ -49,7 +49,7 @@ function kn_enhance_context( $message ) {
         return substr($enhancedMessage, 0, 5) !== 'asst_' && !in_array($enhancedMessage, ['â', 'Ã¢', 'Ã°', 'Ã±', '']) && $enhancedMessage !== ' ';
     });
 
-    // Find matches in the knoweldge base
+    // Find matches in the knowledge base
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
     $results = [];
 

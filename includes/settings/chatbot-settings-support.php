@@ -110,7 +110,7 @@ function chatbot_chatgpt_support_section_callback() {
     <hr style="border-top: 2px solid black;">
     <div id=conversation-history>
         <h2>Conversation History</h2>
-        <p>You can now add a shortcode on your site to retrieve the logged in user’s conversation history.</p>
+        <p>You can now add a shortcode on your site to retrieve the logged-in user’s conversation history.</p>
         <p>Use the following format to invoke the conversation history anywhere you can include a shortcode:</p>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><code>&#91;chatbot_chatgpt_history&#93;</code></li>
@@ -148,7 +148,7 @@ function chatbot_chatgpt_support_section_callback() {
         <p>Each interaction with the chatbot is logged in real-time, capturing all relevant information into the table. This includes automatic and direct data sources for fields like interaction time and message text.</p>
 
         <h3>Application</h3>
-        <p>The conversation log maybe used for:</p>
+        <p>The conversation log may be used for:</p>
         <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
             <li><strong>Analysis and Reporting:</strong> Generate reports on user interactions and queries.</li>
             <li><strong>Bot Improvement:</strong> Refine chatbot responses based on logged data.</li>

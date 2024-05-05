@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     1.9.8
+ * Version:     1.9.9
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.8');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.9');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -122,6 +122,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php
 // Include necessary files - Utilities - Ver 1.9.0
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php'; // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php'; // Deactivation - Ver 1.9.9
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-download-transcript.php'; // Functions - Ver 1.9.9
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
@@ -385,6 +387,23 @@ if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
 }
 add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_conversation_log_cleanup');
 
+// Schedule the transcript file cleanup event if it's not already scheduled - Ver 1.9.9
+// Schedule the cleanup event if it's not already scheduled
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_transcripts')) {
+    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_transcripts');
+}
+
+// Schedule the audio file cleanup event if it's not already scheduled - Ver 1.9.9
+// Schedule the cleanup event if it's not already scheduled
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_audio_files')) {
+    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_audio_files');
+}
+
+// Schedule the upload file cleanup event if it's not already scheduled - Ver 1.9.9
+// Schedule the cleanup event if it's not already scheduled
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_upload_files')) {
+    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_upload_files');
+}
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message(): void {
@@ -421,9 +440,11 @@ function chatbot_chatgpt_send_message(): void {
             // DIAG - Diagnostics
             // back_trace ( 'NOTICE', 'Model set in global: ' . $model);
         } else {
-            // FIXME - I SHOULDN'T BE FALLING THRU HERE - DO NOTHING
+            // Set the model to the default
+            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
             // DIAG - Diagnostics
             // back_trace ( 'ERROR', 'Model not set!!!');
+            // wp_send_json_error('Invalid Model. Please set the model in the plugin settings.');
         }
     }
 
@@ -433,10 +454,9 @@ function chatbot_chatgpt_send_message(): void {
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
-    // FIXME - ADD THIS BACK IN AFTER DECIDING WHAT TO DO ABOUT MISSING OR BAD API KEYS
-    // Check API key and message
+    // Check for missing API key or Message
     if (!$api_key || !$message) {
-        wp_send_json_error('Invalid API key or message');
+        wp_send_json_error('Invalid API key or Message. Please check the plugin settings.');
     }
 
     // Removed in Ver 1.8.6 - 2024 02 15
@@ -492,7 +512,7 @@ function chatbot_chatgpt_send_message(): void {
         // back_trace( 'NOTICE' , 'Using Original GPT Assistant ID');
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
-        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions'), '');
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions', ''));
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
@@ -505,7 +525,7 @@ function chatbot_chatgpt_send_message(): void {
         }
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
-        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate'), '');
+        $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate', ''));
         $use_assistant_id = 'Yes';
         // DIAG - Diagnostics - Ver 1.8.1
         // back_trace( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
@@ -525,7 +545,7 @@ function chatbot_chatgpt_send_message(): void {
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
             // DIAG - Diagnostics - Ver 1.8.1
-            // back_trace( 'NOTICE' , 'Using GPT Assistant Id ' . $assistant_id);
+            // back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
         } else {
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
@@ -536,7 +556,7 @@ function chatbot_chatgpt_send_message(): void {
         }
     }
 
-    // Decide whether to use an Flow, Assistant or original ChatGPT
+    // Decide whether to use Flow, Assistant or Original ChatGPT
     if ($model == 'flow'){
         
         // DIAG - Diagnostics

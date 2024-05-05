@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // General function to display the message - Ver 1.8.1
 function chatbot_chatgpt_general_admin_notice($message = null) {
     if (!empty($message)) {
-        printf('<div class="%1$s"><p><b>Kognetiks Kchat: </b>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
+        printf('<div class="%1$s"><p><strong>Kognetiks Chatbot: </strong>%2$s</p></div>', 'notice notice-error is-dismissible', $message);
         return;
     }
 }
@@ -43,7 +43,7 @@ function display_option_value_admin_notice() {
             'dismiss_chatgpt_notice',
             '_chatgpt_dismiss_nonce'
         );
-            echo '<div class="notice notice-success is-dismissible"><p><b>Knowledge Navigator Outcome:</b> ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Kognetiks Chatbot:</strong> ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
             // back_trace( 'NOTICE', 'Knowledge Navigator Outcome: ' . $kn_results);
     }
 
@@ -67,7 +67,7 @@ function display_option_value_admin_notice() {
             'dismiss_kn_status_notice',
             '_chatgpt_dismiss_nonce'
         );
-            echo '<div class="notice notice-success is-dismissible"><p>Please visit the <b>Knowledge Navigator</b> settings, select a <b>Run Schedule</b>, then <b>Save Settings</b>. <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Kognetiks Chatbot:</strong> Please visit the <b>Knowledge Navigator</b> settings, select a <b>Run Schedule</b>, then <b>Save Settings</b>. <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', '$kn_status: ' . $kn_status);
     }

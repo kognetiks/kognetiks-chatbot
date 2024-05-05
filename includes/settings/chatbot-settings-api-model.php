@@ -17,14 +17,14 @@ if ( ! defined( 'WPINC' ) ) {
 // API/Model settings section callback - Ver 1.3.0
 function chatbot_chatgpt_model_settings_section_callback($args) {
     ?>
-    <p>Configure the default settings for the Chatbot plugin for chat, voice, and imaage generation.  Start by adding your API key then selecting your choices below.  Don't forgert to click "Save Settings" at the very bottom of this page.</p>
+    <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <?php
 }
 
 function chatbot_chatgpt_api_model_general_section_callback($args) {
     ?>
-    <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p></p>
+    <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p>
     <?php
 }
 
