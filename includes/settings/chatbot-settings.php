@@ -204,8 +204,10 @@ function chatbot_chatgpt_settings_page_html(): void {
                 do_settings_sections('chatbot_chatgpt_settings');
 
             } elseif ($active_tab == 'api_model') {
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 settings_fields('chatbot_chatgpt_api_model');
                 do_settings_sections('chatbot_chatgpt_model_settings_general');
+                echo '</div>';
 
                 // API Settings - Ver 1.9.5
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
@@ -245,10 +247,27 @@ function chatbot_chatgpt_settings_page_html(): void {
                 do_settings_sections('chatbot_chatgpt_custom_buttons');
 
             } elseif ($active_tab == 'kn_acquire') {
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 settings_fields('chatbot_chatgpt_knowledge_navigator');
                 do_settings_sections('chatbot_chatgpt_knowledge_navigator');
-                settings_fields('chatbot_chatgpt_kn_settings_section');
-                do_settings_sections('chatbot_chatgpt_kn_settings_section');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_kn_status');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_kn_scheduling');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_kn_include_exclude');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_kn_enhanced_response');
+                echo '</div>';
+
             } elseif ($active_tab == 'kn_analysis') {
                 settings_fields('chatbot_chatgpt_kn_analysis');
                 do_settings_sections('chatbot_chatgpt_kn_analysis');

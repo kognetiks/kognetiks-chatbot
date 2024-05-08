@@ -28,24 +28,6 @@ function is_mobile_device() {
 
 }
 
-// Dump DB options to file
-function chatbot_chatgpt_dump_options_to_file() {
-
-    $debug_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'debug/';
-    // back_trace( 'NOTICE', 'results_dir_path: ' . $debug_dir_path);
-
-    if (!file_exists($debug_dir_path)) {
-        mkdir($debug_dir_path, 0777, true);
-    }
-
-    global $wpdb;
-    $options = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot%' AND option_name != 'chatbot_chatgpt_api_key'", ARRAY_A);
-
-    $file = $debug_dir_path . 'chatbot-chatgpt-options.txt';
-    file_put_contents($file, print_r($options, true));
-
-}
-
 // Function to confirm if curl is enabled
 function can_use_curl_for_file_protocol() {
 

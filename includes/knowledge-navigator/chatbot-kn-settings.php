@@ -129,28 +129,54 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args): void {
     
     ?>
         <div class="wrap">
-            <p>Introducing <b>Knowledge Navigator</b> - the smart explorer behind our Kognetiks Chatbot plugin that's designed to delve into the core of your website. Like a digital archaeologist, it embarks on an all-encompassing journey through your site's pages, carefully following every internal link to get a holistic view of your content. The exciting part? It sifts through each page, extracting the essence of your content in the form of keywords and phrases, gradually building a meticulous, interactive map of your website's architecture. </p>
+            <p>Introducing <b>Knowledge Navigator</b> - the smart explorer behind our Kognetiks Chatbot plugin that's designed to delve into the core of your website. Like a digital archaeologist, it embarks on an all-encompassing journey through your site's puiblished pages, posts, products and approaved comments, carefully following every internal link to get a holistic view of your content. The exciting part? It sifts through each page, extracting the essence of your content in the form of keywords and phrases, gradually building a meticulous, interactive map of your website's architecture. </p>
             <p>What's the outcome? Detailed "results.csv" and "results.json" files are created, tucking away all this valuable information in a dedicated 'results' directory within the plugin's folder. The prime objective of <b>Knowledge Navigator</b> is to enable the Kognetiks Chatbot plugin to have a crystal clear understanding of your website's context and content. The result? Your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.</p>
             <p>And how does the <b>Knowledge Navigator</b> do all this? It employs a clever technique known as TF-IDF (Term Frequency-Inverse Document Frequency) to unearth the keywords that really matter. The keywords are ranked by their TF-IDF scores, where the score represents the keyword's relevance to your site. This score is a fine balance between the term's frequency on your site and its inverse document frequency (which is essentially the log of total instances divided by the number of documents containing the term). In simpler words, it's a sophisticated measure of how special a keyword is to your content.</p>
-            <hr style="border-top: 2px solid;">
-            <h2>Knowledge Navigator Status</h2>
-            <p><b><i>When you're ready to scan you website, set the 'Run Schedule' to one of 'Now', 'Hourly', 'Twice Daily', 'Daily', or 'Weekly', then click 'Save Settings'.</i></b></p>
+        </div>
+    <?php
+}
+
+// Knowledge Navigator Status - Ver 2.0.0.
+function chatbot_chatgpt_kn_status_section_callback($args): void {
+
+    // See if the scanner is needs to run
+    $results = chatbot_chatgpt_kn_results_callback(esc_attr(get_option('chatbot_chatgpt_kn_schedule')));
+
+    // Force run the scanner
+    // $results = chatbot_chatgpt_kn_acquire();
+    
+    ?>
+        <div class="wrap">
             <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
-                <p><b>Knowledge Navigator Status</b></p>
+
                 <p><b>Scheduled to Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_scan_interval', 'No Schedule')); ?></p>
                 <p><b>Status of Last Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_kn_status', 'In Process')); ?></p>
                 <p><b>Content Items Analyzed: </b><?php echo esc_attr(get_option('no_of_items_analyzed', 0)); ?></p>
             </div>
             <p>Refresh this page to determine the progress and status of Knowledge Navigation!</p>
-            <p>To choose a new Run Schedule, select from one of the options below (Now, Hourly, ...)  then click 'Save Settings'.</p>
         </div>
     <?php
 }
 
 function chatbot_chatgpt_kn_settings_section_callback($args) {
     ?>
-    <p><i>Select the Run schedule (frequency, i.e., hourly, daily, weekly, etc.) and maximum number of top words to index.</i></p>
-    <p><i>Choose the content types you want to include in the Knowledge Navigator's indexing process. This will help the Kognetiks Chatbot plugin to understand your website's content better and provide more accurate responses.</i></p>
+    <p>When you're ready to scan you website, set the 'Run Schedule' to one of 'Now', 'Hourly', 'Twice Daily', 'Daily', or 'Weekly', then click 'Save Settings'.</p>
+    <p>Then select the maximum number of top words to index and choose the Tuning Percentage (the percent of top keywords within a given page, post or product).</p>
+    <p>Then click 'Save Settings' at the bottom of the page.</p>
+    <?php
+}
+
+function chatbot_chatgpt_kn_include_exclude_section_callback($args) {
+    ?>
+    <p>Choose the content types you want to include in the Knowledge Navigator's indexing process: pages, posts, products, and/or comments.  Only published/approved content will be indexed.</p>
+    <p>Then click 'Save Settings' at the bottom of the page.</p>
+<?php
+}
+
+function chatbot_chatgpt_kn_enhanced_response_section_callback($args) {
+    ?>
+    <p>Choose the number of enhanced responses you want to display in the chatbot's response. Enhanced responses are links to published/approved content on you site and are displayed along with the titles of the page, post, product and/or comment.</p>
+    <p>Then click 'Save Settings' at the bottom of the page.</p>
     <?php
 }
 
@@ -246,5 +272,27 @@ function chatbot_chatgpt_kn_tuning_percentage_callback($args): void {
         }
         ?>
     </select>
+    <?php
+}
+
+// Suppress Learnings Message - Ver 1.7.1
+function chatbot_chatgpt_suppress_learnings_callback($args) {
+    global $chatbot_chatgpt_suppress_learnings;
+    $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
+    ?>
+    <select id="chatgpt_suppress_learnings_setting" name = "chatbot_chatgpt_suppress_learnings">
+        <option value="None" <?php selected( $chatbot_chatgpt_suppress_learnings, 'None' ); ?>><?php echo esc_html( 'None' ); ?></option>
+        <option value="Random" <?php selected( $chatbot_chatgpt_suppress_learnings, 'Random' ); ?>><?php echo esc_html( 'Random' ); ?></option>
+        <option value="Custom" <?php selected( $chatbot_chatgpt_suppress_learnings, 'Custom' ); ?>><?php echo esc_html( 'Custom' ); ?></option>
+    </select>
+    <?php
+}
+
+// Suppress Learnings Message - Ver 1.7.1
+function chatbot_chatgpt_custom_learnings_message_callback($args) {
+    global $chatbot_chatgpt_custom_learnings_message;
+    $chatbot_chatgpt_custom_learnings_message = esc_attr(get_option('chatbot_chatgpt_custom_learnings_message', 'More information may be found here ...'));
+    ?>
+    <input type="text" style="width: 50%;" id="chatbot_chatgpt_custom_learnings_message" name = "chatbot_chatgpt_custom_learnings_message" value="<?php echo esc_attr( $chatbot_chatgpt_custom_learnings_message ); ?>">
     <?php
 }

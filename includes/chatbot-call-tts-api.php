@@ -56,10 +56,14 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     $audio_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/';
     // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
-    // Create directory if it doesn't exist
-    if (!file_exists($audio_dir_path)) {
-        mkdir($audio_dir_path, 0755, true);
+    // Ensure the directory exists or attempt to create it
+    if (!file_exists($audio_dir_path) && !wp_mkdir_p($audio_dir_path)) {
+        // Error handling, e.g., log the error or handle the failure appropriately
+        // back_trace ( 'ERROR', 'Failed to create directory.')
+        return;
     }
+    // Protect the directory - Ver 2.0.0
+    chmod($audio_dir_path, 0700);
 
     // Get the audio format option
     $audio_format = esc_attr(get_option('chatbot_chatgpt_audio_output_format', 'mp3'));
@@ -330,10 +334,14 @@ function deleteAudioFile($file_id) {
     $audio_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/';
     // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
-    // Create directory if it doesn't exist
-    if (!file_exists($audio_dir_path)) {
-        mkdir($audio_dir_path, 0755, true);
+    // Ensure the directory exists or attempt to create it
+    if (!file_exists($audio_dir_path) && !wp_mkdir_p($audio_dir_path)) {
+        // Error handling, e.g., log the error or handle the failure appropriately
+        // back_trace ( 'ERROR', 'Failed to create directory.')
+        return;
     }
+    // Protect the directory - Ver 2.0.0
+    chmod($audio_dir_path, 0700);
 
     // Strip off just the file name
     $file_id = basename($file_id);
@@ -362,7 +370,7 @@ function deleteAudioFile($file_id) {
 add_action( 'chatbot_chatgpt_delete_audio_file', 'deleteAudioFile' );
 
 // Delete old audio files - Ver 1.9.9
-function chatbot_chatgpt_cleanup_old_audio_files() {
+function chatbot_chatgpt_cleanup_audio_directory() {
     $audio_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'audio/';
     foreach (glob($audio_dir . '*') as $file) {
         // Delete files older than 1 hour
@@ -371,4 +379,4 @@ function chatbot_chatgpt_cleanup_old_audio_files() {
         }
     }
 }
-add_action('chatbot_chatgpt_cleanup_audio_files', 'chatbot_chatgpt_cleanup_old_audio_files');
+add_action('chatbot_chatgpt_cleanup_audio_files', 'chatbot_chatgpt_cleanup_audio_directory');

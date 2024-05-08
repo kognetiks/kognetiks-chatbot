@@ -228,7 +228,10 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 2.0.0 =
-* TBD
+* Revise Knowledge Navigator settings tab grouping similar options together
+* Grouped Suppress Learning Messages, Customer Learnings Messages, and Enhanced Response Limit together on the Knowledge Navigator tab
+* Added an option to allow the Read Aloud option, see API/Model > Voice Settings > Allow Read Aloud = Yes/No
+* Enhanced security to reduced vulnerabilities associated with file upload options
 
 = 1.9.9 =
 * Improved the chatbot's response using bullet points for clarity

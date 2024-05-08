@@ -25,8 +25,6 @@ function chatbot_chatgpt_api_settings_init(): void {
     );
 
     // API/Model settings tab - Ver 1.3.0
-    // register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key');
-    // Obfuscate the API key in settings registration - Ver 1.5.0
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key', 'sanitize_api_key');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_message_limit_setting');
 
@@ -125,7 +123,8 @@ function chatbot_chatgpt_api_settings_init(): void {
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_voice_model_option'); // Ver 1.9.5
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_voice_option'); // Ver 1.9.5
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_audio_output_format'); // Ver 1.9.5
-
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_read_aloud_option'); // Ver 2.0.0
+    
     // Voice Options - Ver 1.9.5
     add_settings_section(
         'chatbot_chatgpt_api_model_voice_section',
@@ -157,6 +156,15 @@ function chatbot_chatgpt_api_settings_init(): void {
         'chatbot_chatgpt_audio_output_format',
         'Audio Output Option',
         'chatbot_chatgpt_audio_output_format_callback',
+        'chatbot_chatgpt_api_model_voice',
+        'chatbot_chatgpt_api_model_voice_section'
+    );
+
+    // Allow Read Aloud - Ver 2.0.0
+    add_settings_field(
+        'chatbot_chatgpt_read_aloud_option',
+        'Allow Read Aloud',
+        'chatbot_chatgpt_read_aloud_option_callback',
         'chatbot_chatgpt_api_model_voice',
         'chatbot_chatgpt_api_model_voice_section'
     );

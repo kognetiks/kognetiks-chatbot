@@ -31,10 +31,14 @@ function chatbot_chatgpt_download_transcript() {
     // Define the path to the transcripts directory
     $transcriptDir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
 
-    // Ensure directory exists or attempt to create it
-    if (!file_exists($transcriptDir)) {
-        wp_mkdir_p($transcriptDir);
+    // Ensure the directory exists or attempt to create it
+    if (!file_exists($transcriptDir) && !wp_mkdir_p($transcriptDir)) {
+        // Error handling, e.g., log the error or handle the failure appropriately
+        // back_trace ( 'ERROR', 'Failed to create directory.')
+        return;
     }
+    // Protect the directory - Ver 2.0.0
+    chmod($transcriptDir, 0700);
 
     // Create the filename
     $transcriptFileName = 'transcript_' . date('Y-m-d_H-i-s') . '.txt';
@@ -62,7 +66,7 @@ add_action('wp_ajax_chatbot_chatgpt_download_transcript', 'chatbot_chatgpt_downl
 add_action('wp_ajax_nopriv_chatbot_chatgpt_download_transcript', 'chatbot_chatgpt_download_transcript');
 
 // Delete old transcripts - Ver 1.9.9   
-function chatbot_chatgpt_cleanup_old_transcripts() {
+function chatbot_chatgpt_cleanup_transcripts_directory() {
     $transcripts_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
     foreach (glob($transcripts_dir . '*') as $file) {
         // Delete files older than 1 hour
@@ -71,4 +75,4 @@ function chatbot_chatgpt_cleanup_old_transcripts() {
         }
     }
 }
-add_action('chatbot_chatgpt_cleanup_transcripts', 'chatbot_chatgpt_cleanup_old_transcripts');
+add_action('chatbot_chatgpt_cleanup_transcript_files', 'chatbot_chatgpt_cleanup_transcripts_directory');
