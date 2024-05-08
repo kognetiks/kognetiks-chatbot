@@ -137,7 +137,7 @@ function chatbot_kn_initialization() {
     update_option('chatbot_chatgpt_kn_document_count', 0);
 
     // Reset the number of items analyzed
-    update_option('no_of_items_analyzed', 0);
+    update_option('chatbot_chatgpt_no_of_items_analyzed', 0);
 
     // Get teh number of posts, pages, products and comments
     chatbot_kn_count_documents();
@@ -232,12 +232,12 @@ function chatbot_kn_run_phase_1() {
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
     $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
-    $no_of_items_analyzed = get_option('no_of_items_analyzed', 0);
+    $chatbot_chatgpt_no_of_items_analyzed = get_option('chatbot_chatgpt_no_of_items_analyzed', 0);
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$offset: ' . $offset );
     // back_trace( 'NOTICE', '$batch_size: ' . $batch_size );
-    // back_trace( 'NOTICE', '$no_of_items_analyzed: ' . $no_of_items_analyzed );
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_no_of_items_analyzed: ' . $chatbot_chatgpt_no_of_items_analyzed );
 
     // Set the next starting point
     update_option( 'chatbot_chatgpt_kn_item_count', $offset + $batch_size );
@@ -307,12 +307,12 @@ function chatbot_kn_run_phase_1() {
         }
 
         // Increment the number of items analyzed by one
-        $no_of_items_analyzed++;
+        $chatbot_chatgpt_no_of_items_analyzed++;
     
     }
 
     // Update the number of items analyzed
-    update_option('no_of_items_analyzed', $no_of_items_analyzed);
+    update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
 
     // chatbot_kn_schedule_batch_acquisition();
     update_option( 'chatbot_chatgpt_kn_action', 'phase 1' );
@@ -337,12 +337,12 @@ function chatbot_kn_run_phase_3() {
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
     $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
-    $no_of_items_analyzed = get_option('no_of_items_analyzed', 0);
+    $chatbot_chatgpt_no_of_items_analyzed = get_option('chatbot_chatgpt_no_of_items_analyzed', 0);
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$offset: ' . $offset );
     // back_trace( 'NOTICE', '$batch_size: ' . $batch_size );
-    // back_trace( 'NOTICE', '$no_of_items_analyzed: ' . $no_of_items_analyzed );
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_no_of_items_analyzed: ' . $chatbot_chatgpt_no_of_items_analyzed );
 
     // Set the next starting point
     update_option( 'chatbot_chatgpt_kn_item_count', $offset + $batch_size );
@@ -425,12 +425,12 @@ function chatbot_kn_run_phase_3() {
         }
 
         // Increment the number of items analyzed by one
-        $no_of_items_analyzed++;
+        $chatbot_chatgpt_no_of_items_analyzed++;
     
     }
 
     // Update the number of items analyzed
-    update_option('no_of_items_analyzed', $no_of_items_analyzed);
+    update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
 
     // chatbot_kn_schedule_batch_acquisition();
     update_option( 'chatbot_chatgpt_kn_action', 'phase 3' );
@@ -542,12 +542,12 @@ function chatbot_kn_run_phase_6 () {
     $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
     $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
-    $no_of_items_analyzed = get_option('no_of_items_analyzed', 0);
+    $chatbot_chatgpt_no_of_items_analyzed = get_option('chatbot_chatgpt_no_of_items_analyzed', 0);
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$offset: ' . $offset );
     // back_trace( 'NOTICE', '$batch_size: ' . $batch_size );
-    // back_trace( 'NOTICE', '$no_of_items_analyzed: ' . $no_of_items_analyzed );
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_no_of_items_analyzed: ' . $chatbot_chatgpt_no_of_items_analyzed );
 
     // Set the next starting point
     update_option( 'chatbot_chatgpt_kn_item_count', $offset + $batch_size );
@@ -667,12 +667,12 @@ function chatbot_kn_run_phase_6 () {
         }
 
         // Increment the number of items analyzed by one
-        // $no_of_items_analyzed++;
+        // $chatbot_chatgpt_no_of_items_analyzed++;
     
     }
 
     // Update the number of items analyzed
-    // update_option('no_of_items_analyzed', $no_of_items_analyzed);
+    // update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
 
     // chatbot_kn_schedule_batch_acquisition();
     update_option( 'chatbot_chatgpt_kn_action', 'phase 6' );

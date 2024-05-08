@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-global $topwords, $words, $start_url, $domain, $max_top_words, $chatbot_chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $no_of_items_analyzed;
+global $topwords, $words, $start_url, $domain, $max_top_words, $chatbot_chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $chatbot_chatgpt_no_of_items_analyzed;
 $start_url = site_url();
 $domain = parse_url($start_url, PHP_URL_HOST);
 $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)); // Default to 25
@@ -47,8 +47,8 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
         // back_trace( 'NOTICE', "domain: " . serialize($GLOBALS['domain']));
         // back_trace( 'NOTICE', "start_url: " . serialize($GLOBALS['start_url']));
 
-        $no_of_items_analyzed = 0;
-        update_option('no_of_items_analyzed', $no_of_items_analyzed);
+        $chatbot_chatgpt_no_of_items_analyzed = 0;
+        update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
 
         // WP Cron Scheduler - VER 1.6.2
         // back_trace( 'NOTICE', 'BEFORE wp_clear_scheduled_hook');
@@ -65,7 +65,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
             if (!wp_next_scheduled('knowledge_navigator_scan_hook')) {
 
                 // RESET THE NO OF LINKS CRAWLED HERE
-                update_option('no_of_items_analyzed', 0);
+                update_option('chatbot_chatgpt_no_of_items_analyzed', 0);
                 
                 // RESET THE STATUS MESSAGE
                 update_option('chatbot_chatgpt_kn_status', 'In Process');
@@ -151,7 +151,7 @@ function chatbot_chatgpt_kn_status_section_callback($args): void {
 
                 <p><b>Scheduled to Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_scan_interval', 'No Schedule')); ?></p>
                 <p><b>Status of Last Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_kn_status', 'In Process')); ?></p>
-                <p><b>Content Items Analyzed: </b><?php echo esc_attr(get_option('no_of_items_analyzed', 0)); ?></p>
+                <p><b>Content Items Analyzed: </b><?php echo esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0)); ?></p>
             </div>
             <p>Refresh this page to determine the progress and status of Knowledge Navigation!</p>
         </div>
