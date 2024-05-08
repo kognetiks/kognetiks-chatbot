@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.5.2
+Tested up to: 6.5.3
 Stable tag: 2.0.0
 Requires PHP: 7.0
 License: GPLv3 or later
