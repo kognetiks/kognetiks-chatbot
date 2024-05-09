@@ -70,8 +70,6 @@ function chatbot_chatgpt_kn_acquire(): void {
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
     }
-    // Protect the directory - Ver 2.0.0
-    chmod($results_dir_path, 0700);
 
     // DIAG - Log directory path for debugging
     // back_trace( 'NOTICE', 'Directory path: ' . $results_dir_path);

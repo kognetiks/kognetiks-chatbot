@@ -37,8 +37,6 @@ function chatbot_chatgpt_download_transcript() {
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
     }
-    // Protect the directory - Ver 2.0.0
-    chmod($transcriptDir, 0700);
 
     // Create the filename
     $transcriptFileName = 'transcript_' . date('Y-m-d_H-i-s') . '.txt';

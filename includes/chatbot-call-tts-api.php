@@ -62,8 +62,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
     }
-    // Protect the directory - Ver 2.0.0
-    chmod($audio_dir_path, 0700);
 
     // Get the audio format option
     $audio_format = esc_attr(get_option('chatbot_chatgpt_audio_output_format', 'mp3'));
@@ -340,8 +338,6 @@ function deleteAudioFile($file_id) {
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
     }
-    // Protect the directory - Ver 2.0.0
-    chmod($audio_dir_path, 0700);
 
     // Strip off just the file name
     $file_id = basename($file_id);

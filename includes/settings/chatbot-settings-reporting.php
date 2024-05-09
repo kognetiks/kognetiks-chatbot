@@ -499,8 +499,6 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
     }
-    // Protect the directory - Ver 2.0.0
-    chmod($results_dir_path, 0700);
 
     $results_csv_file = $results_dir_path . $filename;
     

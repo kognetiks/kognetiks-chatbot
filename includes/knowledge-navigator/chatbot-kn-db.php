@@ -168,8 +168,6 @@ function output_results() {
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
     }
-    // Protect the directory - Ver 2.0.0
-    chmod($results_dir_path, 0700);
 
     // Define output files' paths
     $results_csv_file = $results_dir_path . 'results.csv';
