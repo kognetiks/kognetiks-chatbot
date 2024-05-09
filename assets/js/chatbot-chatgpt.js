@@ -484,9 +484,10 @@ jQuery(document).ready(function ($) {
     }
 
     submitButton.on('click', function () {
-        
-        message = messageInput.val().trim();
-        // console.log('Chatbot: NOTICE: Message: ' + message);
+
+        // Sanitize the input - Ver 2.0.0
+        message = sanitizeInput(messageInput.val().trim());
+        console.log('Chatbot: NOTICE: Message: ' + message);
 
         if (!message) {
             return;
@@ -598,6 +599,28 @@ jQuery(document).ready(function ($) {
             cache: false, // This ensures jQuery does not cache the result
         });
     });
+
+    // Input mitigation - Ver 2.0.0
+    function sanitizeInput(input) {
+        // Remove potentially harmful HTML tags and attributes
+        input = input.replace(/<[^>]+>/g, '');
+
+        // Remove JavaScript URIs in anchor tags
+        input = input.replace(/<a\s+[^>]*href\s*=\s*['"]?javascript:.+?['"]?\s*[^>]*>/gi, '');
+
+        // Remove inline script blocks
+        input = input.replace(/<\s*script.*?>(.|[\r\n])*?<\s*\/\s*script\s*>/gi, '');
+
+        // Remove event handler attributes
+        input = input.replace(/ on\w+=".*?"/gi, '');
+
+        // Remove data URIs
+        input = input.replace(/<\s*img\s+[^>]*src\s*=\s*['"]?data:[^>]*>/gi, '');
+
+        // Additional checks for specific XSS payloads can be added here
+
+        return input;
+    }
     
     // Add the keydown event listener to the message input - Ver 1.7.6
     messageInput.on('keydown', function (e) {
