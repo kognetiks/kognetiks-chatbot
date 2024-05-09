@@ -316,7 +316,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_file_uploads = 'No';
     }
 
-    $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'Yes'));
+    $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
 
     // Assume that the chatbot is NOT using KFlow - Ver 1.9.5
     $use_flow = 'No';

@@ -281,6 +281,15 @@ function chatbot_chatgpt_upgrade() {
         // DIAG - Log the old option deletion
         // back_trace('NOTICE', 'chatbot_kn_items_per_batch option deleted');
     }
+
+    // Replace option - no_of_items_analyzed
+    if (get_option( 'no_of_items_analyzed' )) {
+        $chatbot_chatgpt_no_of_items_analyzed = get_option( 'no_of_items_analyzed' );
+        delete_option( 'no_of_items_analyzed' );
+        update_option( 'chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed );
+        // DIAG - Log the old option deletion
+        // back_trace('NOTICE', 'no_of_items_analyzed option deleted');
+    }
     
     // FIXME - DETERMINE WHAT OTHER 'OLD' OPTIONS SHOULD BE DELETED
     // FIXME - DETERMINE WHAT OPTION NAMES NEED TO BE CHANGED (DELETE, THEN REPLACE)
