@@ -60,9 +60,6 @@ function chatbot_chatgpt_upgrade_completed($upgrader_object, $options) {
 // Upgrade Logic - Revised 1.7.6
 function chatbot_chatgpt_upgrade() {
 
-    // Deactivate old hooks
-    wp_clear_scheduled_hook('chatbot_chatgpt_cleanup_transcripts');
-
     // DIAG - Log the upgrade
     // back_trace( 'NOTICE', 'Plugin upgrade started');
 

@@ -389,6 +389,8 @@ add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_co
 // Schedule the cleanup event if it's not already scheduled
 if (!wp_next_scheduled('chatbot_chatgpt_cleanup_transcript_files')) {
     wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_transcript_files');
+    // Deactivate old hooks - Ver 2.0.0
+    wp_clear_scheduled_hook('chatbot_chatgpt_cleanup_transcripts');
 }
 
 // Schedule the audio file cleanup event if it's not already scheduled - Ver 1.9.9
