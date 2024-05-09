@@ -494,7 +494,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
 
     // Ensure the directory exists or attempt to create it
-    if (!file_exists($results_dir_path) && !wp_mkdir_p($results_dir_path)) {
+    if (!create_directory_and_file($results_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;

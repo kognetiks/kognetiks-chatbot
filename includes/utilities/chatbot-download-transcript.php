@@ -32,7 +32,7 @@ function chatbot_chatgpt_download_transcript() {
     $transcriptDir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
 
     // Ensure the directory exists or attempt to create it
-    if (!file_exists($transcriptDir) && !wp_mkdir_p($transcriptDir)) {
+    if (!create_directory_and_file($transcriptDir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;

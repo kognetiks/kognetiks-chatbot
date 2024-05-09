@@ -60,3 +60,21 @@ function can_use_curl_for_file_protocol() {
     
 }
 
+// Function to create a directory and an index.php file
+function create_directory_and_file($results_dir_path) {
+    
+    if (!file_exists($results_dir_path) && !wp_mkdir_p($results_dir_path)) {
+        // Error handling, e.g., log the error or handle the failure appropriately
+        // back_trace ( 'ERROR', 'Failed to create directory.')
+        return false;
+    }
+
+    $index_file_path = $results_dir_path . '/index.php';
+
+    if (!file_exists($index_file_path)) {
+        $file_content = "<?php\n// Silence is golden.\n?>";
+        file_put_contents($index_file_path, $file_content);
+    }
+
+    return true;
+}

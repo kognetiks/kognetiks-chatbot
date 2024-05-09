@@ -28,6 +28,12 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
             'status' => 'error',
             'message' => 'Oops! File upload failed.'
         );
+    } else {
+        $index_file_path = $upload_dir . '/index.php';
+        if (!file_exists($index_file_path)) {
+            $file_content = "<?php\n// Silence is golden.\n?>";
+            file_put_contents($index_file_path, $file_content);
+        }
     }
     // Protect the directory - Ver 2.0.0
     chmod($upload_dir, 0700);

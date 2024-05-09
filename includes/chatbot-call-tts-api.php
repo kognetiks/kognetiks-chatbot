@@ -57,7 +57,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
     // Ensure the directory exists or attempt to create it
-    if (!file_exists($audio_dir_path) && !wp_mkdir_p($audio_dir_path)) {
+    if (!create_directory_and_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
@@ -333,7 +333,7 @@ function deleteAudioFile($file_id) {
     // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
     // Ensure the directory exists or attempt to create it
-    if (!file_exists($audio_dir_path) && !wp_mkdir_p($audio_dir_path)) {
+    if (!create_directory_and_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
