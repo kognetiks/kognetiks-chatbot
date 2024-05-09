@@ -487,7 +487,7 @@ jQuery(document).ready(function ($) {
 
         // Sanitize the input - Ver 2.0.0
         message = sanitizeInput(messageInput.val().trim());
-        console.log('Chatbot: NOTICE: Message: ' + message);
+        // console.log('Chatbot: NOTICE: Message: ' + message);
 
         if (!message) {
             return;
