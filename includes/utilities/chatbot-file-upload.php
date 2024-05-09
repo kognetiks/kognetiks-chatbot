@@ -15,20 +15,28 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Upload Multiple files to the Assistant
 function chatbot_chatgpt_upload_file_to_assistant(): array {
-    
-    // DIAG - Diagnostic - Ver 1.9.2
-    // back_trace( 'NOTICE', 'Entering chatbot_chatgpt_upload_file_to_assistant()' );
-    // back_trace( 'NOTICE', '$_FILES', print_r($_FILES, true));
 
     global $session_id;
 
-    // FIXME - SO THAT THE PLUGIN ISN'T HARD CODED - V1.9.2 - 2024 03 05
-    $upload_dir = WP_CONTENT_DIR . '/plugins/chatbot-chatgpt/uploads/';
-    
-    // Ensure the upload directory exists
-    if (!file_exists($upload_dir)) {
-        mkdir($upload_dir, 0777, true); // Create directory if it doesn't exist
+    $upload_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
+
+    // Ensure the directory exists or attempt to create it
+    if (!file_exists($upload_dir) && !wp_mkdir_p($upload_dir)) {
+        // Error handling, e.g., log the error or handle the failure appropriately
+        // back_trace ( 'ERROR', 'Failed to create results directory.')
+        return array(
+            'status' => 'error',
+            'message' => 'Oops! File upload failed.'
+        );
+    } else {
+        $index_file_path = $upload_dir . '/index.php';
+        if (!file_exists($index_file_path)) {
+            $file_content = "<?php\n// Silence is golden.\n?>";
+            file_put_contents($index_file_path, $file_content);
+        }
     }
+    // Protect the directory - Ver 2.0.0
+    chmod($upload_dir, 0700);
 
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
@@ -38,16 +46,15 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
         );
     }
 
-    // Initialize the response array to collect upload status of each file
     $responses = [];
 
     // Check if files were uploaded
     if (isset($_FILES['file']['name']) && is_array($_FILES['file']['name'])) {
-        // Loop through each file
         for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
-            $file_path = $upload_dir . basename($_FILES['file']['name'][$i]);
+            // Generate a random file name
+            $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
+            $file_path = $upload_dir . $newFileName;
 
-            // Check for upload errors
             if ($_FILES['file']['error'][$i] > 0) {
                 $responses[] = array(
                     'status' => 'error',
@@ -56,7 +63,6 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
                 continue;
             }
 
-            // Move the uploaded file
             if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
                 $responses[] = array(
                     'status' => 'error',
@@ -65,20 +71,16 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
                 continue;
             }
 
-            // Prepare CURL request for each file
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, get_files_api_url());
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $api_key));
-
-            $postFields = array(
+            curl_setopt($ch, CURLOPT_POSTFIELDS, [
                 'purpose' => 'assistants',
                 'file' => new CURLFile($file_path)
-            );
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+            ]);
 
-            // Execute CURL
             $response = curl_exec($ch);
             $http_status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
             if (curl_errno($ch)) {
@@ -97,41 +99,21 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
                         'message' => $errorMessage
                     );
                 } else {
-                    // Assuming the API does not support batch uploads, each successful upload will be recorded individually
                     set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $responseData['id'], $session_id, $i);
-
-                    // DIAG - Diagnostic - Ver 1.9.2
-                    // back_trace( 'NOTICE', 'asst_file_id ' . $responseData['id'] );
-
-                    // MOVED TO OUTSIDE THE IF TEST - VER 1.9.9
-                    // unlink($file_path); // Optionally delete the file after successful upload
-
                     $responses[] = array(
                         'status' => 'success',
                         'http_status' => $http_status,
                         'id' => $responseData['id'],
-                        'message' => "File {$_FILES['file']['name'][$i]} uploaded successfully."
+                        'message' => "File {$newFileName} uploaded successfully."
                     );
-
-                    // DIAG - Diagnostic - Ver 1.9.2
-                    // back_trace( 'NOTICE', 'responses', print_r($responses, true));
-
                 }
             }
 
-            // DELETE THE FILE AFTER UPLOAD - VER 1.9.9
-            // b2711c63-b1d9-430e-bbab-d077d93442c8
-            unlink($file_path); // Optionally delete the file after successful upload
-
+            unlink($file_path); // Delete the file after successful upload
             curl_close($ch);
-            
         }
 
-        // DIAG - Diagnostic - Ver 1.9.2
-        // back_trace( 'NOTICE', '$responses', print_r($responses, true));
-
         return $responses;
-
     } else {
         return array(
             'status' => 'error',
@@ -140,14 +122,25 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
     }
 }
 
-// Delete old audio files - Ver 1.9.9
-function chatbot_chatgpt_cleanup_old_file_uploads() {
-    $audio_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
-    foreach (glob($audio_dir . '*') as $file) {
+// Function to generate a random alphanumeric string - Ver 1.9.9
+function generate_random_string($length = 26) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+
+// Delete old upload files - Ver 1.9.9
+function chatbot_chatgpt_cleanup_uploads_directory() {
+    $uploads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
+    foreach (glob($uploads_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
             unlink($file);
         }
     }
 }
-add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_old_file_uploads');
+add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_uploads_directory');

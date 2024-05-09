@@ -316,6 +316,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_file_uploads = 'No';
     }
 
+    $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
+
     // Assume that the chatbot is NOT using KFlow - Ver 1.9.5
     $use_flow = 'No';
 
@@ -503,9 +505,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
                 <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
             </button>
-            <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
-                <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
-            </button>
+            <?php if ($chatbot_chatgpt_read_aloud_option == 'yes'): ?>
+                <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
+                    <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
+                </button>
+            <?php endif; ?>
             <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
                 <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
             </button>
@@ -608,9 +612,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
                     <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
                 </button>
-                <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
-                    <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
-                </button>
+                <?php if ($chatbot_chatgpt_read_aloud_option == 'yes'): ?>
+                    <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
+                        <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
+                    </button>
+                <?php endif; ?>
                 <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
                     <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
                 </button>

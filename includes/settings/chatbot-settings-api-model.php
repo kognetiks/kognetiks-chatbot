@@ -296,6 +296,20 @@ function chatbot_chatgpt_audio_output_format_callback($args) {
     <?php
 }
 
+// Read Aloud Option Callback - Ver 2.0.0
+function chatbot_chatgpt_read_aloud_option_callback($args) {
+
+    // Get the saved chatbot_chatgpt_read_aloud_option value or default to "yes"
+    $read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
+    ?>
+    <select id="chatbot_chatgpt_read_aloud_option" name="chatbot_chatgpt_read_aloud_option">
+        <option value="yes" <?php selected($read_aloud_option, 'yes'); ?>>Yes</option>
+        <option value="no" <?php selected($read_aloud_option, 'no'); ?>>No</option>
+    </select>
+    <?php
+
+}
+
 // Image Model Options Callback - Ver 1.9.5
 function chatbot_chatgpt_image_model_option_callback($args) {
 

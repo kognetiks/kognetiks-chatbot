@@ -47,11 +47,11 @@ function chatbot_chatgpt_kn_acquire(): void {
     
     $url = '';
     $words = [];
-    $no_of_items_analyzed = 0;
-    update_option('no_of_items_analyzed', $no_of_items_analyzed);
+    $chatbot_chatgpt_no_of_items_analyzed = 0;
+    update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
 
-    // Reset the $no_of_items_analyzed to zero
-    $no_of_items_analyzed = 0;
+    // Reset the $chatbot_chatgpt_no_of_items_analyzed to zero
+    $chatbot_chatgpt_no_of_items_analyzed = 0;
 
     // Initialize the $topWords array
     $topWords = [];
@@ -64,10 +64,12 @@ function chatbot_chatgpt_kn_acquire(): void {
     $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
     // back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
 
-    // Create directory if it doesn't exist
-    if (!file_exists($results_dir_path)) {
-        mkdir($results_dir_path, 0755, true);
-    }
+    // Ensure the directory exists or attempt to create it
+    if (!create_directory_and_file($results_dir_path)) {
+        // Error handling, e.g., log the error or handle the failure appropriately
+        // back_trace ( 'ERROR', 'Failed to create directory.')
+        return;
+    }   
 
     // DIAG - Log directory path for debugging
     // back_trace( 'NOTICE', 'Directory path: ' . $results_dir_path);
@@ -200,8 +202,8 @@ function chatbot_chatgpt_kn_acquire(): void {
         // error_log(print_r($word_pairs, true) . "\n", 3, $log_file_posts);
 
         // Increment the number of items analyzed by one
-        $no_of_items_analyzed++;
-        update_option('no_of_items_analyzed', $no_of_items_analyzed);
+        $chatbot_chatgpt_no_of_items_analyzed++;
+        update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
     }
 
     // Query WordPress database for page content
@@ -283,8 +285,8 @@ function chatbot_chatgpt_kn_acquire(): void {
         // error_log(print_r($word_pairs, true) . "\n", 3, $log_file_pages);
         
         // Increment the number of items analyzed by one
-        $no_of_items_analyzed++;
-        update_option('no_of_items_analyzed', $no_of_items_analyzed);
+        $chatbot_chatgpt_no_of_items_analyzed++;
+        update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
     }
 
     // Query WordPress database for comments
@@ -379,8 +381,8 @@ function chatbot_chatgpt_kn_acquire(): void {
         // error_log(print_r($word_pairs, true) . "\n", 3, $log_file_comments);
         
         // Increment the number of items analyzed by one
-        $no_of_items_analyzed++;
-        update_option('no_of_items_analyzed', $no_of_items_analyzed);
+        $chatbot_chatgpt_no_of_items_analyzed++;
+        update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
     }
 
     // Now computer the TF-IDF for the $topWords array

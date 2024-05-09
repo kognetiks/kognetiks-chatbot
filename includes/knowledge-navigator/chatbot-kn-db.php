@@ -162,12 +162,11 @@ function output_results() {
     // Generate the directory path
     $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
 
-    // Create the directory if it doesn't exist
-    if (!file_exists($results_dir_path)) {
-        if (!mkdir($results_dir_path, 0755, true)) {
-            // back_trace( 'ERROR', 'Failed to create results directory');
-            return;
-        }
+    // Ensure the directory exists or attempt to create it
+    if (!create_directory_and_file($results_dir_path)) {
+        // Error handling, e.g., log the error or handle the failure appropriately
+        // back_trace ( 'ERROR', 'Failed to create directory.')
+        return;
     }
 
     // Define output files' paths

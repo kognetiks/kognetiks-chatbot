@@ -2,6 +2,14 @@
 
 The **Kognetiks Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
+## What's New in Version 2.0.0
+
+- **Revised Knowledge Navigtor Settings:** Reground similar options together on this settings tab including: Suppress Learning Messages, Customer Learnings Messages, and Enhanced Response Limit.
+
+- **Read Aloud Option:** Added an option to allow the Read Aloud option, see API/Model > Voice Settings > Allow Read Aloud = Yes/No.
+
+- **Enhanced Security:** Reduced vulnerabilities associated with file upload options.
+
 ## What's New in Version 1.9.9
 
 - **Enhanced Response Clarity:** Responses now feature bullet points for improved clarity and readability.

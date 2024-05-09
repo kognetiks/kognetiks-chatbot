@@ -3,8 +3,8 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.5.2
-Stable tag: 1.9.9
+Tested up to: 6.5.3
+Stable tag: 2.0.0
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -226,6 +226,12 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.0.0 =
+* Revise Knowledge Navigator settings tab grouping similar options together
+* Grouped Suppress Learning Messages, Customer Learnings Messages, and Enhanced Response Limit together on the Knowledge Navigator tab
+* Added an option to allow the Read Aloud option, see API/Model > Voice Settings > Allow Read Aloud = Yes/No
+* Enhanced security to reduced vulnerabilities associated with file upload options
 
 = 1.9.9 =
 * Improved the chatbot's response using bullet points for clarity

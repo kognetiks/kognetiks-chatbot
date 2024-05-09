@@ -484,8 +484,9 @@ jQuery(document).ready(function ($) {
     }
 
     submitButton.on('click', function () {
-        
-        message = messageInput.val().trim();
+
+        // Sanitize the input - Ver 2.0.0
+        message = sanitizeInput(messageInput.val().trim());
         // console.log('Chatbot: NOTICE: Message: ' + message);
 
         if (!message) {
@@ -598,6 +599,24 @@ jQuery(document).ready(function ($) {
             cache: false, // This ensures jQuery does not cache the result
         });
     });
+
+    // Input mitigation - Ver 2.0.0
+    function sanitizeInput(input) {
+        // Replace script end tags
+        input = input.replace(/<\/script\s*>/gi, "");
+    
+        // Replace <script with &lt;script
+        input = input.replace(/<script/gi, "&lt;script");
+    
+        // Escape quotes and other special characters
+        input = input.replace(/"/g, "&quot;");
+        input = input.replace(/'/g, "&#x27;");
+        input = input.replace(/</g, "&lt;");
+        input = input.replace(/>/g, "&gt;");
+        input = input.replace(/`/g, "&#x60;");
+    
+        return input;
+    }
     
     // Add the keydown event listener to the message input - Ver 1.7.6
     messageInput.on('keydown', function (e) {

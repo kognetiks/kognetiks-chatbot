@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     1.9.9
+ * Version:     2.0.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '1.9.9');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.0');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -113,6 +113,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-loc
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-notices.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-premium.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-api.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-kn.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reporting.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
@@ -150,10 +151,7 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
-// Dump the chatbot settings - Ver 1.8.6
-// DIAG - Diagnostics
-// back_trace('NOTICE', 'chatbot-chatgpt.php: Dump Options to File is ON');
-// chatbot_chatgpt_dump_options_to_file();
+
 
 // Model choice - Ver 1.9.4
 global $model;
@@ -305,7 +303,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
     // Revised for Ver 1.5.0 
     $option_keys = array(
         'chatbot_chatgpt_bot_name',
-        'chatbot_chatgpt_bot_prompt', // Added in Ver 1.6.6
+        'chatbot_chatgpt_bot_prompt',
         'chatbot_chatgpt_initial_greeting',
         'chatbot_chatgpt_subsequent_greeting',
         'chatbot_chatgpt_display_style',
@@ -389,8 +387,10 @@ add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_co
 
 // Schedule the transcript file cleanup event if it's not already scheduled - Ver 1.9.9
 // Schedule the cleanup event if it's not already scheduled
-if (!wp_next_scheduled('chatbot_chatgpt_cleanup_transcripts')) {
-    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_transcripts');
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_transcript_files')) {
+    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_transcript_files');
+    // Deactivate old hooks - Ver 2.0.0
+    wp_clear_scheduled_hook('chatbot_chatgpt_cleanup_transcripts');
 }
 
 // Schedule the audio file cleanup event if it's not already scheduled - Ver 1.9.9
