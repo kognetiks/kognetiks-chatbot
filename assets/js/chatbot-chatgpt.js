@@ -602,23 +602,19 @@ jQuery(document).ready(function ($) {
 
     // Input mitigation - Ver 2.0.0
     function sanitizeInput(input) {
-        // Remove potentially harmful HTML tags and attributes
-        input = input.replace(/<[^>]+>/g, '');
-
-        // Remove JavaScript URIs in anchor tags
-        input = input.replace(/<a\s+[^>]*href\s*=\s*['"]?javascript:.+?['"]?\s*[^>]*>/gi, '');
-
-        // Remove inline script blocks
-        input = input.replace(/<\s*script.*?>(.|[\r\n])*?<\s*\/\s*script\s*>/gi, '');
-
-        // Remove event handler attributes
-        input = input.replace(/ on\w+=".*?"/gi, '');
-
-        // Remove data URIs
-        input = input.replace(/<\s*img\s+[^>]*src\s*=\s*['"]?data:[^>]*>/gi, '');
-
-        // Additional checks for specific XSS payloads can be added here
-
+        // Replace script end tags
+        input = input.replace(/<\/script\s*>/gi, "");
+    
+        // Replace <script with &lt;script
+        input = input.replace(/<script/gi, "&lt;script");
+    
+        // Escape quotes and other special characters
+        input = input.replace(/"/g, "&quot;");
+        input = input.replace(/'/g, "&#x27;");
+        input = input.replace(/</g, "&lt;");
+        input = input.replace(/>/g, "&gt;");
+        input = input.replace(/`/g, "&#x60;");
+    
         return input;
     }
     
