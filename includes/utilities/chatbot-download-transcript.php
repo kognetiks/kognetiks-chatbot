@@ -29,10 +29,10 @@ function chatbot_chatgpt_download_transcript() {
     $conversation_content = wp_strip_all_tags($conversation_content);
 
     // Define the path to the transcripts directory
-    $transcriptDir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
+    $transcript_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
 
     // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_file($transcriptDir)) {
+    if (!create_directory_and_file($transcript_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
@@ -40,7 +40,7 @@ function chatbot_chatgpt_download_transcript() {
 
     // Create the filename
     $transcriptFileName = 'transcript_' . date('Y-m-d_H-i-s') . '.txt';
-    $transcriptFile = $transcriptDir . $transcriptFileName;
+    $transcriptFile = $transcript_dir . $transcriptFileName;
 
     // DIAG - Diagnostics - Ver 1.9.9
     // back_trace( 'Notice', 'Transcript File: ' . $transcriptFile );

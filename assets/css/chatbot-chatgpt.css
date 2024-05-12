@@ -215,6 +215,20 @@
     background-color: #dcdcdc !important;    
 }
 
+/* File Upload MP3 Button - Ver 2.0.1 */
+#chatbot-chatgpt-upload-mp3 {
+    background-color: #f1f1f1;
+    border: none;
+    border-radius: 1px;
+    padding: 1px 1px;
+    margin-left: 1px;
+    cursor: pointer;
+}
+
+#chatbot-chatgpt-upload-mp3:hover {
+    background-color: #dcdcdc !important;    
+}
+
 #chatbot-chatgpt-erase-btn {
     background-color: #f1f1f1;
     border: none;

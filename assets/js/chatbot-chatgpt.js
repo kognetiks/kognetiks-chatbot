@@ -631,8 +631,22 @@ jQuery(document).ready(function ($) {
         if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
             // console.log('Chatbot: NOTICE: Enter key pressed on upload file button');
-            let $response = chatbot_chatgpt_upload_file_to_assistant();
+            let $response = chatbot_chatgpt_upload_files();
             $('#chatbot-chatgpt-upload-file-input').click();
+            let button = $(this);  // Store a reference to the button
+            setTimeout(function() {
+                button.blur();  // Remove focus from the button
+            }, 0);
+        }
+    });
+
+    // Add the keydown event listener to the upload mp3 button - Ver 2.0.1
+    $('#chatbot-chatgpt-upload-mp3').on('keydown', function(e) {
+        if (e.keyCode === 13  && !e.shiftKey) {
+            e.preventDefault();
+            console.log('Chatbot: NOTICE: Enter key pressed on upload mp3 button');
+            let $response = chatbot_chatgpt_upload_mp3();
+            $('#chatbot-chatgpt-upload-mp3-input').click();
             let button = $(this);  // Store a reference to the button
             setTimeout(function() {
                 button.blur();  // Remove focus from the button
@@ -768,7 +782,7 @@ jQuery(document).ready(function ($) {
             formData.append('file[]', fileField.files[i]);
         }
         // console.log('Chatbot: NOTICE: Files selected ', fileField.files);
-        formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
+        formData.append('action', 'chatbot_chatgpt_upload_files');
     
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
@@ -803,7 +817,61 @@ jQuery(document).ready(function ($) {
             },
         });
     });
+
+    $('#chatbot-chatgpt-upload-mp3-input').on('change', function(e) {
+
+        // console.log('Chatbot: NOTICE: MP3 selected');
+        
+        let fileField = e.target;
     
+        // Check if any files are selected
+        if (!fileField.files.length) {
+            // console.log('Chatbot: WARNING: No file selected');
+            return;
+        }
+    
+        let formData = new FormData();
+        // Append each file to the formData object
+        for (let i = 0; i < fileField.files.length; i++) {
+            // The 'files[]' name here is important for PHP to recognize it as an array of files
+            formData.append('file[]', fileField.files[i]);
+        }
+        // console.log('Chatbot: NOTICE: Files selected ', fileField.files);
+        formData.append('action', 'chatbot_chatgpt_upload_mp3');
+    
+        $.ajax({
+            url: chatbot_chatgpt_params.ajax_url,
+            method: 'POST',
+            timeout: timeout_setting, // Example timeout_setting value: 10000 for 10 seconds
+            data: formData,
+            processData: false,  // Tell jQuery not to process the data
+            contentType: false,  // Tell jQuery not to set contentType
+            beforeSend: function () {
+                showTypingIndicator();
+                submitButton.prop('disabled', true);
+            },
+            success: function(response) {
+                // console.log('Chatbot: NOTICE: Response from server', response);
+                $('#chatbot-chatgpt-upload-mp3-input').val(''); // Clear the file input after successful upload
+                appendMessage('File(s) successfully uploaded.', 'bot');
+            },
+            error: function(jqXHR, status, error) {
+                if(status === "timeout") {
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! This request timed out. Please try again.', 'error');
+                } else {
+                    // DIAG - Log the error - Ver 1.6.7
+                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! Failed to upload file. Please try again.', 'error');
+                }
+            },
+            complete: function () {
+                removeTypingIndicator();
+                submitButton.prop('disabled', false);
+            },
+        });
+    });
 
     // Add the click event listener to the clear button - Ver 1.8.6
     $('#chatbot-chatgpt-erase-btn').on('click', function() {

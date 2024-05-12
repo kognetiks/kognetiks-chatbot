@@ -224,7 +224,11 @@ function chatbot_chatgpt_settings_page_html(): void {
                 do_settings_sections('chatbot_chatgpt_api_model_voice');
                 echo '</div>';
 
-                // Image Settings - Ver 1.9.5
+                // Whisper Settings - Ver 2.0.1
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_api_model_whisper');
+                echo '</div>';
+                                // Image Settings - Ver 1.9.5
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_model_image');
                 echo '</div>';

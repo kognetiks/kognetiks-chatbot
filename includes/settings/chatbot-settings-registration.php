@@ -27,6 +27,10 @@ function chatbot_chatgpt_settings_init(): void {
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions_alternate'); // Alternate Assistant - Ver 1.9.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_beta_version'); // Beta Assistant - Ver 1.9.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_thread_retention_period'); // Thread Retention Period - Ver 1.9.9
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_prompt_tokens'); // Max Prompt Tokens - Ver 2.0.1
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_completion_tokens'); // Max Response Tokens - Ver 2.0.1
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_temperature'); // Temperature - Ver 2.0.1
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_top_p'); // Top P - Ver 2.0.1
 
     add_settings_section(
         'chatbot_chatgpt_custom_gpts_section',
@@ -92,6 +96,42 @@ function chatbot_chatgpt_settings_init(): void {
         'chatbot_chatgpt_assistant_instructions_alternate',
         'Alternate Assistant Instructions',
         'chatbot_chatgpt_assistant_instructions_alternate_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    // Max Prompt Tokens - Ver 2.0.1
+    add_settings_field(
+        'chatbot_chatgpt_max_prompt_tokens',
+        'Max Prompt Tokens',
+        'chatbot_chatgpt_max_prompt_tokens_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    // Max Response Tokens - Ver 2.0.1
+    add_settings_field(
+        'chatbot_chatgpt_max_completion_tokens',
+        'Max Response Tokens',
+        'chatbot_chatgpt_max_completion_tokens_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    // Temperature - Ver 2.0.1
+    add_settings_field(
+        'chatbot_chatgpt_temperature',
+        'Temperature',
+        'chatbot_chatgpt_temperature_callback',
+        'chatbot_chatgpt_custom_gpts',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    // Top P - Ver 2.0.1
+    add_settings_field(
+        'chatbot_chatgpt_top_p',
+        'Top P',
+        'chatbot_chatgpt_top_p_callback',
         'chatbot_chatgpt_custom_gpts',
         'chatbot_chatgpt_custom_gpts_section'
     );

@@ -64,6 +64,18 @@ function chatbot_chatgpt_api_model_voice_section_callback($args) {
     <?php
 }
 
+// Whisper Section Callback - Ver 2.0.1
+function chatbot_chatgpt_api_model_whisper_section_callback($args) {
+    ?>
+    <p>Configure the settings for the plugin when using whisper models. Some example shortcodes include:</p>
+    <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
+        <li><code>&#91;chatbot style="floating" model="whisper-1"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="whisper-1"&#93;</code> - Style is embedded, specific model</li>
+        <!-- <li><code>&#91;chatbot style=embedded model=whisper&#93;</code> - Style is embedded, default whisper model</li> -->
+    </ul>
+    <?php
+}
+
 function chatbot_chatgpt_api_model_advanced_section_callback($args) {
     ?>
     <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
@@ -201,7 +213,7 @@ function get_chat_completions_api_url() {
 // Timeout Settings Callback - Ver 1.8.8
 function chatbot_chatgpt_timeout_setting_callback($args) {
     // Get the saved chatbot_chatgpt_timeout value or default to 240
-    $timeout = esc_attr(get_option('chatbot_chatgpt_timeout_setting', '240'));
+    $timeout = esc_attr(get_option('chatbot_chatgpt_timeout_setting', 240));
     // Allow for a range of tokens between 5 and 500 in 5-step increments - Ver 1.8.8
     ?>
     <select id="chatbot_chatgpt_timeout_setting" name="chatbot_chatgpt_timeout_setting">
@@ -476,3 +488,57 @@ function chatbot_chatgpt_image_style_output_callback($args) {
     <?php
 
 }   
+
+// Whisper Model Option Callback - Ver 2.0.1
+function chatbot_chatgpt_whisper_model_option_callback($args) {
+    
+        // https://platform.openai.com/docs/models/whisper
+        // Options include whisper-1
+    
+        // Get the saved chatbot_chatgpt_whisper_model_option value or default to "whisper-1"
+        $whisper_model_option = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
+    
+        // Fetch models from the API
+        $whisper_models = get_openai_models();
+    
+        // Limit the models to whisper models
+        $whisper_models = array_filter($whisper_models, function($whisper_model) {
+            return strpos($whisper_model['id'], 'whisper') !== false;
+        });
+        
+        // Check for errors
+        if (is_string($whisper_models) && strpos($whisper_models, 'Error:') === 0) {
+            // If there's an error, display the hardcoded list
+            $whisper_model_option = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
+            ?>
+            <select id="chatbot_chatgpt_whisper_model_option" name="chatbot_chatgpt_whisper_model_option">
+                <option value="<?php echo esc_attr( 'whisper-1' ); ?>" <?php selected( $whisper_model_option, 'whisper-1' ); ?>><?php echo esc_html( 'whisper-1' ); ?></option>
+            </select>
+            <?php
+        } else {
+            // If models are fetched successfully, display them dynamically
+            ?>
+            <select id="chatbot_chatgpt_whisper_model_option" name="chatbot_chatgpt_whisper_model_option">
+                <?php foreach ($whisper_models as $whisper_model): ?>
+                    <option value="<?php echo esc_attr($whisper_model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_whisper_model_option'), $whisper_model['id']); ?>><?php echo esc_html($whisper_model['id']); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <?php  
+        }
+}
+
+// Whisper Output Format Options Callback - Ver 2.0.1
+function chatbot_chatgpt_whisper_response_format_callback($args) {
+    
+        // https://platform.openai.com/docs/models/whisper
+        // Options include mp3
+    
+        // Get the saved chatbot_chatgpt_whisper_response_format value or default to "text"
+        $whisper_response_format = esc_attr(get_option('chatbot_chatgpt_whisper_response_format', 'text'));
+        ?>
+        <select id="chatbot_chatgpt_whisper_response_format" name="chatbot_chatgpt_whisper_response_format">
+            <option value="text" <?php selected($whisper_response_format, 'text'); ?>>Text</option>
+        </select>
+        <?php
+    
+}

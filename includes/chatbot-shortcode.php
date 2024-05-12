@@ -316,6 +316,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_file_uploads = 'No';
     }
 
+    $chatbot_chatgpt_allow_mp3_uploads = 'no';
+    // DIAG - Diagnostics - Ver 2.0.1
+    back_trace( 'NOTICE', '$model: ' . $model);
+    // If $model starts with 'whisper' then allow file uploads - Ver 2.0.1
+    if (strpos($model, 'whisper') !== false) {
+        $chatbot_chatgpt_allow_mp3_uploads = 'yes';
+    }
+
     $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
 
     // Assume that the chatbot is NOT using KFlow - Ver 1.9.5
@@ -502,6 +510,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     });
                 </script>
             <?php endif; ?>
+            <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'yes'): ?>
+                <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
+                <button id="chatbot-chatgpt-upload-mp3" title="Upload an MP3">
+                    <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload MP3">
+                </button>
+                <script type="text/javascript">
+                    document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
+                        document.getElementById('chatbot-chatgpt-upload-mp3-input').click();
+                    });
+                </script>
+            <?php endif; ?>
             <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
                 <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
             </button>
@@ -606,6 +625,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
                             document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                        });
+                    </script>
+                <?php endif; ?>
+                <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'yes'): ?>
+                    <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
+                    <button id="chatbot-chatgpt-upload-mp3" title="Upload MP3">
+                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload MP3">
+                    </button>
+                    <script type="text/javascript">
+                        document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
+                            document.getElementById('chatbot-chatgpt-upload-mp3-input').click();
                         });
                     </script>
                 <?php endif; ?>

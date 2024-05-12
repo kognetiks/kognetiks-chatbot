@@ -14,14 +14,14 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Upload Multiple files to the Assistant
-function chatbot_chatgpt_upload_file_to_assistant(): array {
+function chatbot_chatgpt_upload_files(): array {
 
     global $session_id;
 
-    $upload_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
+    $uploads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
 
     // Ensure the directory exists or attempt to create it
-    if (!file_exists($upload_dir) && !wp_mkdir_p($upload_dir)) {
+    if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create results directory.')
         return array(
@@ -29,14 +29,14 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
             'message' => 'Oops! File upload failed.'
         );
     } else {
-        $index_file_path = $upload_dir . '/index.php';
+        $index_file_path = $uploads_dir . '/index.php';
         if (!file_exists($index_file_path)) {
             $file_content = "<?php\n// Silence is golden.\n?>";
             file_put_contents($index_file_path, $file_content);
         }
     }
     // Protect the directory - Ver 2.0.0
-    chmod($upload_dir, 0700);
+    chmod($uploads_dir, 0700);
 
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
@@ -111,6 +111,7 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
 
             unlink($file_path); // Delete the file after successful upload
             curl_close($ch);
+
         }
 
         return $responses;
@@ -120,6 +121,89 @@ function chatbot_chatgpt_upload_file_to_assistant(): array {
             'message' => 'Oops! Please select a file to upload.'
         );
     }
+    
+}
+
+// Upload files - Ver 2.0.1
+function chatbot_chatgpt_upload_mp3() {
+
+    global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+    global $script_data_array;
+    global $additional_instructions;
+    global $model;
+    global $voice;
+
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
+
+    $uploads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
+
+    // Ensure the directory exists or attempt to create it
+    if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
+        // Error handling, e.g., log the error or handle the failure appropriately
+        // back_trace ( 'ERROR', 'Failed to create results directory.')
+        return array(
+            'status' => 'error',
+            'message' => 'Oops! File upload failed.'
+        );
+    } else {
+        $index_file_path = $uploads_dir . '/index.php';
+        if (!file_exists($index_file_path)) {
+            $file_content = "<?php\n// Silence is golden.\n?>";
+            file_put_contents($index_file_path, $file_content);
+        }
+    }
+    // Protect the directory - Ver 2.0.0
+    chmod($uploads_dir, 0700);
+
+    // Check if files were uploaded
+    if (isset($_FILES['file']['name']) && is_array($_FILES['file']['name'])) {
+        for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
+            // Generate a random file name
+            $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
+            $file_path = $upload_dir . $newFileName;
+
+            // DIAG - Diagnostics - Ver 2.0.1
+            back_trace( 'NOTICE', '$file_path: ' . $file_path);
+
+            if ($_FILES['file']['error'][$i] > 0) {
+                $responses[] = array(
+                    'status' => 'error',
+                    'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
+                );
+                continue;
+            }
+
+            if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
+                $responses[] = array(
+                    'status' => 'error',
+                    'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
+                );
+                continue;
+            }
+        }
+
+        // Save the file name for later
+        // DIAG - Diagnostics - Ver 2.0.1
+        back_trace( 'NOTICE', '$newFileName: ' . $newFileName);
+        set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $newFileName, $session_id, $i);
+        $responses[] = array(
+            'status' => 'success',
+            'message' => "File uploaded successfully."
+        );
+        return $responses;
+
+    } else {
+        return array(
+            'status' => 'error',
+            'message' => 'Oops! Please select a file to upload.'
+        );
+    }
+
 }
 
 // Function to generate a random alphanumeric string - Ver 1.9.9
