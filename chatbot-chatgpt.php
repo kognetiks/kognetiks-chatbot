@@ -390,8 +390,14 @@ add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_co
 // Schedule the cleanup event if it's not already scheduled
 if (!wp_next_scheduled('chatbot_chatgpt_cleanup_transcript_files')) {
     wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_transcript_files');
-    // Deactivate old hooks - Ver 2.0.0
+}
+
+// Deactivate old hooks - Ver 2.0.1
+if(esc_attr(get_option('chatbot_chatgpt_cleanup_old_hooks') !== 'Completed')) {
+    // Deactivate old hooks - Ver 2.0.1
     wp_clear_scheduled_hook('chatbot_chatgpt_cleanup_transcripts');
+    // Then update the option
+    update_option('chatbot_chatgpt_cleanup_old_hooks', 'Completed');
 }
 
 // Schedule the audio file cleanup event if it's not already scheduled - Ver 1.9.9

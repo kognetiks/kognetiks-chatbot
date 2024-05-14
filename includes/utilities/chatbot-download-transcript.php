@@ -72,5 +72,7 @@ function chatbot_chatgpt_cleanup_transcripts_directory() {
             unlink($file);
         }
     }
+    // Create the index.php file if it does not exist
+    create_index_file($transcripts_dir);
 }
 add_action('chatbot_chatgpt_cleanup_transcript_files', 'chatbot_chatgpt_cleanup_transcripts_directory');

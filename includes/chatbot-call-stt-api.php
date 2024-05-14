@@ -134,7 +134,8 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     if ($response == '') {
         return 'No transcription text found.';
     } else {
-        unlink($audio_file_name); // Delete the audio file after successful transcription
+        // FIXME - Delete the audio file after successful transcription?
+        // unlink($audio_file_name); // Delete the audio file after successful transcription
         return $response;
     }
 

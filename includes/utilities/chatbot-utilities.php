@@ -78,3 +78,16 @@ function create_directory_and_file($results_dir_path) {
 
     return true;
 }
+
+// Function to create an index.php file
+function create_index_file($results_dir_path) {
+    
+    $index_file_path = $results_dir_path . '/index.php';
+
+    if (!file_exists($index_file_path)) {
+        $file_content = "<?php\n// Silence is golden.\n?>";
+        file_put_contents($index_file_path, $file_content);
+    }
+
+    return true;
+}

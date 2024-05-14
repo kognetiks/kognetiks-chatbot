@@ -374,5 +374,7 @@ function chatbot_chatgpt_cleanup_audio_directory() {
             unlink($file);
         }
     }
+    // Create the index.php file if it does not exist
+    create_index_file($audio_dir);
 }
 add_action('chatbot_chatgpt_cleanup_audio_files', 'chatbot_chatgpt_cleanup_audio_directory');

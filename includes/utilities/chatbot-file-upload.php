@@ -53,7 +53,7 @@ function chatbot_chatgpt_upload_files(): array {
         for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
             // Generate a random file name
             $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
-            $file_path = $upload_dir . $newFileName;
+            $file_path = $uploads_dir . $newFileName;
 
             if ($_FILES['file']['error'][$i] > 0) {
                 $responses[] = array(
@@ -165,7 +165,7 @@ function chatbot_chatgpt_upload_mp3() {
         for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
             // Generate a random file name
             $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
-            $file_path = $upload_dir . $newFileName;
+            $file_path = $uploads_dir . $newFileName;
 
             // DIAG - Diagnostics - Ver 2.0.1
             back_trace( 'NOTICE', '$file_path: ' . $file_path);
@@ -226,5 +226,7 @@ function chatbot_chatgpt_cleanup_uploads_directory() {
             unlink($file);
         }
     }
+    // Create the index.php file if it does not exist
+    create_index_file($uploads_dir);
 }
 add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_uploads_directory');
