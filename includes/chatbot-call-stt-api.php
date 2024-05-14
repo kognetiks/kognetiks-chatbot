@@ -127,8 +127,87 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
         return 'Error in cURL: ' . $error;
     }
 
+    //
+    // POST PROCESS THE TRANSCRIPTION
+    //
+
+    $transcription = $response;
+
+    // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
+
+    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+
+    // $system_prompt = 'You are a helpful assistant. Your task is to correct any spelling discrepancies in the transcribed text. Only add necessary punctuation such as periods, commas, and capitalization, and use only the context provided.';
+
+    // Prepare the body for the POST request
+    $body = array(
+        'model' => $model,
+        'max_tokens' => $max_tokens,
+        'temperature' => 0.5,
+        'messages' => [
+            array(
+                'role' => 'system',
+                'content' => $message
+            ),
+            array(
+                'role' => 'user',
+                'content' => $transcription
+            )],
+    );
+    
+    // Convert the body array to a JSON string
+    $body_string = json_encode($body);
+    
+    // Initialize cURL session
+    $ch = curl_init($api_url);
+    
+    // Set cURL options
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $body_string);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $api_key
+    ]);
+
+    // Execute the cURL request and capture the response
+    $response = curl_exec($ch);
+    $error = curl_error($ch);
+
     // DIAG - Diagnostics - Ver 2.0.1
     back_trace( 'NOTICE', '$response: ' . $response);
+    back_trace( 'NOTICE', '$error: ' . $error);
+
+    // Close the cURL session
+    curl_close($ch);
+
+    if ($error) {
+        return 'Error in cURL: ' . $error;
+    }
+
+    //
+    // END POST PROCESS THE TRANSCRIPTION
+    //
+
+    // DIAG - Diagnostics - Ver 2.0.1
+    back_trace( 'NOTICE', '$response: ' . $response);
+
+    // Decode the JSON response into an array
+    $response_array = json_decode($response, true);
+
+    // Check if the decoding was successful and the required keys exist
+    if (is_array($response_array) && isset($response_array['choices'][0]['message']['content'])) {
+        $analysis = $response_array['choices'][0]['message']['content'];
+    } else {
+        // Handle the error case here
+        // For example, you can set $analysis to an empty string or log an error message
+        $analysis = '';
+    }
+
+    $response = '**The transcription:** ' . $transcription . PHP_EOL . PHP_EOL . '**The analysis:** ' . $analysis;
 
     // if $response = '' then return 'No transcription text found.' else return the $response
     if ($response == '') {
