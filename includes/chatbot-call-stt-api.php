@@ -85,6 +85,14 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
         return 'Audio file does not exist.';
     }
 
+    // Ensure that the file is an audio file
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime_type = finfo_file($finfo, $audio_file_name);
+
+    if (strpos($mime_type, 'audio/') === false) {
+        return "Error: The file is not an audio file. Please upload an audio file.";
+    }
+
     // DIAG - Diagnostics - Ver 2.0.1
     back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
 
@@ -139,7 +147,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
 
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
 
-    // $system_prompt = 'You are a helpful assistant. Your task is to correct any spelling discrepancies in the transcribed text. Only add necessary punctuation such as periods, commas, and capitalization, and use only the context provided.';
+    // $additional_instructions = 'You are a helpful assistant. Your task is to correct any spelling discrepancies in the transcribed text. Only add necessary punctuation such as periods, commas, and capitalization, and use only the context provided.';
 
     // Prepare the body for the POST request
     $body = array(

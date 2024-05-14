@@ -47,6 +47,7 @@ function chatbot_chatgpt_upload_files(): array {
     }
 
     $responses = [];
+    $error_flag = false;
 
     // Check if files were uploaded
     if (isset($_FILES['file']['name']) && is_array($_FILES['file']['name'])) {
@@ -55,12 +56,29 @@ function chatbot_chatgpt_upload_files(): array {
             $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
             $file_path = $uploads_dir . $newFileName;
 
+            // DIAG - Diagnostics - Ver 2.0.1
+            back_trace( 'NOTICE', '$file_path: ' . $file_path);
+
             if ($_FILES['file']['error'][$i] > 0) {
                 $responses[] = array(
                     'status' => 'error',
                     'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
                 );
+                $error_flag = true;
+                back_trace( 'NOTICE', 'Error during file upload.');
                 continue;
+            }
+
+            // Cheched for valid upload file types
+            $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
+            if (is_array($validation_result) && isset($validation_result['error'])) {
+                $responses[] = array(
+                    'status' => 'error',
+                    'message' => $validation_result['error']
+                );
+                $error_flag = true;
+                back_trace( 'NOTICE', $validation_result['error']);
+                return $responses;
             }
 
             if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
@@ -68,6 +86,8 @@ function chatbot_chatgpt_upload_files(): array {
                     'status' => 'error',
                     'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
                 );
+                $error_flag = true;
+                back_trace( 'NOTICE', 'Error during file upload.');
                 continue;
             }
 
@@ -160,6 +180,9 @@ function chatbot_chatgpt_upload_mp3() {
     // Protect the directory - Ver 2.0.0
     chmod($uploads_dir, 0700);
 
+    $responses = [];
+    $error_flag = false;
+
     // Check if files were uploaded
     if (isset($_FILES['file']['name']) && is_array($_FILES['file']['name'])) {
         for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
@@ -175,7 +198,22 @@ function chatbot_chatgpt_upload_mp3() {
                     'status' => 'error',
                     'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
                 );
+                $error_flag = true;
+                back_trace( 'NOTICE', 'Error during file upload.');
                 continue;
+            }
+
+            // Cheched for valid upload file types
+            $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
+            if (is_array($validation_result) && isset($validation_result['error'])) {
+                $responses[] = array(
+                    'status' => 'error',
+                    'message' => $validation_result['error']
+                );
+                $error_flag = true;
+                back_trace( 'NOTICE', $validation_result['error']);
+                http_response_code(403); // Send a 403 Forbidden status code
+                return $responses;
             }
 
             if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
@@ -183,8 +221,16 @@ function chatbot_chatgpt_upload_mp3() {
                     'status' => 'error',
                     'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
                 );
+                $error_flag = true;
+                back_trace( 'NOTICE', 'Error during file upload.');
                 continue;
             }
+        }
+
+        if ($error_flag == true) {
+            back_trace( 'NOTICE', '$error_flag: ' . $error_flag);
+            http_response_code(403); // Send a 403 Forbidden status code
+            return $responses;
         }
 
         // Save the file name for later
@@ -230,3 +276,79 @@ function chatbot_chatgpt_cleanup_uploads_directory() {
     create_index_file($uploads_dir);
 }
 add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_uploads_directory');
+
+// File type validation - Ver 2.0.1
+function upload_validation($file) {
+    // Get the file type from the file name.
+    $file_type = wp_check_filetype($file['name']);
+
+    // Extended allowed file extensions and MIME types
+    $allowed_types = array(
+        'csv' => 'text/csv',
+        'doc' => 'application/msword',
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'gif' => 'image/gif',
+        'jpeg' => 'image/jpeg',
+        'jpg' => 'image/jpeg',
+        'mp3' => 'audio/mpeg',
+        'mp4' => 'video/mp4',
+        'oga' => 'audio/ogg',
+        'ogg' => 'audio/ogg',
+        'ogv' => 'video/ogg',
+        'pdf' => 'application/pdf',
+        'png' => 'image/png',
+        'ppt' => 'application/vnd.ms-powerpoint',
+        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'rtf' => 'application/rtf',
+        'svg' => 'image/svg+xml',
+        'txt' => 'text/plain',
+        'wav' => 'audio/wav',
+        'webm' => 'video/webm',
+        'xls' => 'application/vnd.ms-excel',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'xml' => 'application/xml',
+    );
+
+    // Check if the file type and extension are allowed
+    if (!array_key_exists($file_type['ext'], $allowed_types) || $allowed_types[$file_type['ext']] != $file_type['type']) {
+        $file['error'] = 'Invalid file type or extension.';
+        // DIAG - Diagnostics - Ver 2.0.1
+        back_trace( 'ERROR', 'Invalid file type or extension.');
+        return $file;
+    }
+
+    // Optional: Open the file and perform content-based checks for specific file types
+    $handle = fopen($file['tmp_name'], 'r');
+    $file_content = fread($handle, 1024); // Read the first 1024 bytes
+    fclose($handle);
+
+    $file_content = file_get_contents($file['tmp_name']);
+    $content_check_result = deep_content_check($file_content);
+    
+    $content_check_results = false;
+    if ($content_check_result !== true) {
+        $file['error'] = $content_check_result;
+        back_trace( 'ERROR', $content_check_result);
+        return $file;
+    }
+
+    back_trace( 'NOTICE', 'File type and extension are allowed.');
+
+    // If there's no error, return the file without the 'error' key
+    unset($file['error']);
+
+    return $file;
+
+}
+add_filter('wp_handle_upload_prefilter', 'upload_validation');
+
+// Deep content-based security checks - Ver 2.0.1
+function deep_content_check($file_content) {
+    $patterns = ['/\<\?php/i', '/\<script\>/i', '/\<svg/i', '/onerror/i', '/onload/i', '/data:/i', '/eval\(/i'];
+    foreach ($patterns as $pattern) {
+        if (preg_match($pattern, $file_content)) {
+            return 'Security error: Dangerous content detected!';
+        }
+    }
+    return true;
+}
