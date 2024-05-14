@@ -228,6 +228,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 2.0.1 =
+* Supports OpenAI's latest model gpt-4o and gpt-4o-2024-05-13
 * Max Prompt Tokens - Assistants
 * Max Completion Tokens - Assistants
 * Temperature - Assistants

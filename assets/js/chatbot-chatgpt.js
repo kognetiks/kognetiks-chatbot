@@ -810,6 +810,7 @@ jQuery(document).ready(function ($) {
     
         let formData = new FormData();
         // Append each file to the formData object - Updated - Ver 2.0.1
+        var hasDisallowedFile = false;
         for (var i = 0; i < fileField.files.length; i++) {
             var file = fileField.files[i];
             var ext = getFileExtension(file.name).toLowerCase();
@@ -817,10 +818,16 @@ jQuery(document).ready(function ($) {
 
             if (disallowedFileTypes.includes(fileType) || disallowedExtensions.includes(ext)) {
                 console.log('Disallowed file type or extension: ' + file.name);
-                return;
+                hasDisallowedFile = true;
+                appendMessage('Oops! Unsupported file type. Please try again.', 'error');
+                break;
             } else {
                 formData.append('file[]', file);
             }
+        }
+
+        if (hasDisallowedFile) {
+            return;
         }
         // console.log('Chatbot: NOTICE: Files selected ', fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_files');
@@ -873,6 +880,7 @@ jQuery(document).ready(function ($) {
     
         let formData = new FormData();
         // Append each file to the formData object - Updated - Ver 2.0.1
+        var hasDisallowedFile = false;
         for (var i = 0; i < fileField.files.length; i++) {
             var file = fileField.files[i];
             var ext = getFileExtension(file.name).toLowerCase();
@@ -880,10 +888,17 @@ jQuery(document).ready(function ($) {
 
             if (disallowedFileTypes.includes(fileType) || disallowedExtensions.includes(ext)) {
                 console.log('Disallowed file type or extension: ' + file.name);
-                return;
+                hasDisallowedFile = true;
+                appendMessage('Oops! Unsupported file type. Please try again.', 'error');
+                break;
             } else {
                 formData.append('file[]', file);
             }
+        }
+
+        if (hasDisallowedFile) {
+            return;
+
         }
         // console.log('Chatbot: NOTICE: Files selected ', fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_mp3');
@@ -900,7 +915,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                // console.log('Chatbot: NOTICE: Response from server', response);
+                console.log('Chatbot: NOTICE: Response from server', response);
                 $('#chatbot-chatgpt-upload-mp3-input').val(''); // Clear the file input after successful upload
                 appendMessage('File(s) successfully uploaded.', 'bot');
             },

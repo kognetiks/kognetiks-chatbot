@@ -203,6 +203,19 @@ function chatbot_chatgpt_upload_mp3() {
                 continue;
             }
 
+            // Check for audio file types
+            $audio_file_types = array('audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav');
+            if (!in_array($_FILES['file']['type'][$i], $audio_file_types)) {
+                $responses[] = array(
+                    'status' => 'error',
+                    'message' => 'Invalid audio file type. Please upload an MP3, OGG, or WAV file.'
+                );
+                $error_flag = true;
+                back_trace( 'NOTICE', 'Invalid audio file type.');
+                http_response_code(415); // Send a 415 Unsupported Media Type status code
+                continue;
+            }
+
             // Cheched for valid upload file types
             $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
             if (is_array($validation_result) && isset($validation_result['error'])) {
