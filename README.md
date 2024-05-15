@@ -31,7 +31,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's New in Version 2.0.0
 
-- **Revised Knowledge Navigtor Settings:** Reground similar options together on this settings tab including: Suppress Learning Messages, Customer Learnings Messages, and Enhanced Response Limit.
+- **Revised Knowledge Navigator Settings:** Reground similar options together on this settings tab including: Suppress Learning Messages, Customer Learnings Messages, and Enhanced Response Limit.
 
 - **Read Aloud Option:** Added an option to allow the Read Aloud option, see API/Model > Voice Settings > Allow Read Aloud = Yes/No.
 

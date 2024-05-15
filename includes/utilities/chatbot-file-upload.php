@@ -133,7 +133,7 @@ function chatbot_chatgpt_upload_files(): array {
                         'status' => 'success',
                         'http_status' => $http_status,
                         'id' => $responseData['id'],
-                        'message' => "File {$newFileName} uploaded successfully."
+                        'message' => 'File ' . $newFileName . 'uploaded successfully.'
                     );
                 }
             }

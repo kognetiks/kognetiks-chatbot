@@ -89,7 +89,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime_type = finfo_file($finfo, $audio_file_name);
 
-    if (strpos($mime_type, 'audio/') === false && strpos($mime_type, 'video/') === false) {
+    if (!str_contains($mime_type, 'audio/') && !str_contains($mime_type, 'video/')) {
         return "Error: The file is not an audio or video file. Please upload an audio or video file.";
     }
 

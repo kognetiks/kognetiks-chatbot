@@ -230,7 +230,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 = 2.0.1 =
 * Support for OpenAI's latest models: gpt-4o and gpt-4o-2024-05-13
 
-= 2.0.1 Confiuration Options =
+= 2.0.1 Configuration Options =
 * Added Max Prompt Tokens setting for Assistants
   - Controls the maximum prompt token usage.
   - Example: If set to 500, prompts will be truncated at 500 tokens.

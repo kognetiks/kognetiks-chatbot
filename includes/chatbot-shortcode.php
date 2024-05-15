@@ -137,7 +137,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_chatgpt_assistant_alias = 'original'; // default value
     if (array_key_exists('assistant', $atts)) {
         $sanitized_assistant = sanitize_text_field($atts['assistant']);
-        if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0) {
+        if (in_array($sanitized_assistant, $valid_ids) || str_starts_with($sanitized_assistant, 'asst_')) {
             $chatbot_chatgpt_assistant_alias = $sanitized_assistant;
             // back_trace('NOTICE', '$assistant_id: ' . $chatbot_chatgpt_assistant_alias);
         } else {
@@ -321,7 +321,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // DIAG - Diagnostics - Ver 2.0.1
     // back_trace( 'NOTICE', '$model: ' . $model);
     // If $model starts with 'whisper' then allow file uploads - Ver 2.0.1
-    if (strpos($model, 'whisper') !== false) {
+    if (str_contains($model, 'whisper')) {
         $chatbot_chatgpt_allow_mp3_uploads = 'yes';
         $chatbot_chatgpt_allow_file_uploads = 'No';
     }

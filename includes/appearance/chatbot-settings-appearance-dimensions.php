@@ -27,7 +27,7 @@ function chatbot_chatgpt_appearance_width_wide_callback(): void {
     />
     <?php
     // check to make sure that the value ends with either 'px' or '%'
-    if (substr($chatbot_chatgpt_appearance_width_wide, -2) !== 'px' && substr($chatbot_chatgpt_appearance_width_wide, -1) !== '%') {
+    if (!str_ends_with($chatbot_chatgpt_appearance_width_wide, 'px') && !str_ends_with($chatbot_chatgpt_appearance_width_wide, '%')) {
         chatbot_chatgpt_general_admin_notice( 'Wide width must end with either "px" or "%".');
         update_option('chatbot_chatgpt_appearance_width_wide', '500px');
     } elseif (empty($chatbot_chatgpt_appearance_width_wide)) {
@@ -61,7 +61,7 @@ function chatbot_chatgpt_appearance_width_narrow_callback(): void {
     />
     <?php
     // check to make sure that the value ends with either 'px' or '%'
-    if (substr($chatbot_chatgpt_appearance_width_narrow, -2) !== 'px' && substr($chatbot_chatgpt_appearance_width_narrow, -1) !== '%') {
+    if (!str_ends_with($chatbot_chatgpt_appearance_width_narrow, 'px') && !str_ends_with($chatbot_chatgpt_appearance_width_narrow, '%')) {
         chatbot_chatgpt_general_admin_notice( 'Narrow width must end with either "px" or "%".');
         update_option('chatbot_chatgpt_appearance_width_narrow', '300px');
     } elseif(empty($chatbot_chatgpt_appearance_width_narrow)) {

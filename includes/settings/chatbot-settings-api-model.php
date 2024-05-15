@@ -140,11 +140,11 @@ function chatbot_chatgpt_model_choice_callback($args) {
 
     // Limit the models to chat models
     $models = array_filter($models, function($model) {
-        return strpos($model['id'], 'gpt') !== false;
+        return str_contains($model['id'], 'gpt');
     });
 
     // Check for errors
-    if (is_string($models) && strpos($models, 'Error:') === 0) {
+    if (is_string($models) && str_starts_with($models, 'Error:')) {
         // If there's an error, display the hardcoded list
         $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         ?>
@@ -256,11 +256,11 @@ function chatbot_chatgpt_voice_model_option_callback($args) {
 
     // Limit the models to voice models
     $voice_models = array_filter($voice_models, function($voice_model) {
-        return strpos($voice_model['id'], 'tts') !== false;
+        return str_contains($voice_model['id'], 'tts');
     });
     
     // Check for errors
-    if (is_string($voice_models) && strpos($voice_models, 'Error:') === 0) {
+    if (is_string($voice_models) && str_starts_with($voice_models, 'Error:')) {
         // If there's an error, display the hardcoded list
         $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
         ?>
@@ -352,11 +352,11 @@ function chatbot_chatgpt_image_model_option_callback($args) {
 
     // Limit the models to image models
     $image_models = array_filter($image_models, function($image_model) {
-        return strpos($image_model['id'], 'dall-e') !== false;
+        return str_contains($image_model['id'], 'dall-e');
     });
     
     // Check for errors
-    if (is_string($image_models) && strpos($image_models, 'Error:') === 0) {
+    if (is_string($image_models) && str_starts_with($image_models, 'Error:')) {
         // If there's an error, display the hardcoded list
         $image_model_option = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-3'));
         ?>
@@ -519,11 +519,11 @@ function chatbot_chatgpt_whisper_model_option_callback($args) {
     
         // Limit the models to whisper models
         $whisper_models = array_filter($whisper_models, function($whisper_model) {
-            return strpos($whisper_model['id'], 'whisper') !== false;
+            return str_contains($whisper_model['id'], 'whisper');
         });
         
         // Check for errors
-        if (is_string($whisper_models) && strpos($whisper_models, 'Error:') === 0) {
+        if (is_string($whisper_models) && str_starts_with($whisper_models, 'Error:')) {
             // If there's an error, display the hardcoded list
             $whisper_model_option = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
             ?>

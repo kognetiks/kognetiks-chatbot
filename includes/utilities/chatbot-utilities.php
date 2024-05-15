@@ -19,7 +19,7 @@ function is_mobile_device() {
     $mobile_agents = array('Mobile', 'Android', 'Silk/', 'Kindle', 'BlackBerry', 'Opera Mini', 'Opera Mobi', 'iPhone', 'iPad', 'iPod', 'Windows Phone', 'webOS', 'Symbian', 'IEMobile');
 
     foreach ($mobile_agents as $device) {
-        if (strpos($user_agent, $device) !== false) {
+        if (str_contains($user_agent, $device)) {
             return true; // Mobile device detected
         }
     }
