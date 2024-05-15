@@ -76,7 +76,7 @@ function chatbot_chatgpt_upload_files(): array {
                 exit;
             }
 
-            // Cheched for valid upload file types
+            // Checked for valid upload file types
             $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
             if (is_array($validation_result) && isset($validation_result['error'])) {
                 $responses[] = array(
@@ -236,7 +236,7 @@ function chatbot_chatgpt_upload_mp3() {
                 exit;
             }
 
-            // Cheched for valid upload file types
+            // Checked for valid upload file types
             $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
             if (is_array($validation_result) && isset($validation_result['error'])) {
                 $responses[] = array(
@@ -314,6 +314,7 @@ add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_uplo
 
 // File type validation - Ver 2.0.1
 function upload_validation($file) {
+
     // Get the file type from the file name.
     $file_type = wp_check_filetype($file['name']);
 
@@ -382,16 +383,20 @@ function upload_validation($file) {
     unset($file['error']);
 
     return $file;
+
 }
 add_filter('wp_handle_upload_prefilter', 'upload_validation');
 
 // Deep content-based security checks
 function deep_content_check($file_content) {
+
     $patterns = ['/\<\?php/i', '/\<script\>/i', '/\<svg/i', '/onerror/i', '/onload/i', '/data:/i', '/eval\(/i'];
     foreach ($patterns as $pattern) {
         if (preg_match($pattern, $file_content)) {
             return 'Security error: Dangerous content detected!';
         }
     }
+
     return true;
+    
 }
