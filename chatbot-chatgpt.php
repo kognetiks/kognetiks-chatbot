@@ -342,10 +342,10 @@ function chatbot_chatgpt_enqueue_scripts(): void {
 
     // Set visitor and logged in user limits - Ver 2.0.1
     if (is_user_logged_in()) {
-        back_trace( 'NOTICE', 'User is logged in');
+        // back_trace( 'NOTICE', 'User is logged in');
         $chatbot_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
     } else {
-        back_trace( 'NOTICE', 'User is NOT logged in');
+        // back_trace( 'NOTICE', 'User is NOT logged in');
         $chatbot_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
     }
 

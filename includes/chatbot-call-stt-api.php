@@ -152,6 +152,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $api_url = get_chat_completions_api_url();
 
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')));
 
     // $additional_instructions = 'You are a helpful assistant. Your task is to correct any spelling discrepancies in the transcribed text. Only add necessary punctuation such as periods, commas, and capitalization, and use only the context provided.';
 
@@ -217,7 +218,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
         $analysis = $response_array['choices'][0]['message']['content'];
     } else {
         // Handle the error case here
-        // For example, you can set $analysis to an empty string or log an error message
         $analysis = '';
     }
 
