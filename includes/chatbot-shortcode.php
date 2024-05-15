@@ -319,7 +319,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     $chatbot_chatgpt_allow_mp3_uploads = 'no';
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$model: ' . $model);
     // If $model starts with 'whisper' then allow file uploads - Ver 2.0.1
     if (strpos($model, 'whisper') !== false) {
         $chatbot_chatgpt_allow_mp3_uploads = 'yes';

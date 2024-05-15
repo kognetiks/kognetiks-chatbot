@@ -76,7 +76,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $audio_file_name = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
+    // back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
 
     $audio_file_name = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/' . $audio_file_name;
 
@@ -94,7 +94,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     }
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
+    // back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
 
     // Create a CURLFile object for the audio file
     $audio_file = new CURLFile($audio_file_name, $mime_type, basename($audio_file_name));
@@ -125,8 +125,8 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $error = curl_error($ch);
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$response: ' . $response);
-    back_trace( 'NOTICE', '$error: ' . $error);
+    // back_trace( 'NOTICE', '$response: ' . $response);
+    // back_trace( 'NOTICE', '$error: ' . $error);
 
     // Close the cURL session
     curl_close($ch);
@@ -201,8 +201,8 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $error = curl_error($ch);
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$response: ' . $response);
-    back_trace( 'NOTICE', '$error: ' . $error);
+    // back_trace( 'NOTICE', '$response: ' . $response);
+    // back_trace( 'NOTICE', '$error: ' . $error);
 
     // Close the cURL session
     curl_close($ch);
@@ -216,7 +216,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     //
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$response: ' . $response);
+    // back_trace( 'NOTICE', '$response: ' . $response);
 
     // Decode the JSON response into an array
     $response_array = json_decode($response, true);

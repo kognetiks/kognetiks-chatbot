@@ -172,7 +172,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     $top_p = (float) esc_attr(get_option('chatbot_chatgpt_top_p', 1.0));
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
+    // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
 
     $headers = array(
         "Content-Type: application/json",
@@ -208,12 +208,12 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     // Check HTTP response code
     if (http_response_code() != 200) {
         // DIAG - Diagnostics
-        back_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code()));
+        // back_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code()));
         // return "Error: HTTP response code " . http_response_code();
     }
 
     // DIAG - Diagnostics  Ver 2.0.1
-    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     return json_decode($response, true);
 }

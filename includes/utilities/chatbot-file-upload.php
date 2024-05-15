@@ -44,7 +44,7 @@ function chatbot_chatgpt_upload_files(): array {
             'status' => 'error',
             'message' => 'Oops! Your API key is missing. Please enter your API key in the Chatbot settings.'
         );
-        back_trace ( 'ERROR', 'API key is missing.');
+        // back_trace ( 'ERROR', 'API key is missing.');
         http_response_code(500); // Send a 500 Internal Server Error status code
         exit;
     }
@@ -60,7 +60,7 @@ function chatbot_chatgpt_upload_files(): array {
             $file_path = $uploads_dir . $newFileName;
 
             // DIAG - Diagnostics - Ver 2.0.1
-            back_trace( 'NOTICE', '$file_path: ' . $file_path);
+            // back_trace( 'NOTICE', '$file_path: ' . $file_path);
 
             if ($_FILES['file']['error'][$i] > 0) {
                 $responses[] = array(
@@ -68,7 +68,7 @@ function chatbot_chatgpt_upload_files(): array {
                     'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
                 );
                 $error_flag = true;
-                back_trace( 'NOTICE', 'Error during file upload.');
+                // back_trace( 'NOTICE', 'Error during file upload.');
                 http_response_code(415); // Send a 415 Unsupported Media Type status code
                 exit;
             }
@@ -81,7 +81,7 @@ function chatbot_chatgpt_upload_files(): array {
                     'message' => $validation_result['error']
                 );
                 $error_flag = true;
-                back_trace( 'NOTICE', $validation_result['error']);
+                // back_trace( 'NOTICE', $validation_result['error']);
                 http_response_code(415); // Send a 415 Unsupported Media Type status code
                 exit;
             }
@@ -92,7 +92,7 @@ function chatbot_chatgpt_upload_files(): array {
                     'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
                 );
                 $error_flag = true;
-                back_trace( 'NOTICE', 'Error during file upload.');
+                // back_trace( 'NOTICE', 'Error during file upload.');
                 http_response_code(415); // Send a 415 Unsupported Media Type status code
                 exit;
             }
@@ -200,7 +200,7 @@ function chatbot_chatgpt_upload_mp3() {
             $file_path = $uploads_dir . $newFileName;
 
             // DIAG - Diagnostics - Ver 2.0.1
-            back_trace( 'NOTICE', '$file_path: ' . $file_path);
+            // back_trace( 'NOTICE', '$file_path: ' . $file_path);
 
             if ($_FILES['file']['error'][$i] > 0) {
                 $responses[] = array(
@@ -208,7 +208,7 @@ function chatbot_chatgpt_upload_mp3() {
                     'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
                 );
                 $error_flag = true;
-                back_trace( 'NOTICE', 'Error during file upload.');
+                // back_trace( 'NOTICE', 'Error during file upload.');
                 http_response_code(415); // Send a 415 Unsupported Media Type status code
                 exit;
             }
@@ -225,7 +225,7 @@ function chatbot_chatgpt_upload_mp3() {
                     'message' => 'Invalid file type. Please upload an MP3, WAV, MP4, or WEBM file.'
                 );
                 $error_flag = true;
-                back_trace( 'NOTICE', 'Invalid file type.');
+                // back_trace( 'NOTICE', 'Invalid file type.');
                 http_response_code(415); // Send a 415 Unsupported Media Type status code
                 exit;
             }
@@ -238,7 +238,7 @@ function chatbot_chatgpt_upload_mp3() {
                     'message' => $validation_result['error']
                 );
                 $error_flag = true;
-                back_trace( 'ERROR', $validation_result['error']);
+                // back_trace( 'ERROR', $validation_result['error']);
                 http_response_code(415); // Send a 415 Unsupported Media Type status code
                 exit;
             }
@@ -249,7 +249,7 @@ function chatbot_chatgpt_upload_mp3() {
                     'message' => "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later."
                 );
                 $error_flag = true;
-                back_trace( 'NOTICE', 'Error during file upload.');
+                // back_trace( 'NOTICE', 'Error during file upload.');
                 http_response_code(415); // Send a 415 Unsupported Media Type status code
                 exit;
 
@@ -257,14 +257,14 @@ function chatbot_chatgpt_upload_mp3() {
         }
 
         if ($error_flag == true) {
-            back_trace( 'NOTICE', '$error_flag: ' . $error_flag);
+            // back_trace( 'NOTICE', '$error_flag: ' . $error_flag);
             http_response_code(403); // Send a 403 Forbidden status code
             return $responses;
         }
 
         // Save the file name for later
         // DIAG - Diagnostics - Ver 2.0.1
-        back_trace( 'NOTICE', '$newFileName: ' . $newFileName);
+        // back_trace( 'NOTICE', '$newFileName: ' . $newFileName);
         set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $newFileName, $session_id, $i);
         $responses[] = array(
             'status' => 'success',
@@ -351,7 +351,7 @@ function upload_validation($file) {
     // Check if the file type and extension are allowed
     if (!array_key_exists($file_type['ext'], $allowed_types) || $allowed_types[$file_type['ext']] != $file_type['type']) {
         $file['error'] = 'Invalid file type or extension.';
-        back_trace( 'ERROR', 'Invalid file type or extension.');
+        // back_trace( 'ERROR', 'Invalid file type or extension.');
         return $file;
     }
 
@@ -365,12 +365,12 @@ function upload_validation($file) {
         
         if ($content_check_result !== true) {
             $file['error'] = $content_check_result;
-            back_trace( 'ERROR', $content_check_result);
+            // back_trace( 'ERROR', $content_check_result);
             return $file;
         }
     }
 
-    back_trace( 'NOTICE', 'File type and extension are allowed.');
+    // back_trace( 'NOTICE', 'File type and extension are allowed.');
 
     // If there's no error, return the file without the 'error' key
     unset($file['error']);

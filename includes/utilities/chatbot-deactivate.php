@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_deactivate() {
 
     // DIAG - Log the activation
-    back_trace( 'NOTICE', 'Plugin deactivation started');
+    // back_trace( 'NOTICE', 'Plugin deactivation started');
 
     $t_chatbot_chatgpt_delete_data = esc_attr(get_option('chatbot_chatgpt_delete_data'));
 
@@ -28,7 +28,7 @@ function chatbot_chatgpt_deactivate() {
     update_option('chatbot_chatgpt_delete_data', $t_chatbot_chatgpt_delete_data);
 
     // DIAG - Log the activation
-    back_trace( 'NOTICE', 'Plugin deactivation completed');
+    // back_trace( 'NOTICE', 'Plugin deactivation completed');
 
 }
 

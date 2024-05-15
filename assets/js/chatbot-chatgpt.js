@@ -644,7 +644,7 @@ jQuery(document).ready(function ($) {
     $('#chatbot-chatgpt-upload-mp3').on('keydown', function(e) {
         if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
-            console.log('Chatbot: NOTICE: Enter key pressed on upload mp3 button');
+            // console.log('Chatbot: NOTICE: Enter key pressed on upload mp3 button');
             let $response = chatbot_chatgpt_upload_mp3();
             $('#chatbot-chatgpt-upload-mp3-input').click();
             let button = $(this);  // Store a reference to the button
@@ -826,7 +826,7 @@ jQuery(document).ready(function ($) {
             if (allowedFileTypes.includes(fileType) && allowedExtensions.includes(ext)) {
                 formData.append('file[]', file);
             } else {
-                console.log('Disallowed file type or extension: ' + file.name);
+                // console.log('Disallowed file type or extension: ' + file.name);
                 hasDisallowedFile = true;
                 appendMessage('Oops! Unsupported file type. Please try again.', 'error');
                 break;
@@ -875,7 +875,7 @@ jQuery(document).ready(function ($) {
 
     $('#chatbot-chatgpt-upload-mp3-input').on('change', function(e) {
 
-        console.log('Chatbot: NOTICE: MP3 selected');
+        // console.log('Chatbot: NOTICE: MP3 selected');
         
         let fileField = e.target;
     
@@ -896,7 +896,7 @@ jQuery(document).ready(function ($) {
             if (allowedFileTypes.includes(fileType) && allowedExtensions.includes(ext)) {
                 formData.append('file[]', file);
             } else {
-                console.log('Disallowed file type or extension: ' + file.name);
+                // console.log('Disallowed file type or extension: ' + file.name);
                 hasDisallowedFile = true;
                 appendMessage('Oops! Unsupported file type. Please try again.', 'error');
                 break;
@@ -922,7 +922,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                console.log('Chatbot: NOTICE: Response from server', response);
+                // console.log('Chatbot: NOTICE: Response from server', response);
                 $('#chatbot-chatgpt-upload-mp3-input').val(''); // Clear the file input after successful upload
                 appendMessage('File(s) successfully uploaded.', 'bot');
             },
