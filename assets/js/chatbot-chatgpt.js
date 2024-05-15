@@ -506,7 +506,7 @@ jQuery(document).ready(function ($) {
         let messageCount = localStorage.getItem('chatbot_chatgpt_message_count') || 0;
         messageCount++;
         localStorage.setItem('chatbot_chatgpt_message_count', messageCount);
-        
+      
         // If messageCount is greater than  messageLimit then don't send the message - Ver 1.9.6
         let messageLimit = localStorage.getItem('chatbot_chatgpt_message_limit_setting') || 999999;
         if (messageCount > messageLimit) {

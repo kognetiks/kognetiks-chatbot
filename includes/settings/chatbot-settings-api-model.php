@@ -25,6 +25,7 @@ function chatbot_chatgpt_model_settings_section_callback($args) {
 function chatbot_chatgpt_api_model_general_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p>
+    <p>The Chatbot Daily Message Limit applies to logged-in users. The Visitor Message Limit applies to non-logged-in users. The default is 999.</p>
     <?php
 }
 
@@ -104,7 +105,22 @@ function chatbot_chatgpt_message_limit_setting_callback($args) {
         ?>
     </select>
     <?php
+}
 
+// Visitor Message Limit - Ver 2.0.1
+function chatbot_chatgpt_visitor_message_limit_setting_callback($args) {
+    // Get the saved chatbot_chatgpt_visitor_message_limit_setting value or default to 999
+    $visitor_message_limit = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+    // Allow for a range of visitor message limits between 1 and 999 in 1-step increments - Ver 2.0.1
+    ?>
+    <select id="chatbot_chatgpt_visitor_message_limit_setting" name="chatbot_chatgpt_visitor_message_limit_setting">
+        <?php
+        for ($i=1; $i<=999; $i++) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($visitor_message_limit, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
 }
 
 // OpenAI Models

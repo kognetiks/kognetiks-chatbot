@@ -130,24 +130,15 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
 
     // Close the cURL session
     curl_close($ch);
-
-    // if ($error) {
-    //     return 'Error in cURL: ' . $error;
-    // }
-    
+ 
     // Decode the JSON response
     $response_data = json_decode($response, true);
     
     // Check if the response contains an 'error' key
     if (isset($response_data['error'])) {
-        // Handle the error based on its message
-        if ($response_data['error']['message'] === 'Maximum content size limit (26214400) exceeded (26362242 bytes read)') {
-            http_response_code(413); // Send a 413 Payload Too Large status code
-            exit('Error: The content size limit has been exceeded. Please reduce the size of the content you are trying to process.');
-        } else {
-            // Handle other errors here
-            exit('Error: ' . $response_data['error']['message']);
-        }
+        $sanitized_message = htmlspecialchars($response_data['error']['message'], ENT_QUOTES, 'UTF-8');
+        http_response_code(400); // Send a 400 Bad Request status code
+        exit('Error: ' . $sanitized_message);
     }
 
     //

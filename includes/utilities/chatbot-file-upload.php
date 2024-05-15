@@ -24,10 +24,13 @@ function chatbot_chatgpt_upload_files(): array {
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create results directory.')
-        return array(
+        $responses[] = array(
             'status' => 'error',
             'message' => 'Oops! File upload failed.'
         );
+        // back_trace ( 'ERROR', 'File upload failed');
+        http_response_code(500); // Send a 500 Internal Server Error status code
+        exit;
     } else {
         $index_file_path = $uploads_dir . '/index.php';
         if (!file_exists($index_file_path)) {
@@ -40,7 +43,7 @@ function chatbot_chatgpt_upload_files(): array {
 
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
-        return array(
+        $responses[] = array(
             'status' => 'error',
             'message' => 'Oops! Your API key is missing. Please enter your API key in the Chatbot settings.'
         );
@@ -175,10 +178,13 @@ function chatbot_chatgpt_upload_mp3() {
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create results directory.')
-        return array(
+        $responses[] = array(
             'status' => 'error',
             'message' => 'Oops! File upload failed.'
         );
+        // back_trace ( 'ERROR', 'File upload failed');
+        http_response_code(500); // Send a 500 Internal Server Error status code
+        exit;
     } else {
         $index_file_path = $uploads_dir . '/index.php';
         if (!file_exists($index_file_path)) {

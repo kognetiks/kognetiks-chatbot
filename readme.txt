@@ -253,6 +253,12 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
   - The model will try to match the style of the prompt, using proper capitalization and punctuation.
   - More Info: https://platform.openai.com/docs/guides/speech-to-text/prompting
 
+= 2.0.1 Interaction Limiting =
+* Expanded interaction limiting into limits for visitors and logged-in users.
+  - See the Chatbot Settings > API/Model tab
+  - Chatbot Daily Message Limit - this is for logged-in users
+  - Visitor Daily Message Limit - this is for casual visitors
+
 = 2.0.0 =
 * Revise Knowledge Navigator settings tab grouping similar options together
 * Grouped Suppress Learning Messages, Customer Learnings Messages, and Enhanced Response Limit together on the Knowledge Navigator tab
