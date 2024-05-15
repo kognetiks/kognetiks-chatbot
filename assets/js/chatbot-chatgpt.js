@@ -566,7 +566,7 @@ jQuery(document).ready(function ($) {
                         "As an artificial intelligence developed by OpenAI, "
                     ];
                     for (let prefix of prefixes) {
-                        if (botResponse.startsWith(prefix)) {
+                        if (typeof botResponse === 'string' && botResponse.startsWith(prefix)) {
                             botResponse = botResponse.slice(prefix.length);
                             break;
                         }
@@ -763,33 +763,40 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    // List of disallowed file types - Ver 2.0.1
-    var disallowedFileTypes = [
-        'application/x-msdownload',
-        'application/x-msdos-program',
-        'application/x-msdos-windows',
-        'application/x-dosexec',
-        'application/bat', 'application/x-bat',
-        'application/com', 'application/x-com',
-        'application/javascript',
-        'application/x-javascript',
-        'text/javascript',
-        'application/php',
-        'application/x-php',
-        'application/vnd.microsoft.portable-executable',
-        'text/html',
-        'text/css'
+    // List of allowed MIME types - Ver 2.0.1
+    var allowedFileTypes = [
+        'text/csv',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/gif',
+        'image/jpeg',
+        'audio/mpeg',
+        'video/mp4',
+        'video/mpeg',
+        'audio/m4a',
+        'application/pdf',
+        'image/png',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/rtf',
+        'image/svg+xml',
+        'text/plain',
+        'audio/wav',
+        'video/webm',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/xml',
+        'application/json',
+        'text/markdown',
+        'application/zip'
     ];
-    // List of disallowed extensions - Ver 2.0.1
-    var disallowedExtensions = [
-        '.7z', '.asp', '.aspx', '.bat', '.bin', '.cgi', '.class', '.cmd', '.com', '.dll', 
-        '.dotm', '.dotx', '.exe', '.gz',  '.hta', '.jar', '.js', '.jsp', '.lnk', '.pak', 
-        '.php', '.php3', '.php4', '.php5', '.phtml', '.pif', '.pl', '.potm', '.ppam', '.pptm', 
-        '.ps1', '.psd1', '.psm1', '.py',  '.rar', '.scr', '.shtml', '.svg', '.swf', '.tar', 
-        '.vb', '.vbs', '.xlam', '.xlsm', '.xltm', '.zip', '.manifest', '.msi', '.msp', '.msu',
-        '.sig'
+    // List of allowed extensions - Ver 2.0.1
+    var allowedExtensions = [
+        '.csv', '.doc', '.docx', '.gif', '.jpeg', '.jpg', '.mp3', '.mp4', 
+        '.mpeg', '.m4a', '.pdf', '.png', '.ppt', '.pptx', '.rtf', '.svg', 
+        '.txt', '.wav', '.webm', '.xls', '.xlsx', '.xml', '.json', '.md', '.zip'
     ];
-    
+
     // Function to get file extension - Ver 2.0.1
     function getFileExtension(filename) {
         var index = filename.lastIndexOf('.');
@@ -815,14 +822,14 @@ jQuery(document).ready(function ($) {
             var file = fileField.files[i];
             var ext = getFileExtension(file.name).toLowerCase();
             var fileType = file.type;
-
-            if (disallowedFileTypes.includes(fileType) || disallowedExtensions.includes(ext)) {
+            // Validate the file type and extension
+            if (allowedFileTypes.includes(fileType) && allowedExtensions.includes(ext)) {
+                formData.append('file[]', file);
+            } else {
                 console.log('Disallowed file type or extension: ' + file.name);
                 hasDisallowedFile = true;
                 appendMessage('Oops! Unsupported file type. Please try again.', 'error');
                 break;
-            } else {
-                formData.append('file[]', file);
             }
         }
 
@@ -885,14 +892,14 @@ jQuery(document).ready(function ($) {
             var file = fileField.files[i];
             var ext = getFileExtension(file.name).toLowerCase();
             var fileType = file.type;
-
-            if (disallowedFileTypes.includes(fileType) || disallowedExtensions.includes(ext)) {
+            // Validate the file type and extension
+            if (allowedFileTypes.includes(fileType) && allowedExtensions.includes(ext)) {
+                formData.append('file[]', file);
+            } else {
                 console.log('Disallowed file type or extension: ' + file.name);
                 hasDisallowedFile = true;
                 appendMessage('Oops! Unsupported file type. Please try again.', 'error');
                 break;
-            } else {
-                formData.append('file[]', file);
             }
         }
 

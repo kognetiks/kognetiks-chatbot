@@ -311,10 +311,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     
     $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
+    // With the introduction of 'chatGPT 4o' file uploads are now allowed - Ver 2.0.1
     // If assistant is set to 'original' then do not allow file uploads - Ver 1.7.9
-    if ($chatbot_chatgpt_assistant_alias == 'original') {
-        $chatbot_chatgpt_allow_file_uploads = 'No';
-    }
+    // if ($chatbot_chatgpt_assistant_alias == 'original') {
+    //     $chatbot_chatgpt_allow_file_uploads = 'No';
+    // }
 
     $chatbot_chatgpt_allow_mp3_uploads = 'no';
     // DIAG - Diagnostics - Ver 2.0.1
@@ -322,6 +323,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // If $model starts with 'whisper' then allow file uploads - Ver 2.0.1
     if (strpos($model, 'whisper') !== false) {
         $chatbot_chatgpt_allow_mp3_uploads = 'yes';
+        $chatbot_chatgpt_allow_file_uploads = 'No';
     }
 
     $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
@@ -512,7 +514,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'yes'): ?>
                 <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
-                <button id="chatbot-chatgpt-upload-mp3" title="Upload an MP3">
+                <button id="chatbot-chatgpt-upload-mp3" title="Upload an Audio/Video">
                     <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload MP3">
                 </button>
                 <script type="text/javascript">

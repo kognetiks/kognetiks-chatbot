@@ -44,6 +44,9 @@ function chatbot_chatgpt_upload_files(): array {
             'status' => 'error',
             'message' => 'Oops! Your API key is missing. Please enter your API key in the Chatbot settings.'
         );
+        back_trace ( 'ERROR', 'API key is missing.');
+        http_response_code(500); // Send a 500 Internal Server Error status code
+        exit;
     }
 
     $responses = [];
@@ -66,7 +69,8 @@ function chatbot_chatgpt_upload_files(): array {
                 );
                 $error_flag = true;
                 back_trace( 'NOTICE', 'Error during file upload.');
-                continue;
+                http_response_code(415); // Send a 415 Unsupported Media Type status code
+                exit;
             }
 
             // Cheched for valid upload file types
@@ -78,7 +82,8 @@ function chatbot_chatgpt_upload_files(): array {
                 );
                 $error_flag = true;
                 back_trace( 'NOTICE', $validation_result['error']);
-                return $responses;
+                http_response_code(415); // Send a 415 Unsupported Media Type status code
+                exit;
             }
 
             if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
@@ -88,7 +93,8 @@ function chatbot_chatgpt_upload_files(): array {
                 );
                 $error_flag = true;
                 back_trace( 'NOTICE', 'Error during file upload.');
-                continue;
+                http_response_code(415); // Send a 415 Unsupported Media Type status code
+                exit;
             }
 
             $ch = curl_init();
@@ -135,11 +141,14 @@ function chatbot_chatgpt_upload_files(): array {
         }
 
         return $responses;
+
     } else {
+        
         return array(
             'status' => 'error',
             'message' => 'Oops! Please select a file to upload.'
         );
+
     }
     
 }
@@ -200,20 +209,25 @@ function chatbot_chatgpt_upload_mp3() {
                 );
                 $error_flag = true;
                 back_trace( 'NOTICE', 'Error during file upload.');
-                continue;
+                http_response_code(415); // Send a 415 Unsupported Media Type status code
+                exit;
             }
 
-            // Check for audio file types
+            // Check for allow video and audio file types
+            $video_file_types = array('video/mp4', 'video/ogg', 'video/webm');
             $audio_file_types = array('audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav');
-            if (!in_array($_FILES['file']['type'][$i], $audio_file_types)) {
+
+            $allowed_file_types = array_merge($audio_file_types, $video_file_types);
+
+            if (!in_array($_FILES['file']['type'][$i], $allowed_file_types)) {
                 $responses[] = array(
                     'status' => 'error',
-                    'message' => 'Invalid audio file type. Please upload an MP3, OGG, or WAV file.'
+                    'message' => 'Invalid file type. Please upload an MP3, WAV, MP4, or WEBM file.'
                 );
                 $error_flag = true;
-                back_trace( 'NOTICE', 'Invalid audio file type.');
+                back_trace( 'NOTICE', 'Invalid file type.');
                 http_response_code(415); // Send a 415 Unsupported Media Type status code
-                continue;
+                exit;
             }
 
             // Cheched for valid upload file types
@@ -224,9 +238,9 @@ function chatbot_chatgpt_upload_mp3() {
                     'message' => $validation_result['error']
                 );
                 $error_flag = true;
-                back_trace( 'NOTICE', $validation_result['error']);
-                http_response_code(403); // Send a 403 Forbidden status code
-                return $responses;
+                back_trace( 'ERROR', $validation_result['error']);
+                http_response_code(415); // Send a 415 Unsupported Media Type status code
+                exit;
             }
 
             if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
@@ -236,7 +250,9 @@ function chatbot_chatgpt_upload_mp3() {
                 );
                 $error_flag = true;
                 back_trace( 'NOTICE', 'Error during file upload.');
-                continue;
+                http_response_code(415); // Send a 415 Unsupported Media Type status code
+                exit;
+
             }
         }
 
@@ -295,6 +311,13 @@ function upload_validation($file) {
     // Get the file type from the file name.
     $file_type = wp_check_filetype($file['name']);
 
+    // Whisper
+    // File uploads are currently limited to 25 MB and the following input file types are supported: 
+    // mp3, mp4, mpeg, mpga, m4a, wav, and webm.
+
+    // Supported file types
+    // https://platform.openai.com/docs/assistants/tools/file-search/supported-files
+
     // Extended allowed file extensions and MIME types
     $allowed_types = array(
         'csv' => 'text/csv',
@@ -305,9 +328,9 @@ function upload_validation($file) {
         'jpg' => 'image/jpeg',
         'mp3' => 'audio/mpeg',
         'mp4' => 'video/mp4',
-        'oga' => 'audio/ogg',
-        'ogg' => 'audio/ogg',
-        'ogv' => 'video/ogg',
+        'mpeg' => 'video/mpeg',
+        'mpga' => 'audio/mpeg',
+        'm4a' => 'audio/m4a',
         'pdf' => 'application/pdf',
         'png' => 'image/png',
         'ppt' => 'application/vnd.ms-powerpoint',
@@ -320,29 +343,31 @@ function upload_validation($file) {
         'xls' => 'application/vnd.ms-excel',
         'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'xml' => 'application/xml',
+        'json' => 'application/json',
+        'md' => 'text/markdown',
+        'zip' => 'application/zip',
     );
 
     // Check if the file type and extension are allowed
     if (!array_key_exists($file_type['ext'], $allowed_types) || $allowed_types[$file_type['ext']] != $file_type['type']) {
         $file['error'] = 'Invalid file type or extension.';
-        // DIAG - Diagnostics - Ver 2.0.1
         back_trace( 'ERROR', 'Invalid file type or extension.');
         return $file;
     }
 
-    // Optional: Open the file and perform content-based checks for specific file types
-    $handle = fopen($file['tmp_name'], 'r');
-    $file_content = fread($handle, 1024); // Read the first 1024 bytes
-    fclose($handle);
+    // Define file types for which to perform a deep content check
+    $deep_check_types = array('text/csv', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/xml', 'application/json', 'text/markdown');
 
-    $file_content = file_get_contents($file['tmp_name']);
-    $content_check_result = deep_content_check($file_content);
-    
-    $content_check_results = false;
-    if ($content_check_result !== true) {
-        $file['error'] = $content_check_result;
-        back_trace( 'ERROR', $content_check_result);
-        return $file;
+    // Only perform deep content check for certain file types
+    if (in_array($file_type['type'], $deep_check_types)) {
+        $file_content = file_get_contents($file['tmp_name']);
+        $content_check_result = deep_content_check($file_content);
+        
+        if ($content_check_result !== true) {
+            $file['error'] = $content_check_result;
+            back_trace( 'ERROR', $content_check_result);
+            return $file;
+        }
     }
 
     back_trace( 'NOTICE', 'File type and extension are allowed.');
@@ -351,11 +376,10 @@ function upload_validation($file) {
     unset($file['error']);
 
     return $file;
-
 }
 add_filter('wp_handle_upload_prefilter', 'upload_validation');
 
-// Deep content-based security checks - Ver 2.0.1
+// Deep content-based security checks
 function deep_content_check($file_content) {
     $patterns = ['/\<\?php/i', '/\<script\>/i', '/\<svg/i', '/onerror/i', '/onload/i', '/data:/i', '/eval\(/i'];
     foreach ($patterns as $pattern) {

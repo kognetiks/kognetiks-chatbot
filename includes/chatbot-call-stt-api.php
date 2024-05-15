@@ -89,15 +89,15 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime_type = finfo_file($finfo, $audio_file_name);
 
-    if (strpos($mime_type, 'audio/') === false) {
-        return "Error: The file is not an audio file. Please upload an audio file.";
+    if (strpos($mime_type, 'audio/') === false && strpos($mime_type, 'video/') === false) {
+        return "Error: The file is not an audio or video file. Please upload an audio or video file.";
     }
 
     // DIAG - Diagnostics - Ver 2.0.1
     back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
 
     // Create a CURLFile object for the audio file
-    $audio_file = new CURLFile($audio_file_name, 'audio/mpeg', basename($audio_file_name));
+    $audio_file = new CURLFile($audio_file_name, $mime_type, basename($audio_file_name));
 
     // Prepare the body for the POST request
     $body = array(
@@ -131,8 +131,23 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     // Close the cURL session
     curl_close($ch);
 
-    if ($error) {
-        return 'Error in cURL: ' . $error;
+    // if ($error) {
+    //     return 'Error in cURL: ' . $error;
+    // }
+    
+    // Decode the JSON response
+    $response_data = json_decode($response, true);
+    
+    // Check if the response contains an 'error' key
+    if (isset($response_data['error'])) {
+        // Handle the error based on its message
+        if ($response_data['error']['message'] === 'Maximum content size limit (26214400) exceeded (26362242 bytes read)') {
+            http_response_code(413); // Send a 413 Payload Too Large status code
+            exit('Error: The content size limit has been exceeded. Please reduce the size of the content you are trying to process.');
+        } else {
+            // Handle other errors here
+            exit('Error: ' . $response_data['error']['message']);
+        }
     }
 
     //
