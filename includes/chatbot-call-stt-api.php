@@ -32,12 +32,12 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     // Return 'COMING SOON: STT API is not yet implemented.';
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
-    back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
+    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Check for the API key
     if (empty($api_key) or $api_key == '[private]') {
@@ -63,9 +63,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
         // For supported languages see:
         // https://platform.openai.com/docs/guides/speech-to-text/supported-languages
         $api_url = 'https://api.openai.com/v1/audio/translations';
-    } else {
-        // Transcription API URL
-        $api_url = 'https://api.openai.com/v1/audio/transcriptions';
     }
 
     // Get the URL of the plugins directory
@@ -79,7 +76,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $audio_file_name = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
+    // back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
 
     $audio_file_name = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/' . $audio_file_name;
 
@@ -97,11 +94,14 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     }
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
+    // back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
 
     // Create a CURLFile object for the audio file
     $audio_file = new CURLFile($audio_file_name, $mime_type, basename($audio_file_name));
-    $audio_model = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'whisper-1'));
+    $audio_model = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
+
+    // DIAG - Diagnostics - Ver 2.0.1
+    back_trace( 'NOTICE', '$audio_model: ' . $audio_model);
 
     // Prepare the body for the POST request
     $body = array(
@@ -129,15 +129,15 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $error = curl_error($ch);
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$response: ' . $response);
-    back_trace( 'NOTICE', '$error: ' . $error);
+    // back_trace( 'NOTICE', '$response: ' . $response);
+    // back_trace( 'NOTICE', '$error: ' . $error);
 
     // Close the cURL session
     curl_close($ch);
-
+ 
     // Delete the file
     unlink($audio_file_name);
- 
+
     // Decode the JSON response
     $response_data = json_decode($response, true);
     
@@ -161,7 +161,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')));
 
-    // $additional_instructions = 'You are a helpful assistant. Your task is to correct any spelling discrepancies in the transcribed text. Only add necessary punctuation such as periods, commas, and capitalization, and use only the context provided.';
+    $additional_instructions = 'You are a helpful assistant. Your task is to correct any spelling discrepancies in the transcribed text. Only add necessary punctuation such as periods, commas, and capitalization, and use only the context provided.';
 
     // Prepare the body for the POST request
     $body = array(
@@ -200,8 +200,8 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $error = curl_error($ch);
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$response: ' . $response);
-    back_trace( 'NOTICE', '$error: ' . $error);
+    // back_trace( 'NOTICE', '$response: ' . $response);
+    // back_trace( 'NOTICE', '$error: ' . $error);
 
     // Close the cURL session
     curl_close($ch);
@@ -215,7 +215,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     //
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$response: ' . $response);
+    // back_trace( 'NOTICE', '$response: ' . $response);
 
     // Decode the JSON response into an array
     $response_array = json_decode($response, true);

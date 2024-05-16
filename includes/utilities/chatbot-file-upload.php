@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - File Uploads - Ver 1.7.6
+ * Kognetiks Chatbot for WordPress - File Uploads - Ver 1.7.6 - Updated for Ver 2.0.1
  *
  * This file contains the code for uploading files as part
  * in support of Custom GPT Assistants via the Chatbot.
