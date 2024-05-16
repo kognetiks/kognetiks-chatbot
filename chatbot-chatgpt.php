@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     2.0.0
+ * Version:     2.0.1
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.0');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.1');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -77,6 +77,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; //
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; // Image API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-stt-api.php'; // STT API - Ver 2.0.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
 
@@ -339,6 +340,15 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         // back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
+    // Set visitor and logged in user limits - Ver 2.0.1
+    if (is_user_logged_in()) {
+        // back_trace( 'NOTICE', 'User is logged in');
+        $chatbot_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
+    } else {
+        // back_trace( 'NOTICE', 'User is NOT logged in');
+        $chatbot_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+    }
+
     $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( '/assets/icons/', __FILE__ );
 
     // Localize the data for javascript
@@ -389,8 +399,14 @@ add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_co
 // Schedule the cleanup event if it's not already scheduled
 if (!wp_next_scheduled('chatbot_chatgpt_cleanup_transcript_files')) {
     wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_transcript_files');
-    // Deactivate old hooks - Ver 2.0.0
+}
+
+// Deactivate old hooks - Ver 2.0.1
+if(esc_attr(get_option('chatbot_chatgpt_cleanup_old_hooks') !== 'Completed')) {
+    // Deactivate old hooks - Ver 2.0.1
     wp_clear_scheduled_hook('chatbot_chatgpt_cleanup_transcripts');
+    // Then update the option
+    update_option('chatbot_chatgpt_cleanup_old_hooks', 'Completed');
 }
 
 // Schedule the audio file cleanup event if it's not already scheduled - Ver 1.9.9
@@ -655,7 +671,7 @@ function chatbot_chatgpt_send_message(): void {
             $script_data_array['model'] = $model;
             // Send message to TTS API - Text-to-speech - Ver 1.9.5
             $response = chatbot_chatgpt_call_tts_api($api_key, $message);
-        } elseif (str_starts_with($model,"whisper")) {
+        } elseif (str_starts_with($model,'whisper')) {
             $script_data_array['model'] = $model;
             // Send message to STT API - Speech-to-text - Ver 1.9.6
             $response = chatbot_chatgpt_call_stt_api($api_key, $message);
@@ -698,8 +714,12 @@ add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message
 add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 
 // Add action to upload files - Ver 1.7.6
-add_action('wp_ajax_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
-add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_file_to_assistant', 'chatbot_chatgpt_upload_file_to_assistant');
+add_action('wp_ajax_chatbot_chatgpt_upload_files', 'chatbot_chatgpt_upload_files');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_files', 'chatbot_chatgpt_upload_files');
+
+// Add action to upload files - Ver 1.7.6
+add_action('wp_ajax_chatbot_chatgpt_upload_mp3', 'chatbot_chatgpt_upload_mp3');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_mp3', 'chatbot_chatgpt_upload_mp3');
 
 // Add action to erase conversation - Ver 1.8.6
 add_action('wp_ajax_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation_handler');
@@ -802,7 +822,7 @@ function enqueue_greetings_script(): void {
         $user_field_name = substr($initial_greeting, strpos($initial_greeting, '[') + 1, strpos($initial_greeting, ']') - strpos($initial_greeting, '[') - 1);
 
         // If $initial_greeting contains "[$user_field_name]" then replace with field from DB
-        if (strpos($initial_greeting, '[' . $user_field_name . ']') !== false) {
+        if (str_contains($initial_greeting, '[' . $user_field_name . ']')) {
             $initial_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $initial_greeting);
         } else {
             $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
@@ -816,7 +836,7 @@ function enqueue_greetings_script(): void {
         $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
 
         // If $subsequent_greeting contains "[$user_field_name]" then replace with field from DB
-        if (strpos($subsequent_greeting, '[' . $user_field_name . ']') !== false) {
+        if (str_contains($subsequent_greeting, '[' . $user_field_name . ']')) {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $subsequent_greeting);
         } else {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);

@@ -27,6 +27,7 @@ function chatbot_chatgpt_api_settings_init(): void {
     // API/Model settings tab - Ver 1.3.0
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key', 'sanitize_api_key');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_message_limit_setting');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_visitor_message_limit_setting');
 
     add_settings_section(
         'chatbot_chatgpt_api_model_general_section',
@@ -51,6 +52,13 @@ function chatbot_chatgpt_api_settings_init(): void {
         'chatbot_chatgpt_api_model_general_section'
     );
 
+    add_settings_field(
+        'chatbot_chatgpt_visitor_message_limit_setting',
+        'Visitor Daily Message Limit',
+        'chatbot_chatgpt_visitor_message_limit_setting_callback',
+        'chatbot_chatgpt_api_model_general',
+        'chatbot_chatgpt_api_model_general_section'
+    );
 
     // Advanced Model Settings - Ver 1.9.5
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_base_url'); // Ver 1.8.1
@@ -128,7 +136,7 @@ function chatbot_chatgpt_api_settings_init(): void {
     // Voice Options - Ver 1.9.5
     add_settings_section(
         'chatbot_chatgpt_api_model_voice_section',
-        'Voice Settings',
+        'Voice Settings (Text to Speech)',
         'chatbot_chatgpt_api_model_voice_section_callback',
         'chatbot_chatgpt_api_model_voice'
     );
@@ -231,6 +239,34 @@ function chatbot_chatgpt_api_settings_init(): void {
         'chatbot_chatgpt_image_style_output_callback',
         'chatbot_chatgpt_api_model_image',
         'chatbot_chatgpt_api_model_image_section'
+    );
+
+    // Whisper Options - Ver 2.0.1
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_whisper_model_option');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_whisper_response_format');
+
+    // Image Options - Ver 1.9.5
+    add_settings_section(
+        'chatbot_chatgpt_api_model_whisper_section',
+        'Whisper Settings (Speech to Text)',
+        'chatbot_chatgpt_api_model_whisper_section_callback',
+        'chatbot_chatgpt_api_model_whisper'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_whisper_model_option',
+        'Whisper Model Default',
+        'chatbot_chatgpt_whisper_model_option_callback',
+        'chatbot_chatgpt_api_model_whisper',
+        'chatbot_chatgpt_api_model_whisper_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_whisper_response_format',
+        'Whisper Output Option',
+        'chatbot_chatgpt_whisper_response_format_callback',
+        'chatbot_chatgpt_api_model_whisper',
+        'chatbot_chatgpt_api_model_whisper_section'
     );
 
 }

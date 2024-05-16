@@ -46,7 +46,7 @@ function kn_enhance_context( $message ) {
     // Filter out any $enhancedMessage that are equal to a blank space
     $enhancedMessage = array_filter($enhancedMessage, function($enhancedMessage) {
         // return $enhancedMessage that do not start with "asst_" and is not in the specified array or a blank space
-        return substr($enhancedMessage, 0, 5) !== 'asst_' && !in_array($enhancedMessage, ['â', 'Ã¢', 'Ã°', 'Ã±', '']) && $enhancedMessage !== ' ';
+        return !str_starts_with($enhancedMessage, 'asst_') && !in_array($enhancedMessage, ['â', 'Ã¢', 'Ã°', 'Ã±', '']) && $enhancedMessage !== ' ';
     });
 
     // Find matches in the knowledge base

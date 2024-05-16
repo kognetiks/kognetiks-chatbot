@@ -19,34 +19,23 @@ function chatbot_chatgpt_deactivate() {
     // DIAG - Log the activation
     // back_trace( 'NOTICE', 'Plugin deactivation started');
 
-    // Logic to run during deactivation
-    // FIXME - THIS IS NOT DELETING THE PLUGIN - JUST DEACTIVATION
+    $t_chatbot_chatgpt_delete_data = esc_attr(get_option('chatbot_chatgpt_delete_data'));
 
-    // FIXME - Asked what data should be removed
-    // 
-    // DB - chatbot_chatgpt_conversation_log
-    // DB - chatbot_chatgpt_interactions
-    // DB - chatbot_chatgpt_knowledge_base
-    // DB - chatbot_chatgpt_knowledge_base_tfidf
+    if (empty($t_chatbot_chatgpt_delete_data or $t_chatbot_chatgpt_delete_data == 'no')) {      
+        chatbot_chatgpt_admin_notices();
+    }
 
-    // FIXME - Asked what transients should be removed
-    // 
-
-    // FIXME - Asked what options should be removed
-    //
-    // OPTIONS - *chatbot_chatgpt*
+    update_option('chatbot_chatgpt_delete_data', $t_chatbot_chatgpt_delete_data);
 
     // DIAG - Log the activation
     // back_trace( 'NOTICE', 'Plugin deactivation completed');
-
-    return;
 
 }
 
 // Delete Plugin Data Notice - Ver 1.9.9
 add_action('admin_notices', 'chatbot_chatgpt_admin_notices');
 function chatbot_chatgpt_admin_notices() {
-    $chatbot_chatgpt_delete_data = get_option('chatbot_chatgpt_delete_data');
+    $chatbot_chatgpt_delete_data = esc_attr(get_option('chatbot_chatgpt_delete_data'));
     if (empty($chatbot_chatgpt_delete_data)) {
         echo '<div class="notice notice-warning is-dismissible">
             <p><strong>Kognetiks Chatbot:</strong> Remember to set your data deletion preferences in the plugin settings on the Messages tab if you plan to uninstall the plugin.</p>
@@ -91,7 +80,7 @@ function chatbot_chatgpt_uninstall(){
         $crons = _get_cron_array();
         foreach ($crons as $timestamp => $cron) {
             foreach ($cron as $hook => $events) {
-                if (strpos($hook, 'chatbot_chatgpt') !== false) {
+                if (str_contains($hook, 'chatbot_chatgpt')) {
                     foreach ($events as $event) {
                         wp_unschedule_event($timestamp, $hook, $event['args']);
                     }
@@ -110,4 +99,3 @@ function chatbot_chatgpt_uninstall(){
 
     return;
 }
-

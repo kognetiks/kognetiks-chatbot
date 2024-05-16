@@ -9,6 +9,8 @@
  */
 
 // If this file is called directly, abort.
+use JetBrains\PhpStorm\NoReturn;
+
 if ( ! defined( 'WPINC' ) ) {
     die;
 }
@@ -292,7 +294,7 @@ function chatbot_chatgpt_read_aloud($message) {
 add_action('wp_ajax_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
 
-// Setup the cron job to delete the audio file after 2 hours
+// Set up the cron job to delete the audio file after 2 hours
 function chatbot_chatgpt_delete_audio_file_id( $file_id ) {
 
     global $session_id;
@@ -374,5 +376,7 @@ function chatbot_chatgpt_cleanup_audio_directory() {
             unlink($file);
         }
     }
+    // Create the index.php file if it does not exist
+    create_index_file($audio_dir);
 }
 add_action('chatbot_chatgpt_cleanup_audio_files', 'chatbot_chatgpt_cleanup_audio_directory');

@@ -146,3 +146,64 @@ function chatbot_chatgpt_thread_retention_period_callback($args) {
     </select>
     <?php
 }
+
+// Set chatbot_chatgpt_max_prompt_tokens - Ver 2.0.1
+// https://platform.openai.com/docs/assistants/how-it-works/max-completion-and-max-prompt-tokens
+function chatbot_chatgpt_max_prompt_tokens_callback($args) {
+    $max_prompt_tokens = esc_attr(get_option('chatbot_chatgpt_max_prompt_tokens', 20000));
+    ?>
+    <select id="chatbot_chatgpt_max_prompt_tokens" name="chatbot_chatgpt_max_prompt_tokens">
+        <?php
+        for ($i = 1000; $i <= 100000; $i += 1000) {
+            echo '<option value="' . $i . '" ' . selected($max_prompt_tokens, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
+// Set chatbot_chatgpt_max_completion_tokens - Ver 2.0.1
+// https://platform.openai.com/docs/assistants/how-it-works/max-completion-and-max-prompt-tokens
+function chatbot_chatgpt_max_completion_tokens_callback($args) {
+    $max_completion_tokens = esc_attr(get_option('chatbot_chatgpt_max_completion_tokens', 20000));
+    ?>
+    <select id="chatbot_chatgpt_max_completion_tokens" name="chatbot_chatgpt_max_completion_tokens">
+        <?php
+        for ($i = 1000; $i <= 100000; $i += 1000) {
+            echo '<option value="' . $i . '" ' . selected($max_completion_tokens, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+    ?>
+    </select>
+    <?php
+}
+
+// Set chatbot_chatgpt_temperature - Ver 2.0.1
+// https://platform.openai.com/docs/assistants/how-it-works/temperature
+function chatbot_chatgpt_temperature_callback($args) {
+    $temperature = esc_attr(get_option('chatbot_chatgpt_temperature', 1.00));
+    ?>
+    <select id="chatbot_chatgpt_temperature" name="chatbot_chatgpt_temperature">
+        <?php
+        for ($i = 0.01; $i <= 2.01; $i += 0.01) {
+            echo '<option value="' . $i . '" ' . selected($temperature, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
+// Set chatbot_chatgpt_top_p - Ver 2.0.1
+// https://platform.openai.com/docs/assistants/how-it-works/top-p
+function chatbot_chatgpt_top_p_callback($args) {
+    $top_p = esc_attr(get_option('chatbot_chatgpt_top_p', 1.00));
+    ?>
+    <select id="chatbot_chatgpt_top_p" name="chatbot_chatgpt_top_p">
+        <?php
+        for ($i = 0.01; $i <= 1.01; $i += 0.01) {
+            echo '<option value="' . $i . '" ' . selected($top_p, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+

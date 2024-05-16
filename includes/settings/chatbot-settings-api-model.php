@@ -25,6 +25,7 @@ function chatbot_chatgpt_model_settings_section_callback($args) {
 function chatbot_chatgpt_api_model_general_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p>
+    <p>The Chatbot Daily Message Limit applies to logged-in users. The Visitor Message Limit applies to non-logged-in users. The default is 999.</p>
     <?php
 }
 
@@ -64,6 +65,18 @@ function chatbot_chatgpt_api_model_voice_section_callback($args) {
     <?php
 }
 
+// Whisper Section Callback - Ver 2.0.1
+function chatbot_chatgpt_api_model_whisper_section_callback($args) {
+    ?>
+    <p>Configure the settings for the plugin when using whisper models. Some example shortcodes include:</p>
+    <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
+        <li><code>&#91;chatbot style="floating" model="whisper-1"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="whisper-1"&#93;</code> - Style is embedded, specific model</li>
+        <!-- <li><code>&#91;chatbot style=embedded model=whisper&#93;</code> - Style is embedded, default whisper model</li> -->
+    </ul>
+    <?php
+}
+
 function chatbot_chatgpt_api_model_advanced_section_callback($args) {
     ?>
     <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
@@ -92,7 +105,22 @@ function chatbot_chatgpt_message_limit_setting_callback($args) {
         ?>
     </select>
     <?php
+}
 
+// Visitor Message Limit - Ver 2.0.1
+function chatbot_chatgpt_visitor_message_limit_setting_callback($args) {
+    // Get the saved chatbot_chatgpt_visitor_message_limit_setting value or default to 999
+    $visitor_message_limit = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+    // Allow for a range of visitor message limits between 1 and 999 in 1-step increments - Ver 2.0.1
+    ?>
+    <select id="chatbot_chatgpt_visitor_message_limit_setting" name="chatbot_chatgpt_visitor_message_limit_setting">
+        <?php
+        for ($i=1; $i<=999; $i++) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($visitor_message_limit, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
 }
 
 // OpenAI Models
@@ -112,11 +140,11 @@ function chatbot_chatgpt_model_choice_callback($args) {
 
     // Limit the models to chat models
     $models = array_filter($models, function($model) {
-        return strpos($model['id'], 'gpt') !== false;
+        return str_contains($model['id'], 'gpt');
     });
 
     // Check for errors
-    if (is_string($models) && strpos($models, 'Error:') === 0) {
+    if (is_string($models) && str_starts_with($models, 'Error:')) {
         // If there's an error, display the hardcoded list
         $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         ?>
@@ -201,7 +229,7 @@ function get_chat_completions_api_url() {
 // Timeout Settings Callback - Ver 1.8.8
 function chatbot_chatgpt_timeout_setting_callback($args) {
     // Get the saved chatbot_chatgpt_timeout value or default to 240
-    $timeout = esc_attr(get_option('chatbot_chatgpt_timeout_setting', '240'));
+    $timeout = esc_attr(get_option('chatbot_chatgpt_timeout_setting', 240));
     // Allow for a range of tokens between 5 and 500 in 5-step increments - Ver 1.8.8
     ?>
     <select id="chatbot_chatgpt_timeout_setting" name="chatbot_chatgpt_timeout_setting">
@@ -228,11 +256,11 @@ function chatbot_chatgpt_voice_model_option_callback($args) {
 
     // Limit the models to voice models
     $voice_models = array_filter($voice_models, function($voice_model) {
-        return strpos($voice_model['id'], 'tts') !== false;
+        return str_contains($voice_model['id'], 'tts');
     });
     
     // Check for errors
-    if (is_string($voice_models) && strpos($voice_models, 'Error:') === 0) {
+    if (is_string($voice_models) && str_starts_with($voice_models, 'Error:')) {
         // If there's an error, display the hardcoded list
         $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
         ?>
@@ -324,11 +352,11 @@ function chatbot_chatgpt_image_model_option_callback($args) {
 
     // Limit the models to image models
     $image_models = array_filter($image_models, function($image_model) {
-        return strpos($image_model['id'], 'dall-e') !== false;
+        return str_contains($image_model['id'], 'dall-e');
     });
     
     // Check for errors
-    if (is_string($image_models) && strpos($image_models, 'Error:') === 0) {
+    if (is_string($image_models) && str_starts_with($image_models, 'Error:')) {
         // If there's an error, display the hardcoded list
         $image_model_option = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-3'));
         ?>
@@ -476,3 +504,57 @@ function chatbot_chatgpt_image_style_output_callback($args) {
     <?php
 
 }   
+
+// Whisper Model Option Callback - Ver 2.0.1
+function chatbot_chatgpt_whisper_model_option_callback($args) {
+    
+        // https://platform.openai.com/docs/models/whisper
+        // Options include whisper-1
+    
+        // Get the saved chatbot_chatgpt_whisper_model_option value or default to "whisper-1"
+        $whisper_model_option = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
+    
+        // Fetch models from the API
+        $whisper_models = get_openai_models();
+    
+        // Limit the models to whisper models
+        $whisper_models = array_filter($whisper_models, function($whisper_model) {
+            return str_contains($whisper_model['id'], 'whisper');
+        });
+        
+        // Check for errors
+        if (is_string($whisper_models) && str_starts_with($whisper_models, 'Error:')) {
+            // If there's an error, display the hardcoded list
+            $whisper_model_option = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
+            ?>
+            <select id="chatbot_chatgpt_whisper_model_option" name="chatbot_chatgpt_whisper_model_option">
+                <option value="<?php echo esc_attr( 'whisper-1' ); ?>" <?php selected( $whisper_model_option, 'whisper-1' ); ?>><?php echo esc_html( 'whisper-1' ); ?></option>
+            </select>
+            <?php
+        } else {
+            // If models are fetched successfully, display them dynamically
+            ?>
+            <select id="chatbot_chatgpt_whisper_model_option" name="chatbot_chatgpt_whisper_model_option">
+                <?php foreach ($whisper_models as $whisper_model): ?>
+                    <option value="<?php echo esc_attr($whisper_model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_whisper_model_option'), $whisper_model['id']); ?>><?php echo esc_html($whisper_model['id']); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <?php  
+        }
+}
+
+// Whisper Output Format Options Callback - Ver 2.0.1
+function chatbot_chatgpt_whisper_response_format_callback($args) {
+    
+        // https://platform.openai.com/docs/models/whisper
+        // Options include mp3
+    
+        // Get the saved chatbot_chatgpt_whisper_response_format value or default to "text"
+        $whisper_response_format = esc_attr(get_option('chatbot_chatgpt_whisper_response_format', 'text'));
+        ?>
+        <select id="chatbot_chatgpt_whisper_response_format" name="chatbot_chatgpt_whisper_response_format">
+            <option value="text" <?php selected($whisper_response_format, 'text'); ?>>Text</option>
+        </select>
+        <?php
+    
+}

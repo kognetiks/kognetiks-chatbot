@@ -506,7 +506,7 @@ jQuery(document).ready(function ($) {
         let messageCount = localStorage.getItem('chatbot_chatgpt_message_count') || 0;
         messageCount++;
         localStorage.setItem('chatbot_chatgpt_message_count', messageCount);
-        
+      
         // If messageCount is greater than  messageLimit then don't send the message - Ver 1.9.6
         let messageLimit = localStorage.getItem('chatbot_chatgpt_message_limit_setting') || 999999;
         if (messageCount > messageLimit) {
@@ -566,7 +566,7 @@ jQuery(document).ready(function ($) {
                         "As an artificial intelligence developed by OpenAI, "
                     ];
                     for (let prefix of prefixes) {
-                        if (botResponse.startsWith(prefix)) {
+                        if (typeof botResponse === 'string' && botResponse.startsWith(prefix)) {
                             botResponse = botResponse.slice(prefix.length);
                             break;
                         }
@@ -631,8 +631,22 @@ jQuery(document).ready(function ($) {
         if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
             // console.log('Chatbot: NOTICE: Enter key pressed on upload file button');
-            let $response = chatbot_chatgpt_upload_file_to_assistant();
+            let $response = chatbot_chatgpt_upload_files();
             $('#chatbot-chatgpt-upload-file-input').click();
+            let button = $(this);  // Store a reference to the button
+            setTimeout(function() {
+                button.blur();  // Remove focus from the button
+            }, 0);
+        }
+    });
+
+    // Add the keydown event listener to the upload mp3 button - Ver 2.0.1
+    $('#chatbot-chatgpt-upload-mp3').on('keydown', function(e) {
+        if (e.keyCode === 13  && !e.shiftKey) {
+            e.preventDefault();
+            // console.log('Chatbot: NOTICE: Enter key pressed on upload mp3 button');
+            let $response = chatbot_chatgpt_upload_mp3();
+            $('#chatbot-chatgpt-upload-mp3-input').click();
             let button = $(this);  // Store a reference to the button
             setTimeout(function() {
                 button.blur();  // Remove focus from the button
@@ -749,6 +763,46 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // List of allowed MIME types - Ver 2.0.1
+    var allowedFileTypes = [
+        'text/csv',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/gif',
+        'image/jpeg',
+        'audio/mpeg',
+        'video/mp4',
+        'video/mpeg',
+        'audio/m4a',
+        'application/pdf',
+        'image/png',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/rtf',
+        'image/svg+xml',
+        'text/plain',
+        'audio/wav',
+        'video/webm',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/xml',
+        'application/json',
+        'text/markdown',
+        'application/zip'
+    ];
+    // List of allowed extensions - Ver 2.0.1
+    var allowedExtensions = [
+        '.csv', '.doc', '.docx', '.gif', '.jpeg', '.jpg', '.mp3', '.mp4', 
+        '.mpeg', '.m4a', '.pdf', '.png', '.ppt', '.pptx', '.rtf', '.svg', 
+        '.txt', '.wav', '.webm', '.xls', '.xlsx', '.xml', '.json', '.md', '.zip'
+    ];
+
+    // Function to get file extension - Ver 2.0.1
+    function getFileExtension(filename) {
+        var index = filename.lastIndexOf('.');
+        return index < 0 ? '' : filename.substr(index);
+    }
+
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
 
         // console.log('Chatbot: NOTICE: File selected');
@@ -762,13 +816,28 @@ jQuery(document).ready(function ($) {
         }
     
         let formData = new FormData();
-        // Append each file to the formData object
-        for (let i = 0; i < fileField.files.length; i++) {
-            // The 'files[]' name here is important for PHP to recognize it as an array of files
-            formData.append('file[]', fileField.files[i]);
+        // Append each file to the formData object - Updated - Ver 2.0.1
+        var hasDisallowedFile = false;
+        for (var i = 0; i < fileField.files.length; i++) {
+            var file = fileField.files[i];
+            var ext = getFileExtension(file.name).toLowerCase();
+            var fileType = file.type;
+            // Validate the file type and extension
+            if (allowedFileTypes.includes(fileType) && allowedExtensions.includes(ext)) {
+                formData.append('file[]', file);
+            } else {
+                // console.log('Disallowed file type or extension: ' + file.name);
+                hasDisallowedFile = true;
+                appendMessage('Oops! Unsupported file type. Please try again.', 'error');
+                break;
+            }
+        }
+
+        if (hasDisallowedFile) {
+            return;
         }
         // console.log('Chatbot: NOTICE: Files selected ', fileField.files);
-        formData.append('action', 'chatbot_chatgpt_upload_file_to_assistant');
+        formData.append('action', 'chatbot_chatgpt_upload_files');
     
         $.ajax({
             url: chatbot_chatgpt_params.ajax_url,
@@ -803,7 +872,77 @@ jQuery(document).ready(function ($) {
             },
         });
     });
+
+    $('#chatbot-chatgpt-upload-mp3-input').on('change', function(e) {
+
+        // console.log('Chatbot: NOTICE: MP3 selected');
+        
+        let fileField = e.target;
     
+        // Check if any files are selected
+        if (!fileField.files.length) {
+            // console.log('Chatbot: WARNING: No file selected');
+            return;
+        }
+    
+        let formData = new FormData();
+        // Append each file to the formData object - Updated - Ver 2.0.1
+        var hasDisallowedFile = false;
+        for (var i = 0; i < fileField.files.length; i++) {
+            var file = fileField.files[i];
+            var ext = getFileExtension(file.name).toLowerCase();
+            var fileType = file.type;
+            // Validate the file type and extension
+            if (allowedFileTypes.includes(fileType) && allowedExtensions.includes(ext)) {
+                formData.append('file[]', file);
+            } else {
+                // console.log('Disallowed file type or extension: ' + file.name);
+                hasDisallowedFile = true;
+                appendMessage('Oops! Unsupported file type. Please try again.', 'error');
+                break;
+            }
+        }
+
+        if (hasDisallowedFile) {
+            return;
+
+        }
+        // console.log('Chatbot: NOTICE: Files selected ', fileField.files);
+        formData.append('action', 'chatbot_chatgpt_upload_mp3');
+    
+        $.ajax({
+            url: chatbot_chatgpt_params.ajax_url,
+            method: 'POST',
+            timeout: timeout_setting, // Example timeout_setting value: 10000 for 10 seconds
+            data: formData,
+            processData: false,  // Tell jQuery not to process the data
+            contentType: false,  // Tell jQuery not to set contentType
+            beforeSend: function () {
+                showTypingIndicator();
+                submitButton.prop('disabled', true);
+            },
+            success: function(response) {
+                // console.log('Chatbot: NOTICE: Response from server', response);
+                $('#chatbot-chatgpt-upload-mp3-input').val(''); // Clear the file input after successful upload
+                appendMessage('File(s) successfully uploaded.', 'bot');
+            },
+            error: function(jqXHR, status, error) {
+                if(status === "timeout") {
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! This request timed out. Please try again.', 'error');
+                } else {
+                    // DIAG - Log the error - Ver 1.6.7
+                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
+                    appendMessage('Error: ' + error, 'error');
+                    appendMessage('Oops! Failed to upload file. Please try again.', 'error');
+                }
+            },
+            complete: function () {
+                removeTypingIndicator();
+                submitButton.prop('disabled', false);
+            },
+        });
+    });
 
     // Add the click event listener to the clear button - Ver 1.8.6
     $('#chatbot-chatgpt-erase-btn').on('click', function() {
@@ -866,29 +1005,29 @@ jQuery(document).ready(function ($) {
     // Moved the css to the .css file - Refactored for Ver 1.7.3
     // Add the toggleChatbot() function - Ver 1.1.0
     function toggleChatbot() {
-    if (chatGptChatBot.is(':visible')) {
-        chatGptChatBot.hide();
-        chatGptOpenButton.show();
-        localStorage.setItem('chatbot_chatgpt_start_status', 'closed');
-    } else {
-        if (chatbot_chatgpt_display_style === 'floating') {
-            if (chatbot_chatgpt_width_setting === 'Wide') {
-                $('#chatbot-chatgpt').removeClass('chatbot-narrow chatbot-full').addClass('chatbot-wide');
+        if (chatGptChatBot.is(':visible')) {
+            chatGptChatBot.hide();
+            chatGptOpenButton.show();
+            localStorage.setItem('chatbot_chatgpt_start_status', 'closed');
+        } else {
+            if (chatbot_chatgpt_display_style === 'floating') {
+                if (chatbot_chatgpt_width_setting === 'Wide') {
+                    $('#chatbot-chatgpt').removeClass('chatbot-narrow chatbot-full').addClass('chatbot-wide');
+                } else {
+                    $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-full').addClass('chatbot-narrow');
+                }
+                chatGptChatBot.show();
+                chatGptOpenButton.hide();
             } else {
-                $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-full').addClass('chatbot-narrow');
+                $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-narrow').addClass('chatbot-full');
             }
             chatGptChatBot.show();
             chatGptOpenButton.hide();
-        } else {
-            $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-narrow').addClass('chatbot-full');
+            localStorage.setItem('chatbot_chatgpt_start_status', 'open');
+            // Removed in Ver 1.9.3
+            loadConversation();
+            scrollToBottom();
         }
-        chatGptChatBot.show();
-        chatGptOpenButton.hide();
-        localStorage.setItem('chatbot_chatgpt_start_status', 'open');
-        // Removed in Ver 1.9.3
-        loadConversation();
-        scrollToBottom();
-    }
     }
 
     // Add this function to maintain the chatbot status across page refreshes and sessions - Ver 1.1.0 and updated for Ver 1.4.1

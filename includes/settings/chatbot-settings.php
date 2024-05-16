@@ -99,6 +99,7 @@ function chatbot_chatgpt_settings_page_html(): void {
                         // New options for max tokens and width - Ver 1.4.2
                         let chatgptMaxTokensSettingInput = document.getElementById('chatbot_chatgpt_max_tokens_setting');
                         let chatgptMessageLimitSettingInput = document.getElementById('chatbot_chatgpt_message_limit_setting');
+                        let chatgptVisitorMessageLimitSettingInput = document.getElementById('chatbot_chatgpt_visitor_message_limit_setting');
                         let chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
                         // New options for diagnostics on/off - Ver 1.5.0
                         let chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
@@ -126,6 +127,7 @@ function chatbot_chatgpt_settings_page_html(): void {
                         // New options for max tokens and width - Ver 1.4.2
                         if(chatgptMaxTokensSettingInput) localStorage.setItem('chatbot_chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
                         if(chatgptMessageLimitSettingInput) localStorage.setItem('chatbot_chatgpt_message_limit_setting', chatgptMessageLimitSettingInput.value);
+                        if(chatgptVisitorMessageLimitSettingInput) localStorage.setItem('chatbot_chatgpt_visitor_message_limit_setting', chatgptVisitorMessageLimitSettingInput.value);
                         if(chatgptWidthSettingInput) localStorage.setItem('chatbot_chatgpt_width_setting', chatgptWidthSettingInput.value);
                         // Avatar Settings - Ver 1.5.0
                         if(chatgptAvatarIconSettingInput) localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', chatgptAvatarIconSettingInput.value);
@@ -224,7 +226,11 @@ function chatbot_chatgpt_settings_page_html(): void {
                 do_settings_sections('chatbot_chatgpt_api_model_voice');
                 echo '</div>';
 
-                // Image Settings - Ver 1.9.5
+                // Whisper Settings - Ver 2.0.1
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_api_model_whisper');
+                echo '</div>';
+                                // Image Settings - Ver 1.9.5
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_model_image');
                 echo '</div>';

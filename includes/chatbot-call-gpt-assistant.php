@@ -164,13 +164,27 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
 
+    // Get the max prompt and completion tokens - Ver 2.0.1
+    // https://platform.openai.com/docs/assistants/how-it-works/max-completion-and-max-prompt-tokens
+    $max_prompt_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_prompt_tokens', 20000));
+    $max_completion_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_completion_tokens', 20000));
+    $temperature = (float) esc_attr(get_option('chatbot_chatgpt_temperature', 1.0));
+    $top_p = (float) esc_attr(get_option('chatbot_chatgpt_top_p', 1.0));
+
+    // DIAG - Diagnostics - Ver 2.0.1
+    // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
+
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: " . $beta_version,
         "Authorization: Bearer " . $api_key
     );
     $data = array(
-        "assistant_id" => $assistant_id
+        "assistant_id" => $assistant_id,
+        "max_prompt_tokens" => $max_prompt_tokens,
+        "max_completion_tokens" => $max_completion_tokens,
+        "temperature" => $temperature,
+        "top_p" => $top_p,
     );
 
     $context = stream_context_create(array(
@@ -195,8 +209,11 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     if (http_response_code() != 200) {
         // DIAG - Diagnostics
         // back_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code()));
-        return "Error: HTTP response code " . http_response_code();
+        // return "Error: HTTP response code " . http_response_code();
     }
+
+    // DIAG - Diagnostics  Ver 2.0.1
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     return json_decode($response, true);
 }
