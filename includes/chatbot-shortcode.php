@@ -313,16 +313,16 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // With the introduction of 'chatGPT 4o' file uploads are now allowed - Ver 2.0.1
     // If assistant is set to 'original' then do not allow file uploads - Ver 1.7.9
-    // if ($chatbot_chatgpt_assistant_alias == 'original') {
-    //     $chatbot_chatgpt_allow_file_uploads = 'No';
-    // }
+    if ($chatbot_chatgpt_assistant_alias == 'original') {
+        $chatbot_chatgpt_allow_file_uploads = 'No';
+    }
 
-    $chatbot_chatgpt_allow_mp3_uploads = 'no';
+    $chatbot_chatgpt_allow_mp3_uploads = 'No';
     // DIAG - Diagnostics - Ver 2.0.1
     // back_trace( 'NOTICE', '$model: ' . $model);
     // If $model starts with 'whisper' then allow file uploads - Ver 2.0.1
     if (str_contains($model, 'whisper')) {
-        $chatbot_chatgpt_allow_mp3_uploads = 'yes';
+        $chatbot_chatgpt_allow_mp3_uploads = 'Yes';
         $chatbot_chatgpt_allow_file_uploads = 'No';
     }
 
@@ -512,7 +512,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     });
                 </script>
             <?php endif; ?>
-            <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'yes'): ?>
+            <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
                 <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
                 <button id="chatbot-chatgpt-upload-mp3" title="Upload an Audio/Video">
                     <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload MP3">
@@ -630,7 +630,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         });
                     </script>
                 <?php endif; ?>
-                <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'yes'): ?>
+                <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
                     <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
                     <button id="chatbot-chatgpt-upload-mp3" title="Upload MP3">
                         <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload MP3">
