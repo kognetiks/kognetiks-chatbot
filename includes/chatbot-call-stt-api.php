@@ -101,7 +101,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $audio_model = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
 
     // DIAG - Diagnostics - Ver 2.0.1
-    back_trace( 'NOTICE', '$audio_model: ' . $audio_model);
+    // back_trace( 'NOTICE', '$audio_model: ' . $audio_model);
 
     // Prepare the body for the POST request
     $body = array(
