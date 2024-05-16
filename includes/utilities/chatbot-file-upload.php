@@ -366,17 +366,16 @@ function upload_validation($file) {
     $deep_check_types = array('text/csv', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/xml', 'application/json', 'text/markdown');
 
     // Only perform deep content check for certain file types
-    if (in_array($file_type['type'], $deep_check_types)) {
-        $file_content = file_get_contents($file['tmp_name']);
-        $content_check_result = deep_content_check($file_content);
+    // if (in_array($file_type['type'], $deep_check_types)) {
+        // $file_content = file_get_contents($file['tmp_name']);
+        // $content_check_result = deep_content_check($file_path);
+        $content_check_result = deep_content_check($file['tmp_name']);
         
         if ($content_check_result !== true) {
             $file['error'] = $content_check_result;
             // back_trace( 'ERROR', $content_check_result);
             return $file;
         }
-    }
-
     // back_trace( 'NOTICE', 'File type and extension are allowed.');
 
     // If there's no error, return the file without the 'error' key
@@ -388,15 +387,41 @@ function upload_validation($file) {
 add_filter('wp_handle_upload_prefilter', 'upload_validation');
 
 // Deep content-based security checks
-function deep_content_check($file_content) {
+function deep_content_check($file_path) {
+    // Define patterns to look for potentially dangerous content
+    $patterns = [
+        '/<\?php/i',                            // PHP opening tag
+        '/<script\b[^>]*>(.*?)<\/script>/is',   // Script tags with content
+        '/<svg\b[^>]*>(.*?)<\/svg>/is',         // SVG tags with potential content
+        '/onerror\s*=/i',                       // Onerror attribute
+        '/onload\s*=/i',                        // Onload attribute
+        '/data:/i',                             // Data URIs
+        '/eval\s*\(/i',                         // Eval function
+        '/base64,/i',                           // Base64 data
+        '/<iframe\b[^>]*>(.*?)<\/iframe>/is',   // Iframe tags
+        '/<object\b[^>]*>(.*?)<\/object>/is',   // Object tags
+        '/<embed\b[^>]*>(.*?)<\/embed>/is',     // Embed tags
+        '/<applet\b[^>]*>(.*?)<\/applet>/is',   // Applet tags
+        '/<meta\b[^>]*>/i',                     // Meta tags
+    ];
 
-    $patterns = ['/\<\?php/i', '/\<script\>/i', '/\<svg/i', '/onerror/i', '/onload/i', '/data:/i', '/eval\(/i'];
-    foreach ($patterns as $pattern) {
-        if (preg_match($pattern, $file_content)) {
-            return 'Security error: Dangerous content detected!';
+    $handle = fopen($file_path, 'r');
+    if ($handle === false) {
+        return 'Security error: Unable to read the file.';
+    }
+
+    while (!feof($handle)) {
+        $chunk = fread($handle, 8192);  // Read in 8KB chunks
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $chunk)) {
+                fclose($handle);
+                return 'Security error: Potentially dangerous content found.';
+            }
         }
     }
 
+    fclose($handle);
+
     return true;
-    
+
 }
