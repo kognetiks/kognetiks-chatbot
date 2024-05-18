@@ -329,8 +329,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     if (strpos($model, 'gpt-4o') !== false) {
-        $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
-        $chatbot_chatgpt_allow_mp3_uploads = 'No';
+        // $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+        $chatbot_chatgpt_allow_file_uploads = 'No';
+        $chatbot_chatgpt_allow_mp3_uploads = 'Yes';
     }
 
     // Allow Read Aloud - Ver 1.9.0

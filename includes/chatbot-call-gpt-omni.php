@@ -111,9 +111,65 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
     $temperature = esc_attr(get_option('chatbot_chatgpt_temperature', 1.00));
     $top_p = esc_attr(get_option('chatbot_chatgpt_top_p', 1.00));
 
+    //
+    // OMNI - IF THE ATTACHED FILE IS AN AUDIO FILE
+    //
+    // https://github.com/openai/openai-cookbook/blob/main/examples/gpt4o/introduction_to_gpt4o.ipynb
+    //
+
+    //
+    // CALL THE chatbot_chatgpt_stt()
+    //
+    $trasncription = '';
+    $trasncription = chatbot_chatgpt_call_stt_api($api_key, $message, 'transcription-only');
+
+    //
+    // OMNI - IF THE ATTACHED FILE IS A VIDEO FILE
+    //
+    // CALL THE chatbot_chatgpt_stt()
+
+
     // Get a file to attached to the message - Ver 2.0.2.1
-    $file_id = '';
-    $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
+    // $counter = 0;
+    // $file_name = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+
+    // DIAG - Diagnostics - Ver 2.0.1
+    // back_trace( 'NOTICE', '$file_name: ' . $file_name);
+
+    // $file_name = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/' . $file_name;
+
+    // Ensure the audio file exists
+    // if (!file_exists($file_name)) {
+    //     return 'File does not exist.';
+    // }
+
+    // Ensure that the file is an audio file
+    // $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    // $mime_type = finfo_file($finfo, $file_name);
+
+    // if (!str_contains($mime_type, 'audio/') && !str_contains($mime_type, 'video/')) {
+    //     return "Error: The file is not an audio or video file. Please upload an audio or video file.";
+    // }
+
+    // DIAG - Diagnostics - Ver 2.0.1
+    // back_trace( 'NOTICE', '$file_name: ' . $file_name);
+
+    // DIAG - Diagnostics - Ver 2.0.2.1
+    // back_trace( 'NOTICE', '$file_name: ' . $file_name);
+
+    // Ensure the file exists
+    // $file_contents = null;
+    // if (file_exists($file_name)) {
+    //     $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    //     $mime_type = finfo_file($finfo, $file_name);
+    //     $file_contents = new CURLFile($file_name, $mime_type, basename($file_name));
+    //     finfo_close($finfo);
+    //     unlink($file_name);
+    // }
+
+    // if (!file_exists($file_name)) {
+    //     unlink($file_name);
+    // }
 
     // Added Role, System, Content Static Variable - Ver 1.6.0
     $body = array(
@@ -123,13 +179,9 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
         'top_p' => (float)$top_p,
         'messages' => array(
             array('role' => 'system', 'content' => $context),
-            array('role' => 'user', 'content' => $message),
-            array('role' => 'user', 'content' => $file_id)
+            array('role' => 'user', 'content' => $message . ' ' . $trasncription),
             ),
     );
-
-    // DIAG - Diagnostics - Ver 2.0.2.1
-    back_trace( 'NOTICE', '$file_name: ' . print_r($file_id, true));
 
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
@@ -152,10 +204,12 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
 
     $response = wp_remote_post($api_url, $args);
     // DIAG - Diagnostics - Ver 1.6.7
-    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
+        // DIAG - Diagnostics - Ver 2.0.2.1
+        back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
         return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 

@@ -55,7 +55,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
 
     // Check for the STT option
     // Default to 'transcribe' if the option is not set
-    if ( empty($stt_option) or $sst_option == 'transcribe') {
+    if ( empty($stt_option) or $stt_option == 'transcribe' or $stt_option == 'transcription-only') {
         // Transcription API URL
         $api_url = 'https://api.openai.com/v1/audio/transcriptions';
     } elseif ( $stt_option == 'translate' ) {
@@ -153,6 +153,11 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     //
 
     $transcription = $response;
+
+    // Transcription only for OMNI
+    if ( $stt_option == 'transcription-only' ) {
+        return $transcription;
+    }
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     // $api_url = 'https://api.openai.com/v1/chat/completions';
