@@ -479,7 +479,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // Conversation Context - Ver 1.7.2.1
     $context = "";
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
  
     // // Context History - Ver 1.6.1 - Added here for Ver 1.7.2.1
     //  $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');

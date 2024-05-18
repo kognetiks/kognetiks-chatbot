@@ -93,6 +93,8 @@ function chatbot_chatgpt_api_settings_init(): void {
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_model_choice');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_max_tokens_setting'); // Max Tokens setting options - Ver 1.4.2
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_conversation_context'); // Conversation Context - Ver 1.6.1
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_temperature'); // Temperature - Ver 2.0.1
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_top_p'); // Top P - Ver 2.0.1
 
     add_settings_section(
         'chatbot_chatgpt_api_model_chat_section',
@@ -123,6 +125,24 @@ function chatbot_chatgpt_api_settings_init(): void {
         'chatbot_chatgpt_conversation_context',
         'Conversation Context',
         'chatbot_chatgpt_conversation_context_callback',
+        'chatbot_chatgpt_api_model_chat',
+        'chatbot_chatgpt_api_model_chat_section'
+    );
+
+    // Temperature - Ver 2.0.1
+    add_settings_field(
+        'chatbot_chatgpt_temperature',
+        'Temperature',
+        'chatbot_chatgpt_temperature_callback',
+        'chatbot_chatgpt_api_model_chat',
+        'chatbot_chatgpt_api_model_chat_section'
+    );
+
+    // Top P - Ver 2.0.1
+    add_settings_field(
+        'chatbot_chatgpt_top_p',
+        'Top P',
+        'chatbot_chatgpt_top_p_callback',
         'chatbot_chatgpt_api_model_chat',
         'chatbot_chatgpt_api_model_chat_section'
     );

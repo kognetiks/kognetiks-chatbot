@@ -220,21 +220,21 @@ function chatbot_chatgpt_upload_mp3() {
             }
 
             // Check for allow video and audio file types
-            $video_file_types = array('video/mp4', 'video/ogg', 'video/webm');
-            $audio_file_types = array('audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav');
+            // $video_file_types = array('video/mp4', 'video/ogg', 'video/webm');
+            // $audio_file_types = array('audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav');
 
-            $allowed_file_types = array_merge($audio_file_types, $video_file_types);
+            // $allowed_file_types = array_merge($audio_file_types, $video_file_types);
 
-            if (!in_array($_FILES['file']['type'][$i], $allowed_file_types)) {
-                $responses[] = array(
-                    'status' => 'error',
-                    'message' => 'Invalid file type. Please upload an MP3, WAV, MP4, or WEBM file.'
-                );
-                $error_flag = true;
-                // back_trace( 'NOTICE', 'Invalid file type.');
-                http_response_code(415); // Send a 415 Unsupported Media Type status code
-                exit;
-            }
+            // if (!in_array($_FILES['file']['type'][$i], $allowed_file_types)) {
+            //     $responses[] = array(
+            //         'status' => 'error',
+            //         'message' => 'Invalid file type. Please upload an MP3, WAV, MP4, or WEBM file.'
+            //     );
+            //     $error_flag = true;
+            //     // back_trace( 'NOTICE', 'Invalid file type.');
+            //     http_response_code(415); // Send a 415 Unsupported Media Type status code
+            //     exit;
+            // }
 
             // Checked for valid upload file types
             $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));

@@ -309,23 +309,31 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         wp_add_inline_script('chatbot-chatgpt', 'document.getElementById("chatbot-chatgpt-message").placeholder = "' . $chatbot_chatgpt_hot_bot_prompt . '";');
     }
     
-    $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+    // Allow File Uploads - Ver 1.9.0
+    $chatbot_chatgpt_allow_file_uploads = 'No';
+    $chatbot_chatgpt_allow_mp3_uploads = 'No';
 
-    // With the introduction of 'chatGPT 4o' file uploads are now allowed - Ver 2.0.1
-    // If assistant is set to 'original' then do not allow file uploads - Ver 1.7.9
     if ($chatbot_chatgpt_assistant_alias == 'original') {
         $chatbot_chatgpt_allow_file_uploads = 'No';
+        $chatbot_chatgpt_allow_mp3_uploads = 'No';
     }
 
-    $chatbot_chatgpt_allow_mp3_uploads = 'No';
-    // DIAG - Diagnostics - Ver 2.0.1
-    // back_trace( 'NOTICE', '$model: ' . $model);
-    // If $model starts with 'whisper' then allow file uploads - Ver 2.0.1
-    if (str_contains($model, 'whisper')) {
-        $chatbot_chatgpt_allow_mp3_uploads = 'Yes';
+    if (strpos($chatbot_chatgpt_assistant_alias,'asst_') !== false) {
+        $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+        $chatbot_chatgpt_allow_mp3_uploads = 'No';
+    }
+
+    if (strpos($model, 'whisper') !== false) {
         $chatbot_chatgpt_allow_file_uploads = 'No';
+        $chatbot_chatgpt_allow_mp3_uploads = 'Yes';
     }
 
+    if (strpos($model, 'gpt-4o') !== false) {
+        $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+        $chatbot_chatgpt_allow_mp3_uploads = 'No';
+    }
+
+    // Allow Read Aloud - Ver 1.9.0
     $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
 
     // Assume that the chatbot is NOT using KFlow - Ver 1.9.5

@@ -75,6 +75,7 @@ ob_end_flush(); // End output buffering and send the buffer to the browser
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-omni.php'; // ChatGPT API - Ver 2.0.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; // Image API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-stt-api.php'; // STT API - Ver 2.0.1
@@ -289,7 +290,7 @@ function chatbot_chatgpt_enqueue_scripts(): void {
         'chatbot_chatgpt_custom_avatar_icon_setting' => '',
         'chatbot_chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
         'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
-        'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
+        'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.',
         'chatbot_chatgpt_enable_custom_buttons' => 'Off',
         'chatbot_chatgpt_custom_button_name_1' => '',
         'chatbot_chatgpt_custom_button_url_1' => '',
@@ -656,7 +657,13 @@ function chatbot_chatgpt_send_message(): void {
         // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
         // TRY NOT TO FETCH MODEL AGAIN
         // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-        if (str_starts_with($model, 'gpt')) {
+        if (strpos($model, 'gpt-4o') !== false) {
+            // The string 'gpt-4o' is found in $model
+            // Reload the model - BELT & SUSPENDERS
+            $script_data_array['model'] = $model;
+            // Send message to ChatGPT API - Ver 1.6.7
+            $response = chatbot_chatgpt_call_omni($api_key, $message);
+        } elseif (str_starts_with($model, 'gpt')) {
             // Reload the model - BELT & SUSPENDERS
             $script_data_array['model'] = $model;
             // Send message to ChatGPT API - Ver 1.6.7

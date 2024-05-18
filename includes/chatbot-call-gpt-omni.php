@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - ChatGPT API - Ver 1.6.9
+ * Kognetiks Chatbot for WordPress - ChatGPT Omni - Ver 2.0.2.1
  *
  * This file contains the code for accessing the ChatGPT API.
  * 
@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the ChatGPT API
-function chatbot_chatgpt_call_api($api_key, $message) {
+function chatbot_chatgpt_call_omni($api_key, $message) {
 
     global $session_id;
     global $user_id;
@@ -108,19 +108,28 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
     }
 
+    $temperature = esc_attr(get_option('chatbot_chatgpt_temperature', 1.00));
+    $top_p = esc_attr(get_option('chatbot_chatgpt_top_p', 1.00));
+
+    // Get a file to attached to the message - Ver 2.0.2.1
+    $file_id = '';
+    $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
+
     // Added Role, System, Content Static Variable - Ver 1.6.0
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
-        'temperature' => 0.5,
+        'temperature' => (float)$temperature,
+        'top_p' => (float)$top_p,
         'messages' => array(
             array('role' => 'system', 'content' => $context),
-            array('role' => 'user', 'content' => $message)
+            array('role' => 'user', 'content' => $message),
+            array('role' => 'user', 'content' => $file_id)
             ),
     );
 
-    // FIXME - Allow for file uploads here
-    // $file = 'path/to/file';
+    // DIAG - Diagnostics - Ver 2.0.2.1
+    back_trace( 'NOTICE', '$file_name: ' . print_r($file_id, true));
 
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
@@ -138,9 +147,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         'timeout' => 50, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
+    // DIAG - Diagnostics - Ver 2.0.2.1
+    back_trace( 'NOTICE', '$args: ' . print_r($body, true));
+
     $response = wp_remote_post($api_url, $args);
     // DIAG - Diagnostics - Ver 1.6.7
-    // back_trace( 'NOTICE', '$response: ' . $response);
+    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -194,7 +206,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
     }
-    
+
     if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine
         // Context History - Ver 1.6.1

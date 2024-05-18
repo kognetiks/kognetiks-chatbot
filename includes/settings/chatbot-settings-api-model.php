@@ -190,7 +190,7 @@ function chatbot_chatgpt_conversation_context_callback($args) {
 
     // Check if the option has been set, if not, use a default value
     if (empty($chatbot_chatgpt_conversation_context)) {
-        $chatbot_chatgpt_conversation_context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.";
+        $chatbot_chatgpt_conversation_context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.";
         // Save the default value into the option
         update_option('chatbot_chatgpt_conversation_context', $chatbot_chatgpt_conversation_context);
     }
@@ -198,6 +198,36 @@ function chatbot_chatgpt_conversation_context_callback($args) {
     ?>
     <!-- Define the textarea field. -->
     <textarea id='chatbot_chatgpt_conversation_context' name='chatbot_chatgpt_conversation_context' rows='5' cols='50' maxlength='12500'><?php echo esc_html(stripslashes($chatbot_chatgpt_conversation_context)); ?></textarea>
+    <?php
+}
+
+// Set chatbot_chatgpt_temperature - Ver 2.0.1
+// https://platform.openai.com/docs/assistants/how-it-works/temperature
+function chatbot_chatgpt_temperature_callback($args) {
+    $temperature = esc_attr(get_option('chatbot_chatgpt_temperature', 0.50));
+    ?>
+    <select id="chatbot_chatgpt_temperature" name="chatbot_chatgpt_temperature">
+        <?php
+        for ($i = 0.01; $i <= 2.01; $i += 0.01) {
+            echo '<option value="' . $i . '" ' . selected($temperature, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
+// Set chatbot_chatgpt_top_p - Ver 2.0.1
+// https://platform.openai.com/docs/assistants/how-it-works/top-p
+function chatbot_chatgpt_top_p_callback($args) {
+    $top_p = esc_attr(get_option('chatbot_chatgpt_top_p', 1.00));
+    ?>
+    <select id="chatbot_chatgpt_top_p" name="chatbot_chatgpt_top_p">
+        <?php
+        for ($i = 0.01; $i <= 1.01; $i += 0.01) {
+            echo '<option value="' . $i . '" ' . selected($top_p, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
     <?php
 }
 
