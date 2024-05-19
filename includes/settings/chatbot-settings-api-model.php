@@ -20,6 +20,11 @@ function chatbot_chatgpt_model_settings_section_callback($args) {
     <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <?php
+
+    // Link to the Kognetiks Chatbot for WordPress documentation
+    ?>
+    <p>For detailed documentation about the Kognetiks Chatbot plugin, please visit the <a href="README.md" target="_blank">Kognetiks Chatbot for WordPress Documentation</a> website.</p>
+    <?php
 }
 
 function chatbot_chatgpt_api_model_general_section_callback($args) {
