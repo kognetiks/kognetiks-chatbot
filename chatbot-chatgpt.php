@@ -33,6 +33,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Define the plugin version
 defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.2');
 
+// ****** CHANGE THIS TO MASTER BEFORE RELEASE ******
+// define('CHATBOT_CHATGPT_DOCUMENTATION_VERSION', 'master');
+define('CHATBOT_CHATGPT_DOCUMENTATION_VERSION', 'V2.0.2.1');
+// ****** CHANGE THIS TO MASTER BEFORE RELEASE ******
+
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
 
@@ -138,6 +143,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php'; // Ver 1.6.7
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php'; // Ver 1.8.6
+
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown-utilities.php'; // Version 2.0.2.1
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
 
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start(): void {

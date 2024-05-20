@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// API/Model settings section callback - Ver 1.3.0
+// API/Model settings section callback - Ver 1.3.0 - Updated Ver 2.0.2.1
 function chatbot_chatgpt_model_settings_section_callback($args) {
     ?>
     <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
@@ -22,8 +22,9 @@ function chatbot_chatgpt_model_settings_section_callback($args) {
     <?php
 
     // Link to the Kognetiks Chatbot for WordPress documentation
+    $documentationURL = 'https://github.com/kognetiks/kognetiks-chatbot/blob/' . CHATBOT_CHATGPT_DOCUMENTATION_VERSION . '/documentation/api-model-settings/api-model-settings.md';
     ?>
-    <p>For detailed documentation about the Kognetiks Chatbot plugin, please visit the <a href="README.md" target="_blank">Kognetiks Chatbot for WordPress Documentation</a> website.</p>
+    <p>For detailed information about the API/Model settings, please visit the <a href="https://github.com/kognetiks/kognetiks-chatbot/blob/master/documentation/api-model-settings/api-model-settings.md" target="_blank">here</a>.</p>
     <?php
 }
 

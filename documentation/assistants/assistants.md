@@ -134,4 +134,4 @@ By configuring these settings, you ensure that your Kognetiks Chatbot can effect
 
 ## More Information
 
-See [Chatbots and Assistants](support/chatbots-and-assistants) for more details on using multiple Assistants.
+See [Chatbots and Assistants](chatbots-and-assistants.md) for more details on using multiple Assistants.
