@@ -475,7 +475,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     if (empty($results)) {
         $message = __( 'No data in the file. Please enable conversation and interaction logging if currently off.', 'chatbot-chatgpt' );
         set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
-        wp_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
+        wp_safe_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
         exit;
     }
 
@@ -483,7 +483,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     if (!empty($wpdb->last_error)) {
         $message = __( 'Error reading table: ' . $wpdb->last_error, 'chatbot-chatgpt' );
         set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
-        wp_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
+        wp_safe_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
         exit;
     }
 
@@ -509,7 +509,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     if ($file === false) {
         $message = __( 'Error opening file for writing. Please try again.', 'chatbot-chatgpt' );
         set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
-        wp_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
+        wp_safe_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
         exit;
     }
 
