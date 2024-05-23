@@ -2,6 +2,8 @@
 
 The Reporting Settings allow you to manage how conversation data is logged and retained, providing insights into chatbot interactions and performance. Follow these steps to configure these options:
 
+![Reporting Settings](reporting-settings.png)
+
 1. **Reporting Period**:
    - **Description**: This setting determines the frequency at which reports are generated.
    - **Options**: 

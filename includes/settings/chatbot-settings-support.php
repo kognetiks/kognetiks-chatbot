@@ -78,7 +78,7 @@ function adjustPaths($html, $basePath) {
     $html = preg_replace_callback(
         '/<img\s+src="([^"]+)"/i',
         function ($matches) use ($basePath) {
-            return '<img src="' . adjustImagePath($matches[1], $basePath) . '" style="border: 1px solid black;"';
+            return '<img src="' . adjustImagePath($matches[1], $basePath) . '" style="border: 1px solid black; box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.3);"';
         },
         $html
     );
@@ -121,8 +121,10 @@ function adjustImagePath($url, $basePath) {
         if (count($basePathParts) > 1) {
             $dirParts = explode('&file=', $basePathParts[1]);
             $dir = rtrim($dirParts[0], '/');
+            // FIXME - Check if the URL is a relative path - Ver 2.0.2.1
             $url = site_url() . '/wp-content/plugins/chatbot-chatgpt/documentation/' . $dir . '/' . $url;
         } else {
+            // FIXME - Check if the URL is a relative path - Ver 2.0.2.1
             $url = site_url() . '/wp-content/plugins/chatbot-chatgpt/documentation/' . $url;
         }
     }

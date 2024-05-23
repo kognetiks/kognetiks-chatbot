@@ -12,7 +12,7 @@ More information about ChatGPT models and their capability can be found at https
 
 - [Voice Settings (Text to Speech)](voice-settings.md)
 
-- [Whisper Settings (Speech to Text)](whisper-setting.md)
+- [Whisper Settings (Speech to Text)](whisper-settings.md)
 
 - [Image Settings](image-settings.md)
 
