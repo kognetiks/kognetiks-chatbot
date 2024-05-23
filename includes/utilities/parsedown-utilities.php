@@ -24,7 +24,8 @@ function get_markdown_file_content($file_path) {
     $markdown_content = file_get_contents($file_path);
 
     // Get the directory of the current markdown file
-    $dir = dirname($file_path);
+    // $dir = dirname($file_path);
+    $dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
 
     // Replace relative image paths with absolute paths
     $markdown_content = preg_replace_callback('/!\[.*?\]\((.*?)\)/', function ($matches) use ($dir) {

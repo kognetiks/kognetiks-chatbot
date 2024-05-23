@@ -542,50 +542,40 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
         return;
     }
 
-    if (can_use_curl_for_file_protocol()) {
+    // DIAG - Diagnostic - Ver 2.0.2.1
+    // back_trace( 'NOTICE', 'File path: ' . $results_csv_file);
 
-        // Initialize a cURL session
-        $curl = curl_init();
-
-        // Set the cURL options
-        curl_setopt($curl, CURLOPT_URL, 'file://' . realpath($results_csv_file));
-        // curl_setopt($curl, CURLOPT_URL, 'http://' . realpath($results_csv_file));
-        // curl_setopt($curl, CURLOPT_URL, $results_csv_file);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
-        // Execute the cURL session
-        $csv_data = curl_exec($curl);
-
-        // Check for errors
-        if ($csv_data === false) {
-            $class = 'notice notice-error';
-            $message = __( 'Error reading file: ' . curl_error($curl), 'chatbot-chatgpt' );
-            // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
-            chatbot_chatgpt_general_admin_notice($message);
-            return;
-        }
-
-        // Close the cURL session
-        curl_close($curl);
-
-        // Deliver the file for download
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment;filename=' . $filename);
-        echo $csv_data;
-
-        // Delete the file
-        unlink($results_csv_file);
-        exit;
-
-    } else {
-            
-            $class = 'notice notice-error';
-            $message = __( 'cURL is not enabled for the file protocol!', 'chatbot-chatgpt' );
-            // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
-            chatbot_chatgpt_general_admin_notice($message);
-            return;
+    if (!file_exists($results_csv_file)) {
+        // back_trace( 'ERROR', 'File does not exist: ' . $results_csv_file);
+        return;
+    }
     
-        }
+    if (!is_readable($results_csv_file)) {
+        // back_trace( 'ERROR', 'File is not readable ' . $results_csv_file);
+        return;
+    }
+    
+    $csv_data = file_get_contents(realpath($results_csv_file));
+    if ($csv_data === false) {
+        $class = 'notice notice-error';
+        $message = __( 'Error reading file', 'chatbot-chatgpt' );
+        chatbot_chatgpt_general_admin_notice($message);
+        return;
+    }
+    
+    if (!is_writable($results_csv_file)) {
+        // back_trace( 'ERROR', 'File is not writable: ' . $results_csv_file);
+        return;
+    }  
+    
+    // Deliver the file for download
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment;filename=' . $filename);
+    echo $csv_data;
+
+    // Delete the file
+    unlink($results_csv_file);
+    exit;
 
 }
 add_action('admin_post_chatbot_chatgpt_download_conversation_data', 'chatbot_chatgpt_download_conversation_data');

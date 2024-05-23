@@ -229,6 +229,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 2.0.2 =
 * Overhauled the Support tab with extensive documentation on the chatbot settings
+* Revised export programming for Conversation Data, Interaction Data and Token Usage Data
 
 = 2.0.1 =
 * Support for OpenAI's latest models: gpt-4o and gpt-4o-2024-05-13

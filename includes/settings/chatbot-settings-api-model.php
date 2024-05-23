@@ -25,6 +25,7 @@ function chatbot_chatgpt_model_settings_section_callback($args) {
     $documentationURL = 'https://github.com/kognetiks/kognetiks-chatbot/blob/' . CHATBOT_CHATGPT_DOCUMENTATION_VERSION . '/documentation/api-model-settings/api-model-settings.md';
     ?>
     <p>For detailed information about the API/Model settings, please visit the <a href="https://github.com/kognetiks/kognetiks-chatbot/blob/master/documentation/api-model-settings/api-model-settings.md" target="_blank">here</a>.</p>
+    <p>Or here <a href="?page=chatbot-chatgpt&tab=support&dir=api-model-settings&file=api-model-settings.md" target="_blank">here</a>.</p>
     <?php
 }
 

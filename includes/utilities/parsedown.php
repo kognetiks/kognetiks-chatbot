@@ -1995,11 +1995,15 @@ class Parsedown
 
 class ParsedownCustom extends Parsedown {
     protected function inlineLink($Excerpt) {
+
         $Link = parent::inlineLink($Excerpt);
 
         // Modify the URL in the link
         if (isset($Link['element']['attributes']['href'])) {
             $href = $Link['element']['attributes']['href'];
+
+            $href = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
+            
             if (strpos($href, 'http') !== 0) {
                 $Link['element']['attributes']['href'] = add_query_arg(array(
                     'page' => 'chatbot-chatgpt',
@@ -2009,6 +2013,9 @@ class ParsedownCustom extends Parsedown {
                 ), admin_url('admin.php'));
             }
         }
+
+        // DIAG - Diagnostics - Ver 2.0.2.1
+        back_trace ( 'NOTICE', '$Link', print_r($Link, true));
 
         return $Link;
     }
@@ -2028,6 +2035,9 @@ class ParsedownCustom extends Parsedown {
                 ), admin_url('admin.php'));
             }
         }
+
+        // DIAG - Diagnostics - Ver 2.0.2.1
+        back_trace ( 'NOTICE', '$Link', print_r($image,true) );
 
         return $Image;
     }

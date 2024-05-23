@@ -2,8 +2,8 @@
 /**
  * Kognetiks Chatbot for WordPress - Filter out HTML Tags from Content
  *
- *
- *
+ * This file contains the code for uploading files as part
+ * in support of Custom GPT Assistants via the Chatbot.
  *
  * @package chatbot-chatgpt
  */
