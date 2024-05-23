@@ -2026,6 +2026,9 @@ class ParsedownCustom extends Parsedown {
         // Modify the URL in the image
         if (isset($Image['element']['attributes']['src'])) {
             $src = $Image['element']['attributes']['src'];
+
+            $src = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
+
             if (strpos($src, 'http') !== 0) {
                 $Image['element']['attributes']['src'] = add_query_arg(array(
                     'page' => 'chatbot-chatgpt',
