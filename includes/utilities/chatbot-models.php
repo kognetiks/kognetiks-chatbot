@@ -35,6 +35,54 @@ function get_openai_models() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
+    // Default model list
+    $default_model_list = '';
+    $default_model_list = array(
+        array(
+            'id' => 'dall-e-3',
+            'object' => 'model',
+            'created' => 1698785189,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'gpt-3.5-turbo',
+            'object' => 'model',
+            'created' => 1677610602,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'tts-1-1106',
+            'object' => 'model',
+            'created' => 1699053241,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'whisper-1',
+            'object' => 'model',
+            'created' => 1677532384,
+            'owned_by' => 'openai-internal'
+        )
+    );
+
+    // See if the option exists, if not then create it and set the default
+    if (get_option('chatbot_chatgpt_model_choice') === false) {
+        update_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo');
+    }
+    if (get_option('chatbot_chatgpt_image_model_option') === false) {
+        update_option('chatbot_chatgpt_image_model_option', 'dall-e-3');
+    }
+    if (get_option('chatbot_chatgpt_voice_model_option') === false) {
+        update_option('chatbot_chatgpt_voice_model_option', 'tts-1-1106');
+    }
+    if (get_option('chatbot_chatgpt_whisper_model_option') === false) {
+        update_option('chatbot_chatgpt_whisper_model_option', 'whisper-1');
+    }
+
+    // Check if the API key is empty
+    if (empty($api_key)) {
+        return $default_model_list;
+    }
+
     // Initialize cURL session
     $ch = curl_init();
 
@@ -60,31 +108,7 @@ function get_openai_models() {
         // return "Error: " . $data['error']['message'];
         // On 1st install needs an API key
         // So return a short list of the base models until an API key is entered
-        $data = '';
-
-        $data = array(
-            array(
-                'id' => 'dall-e-3',
-                'object' => 'model',
-                'created' => 1698785189,
-                'owned_by' => 'system'
-            ),
-            array(
-                'id' => 'gpt-4-1106-preview',
-                'object' => 'model',
-                'created' => 1698957206,
-                'owned_by' => 'system'
-            ),
-            array(
-                'id' => 'tts-1-1106',
-                'object' => 'model',
-                'created' => 1699053241,
-                'owned_by' => 'system'
-            )
-        );
-
-        return $data;
-
+        return $default_model_list;
     }
 
     // Extract the models from the response
@@ -94,6 +118,9 @@ function get_openai_models() {
     usort($models, function($a, $b) {
         return $a['id'] <=> $b['id'];
     });
+
+    // DIAG - Diagnostics - Ver 2.0.2.1
+    // back_trace ( 'NOTICE' , '$models: ' . print_r($models, true));
 
     // Return the list of models
     return $models;

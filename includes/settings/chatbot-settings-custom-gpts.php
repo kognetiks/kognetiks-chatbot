@@ -45,7 +45,7 @@ function chatbot_chatgpt_assistant_settings_section_callback($args) {
 function chatbot_chatgpt_gpt_assistants_section_callback($args) {
 
     ?>
-    <p>Configure the Chatbot plugin to use Assistants using the settings below.</p>
+    <p>Configure the Chatbot to use Assistants, allow file uploads, and display the Assistant's name.</p>
     <p><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
 
@@ -54,7 +54,7 @@ function chatbot_chatgpt_gpt_assistants_section_callback($args) {
 // GPT Assistant ID section callback - Ver 1.7.2
 function chatbot_chatgpt_assistant_id_section_callback($args) {
     ?>
-    <p>Configure the GPT Assistant ID for the Chatbot plugin using the settings below.</p>
+    <p>Configure a Primary and Alternate Assistant by entering the ID and any additional instructions.</p>
     <p><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
 }
@@ -62,7 +62,7 @@ function chatbot_chatgpt_assistant_id_section_callback($args) {
 // GPT Assistant Instructions section callback - Ver 1.9.3
 function chatbot_chatgpt_assistant_additional_settings_section_callback($args) {
     ?>
-    <p>Configure the GPT Assistant Instructions for the Chatbot plugin using the settings below.</p>
+    <p>Configure the Advanced settings for Assistants prompt and response tokens, thread retention periods, and the Beta version setting.</p>
     <p><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
 }
@@ -265,7 +265,7 @@ function chatbot_chatgpt_assistant_settings_init() {
         // Assistant Id Settings
         add_settings_section(
             'chatbot_chatgpt_assistant_ids_section',
-            'GPT Assistant Settings',
+            'Assistant IDs and Additional Instructions',
             'chatbot_chatgpt_assistant_id_section_callback',
             'chatbot_chatgpt_assistant_id_settings'
         );
@@ -304,10 +304,10 @@ function chatbot_chatgpt_assistant_settings_init() {
             'chatbot_chatgpt_assistant_ids_section'
         );
     
-        // Additional Settings
+        // Advanced Additional Settings
         add_settings_section(
             'chatbot_chatgpt_assistant_additional_settings_section',
-            'Additional Settings',
+            'Advanced Additional Settings',
             'chatbot_chatgpt_assistant_additional_settings_section_callback',
             'chatbot_chatgpt_additional_assistant_settings'
         );

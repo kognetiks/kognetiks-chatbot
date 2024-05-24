@@ -22,7 +22,7 @@ Assistants work with both 'floating' and 'embedded' styles.
 
 **NOTE:** For best results ensure that the shortcode appears only once on the page.
 
-## Configuring the Assistant Settings
+## Configuring the Assistant General Settings
 
 These settings allow you to configure the behavior and capabilities of the Assistant in your Kognetiks Chatbot. Follow these steps to set up these options:
 
@@ -43,9 +43,9 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` to display the assistant's name for a more personalized user experience.
 
-## GPT Assistant Settings
+## Assistant IDs and Additional Instructions
 
-![Assistant Settings](gpt-assistant-settings.png)
+![Assistant IDs and Additional Instructions](assistant-ids-and-additional-instructions.png)
 
 1. **Primary GPT Assistant Id**:
    - **Description**: This field is for specifying the primary Assistant ID.
@@ -63,9 +63,9 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Description**: This field allows you to provide specific instructions to the alternate assistant.
    - **Input**: Enter any special instructions or context for the alternate assistant.
 
-## Additional Settings
+## Advanced Additional Settings
 
-![Additional Settings](assistant-additional-settings.png)
+![Advanced Additional Settings](advanced-additional-settings.png)
 
 1. **Max Prompt Tokens**:
    - **Description**: This setting determines the maximum number of tokens for the input prompt.
