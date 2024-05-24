@@ -26,7 +26,7 @@ Assistants work with both 'floating' and 'embedded' styles.
 
 These settings allow you to configure the behavior and capabilities of the Assistant in your Kognetiks Chatbot. Follow these steps to set up these options:
 
-![assistants.png](assistants.png)
+![Assistant General Settings](assistant-general-settings.png)
 
 1. **Use GPT Assistant Id**:
    - **Description**: This toggle allows you to enable or disable the use of a specific Assistant ID.
@@ -43,38 +43,46 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` to display the assistant's name for a more personalized user experience.
 
-4. **Primary GPT Assistant Id**:
+## GPT Assistant Settings
+
+![Assistant Settings](gpt-assistant-settings.png)
+
+1. **Primary GPT Assistant Id**:
    - **Description**: This field is for specifying the primary Assistant ID.
    - **Input**: Enter the Assistant ID provided by OpenAI or your specific setup.
 
-5. **Assistant Instructions**:
+2. **Assistant Instructions**:
    - **Description**: This field allows you to provide specific instructions to the primary assistant.
    - **Input**: Enter any special instructions or context that will guide the assistant's responses.
 
-6. **Alternate GPT Assistant Id**:
+3. **Alternate GPT Assistant Id**:
    - **Description**: This field is for specifying an alternate Assistant ID, used as a fallback.
    - **Input**: Enter the alternate Assistant ID if you have one.
 
-7. **Alternate Assistant Instructions**:
+4. **Alternate Assistant Instructions**:
    - **Description**: This field allows you to provide specific instructions to the alternate assistant.
    - **Input**: Enter any special instructions or context for the alternate assistant.
 
-8. **Max Prompt Tokens**:
+## Additional Settings
+
+![Additional Settings](assistant-additional-settings.png)
+
+1. **Max Prompt Tokens**:
    - **Description**: This setting determines the maximum number of tokens for the input prompt.
    - **Options**: A numeric value betweem `1,000` and `20,000` (the default is `20000`).
    - **Selection**: Set this based on the complexity of the queries you expect. Higher values allow for longer inputs.
 
-9. **Max Response Tokens**:
+2. **Max Response Tokens**:
    - **Description**: This setting determines the maximum number of tokens for the assistant's response.
    - **Options**: A numeric value betweem `1,000` and `20,000` (the default is `20000`).
    - **Selection**: Set this based on the level of detail you want in the responses. Higher values allow for longer responses.
 
-10. **Thread Retention Period (hrs)**:
+3. **Thread Retention Period (hrs)**:
     - **Description**: This setting specifies how long conversation threads are retained.
     - **Options**: A numeric value between 6 and 720 hours (the default is `36` hours).
     - **Selection**: Choose a duration that balances user privacy with the need for context in ongoing conversations.
 
-11. **Beta Assistant Version**:
+4. **Beta Assistant Version**:
     - **Description**: This setting allows you to select the version of the beta assistant to use.
     - **Options**: Versions `V1` and `v2` (the default is now `V2`).
     - **Selection**: Choose the version that fits your needs, typically the latest for the most up-to-date features.

@@ -252,7 +252,8 @@ function chatbot_chatgpt_settings_page_html(): void {
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_model_whisper');
                 echo '</div>';
-                                // Image Settings - Ver 1.9.5
+
+                // Image Settings - Ver 1.9.5
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_model_image');
                 echo '</div>';
@@ -263,8 +264,24 @@ function chatbot_chatgpt_settings_page_html(): void {
                 echo '</div>';
 
             } elseif ($active_tab == 'gpt_assistants') {
+
                 settings_fields('chatbot_chatgpt_custom_gpts');
-                do_settings_sections('chatbot_chatgpt_custom_gpts');
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_assistant_settings');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_gpt_assistants_settings');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_assistant_id_settings');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_additional_assistant_settings');
+                echo '</div>';
 
             } elseif ($active_tab == 'avatar') {
                 settings_fields('chatbot_chatgpt_avatar');
