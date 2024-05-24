@@ -33,11 +33,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Define the plugin version
 defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.2');
 
-// ****** CHANGE THIS TO MASTER BEFORE RELEASE ******
-// define('CHATBOT_CHATGPT_DOCUMENTATION_VERSION', 'master');
-define('CHATBOT_CHATGPT_DOCUMENTATION_VERSION', 'V2.0.2.1');
-// ****** CHANGE THIS TO MASTER BEFORE RELEASE ******
-
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
 

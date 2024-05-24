@@ -43,6 +43,7 @@ function chatbot_chatgpt_support_section_callback() {
     // DIAG - Diagnostics - Ver 2.0.2.1
     back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
     
+    // FIXME - STILL NEEDED??? - Ver 2.0.2.1
     // echo '<div class="wrap">';
     // // Use do_shortcode to display the Markdown content, passing the file parameter
     // echo do_shortcode('[display_markdown file="' . esc_attr($docLocation) . '"]');
@@ -52,8 +53,6 @@ function chatbot_chatgpt_support_section_callback() {
     $markdownContent = file_get_contents($docLocation);
     $htmlContent = $parsedown->text($markdownContent);
 
-    // $basePath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/'
-    // $basePath = "?page=chatbot-chatgpt&tab=support&dir=" . $dir . "&file=" . $file;
     $dir = isset($_GET['dir']) ? sanitize_text_field($_GET['dir']) : '';
     $file = isset($_GET['file']) ? sanitize_text_field($_GET['file']) : '';
     

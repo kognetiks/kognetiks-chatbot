@@ -1993,6 +1993,7 @@ class Parsedown
     );
 }
 
+// Custom Code - Ver 2.0.2.1
 class ParsedownCustom extends Parsedown {
     protected function inlineLink($Excerpt) {
 
@@ -2015,7 +2016,7 @@ class ParsedownCustom extends Parsedown {
         }
 
         // DIAG - Diagnostics - Ver 2.0.2.1
-        back_trace ( 'NOTICE', '$Link', print_r($Link, true));
+        // back_trace ( 'NOTICE', '$Link', print_r($Link, true));
 
         return $Link;
     }
@@ -2040,8 +2041,9 @@ class ParsedownCustom extends Parsedown {
         }
 
         // DIAG - Diagnostics - Ver 2.0.2.1
-        back_trace ( 'NOTICE', '$Link', print_r($image,true) );
+        // back_trace ( 'NOTICE', '$Link', print_r($image,true) );
 
         return $Image;
     }
+
 }

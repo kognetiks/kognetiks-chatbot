@@ -152,8 +152,6 @@ function chatbot_chatgpt_kn_settings_init(): void {
         'chatbot_chatgpt_kn_enhanced_response_section'
     );
 
-
-
     // Analysis Tab
 
     // Knowledge Navigator Analysis settings tab - Ver 1.6.1

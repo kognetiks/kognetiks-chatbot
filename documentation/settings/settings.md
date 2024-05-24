@@ -1,8 +1,10 @@
-# General Settings
+# Chatbot Settings
 
 The General Settings allow you to customize the basic behavior and appearance of your Kognetiks Chatbot. Follow these steps to set up these options:
 
-![Settings](settings.png)
+## General Settings
+
+![General Settings](general-settings.png)
 
 1. **Chatbot Name**:
    - **Description**: This field allows you to set the name of your chatbot.
@@ -18,29 +20,37 @@ The General Settings allow you to customize the basic behavior and appearance of
    - **Options**: `Closed` or `Open`.
    - **Selection**: Similar to the Start Status, choose `Closed` or `Open` based on your preference for new visitors.
 
-4. **Chatbot Prompt**:
+## Prompts and Greetings
+
+![Prompts and Greetings](prompts-and-greetings.png)
+
+1. **Chatbot Prompt**:
    - **Description**: This is the initial prompt that appears in the chatbot input field.
    - **Example**: "Tell me your deepest secrets ..." can be customized to something more appropriate for your audience and use case.
 
-5. **Initial Greeting**:
+2. **Initial Greeting**:
    - **Description**: This is the message the chatbot sends when a user first opens it.
    - **Example**: "Hello [first_name]! How can I help you today?" Use placeholders like `[first_name]` to personalize the greeting.
 
-6. **Subsequent Greeting**:
+3. **Subsequent Greeting**:
    - **Description**: This message appears when a returning user opens the chatbot.
    - **Example**: "Hello again [first_name]! How can I help you?" Customize this to acknowledge returning visitors.
 
-7. **Include "As an AI language model" disclaimer**:
+## Additional Settings
+
+![Additional Settings](additional-settings.png)
+
+1. **Include "As an AI language model" disclaimer**:
    - **Description**: This toggle allows you to include a disclaimer about the AI nature of the chatbot.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` if you want to display this disclaimer, which can help manage user expectations.
 
-8. **Audience for Chatbot**:
+2. **Audience for Chatbot**:
    - **Description**: This setting allows you to specify the intended audience for the chatbot.
    - **Options**: `All Audiences`, `Adults Only`, etc.
    - **Selection**: Choose the appropriate audience based on the content and purpose of your chatbot.
 
-9. **Input Rows**:
+3. **Input Rows**:
    - **Description**: This setting determines the number of rows in the chatbot input field.
    - **Options**: Set a numeric value.
    - **Selection**: Choose a value like `5` to allow more space for user input, or adjust based on your layout preferences.
