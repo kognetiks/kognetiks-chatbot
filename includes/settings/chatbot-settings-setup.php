@@ -19,7 +19,7 @@ function chatbot_chatgpt_bot_settings_section_callback($args) {
 
     ?>
     <p>Configure the general settings for the Chatbot plugin, including name of the chatbot, prompts and greetings, and general settings.</p>
-    <p><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=settings&file=settings.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=settings&file=settings.md">here</a>.</b></p>
     <?php
 
 }
@@ -28,7 +28,7 @@ function chatbot_chatgpt_bot_settings_section_callback($args) {
 function chatbot_chatgpt_name_section_callback($args) {
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    back_trace( 'NOTICE', 'chatbot_chatgpt_name_section_callback');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_name_section_callback');
 
     ?>
     <p>Configure the name of the chatbot and start status for the Chatbot.</p>
@@ -40,7 +40,7 @@ function chatbot_chatgpt_name_section_callback($args) {
 function chatbot_chatgpt_greetings_section_callback($args) {
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    back_trace( 'NOTICE', 'chatbot_chatgpt_greetings_section_callback');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_greetings_section_callback');
 
     ?>
     <p>Configure the prompt and greetings for the Chatbot.</p>
@@ -52,7 +52,7 @@ function chatbot_chatgpt_greetings_section_callback($args) {
 function chatbot_chatgpt_additional_setup_section_callback($args) {
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    back_trace( 'NOTICE', 'chatbot_chatgpt_additional_setup_section_callback');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_additional_setup_section_callback');
 
     ?>
     <p>Configure several additional settings for the Chatbot.</p>

@@ -2003,7 +2003,7 @@ class ParsedownCustom extends Parsedown {
         if (isset($Link['element']['attributes']['href'])) {
             $href = $Link['element']['attributes']['href'];
 
-            $href = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
+            $href = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\';
             
             if (strpos($href, 'http') !== 0) {
                 $Link['element']['attributes']['href'] = add_query_arg(array(
@@ -2028,7 +2028,7 @@ class ParsedownCustom extends Parsedown {
         if (isset($Image['element']['attributes']['src'])) {
             $src = $Image['element']['attributes']['src'];
 
-            $src = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
+            $src = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\';
 
             if (strpos($src, 'http') !== 0) {
                 $Image['element']['attributes']['src'] = add_query_arg(array(

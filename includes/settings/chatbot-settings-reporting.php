@@ -20,7 +20,8 @@ function chatbot_chatgpt_reporting_section_callback($args) {
     <div>
         <p>Use these setting to select the reporting period for Visitor Interactions.</p>
         <p>By default, conversation logging is initially turned <b>Off</b>.</p>
-        <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support#chatbot-conversation-log">Support</a> tab of this plugin for more details.</p>
+        <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support&dir=support&file=conversation-logging-and-history.md">Support</a> tab of this plugin for more details.</p>
+        <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Reporting and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=reporting&file=reporting.md">here</a>.</b></p>
         <h3>Conversation Data</h3>
             <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
             <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>

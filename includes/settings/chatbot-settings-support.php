@@ -32,23 +32,17 @@ function chatbot_chatgpt_support_section_callback() {
         $file = '';
     }
     if (!empty($dir) && !empty($file)) {
-        $docLocation = $dir . '/' . $file;
+        $docLocation = $dir . '\\' . $file;
     } else if (empty($dir) && empty($file)) {
         $docLocation = 'overview.md';
     }
 
     // The files are in the 'documentation' directory
-    $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/' . $docLocation;
+    $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\' . $docLocation;
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
+    // back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
     
-    // FIXME - STILL NEEDED??? - Ver 2.0.2.1
-    // echo '<div class="wrap">';
-    // // Use do_shortcode to display the Markdown content, passing the file parameter
-    // echo do_shortcode('[display_markdown file="' . esc_attr($docLocation) . '"]');
-    // echo '</div>';
-
     $parsedown = new Parsedown();
     $markdownContent = file_get_contents($docLocation);
     $htmlContent = $parsedown->text($markdownContent);
@@ -56,7 +50,7 @@ function chatbot_chatgpt_support_section_callback() {
     $dir = isset($_GET['dir']) ? sanitize_text_field($_GET['dir']) : '';
     $file = isset($_GET['file']) ? sanitize_text_field($_GET['file']) : '';
     
-    $basePath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
+    $basePath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\';
     $basePath = "?page=chatbot-chatgpt";
     if ($dir !== '') {
         $basePath .= "&tab=support&dir=" . $dir;
@@ -77,7 +71,7 @@ function adjustPaths($html, $basePath) {
     $html = preg_replace_callback(
         '/<img\s+src="([^"]+)"/i',
         function ($matches) use ($basePath) {
-            return '<img src="' . adjustImagePath($matches[1], $basePath) . '" style="border: 1px solid black; box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.3);"';
+            return '<img src="' . adjustImagePath($matches[1], $basePath) . '" style="width: 80%; height: auto; border: 1px solid black; box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.3);"';
         },
         $html
     );

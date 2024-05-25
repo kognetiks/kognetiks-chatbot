@@ -38,6 +38,7 @@ function chatbot_chatgpt_assistant_settings_section_callback($args) {
         <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li>
     </ul>
     <p><b>NOTE:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
 }
 

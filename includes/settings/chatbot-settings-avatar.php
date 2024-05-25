@@ -23,6 +23,7 @@ function chatbot_chatgpt_avatar_section_callback($args): void {
         <p>Besure to remove the Custom Avatar URL if you want to select \'None\' or one from the set below.</p>
         <p>You can change your avatar at any time.</p>
         <p><b><i>Don\'t forget to click \'Save Settings\' to save your changes.</i><b></p>
+        <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Model settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=avatars&file=avatars.md">here</a>.</b></p>
     </div>';
 }
  
