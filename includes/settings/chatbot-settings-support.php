@@ -86,8 +86,8 @@ function validateDocumentation($dir, $file) {
         if (in_array($dir, $valid_directories) && in_array($file, $valid_files[$dir])) {
 
             // DIAG - Diagnostics - Ver 2.0.2.1
-            back_trace ( 'NOTICE', 'validateDocumentation: $dir: '. $dir );
-            back_trace ( 'NOTICE', 'validateDocumentation: $file: '. $file );
+            // back_trace ( 'NOTICE', 'validateDocumentation: $dir: '. $dir );
+            // back_trace ( 'NOTICE', 'validateDocumentation: $file: '. $file );
 
             // Return true if the directory and file are valid
             return true;
@@ -130,7 +130,7 @@ function chatbot_chatgpt_support_section_callback() {
     }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
+    // back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
   
     $parsedown = new Parsedown();
     $markdownContent = file_get_contents($docLocation);
