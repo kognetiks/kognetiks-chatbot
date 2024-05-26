@@ -31,3 +31,7 @@ Now your website visitors can enjoy a seamless and personalized chat experience 
 8. Use ```[chatbot style="embedded"]``` to display the chatbot as an embedded chatbot.
 
 9. By default, the chatbot will appear in the lower right corner of the page. This is adjustable in the .css file but not recommended for the causal site builders.
+
+---
+
+- **[Back to the Overview](/overview.md)**

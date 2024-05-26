@@ -37,3 +37,7 @@ The Interactions Data settings allow you to view, manage, and export the data re
 - **NOTE:** The Interaction data is accumulated by each day and when exported retains this ganularity. 
 
 By using these settings, you can effectively manage and analyze the interactions data from your Kognetiks Chatbot, helping you gain insights into user engagement and improve the chatbot's performance.
+
+---
+
+- **[Back to the Overview](/overview.md)**

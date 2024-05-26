@@ -28,3 +28,7 @@ The Advanced API Settings allow you to configure critical parameters for the API
 - **Consult Documentation**: For more information on API parameters and troubleshooting, refer to the [OpenAI API documentation](https://platform.openai.com/docs).
 
 By configuring these settings, you ensure that your Kognetiks Chatbot maintains a stable and efficient connection to the OpenAI API, providing reliable performance for your users.
+
+---
+
+- **[Back to the Overview](/overview.md)**

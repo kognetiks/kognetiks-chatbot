@@ -44,3 +44,7 @@ You can have an unlimited number of Assistants on you site if you reference them
 - ```[chatbot style="floating" assistant="asst_...123"]``` - Floating style, GPT Assistant specified
 
 - ```[chatbot style="embedded" assistant="asst_...456"]``` - Embedded style, GPT Assistant specified
+
+---
+
+- **[Back to the Overview](/overview.md)**

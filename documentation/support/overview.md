@@ -21,3 +21,7 @@ The **Kognetiks Chatbot for WordPress** plugin is powered by OpenAI, via it's AP
 - [API Key Safety and Security](api-key-safety-and-security.md)
 
 - [Diagnostics](diagnostics.md)
+
+---
+
+- **[Back to the Overview](/overview.md)**

@@ -32,3 +32,7 @@ The Conversation Data settings allow you to manage and export the interaction da
 - **Data Cleanup**: If the database size becomes too large, consider setting up a routine to archive older conversation data.
 
 By using these settings, you can effectively manage and analyze the conversation data from your Kognetiks Chatbot, helping you gain insights into user interactions and improve the chatbot's performance.
+
+---
+
+- **[Back to the Overview](/overview.md)**

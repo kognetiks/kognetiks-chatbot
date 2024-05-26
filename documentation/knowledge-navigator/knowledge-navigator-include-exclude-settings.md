@@ -47,3 +47,7 @@ The Include/Exclude settings allow you to specify which types of content the **K
 - **Updating Settings**: Revisit these settings periodically, especially if your content strategy changes, to ensure the chatbot indexes the most relevant information.
 
 By configuring these settings, you ensure that your Kognetiks Chatbot indexes only the content that is most pertinent to its function, improving the relevance and accuracy of the information it provides to users.
+
+---
+
+- **[Back to the Overview](/overview.md)**

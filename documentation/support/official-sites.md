@@ -19,3 +19,7 @@ Please use one of these resources to obtain support for the **Kognetisk Chatbot 
 - [Support @ WordPress.org](https://wordpress.org/support/plugin/chatbot-chatgpt/)
 
 - [Support @ GitHub.com](https://github.com/kognetiks/kognetiks-chatbot/issues)
+
+---
+
+- **[Back to the Overview](/overview.md)**

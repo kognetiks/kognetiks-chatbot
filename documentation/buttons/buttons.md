@@ -50,3 +50,7 @@ The Custom Buttons settings allow you to add personalized buttons to your chatbo
 - **User Experience**: Custom buttons can enhance user experience by providing quick access to important information or actions directly from the chatbot.
 
 By configuring these settings, you can add useful custom buttons to your Kognetiks Chatbot, making it easier for users to navigate to key areas of your website.
+
+---
+
+- **[Back to the Overview](/overview.md)**

@@ -68,3 +68,7 @@ The Diagnostics Settings help you monitor the health and performance of the **Ko
 - **Data Management**: Be cautious with the "Delete Plugin Data on Uninstall" setting if you might need the data in the future.
 
 By configuring these settings, you can effectively monitor and maintain the health and performance of your Kognetiks Chatbot, ensuring a smooth and reliable user experience.
+
+---
+
+- **[Back to the Overview](/overview.md)**

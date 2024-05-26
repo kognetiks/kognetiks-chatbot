@@ -36,3 +36,7 @@ Please review the section [Conversation Logging and History](../support/conversa
      - **Enable Conversation Logging**: Toggle to turn logging on or off.
      - **Conversation Log Days to Keep**: Set the number of days to retain conversation logs.
    - **Action**: Adjust these settings to fit your monitoring and data retention needs, then click "Save Settings" to apply.
+
+---
+
+- **[Back to the Overview](/overview.md)**

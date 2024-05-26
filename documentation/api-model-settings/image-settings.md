@@ -69,3 +69,7 @@ Here are some example shortcodes you can use to customize the chatbot's image ge
 - **Style Consistency**: Choose an image style that aligns with your brand or the specific theme of your content for a consistent user experience.
 
 By configuring these settings, you ensure that your Kognetiks Chatbot can effectively generate images that meet your aesthetic and functional requirements, enhancing user engagement and visual appeal.
+
+---
+
+- **[Back to the Overview](/overview.md)**

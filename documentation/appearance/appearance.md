@@ -79,3 +79,7 @@ The Appearance Settings allow you to customize the visual aspects of your chatbo
 - **Custom CSS**: Utilize custom CSS for advanced styling needs that aren't covered by the basic settings.
 
 By configuring these settings, you can ensure that your Kognetiks Chatbot blends well with your website's design, providing a cohesive and visually appealing user experience.
+
+---
+
+- **[Back to the Overview](/overview.md)**

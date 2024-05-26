@@ -74,3 +74,7 @@ To ensure your Kognetiks Chatbot functions optimally, you need to configure the 
 - **Context Matters**: Providing a well-defined conversation context can significantly improve the relevance and helpfulness of the chatbot's responses.
 
 By following these steps and tips, you can ensure that your Kognetiks Chatbot is set up effectively to meet your needs.
+
+---
+
+- **[Back to the Overview](/overview.md)**

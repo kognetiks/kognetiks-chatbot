@@ -18,6 +18,9 @@ More information about ChatGPT models and their capability can be found at https
 
 - [Advanced API Settings](advanced-api-settings.md)
 
+---
+
+- **[Back to the Overview](/overview.md)**
 
 
 

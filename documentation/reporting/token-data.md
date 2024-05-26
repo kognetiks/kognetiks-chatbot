@@ -38,3 +38,7 @@ The Token Data settings allow you to monitor and export the token usage data col
 - **NOTE:** The token data is accumulated by each day and when exported retains this ganularity. 
 
 By using these settings, you can effectively monitor and analyze the token usage data from your Kognetiks Chatbot, helping you manage costs and gain insights into chatbot activity.
+
+---
+
+- **[Back to the Overview](/overview.md)**

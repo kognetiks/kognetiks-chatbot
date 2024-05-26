@@ -86,3 +86,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 - **User Expectations**: Including disclaimers can help manage expectations and improve user understanding of the chatbot’s capabilities.
 
 By configuring these settings, you ensure that your Kognetiks Chatbot is customized to provide a welcoming and user-friendly experience for your website visitors.
+
+---
+
+- **[Back to the Overview](/overview.md)**

@@ -43,3 +43,7 @@ The Enhanced Response settings allow you to customize how additional information
 - **Relevance**: Ensure that the related content linked in enhanced responses is relevant to the user's query to maintain usefulness and user satisfaction.
 
 By configuring these settings, you can enhance the chatbot's responses with additional relevant content from your site, improving the overall user experience and engagement.
+
+---
+
+- **[Back to the Overview](/overview.md)**

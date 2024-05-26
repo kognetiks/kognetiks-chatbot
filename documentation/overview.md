@@ -8,6 +8,16 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
 
+## Quick Start
+
+- [Overview](support/overview.md)
+
+- [Getting Started](support/getting-started.md)
+
+- [Offical Sites](support/official-sites.md)
+
+- [Frequently Asked Questions](support/faqs.md)
+
 ## Sections
 
 - [Settings](settings/settings.md)
@@ -32,12 +42,6 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## Support
 
-- [Overview](support/overview.md)
-
-- [Offical Sites](support/official-sites.md)
-
-- [Getting Started](support/getting-started.md)
-
 - [Chatbots and Assistants](support/chatbots-and-assistants.md)
 
 - [Conversation Logging and History](support/conversation-logging-and-history.md)
@@ -54,3 +58,6 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetiks is not a partner of, endorsed by, or sponsored by OpenAI.
 
+---
+
+- **[Back to the Overview](/overview.md)**

@@ -42,3 +42,7 @@ The Knowledge Navigator Status section provides an overview of the automated con
 - **Frequency Adjustments**: If your content updates vary, adjust the "Scheduled to Run" frequency accordingly to ensure timely content analysis.
 
 By understanding and utilizing the Knowledge Navigator Status settings, you can ensure that your Kognetiks Chatbot remains accurate and effective in providing up-to-date information to users.
+
+---
+
+- **[Back to the Overview](/overview.md)**

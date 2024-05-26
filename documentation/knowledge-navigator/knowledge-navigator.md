@@ -15,3 +15,7 @@ And how does the **Knowledge Navigator** do all this? It employs a clever techni
 - [Knowledge Navigator Include/Exclude Settings](knowledge-navigator-include-exclude-settings.md)
 
 - [Knowledge Navigator Enhanced Response Settings](knowledge-navigator-enhanced-response-settings.md)
+
+---
+
+- **[Back to the Overview](/overview.md)**

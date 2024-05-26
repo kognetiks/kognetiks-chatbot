@@ -14,12 +14,97 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
+// Get the list of documentation contents
+function listDocumentationContents() {
+
+    $documentationPath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . '/documentation';
+    
+    if (!file_exists($documentationPath)) {
+        return "The specified documentation directory does not exist.";
+    }
+
+    return traverseDirectory($documentationPath);
+    
+}
+
+// Traverse the directory structure to get the list of directories and files
+function traverseDirectory($path) {
+    $contents = scandir($path);
+    $result = [
+        'directories' => [],
+        'files' => []
+    ];
+
+    foreach ($contents as $item) {
+        if ($item == '.' || $item == '..') {
+            continue;
+        }
+
+        $fullPath = $path . '/' . $item;
+
+        if (is_dir($fullPath)) {
+            $result['directories'][$item] = traverseDirectory($fullPath);
+        } elseif (is_file($fullPath)) {
+            $result['files'][] = $item;
+        }
+    }
+
+    return $result;
+
+}
+
+// Validate the requested directory and file
+function validateDocumentation($dir, $file) {
+
+    $contents = listDocumentationContents();
+
+    // Flatten the directory structure to create a list of valid directories and files
+    $valid_directories = array_keys($contents['directories']);
+    $valid_files = [];
+
+    foreach ($contents['directories'] as $directory => $data) {
+        if (isset($data['files'])) {
+            $valid_files[$directory] = $data['files'];
+        } else {
+            $valid_files[$directory] = [];
+        }
+
+        // Traverse subdirectories recursively
+        $sub_directories = array_keys($data['directories']);
+        foreach ($sub_directories as $sub_directory) {
+            $valid_directories[] = $directory . '\\' . $sub_directory;
+            $valid_files[$directory . '\\' . $sub_directory] = $data['directories'][$sub_directory]['files'];
+        }
+    }
+
+    // Diagnostics
+    // back_trace('NOTICE', '$valid_directories: ' . print_r($valid_directories, true));
+    // back_trace('NOTICE', '$valid_files: ' . print_r($valid_files, true));
+
+    if (!empty($valid_directories) && !empty($valid_files) && !empty($dir) && !empty($file)) {
+        // If the $dir and $file are found in the list of $valid_directories and $valid_files, return true
+        if (in_array($dir, $valid_directories) && in_array($file, $valid_files[$dir])) {
+
+            // DIAG - Diagnostics - Ver 2.0.2.1
+            back_trace ( 'NOTICE', 'validateDocumentation: $dir: '. $dir );
+            back_trace ( 'NOTICE', 'validateDocumentation: $file: '. $file );
+
+            // Return true if the directory and file are valid
+            return true;
+
+        }
+    }
+
+    // Return false if the directory and file are invalid
+    return false;
+
+}
+
 // Support settings section callback - Ver 1.3.0
 function chatbot_chatgpt_support_section_callback() {
 
-    global $dir;
-
-    // // Get the 'documentation' parameter from the URL
+    // Get the 'documentation' parameter from the URL
+    $docLocation = '';
     $docLocation = '';
     if (isset($_GET['dir'])) {
         $dir = sanitize_text_field($_GET['dir']);
@@ -37,12 +122,16 @@ function chatbot_chatgpt_support_section_callback() {
         $docLocation = 'overview.md';
     }
 
-    // The files are in the 'documentation' directory
-    $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\' . $docLocation;
+    // Validate the that the requestioned documentation directory and file exist
+    if (validateDocumentation($dir, $file)) {
+        $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\' . $docLocation;
+    } else {
+        $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\' . 'overview.md';
+    }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
-    
+    back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
+  
     $parsedown = new Parsedown();
     $markdownContent = file_get_contents($docLocation);
     $htmlContent = $parsedown->text($markdownContent);
@@ -64,6 +153,10 @@ function chatbot_chatgpt_support_section_callback() {
 
     echo $adjustedHtmlContent;
 
+}
+
+function file_exists_in_doc_location($docLocation) {
+    return file_exists($docLocation);
 }
 
 function adjustPaths($html, $basePath) {

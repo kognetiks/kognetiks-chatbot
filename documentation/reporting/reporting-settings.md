@@ -43,3 +43,7 @@ The Reporting Settings allow you to manage how conversation data is logged and r
 - **Logging**: Enabling conversation logging is crucial for tracking chatbot performance and understanding user interactions. Make sure to periodically review and analyze the logged data.
 
 By configuring these settings, you can effectively manage how conversation data is logged and reported, providing valuable insights into the performance and usage of your Kognetiks Chatbot.
+
+---
+
+- **[Back to the Overview](/overview.md)**

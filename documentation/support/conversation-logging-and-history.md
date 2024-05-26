@@ -84,3 +84,7 @@ The privacy policy should be regularly updated to reflect any changes in data ha
 ### Example Notification
 
 - "Please note that your interactions with our chatbot are logged for the purpose of improving our services and providing better support. We respect your privacy, and all data is handled in accordance with our privacy policy, which you can review ```<a href='https//...link to your privacy page ...'>here</a>```. Your continued use of the chatbot indicates your consent to these practices."
+
+---
+
+- **[Back to the Overview](/overview.md)**

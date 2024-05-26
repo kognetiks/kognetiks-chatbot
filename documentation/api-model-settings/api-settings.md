@@ -41,4 +41,6 @@ The **Kognetiks Chatbot for WordPress** plugin requires proper configuration to 
 
 By configuring these settings, you ensure that your Kognetiks Chatbot plugin operates smoothly and efficiently, providing a seamless experience for both logged-in users and visitors.
 
+---
 
+- **[Back to the Overview](/overview.md)**

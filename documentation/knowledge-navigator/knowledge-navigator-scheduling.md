@@ -56,3 +56,7 @@ This configuration will ensure that the Knowledge Navigator scans your website c
 - **Immediate Updates**: Use the `Now` option if you need to run an immediate scan after significant content changes.
 
 By configuring these settings, you ensure that your Kognetiks Chatbot stays up-to-date with the latest content on your website, providing accurate and relevant information to users.
+
+---
+
+- **[Back to the Overview](/overview.md)**

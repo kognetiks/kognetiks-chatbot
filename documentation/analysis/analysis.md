@@ -30,3 +30,7 @@ The Output Format setting allows you to specify the format in which the **Knowle
 - **Future Use**: Consider how you might need to use the exported data in the future. Choosing a versatile format like CSV can make it easier to re-import or share the data later.
 
 By configuring this setting, you ensure that the data collected from the knowledge acquisition prcoess is exported in a format that best suits your needs for analysis and record-keeping.
+
+---
+
+- **[Back to the Overview](/overview.md)**

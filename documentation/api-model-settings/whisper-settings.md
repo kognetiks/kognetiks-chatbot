@@ -36,3 +36,7 @@ Here are some example shortcodes you can use to customize the chatbot's speech-t
 - **Output Format**: Choose the output format that aligns with how you intend to use the transcribed speech data.
 
 By configuring these settings, you ensure that your Kognetiks Chatbot can effectively convert spoken input into text, enhancing interaction and accessibility for users who prefer voice input.
+
+---
+
+- **[Back to the Overview](/overview.md)**

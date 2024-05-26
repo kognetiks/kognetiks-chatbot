@@ -39,3 +39,7 @@ The Avatar Settings allow you to customize the appearance and greeting of your c
 - **Icon Selection**: If you prefer not to upload a custom avatar, choose from the wide array of pre-designed icons to give your chatbot a unique and friendly appearance.
 
 By configuring these settings, you can personalize the appearance and initial interaction of your Kognetiks Chatbot, making it more engaging and visually appealing to users.
+
+---
+
+- **[Back to the Overview](/overview.md)**
