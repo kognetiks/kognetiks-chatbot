@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Get the list of documentation contents
 function listDocumentationContents() {
 
-    $documentationPath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . '\\documentation';
+    $documentationPath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . '/documentation';
     
     if (!file_exists($documentationPath)) {
         return "The specified documentation directory does not exist.";
@@ -56,6 +56,10 @@ function traverseDirectory($path) {
 // Validate the requested directory and file
 function validateDocumentation($dir, $file) {
 
+    $data = []; // Initialize $data as an empty array
+    $sub_directory = ""; // Initialize $sub_directory as an empty string
+    $directory = ""; // Initialize $directory as an empty string
+
     $contents = listDocumentationContents();
 
     // Flatten the directory structure to create a list of valid directories and files
@@ -72,8 +76,8 @@ function validateDocumentation($dir, $file) {
         // Traverse subdirectories recursively
         $sub_directories = array_keys($data['directories']);
         foreach ($sub_directories as $sub_directory) {
-            $valid_directories[] = $directory . '\\' . $sub_directory;
-            $valid_files[$directory . '\\' . $sub_directory] = $data['directories'][$sub_directory]['files'];
+            $valid_directories[] = $directory . '/' . $sub_directory;
+            $valid_files[$directory . '/' . $sub_directory] = $data['directories'][$sub_directory]['files'];
         }
     }
 
@@ -117,16 +121,16 @@ function chatbot_chatgpt_support_section_callback() {
         $file = '';
     }
     if (!empty($dir) && !empty($file)) {
-        $docLocation = $dir . '\\' . $file;
+        $docLocation = $dir . '/' . $file;
     } else if (empty($dir) && empty($file)) {
         $docLocation = 'overview.md';
     }
 
     // Validate the that the requestioned documentation directory and file exist
     if (validateDocumentation($dir, $file)) {
-        $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\' . $docLocation;
+        $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/' . $docLocation;
     } else {
-        $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\' . 'overview.md';
+        $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/' . 'overview.md';
     }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
@@ -139,7 +143,7 @@ function chatbot_chatgpt_support_section_callback() {
     $dir = isset($_GET['dir']) ? sanitize_text_field($_GET['dir']) : '';
     $file = isset($_GET['file']) ? sanitize_text_field($_GET['file']) : '';
     
-    $basePath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\';
+    $basePath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
     $basePath = "?page=chatbot-chatgpt";
     if ($dir !== '') {
         $basePath .= "&tab=support&dir=" . $dir;

@@ -328,7 +328,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_mp3_uploads = 'Yes';
     }
 
-    if (strpos($model, 'gpt-4o') !== false) {
+    if (strpos($model, 'gpt-4o') !== false && strpos($chatbot_chatgpt_assistant_alias, 'asst_') === false && $chatbot_chatgpt_assistant_alias !== 'original') {
         // $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
         $chatbot_chatgpt_allow_file_uploads = 'No';
         $chatbot_chatgpt_allow_mp3_uploads = 'No';
