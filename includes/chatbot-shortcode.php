@@ -313,33 +313,25 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_chatgpt_allow_file_uploads = 'No';
     $chatbot_chatgpt_allow_mp3_uploads = 'No';
 
-    // Check for specific assistant alias
     if ($chatbot_chatgpt_assistant_alias == 'original') {
         $chatbot_chatgpt_allow_file_uploads = 'No';
         $chatbot_chatgpt_allow_mp3_uploads = 'No';
-    } elseif (strpos($chatbot_chatgpt_assistant_alias, 'asst_') !== false) {
+    }
+
+    if (strpos($chatbot_chatgpt_assistant_alias,'asst_') !== false) {
         $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
         $chatbot_chatgpt_allow_mp3_uploads = 'No';
     }
 
-    // Check for specific model
     if (strpos($model, 'whisper') !== false) {
         $chatbot_chatgpt_allow_file_uploads = 'No';
         $chatbot_chatgpt_allow_mp3_uploads = 'Yes';
-    } elseif (strpos($model, 'gpt-4o') !== false) {
-        if (strpos($chatbot_chatgpt_assistant_alias, 'asst_') !== false) {
-            $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
-            $chatbot_chatgpt_allow_mp3_uploads = 'No';
-        } else {
-            $chatbot_chatgpt_allow_file_uploads = 'No'; // Disable file uploads for GPT-4o
-            $chatbot_chatgpt_allow_mp3_uploads = 'No'; // Disable MP3 uploads for GPT-4o
-        }
     }
 
-    // Additional logic to handle any overlapping conditions
-    if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes') {
-        // Ensure file uploads are disabled if MP3 uploads are enabled
+    if (strpos($model, 'gpt-4o') !== false) {
+        // $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
         $chatbot_chatgpt_allow_file_uploads = 'No';
+        $chatbot_chatgpt_allow_mp3_uploads = 'No';
     }
 
     // Allow Read Aloud - Ver 1.9.0

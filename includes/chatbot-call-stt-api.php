@@ -89,7 +89,12 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime_type = finfo_file($finfo, $audio_file_name);
 
-    if (!strpos($mime_type, 'audio/') && !strpos($mime_type, 'video/')) {
+    // DIAG - Diagnostics - Ver 2.0.2.1
+    // back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
+    // back_trace( 'NOTICE', '$finfo: ' . print_r($finfo, true));
+    // back_trace( 'NOTICE', '$mime_type: ' . $mime_type);
+
+    if (strpos($mime_type, 'audio/') === FALSE && strpos($mime_type, 'video/') === FALSE) {
         return "Error: The file is not an audio or video file. Please upload an audio or video file.";
     }
 
