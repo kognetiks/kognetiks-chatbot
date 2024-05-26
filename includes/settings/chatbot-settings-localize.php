@@ -24,7 +24,7 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_avatar_icon_url_setting' => '',
         'chatbot_chatgpt_bot_name' => 'Kognetiks Chatbot',
         'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
-        'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.',
+        'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.',
         'chatbot_chatgpt_custom_avatar_icon_setting' => '',
         'chatbot_chatgpt_custom_button_name_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',

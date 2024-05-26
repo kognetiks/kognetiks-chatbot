@@ -14,11 +14,12 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// API/Model settings section callback - Ver 1.3.0
+// API/Model settings section callback - Ver 1.3.0 - Updated Ver 2.0.2.1
 function chatbot_chatgpt_model_settings_section_callback($args) {
     ?>
     <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Model settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-model-settings&file=api-model-settings.md">here</a>.</b></p>
     <?php
 }
 
@@ -140,11 +141,11 @@ function chatbot_chatgpt_model_choice_callback($args) {
 
     // Limit the models to chat models
     $models = array_filter($models, function($model) {
-        return str_contains($model['id'], 'gpt');
+        return strpos($model['id'], 'gpt') !== false;
     });
 
     // Check for errors
-    if (is_string($models) && str_starts_with($models, 'Error:')) {
+    if (is_string($models) && strpos($models, 'Error:') === 0) {
         // If there's an error, display the hardcoded list
         $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         ?>
@@ -190,7 +191,7 @@ function chatbot_chatgpt_conversation_context_callback($args) {
 
     // Check if the option has been set, if not, use a default value
     if (empty($chatbot_chatgpt_conversation_context)) {
-        $chatbot_chatgpt_conversation_context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.";
+        $chatbot_chatgpt_conversation_context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.";
         // Save the default value into the option
         update_option('chatbot_chatgpt_conversation_context', $chatbot_chatgpt_conversation_context);
     }
@@ -198,6 +199,36 @@ function chatbot_chatgpt_conversation_context_callback($args) {
     ?>
     <!-- Define the textarea field. -->
     <textarea id='chatbot_chatgpt_conversation_context' name='chatbot_chatgpt_conversation_context' rows='5' cols='50' maxlength='12500'><?php echo esc_html(stripslashes($chatbot_chatgpt_conversation_context)); ?></textarea>
+    <?php
+}
+
+// Set chatbot_chatgpt_temperature - Ver 2.0.1
+// https://platform.openai.com/docs/assistants/how-it-works/temperature
+function chatbot_chatgpt_temperature_callback($args) {
+    $temperature = esc_attr(get_option('chatbot_chatgpt_temperature', 0.50));
+    ?>
+    <select id="chatbot_chatgpt_temperature" name="chatbot_chatgpt_temperature">
+        <?php
+        for ($i = 0.01; $i <= 2.01; $i += 0.01) {
+            echo '<option value="' . $i . '" ' . selected($temperature, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
+// Set chatbot_chatgpt_top_p - Ver 2.0.1
+// https://platform.openai.com/docs/assistants/how-it-works/top-p
+function chatbot_chatgpt_top_p_callback($args) {
+    $top_p = esc_attr(get_option('chatbot_chatgpt_top_p', 1.00));
+    ?>
+    <select id="chatbot_chatgpt_top_p" name="chatbot_chatgpt_top_p">
+        <?php
+        for ($i = 0.01; $i <= 1.01; $i += 0.01) {
+            echo '<option value="' . $i . '" ' . selected($top_p, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
     <?php
 }
 
@@ -256,11 +287,11 @@ function chatbot_chatgpt_voice_model_option_callback($args) {
 
     // Limit the models to voice models
     $voice_models = array_filter($voice_models, function($voice_model) {
-        return str_contains($voice_model['id'], 'tts');
+        return strpos($voice_model['id'], 'tts') !== false;
     });
     
     // Check for errors
-    if (is_string($voice_models) && str_starts_with($voice_models, 'Error:')) {
+    if (is_string($voice_models) && strpos($voice_models, 'Error:') === 0) {
         // If there's an error, display the hardcoded list
         $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
         ?>
@@ -352,11 +383,11 @@ function chatbot_chatgpt_image_model_option_callback($args) {
 
     // Limit the models to image models
     $image_models = array_filter($image_models, function($image_model) {
-        return str_contains($image_model['id'], 'dall-e');
+        return strpos($image_model['id'], 'dall-e') !== false;
     });
     
     // Check for errors
-    if (is_string($image_models) && str_starts_with($image_models, 'Error:')) {
+    if (is_string($image_models) && strpos($image_models, 'Error:') === 0) {
         // If there's an error, display the hardcoded list
         $image_model_option = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-3'));
         ?>
@@ -519,11 +550,11 @@ function chatbot_chatgpt_whisper_model_option_callback($args) {
     
         // Limit the models to whisper models
         $whisper_models = array_filter($whisper_models, function($whisper_model) {
-            return str_contains($whisper_model['id'], 'whisper');
+            return strpos($whisper_model['id'], 'whisper') !== false;
         });
         
         // Check for errors
-        if (is_string($whisper_models) && str_starts_with($whisper_models, 'Error:')) {
+        if (is_string($whisper_models) && strpos($whisper_models, 'Error:') === 0) {
             // If there's an error, display the hardcoded list
             $whisper_model_option = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
             ?>

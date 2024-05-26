@@ -119,7 +119,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
 }
 
 // Knowledge Navigator Introduction
-function chatbot_chatgpt_knowledge_navigator_section_callback($args): void {
+function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     // See if the scanner is needs to run
     $results = chatbot_chatgpt_kn_results_callback(esc_attr(get_option('chatbot_chatgpt_kn_schedule')));
@@ -132,12 +132,13 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args): void {
             <p>Introducing <b>Knowledge Navigator</b> - the smart explorer behind our Kognetiks Chatbot plugin that's designed to delve into the core of your website. Like a digital archaeologist, it embarks on an all-encompassing journey through your site's published pages, posts, products and approved comments, carefully following every internal link to get a holistic view of your content. The exciting part? It sifts through each page, extracting the essence of your content in the form of keywords and phrases, gradually building a meticulous, interactive map of your website's architecture. </p>
             <p>What's the outcome? Detailed "results.csv" and "results.json" files are created, tucking away all this valuable information in a dedicated 'results' directory within the plugin's folder. The prime objective of <b>Knowledge Navigator</b> is to enable the Kognetiks Chatbot plugin to have a crystal clear understanding of your website's context and content. The result? Your chatbot will deliver responses that are not just accurate, but also fittingly contextual, thereby crafting a truly bespoke user experience. This all is powered by the advanced AI technology of OpenAI's Large Language Model (LLM) API.</p>
             <p>And how does the <b>Knowledge Navigator</b> do all this? It employs a clever technique known as TF-IDF (Term Frequency-Inverse Document Frequency) to unearth the keywords that really matter. The keywords are ranked by their TF-IDF scores, where the score represents the keyword's relevance to your site. This score is a fine balance between the term's frequency on your site and its inverse document frequency (which is essentially the log of total instances divided by the number of documents containing the term). In simpler words, it's a sophisticated measure of how special a keyword is to your content.</p>
+            <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Knowledge Navigator and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=knowledge-navigator&file=knowledge-navigator.md">here</a>.</b></p>
         </div>
     <?php
 }
 
 // Knowledge Navigator Status - Ver 2.0.0.
-function chatbot_chatgpt_kn_status_section_callback($args): void {
+function chatbot_chatgpt_kn_status_section_callback($args) {
 
     // See if the scanner is needs to run
     $results = chatbot_chatgpt_kn_results_callback(esc_attr(get_option('chatbot_chatgpt_kn_schedule')));
@@ -181,7 +182,7 @@ function chatbot_chatgpt_kn_enhanced_response_section_callback($args) {
 }
 
 // Select Frequency of Scan - Ver 1.6.2
-function chatbot_chatgpt_kn_schedule_callback($args): void {
+function chatbot_chatgpt_kn_schedule_callback($args) {
     $chatbot_chatgpt_kn_schedule = esc_attr(get_option('chatbot_chatgpt_kn_schedule', 'No'));
     ?>
     <select id="chatbot_chatgpt_kn_schedule" name="chatbot_chatgpt_kn_schedule">
@@ -196,7 +197,7 @@ function chatbot_chatgpt_kn_schedule_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_maximum_top_words_callback($args): void {
+function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 25));
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
@@ -209,7 +210,7 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_include_posts_callback($args): void {
+function chatbot_chatgpt_kn_include_posts_callback($args) {
     $chatbot_chatgpt_kn_include_posts = esc_attr(get_option('chatbot_chatgpt_kn_include_posts', 'Yes'));
     ?>
     <select id="chatbot_chatgpt_kn_include_posts" name="chatbot_chatgpt_kn_include_posts">
@@ -219,7 +220,7 @@ function chatbot_chatgpt_kn_include_posts_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_include_pages_callback($args): void {
+function chatbot_chatgpt_kn_include_pages_callback($args) {
     $chatbot_chatgpt_kn_include_pages = esc_attr(get_option('chatbot_chatgpt_kn_include_pages', 'Yes'));
     ?>
     <select id="chatbot_chatgpt_kn_include_pages" name="chatbot_chatgpt_kn_include_pages">
@@ -229,7 +230,7 @@ function chatbot_chatgpt_kn_include_pages_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_include_products_callback($args): void {
+function chatbot_chatgpt_kn_include_products_callback($args) {
     $chatbot_chatgpt_kn_include_products = esc_attr(get_option('chatbot_chatgpt_kn_include_products', 'Yes'));
     ?>
     <select id="chatbot_chatgpt_kn_include_products" name="chatbot_chatgpt_kn_include_products">
@@ -239,7 +240,7 @@ function chatbot_chatgpt_kn_include_products_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_include_comments_callback($args): void {
+function chatbot_chatgpt_kn_include_comments_callback($args) {
     $chatbot_chatgpt_kn_include_comments = esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'Yes'));
     ?>
     <select id="chatbot_chatgpt_kn_include_comments" name="chatbot_chatgpt_kn_include_comments">
@@ -249,7 +250,7 @@ function chatbot_chatgpt_kn_include_comments_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_enhanced_response_limit_callback($args): void {
+function chatbot_chatgpt_enhanced_response_limit_callback($args) {
     $chatbot_chatgpt_enhanced_response_limit = intval(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
     ?>
     <select id="chatbot_chatgpt_enhanced_response_limit" name="chatbot_chatgpt_enhanced_response_limit">
@@ -262,7 +263,7 @@ function chatbot_chatgpt_enhanced_response_limit_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_tuning_percentage_callback($args): void {
+function chatbot_chatgpt_kn_tuning_percentage_callback($args) {
     $chatbot_chatgpt_kn_tuning_percentage = intval(get_option('chatbot_chatgpt_kn_tuning_percentage', 25));
     ?>
     <select id="chatbot_chatgpt_kn_tuning_percentage" name="chatbot_chatgpt_kn_tuning_percentage">

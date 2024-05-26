@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Register settings
-function chatbot_chatgpt_kn_settings_init(): void {
+function chatbot_chatgpt_kn_settings_init() {
 
     // Knowledge Navigator Tab
     
@@ -151,8 +151,6 @@ function chatbot_chatgpt_kn_settings_init(): void {
         'chatbot_chatgpt_kn_enhanced_response',
         'chatbot_chatgpt_kn_enhanced_response_section'
     );
-
-
 
     // Analysis Tab
 

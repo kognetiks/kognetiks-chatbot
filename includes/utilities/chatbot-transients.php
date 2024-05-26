@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set the transients based on the type - Ver 1.8.1
-function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null, $thread_id = null, $sequence_id = null, $step_id = null): void {
+function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null, $thread_id = null, $sequence_id = null, $step_id = null) {
 
     global $session_id;
     global $user_id;
@@ -159,7 +159,7 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
 }
 
 // Delete the transients - Ver 1.7.9
-function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page_id = null, $session_id = null ): void {
+function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page_id = null, $session_id = null ) {
 
     // FIXME - DECIDE - Should we delete the transients
 

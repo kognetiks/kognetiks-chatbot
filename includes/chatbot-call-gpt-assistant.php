@@ -78,9 +78,15 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     // Set up the data payload
+    // Updated content to be an array - Ver 2.0.2.1
     $data = [
         'role' => 'user',
-        'content' => $prompt,
+        'content' => array(
+            array(
+                'type' => 'text',
+                'text' => $prompt,
+            )
+        ),
     ];
 
     // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
@@ -219,7 +225,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 }
 
 // Step 5: Get the Run's Status
-function getTheRunsStatus($thread_id, $runId, $api_key): void {
+function getTheRunsStatus($thread_id, $runId, $api_key) {
 
     $status = "";
 
@@ -305,7 +311,7 @@ function getTheRunsSteps($thread_id, $runId, $api_key) {
 }
 
 // Step 7: Get the Step's Status
-function getTheStepsStatus($thread_id, $runId, $api_key): void {
+function getTheStepsStatus($thread_id, $runId, $api_key) {
 
     $status = false;
 
@@ -479,7 +485,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // Conversation Context - Ver 1.7.2.1
     $context = "";
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
  
     // // Context History - Ver 1.6.1 - Added here for Ver 1.7.2.1
     //  $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
@@ -518,7 +524,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
 
     if (empty($file_id)) {
         // back_trace( 'NOTICE', 'No file to retrieve');

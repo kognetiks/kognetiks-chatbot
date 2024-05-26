@@ -2,6 +2,16 @@
 
 The **Kognetiks Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
+## Documentation
+
+## What's New in Version 2.0.2
+
+- **Documentation Updates:** The Support documentation has been extensively updated with detailed information on the chatbot settings. You can find this in the Support tab under Settings.
+
+- **Data Export:** The export function for Conversation Data, Interaction Data, and Token Usage Data has been revised.
+
+- **PHP 7 Support:** The `str_contains` function has been reverted to `strpos` for compatibility with PHP 7, as `str_contains` is only available in PHP 8.
+
 ## What's New in Version 2.0.1
 
 - **Support for Latest Models**

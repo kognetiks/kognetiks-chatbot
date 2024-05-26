@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set the threads transient
-function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id): void {
+function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id) {
 
     global $session_id;
     global $user_id;
