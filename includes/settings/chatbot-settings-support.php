@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Support Page
+ * Kognetiks Chatbot for WordPress - Settings - Support Pages - Overhauled in Ver 2.0.2.1
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the support settings and other parameters.
@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Get the list of documentation contents
 function listDocumentationContents() {
 
-    $documentationPath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . '/documentation';
+    $documentationPath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . '\\documentation';
     
     if (!file_exists($documentationPath)) {
         return "The specified documentation directory does not exist.";
@@ -164,7 +164,7 @@ function adjustPaths($html, $basePath) {
     $html = preg_replace_callback(
         '/<img\s+src="([^"]+)"/i',
         function ($matches) use ($basePath) {
-            return '<img src="' . adjustImagePath($matches[1], $basePath) . '" style="width: 80%; height: auto; border: 1px solid black; box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.3);"';
+            return '<img src="' . adjustImagePath($matches[1], $basePath) . '" style="max-width: 80%; width: auto; height: auto; border: 1px solid black; box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.3);"';
         },
         $html
     );

@@ -78,9 +78,15 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     // Set up the data payload
+    // Updated content to be an array - Ver 2.0.2.1
     $data = [
         'role' => 'user',
-        'content' => $prompt,
+        'content' => array(
+            array(
+                'type' => 'text',
+                'text' => $prompt,
+            )
+        ),
     ];
 
     // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
@@ -518,7 +524,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $file_id);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
 
     if (empty($file_id)) {
         // back_trace( 'NOTICE', 'No file to retrieve');

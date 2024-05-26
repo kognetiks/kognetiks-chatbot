@@ -137,7 +137,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
     $models = get_openai_models();
 
     // DIAG - Ver 1.9.5
-    back_trace ( 'NOTICE', '$models: ' . print_r($models, true) );
+    // back_trace ( 'NOTICE', '$models: ' . print_r($models, true) );
 
     // Limit the models to chat models
     $models = array_filter($models, function($model) {

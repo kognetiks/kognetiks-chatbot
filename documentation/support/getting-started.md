@@ -32,6 +32,14 @@ Now your website visitors can enjoy a seamless and personalized chat experience 
 
 9. By default, the chatbot will appear in the lower right corner of the page. This is adjustable in the .css file but not recommended for the causal site builders.
 
+# Floating Chatbot Example
+
+![Floating Chatbot Example](chatbot-floating-example.png)
+
+# Embedded Chatbot Example
+
+![Embedded Chatbot Example](chatbot-embedded-example.png)
+
 ---
 
 - **[Back to the Overview](/overview.md)**

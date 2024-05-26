@@ -832,8 +832,8 @@ function enqueue_greetings_script() {
         // If $initial_greeting contains "[$user_field_name]" then replace with field from DB
         if (strpos($initial_greeting, '[' . $user_field_name . ']') !== false) {
             $initial_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $initial_greeting);
-            back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
-            back_trace ( 'NOTICE', 'Initial Greeting: ' . $initial_greeting);
+            // back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
+            // back_trace ( 'NOTICE', 'Initial Greeting: ' . $initial_greeting);
         } else {
             $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
         }
@@ -847,8 +847,8 @@ function enqueue_greetings_script() {
         // If $subsequent_greeting contains "[$user_field_name]" then replace with field from DB
         if (strpos($subsequent_greeting, '[' . $user_field_name . ']') !== false) {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $subsequent_greeting);
-            back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
-            back_trace ( 'NOTICE', 'Subsequent Greeting: ' . $subsequent_greeting);
+            // back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
+            // back_trace ( 'NOTICE', 'Subsequent Greeting: ' . $subsequent_greeting);
         } else {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
         }
