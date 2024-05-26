@@ -85,6 +85,12 @@ function create_index_file($results_dir_path) {
     $index_file_path = $results_dir_path . 'index.php';
 
     if (!file_exists($index_file_path)) {
+
+        $directory = dirname($index_file_path);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+        
         $file_content = "<?php\n// Silence is golden.\n?>";
         file_put_contents($index_file_path, $file_content);
     }
