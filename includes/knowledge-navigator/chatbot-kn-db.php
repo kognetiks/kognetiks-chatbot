@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Database Management - drop the table if it exists, then add it if it doesn't exist - Ver 1.6.3
-function dbKNStore(): bool {
+function dbKNStore() {
 
     global $wpdb;
 
@@ -46,7 +46,7 @@ function dbKNStore(): bool {
 }
 
 // Database Management - drop a table if it exists, then add it if it doesn't exist to store the TF-IDF words and score - Ver 1.6.3
-function dbKNStoreTFIDF(): bool {
+function dbKNStoreTFIDF() {
 
     global $wpdb;
 
@@ -75,7 +75,7 @@ function dbKNStoreTFIDF(): bool {
 }
 
 // Database Management - drop a table if it exists, then add it if it doesn't exist to store the words and score - Ver 1.9.6
-function dbKNStoreWordCount(): bool {
+function dbKNStoreWordCount() {
     
         global $wpdb;
     
@@ -105,7 +105,7 @@ function dbKNStoreWordCount(): bool {
 }
 
 // Database Management - drop a table if it exists to clean up the database - Ver 1.9.6
-function dbKNClean(): bool {
+function dbKNClean() {
 
     global $wpdb;
 
@@ -117,7 +117,7 @@ function dbKNClean(): bool {
 }
 
 // Store the top words for context
-function store_top_words(): void {
+function store_top_words() {
 
     global $wpdb;
     global $topWords;

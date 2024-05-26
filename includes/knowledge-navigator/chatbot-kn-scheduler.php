@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Handle long-running scripts with a scheduled event function - Ver 1.6.1
-function knowledge_navigator_scan(): void {
+function knowledge_navigator_scan() {
 
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', 'ENTERING knowledge_navigator_scan()');

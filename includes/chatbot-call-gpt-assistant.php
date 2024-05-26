@@ -219,7 +219,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 }
 
 // Step 5: Get the Run's Status
-function getTheRunsStatus($thread_id, $runId, $api_key): void {
+function getTheRunsStatus($thread_id, $runId, $api_key) {
 
     $status = "";
 
@@ -305,7 +305,7 @@ function getTheRunsSteps($thread_id, $runId, $api_key) {
 }
 
 // Step 7: Get the Step's Status
-function getTheStepsStatus($thread_id, $runId, $api_key): void {
+function getTheStepsStatus($thread_id, $runId, $api_key) {
 
     $status = false;
 

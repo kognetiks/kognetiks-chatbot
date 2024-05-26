@@ -43,7 +43,7 @@ function chatbot_chatgpt_kn_analysis_output_callback($args) {
 
 
 // Download the TF-IDF data
-function chatbot_chatgpt_kn_analysis_download_csv(): void {
+function chatbot_chatgpt_kn_analysis_download_csv() {
 
     // Generate the results directory path
     $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';

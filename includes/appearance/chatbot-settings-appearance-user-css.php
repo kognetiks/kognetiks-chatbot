@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // User CSS Settings
-function chatbot_chatgpt_appearance_user_css_setting_callback(): void {
+function chatbot_chatgpt_appearance_user_css_setting_callback() {
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_appearance_user_css_setting = esc_attr(get_option('chatbot_chatgpt_appearance_user_css_setting', ''));
     ?>

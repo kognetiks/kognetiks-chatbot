@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Custom Avatar Icon - Ver 1.5.0
-function chatbot_chatgpt_avatar_section_callback($args): void {
+function chatbot_chatgpt_avatar_section_callback($args) {
 
     echo '<div>
         <p>Choose an avatar that best represents you and your brand or link to your own avatar by adding a Custom Avatar URL (recommended 60x60px).</p>

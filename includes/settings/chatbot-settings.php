@@ -15,13 +15,13 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set up the Setting Pages - Ver 1.9.0
-// function chatbot_chatgpt_settings_page(): void {
+// function chatbot_chatgpt_settings_page() {
 //     add_options_page('Chatbot Settings', 'Kognetiks Chatbot', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
 // }
 // add_action('admin_menu', 'chatbot_chatgpt_settings_page');
 
 // Set up the Chatbot Main Menu Page - Ver 1.9.0
-function chatbot_chatgpt_menu_page(): void {
+function chatbot_chatgpt_menu_page() {
     add_menu_page(
         'Chatbot Settings',         // Page title
         'Kognetiks Chatbot',        // Menu title
@@ -34,7 +34,7 @@ function chatbot_chatgpt_menu_page(): void {
 add_action('admin_menu', 'chatbot_chatgpt_menu_page');
 
 // Settings page HTML - Ver 1.3.0
-function chatbot_chatgpt_settings_page_html(): void {
+function chatbot_chatgpt_settings_page_html() {
     if (!current_user_can('manage_options')) {
         return;
     }

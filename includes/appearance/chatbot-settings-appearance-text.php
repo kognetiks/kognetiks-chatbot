@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set the chatbot text color
-function chatbot_chatgpt_appearance_text_color_callback(): void {
+function chatbot_chatgpt_appearance_text_color_callback() {
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_appearance_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
     ?>
@@ -38,7 +38,7 @@ function chatbot_chatgpt_appearance_text_color_callback(): void {
 }
 
 // Now override the css with the color chosen by the user
-function chatbot_chatgpt_appearance_text_color_custom_css_settings(): void {
+function chatbot_chatgpt_appearance_text_color_custom_css_settings() {
     $chatbot_chatgpt_appearance_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
     $chatbot_chatgpt_appearance_background_greeting_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_greeting_text_color', '#000000'));
 
@@ -56,7 +56,7 @@ function chatbot_chatgpt_appearance_text_color_custom_css_settings(): void {
 }
 
 // Set the chatbot user text background color
-function chatbot_chatgpt_appearance_user_text_background_color_callback(): void {
+function chatbot_chatgpt_appearance_user_text_background_color_callback() {
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_appearance_user_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_user_text_background_color', '#007bff'));
     ?>
@@ -78,7 +78,7 @@ function chatbot_chatgpt_appearance_user_text_background_color_callback(): void 
 }
 
 // Now override the css with the color chosen by the user
-function chatbot_chatgpt_appearance_user_text_background_custom_css_settings(): void {
+function chatbot_chatgpt_appearance_user_text_background_custom_css_settings() {
     $chatbot_chatgpt_appearance_user_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_user_text_background_color', '#007bff'));
 
     // Check for text color
@@ -89,7 +89,7 @@ function chatbot_chatgpt_appearance_user_text_background_custom_css_settings(): 
 }
 
 // Set the chatbot greeting text color
-function chatbot_chatgpt_appearance_greeting_text_color_callback(): void {
+function chatbot_chatgpt_appearance_greeting_text_color_callback() {
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_appearance_greeting_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_greeting_text_color', '#000000'));
     ?>
@@ -110,7 +110,7 @@ function chatbot_chatgpt_appearance_greeting_text_color_callback(): void {
 }
 
 // Now override the css with the color chosen by the user
-function chatbot_chatgpt_appearance_greeting_text_color_custom_css_settings(): void {
+function chatbot_chatgpt_appearance_greeting_text_color_custom_css_settings() {
     $chatbot_chatgpt_appearance_greeting_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
 
     // Define CSS styles as global variables
@@ -119,7 +119,7 @@ function chatbot_chatgpt_appearance_greeting_text_color_custom_css_settings(): v
 }
 
 // Set the chatbot greeting text color
-function chatbot_chatgpt_appearance_header_text_color_callback(): void {
+function chatbot_chatgpt_appearance_header_text_color_callback() {
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_appearance_header_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_header_text_color', '#ffffff'));
     ?>
@@ -140,7 +140,7 @@ function chatbot_chatgpt_appearance_header_text_color_callback(): void {
 }
 
 // Now override the css with the color chosen by the user
-function chatbot_chatgpt_appearance_header_text_color_custom_css_settings(): void {
+function chatbot_chatgpt_appearance_header_text_color_custom_css_settings() {
     $chatbot_chatgpt_appearance_header_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_header_text_color', '#ffffff'));
 
     // Define CSS styles as global variables
@@ -149,7 +149,7 @@ function chatbot_chatgpt_appearance_header_text_color_custom_css_settings(): voi
 }
 
 // Set the chatbot bot text background color
-function chatbot_chatgpt_appearance_bot_text_background_color_callback(): void {
+function chatbot_chatgpt_appearance_bot_text_background_color_callback() {
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_appearance_bot_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_bot_text_background_color', '#5BC236'));
     ?>
@@ -170,7 +170,7 @@ function chatbot_chatgpt_appearance_bot_text_background_color_callback(): void {
 }
 
 // Now override the css with the color chosen by the user
-function chatbot_chatgpt_appearance_bot_text_background_custom_css_settings(): void {
+function chatbot_chatgpt_appearance_bot_text_background_custom_css_settings() {
     $chatbot_chatgpt_appearance_bot_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_bot_text_background_color', '#5BC236'));
 
     // Check for text color

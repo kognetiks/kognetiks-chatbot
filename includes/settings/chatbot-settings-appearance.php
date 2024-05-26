@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_appearance_settings(): void {
+function chatbot_chatgpt_appearance_settings() {
     
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_background_color');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_header_background_color');
@@ -141,7 +141,7 @@ add_action('admin_init', 'chatbot_chatgpt_appearance_settings');
 
 
 // Custom Appearance Settings - Ver 1.8.1
-function chatbot_chatgpt_appearance_section_callback(): void{
+function chatbot_chatgpt_appearance_section_callback(){
     ?>
     <div>
         <p>Choose a color combinations that best represents you and your brand.  You can change your color combinations at any time.</p>
@@ -154,7 +154,7 @@ function chatbot_chatgpt_appearance_section_callback(): void{
 
 
 // Reset the appearance settings - Ver 1.8.1
-function chatbot_chatgpt_appearance_reset_callback(): void {
+function chatbot_chatgpt_appearance_reset_callback() {
     $chatbot_chatgpt_appearance_reset = esc_attr(get_option('chatbot_chatgpt_appearance_reset', 'No'));
     ?>
     <label for="chatbot_chatgpt_appearance_reset"></label><select id="chatbot_chatgpt_appearance_reset" name="chatbot_chatgpt_appearance_reset">
@@ -165,7 +165,7 @@ function chatbot_chatgpt_appearance_reset_callback(): void {
 }
 
 // Restore the appearance defaults - Ver 1.8.1
-function chatbot_chatgpt_appearance_restore_default_settings(): void {
+function chatbot_chatgpt_appearance_restore_default_settings() {
 
     // DIAG - Enter function
     // back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_restore_default_settings()');
@@ -200,7 +200,7 @@ function chatbot_chatgpt_appearance_restore_default_settings(): void {
 }
 
 // Override the css with the color chosen by the user
-function chatbot_chatgpt_appearance_custom_css_settings(): void {
+function chatbot_chatgpt_appearance_custom_css_settings() {
     
     // Color settings
     chatbot_chatgpt_appearance_background_custom_css_settings();
@@ -223,7 +223,7 @@ function chatbot_chatgpt_appearance_custom_css_settings(): void {
 }
 
 // Inject the custom css settings
-function chatbot_chatgpt_appearance_inject_custom_css_settings(): void {
+function chatbot_chatgpt_appearance_inject_custom_css_settings() {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Injecting custom CSS settings...');

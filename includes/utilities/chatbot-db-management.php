@@ -79,7 +79,7 @@ function update_interaction_tracking() {
 }
 
 // Conversation Tracking - Ver 1.7.6
-function create_conversation_logging_table(): void {
+function create_conversation_logging_table() {
 
     global $wpdb;
 
@@ -247,7 +247,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 }
 
 // Function to delete specific expired transients - Ver 1.7.6
-function clean_specific_expired_transients(): void {
+function clean_specific_expired_transients() {
 
     global $wpdb;
 

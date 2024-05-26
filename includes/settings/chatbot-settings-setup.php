@@ -68,7 +68,7 @@ function chatbot_chatgpt_settings_section_callback($args) {
 }
 
 // Chatbot Name
-function chatbot_chatgpt_bot_name_callback($args): void {
+function chatbot_chatgpt_bot_name_callback($args) {
     $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     ?>
     <input type="text" id="chatbot_chatgpt_bot_name" name="chatbot_chatgpt_bot_name" value="<?php echo esc_attr( $bot_name ); ?>" class="regular-text">

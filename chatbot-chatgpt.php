@@ -142,7 +142,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.p
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
 
 add_action('init', 'my_custom_buffer_start');
-function my_custom_buffer_start(): void {
+function my_custom_buffer_start() {
     ob_start();
 }
 
@@ -200,7 +200,7 @@ $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppr
 // Context History - Ver 1.6.1
 $context_history = [];
 
-function chatbot_chatgpt_enqueue_admin_scripts(): void {
+function chatbot_chatgpt_enqueue_admin_scripts() {
     wp_enqueue_script('chatbot_chatgpt_admin', plugins_url('assets/js/chatbot-chatgpt-admin.js', __FILE__), array('jquery'), '1.0.0', true);
 }
 add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
@@ -212,7 +212,7 @@ register_uninstall_hook(__FILE__, 'chatbot_chatgpt_uninstall');
 add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10, 2);
 
 // Enqueue plugin scripts and styles
-function chatbot_chatgpt_enqueue_scripts(): void {
+function chatbot_chatgpt_enqueue_scripts() {
 
     global $session_id;
     global $user_id;
@@ -379,7 +379,7 @@ add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
 // Settings and Deactivation Links - Ver - 1.5.0
 if (!function_exists('enqueue_jquery_ui')) {
-    function enqueue_jquery_ui(): void {
+    function enqueue_jquery_ui() {
         wp_enqueue_style('wp-jquery-ui-dialog');
         wp_enqueue_script('jquery-ui-dialog');
     }
@@ -425,7 +425,7 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_upload_files')) {
 }
 
 // Handle Ajax requests
-function chatbot_chatgpt_send_message(): void {
+function chatbot_chatgpt_send_message() {
 
     // Global variables
     global $session_id;
@@ -738,7 +738,7 @@ add_action('wp_ajax_nopriv_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
 
 // Crawler aka Knowledge Navigator - Ver 1.6.1
-function chatbot_chatgpt_kn_status_activation(): void {
+function chatbot_chatgpt_kn_status_activation() {
     add_option('chatbot_chatgpt_kn_status', 'Never Run');
     // clear any old scheduled runs
     if (wp_next_scheduled('crawl_scheduled_event_hook')) {
@@ -753,14 +753,14 @@ function chatbot_chatgpt_kn_status_activation(): void {
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
 
 // Clean Up in Aisle 4
-function chatbot_chatgpt_kn_status_deactivation(): void {
+function chatbot_chatgpt_kn_status_deactivation() {
     delete_option('chatbot_chatgpt_kn_status');
     wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); 
 }
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
-function addEntry($transient_name, $newEntry): void {
+function addEntry($transient_name, $newEntry) {
 
     $context_history = get_transient($transient_name);
     if (!$context_history) {
@@ -801,7 +801,7 @@ function addEntry($transient_name, $newEntry): void {
 
 
 // Function to return message and response - Ver 1.6.1
-function concatenateHistory($transient_name): string {
+function concatenateHistory($transient_name) {
     $context_history = get_transient($transient_name);
     if (!$context_history) {
         return ''; // Return an empty string if the transient does not exist
@@ -810,7 +810,7 @@ function concatenateHistory($transient_name): string {
 }
 
 // Initialize the Greetings - Ver 1.6.1
-function enqueue_greetings_script(): void {
+function enqueue_greetings_script() {
 
     // DIAG - Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', "enqueue_greetings_script() called");
@@ -832,6 +832,8 @@ function enqueue_greetings_script(): void {
         // If $initial_greeting contains "[$user_field_name]" then replace with field from DB
         if (strpos($initial_greeting, '[' . $user_field_name . ']') !== false) {
             $initial_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $initial_greeting);
+            back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
+            back_trace ( 'NOTICE', 'Initial Greeting: ' . $initial_greeting);
         } else {
             $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
         }
@@ -843,8 +845,10 @@ function enqueue_greetings_script(): void {
         $user_field_name = '';
         $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
         // If $subsequent_greeting contains "[$user_field_name]" then replace with field from DB
-        if (strpos($initial_greeting, '[' . $user_field_name . ']') !== false) {
+        if (strpos($subsequent_greeting, '[' . $user_field_name . ']') !== false) {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $subsequent_greeting);
+            back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
+            back_trace ( 'NOTICE', 'Subsequent Greeting: ' . $subsequent_greeting);
         } else {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
         }
@@ -866,6 +870,7 @@ function enqueue_greetings_script(): void {
 
         // $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
         $subsequent_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $subsequent_greeting);
+
     }
 
     $greetings = array(
@@ -880,7 +885,7 @@ add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
 
 
 // Function to add the adaptive appearance settings to the Chatbot settings page
-function chatbot_chatgpt_settings_appearance(): void {
+function chatbot_chatgpt_settings_appearance() {
 
     // Register the settings
     register_setting('chatbot_chatgpt_settings_appearance', 'chatbot_chatgpt_appearance');
@@ -905,7 +910,7 @@ function chatbot_chatgpt_settings_appearance(): void {
 }
 
 // Add the color picker to the adaptive appearance settings section - Ver 1.8.1
-function enqueue_color_picker($hook_suffix): void {
+function enqueue_color_picker($hook_suffix) {
     // first check that $hook_suffix is appropriate for your admin page
     wp_enqueue_style('wp-color-picker');
     wp_enqueue_script('my-script-handle', plugin_dir_url(__FILE__) . 'assets/js/chatbot-chatgpt-color-picker.js', array('wp-color-picker'), false, true);

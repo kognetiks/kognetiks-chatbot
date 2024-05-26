@@ -554,7 +554,7 @@ function chatbot_chatgpt_whisper_model_option_callback($args) {
         });
         
         // Check for errors
-        if (is_string($image_models) && strpos($image_models, 'Error:') === 0) {
+        if (is_string($whisper_models) && strpos($whisper_models, 'Error:') === 0) {
             // If there's an error, display the hardcoded list
             $whisper_model_option = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
             ?>

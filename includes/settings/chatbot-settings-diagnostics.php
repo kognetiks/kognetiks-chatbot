@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Diagnostics settings section callback - Ver 1.6.5
-function chatbot_chatgpt_diagnostics_section_callback($args): void {
+function chatbot_chatgpt_diagnostics_section_callback($args) {
     ?>
     <p>The Diagnostics tab checks the API status and set options for diagnostics and notices.</p>
     <p>You can turn on/off console and error logging (as of Version 1.6.5 most are now commented out).</p>

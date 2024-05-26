@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Register settings
-function chatbot_chatgpt_api_settings_init(): void {
+function chatbot_chatgpt_api_settings_init() {
 
     add_settings_section(
         'chatbot_chatgpt_model_settings_section',

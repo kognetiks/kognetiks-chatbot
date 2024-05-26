@@ -119,7 +119,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
 }
 
 // Knowledge Navigator Introduction
-function chatbot_chatgpt_knowledge_navigator_section_callback($args): void {
+function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
     // See if the scanner is needs to run
     $results = chatbot_chatgpt_kn_results_callback(esc_attr(get_option('chatbot_chatgpt_kn_schedule')));
@@ -138,7 +138,7 @@ function chatbot_chatgpt_knowledge_navigator_section_callback($args): void {
 }
 
 // Knowledge Navigator Status - Ver 2.0.0.
-function chatbot_chatgpt_kn_status_section_callback($args): void {
+function chatbot_chatgpt_kn_status_section_callback($args) {
 
     // See if the scanner is needs to run
     $results = chatbot_chatgpt_kn_results_callback(esc_attr(get_option('chatbot_chatgpt_kn_schedule')));
@@ -182,7 +182,7 @@ function chatbot_chatgpt_kn_enhanced_response_section_callback($args) {
 }
 
 // Select Frequency of Scan - Ver 1.6.2
-function chatbot_chatgpt_kn_schedule_callback($args): void {
+function chatbot_chatgpt_kn_schedule_callback($args) {
     $chatbot_chatgpt_kn_schedule = esc_attr(get_option('chatbot_chatgpt_kn_schedule', 'No'));
     ?>
     <select id="chatbot_chatgpt_kn_schedule" name="chatbot_chatgpt_kn_schedule">
@@ -197,7 +197,7 @@ function chatbot_chatgpt_kn_schedule_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_maximum_top_words_callback($args): void {
+function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 25));
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
@@ -210,7 +210,7 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_include_posts_callback($args): void {
+function chatbot_chatgpt_kn_include_posts_callback($args) {
     $chatbot_chatgpt_kn_include_posts = esc_attr(get_option('chatbot_chatgpt_kn_include_posts', 'Yes'));
     ?>
     <select id="chatbot_chatgpt_kn_include_posts" name="chatbot_chatgpt_kn_include_posts">
@@ -220,7 +220,7 @@ function chatbot_chatgpt_kn_include_posts_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_include_pages_callback($args): void {
+function chatbot_chatgpt_kn_include_pages_callback($args) {
     $chatbot_chatgpt_kn_include_pages = esc_attr(get_option('chatbot_chatgpt_kn_include_pages', 'Yes'));
     ?>
     <select id="chatbot_chatgpt_kn_include_pages" name="chatbot_chatgpt_kn_include_pages">
@@ -230,7 +230,7 @@ function chatbot_chatgpt_kn_include_pages_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_include_products_callback($args): void {
+function chatbot_chatgpt_kn_include_products_callback($args) {
     $chatbot_chatgpt_kn_include_products = esc_attr(get_option('chatbot_chatgpt_kn_include_products', 'Yes'));
     ?>
     <select id="chatbot_chatgpt_kn_include_products" name="chatbot_chatgpt_kn_include_products">
@@ -240,7 +240,7 @@ function chatbot_chatgpt_kn_include_products_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_include_comments_callback($args): void {
+function chatbot_chatgpt_kn_include_comments_callback($args) {
     $chatbot_chatgpt_kn_include_comments = esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'Yes'));
     ?>
     <select id="chatbot_chatgpt_kn_include_comments" name="chatbot_chatgpt_kn_include_comments">
@@ -250,7 +250,7 @@ function chatbot_chatgpt_kn_include_comments_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_enhanced_response_limit_callback($args): void {
+function chatbot_chatgpt_enhanced_response_limit_callback($args) {
     $chatbot_chatgpt_enhanced_response_limit = intval(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
     ?>
     <select id="chatbot_chatgpt_enhanced_response_limit" name="chatbot_chatgpt_enhanced_response_limit">
@@ -263,7 +263,7 @@ function chatbot_chatgpt_enhanced_response_limit_callback($args): void {
     <?php
 }
 
-function chatbot_chatgpt_kn_tuning_percentage_callback($args): void {
+function chatbot_chatgpt_kn_tuning_percentage_callback($args) {
     $chatbot_chatgpt_kn_tuning_percentage = intval(get_option('chatbot_chatgpt_kn_tuning_percentage', 25));
     ?>
     <select id="chatbot_chatgpt_kn_tuning_percentage" name="chatbot_chatgpt_kn_tuning_percentage">

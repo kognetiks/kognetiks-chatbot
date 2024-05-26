@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Upload Multiple files to the Assistant
-function chatbot_chatgpt_upload_files(): array {
+function chatbot_chatgpt_upload_files() {
 
     global $session_id;
 

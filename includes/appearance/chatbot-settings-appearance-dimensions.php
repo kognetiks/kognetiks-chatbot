@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set the chatbot width
-function chatbot_chatgpt_appearance_width_wide_callback(): void {
+function chatbot_chatgpt_appearance_width_wide_callback() {
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_appearance_width_wide = esc_attr(get_option('chatbot_chatgpt_appearance_width_wide', '500px'));
     ?>
@@ -41,7 +41,7 @@ function chatbot_chatgpt_appearance_width_wide_callback(): void {
 }
 
 // Now override the css with the width chosen by the user
-function chatbot_chatgpt_appearance_width_wide_custom_css_settings(): void {
+function chatbot_chatgpt_appearance_width_wide_custom_css_settings() {
     $chatbot_chatgpt_appearance_width_wide = esc_attr(get_option('chatbot_chatgpt_appearance_width_wide', '500px'));
 
     // Define CSS styles as global variables
@@ -51,7 +51,7 @@ function chatbot_chatgpt_appearance_width_wide_custom_css_settings(): void {
 }
 
 // Set the chatbot user text background color
-function chatbot_chatgpt_appearance_width_narrow_callback(): void {
+function chatbot_chatgpt_appearance_width_narrow_callback() {
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_appearance_width_narrow = esc_attr(get_option('chatbot_chatgpt_appearance_width_narrow', '300px'));
     ?>
@@ -75,7 +75,7 @@ function chatbot_chatgpt_appearance_width_narrow_callback(): void {
 }
 
 // Now override the css with the color chosen by the user
-function chatbot_chatgpt_appearance_width_narrow_custom_css_settings(): void {
+function chatbot_chatgpt_appearance_width_narrow_custom_css_settings() {
     $chatbot_chatgpt_appearance_width_narrow = esc_attr(get_option('chatbot_chatgpt_appearance_width_narrow', '300px'));
 
     // Define CSS styles as global variables
