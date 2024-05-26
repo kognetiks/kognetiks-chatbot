@@ -831,7 +831,7 @@ function enqueue_greetings_script(): void {
         $user_field_name = substr($initial_greeting, strpos($initial_greeting, '[') + 1, strpos($initial_greeting, ']') - strpos($initial_greeting, '[') - 1);
 
         // If $initial_greeting contains "[$user_field_name]" then replace with field from DB
-        if (str_contains($initial_greeting, '[' . $user_field_name . ']')) {
+        if (strpos($initial_greeting, '[' . $user_field_name . ']')) {
             $initial_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $initial_greeting);
         } else {
             $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
@@ -845,7 +845,7 @@ function enqueue_greetings_script(): void {
         $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
 
         // If $subsequent_greeting contains "[$user_field_name]" then replace with field from DB
-        if (str_contains($subsequent_greeting, '[' . $user_field_name . ']')) {
+        if (strpos($subsequent_greeting, '[' . $user_field_name . ']')) {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $subsequent_greeting);
         } else {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);

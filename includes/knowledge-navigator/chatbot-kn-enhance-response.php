@@ -23,7 +23,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     // Check if the Knowledge Navigator is finished running
     $chatbot_chatgpt_kn_status = get_option('chatbot_chatgpt_kn_status', '');
-    if (!str_contains($chatbot_chatgpt_kn_status, 'Completed')) {
+    if (!strpos($chatbot_chatgpt_kn_status, 'Completed')) {
         return;
     }
 

@@ -80,7 +80,7 @@ function chatbot_chatgpt_uninstall(){
         $crons = _get_cron_array();
         foreach ($crons as $timestamp => $cron) {
             foreach ($cron as $hook => $events) {
-                if (str_contains($hook, 'chatbot_chatgpt')) {
+                if (strpos($hook, 'chatbot_chatgpt')) {
                     foreach ($events as $event) {
                         wp_unschedule_event($timestamp, $hook, $event['args']);
                     }

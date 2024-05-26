@@ -141,7 +141,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
 
     // Limit the models to chat models
     $models = array_filter($models, function($model) {
-        return str_contains($model['id'], 'gpt');
+        return strpos($model['id'], 'gpt');
     });
 
     // Check for errors
@@ -287,7 +287,7 @@ function chatbot_chatgpt_voice_model_option_callback($args) {
 
     // Limit the models to voice models
     $voice_models = array_filter($voice_models, function($voice_model) {
-        return str_contains($voice_model['id'], 'tts');
+        return strpos($voice_model['id'], 'tts');
     });
     
     // Check for errors
@@ -383,7 +383,7 @@ function chatbot_chatgpt_image_model_option_callback($args) {
 
     // Limit the models to image models
     $image_models = array_filter($image_models, function($image_model) {
-        return str_contains($image_model['id'], 'dall-e');
+        return strpos($image_model['id'], 'dall-e');
     });
     
     // Check for errors
@@ -550,7 +550,7 @@ function chatbot_chatgpt_whisper_model_option_callback($args) {
     
         // Limit the models to whisper models
         $whisper_models = array_filter($whisper_models, function($whisper_model) {
-            return str_contains($whisper_model['id'], 'whisper');
+            return strpos($whisper_model['id'], 'whisper');
         });
         
         // Check for errors
