@@ -18,6 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_kn_analysis_section_callback($args) {
     ?>
     <p>Use the 'Download Data' button to retrieve the Knowledge Navigator results.</p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Knowledge Navigator Analysis and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=analysis&file=analysis.md">here</a>.</b></p>
     <?php
     if (is_admin()) {
         $header = " ";
@@ -42,7 +43,7 @@ function chatbot_chatgpt_kn_analysis_output_callback($args) {
 
 
 // Download the TF-IDF data
-function chatbot_chatgpt_kn_analysis_download_csv(): void {
+function chatbot_chatgpt_kn_analysis_download_csv() {
 
     // Generate the results directory path
     $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';

@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Upload Multiple files to the Assistant
-function chatbot_chatgpt_upload_files(): array {
+function chatbot_chatgpt_upload_files() {
 
     global $session_id;
 
@@ -23,7 +23,7 @@ function chatbot_chatgpt_upload_files(): array {
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace ( 'ERROR', 'Failed to create results directory.')
+        // back_trace ( 'ERROR', 'Failed to create results directory.');
         $responses[] = array(
             'status' => 'error',
             'message' => 'Oops! File upload failed.'
@@ -177,7 +177,7 @@ function chatbot_chatgpt_upload_mp3() {
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace ( 'ERROR', 'Failed to create results directory.')
+        // back_trace ( 'ERROR', 'Failed to create results directory.');
         $responses[] = array(
             'status' => 'error',
             'message' => 'Oops! File upload failed.'
@@ -220,21 +220,21 @@ function chatbot_chatgpt_upload_mp3() {
             }
 
             // Check for allow video and audio file types
-            $video_file_types = array('video/mp4', 'video/ogg', 'video/webm');
-            $audio_file_types = array('audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav');
+            // $video_file_types = array('video/mp4', 'video/ogg', 'video/webm');
+            // $audio_file_types = array('audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav');
 
-            $allowed_file_types = array_merge($audio_file_types, $video_file_types);
+            // $allowed_file_types = array_merge($audio_file_types, $video_file_types);
 
-            if (!in_array($_FILES['file']['type'][$i], $allowed_file_types)) {
-                $responses[] = array(
-                    'status' => 'error',
-                    'message' => 'Invalid file type. Please upload an MP3, WAV, MP4, or WEBM file.'
-                );
-                $error_flag = true;
-                // back_trace( 'NOTICE', 'Invalid file type.');
-                http_response_code(415); // Send a 415 Unsupported Media Type status code
-                exit;
-            }
+            // if (!in_array($_FILES['file']['type'][$i], $allowed_file_types)) {
+            //     $responses[] = array(
+            //         'status' => 'error',
+            //         'message' => 'Invalid file type. Please upload an MP3, WAV, MP4, or WEBM file.'
+            //     );
+            //     $error_flag = true;
+            //     // back_trace( 'NOTICE', 'Invalid file type.');
+            //     http_response_code(415); // Send a 415 Unsupported Media Type status code
+            //     exit;
+            // }
 
             // Checked for valid upload file types
             $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));

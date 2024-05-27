@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.5.3
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -226,6 +226,11 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.0.2 =
+* Overhauled the Support documentation with extensive information on the chatbot settings - See the Support tab in Settings
+* Revised the export function for Conversation Data, Interaction Data and Token Usage Data
+* Reverted the function ```str_contains``` to ```strpos``` as the latter is only availble in PHP 8
 
 = 2.0.1 =
 * Support for OpenAI's latest models: gpt-4o and gpt-4o-2024-05-13

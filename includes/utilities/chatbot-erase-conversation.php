@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_erase_conversation_handler(): void {
+function chatbot_chatgpt_erase_conversation_handler() {
 
     // FIXME - This is not working - Ver 1.8.6
     // THIS IS NOT CONFIRMED WORKING YET FOR ASSISTANTS
@@ -123,7 +123,7 @@ function chatbot_chatgpt_erase_conversation_handler(): void {
 
 // Delete any file transients - Ver 1.9.3
 // THIS IS VERY AGGRESSIVE - USE WITH CAUTION
-function delete_any_file_transients($session_id): void {
+function delete_any_file_transients($session_id) {
     global $wpdb;
     $sql = "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_chatbot_chatgpt_file_id_$session_id%'";
     $wpdb->query($sql);

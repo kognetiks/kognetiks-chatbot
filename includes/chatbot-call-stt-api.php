@@ -55,7 +55,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
 
     // Check for the STT option
     // Default to 'transcribe' if the option is not set
-    if ( empty($stt_option) or $sst_option == 'transcribe') {
+    if ( empty($stt_option) or $stt_option == 'transcribe' or $stt_option == 'transcription-only') {
         // Transcription API URL
         $api_url = 'https://api.openai.com/v1/audio/transcriptions';
     } elseif ( $stt_option == 'translate' ) {
@@ -89,7 +89,12 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime_type = finfo_file($finfo, $audio_file_name);
 
-    if (!str_contains($mime_type, 'audio/') && !str_contains($mime_type, 'video/')) {
+    // DIAG - Diagnostics - Ver 2.0.2.1
+    // back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
+    // back_trace( 'NOTICE', '$finfo: ' . print_r($finfo, true));
+    // back_trace( 'NOTICE', '$mime_type: ' . $mime_type);
+
+    if (strpos($mime_type, 'audio/') === FALSE && strpos($mime_type, 'video/') === FALSE) {
         return "Error: The file is not an audio or video file. Please upload an audio or video file.";
     }
 
@@ -153,6 +158,11 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     //
 
     $transcription = $response;
+
+    // Transcription only for OMNI
+    if ( $stt_option == 'transcription-only' ) {
+        return $transcription;
+    }
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     // $api_url = 'https://api.openai.com/v1/chat/completions';

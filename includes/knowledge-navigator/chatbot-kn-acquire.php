@@ -27,7 +27,7 @@ $totalWordPairCount = 0;
 //
 
 // Output Knowledge Navigator Data to log files for pages, posts and comments - Ver 1.6.3
-function chatbot_chatgpt_kn_acquire(): void {
+function chatbot_chatgpt_kn_acquire() {
 
     global $wpdb;
     global $topWords;

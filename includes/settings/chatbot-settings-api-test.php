@@ -95,7 +95,7 @@ if ( ! defined( 'WPINC' ) ) {
 // FIXME - TEST THE ASSISTANT IF PROVIDED - Ver 1.6.7
 
 // This function is executed whenever any option is updated
-function chatgpt_option_updated($option_name, $old_value, $new_value): void {
+function chatgpt_option_updated($option_name, $old_value, $new_value) {
 
     // Check if the "Diagnostics" tab is active
     if ($option_name !== 'chatgpt_model_choice') {

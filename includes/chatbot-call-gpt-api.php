@@ -54,7 +54,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150')));
 
     // Conversation Context - Ver 1.6.1
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks.'));
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
  
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
@@ -189,10 +189,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
-
+    if ($response['response']['code'] == 200) {
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
+    }
+    
     if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine
         // Context History - Ver 1.6.1
