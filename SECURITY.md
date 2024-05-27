@@ -29,4 +29,3 @@ To report a vulnerability in our plugin, please follow these steps:
 **Feedback**: If you have any feedback on the reporting process or our security policy, feel free to include it in your report.
 
 Thank you for helping us keep our plugin secure!
-
