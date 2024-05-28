@@ -117,6 +117,17 @@ function chatbot_chatgpt_subsequent_greeting_callback($args) {
     <?php
 }
 
+// Option to allow downloading transcripts - Ver 2.0.3
+function chatbot_chatgpt_allow_download_transcript_callback($args) {
+    $chatbot_chatgpt_allow_download_transcript = esc_attr(get_option('chatbot_chatgpt_allow_download_transcript', 'Yes'));
+    ?>
+    <select id="chatbot_chatgpt_allow_download_transcript" name="chatbot_chatgpt_allow_download_transcript">
+        <option value="Yes" <?php selected( $chatbot_chatgpt_allow_download_transcript, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $chatbot_chatgpt_allow_download_transcript, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php    
+}
+
 // Option to remove OpenAI disclaimer - Ver 1.4.1
 function chatbot_chatgpt_disclaimer_setting_callback($args) {
     $chatbot_chatgpt_disclaimer_setting = esc_attr(get_option('chatbot_chatgpt_disclaimer_setting', 'Yes'));
@@ -172,6 +183,7 @@ function chatbot_chatgpt_settings_setup_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_bot_prompt');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_initial_greeting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_subsequent_greeting');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_allow_download_transcript');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_input_rows');
@@ -246,6 +258,15 @@ function chatbot_chatgpt_settings_setup_init() {
         'Additional Settings',
         'chatbot_chatgpt_additional_setup_section_callback',
         'chatbot_chatgpt_additional_setup_settings'
+    );
+
+    // Option to allow downloading transcripts - Ver 2.0.3
+    add_settings_field(
+        'chatbot_chatgpt_allow_download_transcript',
+        'Allow Downloading Transcripts',
+        'chatbot_chatgpt_allow_download_transcript_callback',
+        'chatbot_chatgpt_additional_setup_settings',
+        'chatbot_chatgpt_additional_setup_section'
     );
 
     // Option to remove the OpenAI disclaimer - Ver 1.4.1

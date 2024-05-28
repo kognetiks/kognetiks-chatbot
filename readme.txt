@@ -228,12 +228,13 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 2.0.3 =
-* TBD
+* Added an option to allow/disallow downloading a transcript of the user conversations with the chatbot.
+* Adjusted the image size to reflect actual size for images smaller that the view port of the chatbot message.
 
 = 2.0.2 =
 * Overhauled the Support documentation with extensive information on the chatbot settings - See the Support tab in Settings
 * Revised the export function for Conversation Data, Interaction Data and Token Usage Data
-* Reverted the function ```str_contains``` to ```strpos``` as the latter is only availble in PHP 8
+* Reverted the function ```str_contains``` to ```strpos``` as the latter is only available in PHP 8
 
 = 2.0.1 =
 * Support for OpenAI's latest models: gpt-4o and gpt-4o-2024-05-13

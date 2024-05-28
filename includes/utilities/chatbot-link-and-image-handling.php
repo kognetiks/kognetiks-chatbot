@@ -22,7 +22,7 @@ function chatbot_chatgpt_check_for_links_and_images( $response ) {
     $response = preg_replace_callback('/(!)?\[([^\]]+)\]\(([^)]+)\)/', function($matches) {
         // If the first character is "!", it's an image
         if ($matches[1] === "!") {
-            return "<span><center><img src='" . $matches[3] . "' alt='" . $matches[2] . "' style='max-width: 95%;' /></center></span>";
+            return "<span><center><img src='" . $matches[3] . "' alt='" . $matches[2] . "' style='max-width: 95%; width: auto;' /></center></span>";
         } else {
             // Otherwise, it's a link
             return "<span><a href='" . $matches[3] . "' target='_blank'>" . $matches[2] . "</a></span>";

@@ -337,6 +337,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Allow Read Aloud - Ver 1.9.0
     $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
 
+    // Allo Download Transcript - Ver 2.0.3
+    $chatbot_chatgpt_allow_download_transcript = esc_attr(get_option('chatbot_chatgpt_allow_download_transcript', 'Yes'));
+
     // Assume that the chatbot is NOT using KFlow - Ver 1.9.5
     $use_flow = 'No';
 
@@ -540,9 +543,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
                 </button>
             <?php endif; ?>
-            <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
-            </button>
+            <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
+                <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                    <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
+                </button>
+            <?php endif; ?>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
         <!-- <i class="dashicons dashicons-format-chat"></i> -->
@@ -658,9 +663,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
                     </button>
                 <?php endif; ?>
-                <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                    <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
-                </button>
+                <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
+                    <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                        <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
+                    </button>
+                <?php endif; ?>
             </div>
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php

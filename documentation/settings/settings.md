@@ -40,17 +40,22 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ![Additional Settings](additional-settings.png)
 
-1. **Include "As an AI language model" disclaimer**:
+1. **Allow Downloading Transcripts**:
+   - **Description**: This toggle allows you to allow chatbot users to download transcripts.
+   - **Options**: `Yes` or `No`.
+   - **Selection**: Choose `Yes` if you want to allow a transcript downaload.
+
+2. **Include "As an AI language model" disclaimer**:
    - **Description**: This toggle allows you to include a disclaimer about the AI nature of the chatbot.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` if you want to display this disclaimer, which can help manage user expectations.
 
-2. **Audience for Chatbot**:
+3. **Audience for Chatbot**:
    - **Description**: This setting allows you to specify the intended audience for the chatbot.
    - **Options**: `All Audiences`, `Adults Only`, etc.
    - **Selection**: Choose the appropriate audience based on the content and purpose of your chatbot.
 
-3. **Input Rows**:
+4. **Input Rows**:
    - **Description**: This setting determines the number of rows in the chatbot input field.
    - **Options**: Set a numeric value.
    - **Selection**: Choose a value like `5` to allow more space for user input, or adjust based on your layout preferences.
