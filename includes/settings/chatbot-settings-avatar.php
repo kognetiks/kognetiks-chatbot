@@ -82,15 +82,22 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
 
     // Try to get the current setting for the avatar icon.
     $selectedIcon = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', 'icon-001.png'));
-    if (esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting')) !== '') {
+    $customAvatarIcon = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting'));
+
+    // DIAG - Diagnostic - Ver 2.0.3
+    back_trace( 'NOTICE', "Custom Avatar Icon: " . $customAvatarIcon );
+
+    if ($customAvatarIcon !== '') {
         $selectedIcon = 'custom-000.png';
-    } else {
-        $selectedIcon = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', 'icon-001.png'));
+        update_option('chatbot_chatgpt_avatar_icon_setting', $selectedIcon);
     }
+
+    // DIAG - Diagnostic - Ver 2.0.3
+    back_trace( 'NOTICE', "Selected Icon: " . $selectedIcon );
 
     ?>
         <p>Select your icon by clicking on an image to select it.  Don't forget to click 'Save Settings'.</p>
-        <input type="hidden" id="chatbot_chatgpt_avatar_icon_setting" name="chatbot_chatgpt_avatar_icon_setting" value="<?php echo esc_attr( $selectedIcon ); ?>">
+        <!-- <input type="hidden" id="chatbot_chatgpt_avatar_icon_setting" name="chatbot_chatgpt_avatar_icon_setting" value="<?php echo esc_attr( $selectedIcon ); ?>"> -->
         <table>
             <?php
                 $iconSets = [
@@ -106,7 +113,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
                     "Custom" => 1
                 ];
                 $cols = 10;
-                $selectedIcon = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', 'icon-001.png'));
+
                 foreach ($iconSets as $setName => $iconCount) {
                     $rows = ceil($iconCount / $cols);
                     $iconIndex = 0;
@@ -116,6 +123,11 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
                         for ($j = 0; $j < $cols; $j++) {
                             if ($iconIndex < $iconCount) {
                                 $iconName = sprintf(strtolower(str_replace(' ', '-', $setName)) . "-%03d.png", $iconIndex);
+                                
+                                // DIAG - Diagnostic - Ver 2.0.3
+                                // back_trace( 'NOTICE', "Icon Name: " . $iconName );
+                                // back_trace( 'NOTICE', "Selected Icon: " . $selectedIcon );
+
                                 $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
                                 echo '<td style="padding: 15px;">';
                                 echo '<img src="' . plugins_url('../../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:60px;height:60px;cursor:pointer;"/>';
@@ -128,6 +140,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
                 }
             ?>
         </table>
+        <input type="hidden" id="chatbot_chatgpt_avatar_icon_setting" name="chatbot_chatgpt_avatar_icon_setting" value="<?php echo esc_attr( $selectedIcon ); ?>">
     <?php
 
 }

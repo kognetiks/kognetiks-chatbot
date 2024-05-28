@@ -199,64 +199,60 @@ jQuery(document).ready(function ($) {
 
     chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
-    // Avatar and Custom Message - Ver 1.5.0
-    selectedAvatar = encodeURIComponent(localStorage.getItem('chatbot_chatgpt_avatar_icon_setting'));
-    if (isValidAvatarSetting(selectedAvatar)) {
-        // Is valid avatar setting
-        // DIAG - Diagnostics - Ver 1.8.1
-        // console.log('Chatbot: NOTICE: selectedAvatar: ' + selectedAvatar);
-    } else {
-        // Is not valid avatar setting
-        // DIAG - Diagnostics - Ver 1.8.1
-        // console.error('Chatbot: ERROR: selectedAvatar: ' + selectedAvatar);
-        selectedAvatar = 'icon-000.png';
-    }
+    // Avatar and Custom Message - Ver 1.5.0 - Upgraded - Ver 2.0.3 - 2024 05 28
+    let selectedAvatar = encodeURIComponent(localStorage.getItem('chatbot_chatgpt_avatar_icon_setting') || '');
+    let customAvatar = localStorage.getItem('chatbot_chatgpt_custom_avatar_icon_setting') || '';
 
     // Overrides for mobile devices - Ver 1.8.1
     if (isMobile()) {
         // Set selectedAvatar to 'icon-000.png' for mobile devices, i.e., none
         selectedAvatar = 'icon-000.png';
+        // Even if it's mobile, if a custom avatar is set use it - Ver 2.0.3
+        if (customAvatar !== '') {
+            avatarPath = customAvatar;
+        }
     }
 
     // Select the avatar based on the setting - Ver 1.5.0
-    if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
-
-        // FIXME - Add option for custom Avatar - Ver 1.8.6
-        let chatbot_chatgpt_custom_avatar_icon_setting = localStorage.getItem('chatbot_chatgpt_custom_avatar_icon_setting') || '';
-
-        if (chatbot_chatgpt_custom_avatar_icon_setting === '') {
-            // Construct the path to the avatar
+    if (customAvatar !== '') {
+        avatarPath = customAvatar; // Use the custom URL
+    } else if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
+        // Valid avatar setting
+        if (isValidAvatarSetting(selectedAvatar)) {
             avatarPath = plugins_url + '/assets/icons/' + selectedAvatar;
         } else {
-            // Construct the path to the avatar
-            avatarPath = chatbot_chatgpt_custom_avatar_icon_setting; // Use the custom URL
+            // Invalid avatar setting
+            console.error('Chatbot: ERROR: selectedAvatar: ' + selectedAvatar);
+            avatarPath = plugins_url + '/assets/icons/icon-000.png';
         }
+    } else {
+        avatarPath = plugins_url + '/assets/icons/icon-000.png'; // Default avatar
+    }
 
-        // IDEA - Add option to suppress avatar greeting in setting options page
-        // IDEA - If blank greeting, don't show the bubble
-        // IDEA - Add option to suppress avatar greeting if clicked on
+    // IDEA - Add option to suppress avatar greeting in setting options page
+    // IDEA - If blank greeting, don't show the bubble
+    // IDEA - Add option to suppress avatar greeting if clicked on
 
-        // Updated to address cross-site scripting - Ver 1.8.1
-        // If an avatar is selected, and it's not 'icon-000.png', use the avatar
+    // Updated to address cross-site scripting - Ver 1.8.1
+    // If an avatar is selected, and it's not 'icon-000.png', use the avatar
+    if (avatarPath !== plugins_url + '/assets/icons/icon-000.png') {
         avatarImg = $('<img>')
             .attr('id', 'chatbot_chatgpt_avatar_icon_setting')
             .attr('class', 'chatbot-avatar')
             .attr('src', avatarPath);
 
         // Get the stored greeting message. If it's not set, default to a custom value.
-        avatarGreeting = localStorage.getItem('chatbot_chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
+        let avatarGreeting = localStorage.getItem('chatbot_chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
 
         // Create a bubble with the greeting message
         // Using .text() for safety, as it automatically escapes HTML
-        bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
+        let bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
 
         // Append the avatar and the bubble to the button and apply the class for the avatar icon
         chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
     } else {
         // If no avatar is selected or the selected avatar is 'icon-000.png', use the dashicon
         // Remove the avatar-icon class (if it was previously added) and add the dashicon class
-        // chatGptOpenButton.empty().removeClass('avatar-icon').addClass('dashicons dashicons-format-chat dashicon');
-        // chatGptOpenButton.empty().removeClass('avatar-icon').addClass('dashicons chatbot-open-icon chatbotopenicon'); // Add an open button
         chatGptOpenButton.empty().removeClass('avatar-icon').addClass('chatbot-open-icon').append(chatbotopenicon); // Add an open button
     }
     
