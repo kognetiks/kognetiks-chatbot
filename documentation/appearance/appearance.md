@@ -43,7 +43,7 @@ The Appearance Settings allow you to customize the visual aspects of your chatbo
 10. **Chatbot Width Setting**:
     - **Description**: Selects the default width setting for the chatbot.
     - **Options**: `Wide` or `Narrow`.
-    - **Selection**: Choose `Wide` or `Narrow` based on your preference for the chatbot's appearance on your site.
+    - **Selection**: Choose `Wide` or `Narrow` based on your preference for the chatbot's appearance on your site.  Selecting `Wide` will use the pixel width set in the `Chatbot Width Wide` setting.  Selecting Narrow will use the pixel width set in the `Chatbot Width Narrow` setting.
 
 11. **Restore Defaults**:
     - **Description**: Resets the appearance settings to their default values.

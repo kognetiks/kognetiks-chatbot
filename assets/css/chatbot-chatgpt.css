@@ -490,3 +490,24 @@
     border-radius: 5px;
     margin: 10px;
 }
+
+/* Added in Version 2.0.3 - 2024 05 29 */
+@media only screen and (max-width: 600px) {
+    #chatbot-chatgpt-conversation {
+        flex-grow: 1;
+        padding: 10px;
+        overflow-y: auto;
+        max-height: 200px; /* Adjust the percentage as needed */
+    }
+}
+    
+/* Added in Version 2.0.3 - 2024 05 29 */
+@media only screen and (min-width: 600px) {
+#chatbot-chatgpt-conversation {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    max-height: 400px; /* Adjust the percentage as needed */
+    }
+}
+
