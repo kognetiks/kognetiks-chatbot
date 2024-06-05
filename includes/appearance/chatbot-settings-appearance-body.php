@@ -51,6 +51,7 @@ function chatbot_chatgpt_appearance_background_custom_css_settings() {
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-upload-file'] = "#chatbot-chatgpt-upload-file { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-erase-conversation'] = "#chatbot-chatgpt-erase-btn { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-text-to-speech-btn'] = "#chatbot-chatgpt-text-to-speech-btn { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-download-transcript-btn'] = "#chatbot-chatgpt-download-transcript-btn { background-color: {$chatbot_chatgpt_appearance_background_color} !important; }";
     
 }
 add_action('wp_head', 'chatbot_chatgpt_appearance_background_custom_css_settings');
