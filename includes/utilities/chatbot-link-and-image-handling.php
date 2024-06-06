@@ -23,6 +23,8 @@ function chatbot_chatgpt_check_for_links_and_images( $response ) {
     $img_width = esc_attr(get_option('chatbot_chatgpt_image_width_setting', '100%'));
     if (!str_ends_with($img_width, 'px') && !str_ends_with($img_width, '%')) {
         $img_width = 'auto';
+    } else if ($img_width === '100%') {
+        $img_width = 'auto';
     }
 
     $response = preg_replace_callback('/(!)?\[([^\]]+)\]\(([^)]+)\)/', function($matches) use ($img_width) {
