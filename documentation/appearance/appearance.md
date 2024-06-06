@@ -41,16 +41,21 @@ The Appearance Settings allow you to customize the visual aspects of your chatbo
    - **Input**: Enter the desired width in pixels (e.g., `300px`).
 
 10. **Chatbot Width Setting**:
-    - **Description**: Selects the default width setting for the chatbot.
+    - **Description**: Sets the default width setting for the chatbot.
     - **Options**: `Wide` or `Narrow`.
     - **Selection**: Choose `Wide` or `Narrow` based on your preference for the chatbot's appearance on your site.  Selecting `Wide` will use the pixel width set in the `Chatbot Width Wide` setting.  Selecting Narrow will use the pixel width set in the `Chatbot Width Narrow` setting.
 
-11. **Restore Defaults**:
+11. **Image Width Setting**:
+    - **Description**: Sets the default image width setting for the chatbot.
+    - **Options**: A value between `1%` and `100%` or an actual values in pixels such as `200px`.
+    - **Selection**: Choose `100%` to display images at actual size up to the 95% max width of the viewable area of the chatbot.If you choose 200px the **all** images will be 200px regardless of their actual size, so smaller images will scale up and larger images will scale down to be 200px, but in no case will be larger than 95% max width of the viewable area of the chatbot.
+
+12. **Restore Defaults**:
     - **Description**: Resets the appearance settings to their default values.
     - **Options**: `Yes` or `No`.
     - **Selection**: Choose `Yes` to restore default settings.
 
-12. **Custom CSS**:
+13. **Custom CSS**:
     - **Description**: Allows you to add custom CSS to further style the chatbot.
     - **Input**: Enter any custom CSS rules to override the default styles and achieve specific design requirements.
 
