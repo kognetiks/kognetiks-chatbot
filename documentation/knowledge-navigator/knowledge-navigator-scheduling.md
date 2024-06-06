@@ -7,12 +7,14 @@ The Knowledge Navigator Scheduling settings allow you to automate the content an
 1. **Select Run Schedule**:
    - **Description**: This dropdown allows you to set the frequency at which the Knowledge Navigator scans your website content.
    - **Options**: 
-     - `No`: Disables the scheduled runs.
-     - `Now`: Runs the scan immediately.
+     - `No`: No schedule has been set.
+     - `Now`: Runs the scan immediately - non-recurring schedule.
      - `Hourly`: Runs the scan every hour.
      - `Twice Daily`: Runs the scan twice a day.
      - `Daily`: Runs the scan once a day.
      - `Weekly`: Runs the scan once a week.
+     - `Disable`: Disables the scheduled runs altogether.
+     - `Cancel`: Stops the current run.
    - **Selection**: Choose the frequency that best suits your content update schedule. For frequently updated sites, `Hourly` or `Daily` is recommended.
 
 2. **Maximum Top Words**:

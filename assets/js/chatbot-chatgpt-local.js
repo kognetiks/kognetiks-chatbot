@@ -21,6 +21,7 @@ jQuery(document).ready(function ($) {
 
         let chatgptDisclaimerSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_disclaimer_setting) ? chatbotSettings.chatbot_chatgpt_disclaimer_setting : 'Yes';
         let chatgptWidthSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_width_setting) ? chatbotSettings.chatbot_chatgpt_width_setting : 'Narrow';
+        let chatgptImageWidthSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_image_width_setting) ? chatbotSettings.chatbot_chatgpt_image_width_setting : '100%';
         let chatgptDiagnosticsSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_diagnotics) ? chatbotSettings.chatbot_chatgpt_diagnostics : 'Off';
 
         // Avatar Setting - Ver 1.5.0
@@ -78,6 +79,7 @@ jQuery(document).ready(function ($) {
         chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
         chatbotChatgptAudienceChoiceInput = document.getElementById('chatbot_chatgpt_audience_choice');
         chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
+        chatgptImageWidthSettingInput = document.getElementById('chatbot_chatgpt_image_width_setting');
         chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
 
         // Avatar Setting - Ver 1.5.0
@@ -155,6 +157,12 @@ jQuery(document).ready(function ($) {
         if(chatgptWidthSettingInput) {
             chatgptWidthSettingInput.addEventListener('change', function() {
                 localStorage.setItem('chatbot_chatgpt_width_setting', this.options[this.selectedIndex].value);
+            });
+        }
+
+        if(chatgptImageWidthSettingInput) {
+            chatgptImageWidthSettingInput.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_image_width_setting', this.options[this.selectedIndex].value);
             });
         }
 
@@ -302,6 +310,7 @@ jQuery(document).ready(function ($) {
                 let chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
                 let chatbotChatgptAudienceChoiceInput = document.getElementById('chatbot_chatgpt_audience_choice');
                 let chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
+                let chatgptImageWidthSettingInput = document.getElementById('chatbot_chatgpt_image_width_setting');
                 let chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
 
                 // Avatar Settings - Ver 1.5.0
@@ -363,6 +372,10 @@ jQuery(document).ready(function ($) {
 
                 if(chatgptWidthSettingInput) {
                     localStorage.setItem('chatbot_chatgpt_width_setting', chatgptWidthSettingInput.value);
+                }
+
+                if(chatgptImageWidthSettingInput) {
+                    localStorage.setItem('chatbot_chatgpt_image_width_setting', chatgptImageWidthSettingInput.value);
                 }
 
                 if(chatgptDiagnosticsSettingInput) {

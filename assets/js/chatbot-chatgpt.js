@@ -33,6 +33,7 @@ jQuery(document).ready(function ($) {
 
     chatbot_chatgpt_disclaimer_setting = localStorage.getItem('chatbot_chatgpt_disclaimer_setting') || 'Yes';
     chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
+    chatbot_chatgpt_image_width_setting = localStorage.getItem('chatbot_chatgpt_image_width_setting') || '100%';
 
     // Add variables for the timeout setting - Ver 1.8.8
     timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 240;
@@ -69,6 +70,7 @@ jQuery(document).ready(function ($) {
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_width_setting: ' + chatbot_chatgpt_width_setting);
+    // console.log('Chatbot: NOTICE: chatbot_chatgpt_image_width_setting: ' + chatbot_chatgpt_image_width_setting);
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
     // var site-header = document.querySelector("#site-header");
@@ -447,7 +449,7 @@ jQuery(document).ready(function ($) {
         // console.log("After HTML Escape:", markdown);
     
         // Step 3: Process images first
-        markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">');
+        markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2">`);
         // console.log("After Image Replacement:", markdown);
     
         // Step 4: Process links before any other inline elements

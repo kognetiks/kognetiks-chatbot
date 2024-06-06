@@ -230,6 +230,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 = 2.0.3 =
 * Added an option to allow/disallow downloading a transcript of the user conversations with the chatbot.
 * Adjusted the image size to reflect actual size for images smaller that the view port of the chatbot message.
+* Added an option to set the Knowledge Navigator to never run - useful if you're only going to use assistants for interactions within the chatbot.
 
 = 2.0.2 =
 * Overhauled the Support documentation with extensive information on the chatbot settings - See the Support tab in Settings
