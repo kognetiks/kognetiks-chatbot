@@ -763,6 +763,10 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     $style = $chatbot_chatgpt_display_style ?? '';
     $assistant = $chatbot_chatgpt_assistant_alias ?? '';
 
+    // Preload avatar - Ver 2.0.3
+    $avatar_icon_setting = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', ''));
+    $custom_avartar_icon_setting = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
+
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode_enqueue_script - at the beginning of the function');
     // back_trace( 'NOTICE', 'get_the_id(): ' . get_the_id() );
@@ -782,6 +786,14 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
         }
         if ('<?php echo $assistant; ?>' !== '') {
             localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $assistant; ?>');
+        }
+        
+        // Preload avatar - Ver 2.0.3
+        if ('<?php echo $avatar_icon_setting; ?>' !== '') {
+            localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', '<?php echo $avatar_icon_setting; ?>');
+        }
+        if ('<?php echo $custom_avartar_icon_setting; ?>' !== '') {
+            localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', '<?php echo $custom_avartar_icon_setting; ?>');
         }
     </script>
     <?php

@@ -126,7 +126,7 @@ function chatbot_chatgpt_support_section_callback() {
         $docLocation = 'overview.md';
     }
 
-    // Validate the that the requestioned documentation directory and file exist
+    // Validate the that the requested documentation directory and file exist
     if (validateDocumentation($dir, $file)) {
         $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/' . $docLocation;
     } else {

@@ -429,55 +429,83 @@ jQuery(document).ready(function ($) {
     // markdownToHtml - Ver 1.9.2
     function markdownToHtml(markdown) {
 
-        // Escape HTML outside of code blocks
+        // console.log("Original Markdown:", markdown);
+    
+        // Step 1: Extract predefined HTML tags
+        const predefinedHtmlRegex = /<.*?>/g;
+        let predefinedHtml = [];
+        markdown = markdown.replace(predefinedHtmlRegex, (match) => {
+            predefinedHtml.push(match);
+            return `{{HTML_TAG_${predefinedHtml.length - 1}}}`;
+        });
+        // console.log("After Extracting HTML Tags:", markdown);
+    
+        // Step 2: Escape HTML outside of code blocks
         markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
             return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
         }).join('');
+        // console.log("After HTML Escape:", markdown);
     
-        // Headers
-        markdown = markdown.replace(/^#### (.*$)/gim, '<h4>$1</h4>')
-                           .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                           .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                           .replace(/^# (.*$)/gim, '<h1>$1</h1>');
+        // Step 3: Process images first
+        markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">');
+        // console.log("After Image Replacement:", markdown);
     
-        // Bold, Italic, Strikethrough
+        // Step 4: Process links before any other inline elements
+        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+        // console.log("After Link Replacement:", markdown);
+    
+        // Step 5: Headers
+        markdown = markdown.replace(/^#### (.*)$/gim, '<h4>$1</h4>')
+                           .replace(/^### (.*)$/gim, '<h3>$1</h3>')
+                           .replace(/^## (.*)$/gim, '<h2>$1</h2>')
+                           .replace(/^# (.*)$/gim, '<h1>$1</h1>');
+        // console.log("After Headers Replacement:", markdown);
+    
+        // Step 6: Bold, Italic, Strikethrough
         markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
                            .replace(/\~\~(.*?)\~\~/g, '<del>$1</del>');
+        // console.log("After Text Formatting Replacement:", markdown);
     
-        // Multi-line code blocks
+        // Step 7: Multi-line code blocks
         markdown = markdown.replace(/```([\s\S]*?)```/gm, '<pre><code>$1</code></pre>');
+        // console.log("After Code Block Replacement:", markdown);
     
-        // Inline code - after handling multi-line to prevent conflicts
+        // Step 8: Inline code - after handling multi-line to prevent conflicts
         markdown = markdown.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // console.log("After Inline Code Replacement:", markdown);
     
-        // Images
-        markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">');
-    
-        // Links
-        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-    
-        // Lists - Needs refining for nested lists
+        // Step 9: Lists - Needs refining for nested lists
         markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
                            .replace(/<\/li><li>/g, '</li>\n<li>')
                            .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>')
                            .replace(/<ul>\s*<li>/g, '<ul>\n<li>')
                            .replace(/<\/li>\s*<\/ul>/g, '</li>\n</ul>');
+        // console.log("After Lists Replacement:", markdown);
     
-        // Improved blockquote handling
+        // Step 10: Improved blockquote handling
         markdown = markdown.replace(/^(>+\s?)(.*)$/gm, (match, p1, p2) => {
             return `<blockquote>${p2}</blockquote>`;
         });
+        // console.log("After Blockquote Replacement:", markdown);
     
-        // Convert line breaks to <br>, except for code blocks
+        // Step 11: Convert line breaks to <br>, except for code blocks and blockquotes
         markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>)/g).map((chunk, index) => {
             // Only convert newlines to <br> outside of code blocks and blockquotes
             return index % 2 === 0 ? chunk.replace(/\n/g, '<br>') : chunk;
         }).join('');
+        // console.log("After Line Breaks Replacement:", markdown);
+    
+        // Step 12: Reinsert predefined HTML tags
+        markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
+            return predefinedHtml[parseInt(index)];
+        });
+        // console.log("After Reinserting HTML Tags:", markdown);
     
         return markdown.trim();
-    
+
     }
+    
 
     submitButton.on('click', function () {
 
@@ -1102,7 +1130,7 @@ jQuery(document).ready(function ($) {
     }
 
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
-    // function scrollToBottom() {
+    function scrollToBottom() {
     //     setTimeout(() => {
     //         // DIAG - Diagnostics - Ver 1.5.0
     //         // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
@@ -1113,7 +1141,7 @@ jQuery(document).ready(function ($) {
     //         }
     //     }, 100);  // delay of 100 milliseconds  
     // 
-    // }
+    }
 
     // Add this function to scroll to the top of the last chatbot response - Ver 2.0.3
     function scrollToLastBotResponse() {

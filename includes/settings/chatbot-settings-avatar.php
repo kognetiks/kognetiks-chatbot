@@ -85,7 +85,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
     $customAvatarIcon = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting'));
 
     // DIAG - Diagnostic - Ver 2.0.3
-    back_trace( 'NOTICE', "Custom Avatar Icon: " . $customAvatarIcon );
+    // back_trace( 'NOTICE', "Custom Avatar Icon: " . $customAvatarIcon );
 
     if ($customAvatarIcon !== '') {
         $selectedIcon = 'custom-000.png';
@@ -93,7 +93,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
     }
 
     // DIAG - Diagnostic - Ver 2.0.3
-    back_trace( 'NOTICE', "Selected Icon: " . $selectedIcon );
+    // back_trace( 'NOTICE', "Selected Icon: " . $selectedIcon );
 
     ?>
         <p>Select your icon by clicking on an image to select it.  Don't forget to click 'Save Settings'.</p>
