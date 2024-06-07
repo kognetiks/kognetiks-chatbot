@@ -416,6 +416,17 @@ function getTheMessage($thread_id, $api_key) {
                             // Append the local URL to the message (modify as needed for your use case)
                             $message['file_url'] = $file_url;
                         }
+
+                        // Set a transient that expires in 2 hours
+                        $timeFrameForDelete = time() + 2 * 60 * 60;
+                        set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
+
+                        // Set a cron job to delete the file in 1 hour 45 minutes
+                        $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+                        if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
+                            wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
+                        }
+
                     }
                 }
             }
@@ -442,6 +453,17 @@ function getTheMessage($thread_id, $api_key) {
                                     // Replace the placeholder link with the actual URL
                                     $content['text']['value'] = str_replace($annotation['text'], $file_url, $content['text']['value']);
                                 }
+                                
+                                // Set a transient that expires in 2 hours
+                                $timeFrameForDelete = time() + 2 * 60 * 60;
+                                set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
+
+                                // Set a cron job to delete the file in 1 hour 45 minutes
+                                $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+                                if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
+                                    wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
+                                }
+                        
                             }
                         }
                     }
@@ -452,7 +474,7 @@ function getTheMessage($thread_id, $api_key) {
 
         // DIAG - Diagnostics - Ver 2.0.3
         // back_trace('NOTICE', 'No data or attachments found in the response.');
-        
+
     }
 
     return $response_data;
@@ -722,6 +744,7 @@ function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id) {
 
         // Retrieve the next file id
         $file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+
     }
 
     // Join the file ids into a comma-separated string and return it
