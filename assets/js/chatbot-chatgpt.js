@@ -204,14 +204,10 @@ jQuery(document).ready(function ($) {
     let customAvatar = localStorage.getItem('chatbot_chatgpt_custom_avatar_icon_setting') || '';
 
     // Overrides for mobile devices - Ver 1.8.1
-    if (isMobile()) {
-        // Set selectedAvatar to 'icon-000.png' for mobile devices, i.e., none
-        selectedAvatar = 'icon-000.png';
-        // Even if it's mobile, if a custom avatar is set use it - Ver 2.0.3
-        if (customAvatar !== '') {
-            avatarPath = customAvatar;
-        }
-    }
+    // if (isMobile()) {
+    //     // Set selectedAvatar to 'icon-000.png' for mobile devices, i.e., none
+    //     selectedAvatar = 'icon-000.png';
+    // }
 
     // Select the avatar based on the setting - Ver 1.5.0
     if (customAvatar !== '') {
@@ -248,8 +244,15 @@ jQuery(document).ready(function ($) {
         // Using .text() for safety, as it automatically escapes HTML
         let bubble = $('<div>').text(avatarGreeting).addClass('chatbot-bubble');
 
-        // Append the avatar and the bubble to the button and apply the class for the avatar icon
-        chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
+        // Don't add greeting bubble if mobile - Ver 2.0.3
+        if (isMobile()) {
+            // Append the avatar and the bubble to the button and apply the class for the avatar icon
+            chatGptOpenButton.empty().append(avatarImg).addClass('avatar-icon');
+        } else {
+            // Append the avatar and the bubble to the button and apply the class for the avatar icon
+            chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
+        }
+
     } else {
         // If no avatar is selected or the selected avatar is 'icon-000.png', use the dashicon
         // Remove the avatar-icon class (if it was previously added) and add the dashicon class
