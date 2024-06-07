@@ -86,7 +86,7 @@ function download_openai_file($file_id, $filename) {
 
 // Delete old download files - Ver 2.0.3
 function chatbot_chatgpt_cleanup_download_directory() {
-    $download_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'download/';
+    $download_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'downloads/';
     foreach (glob($download_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {
