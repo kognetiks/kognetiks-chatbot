@@ -425,6 +425,12 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_upload_files')) {
     wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_upload_files');
 }
 
+// Schedule the download file cleanup event if it's not already scheduled - Ver 2.0.3
+// Schedule the cleanup event if it's not already scheduled
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
+    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_download_files');
+}
+
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
 

@@ -372,18 +372,10 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
 
 // Step 8: Get the Message
 function getTheMessage($thread_id, $api_key) {
-
-    // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/messages";
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
 
     $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    if ( $assistant_beta_version == 'v2' ) {
-        $beta_version = "assistants=v2";
-    } else {
-        $beta_version = "assistants=v1";
-    }
-    // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+    $beta_version = $assistant_beta_version == 'v2' ? "assistants=v2" : "assistants=v1";
 
     $headers = array(
         "Content-Type: application/json",
@@ -397,8 +389,64 @@ function getTheMessage($thread_id, $api_key) {
             'header' => $headers
     )));
     $response = fetchDataUsingCurl($url, $context);
+    $response_data = json_decode($response, true);
 
-    return json_decode($response, true);
+    back_trace('NOTICE', '$response_data: ' . print_r($response_data, true));
+
+    // Download any file attachments - Ver 2.0.3
+    if (isset($response_data['data']) && is_array($response_data['data'])) {
+        foreach ($response_data['data'] as &$message) {
+            // Check attachments
+            if (isset($message['attachments']) && is_array($message['attachments'])) {
+                foreach ($message['attachments'] as $attachment) {
+                    if (isset($attachment['file_id'])) {
+                        $file_id = $attachment['file_id'];
+
+                        back_trace('NOTICE', '$file_id: ' . $file_id);
+
+                        // Call the function to download the file
+                        $file_url = download_openai_file($file_id);
+
+                        back_trace('NOTICE', '$file_url: ' . $file_url);
+
+                        if ($file_url) {
+                            // Append the local URL to the message (modify as needed for your use case)
+                            $message['file_url'] = $file_url;
+                        }
+                    }
+                }
+            }
+
+            // Check content annotations
+            if (isset($message['content']) && is_array($message['content'])) {
+                foreach ($message['content'] as $content) {
+                    if (isset($content['text']['annotations']) && is_array($content['text']['annotations'])) {
+                        foreach ($content['text']['annotations'] as $annotation) {
+                            if (isset($annotation['file_path']['file_id'])) {
+                                $file_id = $annotation['file_path']['file_id'];
+
+                                back_trace('NOTICE', '$file_id: ' . $file_id);
+
+                                // Call the function to download the file
+                                $file_url = download_openai_file($file_id);
+
+                                back_trace('NOTICE', '$file_url: ' . $file_url);
+
+                                if ($file_url) {
+                                    // Append the local URL to the message (modify as needed for your use case)
+                                    $message['file_url'] = $file_url;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        back_trace('NOTICE', 'No data or attachments found in the response.');
+    }
+
+    return $response_data;
 }
 
 // CustomerGPT - Assistants - Ver 1.7.2

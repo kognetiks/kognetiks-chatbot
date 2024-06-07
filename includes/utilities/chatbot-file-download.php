@@ -13,27 +13,17 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function download_an_openai_file($file_id) {
+function download_openai_file($file_id) {
 
     global $session_id;
 
     $downloads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'downloads/';
 
     // Ensure the directory exists or attempt to create it
-    if (!file_exists($downloads_dir) && !wp_mkdir_p($downloads_dir)) {
+    if (!create_directory_and_file($downloads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        $responses[] = array(
-            'status' => 'error',
-            'message' => 'Oops! File download failed.'
-        );
-        http_response_code(500); // Send a 500 Internal Server Error status code
-        exit;
-    } else {
-        $index_file_path = $downloads_dir . 'index.php';
-        if (!file_exists($index_file_path)) {
-            $file_content = "<?php\n// Silence is golden.\n?>";
-            file_put_contents($index_file_path, $file_content);
-        }
+        // back_trace ( 'ERROR', 'Failed to create directory.')
+        return;
     }
     // Protect the directory - Ver 2.0.0
     chmod($downloads_dir, 0700);
@@ -100,3 +90,17 @@ function download_an_openai_file($file_id) {
     }
 
 }
+
+// Delete old download files - Ver 2.0.3
+function chatbot_chatgpt_cleanup_download_directory() {
+    $download_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'download/';
+    foreach (glob($download_dir . '*') as $file) {
+        // Delete files older than 1 hour
+        if (filemtime($file) < time() - 60 * 60 * 1) {
+            unlink($file);
+        }
+    }
+    // Create the index.php file if it does not exist
+    create_index_file($download_dir);
+}
+add_action('chatbot_chatgpt_cleanup_download_files', 'chatbot_chatgpt_cleanup_download_directory');
