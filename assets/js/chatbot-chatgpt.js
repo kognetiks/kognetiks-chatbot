@@ -246,11 +246,15 @@ jQuery(document).ready(function ($) {
 
         // Don't add greeting bubble if mobile - Ver 2.0.3
         if (isMobile()) {
+            // Remove the bubble if it was previously added
+            bubble.remove();
             // Append the avatar and the bubble to the button and apply the class for the avatar icon
             chatGptOpenButton.empty().append(avatarImg).addClass('avatar-icon');
+            // console.log('Chatbot: NOTICE: Mobile device detected. Avatar greeting suppressed.');
         } else {
             // Append the avatar and the bubble to the button and apply the class for the avatar icon
             chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
+            //console.log('Chatbot: NOTICE: Avatar greeting displayed.');
         }
 
     } else {
@@ -1229,7 +1233,9 @@ jQuery(document).ready(function ($) {
 
     // Detect mobile device - Ver 1.8.1
     function isMobile() {
+
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Silk|Kindle|Symbian/i.test(navigator.userAgent) || (window.innerWidth <= 800);
+
     }
 
     function updateChatbotStyles() {
