@@ -13,8 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function download_openai_file($file_id) {
-
+function download_openai_file($file_id, $filename) {
     global $session_id;
 
     $downloads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'downloads/';
@@ -22,20 +21,18 @@ function download_openai_file($file_id) {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_file($downloads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace ( 'ERROR', 'Failed to create directory.')
-        return;
+        // DIAG - Diagnostic - Ver 2.0.3
+        // back_trace('ERROR', 'Failed to create download directory.');
+        return false;
     }
     // Protect the directory - Ver 2.0.0
     chmod($downloads_dir, 0700);
 
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
-        $responses[] = array(
-            'status' => 'error',
-            'message' => 'Oops! Your API key is missing. Please enter your API key in the Chatbot settings.'
-        );
-        http_response_code(500); // Send a 500 Internal Server Error status code
-        exit;
+        // DIAG - Diagnostic - Ver 2.0.3
+        // back_trace('ERROR', 'API key is missing.');
+        return false;
     }
 
     // API endpoint to retrieve the file content
@@ -55,7 +52,8 @@ function download_openai_file($file_id) {
 
     // Check for cURL errors
     if (curl_errno($ch)) {
-        error_log('cURL error: ' . curl_error($ch));
+        // DIAG - Diagnostic - Ver 2.0.3
+        // back_trace('ERROR', 'cURL error: ' . curl_error($ch));
         curl_close($ch);
         return false;
     }
@@ -68,27 +66,22 @@ function download_openai_file($file_id) {
 
     // Check if the request was successful
     if ($http_code == 200) {
+
         // Define the file path
-        $file_path = $downloads_dir . 'downloaded_file';
+        $file_path = $downloads_dir . $filename;
 
         // Save the file content locally
         file_put_contents($file_path, $response);
 
         // Return the file URL
-        $responses[] = array(
-            'status' => 'success',
-            'message' => 'File downloaded successfully. ' . content_url( $downloads_dir . 'downloaded_file')
-        );
-        return true;
+        return content_url('plugins/' . basename(CHATBOT_CHATGPT_PLUGIN_DIR_PATH) . '/downloads/' . $filename);
+
     } else {
-        $responses[] = array(
-            'status' => 'error',
-            'message' => 'Oops! Failed to retrieve the file: ' . $http_code
-        );
-        back_trace( 'ERROR', 'Failed to retrieve the file: ' . $http_code);
+
+        // DIAG - Diagnostic - Ver 2.0.3
+        back_trace('ERROR', 'Failed to retrieve the file: ' . $http_code);
         return false;
     }
-
 }
 
 // Delete old download files - Ver 2.0.3

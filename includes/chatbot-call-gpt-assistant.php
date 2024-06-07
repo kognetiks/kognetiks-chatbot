@@ -391,7 +391,8 @@ function getTheMessage($thread_id, $api_key) {
     $response = fetchDataUsingCurl($url, $context);
     $response_data = json_decode($response, true);
 
-    back_trace('NOTICE', '$response_data: ' . print_r($response_data, true));
+    // DIAG - Diagnostics - Ver 2.0.3
+    // back_trace('NOTICE', '$response_data: ' . print_r($response_data, true));
 
     // Download any file attachments - Ver 2.0.3
     if (isset($response_data['data']) && is_array($response_data['data'])) {
@@ -402,12 +403,14 @@ function getTheMessage($thread_id, $api_key) {
                     if (isset($attachment['file_id'])) {
                         $file_id = $attachment['file_id'];
 
-                        back_trace('NOTICE', '$file_id: ' . $file_id);
+                        // DIAG - Diagnostics - Ver 2.0.3
+                        // back_trace('NOTICE', '$file_id: ' . $file_id);
 
                         // Call the function to download the file
-                        $file_url = download_openai_file($file_id);
+                        $file_url = download_openai_file($file_id, 'sample_data.csv');
 
-                        back_trace('NOTICE', '$file_url: ' . $file_url);
+                        // DIAG - Diagnostics - Ver 2.0.3
+                        // back_trace('NOTICE', '$file_url: ' . $file_url);
 
                         if ($file_url) {
                             // Append the local URL to the message (modify as needed for your use case)
@@ -419,22 +422,25 @@ function getTheMessage($thread_id, $api_key) {
 
             // Check content annotations
             if (isset($message['content']) && is_array($message['content'])) {
-                foreach ($message['content'] as $content) {
+                foreach ($message['content'] as &$content) { // Note the change here to modify the content
                     if (isset($content['text']['annotations']) && is_array($content['text']['annotations'])) {
                         foreach ($content['text']['annotations'] as $annotation) {
-                            if (isset($annotation['file_path']['file_id'])) {
+                            if (isset($annotation['file_path']['file_id']) && isset($annotation['text'])) {
                                 $file_id = $annotation['file_path']['file_id'];
+                                $file_name = basename($annotation['text']); // Extract the filename
 
-                                back_trace('NOTICE', '$file_id: ' . $file_id);
+                                // DIAG - Diagnostics - Ver 2.0.3
+                                // back_trace('NOTICE', '$file_id: ' . $file_id . ', $file_name: ' . $file_name);
 
                                 // Call the function to download the file
-                                $file_url = download_openai_file($file_id);
+                                $file_url = download_openai_file($file_id, $file_name);
 
-                                back_trace('NOTICE', '$file_url: ' . $file_url);
+                                // DIAG - Diagnostics - Ver 2.0.3
+                                // back_trace('NOTICE', '$file_url: ' . $file_url);
 
                                 if ($file_url) {
-                                    // Append the local URL to the message (modify as needed for your use case)
-                                    $message['file_url'] = $file_url;
+                                    // Replace the placeholder link with the actual URL
+                                    $content['text']['value'] = str_replace($annotation['text'], $file_url, $content['text']['value']);
                                 }
                             }
                         }
@@ -443,10 +449,14 @@ function getTheMessage($thread_id, $api_key) {
             }
         }
     } else {
-        back_trace('NOTICE', 'No data or attachments found in the response.');
+
+        // DIAG - Diagnostics - Ver 2.0.3
+        // back_trace('NOTICE', 'No data or attachments found in the response.');
+        
     }
 
     return $response_data;
+
 }
 
 // CustomerGPT - Assistants - Ver 1.7.2
