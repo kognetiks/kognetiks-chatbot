@@ -402,12 +402,13 @@ function getTheMessage($thread_id, $api_key) {
                 foreach ($message['attachments'] as $attachment) {
                     if (isset($attachment['file_id'])) {
                         $file_id = $attachment['file_id'];
+                        $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
 
                         // DIAG - Diagnostics - Ver 2.0.3
                         // back_trace('NOTICE', '$file_id: ' . $file_id);
 
                         // Call the function to download the file
-                        $file_url = download_openai_file($file_id, 'sample_data.csv');
+                        $file_url = download_openai_file($file_id, $file_name);
 
                         // DIAG - Diagnostics - Ver 2.0.3
                         // back_trace('NOTICE', '$file_url: ' . $file_url);
@@ -438,7 +439,7 @@ function getTheMessage($thread_id, $api_key) {
                         foreach ($content['text']['annotations'] as $annotation) {
                             if (isset($annotation['file_path']['file_id']) && isset($annotation['text'])) {
                                 $file_id = $annotation['file_path']['file_id'];
-                                $file_name = basename($annotation['text']); // Extract the filename
+                                $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
 
                                 // DIAG - Diagnostics - Ver 2.0.3
                                 // back_trace('NOTICE', '$file_id: ' . $file_id . ', $file_name: ' . $file_name);

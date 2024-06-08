@@ -14,6 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 function chatbot_chatgpt_download_transcript() {
+
     if (!isset($_POST['user_id'], $_POST['page_id'], $_POST['conversation_content'])) {
         wp_send_json_error('Missing required POST fields');
         return;
@@ -37,9 +38,9 @@ function chatbot_chatgpt_download_transcript() {
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
     }
-    
+
     // Create the filename
-    $transcriptFileName = 'transcript_' . date('Y-m-d_H-i-s') . '.txt';
+    $transcriptFileName = 'transcript_' . generate_random_string() . '_' . date('Y-m-d_H-i-s') . '.txt';
     $transcriptFile = $transcript_dir . $transcriptFileName;
 
     // DIAG - Diagnostics - Ver 1.9.9

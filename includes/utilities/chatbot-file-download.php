@@ -14,6 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 function download_openai_file($file_id, $filename) {
+
     global $session_id;
 
     $downloads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'downloads/';
@@ -23,6 +24,7 @@ function download_openai_file($file_id, $filename) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // DIAG - Diagnostic - Ver 2.0.3
         // back_trace('ERROR', 'Failed to create download directory.');
+        // FIXME - Return an error message
         return false;
     }
 
@@ -30,6 +32,7 @@ function download_openai_file($file_id, $filename) {
     if (empty($api_key)) {
         // DIAG - Diagnostic - Ver 2.0.3
         // back_trace('ERROR', 'API key is missing.');
+        // FIXME - Return an error message
         return false;
     }
 
@@ -53,6 +56,7 @@ function download_openai_file($file_id, $filename) {
         // DIAG - Diagnostic - Ver 2.0.3
         // back_trace('ERROR', 'cURL error: ' . curl_error($ch));
         curl_close($ch);
+        // FIXME - Return an error message
         return false;
     }
 
