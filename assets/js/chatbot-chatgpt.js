@@ -513,7 +513,7 @@ jQuery(document).ready(function ($) {
 
     }
     
-
+    // Submit the message when the submit button is clicked
     submitButton.on('click', function () {
 
         // Sanitize the input - Ver 2.0.0
@@ -625,6 +625,7 @@ jQuery(document).ready(function ($) {
                 if (botResponse) {
                     appendMessage(botResponse, 'bot');
                 }
+                scrollToLastBotResponse();
                 submitButton.prop('disabled', false);
             },
             cache: false, // This ensures jQuery does not cache the result
@@ -1138,16 +1139,16 @@ jQuery(document).ready(function ($) {
 
     // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
     function scrollToBottom() {
-    //     setTimeout(() => {
-    //         // DIAG - Diagnostics - Ver 1.5.0
-    //         // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-    //         //     console.log('Chatbot: NOTICE: scrollToBottom");
-    //         // }
-    //         if (conversation && conversation.length > 0) {
-    //             conversation.scrollTop(conversation[0].scrollHeight);
-    //         }
-    //     }, 100);  // delay of 100 milliseconds  
-    // 
+        // setTimeout(() => {
+        //     // DIAG - Diagnostics - Ver 1.5.0
+        //     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
+        //     //     console.log('Chatbot: NOTICE: scrollToBottom");
+        //     // }
+        //     if (conversation && conversation.length > 0) {
+        //         conversation.scrollTop(conversation[0].scrollHeight);
+        //     }
+        // }, 100);  // delay of 100 milliseconds  
+
     }
 
     // Add this function to scroll to the top of the last chatbot response - Ver 2.0.3
@@ -1155,18 +1156,24 @@ jQuery(document).ready(function ($) {
         setTimeout(() => {
             // DIAG - Diagnostics - Ver 1.5.0
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('Chatbot: NOTICE: scrollToLastBotResponse');
+                 console.log('Chatbot: NOTICE: scrollToLastBotResponse');
             // }
 
             const botTexts = document.querySelectorAll('.bot-text');
             if (botTexts && botTexts.length > 0) {
                 const lastBotText = botTexts[botTexts.length - 1];
-                const conversation = document.querySelector('#conversation'); // Assuming conversation is the container ID
+                const conversation = document.querySelector('#conversation');
                 if (conversation) {
-                    const topPosition = lastBotText.offsetTop;
+                    let topPosition = lastBotText.offsetTop;
+                    let parent = lastBotText.offsetParent;
+                    while(parent && parent !== conversation) {
+                        topPosition += parent.offsetTop;
+                        parent = parent.offsetParent;
+                    }
+                    topPosition -= conversation.clientHeight;
                     conversation.scrollTo({
-                        top: topPosition,
-                        behavior: 'smooth' // For smooth scrolling
+                        top: topPosition > 0 ? topPosition : 0,
+                        behavior: 'smooth'
                     });
                 }
             }

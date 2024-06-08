@@ -4,6 +4,13 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## Documentation
 
+## What's New in Verion 2.0.3
+
+- **Transcript Download Option**: You can now choose whether users can download a transcript of their conversations with the chatbot.
+- **Improved Image Sizing**: Images smaller than the chatbot's message view now display in their actual size for better clarity.
+- **Knowledge Navigator Settings**: We've added an option to disable the Knowledge Navigator if you only want to use assistants for chatbot interactions.
+- **File Download Support**: The chatbot now supports downloading files generated on the OpenAI platform.
+
 ## What's New in Version 2.0.2
 
 - **Documentation Updates:** The Support documentation has been extensively updated with detailed information on the chatbot settings. You can find this in the Support tab under Settings.
