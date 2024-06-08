@@ -308,7 +308,7 @@ function chatbot_chatgpt_cleanup_uploads_directory() {
         }
     }
     // Create the index.php file if it does not exist
-    create_index_file($uploads_dir);
+    create_directory_and_index_file($uploads_dir);
 }
 add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_uploads_directory');
 

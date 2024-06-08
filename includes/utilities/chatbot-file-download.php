@@ -19,14 +19,12 @@ function download_openai_file($file_id, $filename) {
     $downloads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'downloads/';
 
     // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_file($downloads_dir)) {
+    if (!create_directory_and_index_file($downloads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // DIAG - Diagnostic - Ver 2.0.3
         // back_trace('ERROR', 'Failed to create download directory.');
         return false;
     }
-    // Protect the directory - Ver 2.0.0
-    chmod($downloads_dir, 0700);
 
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
@@ -94,6 +92,6 @@ function chatbot_chatgpt_cleanup_download_directory() {
         }
     }
     // Create the index.php file if it does not exist
-    create_index_file($download_dir);
+    create_directory_and_index_file($download_dir);
 }
 add_action('chatbot_chatgpt_cleanup_download_files', 'chatbot_chatgpt_cleanup_download_directory');

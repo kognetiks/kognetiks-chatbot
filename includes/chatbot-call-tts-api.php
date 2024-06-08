@@ -59,7 +59,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
     // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_file($audio_dir_path)) {
+    if (!create_directory_and_index_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
@@ -335,7 +335,7 @@ function deleteAudioFile($file_id) {
     // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
     // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_file($audio_dir_path)) {
+    if (!create_directory_and_index_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
@@ -377,6 +377,6 @@ function chatbot_chatgpt_cleanup_audio_directory() {
         }
     }
     // Create the index.php file if it does not exist
-    create_index_file($audio_dir);
+    create_directory_and_index_file($audio_dir);
 }
 add_action('chatbot_chatgpt_cleanup_audio_files', 'chatbot_chatgpt_cleanup_audio_directory');
