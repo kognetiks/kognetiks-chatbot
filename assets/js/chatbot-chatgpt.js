@@ -1147,38 +1147,55 @@ jQuery(document).ready(function ($) {
         //     if (conversation && conversation.length > 0) {
         //         conversation.scrollTop(conversation[0].scrollHeight);
         //     }
-        // }, 100);  // delay of 100 milliseconds  
-
+        // }, 100);  // delay of 100 milliseconds
+        //
     }
 
     // Add this function to scroll to the top of the last chatbot response - Ver 2.0.3
     function scrollToLastBotResponse() {
-        setTimeout(() => {
-            // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-                 console.log('Chatbot: NOTICE: scrollToLastBotResponse');
-            // }
 
+        setTimeout(() => {
+            
+            // DIAG - Diagnostics - Ver 2.0.3
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
+            //    console.log('Chatbot: NOTICE: scrollToLastBotResponse');
+            // }
+    
             const botTexts = document.querySelectorAll('.bot-text');
-            if (botTexts && botTexts.length > 0) {
+            const conversation = document.querySelector('#chatbot-chatgpt-conversation');
+    
+            // DIAG - Diagnostics - Ver 2.0.3
+            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
+            //     console.log('Bot Texts:', botTexts);
+            //     console.log('Conversation:', conversation);
+            // }
+    
+            if (botTexts && botTexts.length > 0 && conversation) {
                 const lastBotText = botTexts[botTexts.length - 1];
-                const conversation = document.querySelector('#conversation');
-                if (conversation) {
-                    let topPosition = lastBotText.offsetTop;
-                    let parent = lastBotText.offsetParent;
-                    while(parent && parent !== conversation) {
-                        topPosition += parent.offsetTop;
-                        parent = parent.offsetParent;
-                    }
-                    topPosition -= conversation.clientHeight;
-                    conversation.scrollTo({
-                        top: topPosition > 0 ? topPosition : 0,
-                        behavior: 'smooth'
-                    });
-                }
+                const topPosition = lastBotText.offsetTop - conversation.offsetTop;
+
+                // DIAG - Diagnostics - Ver 2.0.3
+                // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
+                //     console.log('Last Bot Text:', lastBotText);
+                //     console.log('Last Bot Text OffsetTop:', lastBotText.offsetTop);
+                //     console.log('Conversation OffsetTop:', conversation.offsetTop);
+                //     console.log('Top Position:', topPosition);
+                // }
+    
+                // Scroll to the top of the last bot message
+                conversation.scrollTop = topPosition;
+
+            } else {
+
+                // DIAG - Diagnostics - Ver 2.0.3
+                // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
+                // console.log('No bot texts found or conversation container is missing.');
+                // }
+
             }
-        }, 100);  // delay of 100 milliseconds
-    }
+
+        }, 200); // Adjust the delay as needed
+    }    
    
     // Load conversation from local storage if available - Ver 1.2.0
     function loadConversation() {
