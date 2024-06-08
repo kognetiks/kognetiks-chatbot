@@ -68,7 +68,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     // Get the audio format option
     $audio_format = esc_attr(get_option('chatbot_chatgpt_audio_output_format', 'mp3'));
 
-    $audio_file_name = $session_id . '_' . time() . '.' . $audio_format;
+    // $audio_file_name = $session_id . '_' . time() . '.' . $audio_format;
+    $audio_file_name = 'audio_' . generate_random_string() . '_' . date('Y-m-d_H-i-s') . '.' . $audio_format;
     $audio_file = $audio_dir_path . $audio_file_name;
 
     // Get the URL of the plugins directory
