@@ -128,7 +128,7 @@ function store_top_words() {
     // String together the $topWords
     $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
     foreach ($topWords as $word => $tfidf) {
-        $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
+        $chatbot_chattgpt_kn_conversation_context .= $word . ", ";
         }
     $chatbot_chatgpt_kn_conversation_context .= "and more.";
     

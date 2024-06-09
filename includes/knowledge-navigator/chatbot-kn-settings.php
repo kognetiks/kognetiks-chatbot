@@ -204,11 +204,11 @@ function chatbot_chatgpt_kn_schedule_callback($args) {
 }
 
 function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
-    $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 25));
+    $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 250));
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php
-        for ($i = 100; $i <= 2000; $i += 100) {
+        for ($i = 500; $i <= 10000; $i += 500) {
             echo '<option value="' . $i . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . $i . '</option>';
         }
         ?>
