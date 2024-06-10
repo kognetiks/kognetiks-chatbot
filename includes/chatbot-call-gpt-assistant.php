@@ -71,7 +71,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', '$url: ' . $url);
-    // back_trace( 'NOTICE', '$headers: ' . print_r($headers, true));
+    // back_trace( 'NOTICE', '$headers: ' . ' PRIVATE DATA ');
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$prompt: ' . $prompt);
     // back_trace( 'NOTICE', '$context: ' . $context);
@@ -89,12 +89,16 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
         ),
     ];
 
-    // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
-    // unset($data['file_ids']);
+    // // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
+    // // unset($data['file_ids']);
+
+    // *********************************************************************************
+    // THIS SECTION HANDLES NON-IMAGE ATTACHMENTS - Ver 2.0.3
+    // *********************************************************************************
 
     if ( !empty($file_id && !empty($file_id[0]) )) {
         if ( $beta_version == 'assistants=v1' ) {
-            // assistants=v1 - Ver 1.9.6 - 20224 04 24
+            // assistants=v1 - Ver 1.9.6 - 2024 04 24
             $data['file_ids'] = $file_id;
         } else {
             // assistants=v2 - Ver 1.9.6 - 2024 04 24
@@ -109,6 +113,33 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
                     ]
                 ];
                 // Add each attachment to the attachments array in the main data structure
+                $data['attachments'][] = $attachment;
+            }
+        }
+    }
+
+    // *********************************************************************************
+    // THIS SECTION HANDLES IMAGE ATTACHMENTS - Ver 2.0.3
+    // *********************************************************************************
+
+    if ( !empty($file_id && !empty($file_id[0]) )) {
+        if ( $beta_version == 'assistants=v1' ) {
+            // assistants=v1 - Ver 1.9.6 - 2024 04 24
+            $data['file_ids'] = $file_id;
+        } else {
+            // assistants=v2 - Ver 1.9.6 - 2024 04 24
+            $data = $data + [
+                "attachments" => [],
+            ];
+            foreach ($file_id as $file_item) {
+                $attachment = [
+                    'type' => 'image_file',
+                    'image_file' => [
+                        'file_id' => $file_item,
+                        'detail' => 'auto'
+                    ]
+                ];
+                // Add each image attachment to the attachments array in the main data structure
                 $data['attachments'][] = $attachment;
             }
         }
@@ -402,6 +433,22 @@ function getTheMessage($thread_id, $api_key) {
                 foreach ($message['attachments'] as $attachment) {
                     if (isset($attachment['file_id'])) {
                         $file_id = $attachment['file_id'];
+
+                        // If $annotation is not defined or not an array, skip this iteration
+                        if (!isset($annotation) || !is_array($annotation)) {
+                            continue;
+                        }
+
+                        // Access array offset here
+                        $value = $annotation['offset_key'];
+
+                        // If $path is not defined or not a string, skip this iteration
+                        if (!isset($path) || !is_string($path)) {
+                            continue;
+                        }
+
+                        $basename = basename($path);
+
                         $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
 
                         // DIAG - Diagnostics - Ver 2.0.3
@@ -554,13 +601,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Step 1: Create an Assistant
     // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
     // $assistants_response = createAnAssistant($api_key);
-    // DIAG - Print the response
+    // // DIAG - Print the response
     // back_trace( 'NOTICE', $assistants_response);
 
     // Step 2: Get The Thread ID
     // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
     // $thread_id = $assistants_response["id"];
-    // DIAG - Print the threadId
+    // // DIAG - Print the threadId
     // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
     // set_chatbot_chatgpt_threads($thread_id, $assistant_id);
 
@@ -613,7 +660,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
         // back_trace( 'NOTICE', 'File to retrieve');
-        // back_trace( 'NOTICE', '$file_id ' . $file_id);
+        // back_trace( 'NOTICE', '$file_id ' . print_r($file_id, true));
         $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, $file_id);
         // DIAG - Print the response
         // back_trace( 'NOTICE', $assistants_response);
