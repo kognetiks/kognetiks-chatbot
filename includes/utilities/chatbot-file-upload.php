@@ -93,8 +93,10 @@ function chatbot_chatgpt_upload_files() {
 
             // ***************************************************************************
             // DECIDE IF THE UPLOADED FILE IS AN IMAGE OR NON-IMAGE
+            // 
+            // SET A TRANSIENT FOR THE FILE TYPE
             // ***************************************************************************
-            
+
             $file_mime_type = mime_content_type($file_path);
             $purpose = strpos($file_mime_type, 'image/') === 0 ? 'vision' : 'assistants';
 
@@ -133,6 +135,7 @@ function chatbot_chatgpt_upload_files() {
                     back_trace('ERROR', 'API error: ' . $errorMessage);
                 } else {
                     set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $responseData['id'], $session_id, $i);
+                    set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $purpose, $session_id,  $responseData['id']);
                     $responses[] = array(
                         'status' => 'success',
                         'http_status' => $http_status,
