@@ -180,7 +180,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
                     foreach ($file_id as $file_item) {
                         // Skip invalid file_item entries
                         if ($file_item == 'vision') {
-                            break;
+                            break 2;
                         }
                         $attachment = [
                             'type' => 'image_file',
