@@ -80,121 +80,51 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     // *********************************************************************************
-    // DECIDE - IMAGE OR NON-IMAGE ATTACHMENTS - Ver 2.0.3
+    // FILE ID IS NULL
     // *********************************************************************************
 
-    $do_content = true;
+    if ( empty($file_id) ) {
 
-    foreach ($file_id as $i => $file_item) {
-        // Retrieve the file type
-        $file_type = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_type', $session_id, $file_item);
+        // No files attached, just send the prompt
+        $data = [
+            'role' => 'user',
+            'content' => [
+                [
+                    'type' => 'text',
+                    'text' => $prompt,
+                ]
+            ],
+        ];
+
+    }
+
+    if ( !empty($file_id) ) {
+
+        // *********************************************************************************
+        // Decide which helper to use
+        // *********************************************************************************
+
+        // FIXME - Retrieve the first item file type - assumes they are all the same, not mixed
+        $file_type = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_type', $session_id, $file_id[0]);
         $file_type = $file_type ? $file_type : 'unknown';
     
         // DIAG - Diagnostics - Ver 2.0.3
-        back_trace('NOTICE', '$file_item: ' . $file_item);
         back_trace('NOTICE', '$file_type: ' . $file_type);
 
-        // Skip if file_type is 'assistants' or 'vision' as they are not valid types for processing
-        if ($file_type == 'assistants' || $file_type == 'vision') {
-            continue;
+        // *********************************************************************************
+        // NON-IMAGE ATTACHMENTS - Ver 2.0.3
+        // *********************************************************************************
+
+        if ( $file_type == 'assistants' ) {
+            $data = chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version);
         }
 
-        if ( $file_type != 'vision' ) {
-            
-            if ($do_content) {
-                // Set up the data payload
-                $data = [
-                    'role' => 'user',
-                    'content' => [
-                        [
-                            'type' => 'text',
-                            'text' => $prompt,
-                        ]
-                    ],
-                ];
-                $do_content = false;
-            }
+        // *********************************************************************************
+        // IMAGE ATTACHMENTS - Ver 2.0.3
+        // *********************************************************************************
 
-            // *********************************************************************************
-            // THIS SECTION HANDLES NON-IMAGE ATTACHMENTS - Ver 2.0.3
-            // *********************************************************************************
-
-            if ( !empty($file_id && !empty($file_id[0]) )) {
-                if ( $beta_version == 'assistants=v1' ) {
-                    // assistants=v1 - Ver 1.9.6 - 2024 04 24
-                    $data['file_ids'] = $file_id;
-                } else {
-                    // assistants=v2 - Ver 1.9.6 - 2024 04 24
-                    $data = $data + [
-                        "attachments" => [],
-                    ];
-                    foreach ($file_id as $file_item) {
-                        // Skip invalid file_item entries
-                        if ($file_item == 'assistants') {
-                            continue;
-                        }
-                        $attachment = [
-                            "file_id" => $file_item,
-                            "tools" => [
-                                ["type" => "file_search"]
-                            ]
-                        ];
-                        // Add each attachment to the attachments array in the main data structure
-                        $data['attachments'][] = $attachment;
-                    }
-                }
-            }
-
-            // Exit the loop
-            break;
-
-        } else {
-
-            // *********************************************************************************
-            // THIS SECTION HANDLES IMAGE ATTACHMENTS - Ver 2.0.3
-            // *********************************************************************************
-
-            if ($do_content) {
-                // Set up the data payload
-                $data = [
-                    'role' => 'user',
-                    'content' => [
-                        [
-                            'type' => 'text',
-                            'text' => $prompt,
-                        ],
-                    ],
-                ];
-                $do_content = false;
-            }
-
-            if ( !empty($file_id && !empty($file_id[0]) )) {
-                if ( $beta_version == 'assistants=v1' ) {
-                    // assistants=v1 - Ver 1.9.6 - 2024 04 24
-                    $data['file_ids'] = $file_id;
-                } else {
-                    // assistants=v2 - Ver 1.9.6 - 2024 04 24
-                    $data = $data + [
-                        "attachments" => [],
-                    ];
-                    foreach ($file_id as $file_item) {
-                        // Skip invalid file_item entries
-                        if ($file_item == 'vision') {
-                            break 2;
-                        }
-                        $attachment = [
-                            'type' => 'image_file',
-                            'image_file' => [
-                                'file_id' => $file_item,
-                                'detail' => 'auto'
-                            ]
-                        ];
-                        // Add each image attachment to the attachments array in the main data structure
-                        $data['attachments'][] = $attachment;
-                    }
-                }
-            }
-
+        if ( $file_type == 'vision' ) {
+            $data = chatbot_chatgpt_image_attachment($prompt, $file_id, $beta_version);
         }
 
     }
@@ -583,7 +513,7 @@ function getTheMessage($thread_id, $api_key) {
 
 }
 
-// CustomerGPT - Assistants - Ver 1.7.2
+// CustomGPT - Assistants - Ver 1.7.2
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id) {
 
     global $session_id;
@@ -704,6 +634,17 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Fetch the file id - Ver 1.7.9
     // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 1.9.2 - 2024 03 06
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
+
+    // DIAG - Diagnostics - Ver 2.0.3
+    for ($i = 0; $i < count($file_id); $i++) {
+        if (isset($file_id[$i])) {
+            back_trace('NOTICE', '$file_id[' . $i . ']: ' . $file_id[$i]);
+        } else {
+            // Handle the error appropriately
+            back_trace('NOTICE', '$file_id[' . $i . ']: index does not exist');
+            unset($file_id[$i]); // Remove the non-existent key
+        }
+    }
 
     // DIAG - Diagnostics - Ver 1.8.1
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
