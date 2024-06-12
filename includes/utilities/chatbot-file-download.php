@@ -81,7 +81,7 @@ function download_openai_file($file_id, $filename) {
     } else {
 
         // DIAG - Diagnostic - Ver 2.0.3
-        back_trace('ERROR', 'Failed to retrieve the file: ' . $http_code);
+        // back_trace('ERROR', 'Failed to retrieve the file: ' . $http_code);
         return false;
     }
 }

@@ -396,12 +396,15 @@ jQuery(document).ready(function ($) {
         if (sender === 'user') {
             messageElement.addClass('user-message');
             textElement.addClass('user-text');
-        } else if (sender === 'bot') {
+        // } else if (sender === 'bot') {
+        //     messageElement.addClass('bot-message');
+        //     textElement.addClass('bot-text');
+        // } else {
+        //     messageElement.addClass('error-message');
+        //     textElement.addClass('error-text');
+        } else {
             messageElement.addClass('bot-message');
             textElement.addClass('bot-text');
-        } else {
-            messageElement.addClass('error-message');
-            textElement.addClass('error-text');
         }
 
         messageElement.append(textElement);

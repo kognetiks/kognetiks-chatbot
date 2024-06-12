@@ -428,7 +428,7 @@ function getTheMessage($thread_id, $api_key) {
                             $value = $annotation['offset_key'];
                         } else {
                             // Handle the error appropriately
-                            back_trace('NOTICE', '$annotation: offset_key does not exist');
+                            // back_trace('NOTICE', '$annotation: offset_key does not exist');
                             continue;
                         }
 
@@ -642,8 +642,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 2.0.3
-    back_trace ( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace ( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace ( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace ( 'NOTICE', '$page_id: ' . $page_id);
 
     // DIAG - Diagnostics - Ver 2.0.3
     for ($i = 0; $i < count($file_id); $i++) {

@@ -697,7 +697,7 @@ function chatbot_kn_output_the_results() {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        back_trace ( 'ERROR', 'Failed to create directory.');
+        // back_trace ( 'ERROR', 'Failed to create directory.');
         return;
     }
 
