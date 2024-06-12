@@ -345,12 +345,6 @@ function chatbot_chatgpt_upload_mp3() {
 
 }
 
-// Sanitize File Name
-function sanitizeFileName($fileName) {
-    // Remove any path traversal characters and limit to alphanumeric characters, dashes, and underscores
-    return preg_replace('/[^a-zA-Z0-9-_\.]/', '', basename($fileName));
-}
-
 // Function to generate a random alphanumeric string - Ver 1.9.9
 function generate_random_string($length = 26) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
