@@ -28,6 +28,7 @@ function chatbot_chatgpt_appearance_settings() {
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_greeting_text_color');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_width_wide');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_width_narrow');
+    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_image_width_setting');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_width_setting');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_reset');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_user_css_setting');
@@ -120,6 +121,15 @@ function chatbot_chatgpt_appearance_settings() {
         'chatbot_chatgpt_appearance_section'
     );
 
+    // Option to fix image width to a percentage of the chatbot width - Ver 2.0.3
+    add_settings_field(
+        'chatbot_chatgpt_image_width_setting',
+        'Image Width Setting',
+        'chatbot_chatgpt_image_width_setting_callback',
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_section'
+    );
+
     add_settings_field(
         'chatbot_chatgpt_appearance_reset',
         'Restore Defaults',
@@ -139,7 +149,6 @@ function chatbot_chatgpt_appearance_settings() {
 }
 add_action('admin_init', 'chatbot_chatgpt_appearance_settings');
 
-
 // Custom Appearance Settings - Ver 1.8.1
 function chatbot_chatgpt_appearance_section_callback(){
     ?>
@@ -151,7 +160,6 @@ function chatbot_chatgpt_appearance_section_callback(){
     </div>
     <?php
 }
-
 
 // Reset the appearance settings - Ver 1.8.1
 function chatbot_chatgpt_appearance_reset_callback() {
@@ -216,6 +224,9 @@ function chatbot_chatgpt_appearance_custom_css_settings() {
     // Dimension settings
     chatbot_chatgpt_appearance_width_wide_custom_css_settings();
     chatbot_chatgpt_appearance_width_narrow_custom_css_settings();
+
+    // Image settings
+    chatbot_chatgpt_appearance_image_width_custom_css_settings();
 
     // Inject inline css
     chatbot_chatgpt_appearance_inject_custom_css_settings();

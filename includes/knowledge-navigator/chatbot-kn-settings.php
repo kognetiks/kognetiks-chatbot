@@ -39,7 +39,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
         $run_scanner = 'No';
     }
 
-    if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Cancel'])) {
+    if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Disable', 'Cancel'])) {
 
         // DIAG - Diagnostic - Ver 1.6.3
         // back_trace( 'NOTICE', "$run_scanner: " . $run_scanner);
@@ -61,6 +61,11 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
             update_option( 'chatbot_chatgpt_scan_interval', 'No Schedule' );
             update_option( 'chatbot_chatgpt_kn_action', 'cancel' );
             update_option( 'chatbot_chatgpt_kn_status', 'Cancelled' );
+        } elseif ($run_scanner === 'Disable') {
+            update_option( 'chatbot_chatgpt_kn_schedule', 'Disable' );
+            update_option( 'chatbot_chatgpt_scan_interval', 'No Schedule' );
+            update_option( 'chatbot_chatgpt_kn_action', 'disable' );
+            update_option( 'chatbot_chatgpt_kn_status', 'Disabled' );
         } else {
             if (!wp_next_scheduled('knowledge_navigator_scan_hook')) {
 
@@ -192,17 +197,18 @@ function chatbot_chatgpt_kn_schedule_callback($args) {
         <option value="Twice Daily" <?php selected($chatbot_chatgpt_kn_schedule, 'Twice Daily'); ?>><?php echo esc_html('Twice Daily'); ?></option>
         <option value="Daily" <?php selected($chatbot_chatgpt_kn_schedule, 'Daily'); ?>><?php echo esc_html('Daily'); ?></option>
         <option value="Weekly" <?php selected($chatbot_chatgpt_kn_schedule, 'Weekly'); ?>><?php echo esc_html('Weekly'); ?></option>
+        <option value="Disable" <?php selected($chatbot_chatgpt_kn_schedule, 'Disable'); ?>><?php echo esc_html('Disable'); ?></option>
         <option value="Cancel" <?php selected($chatbot_chatgpt_kn_schedule, 'Cancel'); ?>><?php echo esc_html('Cancel'); ?></option>
     </select>
     <?php
 }
 
 function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
-    $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 25));
+    $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 250));
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php
-        for ($i = 100; $i <= 2000; $i += 100) {
+        for ($i = 500; $i <= 10000; $i += 500) {
             echo '<option value="' . $i . '"' . selected($GLOBALS['max_top_words'], $i, false) . '>' . $i . '</option>';
         }
         ?>

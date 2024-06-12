@@ -14,6 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 function chatbot_chatgpt_download_transcript() {
+
     if (!isset($_POST['user_id'], $_POST['page_id'], $_POST['conversation_content'])) {
         wp_send_json_error('Missing required POST fields');
         return;
@@ -32,14 +33,14 @@ function chatbot_chatgpt_download_transcript() {
     $transcript_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
 
     // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_file($transcript_dir)) {
+    if (!create_directory_and_index_file($transcript_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;
     }
 
     // Create the filename
-    $transcriptFileName = 'transcript_' . date('Y-m-d_H-i-s') . '.txt';
+    $transcriptFileName = 'transcript_' . generate_random_string() . '_' . date('Y-m-d_H-i-s') . '.txt';
     $transcriptFile = $transcript_dir . $transcriptFileName;
 
     // DIAG - Diagnostics - Ver 1.9.9
@@ -73,6 +74,6 @@ function chatbot_chatgpt_cleanup_transcripts_directory() {
         }
     }
     // Create the index.php file if it does not exist
-    create_index_file($transcripts_dir);
+    create_directory_and_index_file($transcripts_dir);
 }
 add_action('chatbot_chatgpt_cleanup_transcript_files', 'chatbot_chatgpt_cleanup_transcripts_directory');

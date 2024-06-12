@@ -62,6 +62,17 @@ function chatbot_chatgpt_diagnostics_setting_callback($args) {
     <?php
 }
 
+// Custom Error Message - Ver 2.0.3
+function chatbot_chatgpt_custom_error_message_callback($args) {
+    $chatbot_chatgpt_custom_error_message = esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.'));
+    if ( $chatbot_chatgpt_custom_error_message === null || $chatbot_chatgpt_custom_error_message === '' ) {
+        $chatbot_chatgpt_custom_error_message = 'Your custom error message goes here.';
+    }
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_error_message" name="chatbot_chatgpt_custom_error_message" value="<?php echo esc_html( $chatbot_chatgpt_custom_error_message ); ?>" size="50">
+    <?php
+}
+
 // Suppress Notices On/Off - Ver 1.6.5
 function chatbot_chatgpt_suppress_notices_callback($args) {
     global $chatbot_chatgpt_suppress_notices;
@@ -172,3 +183,16 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     }
 
 }
+
+// Log Chatbot Errors to the Server - Ver 2.0.3
+function log_chatbot_error() {
+    if (isset($_POST['error_message'])) {
+        $error_message = sanitize_text_field($_POST['error_message']);
+        error_log('[Chatbot] [ERROR] [' . $error_message . ']');
+    }
+    wp_die(); // this is required to terminate immediately and return a proper response
+}
+
+// Register AJAX actions
+add_action('wp_ajax_log_chatbot_error', 'log_chatbot_error');
+add_action('wp_ajax_nopriv_log_chatbot_error', 'log_chatbot_error');

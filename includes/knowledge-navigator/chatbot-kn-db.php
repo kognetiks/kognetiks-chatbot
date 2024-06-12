@@ -128,7 +128,7 @@ function store_top_words() {
     // String together the $topWords
     $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
     foreach ($topWords as $word => $tfidf) {
-        $chatbot_chatgpt_kn_conversation_context .= $word . ", ";
+        $chatbot_chattgpt_kn_conversation_context .= $word . ", ";
         }
     $chatbot_chatgpt_kn_conversation_context .= "and more.";
     
@@ -163,7 +163,7 @@ function output_results() {
     $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
 
     // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_file($results_dir_path)) {
+    if (!create_directory_and_index_file($results_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // back_trace ( 'ERROR', 'Failed to create directory.')
         return;

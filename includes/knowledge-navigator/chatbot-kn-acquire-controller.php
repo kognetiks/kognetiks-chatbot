@@ -690,15 +690,14 @@ function chatbot_kn_output_the_results() {
 
     global $wpdb;
 
-
     // Generate directory path
     $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
     // back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
 
     // Ensure the directory exists or attempt to create it
-    if (!create_directory_and_file($results_dir_path)) {
+    if (!create_directory_and_index_file($results_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace ( 'ERROR', 'Failed to create directory.')
+        // back_trace ( 'ERROR', 'Failed to create directory.');
         return;
     }
 
@@ -761,6 +760,25 @@ function chatbot_kn_output_the_results() {
 
     // Close the files
     $f = null;
+
+    // Retrieve the list of words and the score for each word ordered by score descending in the TF-IDF table
+    $results = $wpdb->get_results(
+        "SELECT word, score FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base_tfidf ORDER BY score DESC"
+    );
+
+    // Store the top words for context
+    $chatbot_chatgpt_kn_conversation_context = "This site includes references to and information about the following topics: ";
+
+    foreach ($results as $result) {
+        $chatbot_chatgpt_kn_conversation_context .= $result->word . ", ";
+    }
+    
+    $chatbot_chatgpt_kn_conversation_context .= "and more.";
+
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_conversation_context: ' . $chatbot_chatgpt_kn_conversation_context);
+    
+    // Save the results in the option for later use
+    update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
 
     // Unset large variables to free memory
     unset($results);

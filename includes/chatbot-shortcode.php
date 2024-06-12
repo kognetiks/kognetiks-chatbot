@@ -334,8 +334,22 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_mp3_uploads = 'No';
     }
 
+    if (strpos($model, 'gpt-4o') !== false) {
+        $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+        $chatbot_chatgpt_allow_mp3_uploads = 'No';
+    }
+
+    if (strpos($chatbot_chatgpt_assistant_alias, 'asst_') !== false) {
+        $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+        $chatbot_chatgpt_allow_mp3_uploads = 'No';
+    }
+
+
     // Allow Read Aloud - Ver 1.9.0
     $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
+
+    // Allo Download Transcript - Ver 2.0.3
+    $chatbot_chatgpt_allow_download_transcript = esc_attr(get_option('chatbot_chatgpt_allow_download_transcript', 'Yes'));
 
     // Assume that the chatbot is NOT using KFlow - Ver 1.9.5
     $use_flow = 'No';
@@ -540,9 +554,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
                 </button>
             <?php endif; ?>
-            <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
-            </button>
+            <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
+                <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                    <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
+                </button>
+            <?php endif; ?>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
         <!-- <i class="dashicons dashicons-format-chat"></i> -->
@@ -658,9 +674,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
                     </button>
                 <?php endif; ?>
-                <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                    <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
-                </button>
+                <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
+                    <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                        <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
+                    </button>
+                <?php endif; ?>
             </div>
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php
@@ -756,6 +774,10 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     $style = $chatbot_chatgpt_display_style ?? '';
     $assistant = $chatbot_chatgpt_assistant_alias ?? '';
 
+    // Preload avatar - Ver 2.0.3
+    $avatar_icon_setting = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', ''));
+    $custom_avartar_icon_setting = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
+
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode_enqueue_script - at the beginning of the function');
     // back_trace( 'NOTICE', 'get_the_id(): ' . get_the_id() );
@@ -775,6 +797,14 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
         }
         if ('<?php echo $assistant; ?>' !== '') {
             localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $assistant; ?>');
+        }
+        
+        // Preload avatar - Ver 2.0.3
+        if ('<?php echo $avatar_icon_setting; ?>' !== '') {
+            localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', '<?php echo $avatar_icon_setting; ?>');
+        }
+        if ('<?php echo $custom_avartar_icon_setting; ?>' !== '') {
+            localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', '<?php echo $custom_avartar_icon_setting; ?>');
         }
     </script>
     <?php

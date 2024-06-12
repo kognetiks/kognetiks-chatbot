@@ -61,7 +61,9 @@ function display_option_value_admin_notice() {
     // }
 
     $kn_status = get_option('chatbot_chatgpt_kn_status');
-    if ($kn_status === 'Never Run') {
+    if ($kn_status === 'Disable') {
+        return;
+    } elseif ($kn_status === 'Never Run') {
         $dismiss_url = wp_nonce_url(
             add_query_arg('dismiss_kn_status_notice', '1'),
             'dismiss_kn_status_notice',

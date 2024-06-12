@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     2.0.2
+ * Version:     2.0.3
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.2');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.3');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -128,6 +128,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-manageme
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php'; // Deactivation - Ver 1.9.9
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-download-transcript.php'; // Functions - Ver 1.9.9
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-download.php'; // Download a file via the API - Ver 2.0.3
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper.php'; // Functions - Ver 2.0.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
@@ -154,8 +156,6 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
-
-
 
 // Model choice - Ver 1.9.4
 global $model;
@@ -287,6 +287,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_message_limit_setting' => '999',
         'chatbot_chatgpt_width_setting' => 'Narrow',
         'chatbot_chatgpt_diagnostics' => 'Off',
+        'chatbot_chatgpt_custom_error_message' => 'Your custom error message goes here.',
         'chatbot_chatgpt_avatar_icon_setting' => 'icon-001.png',
         'chatbot_chatgpt_avatar_icon_url_setting' => '',
         'chatbot_chatgpt_custom_avatar_icon_setting' => '',
@@ -320,6 +321,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_message_limit_setting',
         'chatbot_chatgpt_width_setting',
         'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_custom_error_message',
         'chatbot_chatgpt_avatar_icon_setting',
         'chatbot_chatgpt_avatar_icon_url_setting',
         'chatbot_chatgpt_custom_avatar_icon_setting',
@@ -424,6 +426,12 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_upload_files')) {
     wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_upload_files');
 }
 
+// Schedule the download file cleanup event if it's not already scheduled - Ver 2.0.3
+// Schedule the cleanup event if it's not already scheduled
+if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
+    wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_download_files');
+}
+
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
 
@@ -475,7 +483,7 @@ function chatbot_chatgpt_send_message() {
 
     // Check for missing API key or Message
     if (!$api_key || !$message) {
-        wp_send_json_error('Invalid API key or Message. Please check the plugin settings.');
+        wp_send_json_error('Error: Invalid API key or Message. Please check the plugin settings.');
     }
 
     // Removed in Ver 1.8.6 - 2024 02 15

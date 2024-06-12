@@ -51,6 +51,8 @@ function createAnAssistant($api_key) {
 // Step 3: Add a Message to a Thread
 function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
+    global $session_id;
+
     // Set the URL
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
 
@@ -71,47 +73,60 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', '$url: ' . $url);
-    // back_trace( 'NOTICE', '$headers: ' . print_r($headers, true));
+    // back_trace( 'NOTICE', '$headers: ' . ' PRIVATE DATA ');
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$prompt: ' . $prompt);
     // back_trace( 'NOTICE', '$context: ' . $context);
     // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
-    // Set up the data payload
-    // Updated content to be an array - Ver 2.0.2.1
-    $data = [
-        'role' => 'user',
-        'content' => array(
-            array(
-                'type' => 'text',
-                'text' => $prompt,
-            )
-        ),
-    ];
+    // *********************************************************************************
+    // FILE ID IS NULL
+    // *********************************************************************************
 
-    // Remove the file_ids key if it exists - Belt and Suspenders - Ver 1.9.3
-    // unset($data['file_ids']);
+    if ( empty($file_id) ) {
 
-    if ( !empty($file_id && !empty($file_id[0]) )) {
-        if ( $beta_version == 'assistants=v1' ) {
-            // assistants=v1 - Ver 1.9.6 - 20224 04 24
-            $data['file_ids'] = $file_id;
-        } else {
-            // assistants=v2 - Ver 1.9.6 - 2024 04 24
-            $data = $data + [
-                "attachments" => [],
-            ];
-            foreach ($file_id as $file_item) {
-                $attachment = [
-                    "file_id" => $file_item,
-                    "tools" => [
-                        ["type" => "file_search"]
-                    ]
-                ];
-                // Add each attachment to the attachments array in the main data structure
-                $data['attachments'][] = $attachment;
-            }
+        // No files attached, just send the prompt
+        $data = [
+            'role' => 'user',
+            'content' => [
+                [
+                    'type' => 'text',
+                    'text' => $prompt,
+                ]
+            ],
+        ];
+
+    }
+
+    if ( !empty($file_id) ) {
+
+        // *********************************************************************************
+        // Decide which helper to use
+        // *********************************************************************************
+
+        // FIXME - Retrieve the first item file type - assumes they are all the same, not mixed
+        $file_type = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_type', $session_id, $file_id[0]);
+        $file_type = $file_type ? $file_type : 'unknown';
+    
+        // DIAG - Diagnostics - Ver 2.0.3
+        // back_trace('NOTICE', '$file_type: ' . $file_type);
+
+        // *********************************************************************************
+        // NON-IMAGE ATTACHMENTS - Ver 2.0.3
+        // *********************************************************************************
+
+        if ( $file_type == 'assistants' ) {
+            $data = chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version);
         }
+
+        // *********************************************************************************
+        // IMAGE ATTACHMENTS - Ver 2.0.3
+        // *********************************************************************************
+
+        if ( $file_type == 'vision' ) {
+            $data = chatbot_chatgpt_image_attachment($prompt, $file_id, $beta_version);
+        }
+
     }
 
     // DIAG - Diagnostics
@@ -372,18 +387,10 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
 
 // Step 8: Get the Message
 function getTheMessage($thread_id, $api_key) {
-
-    // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/messages";
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
 
     $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    if ( $assistant_beta_version == 'v2' ) {
-        $beta_version = "assistants=v2";
-    } else {
-        $beta_version = "assistants=v1";
-    }
-    // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+    $beta_version = $assistant_beta_version == 'v2' ? "assistants=v2" : "assistants=v1";
 
     $headers = array(
         "Content-Type: application/json",
@@ -397,11 +404,122 @@ function getTheMessage($thread_id, $api_key) {
             'header' => $headers
     )));
     $response = fetchDataUsingCurl($url, $context);
+    $response_data = json_decode($response, true);
 
-    return json_decode($response, true);
+    // DIAG - Diagnostics - Ver 2.0.3
+    // back_trace('NOTICE', '$response_data: ' . print_r($response_data, true));
+
+    // Download any file attachments - Ver 2.0.3
+    if (isset($response_data['data']) && is_array($response_data['data'])) {
+        foreach ($response_data['data'] as &$message) {
+            // Check attachments
+            if (isset($message['attachments']) && is_array($message['attachments'])) {
+                foreach ($message['attachments'] as $attachment) {
+                    if (isset($attachment['file_id'])) {
+                        $file_id = $attachment['file_id'];
+
+                        // If $annotation is not defined or not an array, skip this iteration
+                        if (!isset($annotation) || !is_array($annotation)) {
+                            continue;
+                        }
+
+                        // Access array offset here
+                        if (isset($annotation['offset_key'])) {
+                            $value = $annotation['offset_key'];
+                        } else {
+                            // Handle the error appropriately
+                            // back_trace('NOTICE', '$annotation: offset_key does not exist');
+                            continue;
+                        }
+
+                        // If $path is not defined or not a string, skip this iteration
+                        if (!isset($path) || !is_string($path)) {
+                            continue;
+                        }
+
+                        $basename = basename($path);
+
+                        $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
+
+                        // DIAG - Diagnostics - Ver 2.0.3
+                        // back_trace('NOTICE', '$file_id: ' . $file_id);
+
+                        // Call the function to download the file
+                        $file_url = download_openai_file($file_id, $file_name);
+
+                        // DIAG - Diagnostics - Ver 2.0.3
+                        // back_trace('NOTICE', '$file_url: ' . $file_url);
+
+                        if ($file_url) {
+                            // Append the local URL to the message (modify as needed for your use case)
+                            $message['file_url'] = $file_url;
+                        }
+
+                        // Set a transient that expires in 2 hours
+                        $timeFrameForDelete = time() + 2 * 60 * 60;
+                        set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
+
+                        // Set a cron job to delete the file in 1 hour 45 minutes
+                        $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+                        if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
+                            wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
+                        }
+
+                    }
+                }
+            }
+
+            // Check content annotations
+            if (isset($message['content']) && is_array($message['content'])) {
+                foreach ($message['content'] as &$content) { // Note the change here to modify the content
+                    if (isset($content['text']['annotations']) && is_array($content['text']['annotations'])) {
+                        foreach ($content['text']['annotations'] as $annotation) {
+                            if (isset($annotation['file_path']['file_id']) && isset($annotation['text'])) {
+                                $file_id = $annotation['file_path']['file_id'];
+                                $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
+
+                                // DIAG - Diagnostics - Ver 2.0.3
+                                // back_trace('NOTICE', '$file_id: ' . $file_id . ', $file_name: ' . $file_name);
+
+                                // Call the function to download the file
+                                $file_url = download_openai_file($file_id, $file_name);
+
+                                // DIAG - Diagnostics - Ver 2.0.3
+                                // back_trace('NOTICE', '$file_url: ' . $file_url);
+
+                                if ($file_url) {
+                                    // Replace the placeholder link with the actual URL
+                                    $content['text']['value'] = str_replace($annotation['text'], $file_url, $content['text']['value']);
+                                }
+                                
+                                // Set a transient that expires in 2 hours
+                                $timeFrameForDelete = time() + 2 * 60 * 60;
+                                set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
+
+                                // Set a cron job to delete the file in 1 hour 45 minutes
+                                $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+                                if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
+                                    wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
+                                }
+                        
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+
+        // DIAG - Diagnostics - Ver 2.0.3
+        // back_trace('NOTICE', 'No data or attachments found in the response.');
+
+    }
+
+    return $response_data;
+
 }
 
-// CustomerGPT - Assistants - Ver 1.7.2
+// CustomGPT - Assistants - Ver 1.7.2
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id) {
 
     global $session_id;
@@ -473,13 +591,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Step 1: Create an Assistant
     // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
     // $assistants_response = createAnAssistant($api_key);
-    // DIAG - Print the response
+    // // DIAG - Print the response
     // back_trace( 'NOTICE', $assistants_response);
 
     // Step 2: Get The Thread ID
     // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
     // $thread_id = $assistants_response["id"];
-    // DIAG - Print the threadId
+    // // DIAG - Print the threadId
     // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
     // set_chatbot_chatgpt_threads($thread_id, $assistant_id);
 
@@ -523,6 +641,21 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 1.9.2 - 2024 03 06
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
+    // DIAG - Diagnostics - Ver 2.0.3
+    // back_trace ( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace ( 'NOTICE', '$page_id: ' . $page_id);
+
+    // DIAG - Diagnostics - Ver 2.0.3
+    for ($i = 0; $i < count($file_id); $i++) {
+        if (isset($file_id[$i])) {
+            // back_trace('NOTICE', '$file_id[' . $i . ']: ' . $file_id[$i]);
+        } else {
+            // Handle the error appropriately
+            // back_trace('NOTICE', '$file_id[' . $i . ']: index does not exist');
+            unset($file_id[$i]); // Remove the non-existent key
+        }
+    }
+
     // DIAG - Diagnostics - Ver 1.8.1
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
 
@@ -532,7 +665,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
         // back_trace( 'NOTICE', 'File to retrieve');
-        // back_trace( 'NOTICE', '$file_id ' . $file_id);
+        // back_trace( 'NOTICE', '$file_id ' . print_r($file_id, true));
         $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, $file_id);
         // DIAG - Print the response
         // back_trace( 'NOTICE', $assistants_response);
@@ -636,8 +769,14 @@ function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id) {
 
     $counter = 0;
     $file_ids = [];
+    $file_types = [];
 
     $file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+    $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $file_id);
+
+    // DIAG - Diagnostics - Ver 2.0.3
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_types, true));
 
     while (!empty($file_id)) {
         // Delete the transient
@@ -658,12 +797,15 @@ function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id) {
 
         // Add the file id to the list
         $file_ids[] = $file_id;
+        $file_ids[$file_id] = $file_types;
 
         // Increment the counter
         $counter++;
 
         // Retrieve the next file id
         $file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+        $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $file_id);
+
     }
 
     // Join the file ids into a comma-separated string and return it
