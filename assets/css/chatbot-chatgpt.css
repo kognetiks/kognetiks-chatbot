@@ -102,6 +102,7 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     left: 0;
     right: 0;
+    z-index: 1;
 }
 
 /* Removed CSS from JS file - Ver 1.7.3 */
