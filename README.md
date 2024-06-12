@@ -4,7 +4,9 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## Documentation
 
-## What's New in Verion 2.0.3
+## What's New in Version 2.0.4
+
+## What's New in Version 2.0.3
 
 - **Transcript Download Option**: You can now choose whether users can download a transcript of their conversations with the chatbot.
 - **Improved Image Sizing**: Images smaller than the chatbot's message view now display in their actual size for better clarity.
