@@ -19,6 +19,8 @@ function chatbot_chatgpt_settings_init() {
 
     // Diagnostics settings tab - Ver 1.6.5
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
+    // Custom Error Message - Ver 2.0.3
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_error_message');
     // Suppress Notices and Warnings
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
@@ -45,6 +47,15 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_diagnostics',
         'Chatbot Diagnostics',
         'chatbot_chatgpt_diagnostics_setting_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Custom Error Message - Ver 2.0.3
+    add_settings_field(
+        'chatbot_chatgpt_custom_error_message',
+        'Custom Error Message',
+        'chatbot_chatgpt_custom_error_message_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
     );

@@ -424,7 +424,13 @@ function getTheMessage($thread_id, $api_key) {
                         }
 
                         // Access array offset here
-                        $value = $annotation['offset_key'];
+                        if (isset($annotation['offset_key'])) {
+                            $value = $annotation['offset_key'];
+                        } else {
+                            // Handle the error appropriately
+                            back_trace('NOTICE', '$annotation: offset_key does not exist');
+                            continue;
+                        }
 
                         // If $path is not defined or not a string, skip this iteration
                         if (!isset($path) || !is_string($path)) {
@@ -634,6 +640,10 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Fetch the file id - Ver 1.7.9
     // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 1.9.2 - 2024 03 06
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
+
+    // DIAG - Diagnostics - Ver 2.0.3
+    back_trace ( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace ( 'NOTICE', '$page_id: ' . $page_id);
 
     // DIAG - Diagnostics - Ver 2.0.3
     for ($i = 0; $i < count($file_id); $i++) {

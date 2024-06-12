@@ -348,6 +348,23 @@ jQuery(document).ready(function ($) {
 
     function appendMessage(message, sender, cssClass) {
 
+        // Check if the message starts with "Error" or "Oops" - Ver 2.0.3
+        const defaultCustomErrorMessage = 'Your custom error message goes here.';
+        let customErrorMessage = localStorage.getItem('chatbot_chatgpt_custom_error_message');
+    
+        if (message.startsWith('Error')) {
+            logErrorToServer(message);  // Log the error to the server
+    
+            if (customErrorMessage && customErrorMessage !== defaultCustomErrorMessage) {
+                message = customErrorMessage;  // Replace the message with the value from local storage
+            }
+        } else if (message.startsWith('Oops')) {
+            if (customErrorMessage && customErrorMessage !== defaultCustomErrorMessage) {
+                logErrorToServer(message);  // Log the error to the server
+                return;  // Return to prevent further processing of the error message
+            }
+        }
+
         messageElement = $('<div></div>').addClass('chat-message');
 
         // Convert HTML entities back to their original form
@@ -1309,3 +1326,11 @@ jQuery(document).ready(function ($) {
     // loadConversation();
 
 });
+
+// Log error to the error log - Ver 2.0.3
+function logErrorToServer(error) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', chatbot_chatgpt_params.ajax_url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send('action=log_chatbot_error&error_message=' + encodeURIComponent(error));
+}

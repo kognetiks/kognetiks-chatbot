@@ -334,6 +334,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_mp3_uploads = 'No';
     }
 
+    if (strpos($model, 'gpt-4o') !== false) {
+        $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+        $chatbot_chatgpt_allow_mp3_uploads = 'No';
+    }
+
+    if (strpos($chatbot_chatgpt_assistant_alias, 'asst_') !== false) {
+        $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+        $chatbot_chatgpt_allow_mp3_uploads = 'No';
+    }
+
+
     // Allow Read Aloud - Ver 1.9.0
     $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
 

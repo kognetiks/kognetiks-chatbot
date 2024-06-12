@@ -231,7 +231,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **Transcript Download Option**: You can now choose whether users can download a transcript of their conversations with the chatbot.
 * **Improved Image Sizing**: Images smaller than the chatbot's message view now display in their actual size for better clarity.
 * **Knowledge Navigator Settings**: We've added an option to disable the Knowledge Navigator if you only want to use assistants for chatbot interactions.
+* **Knowledge Navigator Analysis**: Increased the maximum number of top keywords to 10,000 for more detailed analysis.
 * **File Download Support**: The chatbot now supports downloading files generated on the OpenAI platform.
+* **Custom Error Handling**: When there's an issue with the chatbot, you can now display a custom error message to users.
 
 = 2.0.2 =
 * Overhauled the Support documentation with extensive information on the chatbot settings - See the Support tab in Settings
