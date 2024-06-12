@@ -62,7 +62,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
             update_option( 'chatbot_chatgpt_kn_action', 'cancel' );
             update_option( 'chatbot_chatgpt_kn_status', 'Cancelled' );
         } elseif ($run_scanner === 'Disable') {
-            update_option( 'chatbot_chatgpt_kn_schedule', 'No' );
+            update_option( 'chatbot_chatgpt_kn_schedule', 'Disable' );
             update_option( 'chatbot_chatgpt_scan_interval', 'No Schedule' );
             update_option( 'chatbot_chatgpt_kn_action', 'disable' );
             update_option( 'chatbot_chatgpt_kn_status', 'Disabled' );
