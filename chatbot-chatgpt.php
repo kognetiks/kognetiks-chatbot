@@ -891,32 +891,6 @@ function enqueue_greetings_script() {
 }
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
 
-
-// Function to add the adaptive appearance settings to the Chatbot settings page
-function chatbot_chatgpt_settings_appearance() {
-
-    // Register the settings
-    register_setting('chatbot_chatgpt_settings_appearance', 'chatbot_chatgpt_appearance');
-
-    // Add the adaptive appearance settings section
-    add_settings_section(
-        'chatbot_chatgpt_settings_appearance_section',
-        'Adaptive Appearance Settings',
-        'chatbot_chatgpt_settings_appearance_section_callback',
-        'chatbot_chatgpt_settings_appearance'
-    );
-
-    // Add the adaptive appearance settings fields
-    add_settings_field(
-        'chatbot_chatgpt_settings_appearance_field',
-        'Adaptive Appearance Settings',
-        'chatbot_chatgpt_settings_appearance_field_callback',
-        'chatbot_chatgpt_settings_appearance',
-        'chatbot_chatgpt_settings_appearance_section'
-    );
-
-}
-
 // Add the color picker to the adaptive appearance settings section - Ver 1.8.1
 function enqueue_color_picker($hook_suffix) {
     // first check that $hook_suffix is appropriate for your admin page

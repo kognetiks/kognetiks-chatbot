@@ -170,13 +170,13 @@ function chatbot_chatgpt_model_choice_callback($args) {
 
 // Max Tokens choice - Ver 1.4.2
 function chatgpt_max_tokens_setting_callback($args) {
-    // Get the saved chatbot_chatgpt_max_tokens_setting or default to 150
-    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '150'));
-    // Allow for a range of tokens between 100 and 4096 in 50-step increments - Ver 1.6.1
+    // Get the saved chatbot_chatgpt_max_tokens_setting or default to 500
+    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '500'));
+    // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
     ?>
     <select id="chatbot_chatgpt_max_tokens_setting" name="chatbot_chatgpt_max_tokens_setting">
         <?php
-        for ($i=100; $i<=4096; $i+=50) {
+        for ($i=100; $i<=4000; $i+=100) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>

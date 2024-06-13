@@ -103,8 +103,8 @@ function chatbot_chatgpt_delete_data_callback($args) {
     $chatbot_chatgpt_delete_data = esc_attr(get_option('chatbot_chatgpt_delete_data', 'no'));
     ?>
     <select id="chatbot_chatgpt_delete_data_setting" name = "chatbot_chatgpt_delete_data">
-        <option value="no" <?php selected( $chatbot_chatgpt_delete_data, 'no' ); ?>><?php echo esc_html( 'No' ); ?></option>
-        <option value="yes" <?php selected( $chatbot_chatgpt_delete_data, 'yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="no" <?php selected( $chatbot_chatgpt_delete_data, 'no' ); ?>><?php echo esc_html( 'DO NOT DELETE' ); ?></option>
+        <option value="yes" <?php selected( $chatbot_chatgpt_delete_data, 'yes' ); ?>><?php echo esc_html( 'DELETE ALL DATA' ); ?></option>
     </select>
     <?php
 }
@@ -188,7 +188,34 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 function log_chatbot_error() {
     if (isset($_POST['error_message'])) {
         $error_message = sanitize_text_field($_POST['error_message']);
-        error_log('[Chatbot] [ERROR] [' . $error_message . ']');
+        $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';
+
+        // Ensure the directory and index file exist
+        create_directory_and_index_file($chatbot_logs_dir);
+
+        // Get the current date to create a daily log file
+        $current_date = date('Y-m-d');
+        $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
+
+        // Get additional info
+        $session_id = session_id();
+        $user_id = get_current_user_id();
+        $ip_address = $_SERVER['REMOTE_ADDR'];
+        $date_time = date('Y-m-d H:i:s');
+
+        // Construct the log message
+        $log_message = sprintf(
+            "[Chatbot] [ERROR] [%s] [Session ID: %s] [User ID: %s] [IP Address: %s] [%s]%s",
+            $date_time,
+            $session_id ? $session_id : 'N/A',
+            $user_id ? $user_id : 'N/A',
+            $ip_address,
+            $error_message,
+            PHP_EOL
+        );
+
+        // Append the error message to the log file
+        file_put_contents($log_file, $log_message, FILE_APPEND | LOCK_EX);
     }
     wp_die(); // this is required to terminate immediately and return a proper response
 }

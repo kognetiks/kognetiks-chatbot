@@ -6,6 +6,8 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's New in Version 2.0.4
 
+- **TBC**
+
 ## What's New in Version 2.0.3
 
 - **Transcript Download Option**: You can now choose whether users can download a transcript of their conversations with the chatbot.

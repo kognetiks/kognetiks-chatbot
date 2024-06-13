@@ -126,7 +126,7 @@ function chatbot_chatgpt_support_section_callback() {
         $docLocation = 'overview.md';
     }
 
-    // Validate the that the requested documentation directory and file exist
+    // Validate the that the requestioned documentation directory and file exist
     if (validateDocumentation($dir, $file)) {
         $docLocation = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/' . $docLocation;
     } else {
@@ -137,38 +137,32 @@ function chatbot_chatgpt_support_section_callback() {
     // back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
   
     $parsedown = new Parsedown();
+    $markdownContent = file_get_contents($docLocation);
+    $htmlContent = $parsedown->text($markdownContent);
 
-    // Sanitize and construct the file path
     $dir = isset($_GET['dir']) ? sanitize_text_field($_GET['dir']) : '';
     $file = isset($_GET['file']) ? sanitize_text_field($_GET['file']) : '';
     
-    $baseDir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
-    $docLocation = realpath($baseDir . $dir . '/' . $file);
-    
-    // Validate the file path
-    if ($docLocation && strpos($docLocation, realpath($baseDir)) === 0 && file_exists($docLocation)) {
-        $markdownContent = file_get_contents($docLocation);
-        $htmlContent = $parsedown->text($markdownContent);
-    
-        $basePath = "?page=chatbot-chatgpt";
-        if ($dir !== '') {
-            $basePath .= "&tab=support&dir=" . $dir;
-        }
-        if ($file !== '') {
-            // Remove 'overview.md/' from the file parameter
-            $file = str_replace('overview.md/', '', $file);
-            $basePath .= "&file=" . $file;
-        }
-        $adjustedHtmlContent = adjustPaths($htmlContent, $basePath);
-    
-        echo $adjustedHtmlContent;
-    } else {
-        // Handle invalid file path
-        echo "Invalid file path.";
+    $basePath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
+    $basePath = "?page=chatbot-chatgpt";
+    if ($dir !== '') {
+        $basePath .= "&tab=support&dir=" . $dir;
     }
+    if ($file !== '') {
+        // Remove 'overview.md/' from the file parameter
+        $file = str_replace('overview.md/', '', $file);
+        $basePath .= "&file=" . $file;
+    }
+    $adjustedHtmlContent = adjustPaths($htmlContent, $basePath);
+
+    echo $adjustedHtmlContent;
 
 }
-    
+
+function file_exists_in_doc_location($docLocation) {
+    return file_exists($docLocation);
+}
+
 function adjustPaths($html, $basePath) {
     // Adjust image paths
     $html = preg_replace_callback(
@@ -217,8 +211,10 @@ function adjustImagePath($url, $basePath) {
         if (count($basePathParts) > 1) {
             $dirParts = explode('&file=', $basePathParts[1]);
             $dir = rtrim($dirParts[0], '/');
+            // FIXME - Check if the URL is a relative path - Ver 2.0.2.1
             $url = site_url() . '/wp-content/plugins/chatbot-chatgpt/documentation/' . $dir . '/' . $url;
         } else {
+            // FIXME - Check if the URL is a relative path - Ver 2.0.2.1
             $url = site_url() . '/wp-content/plugins/chatbot-chatgpt/documentation/' . $url;
         }
     }

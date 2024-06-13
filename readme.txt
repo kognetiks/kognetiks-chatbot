@@ -228,7 +228,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 2.0.4 =
-* TBD
+* **Support Tab**: Reverted the "Support" tab to correctly display the plugin's support documentation overview.
 
 = 2.0.3 =
 * **Transcript Download Option**: You can now choose whether users can download a transcript of their conversations with the chatbot.
