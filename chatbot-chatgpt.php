@@ -123,6 +123,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-sup
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
 // Include necessary files - Utilities - Ver 1.9.0
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants.php'; // Assistants Management - Ver 2.0.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php'; // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php'; // Deactivation - Ver 1.9.9
@@ -433,6 +434,9 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_upload_files')) {
 if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
     wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_download_files');
 }
+
+// Add the Assistant table to the database - Ver 2.0.4
+create_chatbot_chatgpt_assistants_table();
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
