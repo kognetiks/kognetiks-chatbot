@@ -793,7 +793,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$model: ' . $model);
     // back_trace( 'NOTICE', '$voice: ' . $voice);
-    back_trace ( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    // back_trace ( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     ?>

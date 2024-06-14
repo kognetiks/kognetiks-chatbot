@@ -108,7 +108,7 @@ function chatbot_chatgpt_erase_conversation_handler() {
     delete_any_file_transients($session_id);
 
     // DIAG - Diagnostics - Ver 2.0.4
-    back_trace( 'NOTICE', '$chatbot_chatgpt_force_page_reload: ' . $chatbot_chatgpt_force_page_reload);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_force_page_reload: ' . $chatbot_chatgpt_force_page_reload);
 
     if ($chatbot_chatgpt_force_page_reload == 'Yes') {
         wp_send_json_success('Conversation cleared. Please wait while the page reloads.');

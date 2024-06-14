@@ -20,7 +20,7 @@ jQuery(document).ready(function ($) {
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
     chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
-    console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+    // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
     chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
 
     initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
@@ -65,7 +65,7 @@ jQuery(document).ready(function ($) {
 
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
-    console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+    // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_width_setting: ' + chatbot_chatgpt_width_setting);
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
@@ -148,7 +148,7 @@ jQuery(document).ready(function ($) {
 
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
-    console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+    // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_width_setting: ' + chatbot_chatgpt_width_setting);
 
     if ( chatbot_chatgpt_display_style === 'embedded') {
@@ -1091,7 +1091,7 @@ jQuery(document).ready(function ($) {
 
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
-        console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+        // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_width_setting: ' + chatbot_chatgpt_width_setting);
     
         // FIXME - THIS SHOULD FIX IOS CHROME ISSUE - Ver 1.8.6
@@ -1141,7 +1141,7 @@ jQuery(document).ready(function ($) {
         
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
-        console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+        // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_width_setting: ' + chatbot_chatgpt_width_setting);
         
         // If the chatbot status is not set in local storage, use chatbot_chatgpt_start_status - Ver 1.5.1
@@ -1287,7 +1287,7 @@ jQuery(document).ready(function ($) {
     function updateChatbotStyles() {
 
         // console.log('Chatbot: NOTICE: updateChatbotStyles');
-        console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+        // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
 
         // Just return if it's mobile and embedded
         if (isMobile() && chatbot_chatgpt_display_style === 'embedded') {
