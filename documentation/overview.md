@@ -56,7 +56,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## Notice
 
-While our AI-powered applications strive for accuracy, they can sometimes make mistakes. We recommend that you and your users verify critical information to ensure its reliability.
+While AI-powered applications strive for accuracy, they can sometimes make mistakes. We recommend that you and your users verify critical information to ensure its reliability.
 
 ## Disclaimer
 
