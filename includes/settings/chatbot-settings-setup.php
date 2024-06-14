@@ -128,6 +128,17 @@ function chatbot_chatgpt_allow_download_transcript_callback($args) {
     <?php    
 }
 
+// Option to force page reload on conversation cleared - Ver 2.0.4
+function chatbot_chatgpt_force_page_reload_callback($args) {
+    $chatbot_chatgpt_force_page_reload = esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_force_page_reload" name="chatbot_chatgpt_force_page_reload">
+        <option value="Yes" <?php selected( $chatbot_chatgpt_force_page_reload, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $chatbot_chatgpt_force_page_reload, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php    
+}
+
 // Option to remove OpenAI disclaimer - Ver 1.4.1
 function chatbot_chatgpt_disclaimer_setting_callback($args) {
     $chatbot_chatgpt_disclaimer_setting = esc_attr(get_option('chatbot_chatgpt_disclaimer_setting', 'Yes'));
@@ -184,6 +195,7 @@ function chatbot_chatgpt_settings_setup_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_initial_greeting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_subsequent_greeting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_allow_download_transcript');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_force_page_reload');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_input_rows');
@@ -265,6 +277,15 @@ function chatbot_chatgpt_settings_setup_init() {
         'chatbot_chatgpt_allow_download_transcript',
         'Allow Downloading Transcripts',
         'chatbot_chatgpt_allow_download_transcript_callback',
+        'chatbot_chatgpt_additional_setup_settings',
+        'chatbot_chatgpt_additional_setup_section'
+    );
+
+    // Option to force page reload on conversation cleared - Ver 2.0.3
+    add_settings_field(
+        'chatbot_chatgpt_force_page_reload',
+        'Force Page Reload on Conversation Cleared',
+        'chatbot_chatgpt_force_page_reload_callback',
         'chatbot_chatgpt_additional_setup_settings',
         'chatbot_chatgpt_additional_setup_section'
     );

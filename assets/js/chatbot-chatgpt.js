@@ -20,13 +20,11 @@ jQuery(document).ready(function ($) {
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
     chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
+    console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
     chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
 
     initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
     subsequentGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
-
-    chatbotChatgptDisplaySytle = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
-    chatbotChatgptAssistantAlias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
 
     chatbot_chatgpt_start_status = localStorage.getItem('chatbot_chatgpt_start_status') || 'closed';
     chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor') || 'closed';
@@ -67,7 +65,7 @@ jQuery(document).ready(function ($) {
 
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
-    // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+    console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_width_setting: ' + chatbot_chatgpt_width_setting);
 
     // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
@@ -150,7 +148,7 @@ jQuery(document).ready(function ($) {
 
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
-    // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+    console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_width_setting: ' + chatbot_chatgpt_width_setting);
 
     if ( chatbot_chatgpt_display_style === 'embedded') {
@@ -424,7 +422,7 @@ jQuery(document).ready(function ($) {
         // window.scrollTo(0, document.body.scrollHeight);
 
         // Save the conversation locally between bot sessions - Ver 1.2.0
-        // if message starts with "Conversation Clearer" then clear the conversation - Ver 1.9.3
+        // if message starts with "Conversation cleared" then clear the conversation - Ver 1.9.3
         if (message.startsWith('Conversation cleared')) {
             // Clear the conversation from sessionStorage
             // console.log('Chatbot: NOTICE: Clearing the conversation');
@@ -1006,6 +1004,7 @@ jQuery(document).ready(function ($) {
         let session_id = php_vars.session_id;
         let assistant_id = php_vars.assistant_id;
         let thread_id = php_vars.thread_id;
+        let chatbot_chatgpt_force_page_reload = localStorage.getItem('chatbot_chatgpt_force_page_reload');
 
         // DIAG - Diagnostics - Ver 1.9.1
         // console.log('Chatbot: NOTICE: assistant_id: ' + assistant_id);
@@ -1021,6 +1020,7 @@ jQuery(document).ready(function ($) {
                 session_id: session_id, // pass the session
                 thread_id: thread_id, // pass the thread ID
                 assistant_id: assistant_id, // pass the assistant ID
+                chatbot_chatgpt_force_page_reload: chatbot_chatgpt_force_page_reload, // pass the force page reload setting
             },
             beforeSend: function () {
                 showTypingIndicator();
@@ -1032,8 +1032,10 @@ jQuery(document).ready(function ($) {
                 // DIAG - Log the response
                 // console.log('Success:', response.data);
                 appendMessage( response.data, 'bot');
-                // Force a page reload
-                // location.reload();
+                // Check localStorage setting and force a page reload if equal to 'Yes' - Ver 2.0.4
+                if (localStorage.getItem('chatbot_chatgpt_force_page_reload') === 'Yes') {
+                    location.reload(); // Force a page reload after clearing the conversation
+                }
             },
             error: function(jqXHR, status, error) {
                 if(status === "timeout") {
@@ -1089,7 +1091,7 @@ jQuery(document).ready(function ($) {
 
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
-        // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+        console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_width_setting: ' + chatbot_chatgpt_width_setting);
     
         // FIXME - THIS SHOULD FIX IOS CHROME ISSUE - Ver 1.8.6
@@ -1139,7 +1141,7 @@ jQuery(document).ready(function ($) {
         
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
-        // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
+        console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_width_setting: ' + chatbot_chatgpt_width_setting);
         
         // If the chatbot status is not set in local storage, use chatbot_chatgpt_start_status - Ver 1.5.1
@@ -1285,6 +1287,7 @@ jQuery(document).ready(function ($) {
     function updateChatbotStyles() {
 
         // console.log('Chatbot: NOTICE: updateChatbotStyles');
+        console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
 
         // Just return if it's mobile and embedded
         if (isMobile() && chatbot_chatgpt_display_style === 'embedded') {

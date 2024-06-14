@@ -348,8 +348,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Allow Read Aloud - Ver 1.9.0
     $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
 
-    // Allo Download Transcript - Ver 2.0.3
+    // Allow Download Transcript - Ver 2.0.3
     $chatbot_chatgpt_allow_download_transcript = esc_attr(get_option('chatbot_chatgpt_allow_download_transcript', 'Yes'));
+
+    // Force Page Reload on Conversation Clear - Ver 2.0.4
+    $chatbot_chatgpt_force_page_reload = esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No'));
 
     // Assume that the chatbot is NOT using KFlow - Ver 1.9.5
     $use_flow = 'No';
@@ -564,6 +567,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <!-- <i class="dashicons dashicons-format-chat"></i> -->
         <i class="chatbot-open-icon"></i>
         </button>
+        </div>
         <?php
         return ob_get_clean();
     } elseif ($chatbot_chatgpt_display_style == 'floating') {
@@ -738,6 +742,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <!-- <i class="dashicons dashicons-format-chat"></i> -->
         <i class="chatbot-open-icon"></i>
         </button>
+        <!-- </div> OMIT THE CLOSING /DIV STATEMENT FOR FLOATING -->
         <?php
         return ob_get_clean();
     }
@@ -787,6 +792,8 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$voice: ' . $voice);
+    back_trace ( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
 
     ?>

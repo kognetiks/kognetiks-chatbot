@@ -303,6 +303,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_timeout_setting' => '240',
         'chatbot_chatgpt_voice_option' => 'alloy',
         'chatbot_chatgpt_audio_output_format' => 'mp3',
+        'chatbot_chatgpt_force_page_reload' => 'No',
     );
 
     // Revised for Ver 1.5.0 
@@ -335,6 +336,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_timeout_setting',
         'chatbot_chatgpt_voice_option',
         'chatbot_chatgpt_audio_output_format',
+        'chatbot_chatgpt_force_page_reload',
     );
 
     $chatbot_settings = array();

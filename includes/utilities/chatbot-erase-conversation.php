@@ -29,6 +29,7 @@ function chatbot_chatgpt_erase_conversation_handler() {
     if (isset($_POST['user_id']) && isset($_POST['page_id'])) {
         $user_id = $_POST['user_id'];
         $page_id = $_POST['page_id'];
+        $chatbot_chatgpt_force_page_reload = $_POST['chatbot_chatgpt_force_page_reload'];
     }
 
     // DIAG - Diagnostics - Ver 1.9.1
@@ -106,7 +107,14 @@ function chatbot_chatgpt_erase_conversation_handler() {
     delete_chatbot_chatgpt_threads($user_id, $page_id);
     delete_any_file_transients($session_id);
 
-    wp_send_json_success('Conversation cleared.');
+    // DIAG - Diagnostics - Ver 2.0.4
+    back_trace( 'NOTICE', '$chatbot_chatgpt_force_page_reload: ' . $chatbot_chatgpt_force_page_reload);
+
+    if ($chatbot_chatgpt_force_page_reload == 'Yes') {
+        wp_send_json_success('Conversation cleared. Please wait while the page reloads.');
+    } else {
+        wp_send_json_success('Conversation cleared.');
+    }
 
 
     // DIAG - Diagnostics - Ver 1.8.6
