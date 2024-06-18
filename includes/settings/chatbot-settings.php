@@ -190,7 +190,7 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=appearance" class="nav-tab <?php echo $active_tab == 'appearance' ? 'nav-tab-active' : ''; ?>">Appearance</a>
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
             <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
-            <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Analysis</a>
+            <!-- <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Analysis</a> -->
             <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
             <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Messages</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
@@ -265,25 +265,27 @@ function chatbot_chatgpt_settings_page_html() {
 
                 settings_fields('chatbot_chatgpt_custom_gpts');
 
+                // Assistant Matrix - Ver 2.0.4
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_assistant_settings');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_chatgpt_assistants_management');
+                display_chatbot_chatgpt_assistants_table();
                 echo '</div>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_gpt_assistants_settings');
                 echo '</div>';
 
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_chatgpt_assistant_id_settings');
-                echo '</div>';
+                // Replaced by Assistant Matrix - Ver 2.0.4
+                // echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_chatgpt_assistant_id_settings');
+                // echo '</div>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_additional_assistant_settings');
-                echo '</div>';
-
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                // do_settings_sections('chatbot_chatgpt_assistants_management');
-                display_chatbot_chatgpt_assistants_table();
                 echo '</div>';
 
             } elseif ($active_tab == 'avatar') {
@@ -326,13 +328,19 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_kn_enhanced_response');
                 echo '</div>';
 
-            } elseif ($active_tab == 'kn_analysis') {
-
                 settings_fields('chatbot_chatgpt_kn_analysis');
                 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_kn_analysis');
                 echo '</div>';
+
+            // } elseif ($active_tab == 'kn_analysis') {
+
+                // settings_fields('chatbot_chatgpt_kn_analysis');
+                
+                // echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_chatgpt_kn_analysis');
+                // echo '</div>';
 
             } elseif ($active_tab == 'reporting') {
 

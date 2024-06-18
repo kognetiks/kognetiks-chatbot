@@ -14,31 +14,42 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// GPT Assistants settings section callback - Ver 1.7.2
+// GPT Assistants settings section callback - Ver 1.7.2 - Updated Ver 2.0.4
 function chatbot_chatgpt_assistant_settings_section_callback($args) {
     ?>
-    <p>Configure settings for your GPT Assistants by adding your below.</p>
-    <p>If you have developed a GPT Assistant, you will need the id of the assistant - is usually starts with "asst_".</p>
-    <p>Enter your GPT Assistant ID instead of ChatGPT.  Set the 'Use GPT Assistant ID' to 'Yes'.</p>
-    <p>Otherwise, you can leave the GPT Assistant ID field blank and set the usage to 'No'.</p>
+    <p>Effortlessly manage you chatbot Assistants all in one place using the intuitive interface below.</p>
+    <p>You will no longer need to remember all the Assistant options, as they are all available here for you to view and edit.</p>
+    <p>Tailor each Assistant to meet the unique needs of your audience, ensuring an engaging and personalized experience for all.</p>
+    <p>If you have developed an Assistant in the OpenAI Playground, you will need the id of the assistant - it usually starts with "asst_".</p>
     <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</p>
-    <p>See <a href="?page=chatbot-chatgpt&tab=support">Support</a> for more details on using multiple GPT assistants.</p>
-    <h2>Using Multiple GPT Assistants</h2>
-    <p>You can integrate GPT Assistants into your platform using one of shortcode configurations below.</p>
-    <p>Each configuration requires either 'primary', 'alternate' or a GPT Assistant ID, denoted as 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'.</p>
-    <p>GPT Assistants work with both 'floating' and 'embedded' styles.</p>
-    <p><b>NOTE:</b> The 'primary' and 'alternate' assistants are set in the ChatGPT settings page.</p>
-    <p><b>NOTE:</b> For best results ensure that the shortcode appears only once on the page.</p>
-    <p>Use the following format to invoke the primary or alternate assistant:</p>
-    <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-        <li><b><code>&#91;chatbot style="floating" assistant="primary"&#93;</code></b> - Floating style, GPT Assistant as set in Primary setting</li>
-        <li><b><code>&#91;chatbot style="embedded" assistant="alternate"&#93;</code></b> - Embedded style, GPT Assistant as set in Alternate setting</li>
-        <li><b><code>&#91;chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</code></b> - Floating style, GPT Assistant as set in GPT Assistant ID setting</li>
-        <li><b><code>&#91;chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</code></b> - Embedded style, GPT Assistant as set in GPT Assistant ID setting</li>
-        <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li>
-    </ul>
-    <p><b>NOTE:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
+    <p>When you\'re ready to use an Assistant, simply add the shortcode <code>[chatbot assistant="Common Name"]</code> to your page.</p>
+    <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
+    <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=manage-assistants.md">here</a>.</b></p>
+
+    <!-- <p>Configure settings for your GPT Assistants by adding your below.</p> -->
+    <!-- <p>If you have developed a GPT Assistant, you will need the id of the assistant - is usually starts with "asst_".</p> -->
+    <!-- <p>Enter your GPT Assistant ID instead of ChatGPT.  Set the 'Use GPT Assistant ID' to 'Yes'.</p> -->
+    <!-- <p>Otherwise, you can leave the GPT Assistant ID field blank and set the usage to 'No'.</p> -->
+    <!-- <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</p> -->
+    <!-- <p>See <a href="?page=chatbot-chatgpt&tab=support">Support</a> for more details on using multiple GPT assistants.</p> -->
+    <!-- <h2>Using Multiple GPT Assistants</h2> -->
+    <!-- <p>You can integrate GPT Assistants into your platform using one of shortcode configurations below.</p> -->
+    <!-- <p>Each configuration requires either 'primary', 'alternate' or a GPT Assistant ID, denoted as 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'.</p> -->
+    <!-- <p>GPT Assistants work with both 'floating' and 'embedded' styles.</p> -->
+
+    <!-- <p><b>NOTE:</b> The 'primary' and 'alternate' assistants are set in the ChatGPT settings page.</p> -->
+    <!-- <p><b>NOTE:</b> For best results ensure that the shortcode appears only once on the page.</p> -->
+    <!-- <p>Use the following format to invoke the primary or alternate assistant:</p> -->
+    <!-- <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;"> -->
+        <!-- <li><b><code>&#91;chatbot style="floating" assistant="primary"&#93;</code></b> - Floating style, GPT Assistant as set in Primary setting</li> -->
+        <!-- <li><b><code>&#91;chatbot style="embedded" assistant="alternate"&#93;</code></b> - Embedded style, GPT Assistant as set in Alternate setting</li> -->
+        <!-- <li><b><code>&#91;chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</code></b> - Floating style, GPT Assistant as set in GPT Assistant ID setting</li> -->
+        <!-- <li><b><code>&#91;chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</code></b> - Embedded style, GPT Assistant as set in GPT Assistant ID setting</li> -->
+        <!-- <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li> -->
+    <!-- </ul> -->
+    <!-- <p><b>NOTE:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p> -->
+    <!-- <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p> -->
     <?php
 }
 

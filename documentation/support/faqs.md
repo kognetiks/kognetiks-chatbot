@@ -74,6 +74,44 @@ In the case of hosting on WP Engine, you would set this in the web rules section
 
 If you’re using a different hosting provider, check their documentation for similar cache-control settings.
 
+### Diagnosing the Issue:
+
+This issue could be caused by several factors, including caching plugins, theme conflicts, or differences in how WordPress handles logged-in vs. non-logged-in users. Here are a few potential reasons and solutions:
+
+1. **Caching Plugins**:
+   - **Issue**: Caching plugins like W3 Total Cache, WP Super Cache, or any other caching mechanism might serve cached pages to non-logged-in users. These cached pages may not process shortcodes dynamically as they do for logged-in users.
+   - **Solution**: Exclude the pages with your shortcodes from being cached or configure the caching plugin to dynamically process these pages for non-logged-in users.
+
+2. **Theme Conflicts**:
+   - **Issue**: Some themes might handle shortcodes differently or have custom functions that alter the behavior of shortcodes based on the user’s logged-in status.
+   - **Solution**: Test with a default WordPress theme like Twenty Twenty-One to see if the issue persists. If the problem resolves with a default theme, the issue likely lies within the custom theme’s functions.
+
+3. **User Role Capabilities**:
+   - **Issue**: Certain shortcode functions might be restricted to specific user roles or capabilities, which are not available to non-logged-in users.
+   - **Solution**: Ensure that the shortcodes and their corresponding functions do not have role-based restrictions unless necessary. You can check the capabilities required for executing the shortcodes and adjust them accordingly.
+
+4. **Session and Cookies**:
+   - **Issue**: Some shortcodes may rely on session data or cookies, which can behave differently for logged-in and non-logged-in users.
+   - **Solution**: Ensure that any session or cookie-based data is correctly handled for all users. You might need to review how sessions are initiated and maintained in your plugin.
+
+5. **Custom Query Variables**:
+   - **Issue**: If your shortcode relies on custom query variables, these might be stripped or not passed correctly for non-logged-in users due to URL rewriting or security plugins.
+   - **Solution**: Use `add_query_var()` to register your custom query variables and ensure they are recognized by WordPress. This helps maintain custom variables across requests.
+
+6. **Security Plugins**:
+   - **Issue**: Security plugins may block or alter the behavior of certain queries or scripts for non-logged-in users.
+   - **Solution**: Check the settings of any security plugins to see if they are restricting access to certain scripts or query parameters for non-logged-in users.
+
+Here are a few steps to diagnose and potentially resolve the issue:
+
+- **Disable Caching**: Temporarily disable any caching plugins and test the shortcodes.
+- **Switch Themes**: Temporarily switch to a default WordPress theme and see if the issue persists.
+- **Check User Capabilities**: Review and adjust any role or capability checks within your shortcodes.
+- **Inspect Query Variables**: Ensure custom query variables are registered and handled properly.
+- **Review Security Settings**: Check the settings of security plugins that might be blocking or altering requests.
+
+By following these steps, you should be able to identify and address the root cause of the issue.
+
 ## How can I inspect the conversation logs to ensure the Assistant is being activated?
 
 Follow these steps to enable conversation logging and inspect the logs:

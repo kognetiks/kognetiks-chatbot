@@ -62,7 +62,7 @@ if (empty($session_id)) {
             'cookie_domain' => $_SERVER['HTTP_HOST'],
             'cookie_secure' => true,
             'cookie_httponly' => true,
-            'cookie_samesite' => 'Strict'
+            'cookie_samesite' => 'Strict' // Change to Strict, Lax or None as needed
         ]);
     }
     $session_id = session_id();
@@ -146,7 +146,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // 
 
 add_action('init', 'my_custom_buffer_start');
 function my_custom_buffer_start() {
-    ob_start();
+    // ob_start();
 }
 
 // Check for Upgrades - Ver 1.7.7

@@ -120,6 +120,43 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $atts[$key] = htmlspecialchars(strip_tags($atts[$key] ?? ''), ENT_QUOTES, 'UTF-8');
     }
 
+    // If (strpos($atts['assistant'], 'asst_') === false && $atts['assistant'] != 'original' && $atts['assistant'] != 'primary' && $atts['assistant'] != 'alternate') {
+    If (strpos($atts['assistant'], 'asst_') === false ) {
+
+        // Initialize the Assistant details
+        $assistant_details = array();
+        
+        // Try to fetch the Assistant details from the Assistant table
+        $assistantCommonName = $atts['assistant'];
+
+        // Utility
+        $assistant_details = get_chatbot_chatgpt_assistant_by_common_name($assistantCommonName);
+
+        // If no match is found, then the $assistant_details will be an empty array
+        if (empty($assistant_details)) {
+            // Do nothing    
+        } else {
+            // If a match is found, then the $assistant_details will contain the details of the Assistant
+
+            // DIAG - Diagnostics - Ver 2.0.4
+            back_trace ( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
+
+            // DIAG - Diagnostics - Ver 2.0.4
+            back_trace ( 'NOTICE', 'BEFORE $atts: ' . print_r($atts, true));
+
+            // Overwrite the values in $atts with values from $assistant_details
+            foreach ($assistant_details as $key => $value) {
+                if (array_key_exists($key, $atts)) {
+                    $atts[$key] = $value;
+                }
+            }
+
+            // DIAG - Diagnostics - Ver 2.0.4
+            back_trace ( 'NOTICE', 'AFTER $atts: ' . print_r($atts, true));
+
+        }
+    }
+
     // Validate and sanitize the style parameter - Ver 1.9.9
     $valid_styles = ['floating', 'embedded'];
     $chatbot_chatgpt_display_style = 'floating'; // default value
@@ -291,6 +328,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Retrieve the bot name - Ver 1.1.0
     // Get the Assistant's name - Ver 1.9.4
     $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'No'));
+
+    // Assistant's Table Override - Ver 2.0.4
+    if ( !empty($assistant_details['show_assistant_name']) ) {
+        $use_assistant_name = 'Yes';
+    }
+
     if ($use_assistant_name == 'Yes' && $assistant_id != ''){
         $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
         if (!empty($assistant_name)) {
@@ -309,6 +352,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         wp_add_inline_script('chatbot-chatgpt', 'document.getElementById("chatbot-chatgpt-message").placeholder = "' . $chatbot_chatgpt_hot_bot_prompt . '";');
     }
 
+    // Assistant's Table Override - Ver 2.0.4
+    // FIXME - HOT BOT PROMPT
+
     // Allow File Uploads - Ver 1.9.0
     $chatbot_chatgpt_allow_file_uploads = 'No';
     $chatbot_chatgpt_allow_mp3_uploads = 'No';
@@ -320,6 +366,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     if (strpos($chatbot_chatgpt_assistant_alias,'asst_') !== false) {
         $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+
+        // Assistant's Table Override - Ver 2.0.4
+        if ( !empty($assistant_details['allow_file_uploads']) ) {
+            $chatbot_chatgpt_allow_file_uploads = $assistant_details['allow_file_uploads'];
+        }
+
         $chatbot_chatgpt_allow_mp3_uploads = 'No';
     }
 
@@ -344,15 +396,27 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_mp3_uploads = 'No';
     }
 
-
     // Allow Read Aloud - Ver 1.9.0
     $chatbot_chatgpt_read_aloud_option = esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
+
+    // Assistant's Table Override - Ver 2.0.4
+    if ( !empty($assistant_details['allow_read_allow']) ) {
+        $chatbot_chatgpt_read_aloud_option = $assistant_details['allow_read_allow'];
+    }
 
     // Allow Download Transcript - Ver 2.0.3
     $chatbot_chatgpt_allow_download_transcript = esc_attr(get_option('chatbot_chatgpt_allow_download_transcript', 'Yes'));
 
+    // Assistant's Table Override - Ver 2.0.4
+    if ( !empty($assistant_details['allow_transcript_download']) ) {
+        $chatbot_chatgpt_allow_download_transcript = $assistant_details['allow_transcript_download'];
+    }
+
     // Force Page Reload on Conversation Clear - Ver 2.0.4
     $chatbot_chatgpt_force_page_reload = esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No'));
+
+    // Assistant's Table Override - Ver 2.0.4
+    // FIXME - FORCE PAGE RELOAD
 
     // Assume that the chatbot is NOT using KFlow - Ver 1.9.5
     $use_flow = 'No';
@@ -439,7 +503,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
-        ob_start();
+        // ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
         <!-- <script>
@@ -517,6 +581,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         // back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
                         $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                         $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
+                        // Assistant's Table Override - Ver 2.0.4
+                        if ( !empty($assistant_details['placeholder_prompt']) ) {
+                            $chatbot_chatgpt_bot_prompt = $assistant_details['placeholder_prompt'];
+                        }
                         $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
                         echo "<center><textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea></center>";
                     }
@@ -578,7 +646,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
-        ob_start();
+        // ob_start();
         ?>
         <div id="chatbot-chatgpt">
             <div id="chatbot-chatgpt-header">
@@ -639,6 +707,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             </script>";
                         } else {
                             $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
+                            // Assistant's Table Override - Ver 2.0.4
+                            if ( !empty($assistant_details['placeholder_prompt']) ) {
+                                $chatbot_chatgpt_bot_prompt = $assistant_details['placeholder_prompt'];
+                            }
                             echo "<center><textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea></center>";
                         }
                     ?>

@@ -231,6 +231,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **Support Tab**: Reverted the "Support" tab to correctly display the plugin's support documentation overview.
 * **Embedded Chatbot Formatting Updated**: Added a closing </div> tag to the embedded chatbot to ensure proper formatting.
 * **Force Page Reload on Conversation Cleared**: Added an option to force a page reload when the conversation is cleared.
+* **Knowledge Navigator Analysis**: Moved the Knowledge Navigator Analysis for export to the bottom of the Knowledge Navigator tab.
 
 = 2.0.3 =
 * **Transcript Download Option**: You can now choose whether users can download a transcript of their conversations with the chatbot.
