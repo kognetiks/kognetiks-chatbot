@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.5.4
-Stable tag: 2.0.4
+Stable tag: 2.0.5
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -227,11 +227,14 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
-= 2.0.4 =
+= 2.0.5 =
 * **Support Tab**: Reverted the "Support" tab to correctly display the plugin's support documentation overview.
 * **Embedded Chatbot Formatting Updated**: Added a closing </div> tag to the embedded chatbot to ensure proper formatting.
 * **Force Page Reload on Conversation Cleared**: Added an option to force a page reload when the conversation is cleared.
 * **Knowledge Navigator Analysis**: Moved the Knowledge Navigator Analysis for export to the bottom of the Knowledge Navigator tab.
+
+= 2.0.4 =
+* Removed session id from the chatbot shortcode and replaced with a unique id for visitors and logged-in users alike.
 
 = 2.0.3 =
 * **Transcript Download Option**: You can now choose whether users can download a transcript of their conversations with the chatbot.
