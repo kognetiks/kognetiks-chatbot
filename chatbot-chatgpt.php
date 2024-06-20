@@ -45,29 +45,27 @@ global $session_id;
 // Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
 ob_start();
 
-// Updated for Ver 1.8.5
-// Cookie "PHPSESSID" does not have a proper "SameSite" attribute value. Soon, cookies 
-// without the "SameSite" attribute or with an invalid value will be treated as “Lax”. 
-// This means that the cookie will no longer be sent in third-party contexts. If your 
-// application depends on this cookie being available in such contexts, please add the 
-// "SameSite=None" attribute to it. To know more about the "SameSite" attribute, 
-// read https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-
-// Start the session if it has not been started, set the global, then close the session
-if (empty($session_id)) {
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start([
-            'cookie_lifetime' => 0,
-            'cookie_path' => '/',
-            'cookie_domain' => $_SERVER['HTTP_HOST'],
-            'cookie_secure' => true,
-            'cookie_httponly' => true,
-            'cookie_samesite' => 'Strict' // Change to Strict, Lax or None as needed
-        ]);
+// Assign a unique ID to the visitor and logged in users - Ver 2.0.4
+function kognetiks_assign_unique_id() {
+    if (!isset($_COOKIE['kognetiks_unique_id'])) {
+        $unique_id = uniqid('kognetiks_', true);
+        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/"); // Cookie expires in 30 days
     }
-    $session_id = session_id();
-    session_write_close();  // Close the session after setting the session id
+}
+add_action('init', 'kognetiks_assign_unique_id');
 
+// Get the unique ID of the visitor or logged in user - Ver 2.0.4
+function kognetiks_get_unique_id() {
+    if (isset($_COOKIE['kognetiks_unique_id'])) {
+        return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
+    }
+    return null;
+}
+
+// Store the unique ID in a global variable - Ver 2.0.4
+if (empty($session_id)) {
+    $session_id = kognetiks_get_unique_id();
+    error_log('Session ID: ' . $session_id);
 }
 
 ob_end_flush(); // End output buffering and send the buffer to the browser
@@ -144,10 +142,24 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.p
 
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
 
-add_action('init', 'my_custom_buffer_start');
-function my_custom_buffer_start() {
-    // ob_start();
+// User Capability Check - Ver 2.0.4
+function chatbot_chatgpt_check_user_capability() {
+    $capabilities = array(
+        'read',
+        'edit_posts',
+        'publish_posts',
+        'manage_options'
+    );
+
+    foreach ($capabilities as $capability) {
+        if (current_user_can($capability)) {
+            back_trace('NOTICE', 'User has the capability: ' . $capability);
+        } else {
+            back_trace('ERROR', 'User does not have the capability: ' . $capability);
+        }
+    }
 }
+add_action('init', 'chatbot_chatgpt_check_user_capability');
 
 // Check for Upgrades - Ver 1.7.7
 if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {

@@ -494,6 +494,27 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     }
 
+    // Push data to local storage for the Chatbot - Ver 2.0.4
+    // $chatbotSettings = $script_data_array;
+    // wp_localize_script('chatbot-chatgpt', 'chatbot_chatgpt_script_data', $chatbotSettings);
+    $chatbot_settings['TEST'] = 'TEST';
+    $chatbot_settings['chatbot_chatgpt_bot_name'] = $bot_name;
+
+    // DIAG - Diagnostics - Ver 2.0.4
+    back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
+
+    echo '<script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function(event) {
+            // Encode the chatbot settings array into JSON format for use in JavaScript
+            let chatbotSettings = ' . json_encode($chatbot_settings) . ';
+            Object.keys(chatbotSettings).forEach(function(key) {
+                // DIAG - Diagnostics - Ver 2.0.4
+                console.log("VIA PHP LOCALIZE Setting " + key + " " + chatbotSettings[key] + " in localStorage");
+                localStorage.setItem(key, chatbotSettings[key]);
+            });
+        });
+    </script>';
+
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
