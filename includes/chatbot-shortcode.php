@@ -564,6 +564,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <!-- <i class="dashicons dashicons-format-chat"></i> -->
         <i class="chatbot-open-icon"></i>
         </button>
+        </div>
         <?php
         return ob_get_clean();
     } elseif ($chatbot_chatgpt_display_style == 'floating') {

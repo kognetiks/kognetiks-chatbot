@@ -65,7 +65,7 @@ function kognetiks_get_unique_id() {
 // Store the unique ID in a global variable - Ver 2.0.4
 if (empty($session_id)) {
     $session_id = kognetiks_get_unique_id();
-    error_log('Session ID: ' . $session_id);
+    // error_log('Session ID: ' . $session_id);
 }
 
 ob_end_flush(); // End output buffering and send the buffer to the browser
