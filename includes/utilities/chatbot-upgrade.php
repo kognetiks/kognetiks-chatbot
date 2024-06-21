@@ -290,6 +290,13 @@ function chatbot_chatgpt_upgrade() {
         // DIAG - Log the old option deletion
         // back_trace('NOTICE', 'no_of_items_analyzed option deleted');
     }
+
+    // Reset the Knowledge Navigator reminder option
+    if (get_option( 'chatbot_chatgpt_kn_dismissed' )) {
+        delete_option( 'chatbot_chatgpt_kn_dismissed' );
+        // DIAG - Log the old option deletion
+        // back_trace('NOTICE', 'chatbot_chatgpt_kn_dismissed option deleted');
+    }
     
     // FIXME - DETERMINE WHAT OTHER 'OLD' OPTIONS SHOULD BE DELETED
     // FIXME - DETERMINE WHAT OPTION NAMES NEED TO BE CHANGED (DELETE, THEN REPLACE)

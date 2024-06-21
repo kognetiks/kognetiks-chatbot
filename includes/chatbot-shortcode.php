@@ -299,10 +299,20 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $additional_instructions = array_key_exists('instructions', $atts) ? sanitize_text_field($atts['instructions']) : '';
     }
 
+    // Fetch the Kognetiks cookie
+    $session_id = kognetiks_get_unique_id();
+    // back_trace( 'NOTICE', 'session_id: ' . $session_id);
+    // if (empty($user_id)) {
+        $user_id = $session_id;
+    // }
+
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
-    set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
-    set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
+    
+    set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, null, null);
+    // back_trace( 'NOTICE', 'assistant_id: ' . $assistant_id);
+    set_chatbot_chatgpt_transients( 'thread_id', $thread_id, $user_id, $page_id, null, null);
+    // back_trace( 'NOTICE', 'thread_id: ' . $thread_id);
 
     // DUPLICATE ADDED THIS HERE - VER 1.9.1
     $script_data_array = array(
