@@ -4,9 +4,13 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## Documentation
 
+## What's New in Version 2.0.5
+
+- **TBD***
+
 ## What's New in Version 2.0.4
 
-- **TBC**
+- Removed session id from the chatbot shortcode and replaced with a unique id for visitors and logged-in users alike.
 
 ## What's New in Version 2.0.3
 
