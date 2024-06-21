@@ -510,20 +510,38 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_settings['TEST'] = 'TEST';
     $chatbot_settings['chatbot_chatgpt_bot_name'] = $bot_name;
 
+    $chatbot_settings['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
+    $chatbot_settings['chatbot_chatgpt_subsequent_greeting'] = $assistant_details['subsequent_greeting'];
+    
+    $greetings = array(
+        'initial_greeting' => $assistant_details['initial_greeting'],
+        'subsequent_greeting' => $assistant_details['subsequent_greeting'],
+    );
+
+    $chatbot_settings['chatbot_chatgpt_display_style'] = $assistant_details['style'];
+    $chatbot_settings['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
+    $chatbot_settings['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
+    $chatbot_settings['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
+    // $chatbot_settings['chatbot_chatgpt_allow_mp3_uploads'] = $assistant_details['allow_mp3_uploads'];
+    // $chatbot_settings['chatbot_chatgpt_read_aloud_option'] = $assistant_details['allow_read_aloud'];
+    $chatbot_settings['chatbot_chatgpt_allow_download_transcript'] = $assistant_details['allow_transcript_downloads'];
+
     // DIAG - Diagnostics - Ver 2.0.4
     back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
 
     echo '<script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function(event) {
-            // Encode the chatbot settings array into JSON format for use in JavaScript
-            let chatbotSettings = ' . json_encode($chatbot_settings) . ';
-            Object.keys(chatbotSettings).forEach(function(key) {
-                // DIAG - Diagnostics - Ver 2.0.4
-                console.log("VIA PHP LOCALIZE Setting " + key + " " + chatbotSettings[key] + " in localStorage");
-                localStorage.setItem(key, chatbotSettings[key]);
+            document.addEventListener("DOMContentLoaded", function(event) {
+                // Encode the chatbot settings array into JSON format for use in JavaScript
+                let chatbotSettings = ' . json_encode($chatbot_settings) . ';
+                if (chatbotSettings && typeof chatbotSettings === "object") {
+                    Object.keys(chatbotSettings).forEach(function(key) {
+                        // DIAG - Diagnostics - Ver 2.0.4
+                        console.log("VIA PHP LOCALIZE Setting " + key + " " + chatbotSettings[key] + " in localStorage");
+                        localStorage.setItem(key, chatbotSettings[key]);
+                    });
+                }
             });
-        });
-    </script>';
+        </script>';
 
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {

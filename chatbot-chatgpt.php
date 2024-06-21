@@ -43,14 +43,21 @@ global $wpdb;
 global $session_id;
 global $user_id;
 
-// Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
-ob_start();
-
 // Assign a unique ID to the visitor and logged in users - Ver 2.0.4
 function kognetiks_assign_unique_id() {
     if (!isset($_COOKIE['kognetiks_unique_id'])) {
         $unique_id = uniqid('kognetiks_', true);
-        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/"); // Cookie expires in 30 days
+        
+        // Use the build-in setcookie function
+        // setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/"); // Cookie expires in 30 days
+
+        // Use the build-in setcookie function - Sets HttpOnly and Secure flags
+        // setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
+        
+        // Set SameSite attribute manually
+        // Sets HttpOnly, Secure, and SameSite = Strict, Lax or None
+        header('Set-Cookie: kognetiks_unique_id=' . $unique_id . '; expires=' . gmdate('D, d M Y H:i:s T', time() + (86400 * 30)) . '; path=/; HttpOnly; Secure; SameSite=Lax');
+        
         // Ensure the cookie is set for the current request
         $_COOKIE['kognetiks_unique_id'] = $unique_id;
     }
@@ -60,9 +67,10 @@ add_action('init', 'kognetiks_assign_unique_id');
 // Get the unique ID of the visitor or logged in user - Ver 2.0.4
 function kognetiks_get_unique_id() {
     if (isset($_COOKIE['kognetiks_unique_id'])) {
+        // error_log('Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
         return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
     }
-    error_log('Unique ID not found');
+    // error_log('Unique ID not found');
     return null;
 }
 
@@ -73,7 +81,9 @@ $session_id = kognetiks_get_unique_id();
 if (empty($session_id)) {
     $session_id = kognetiks_get_unique_id();
 }
+
 $user_id = get_current_user_id();
+
 if ($user_id == 0) {
     $user_id = $session_id;
 }
@@ -153,24 +163,26 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.p
 
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
 
-// User Capability Check - Ver 2.0.4
-function chatbot_chatgpt_check_user_capability() {
-    $capabilities = array(
-        'read',
-        'edit_posts',
-        'publish_posts',
-        'manage_options'
-    );
+// User Capability Check - Ver 2.0.5
+// function chatbot_chatgpt_check_user_capability() {
 
-    foreach ($capabilities as $capability) {
-        if (current_user_can($capability)) {
-            back_trace('NOTICE', 'User has the capability: ' . $capability);
-        } else {
-            back_trace('ERROR', 'User does not have the capability: ' . $capability);
-        }
-    }
-}
-add_action('init', 'chatbot_chatgpt_check_user_capability');
+//     $capabilities = array(
+//         'read',
+//         'edit_posts',
+//         'publish_posts',
+//         'manage_options'
+//     );
+
+//     foreach ($capabilities as $capability) {
+//         if (current_user_can($capability)) {
+//             back_trace('NOTICE', 'User has the capability: ' . $capability);
+//         } else {
+//             back_trace('ERROR', 'User does not have the capability: ' . $capability);
+//         }
+//     }
+
+// }
+// add_action('init', 'chatbot_chatgpt_check_user_capability');
 
 // Check for Upgrades - Ver 1.7.7
 if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
