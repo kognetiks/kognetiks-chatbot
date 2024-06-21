@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     2.0.3
+ * Version:     2.0.4
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.3');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.4');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -41,34 +41,43 @@ global $wpdb;
 
 // Uniquely Identify the Visitor
 global $session_id;
+global $user_id;
 
 // Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
 ob_start();
 
-// Updated for Ver 1.8.5
-// Cookie "PHPSESSID" does not have a proper "SameSite" attribute value. Soon, cookies 
-// without the "SameSite" attribute or with an invalid value will be treated as “Lax”. 
-// This means that the cookie will no longer be sent in third-party contexts. If your 
-// application depends on this cookie being available in such contexts, please add the 
-// "SameSite=None" attribute to it. To know more about the "SameSite" attribute, 
-// read https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-
-// Start the session if it has not been started, set the global, then close the session
-if (empty($session_id)) {
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start([
-            'cookie_lifetime' => 0,
-            'cookie_path' => '/',
-            'cookie_domain' => $_SERVER['HTTP_HOST'],
-            'cookie_secure' => true,
-            'cookie_httponly' => true,
-            'cookie_samesite' => 'Strict'
-        ]);
+// Assign a unique ID to the visitor and logged in users - Ver 2.0.4
+function kognetiks_assign_unique_id() {
+    if (!isset($_COOKIE['kognetiks_unique_id'])) {
+        $unique_id = uniqid('kognetiks_', true);
+        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/"); // Cookie expires in 30 days
+        // Ensure the cookie is set for the current request
+        $_COOKIE['kognetiks_unique_id'] = $unique_id;
     }
-    $session_id = session_id();
-    session_write_close();  // Close the session after setting the session id
-
 }
+add_action('init', 'kognetiks_assign_unique_id');
+
+// Get the unique ID of the visitor or logged in user - Ver 2.0.4
+function kognetiks_get_unique_id() {
+    if (isset($_COOKIE['kognetiks_unique_id'])) {
+        return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
+    }
+    error_log('Unique ID not found');
+    return null;
+}
+
+// Fetch the unique ID of the visitor or logged in user - Ver 2.0.4
+$session_id = kognetiks_get_unique_id();
+
+// Store the unique ID in a global variable - Ver 2.0.4
+if (empty($session_id)) {
+    $session_id = kognetiks_get_unique_id();
+}
+$user_id = get_current_user_id();
+if ($user_id == 0) {
+    $user_id = $session_id;
+}
+// error_log('Session ID: ' . $session_id);
 
 ob_end_flush(); // End output buffering and send the buffer to the browser
 
@@ -249,6 +258,11 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
     $page_id = get_the_id();
+
+    // if user is not logged in, then set user_id to $session_id
+    if (!is_user_logged_in()) {
+        $user_id = $session_id;
+    }
 
     $script_data_array = array(
         'user_id' => $user_id,
@@ -502,6 +516,10 @@ function chatbot_chatgpt_send_message() {
 
     $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
+    $chatbot_settings['assistantID'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id);
+    // back_trace ( 'NOTICE', 'chatbot_chatgpt_send_message $chatbot_settings[assistantID]: ' . $chatbot_settings['assistantID']);
+    $chatbot_settings['threadID'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id);
+    // back_trace ( 'NOTICE', 'chatbot_chatgpt_send_message $chatbot_settings[threadID]: ' . $chatbot_settings['threadID']);
     $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
     $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
 
