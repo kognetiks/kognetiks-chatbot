@@ -3,7 +3,14 @@ jQuery(document).ready(function ($) {
     function chatbot_chatgpt_localize() {
    
         // DIAG - Diagnostics - Ver 1.8.5
-        // console.log('Entering chatbot_chatgpt_localize');
+        console.log('Chatbot: NOTICE: Entering chatbot_chatgpt_localize');
+
+        // For each key in chatbotSettings, console.log the key and value
+        console.log('Chatbot: NOTICE: chatbot-chatgpt.js - START - TOP');
+        Object.keys(chatbotSettings).forEach((key) => {
+            console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Key: ' + key + ' Value: ' + chatbotSettings[key]);
+        });
+        console.log('Chatbot: NOTICE: chatbot-chatgpt.js - FINISH - TOP');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         let chatbotChatgptBotNameInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_name) ? chatbotSettings.chatbot_chatgpt_bot_name : 'Kognetiks Chatbot';
@@ -52,8 +59,8 @@ jQuery(document).ready(function ($) {
         // Force Page Reload on Converation Cleared - Ver 2.0.4
         let chatgptForcePageReloadInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_force_page_reload) ? chatbotSettings.chatbot_chatgpt_force_page_reload : 'No';
     
-        // DIAG - Diagnostics - Ver 1.8.5
-        // console.log('Before localStorage.set Item loop');
+        console.log('Chatbot: NOTICE: Entering chatbot-chatgpt-local.js');
+        console.log('Chatbot: NOTICE: Before localStorage.set Item loop');
 
         Object.keys(chatbotSettings).forEach((key) => {
 
@@ -63,7 +70,7 @@ jQuery(document).ready(function ($) {
             }
             
             // DIAG - Diagnostics - Ver 1.8.5
-            // console.log('Setting ' + key + ' Value ' + chatbotSettings[key] + ' in localStorage');
+            console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Key: ' + key + ' Value: ' + chatbotSettings[key]);
 
         });
 
@@ -468,18 +475,18 @@ jQuery(document).ready(function ($) {
         }
 
         // DIAG - Diagnostics - Ver 1.8.5
-        // console.log('Exiting chatbot_chatgpt_localize');
+        // console.log('Chatbot: NOTICE: Exiting chatbot_chatgpt_localize');
         
     }
 
     // DIAG - Diagnostics - Ver 1.8.5
-    // console.log(chatbotSettings);
+    console.log('Chatbot: NOTICE: Before call to chatbot_chatgpt_localize');
 
     // Localize the chatbot settings
     chatbot_chatgpt_localize();
 
     // DIAG - Diagnostics - Ver 1.8.5
-    // console.log(chatbotSettings);
+    console.log('Chatbot: NOTICE: After call to chatbot_chatgpt_loccalize');
 
 });
 

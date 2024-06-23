@@ -93,7 +93,7 @@ ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // GPT Assistants - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-omni.php'; // ChatGPT API - Ver 2.0.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; // Image API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
@@ -584,53 +584,85 @@ function chatbot_chatgpt_send_message() {
   
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
+
         $use_assistant_id = 'No';
-        // DIAG - Diagnostics - Ver 1.8.1
-        // back_trace( 'NOTICE' , 'Using Original GPT Assistant ID');
+        // DIAG - Diagnostics - Ver 2.0.5
+        back_trace( 'NOTICE' , 'Using Original ChatGPT - $chatbto_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
+
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
         $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions', ''));
         $use_assistant_id = 'Yes';
-        // DIAG - Diagnostics - Ver 1.8.1
-        // back_trace( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
+
+        // DIAG - Diagnostics - Ver 2.0.5
+        back_trace( 'NOTICE' , 'Using Primary Assistant - $assistant_id: ' .  $assistant_id);
+        
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
-            // Override the $use_assistant_id and set it to 'No'
+        
+            // Primary assistant_id not set
+            $chatbot_chatgpt_assistant_alias = 'original';
             $use_assistant_id = 'No';
-            // DIAG - Diagnostics - Ver 1.8.1
-            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API' );
+        
+            // DIAG - Diagnostics - Ver 2.0.5
+            back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
         }
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
+
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
         $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate', ''));
         $use_assistant_id = 'Yes';
-        // DIAG - Diagnostics - Ver 1.8.1
-        // back_trace( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
+
+        // DIAG - Diagnostics - Ver 2.0.5
+        back_trace( 'NOTICE' , 'Using Altrnate Assistant - $assistant_id: ' .  $assistant_id);
+
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
-            // Override the $use_assistant_id and set it to 'No'
+
+            /// Alternate assistant_id not set
+            $chatbot_chatgpt_assistant_alias = 'original';
             $use_assistant_id = 'No';
-            // DIAG - Diagnostics - Ver 1.8.1
-            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API' );
+
+            // DIAG - Diagnostics - Ver 2.0.5
+            back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
+        
         }
+    } elseif (str_starts_with($assistant_id, 'asst_')) {
+
+        $use_assistant_id = 'Yes';
+
+        // DIAG - Diagnostics - Ver 2.0.5
+        back_trace( 'NOTICE' ,'Assistant ID pass as a parameter - $assistant_id: ' . $assistant_id );
+
     } else {
+
         // Reference GPT Assistant IDs directly - Ver 1.7.3
         if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_')) {
-            // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
+
+            // DIAG - Diagnostics - 2.0.5
+            back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
+
             // Override the $assistant_id with the GPT Assistant ID
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
-            // DIAG - Diagnostics - Ver 1.8.1
-            // back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
+
+            // DIAG - Diagnostics - Ver 2.0.5
+            back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
+
         } else {
-            // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
+
+            // DIAG - Diagnostics - Ver 2.0.5
+            back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
+
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
+            
             // DIAG - Diagnostics - Ver 1.8.1
-            // back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
+            back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
+
         }
+
     }
 
     // Decide whether to use Flow, Assistant or Original ChatGPT

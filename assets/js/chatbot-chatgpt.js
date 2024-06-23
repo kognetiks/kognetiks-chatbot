@@ -2,7 +2,7 @@ jQuery(document).ready(function ($) {
 
     // DIAG - Diagnostics = Ver 1.4.2
     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-    //     console.log('Chatbot: NOTICE: Entering chatbot-chatgpt.js');
+        console.log('Chatbot: NOTICE: Entering chatbot-chatgpt.js');
     // }
 
     let chatGptChatBot = $('#chatbot-chatgpt').hide();
@@ -127,11 +127,11 @@ jQuery(document).ready(function ($) {
         // Determine the orientation
         const orientation = screen.orientation || screen.mozOrientation || screen.msOrientation;
         if (orientation.type === 'landscape-primary') {
-        // console.log('Orientation: Landscape');
+        // console.log('Chatbot: NOTICE: Orientation: Landscape');
         } else if (orientation.type === 'portrait-primary') {
-        // console.log('Orientation: Portrait');
+        // console.log('Chatbot: NOTICE: Orientation: Portrait');
         } else {
-        // console.log('Orientation:', orientation.type);
+        // console.log('Chatbot: NOTICE: Orientation:', orientation.type);
         }
 
         updateChatbotStyles();
@@ -454,7 +454,7 @@ jQuery(document).ready(function ($) {
     // markdownToHtml - Ver 1.9.2
     function markdownToHtml(markdown) {
 
-        // console.log("Original Markdown:", markdown);
+        // console.log("Chatbot: NOTICE: Original Markdown: ", markdown);
     
         // Step 1: Extract predefined HTML tags
         const predefinedHtmlRegex = /<.*?>/g;
@@ -463,42 +463,42 @@ jQuery(document).ready(function ($) {
             predefinedHtml.push(match);
             return `{{HTML_TAG_${predefinedHtml.length - 1}}}`;
         });
-        // console.log("After Extracting HTML Tags:", markdown);
+        // console.log("Chatbot: NOTICE: After Extracting HTML Tags: ", markdown);
     
         // Step 2: Escape HTML outside of code blocks
         markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
             return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
         }).join('');
-        // console.log("After HTML Escape:", markdown);
+        // console.log("Chatbot: NOTICE: After HTML Escape: ", markdown);
     
         // Step 3: Process images first
         markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2">`);
-        // console.log("After Image Replacement:", markdown);
+        // console.log("Chatbot: NOTICE: After Image Replacement: ", markdown);
     
         // Step 4: Process links before any other inline elements
         markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-        // console.log("After Link Replacement:", markdown);
+        // console.log("Chatbot: NOTICE: After Link Replacement: ", markdown);
     
         // Step 5: Headers
         markdown = markdown.replace(/^#### (.*)$/gim, '<h4>$1</h4>')
                            .replace(/^### (.*)$/gim, '<h3>$1</h3>')
                            .replace(/^## (.*)$/gim, '<h2>$1</h2>')
                            .replace(/^# (.*)$/gim, '<h1>$1</h1>');
-        // console.log("After Headers Replacement:", markdown);
+        // console.log("Chatbot: NOTICE: After Headers Replacement: ", markdown);
     
         // Step 6: Bold, Italic, Strikethrough
         markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
                            .replace(/\~\~(.*?)\~\~/g, '<del>$1</del>');
-        // console.log("After Text Formatting Replacement:", markdown);
+        // console.log("Chatbot: NOTICE: After Text Formatting Replacement: ", markdown);
     
         // Step 7: Multi-line code blocks
         markdown = markdown.replace(/```([\s\S]*?)```/gm, '<pre><code>$1</code></pre>');
-        // console.log("After Code Block Replacement:", markdown);
+        // console.log("Chatbot: NOTICE: After Code Block Replacement: ", markdown);
     
         // Step 8: Inline code - after handling multi-line to prevent conflicts
         markdown = markdown.replace(/`([^`]+)`/g, '<code>$1</code>');
-        // console.log("After Inline Code Replacement:", markdown);
+        // console.log("Chatbot: NOTICE: After Inline Code Replacement: ", markdown);
     
         // Step 9: Lists - Needs refining for nested lists
         markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
@@ -506,26 +506,26 @@ jQuery(document).ready(function ($) {
                            .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>')
                            .replace(/<ul>\s*<li>/g, '<ul>\n<li>')
                            .replace(/<\/li>\s*<\/ul>/g, '</li>\n</ul>');
-        // console.log("After Lists Replacement:", markdown);
+        // console.log("Chatbot: NOTICE: After Lists Replacement: ", markdown);
     
         // Step 10: Improved blockquote handling
         markdown = markdown.replace(/^(>+\s?)(.*)$/gm, (match, p1, p2) => {
             return `<blockquote>${p2}</blockquote>`;
         });
-        // console.log("After Blockquote Replacement:", markdown);
+        // console.log("Chatbot: NOTICE: After Blockquote Replacement: ", markdown);
     
         // Step 11: Convert line breaks to <br>, except for code blocks and blockquotes
         markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>)/g).map((chunk, index) => {
             // Only convert newlines to <br> outside of code blocks and blockquotes
             return index % 2 === 0 ? chunk.replace(/\n/g, '<br>') : chunk;
         }).join('');
-        // console.log("After Line Breaks Replacement:", markdown);
+        // console.log("Chatbot: NOTICE: After Line Breaks Replacement: ", markdown);
     
         // Step 12: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
             return predefinedHtml[parseInt(index)];
         });
-        // console.log("After Reinserting HTML Tags:", markdown);
+        // console.log("Chatbot: NOTICE: After Reinserting HTML Tags: ", markdown);
     
         return markdown.trim();
 
@@ -631,7 +631,7 @@ jQuery(document).ready(function ($) {
                     botResponse = '';
                 } else {
                     // DIAG - Log the error - Ver 1.6.7
-                    // console.log('Chatbot ChatGPT: ERROR: ' + JSON.stringify(response));
+                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
                     // appendMessage('Error: ' + errorThrown, 'error');
                     appendMessage('Error: ' + error, 'error')
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
@@ -707,7 +707,7 @@ jQuery(document).ready(function ($) {
     // Add the click event listener to the download transcript button - Ver 1.9.9
     $('#chatbot-chatgpt-download-transcript-btn').on('click', function(e) {
         e.preventDefault();  // Prevent the default action of the button (if needed)
-        // console.log('Button clicked: Downloading transcript');  // Optional: Log to console
+        // console.log('Chatbot: NOTICE: Button clicked: Downloading transcript');  // Optional: Log to console
     
         let conversationContent = $('#chatbot-chatgpt-conversation').html();  // Get the HTML content
         let button = $(this);  // Store a reference to the button
@@ -876,7 +876,7 @@ jQuery(document).ready(function ($) {
             if (allowedFileTypes.includes(fileType) && allowedExtensions.includes(ext)) {
                 formData.append('file[]', file);
             } else {
-                // console.log('Disallowed file type or extension: ' + file.name);
+                // console.log('Chatbot: NOTICE: Disallowed file type or extension: ' + file.name);
                 hasDisallowedFile = true;
                 appendMessage('Oops! Unsupported file type. Please try again.', 'error');
                 break;
@@ -946,7 +946,7 @@ jQuery(document).ready(function ($) {
             if (allowedFileTypes.includes(fileType) && allowedExtensions.includes(ext)) {
                 formData.append('file[]', file);
             } else {
-                // console.log('Disallowed file type or extension: ' + file.name);
+                // console.log('Chatbot: NOTICE: Disallowed file type or extension: ' + file.name);
                 hasDisallowedFile = true;
                 appendMessage('Oops! Unsupported file type. Please try again.', 'error');
                 break;
@@ -1030,7 +1030,7 @@ jQuery(document).ready(function ($) {
                 // sessionStorage.setItem('chatbot_chatgpt_conversation', ''); // Clear the conversation from sessionStorage
                 sessionStorage.removeItem('chatbot_chatgpt_conversation'); // Clear the last response from sessionStorage
                 // DIAG - Log the response
-                // console.log('Success:', response.data);
+                // console.log('Chatbot: SUCCESS:', response.data);
                 appendMessage( response.data, 'bot');
                 // Check localStorage setting and force a page reload if equal to 'Yes' - Ver 2.0.4
                 if (localStorage.getItem('chatbot_chatgpt_force_page_reload') === 'Yes') {
@@ -1188,8 +1188,8 @@ jQuery(document).ready(function ($) {
     
             // DIAG - Diagnostics - Ver 2.0.3
             // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('Bot Texts:', botTexts);
-            //     console.log('Conversation:', conversation);
+            //     console.log('Chatbot: NOTICE: Bot Texts:', botTexts);
+            //     console.log('Chatbot: NOTICE: Conversation:', conversation);
             // }
     
             if (botTexts && botTexts.length > 0 && conversation) {
@@ -1198,10 +1198,10 @@ jQuery(document).ready(function ($) {
 
                 // DIAG - Diagnostics - Ver 2.0.3
                 // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-                //     console.log('Last Bot Text:', lastBotText);
-                //     console.log('Last Bot Text OffsetTop:', lastBotText.offsetTop);
-                //     console.log('Conversation OffsetTop:', conversation.offsetTop);
-                //     console.log('Top Position:', topPosition);
+                //     console.log('Chatbot: NOTICE: Last Bot Text:', lastBotText);
+                //     console.log('Chatbot: NOTICE: Last Bot Text OffsetTop:', lastBotText.offsetTop);
+                //     console.log('Chatbot: NOTICE: Conversation OffsetTop:', conversation.offsetTop);
+                //     console.log('Chatbot: NOTICE: Top Position:', topPosition);
                 // }
     
                 // Scroll to the top of the last bot message
@@ -1211,7 +1211,7 @@ jQuery(document).ready(function ($) {
 
                 // DIAG - Diagnostics - Ver 2.0.3
                 // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-                // console.log('No bot texts found or conversation container is missing.');
+                // console.log('Chatbot: NOTICE: No bot texts found or conversation container is missing.');
                 // }
 
             }
