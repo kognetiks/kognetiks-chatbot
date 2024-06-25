@@ -451,11 +451,11 @@ jQuery(document).ready(function ($) {
         $('.typing-indicator').remove();
     }
 
-    // markdownToHtml - Ver 2.0.6
+    // markdownToHtml - Ver 1.9.2
     function markdownToHtml(markdown) {
 
-        // console.log("Chatbot: NOTICE: Original Markdown: ", markdown);
-
+        // console.log("Original Markdown:", markdown);
+    
         // Step 1: Extract predefined HTML tags
         const predefinedHtmlRegex = /<.*?>/g;
         let predefinedHtml = [];
@@ -463,82 +463,72 @@ jQuery(document).ready(function ($) {
             predefinedHtml.push(match);
             return `{{HTML_TAG_${predefinedHtml.length - 1}}}`;
         });
-        // console.log("Chatbot: NOTICE: After Extracting HTML Tags: ", markdown);
-
+        // console.log("After Extracting HTML Tags:", markdown);
+    
         // Step 2: Escape HTML outside of code blocks
         markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
             return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
         }).join('');
-        // console.log("Chatbot: NOTICE: After HTML Escape: ", markdown);
-
+        // console.log("After HTML Escape:", markdown);
+    
         // Step 3: Process images first
-        markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2" class="markdown-image">`);
-        // console.log("Chatbot: NOTICE: After Image Replacement: ", markdown);
-
+        markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2">`);
+        // console.log("After Image Replacement:", markdown);
+    
         // Step 4: Process links before any other inline elements
-        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="markdown-link">$1</a>');
-        // console.log("Chatbot: NOTICE: After Link Replacement: ", markdown);
-
+        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+        // console.log("After Link Replacement:", markdown);
+    
         // Step 5: Headers
-        markdown = markdown.replace(/^#### (.*)$/gim, '<h4 class="markdown-header">$1</h4>')
-                        .replace(/^### (.*)$/gim, '<h3 class="markdown-header">$1</h3>')
-                        .replace(/^## (.*)$/gim, '<h2 class="markdown-header">$1</h2>')
-                        .replace(/^# (.*)$/gim, '<h1 class="markdown-header">$1</h1>');
-        // console.log("Chatbot: NOTICE: After Headers Replacement: ", markdown);
-
+        markdown = markdown.replace(/^#### (.*)$/gim, '<h4>$1</h4>')
+                           .replace(/^### (.*)$/gim, '<h3>$1</h3>')
+                           .replace(/^## (.*)$/gim, '<h2>$1</h2>')
+                           .replace(/^# (.*)$/gim, '<h1>$1</h1>');
+        // console.log("After Headers Replacement:", markdown);
+    
         // Step 6: Bold, Italic, Strikethrough
-        markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong class="markdown-bold">$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em class="markdown-italic">$1</em>')
-                        .replace(/\~\~(.*?)\~\~/g, '<del class="markdown-strikethrough">$1</del>');
-        // console.log("Chatbot: NOTICE: After Text Formatting Replacement: ", markdown);
-
+        markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                           .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                           .replace(/\~\~(.*?)\~\~/g, '<del>$1</del>');
+        // console.log("After Text Formatting Replacement:", markdown);
+    
         // Step 7: Multi-line code blocks
-        markdown = markdown.replace(/```([\s\S]*?)```/gm, '<pre class="markdown-code"><code>$1</code></pre>');
-        // console.log("Chatbot: NOTICE: After Code Block Replacement: ", markdown);
-
+        markdown = markdown.replace(/```([\s\S]*?)```/gm, '<pre><code>$1</code></pre>');
+        // console.log("After Code Block Replacement:", markdown);
+    
         // Step 8: Inline code - after handling multi-line to prevent conflicts
-        markdown = markdown.replace(/`([^`]+)`/g, '<code class="markdown-inline-code">$1</code>');
-        // console.log("Chatbot: NOTICE: After Inline Code Replacement: ", markdown);
-
+        markdown = markdown.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // console.log("After Inline Code Replacement:", markdown);
+    
         // Step 9: Lists - Needs refining for nested lists
-        markdown = markdown.replace(/^\*\s(.+)$/gim, '<li class="markdown-list-item">$1</li>')
-                        .replace(/<\/li><li>/g, '</li>\n<li>')
-                        .replace(/<li>(.*?)<\/li>/gs, '<ul class="markdown-list">$&</ul>')
-                        .replace(/<ul>\s*<li>/g, '<ul class="markdown-list">\n<li>')
-                        .replace(/<\/li>\s*<\/ul>/g, '</li>\n</ul>');
-        // console.log("Chatbot: NOTICE: After Lists Replacement: ", markdown);
-
+        markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
+                           .replace(/<\/li><li>/g, '</li>\n<li>')
+                           .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>')
+                           .replace(/<ul>\s*<li>/g, '<ul>\n<li>')
+                           .replace(/<\/li>\s*<\/ul>/g, '</li>\n</ul>');
+        // console.log("After Lists Replacement:", markdown);
+    
         // Step 10: Improved blockquote handling
         markdown = markdown.replace(/^(>+\s?)(.*)$/gm, (match, p1, p2) => {
-            return `<blockquote class="markdown-blockquote">${p2}</blockquote>`;
+            return `<blockquote>${p2}</blockquote>`;
         });
-        // console.log("Chatbot: NOTICE: After Blockquote Replacement: ", markdown);
-
+        // console.log("After Blockquote Replacement:", markdown);
+    
         // Step 11: Convert line breaks to <br>, except for code blocks and blockquotes
-        markdown = markdown.split(/(<pre class="markdown-code"><code>[\s\S]*?<\/code><\/pre>|<blockquote class="markdown-blockquote">[\s\S]*?<\/blockquote>)/g).map((chunk, index) => {
+        markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>)/g).map((chunk, index) => {
             // Only convert newlines to <br> outside of code blocks and blockquotes
             return index % 2 === 0 ? chunk.replace(/\n/g, '<br>') : chunk;
         }).join('');
-        // console.log("Chatbot: NOTICE: After Line Breaks Replacement: ", markdown);
-
-        // Step 12: Process tables
-        markdown = markdown.replace(/(\|.*?\|)(\r?\n)(\|[-:]+?\|)(\r?\n)((?:\|.*?\|\r?\n?)*)/g, (match, header, newline1, separator, newline2, body) => {
-            const headerHtml = header.split('|').map(cell => `<th class="markdown-table-header">${cell.trim()}</th>`).join('');
-            const bodyHtml = body.trim().split('\n').map(row => {
-                return `<tr class="markdown-table-row">${row.split('|').map(cell => `<td class="markdown-table-cell">${cell.trim()}</td>`).join('')}</tr>`;
-            }).join('');
-            return `<table class="markdown-table"><thead class="markdown-table-head"><tr>${headerHtml}</tr></thead><tbody class="markdown-table-body">${bodyHtml}</tbody></table>`;
-        });
-        // console.log("Chatbot: NOTICE: After Tables Replacement: ", markdown);
-
-        // Step 13: Reinsert predefined HTML tags
+        // console.log("After Line Breaks Replacement:", markdown);
+    
+        // Step 12: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
             return predefinedHtml[parseInt(index)];
         });
-        // console.log("Chatbot: NOTICE: After Reinserting HTML Tags: ", markdown);
-
+        // console.log("After Reinserting HTML Tags:", markdown);
+    
         return `<div>${markdown.trim()}</div>`;
-        
+
     }
         
     // Submit the message when the submit button is clicked
