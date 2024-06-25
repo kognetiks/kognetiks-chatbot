@@ -152,6 +152,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-downlo
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper.php'; // Functions - Ver 2.0.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-greetings.php'; // Functions - Ver 2.0.5
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
@@ -587,7 +588,7 @@ function chatbot_chatgpt_send_message() {
 
         $use_assistant_id = 'No';
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE' , 'Using Original ChatGPT - $chatbto_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+        back_trace( 'NOTICE' , 'Using Original ChatGPT - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
 
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
 
@@ -630,6 +631,7 @@ function chatbot_chatgpt_send_message() {
         }
     } elseif (str_starts_with($assistant_id, 'asst_')) {
 
+        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
         $use_assistant_id = 'Yes';
 
         // DIAG - Diagnostics - Ver 2.0.5
@@ -800,8 +802,12 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', 'Check for links and images in response before returning');
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
+        // DIAG - Diagnostics - Ver 2.0.5 - XXX
+        back_trace( 'NOTICE', 'Response: ' . $response);
+
         // Return response
         wp_send_json_success($response);
+
     }
 
     wp_send_json_error('Oops, I fell through the cracks!');
@@ -899,8 +905,9 @@ function concatenateHistory($transient_name) {
     return implode(' ', $context_history); // Concatenate the array values into a single string
 }
 
+// FIXME - MOVE CORE FUNCTIONS TO A SEPARATE FILE,LEAVING ONLY THE HOOKS HERE
 // Initialize the Greetings - Ver 1.6.1
-function enqueue_greetings_script() {
+function enqueue_greetings_script( $initial_greeting = null, $subsequent_greeting = null) {
 
     // DIAG - Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', "enqueue_greetings_script() called");
@@ -914,7 +921,9 @@ function enqueue_greetings_script() {
         $current_user = get_userdata($current_user_id);
 
         //Do this for Initial Greeting
-        $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+        if ( empty($initial_greeting) ) {
+            $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+        }
 
         // Determine what the field name is between the brackets
         $user_field_name = '';
@@ -929,7 +938,9 @@ function enqueue_greetings_script() {
         }
 
         // Do this for Subsequent Greeting
-        $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+        if ( empty($subsequent_greeting) ) {
+            $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+        }
 
         // Determine what the field name is between the brackets
         $user_field_name = '';
@@ -969,6 +980,8 @@ function enqueue_greetings_script() {
     );
 
     wp_localize_script('greetings', 'greetings_data', $greetings);
+
+    return $greetings;
 
 }
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
