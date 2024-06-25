@@ -86,7 +86,7 @@ function chatbot_chatgpt_localize(){
         console.log("Chatbot: NOTICE: chatbot_settings_localize.php - STARTED");
         document.addEventListener("DOMContentLoaded", function(event) {
             // Encode the chatbot settings array into JSON format for use in JavaScript
-            let chatbotSettings = ' . json_encode($chatbot_settings) . ';
+            chatbotSettings = ' . json_encode($chatbot_settings) . ';
             Object.keys(chatbotSettings).forEach(function(key) {
                 // DIAG - Diagnostics
                 console.log("Chatbot: NOTICE: chatbot-settings-localize.php - Key: " + key + " Value: " + chatbotSettings[key]);

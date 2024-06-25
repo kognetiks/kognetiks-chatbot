@@ -564,7 +564,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // back_trace( 'WARNING', 'kflow modules not installed');
 
     }
-
     
     // Miscellaneous Other Setting to pass to localStorage - Ver 2.0.5
     $chatbot_chatgpt_width_setting = esc_attr(get_option('chatbot_chatgpt_width_setting', '300'));
@@ -580,11 +579,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_settings['chatbot_chatgpt_start_status_new_visitor'] = $chatbot_chatgpt_start_status_new_visitor;
 
     // Fetch and update initial greeting
-    $assistant_details = get_and_update_greeting($assistant_details, 'initial_greeting', 'Hello! How can I help you today?');
+    $assistant_details = options_helper($assistant_details, 'initial_greeting', 'Hello! How can I help you today?');
     $chatbot_settings['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
 
     // Fetch and update subsequent greeting
-    $assistant_details = get_and_update_greeting($assistant_details, 'subsequent_greeting', 'How can I help you further?');
+    $assistant_details = options_helper($assistant_details, 'subsequent_greeting', 'How can I help you further?');
     $chatbot_settings['chatbot_chatgpt_subsequent_greeting'] = $assistant_details['subsequent_greeting'];
 
     // Correctly use enqueue_greetings_script and handle its return
@@ -595,6 +594,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['initial_greeting'] = $modified_greetings['initial_greeting'];
         $assistant_details['subsequent_greeting'] = $modified_greetings['subsequent_greeting'];
     }
+
+    // chatbot_chatgpt_shortcode_enqueue_script();
 
     // Push data to local storage for the Chatbot - Ver 2.0.4
     // $chatbotSettings = $script_data_array;
@@ -1011,33 +1012,41 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     ?>
     <script>
 
-        // Loop through the chatbot settings and set them in localStorage
-        // for use in the Chatbot
-        // Encode the chatbot settings array into JSON format for use in JavaScript
-        let chatbotSettings = <?php echo json_encode($chatbot_settings); ?>;
-        if (chatbotSettings && typeof chatbotSettings === "object") {
-            Object.keys(chatbotSettings).forEach(function(key) {
-                // DIAG - Diagnostics - Ver 2.0.4
-                console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
-                localStorage.setItem(key, chatbotSettings[key]);
-            });
+        function updateChatbotLocalStorage() {
+            // Loop through the chatbot settings and set them in localStorage
+            // for use in the Chatbot
+            // Encode the chatbot settings array into JSON format for use in JavaScript
+            chatbotSettings = <?php echo json_encode($chatbot_settings); ?>;
+            if (chatbotSettings && typeof chatbotSettings === "object") {
+                Object.keys(chatbotSettings).forEach(function(key) {
+                    // DIAG - Diagnostics - Ver 2.0.4
+                    console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
+                    localStorage.setItem(key, chatbotSettings[key]);
+                });
+            }
+
+            // Check if the variables are not empty before setting them in localStorage
+            if ('<?php echo $style; ?>' !== '') {
+                localStorage.setItem('chatbot_chatgpt_display_style', '<?php echo $style; ?>');
+            }
+            if ('<?php echo $assistant; ?>' !== '') {
+                localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $assistant; ?>');
+            }
+            
+            // Preload avatar - Ver 2.0.3
+            if ('<?php echo $avatar_icon_setting; ?>' !== '') {
+                localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', '<?php echo $avatar_icon_setting; ?>');
+            }
+            if ('<?php echo $custom_avartar_icon_setting; ?>' !== '') {
+                localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', '<?php echo $custom_avartar_icon_setting; ?>');
+            }
         }
 
-        // Check if the variables are not empty before setting them in localStorage
-        if ('<?php echo $style; ?>' !== '') {
-            localStorage.setItem('chatbot_chatgpt_display_style', '<?php echo $style; ?>');
-        }
-        if ('<?php echo $assistant; ?>' !== '') {
-            localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $assistant; ?>');
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update the localStorage with the chatbot settings
+            updateChatbotLocalStorage();
+        }); 
         
-        // Preload avatar - Ver 2.0.3
-        if ('<?php echo $avatar_icon_setting; ?>' !== '') {
-            localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', '<?php echo $avatar_icon_setting; ?>');
-        }
-        if ('<?php echo $custom_avartar_icon_setting; ?>' !== '') {
-            localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', '<?php echo $custom_avartar_icon_setting; ?>');
-        }
     </script>
     <?php
 

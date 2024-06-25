@@ -152,10 +152,10 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-downlo
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper.php'; // Functions - Ver 2.0.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-greetings.php'; // Functions - Ver 2.0.5
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php'; // Functions - Ver 2.0.5
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-file.php'; // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
@@ -802,8 +802,8 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', 'Check for links and images in response before returning');
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
-        // DIAG - Diagnostics - Ver 2.0.5 - XXX
-        back_trace( 'NOTICE', 'Response: ' . $response);
+        // DIAG - Diagnostics - Ver 2.0.5
+        // back_trace( 'NOTICE', 'Response: ' . $response);
 
         // Return response
         wp_send_json_success($response);
