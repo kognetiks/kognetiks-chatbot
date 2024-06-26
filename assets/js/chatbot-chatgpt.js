@@ -1,9 +1,9 @@
 jQuery(document).ready(function ($) {
 
-    // DIAG - Diagnostics = Ver 1.4.2
-    // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-        console.log('Chatbot: NOTICE: Entering chatbot-chatgpt.js');
-    // }
+    // DIAG - Diagnotics - Ver 2.0.5
+    console.log('Chatbot: NOTICE: chatbot-chatgpt.js - ENTERING');
+    console.log('Chatbot: NOTICE: chatbot-chatgpt.js - chatbot_chatgpt_initial_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
+    console.log('Chatbot: NOTICE: chatbot-chatgpt.js - chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
 
     let chatGptChatBot = $('#chatbot-chatgpt').hide();
 
@@ -18,9 +18,7 @@ jQuery(document).ready(function ($) {
     chatbotChatgptBotName = localStorage.getItem('chatbot_chatgpt_bot_name') || 'Kognetiks Chatbot';
     chatbotChatgptBotPrompt = localStorage.getItem('chatbot_chatgpt_bot_prompt') || 'Enter your question ...';
 
-    // Determine the shortcode styling where default is 'floating' or 'embedded' - Ver 1.7.1
     chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
-    // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
     chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
 
     initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
@@ -278,41 +276,38 @@ jQuery(document).ready(function ($) {
         // console.log('Chatbot: NOTICE: isFirstTime: ' + isFirstTime);
 
         if (isFirstTime) {
-            // DIAG - Logging for Diagnostics
-            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('Chatbot: NOTICE: initializeChatbot at isFirstTime');
-            // }
-            initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
 
-            // Don't append the greeting if it's already in the conversation
+            // Explicitly check for null to determine if a value exists for the key
+            let storedGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting');
+            initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello! How can I help you today?';
+
+            console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+
             if (conversation.text().includes(initialGreeting)) {
                 return;
             }
 
             lastMessage = conversation.children().last().text();
 
-            // Don't append the subsequent greeting if it's already in the conversation - Ver 1.5.0
             if (lastMessage === subsequentGreeting) {
                 return;
             }
 
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatbot_chatgpt_opened', 'true');
-            // Save the conversation after the initial greeting is appended - Ver 1.2.0
-            sessionStorage.setItem('chatbot_chatgpt_conversation', conversation.html());           
+            sessionStorage.setItem('chatbot_chatgpt_conversation', conversation.html());         
 
         } else {
-            // DIAG - Logging for Diagnostics - Ver 1.4.2
-            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('Chatbot: NOTICE: initializeChatbot at else');
-            // }
-            initialGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
-            // Don't append the greeting if it's already in the conversation
+            let storedGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting');
+            initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello again! How can I help you?';
+    
+            console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+    
             if (conversation.text().includes(initialGreeting)) {
                 return;
             }
-
+    
             appendMessage(initialGreeting, 'bot', 'initial-greeting');
             localStorage.setItem('chatbot_chatgpt_opened', 'true');
 

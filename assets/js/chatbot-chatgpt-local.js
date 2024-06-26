@@ -3,7 +3,7 @@ jQuery(document).ready(function ($) {
     function chatbot_chatgpt_localize() {
    
         // DIAG - Diagnostics - Ver 1.8.5
-        console.log('Chatbot: NOTICE: Entering chatbot_chatgpt_localize');
+        console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - ENTERING');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         let chatbotChatgptBotNameInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_name) ? chatbotSettings.chatbot_chatgpt_bot_name : 'Kognetiks Chatbot';
@@ -12,8 +12,7 @@ jQuery(document).ready(function ($) {
         let chatgptInitialGreetingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.initial_greeting) ? chatbotSettings.initial_greeting : 'Hello! How can I help you today?';
         let chatgptSubsequentGreetingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_subsequent_greeting) ? chatbotSettings.chatbot_chatgpt_subsequent_greeting : 'Hello again! How can I help you?';
 
-        // let chatbotChatgptDisplayStyleInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_display_style) ? chatbotSettings.chatbot_chatgpt_display_style : 'floating';
-        // console.log('CHATBOT: NOTICE: chatbotChatgptDisplayStyleInput: ' + chatbotChatgptDisplayStyleInput);
+        let chatbotChatgptDisplayStyleInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_display_style) ? chatbotSettings.chatbot_chatgpt_display_style : 'floating';
         let chatbotChatgptAssistantAliasInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_assistant_alias) ? chatbotSettings.chatbot_chatgpt_assistant_alias : 'primary';
 
         let chatgptStartStatusInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbotStartStatus) ? chatbotSettings.chatbotStartStatus : 'closed';

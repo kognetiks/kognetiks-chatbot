@@ -20,9 +20,11 @@ function options_helper($assistant_details, $option_name, $default_value) {
         $assistant_details[$option_name] = esc_attr(get_option("chatbot_chatgpt_{$option_name}", $default_value));
 
         // DIAG - Diagnotics - Ver 2.0.5
-        back_trace( 'NOTICE', 'Option: ' . $option_name . ' - Value: ' . $assistant_details[$option_name]);
+        back_trace( 'NOTICE', 'Option: ' . $option_name . ' - Value: ' . $assistant_details[$option_name] . ' - Option Not Set');
 
     }
+
+    back_trace( 'NOTICE', 'Option: ' . $option_name . ' - Value: ' . $assistant_details[$option_name] . ' - Option Set');
 
     return $assistant_details;
 }

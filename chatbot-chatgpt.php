@@ -275,8 +275,9 @@ function chatbot_chatgpt_enqueue_scripts() {
     // }
 
     // Enqueue the scripts
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
+    // wp_enqueue_script('greetings.js', plugins_url('assets/js/greetings.js', __FILE__), array('jquery'), '1.0', true);
 
     // Enqueue DOMPurify - Ver 1.8.1
     // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
@@ -300,7 +301,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
         'model' => $model,
-        'voice' => 'alloy',
+        'voice' => $voice,
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -909,10 +910,7 @@ function concatenateHistory($transient_name) {
 // Initialize the Greetings - Ver 1.6.1
 function enqueue_greetings_script( $initial_greeting = null, $subsequent_greeting = null) {
 
-    // DIAG - Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', "enqueue_greetings_script() called");
-
-    wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
+    // wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
     // If user is logged in, then modify greeting if greeting contains "[...]" or remove if not logged in - Ver 1.9.4
     if (is_user_logged_in()) {
@@ -931,8 +929,6 @@ function enqueue_greetings_script( $initial_greeting = null, $subsequent_greetin
         // If $initial_greeting contains "[$user_field_name]" then replace with field from DB
         if (strpos($initial_greeting, '[' . $user_field_name . ']') !== false) {
             $initial_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $initial_greeting);
-            // back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
-            // back_trace ( 'NOTICE', 'Initial Greeting: ' . $initial_greeting);
         } else {
             $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
         }
@@ -948,28 +944,30 @@ function enqueue_greetings_script( $initial_greeting = null, $subsequent_greetin
         // If $subsequent_greeting contains "[$user_field_name]" then replace with field from DB
         if (strpos($subsequent_greeting, '[' . $user_field_name . ']') !== false) {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $subsequent_greeting);
-            // back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
-            // back_trace ( 'NOTICE', 'Subsequent Greeting: ' . $subsequent_greeting);
         } else {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
         }
 
     } else {
 
-        $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+        //Do this for Initial Greeting
+        if ( empty($initial_greeting) ) {
+            $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+        }
 
         $user_field_name = '';
         $user_field_name = substr($initial_greeting, strpos($initial_greeting, '[') + 1, strpos($initial_greeting, ']') - strpos($initial_greeting, '[') - 1 );
 
-        // $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
         $initial_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $initial_greeting);
 
-        $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+        //Do this for Subsequent Greeting
+        if ( empty($subsequent_greeting) ) {
+            $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+        }
 
         $user_field_name = '';
         $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
 
-        // $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
         $subsequent_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $subsequent_greeting);
 
     }

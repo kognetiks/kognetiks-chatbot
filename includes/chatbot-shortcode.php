@@ -580,11 +580,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Fetch and update initial greeting
     $assistant_details = options_helper($assistant_details, 'initial_greeting', 'Hello! How can I help you today?');
-    $chatbot_settings['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
 
     // Fetch and update subsequent greeting
     $assistant_details = options_helper($assistant_details, 'subsequent_greeting', 'How can I help you further?');
-    $chatbot_settings['chatbot_chatgpt_subsequent_greeting'] = $assistant_details['subsequent_greeting'];
 
     // Correctly use enqueue_greetings_script and handle its return
     $modified_greetings = enqueue_greetings_script($assistant_details['initial_greeting'], $assistant_details['subsequent_greeting']);
@@ -595,49 +593,77 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['subsequent_greeting'] = $modified_greetings['subsequent_greeting'];
     }
 
+    // FIXME - WHY DO I NEED TO DO THIS? - THE KEY SHOULD PROBABLY BE 'chatbot_chatgpt_initial_greeting' ALL ALONG
+    $assistant_details['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
+    $chatbot_settings['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
+    // FIXME - WHY DO I NEED TO DO THIS? - THE KEY SHOULD PROBABLY BE 'chatbot_chatgpt_subsequent_greeting' ALL ALONG
+    $assistant_details['chatbot_chatgpt_subsequent_greeting'] = $assistant_details['subsequent_greeting'];
+    $chatbot_settings['chatbot_chatgpt_subsequent_greeting'] = $assistant_details['subsequent_greeting'];
+
+    // DIAG - Diagnostics - Ver 2.0.5
+    back_trace( 'NOTICE', '$modified_greetings: ' . print_r($modified_greetings, true));
+
+    // DIAG - Diagnostics - Ver 2.0.5
+    back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
+    
     // chatbot_chatgpt_shortcode_enqueue_script();
 
-    // Push data to local storage for the Chatbot - Ver 2.0.4
-    // $chatbotSettings = $script_data_array;
-    // wp_localize_script('chatbot-chatgpt', 'chatbot_chatgpt_script_data', $chatbotSettings);
-    // $chatbot_settings['TEST'] = 'TEST';
-    // $chatbot_settings['chatbot_chatgpt_bot_name'] = $bot_name;
+    // Last chance to set localStorage - Ver 2.0.5
+    $assistant_details['style'] = !empty($assistant_details['style']) ? $assistant_details['style'] : esc_attr(get_option('chatbot_chatgpt_width_setting', 'floating'));
+    $chatbot_settings['chatbot_chatgpt_width_setting'] = $assistant_details['style'];
 
-    // $chatbot_settings['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
-    // $chatbot_settings['chatbot_chatgpt_subsequent_greeting'] = $assistant_details['subsequent_greeting'];
-    
-    // $greetings = array(
-    //     'initial_greeting' => $assistant_details['initial_greeting'],
-    //     'subsequent_greeting' => $assistant_details['subsequent_greeting'],
-    // );
+    $assistant_details['audience'] = !empty($assistant_details['audience']) ? $assistant_details['audience'] : esc_attr(get_option('chatbot_chatgpt_audience_choice', 'All'));
+    $chatbot_settings['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
 
-    // $chatbot_settings['chatbot_chatgpt_display_style'] = $assistant_details['style'];
-    // $chatbot_settings['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
-    // $chatbot_settings['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
-    // $chatbot_settings['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
-    // // $chatbot_settings['chatbot_chatgpt_allow_mp3_uploads'] = $assistant_details['allow_mp3_uploads'];
-    // // $chatbot_settings['chatbot_chatgpt_read_aloud_option'] = $assistant_details['allow_read_aloud'];
-    // $chatbot_settings['chatbot_chatgpt_allow_download_transcript'] = $assistant_details['allow_transcript_downloads'];
+    $assistant_details['voice'] = !empty($assistant_details['voice']) ? $assistant_details['voice'] : esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+    $chatbot_settings['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
+
+    $assistant_details['allow_file_uploads'] = !empty($assistant_details['allow_file_uploads']) ? $assistant_details['allow_file_uploads'] : esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+    $chatbot_settings['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
+
+    $assistant_details['allow_mp3_uploads'] = !empty($assistant_details['allow_mp3_uploads']) ? $assistant_details['allow_mp3_uploads'] : esc_attr(get_option('chatbot_chatgpt_allow_mp3_uploads', 'No'));
+    $chatbot_settings['chatbot_chatgpt_allow_mp3_uploads'] = $assistant_details['allow_mp3_uploads'];
+
+    $assistant_details['allow_read_aloud'] = !empty($assistant_details['allow_read_aloud']) ? $assistant_details['allow_read_aloud'] : esc_attr(get_option('chatbot_chatgpt_read_aloud_option', 'yes'));
+    $chatbot_settings['chatbot_chatgpt_read_aloud_option'] = $assistant_details['allow_read_aloud'];
+
+    $assistant_details['allow_transcript_downloads'] = !empty($assistant_details['allow_transcript_downloads']) ? $assistant_details['allow_transcript_downloads'] : esc_attr(get_option('chatbot_chatgpt_allow_download_transcript', 'Yes'));
+    $chatbot_settings['chatbot_chatgpt_allow_download_transcript'] = $assistant_details['allow_transcript_downloads'];
+
+    $assistant_details['additional_instructions'] = !empty($assistant_details['additional_instructions']) ? $assistant_details['additional_instructions'] : esc_attr(get_option('chatbot_chatgpt_additional_instructions', ''));
+    $chatbot_settings['chatbot_chatgpt_additional_instructions'] = $assistant_details['additional_instructions'];
+
+    $assistant_details['force_page_reload'] = !empty($assistant_details['force_page_reload']) ? $assistant_details['force_page_reload'] : esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No'));
+    $chatbot_settings['chatbot_chatgpt_force_page_reload'] = $assistant_details['force_page_reload'];
+
+    $assistant_details['width'] = !empty($assistant_details['width']) ? $assistant_details['width'] : esc_attr(get_option('chatbot_chatgpt_width_setting', '300'));
+    $chatbot_settings['chatbot_chatgpt_width_setting'] = $assistant_details['width'];
+
+    $assistant_details['common_name'] = !empty($assistant_details['common_name']) ? $assistant_details['common_name'] : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+    $chatbot_settings['chatbot_chatgpt_bot_name'] = $assistant_details['common_name'];
 
     // DIAG - Diagnostics - Ver 2.0.4
     // back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
 
     // // Push data to local storage for the Chatbot - Ver 2.0.5
-    // echo '<script type="text/javascript">
-    //         window.onload = function() {
-    //             console.log("Chatbot: NOTICE: chatbot-shortcode.php - STARTED");
-    //             // Encode the chatbot settings array into JSON format for use in JavaScript
-    //             let chatbotSettings = ' . json_encode($chatbot_settings) . ';
-    //             if (chatbotSettings && typeof chatbotSettings === "object") {
-    //                 Object.keys(chatbotSettings).forEach(function(key) {
-    //                     // DIAG - Diagnostics - Ver 2.0.4
-    //                     console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
-    //                     localStorage.setItem(key, chatbotSettings[key]);
-    //                 });
-    //             }
-    //             console.log("Chatbot: NOTICE: chatbot-shortcode.php - FINISHED");
-    //         };
-    //     </script>';
+    echo '<script type="text/javascript">
+            window.onload = function() {
+                console.log("Chatbot: NOTICE: chatbot-shortcode.php - STARTED");
+                // Encode the chatbot settings array into JSON format for use in JavaScript
+                let chatbotSettings = ' . json_encode($chatbot_settings) . ';
+                if (chatbotSettings && typeof chatbotSettings === "object") {
+                    Object.keys(chatbotSettings).forEach(function(key) {
+                        if (key === "assistant_id" || key === "chatbot_chatgpt_assistant_alias") {
+                            return;
+                        }
+                        // DIAG - Diagnostics - Ver 2.0.5
+                        console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
+                        localStorage.setItem(key, chatbotSettings[key]);
+                    });
+                }
+                console.log("Chatbot: NOTICE: chatbot-shortcode.php - FINISHED");
+            };
+        </script>';
 
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
