@@ -931,6 +931,10 @@ function enqueue_greetings_script( $initial_greeting = null, $subsequent_greetin
             $initial_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $initial_greeting);
         } else {
             $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
+            // Remove the extra space when two spaces are present
+            $initial_greeting = str_replace('  ', ' ', $initial_greeting);
+            // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+            $initial_greeting = preg_replace('/\s*([.,!?])/', '$1', $initial_greeting);
         }
 
         // Do this for Subsequent Greeting
@@ -946,6 +950,10 @@ function enqueue_greetings_script( $initial_greeting = null, $subsequent_greetin
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $subsequent_greeting);
         } else {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
+            // Remove the extra space when two spaces are present
+            $subsequent_greeting = str_replace('  ', ' ', $subsequent_greeting);
+            // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+            $subsequent_greeting = preg_replace('/\s*([.,!?])/', '$1', $subsequent_greeting);
         }
 
     } else {
@@ -958,7 +966,12 @@ function enqueue_greetings_script( $initial_greeting = null, $subsequent_greetin
         $user_field_name = '';
         $user_field_name = substr($initial_greeting, strpos($initial_greeting, '[') + 1, strpos($initial_greeting, ']') - strpos($initial_greeting, '[') - 1 );
 
-        $initial_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $initial_greeting);
+        // $initial_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $initial_greeting);
+        $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
+        // Remove the extra space when two spaces are present
+        $initial_greeting = str_replace('  ', ' ', $initial_greeting);
+        // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+        $initial_greeting = preg_replace('/\s*([.,!?])/', '$1', $initial_greeting);
 
         //Do this for Subsequent Greeting
         if ( empty($subsequent_greeting) ) {
@@ -968,7 +981,12 @@ function enqueue_greetings_script( $initial_greeting = null, $subsequent_greetin
         $user_field_name = '';
         $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
 
-        $subsequent_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $subsequent_greeting);
+        // $subsequent_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $subsequent_greeting);
+        $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
+        // Remove the extra space when two spaces are present
+        $subsequent_greeting = str_replace('  ', ' ', $subsequent_greeting);
+        // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+        $subsequent_greeting = preg_replace('/\s*([.,!?])/', '$1', $subsequent_greeting);        
 
     }
 

@@ -101,16 +101,16 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     if ( !empty($t_voice) ) {
         $voice = $t_voice;
         // DIAG - Diagnostics - Ver 1.9.5
-        // back_trace( 'NOTICE', '$voice from transient: ' . $voice);
+        back_trace( 'NOTICE', '$voice from transient: ' . $voice);
     } elseif ( !empty($script_data_array['voice'])) {
         $voice = $script_data_array['voice'];
         // DIAG - Diagnostics - Ver 1.9.5
-        // back_trace( 'NOTICE', '$voice from script_data_array: ' . $voice);
+        back_trace( 'NOTICE', '$voice from script_data_array: ' . $voice);
     } else {
         // Get the voice option from the settings (default is alloy)
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
         // DIAG - Diagnostics - Ver 1.9.5
-        // back_trace( 'NOTICE', '$voice from get_option: ' . $voice);
+        back_trace( 'NOTICE', '$voice from get_option: ' . $voice);
     }
 
     // Belt and Suspender - Ver 1.9.5
@@ -264,11 +264,20 @@ function chatbot_chatgpt_read_aloud($message) {
     // DIAG - Diagnostics - Ver 1.9.5
     // back_trace( 'NOTICE', '$t_model: ' . $t_model);
     if ( empty($t_model) ) {
-        $t_model = 'tts-1-1106';
+        $t_model = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));;
     }
 
-    set_chatbot_chatgpt_transients( 'model', esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106')), $user_id, $page_id);
-    $script_data_array['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
+    // Hold the voice
+    $t_voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    // DIAG - Diagnostics - Ver 2.0.5
+    // back_trace( 'NOTICE', '$t_voice: ' . $t_voice);
+    if ( empty($t_voice) ) {
+        $t_voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );;
+    }
+
+    set_chatbot_chatgpt_transients( 'model', esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106')), $session_id, $page_id);
+    $script_data_array['model'] = $t_model;
+    $script_data_array['voice'] = $t_voice;
     // DIAG - Diagnostics - Ver 1.9.5
     // back_trace( 'NOTICE', 'esc_attr(get_option( chatbot_chatgpt_voice_model_option)): ' . esc_attr(get_option( 'chatbot_chatgpt_voice_model_option')));
     

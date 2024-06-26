@@ -533,5 +533,6 @@ function upgrade_chatbot_chatgpt_assistants_table() {
     delete_option('chatbot_chatgpt_assistant_id_alternate');
     delete_option('chatbot_chatgpt_assistant_instructions');
     delete_option('chatbot_chatgpt_assistant_instructions_alternate');
+    
 }
 

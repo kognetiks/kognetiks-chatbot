@@ -351,10 +351,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Fetch the Kognetiks cookie
     $session_id = kognetiks_get_unique_id();
 
-    // FIXME - THIS NEEDS TO BE FIXED
-    // FIXME - IF THE $assistant_details['additional_instructions'] IS NOT EMPTY THEN USE THETHEM
-    back_trace( 'NOTICE', 'THIS NEEDS TO BE FIXED');
-
     // Set the display style and the assistant alias
     if ( $chatbot_chatgpt_assistant_alias == 'primary' ) {
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', ''));
@@ -567,15 +563,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     
     // Miscellaneous Other Setting to pass to localStorage - Ver 2.0.5
     $chatbot_chatgpt_width_setting = esc_attr(get_option('chatbot_chatgpt_width_setting', '300'));
-    $assistant_details['chatbot_chatgpt_width_setting'] = $chatbot_chatgpt_width_setting;
+    // $assistant_details['chatbot_chatgpt_width_setting'] = $chatbot_chatgpt_width_setting;
     $chatbot_settings['chatbot_chatgpt_width_setting'] = $chatbot_chatgpt_width_setting;
 
     $chatbot_chatgpt_start_status = esc_attr(get_option('chatbot_chatgpt_start_status', 'open'));
-    $assistant_details['chatbot_chatgpt_start_status'] = $chatbot_chatgpt_start_status;
+    // $assistant_details['chatbot_chatgpt_start_status'] = $chatbot_chatgpt_start_status;
     $chatbot_settings['chatbot_chatgpt_start_status'] = $chatbot_chatgpt_start_status;
 
     $chatbot_chatgpt_start_status_new_visitor = esc_attr(get_option('chatbot_chatgpt_start_status_new_visitor', 'closed'));
-    $assistant_details['chatbot_chatgpt_start_status_new_visitor'] = $chatbot_chatgpt_start_status_new_visitor;
+    // $assistant_details['chatbot_chatgpt_start_status_new_visitor'] = $chatbot_chatgpt_start_status_new_visitor;
     $chatbot_settings['chatbot_chatgpt_start_status_new_visitor'] = $chatbot_chatgpt_start_status_new_visitor;
 
     // Fetch and update initial greeting
@@ -601,11 +597,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_settings['chatbot_chatgpt_subsequent_greeting'] = $assistant_details['subsequent_greeting'];
 
     // DIAG - Diagnostics - Ver 2.0.5
-    back_trace( 'NOTICE', '$modified_greetings: ' . print_r($modified_greetings, true));
+    // back_trace( 'NOTICE', '$modified_greetings: ' . print_r($modified_greetings, true));
 
-    // DIAG - Diagnostics - Ver 2.0.5
-    back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
-    
+    // REMOVED - Ver 2.0.5
     // chatbot_chatgpt_shortcode_enqueue_script();
 
     // Last chance to set localStorage - Ver 2.0.5
@@ -641,6 +635,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     $assistant_details['common_name'] = !empty($assistant_details['common_name']) ? $assistant_details['common_name'] : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     $chatbot_settings['chatbot_chatgpt_bot_name'] = $assistant_details['common_name'];
+    $chatbot_settings['chatbot_chatgpt_bot_name'] = !empty($assistant_details['common_name']) ? $assistant_details['common_name'] : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+    
+    // DIAG - Diagnostics - Ver 2.0.5
+    back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
     // DIAG - Diagnostics - Ver 2.0.4
     // back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
