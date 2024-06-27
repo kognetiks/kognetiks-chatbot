@@ -35,6 +35,10 @@ jQuery(document).ready(function ($) {
         let chatgptCustomButtonURL1Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_1) ? chatbotSettings.chatbot_chatgpt_custom_button_url_1 : '';
         let chatgptCustomButtonName2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_2) ? chatbotSettings.chatbot_chatgpt_custom_button_name_2 : '';
         let chatgptCustomButtonURL2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_2) ? chatbotSettings.chatbot_chatgpt_custom_button_url_2 : '';
+        let chatgptCustomButtonName3Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_3) ? chatbotSettings.chatbot_chatgpt_custom_button_name_3 : '';
+        let chatgptCustomButtonURL3Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_3) ? chatbotSettings.chatbot_chatgpt_custom_button_url_3 : '';
+        let chatgptCustomButtonName4Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_4) ? chatbotSettings.chatbot_chatgpt_custom_button_name_4 : '';
+        let chatgptCustomButtonURL4Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_4) ? chatbotSettings.chatbot_chatgpt_custom_button_url_4 : '';
 
         // Allow file uploads - Ver 1.7.6
         let chatgptAllowFileUploadsInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_allow_file_uploads) ? chatbotSettings.chatbot_chatgpt_allow_file_uploads : 'No';
@@ -99,6 +103,10 @@ jQuery(document).ready(function ($) {
         chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
         chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
         chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
+        chatgptCustomButtonName3Input = document.getElementById('chatbot_chatgpt_custom_button_name_3');
+        chatgptCustomButtonURL3Input = document.getElementById('chatbot_chatgpt_custom_button_url_3');
+        chatgptCustomButtonName4Input = document.getElementById('chatbot_chatgpt_custom_button_name_4');
+        chatgptCustomButtonURL4Input = document.getElementById('chatbot_chatgpt_custom_button_url_4');
 
         // Allow file uploads - Ver 1.7.6
         chatgptAllowFileUploadsInput = document.getElementById('chatbot_chatgpt_allow_file_uploads');
@@ -210,6 +218,30 @@ jQuery(document).ready(function ($) {
                 localStorage.setItem('chatbot_chatgpt_custom_button_url_2', this.value);
             });
         }
+
+        if(chatgptCustomButtonName3Input) {
+            chatgptCustomButtonName3Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_3', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonURL3Input) {
+            chatgptCustomButtonURL3Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_3', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonName4Input) {
+            chatgptCustomButtonName4Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_4', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonURL4Input) {
+            chatgptCustomButtonURL4Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_4', this.value);
+            });
+        }
         
         // Avatar Settings - Ver 1.5.0
         if(chatgptAvatarIconSettingInput) {
@@ -263,6 +295,18 @@ jQuery(document).ready(function ($) {
         if(chatgptCustomButtonURL2Input) {
             chatgptCustomButtonURL2Input.addEventListener('change', function() {
                 localStorage.setItem('chatbot_chatgpt_custom_button_url_2', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonName3Input) {
+            chatgptCustomButtonName3Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_3', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonURL3Input) {
+            chatgptCustomButtonURL3Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_3', this.value);
             });
         }
 
@@ -341,6 +385,10 @@ jQuery(document).ready(function ($) {
                 let chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
                 let chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
                 let chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
+                let chatgptCustomButtonName3Input = document.getElementById('chatbot_chatgpt_custom_button_name_3');
+                let chatgptCustomButtonURL3Input = document.getElementById('chatbot_chatgpt_custom_button_url_3');
+                let chatgptCustomButtonName4Input = document.getElementById('chatbot_chatgpt_custom_button_name_4');
+                let chatgptCustomButtonURL4Input = document.getElementById('chatbot_chatgpt_custom_button_url_4');
 
                 // Allow file uploads - Ver 1.7.6
                 let chatgptAllowFileUploadsInput = document.getElementById('chatbot_chatgpt_allow_file_uploads');
@@ -436,6 +484,18 @@ jQuery(document).ready(function ($) {
 
                 if(chatgptCustomButtonURL2Input) {
                     localStorage.setItem('chatbot_chatgpt_custom_button_url_2', chatgptCustomButtonURL2Input.value);
+                }
+
+                if(chatgptCustomButtonName3Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_name_3', chatgptCustomButtonName3Input.value);
+                }
+
+                if(chatgptCustomButtonURL3Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_url_3', chatgptCustomButtonURL3Input.value);
+                }
+
+                if(chatgptCustomButtonName4Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_name_4', chatgptCustomButtonName4Input.value);
                 }
 
                 // Allow file uploads - Ver 1.7.6

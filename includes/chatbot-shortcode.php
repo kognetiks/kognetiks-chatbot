@@ -70,6 +70,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Script Attributes
+    // FIXME - STILL NEEDED? - Ver 2.0.5 - 2024 06 27
     $script_data_array = array(
         'user_id' => $user_id,
         'page_id' => $page_id,
@@ -83,6 +84,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // BELT & SUSPENDERS - Ver 1.9.4
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+    $voice_choice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
 
     // Shortcode Attributes
     $chatbot_chatgpt_default_atts = array(
@@ -93,7 +95,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'sequence' => '', // If not passed then default value
         'additional_instructions' => '', // If not passed then default value
         'model' => $model_choice, // If not passed then default value
-        'voice' => 'alloy', // If not passed then default value
+        'voice' => $voice_choice, // If not passed then default value
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -284,6 +286,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // Validate and sanitize the voice parameter - Ver 1.9.9
+    // FIXME - VOICE = NONE, THEN READ ALLOW SHOULD BE OFF
     $valid_voices = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
     $voice = 'alloy'; // default value
     if (array_key_exists('voice', $atts)) {
@@ -291,20 +294,20 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         if (in_array($sanitized_voice, $valid_voices)) {
             $voice = $sanitized_voice;
             $script_data_array['voice'] = $voice;
-            $assistant_details['chatbot_chatgpt_voice_option'] = $voice;
+            $assistant_details['voice'] = $voice;
             $chatbot_settings['chatbot_chatgpt_voice_option'] = $voice;
             // back_trace('NOTICE', '$voice: ' . $voice);
         } else {
             $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
             $script_data_array['voice'] = $voice;
-            $assistant_details['chatbot_chatgpt_voice_option'] = $voice;
+            $assistant_details['voice'] = $voice;
             $chatbot_settings['chatbot_chatgpt_voice_option'] = $voice;
             // back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
         }
     } else {
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
         $script_data_array['voice'] = $voice;
-        $assistant_details['chatbot_chatgpt_voice_option'] = $voice;
+        $assistant_details['voice'] = $voice;
         $chatbot_settings['chatbot_chatgpt_voice_option'] = $voice;
         // back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
     }
@@ -383,6 +386,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'model' => $model,
         'voice' => $voice,
     );
+
+    back_trace( 'NOTICE', '$voice: ' . $voice);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at line 230 of the function');
@@ -608,9 +614,21 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     $assistant_details['audience'] = !empty($assistant_details['audience']) ? $assistant_details['audience'] : esc_attr(get_option('chatbot_chatgpt_audience_choice', 'All'));
     $chatbot_settings['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
-
+    
+    // DIAG - Diagnostics - Ver 2.0.5
+    back_trace( 'NOTICE', 'BEFORE: $assistant_details[\'voice\']: ' . $assistant_details['voice']);
+    back_trace( 'NOTICE', 'BEFORE: $chatbot_settings[\'chatbot_chatgpt_voice_option\']: ' . $chatbot_settings['chatbot_chatgpt_voice_option']);
+    back_trace( 'NOTICE', 'BEFORE: $script_data_array[\'voice\']: ' . $script_data_array['voice']);
+    
     $assistant_details['voice'] = !empty($assistant_details['voice']) ? $assistant_details['voice'] : esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
     $chatbot_settings['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
+    $script_data_array['voice'] = $assistant_details['voice'];
+    set_chatbot_chatgpt_transients('voice', $assistant_details['voice'], $user_id, $page_id, null, null);
+
+    // DIAG - Diagnostics - Ver 2.0.5
+    back_trace( 'NOTICE', 'AFTER: $assistant_details[\'voice\']: ' . $assistant_details['voice']);
+    back_trace( 'NOTICE', 'AFTER: $chatbot_settings[\'chatbot_chatgpt_voice_option\']: ' . $chatbot_settings['chatbot_chatgpt_voice_option']);
+    back_trace( 'NOTICE', 'AFTER: $script_data_array[\'voice\']: ' . $script_data_array['voice']);
 
     $assistant_details['allow_file_uploads'] = !empty($assistant_details['allow_file_uploads']) ? $assistant_details['allow_file_uploads'] : esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
     $chatbot_settings['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
@@ -928,32 +946,25 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 ?>
                 <div id="chatbot-chatgpt-custom-buttons" style="justify-content: center; flex-grow: 0; display: flex; flex-direction: row; align-items: center; gap: 5px; padding: 5px;">
                     <?php
-                    $chatbot_chatgpt_custom_button_name_1 = '';
-                    $chatbot_chatgpt_custom_button_url_1 = '';
-                    $chatbot_chatgpt_custom_button_name_2 = '';
-                    $chatbot_chatgpt_custom_button_url_2 = '';
-                    $chatbot_chatgpt_custom_button_name_1 = get_option('chatbot_chatgpt_custom_button_name_1');
-                    $chatbot_chatgpt_custom_button_url_1 = get_option('chatbot_chatgpt_custom_button_url_1');
-                    $chatbot_chatgpt_custom_button_name_2 = get_option('chatbot_chatgpt_custom_button_name_2');
-                    $chatbot_chatgpt_custom_button_url_2 = get_option('chatbot_chatgpt_custom_button_url_2');
-                    // DIAG - Diagnostics - Ver 1.6.5
-                    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_button_name_1: ' . $chatbot_chatgpt_custom_button_name_1);
-                    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_button_url_1: ' . $chatbot_chatgpt_custom_button_url_1);
-                    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_button_name_2: ' . $chatbot_chatgpt_custom_button_name_2);
-                    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_button_url_2: ' . $chatbot_chatgpt_custom_button_url_2);
-                    if (!empty($chatbot_chatgpt_custom_button_name_1) && !empty($chatbot_chatgpt_custom_button_url_1)) {
-                        ?>
-                        <button class="chatbot-chatgpt-custom-button-class">
-                        <a href="<?php echo esc_url($chatbot_chatgpt_custom_button_url_1); ?>" target="_blank"><?php echo esc_html($chatbot_chatgpt_custom_button_name_1); ?></a>
-                        </button>
-                        <?php
+                    $button_names = [];
+                    $button_urls = [];
+                    $button_count = 4; // Maximum number of buttons
+
+                    // Initialize and set button names and URLs
+                    for ($i = 1; $i <= $button_count; $i++) {
+                        $button_names[$i] = get_option("chatbot_chatgpt_custom_button_name_$i");
+                        $button_urls[$i] = get_option("chatbot_chatgpt_custom_button_url_$i");
                     }
-                    if (!empty($chatbot_chatgpt_custom_button_name_2) && !empty($chatbot_chatgpt_custom_button_url_2)) {
-                        ?>
-                        <button class="chatbot-chatgpt-custom-button-class">
-                        <a href="<?php echo esc_url($chatbot_chatgpt_custom_button_url_2); ?>" target="_blank"><?php echo esc_html($chatbot_chatgpt_custom_button_name_2); ?></a>
-                        </button>
-                        <?php
+
+                    // Generate buttons
+                    for ($i = 1; $i <= $button_count; $i++) {
+                        if (!empty($button_names[$i]) && !empty($button_urls[$i])) {
+                            ?>
+                            <button class="chatbot-chatgpt-custom-button-class">
+                                <a href="<?php echo esc_url($button_urls[$i]); ?>" target="_blank"><?php echo esc_html($button_names[$i]); ?></a>
+                            </button>
+                            <?php
+                        }
                     }
                     ?>
                 </div>

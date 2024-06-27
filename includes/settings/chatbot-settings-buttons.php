@@ -66,3 +66,35 @@ function chatbot_chatgpt_custom_button_link_2_callback($args) {
     <input type="text" id="chatbot_chatgpt_custom_button_url_2" name="chatbot_chatgpt_custom_button_url_2" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
     <?php
 }
+
+function chatbot_chatgpt_custom_button_name_3_callback($args) {
+    $chatbot_chatgpt_custom_button_name_3 = get_option('chatbot_chatgpt_custom_button_name_3');
+    $value = isset($chatbot_chatgpt_custom_button_name_3) ? sanitize_text_field($chatbot_chatgpt_custom_button_name_3) : '';
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_button_name_3" name="chatbot_chatgpt_custom_button_name_3" value="<?php echo esc_attr($value); ?>" />
+    <?php
+}
+
+function chatbot_chatgpt_custom_button_link_3_callback($args) {
+    $chatbot_chatgpt_custom_button_url_3 = get_option('chatbot_chatgpt_custom_button_url_3');
+    $value = isset($chatbot_chatgpt_custom_button_url_3) ? esc_url($chatbot_chatgpt_custom_button_url_3) : '';
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_button_url_3" name="chatbot_chatgpt_custom_button_url_3" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
+    <?php
+}
+
+function chatbot_chatgpt_custom_button_name_4_callback($args) {
+    $chatbot_chatgpt_custom_button_name_4 = get_option('chatbot_chatgpt_custom_button_name_4');
+    $value = isset($chatbot_chatgpt_custom_button_name_4) ? sanitize_text_field($chatbot_chatgpt_custom_button_name_4) : '';
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_button_name_4" name="chatbot_chatgpt_custom_button_name_4" value="<?php echo esc_attr($value); ?>" />
+    <?php
+}
+
+function chatbot_chatgpt_custom_button_link_4_callback($args) {
+    $chatbot_chatgpt_custom_button_url_4 = get_option('chatbot_chatgpt_custom_button_url_4');
+    $value = isset($chatbot_chatgpt_custom_button_url_4) ? esc_url($chatbot_chatgpt_custom_button_url_4) : '';
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_button_url_4" name="chatbot_chatgpt_custom_button_url_4" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
+    <?php
+}

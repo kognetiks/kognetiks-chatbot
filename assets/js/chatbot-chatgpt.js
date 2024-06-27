@@ -776,6 +776,10 @@ jQuery(document).ready(function ($) {
             data: {
                 action: 'chatbot_chatgpt_read_aloud',
                 message: lastMessage,
+                voice: localStorage.getItem('chatbot_chatgpt_voice_option') || 'alloy',  // Default voice: 'alloy',
+                user_id: php_vars.user_id,
+                page_id: php_vars.page_id,
+                session_id: php_vars.session_id,
             },
             beforeSend: function () {
                 showTypingIndicator();

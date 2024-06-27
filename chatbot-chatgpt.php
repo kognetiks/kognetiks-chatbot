@@ -43,6 +43,9 @@ global $wpdb;
 global $session_id;
 global $user_id;
 
+// Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
+ob_start();
+
 // Assign a unique ID to the visitor and logged in users - Ver 2.0.4
 function kognetiks_assign_unique_id() {
     if (!isset($_COOKIE['kognetiks_unique_id'])) {
@@ -342,6 +345,10 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_custom_button_url_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',
         'chatbot_chatgpt_custom_button_url_2' => '',
+        'chatbot_chatgpt_custom_button_name_3' => '',
+        'chatbot_chatgpt_custom_button_url_3' => '',
+        'chatbot_chatgpt_custom_button_name_4' => '',
+        'chatbot_chatgpt_custom_button_url_4' => '',
         'chatbot_chatgpt_allow_file_uploads' => 'No',
         'chatbot_chatgpt_timeout_setting' => '240',
         'chatbot_chatgpt_voice_option' => 'alloy',
@@ -375,6 +382,10 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_custom_button_url_1',
         'chatbot_chatgpt_custom_button_name_2',
         'chatbot_chatgpt_custom_button_url_2',
+        'chatbot_chatgpt_custom_button_name_3',
+        'chatbot_chatgpt_custom_button_url_3',
+        'chatbot_chatgpt_custom_button_name_4',
+        'chatbot_chatgpt_custom_button_url_4',
         'chatbot_chatgpt_allow_file_uploads',
         'chatbot_chatgpt_timeout_setting',
         'chatbot_chatgpt_voice_option',
@@ -556,6 +567,7 @@ function chatbot_chatgpt_send_message() {
     // back_trace ( 'NOTICE', 'chatbot_chatgpt_send_message $chatbot_settings[threadID]: ' . $chatbot_settings['threadID']);
     $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
     $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    $voice = $chatbot_settings['voice'];
 
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
@@ -771,8 +783,9 @@ function chatbot_chatgpt_send_message() {
         } elseif (str_starts_with($model, 'tts')) {
             // Reload the model - BELT & SUSPENDERS
             $script_data_array['model'] = $model;
+            $script_data_array['voice'] = $voice;
             // Send message to TTS API - Text-to-speech - Ver 1.9.5
-            $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+            $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
         } elseif (str_starts_with($model,'whisper')) {
             $script_data_array['model'] = $model;
             // Send message to STT API - Speech-to-text - Ver 1.9.6
