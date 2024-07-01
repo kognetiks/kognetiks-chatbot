@@ -232,6 +232,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **Embedded Chatbot Formatting Updated**: Added a closing </div> tag to the embedded chatbot to ensure proper formatting.
 * **Force Page Reload on Conversation Cleared**: Added an option to force a page reload when the conversation is cleared.
 * **Knowledge Navigator Analysis**: Moved the Knowledge Navigator Analysis for export to the bottom of the Knowledge Navigator tab.
+* **Custom Buttons Expanded**: Now supports up to four custom buttons, on floating only, embedded only, or on both chatbot styles.
 
 = 2.0.4 =
 * Removed session id from the chatbot shortcode and replaced with a unique id for visitors and logged-in users alike.

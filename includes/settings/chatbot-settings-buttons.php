@@ -23,12 +23,20 @@ function chatbot_chatgpt_custom_button_section_callback($args) {
     <?php
 }
 
-// Custom buttons on/off settings field callback - Ver 1.6.5
+// Custom buttons on/off settings field callback - Ver 1.6.5 - Updated in Ver 2.0.5
 function chatbot_chatgpt_enable_custom_buttons_callback($args) {
     $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
+    if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
+        $chatbot_chatgpt_enable_custom_buttons = 'Floating';
+        update_option('chatbot_chatgpt_enable_custom_buttons', 'Floating');
+    } else {
+        $chatbot_chatgpt_enable_custom_buttons = 'Off';
+    }
     ?>
     <select id="chatbot_chatgpt_enable_custom_buttons" name="chatbot_chatgpt_enable_custom_buttons">
-        <option value="On" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
+        <option value="Floating" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'Floating' ); ?>><?php echo esc_html( 'Floating Only' ); ?></option>
+        <option value="Embedded" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'Embedded' ); ?>><?php echo esc_html( 'Embedded Only' ); ?></option>
+        <option value="Both" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'Both' ); ?>><?php echo esc_html( 'Both' ); ?></option>
         <option value="Off" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'Off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
     </select>
     <?php

@@ -815,12 +815,57 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
                 </button>
             <?php endif; ?>
+            </div>
+            <!-- Custom buttons - Ver 1.6.5 -->
+            <?php
+            $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
+            if ($chatbot_chatgpt_enable_custom_buttons == 'Embedded' || $chatbot_chatgpt_enable_custom_buttons == 'Both') {
+                ?>
+                <div id="chatbot-chatgpt-custom-buttons" style="justify-content: center; flex-grow: 0; display: flex; flex-direction: row; align-items: center; gap: 5px; padding: 5px;">
+                    <?php
+                    $button_names = [];
+                    $button_urls = [];
+                    $button_count = 4; // Maximum number of buttons
+
+                    // Initialize and set button names and URLs
+                    for ($i = 1; $i <= $button_count; $i++) {
+                        $button_names[$i] = get_option("chatbot_chatgpt_custom_button_name_$i");
+                        $button_urls[$i] = get_option("chatbot_chatgpt_custom_button_url_$i");
+                    }
+
+                    // Generate buttons
+                    for ($i = 1; $i <= $button_count; $i++) {
+                        if (!empty($button_names[$i]) && !empty($button_urls[$i])) {
+                            ?>
+                            <button class="chatbot-chatgpt-custom-button-class">
+                                <a href="<?php echo esc_url($button_urls[$i]); ?>" target="_blank"><?php echo esc_html($button_names[$i]); ?></a>
+                            </button>
+                            <?php
+                        }
+                    }
+                    ?>
+                </div>
+                <?php
+            }
+            $chatbot_chatgpt_suppress_attribution = 'Off'; // 'On' or 'Off'
+            $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+            // DIAG - Diagnostics - Ver 1.6.5
+            // back_trace( 'NOTICE', 'chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);
+            if ($chatbot_chatgpt_suppress_attribution == 'Off') {
+                ?>
+                <div style="text-align: center;">
+                    <!-- <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" style="text-decoration:none; font-size: 10px;"><?php echo esc_html('Chatbot & Knowledge Navigator by Kognetiks'); ?></a> -->
+                    <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" style="text-decoration:none; font-size: 10px;"><?php echo esc_html('Chatbot WordPress plugin by Kognetiks'); ?></a>
+                </div>
+                <?php
+            }
+            ?>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
         <!-- <i class="dashicons dashicons-format-chat"></i> -->
         <i class="chatbot-open-icon"></i>
         </button>
-        </div>
+        <!-- </div> -->
         <?php
         return ob_get_clean();
     } elseif ($chatbot_chatgpt_display_style == 'floating') {
@@ -940,9 +985,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <!-- Custom buttons - Ver 1.6.5 -->
             <?php
             $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
-            // DIAG - Diagnostics - Ver 1.6.5
-            // back_trace( 'NOTICE', '$chatbot_chatgpt_enable_custom_buttons: ' . $chatbot_chatgpt_enable_custom_buttons);
-            if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
+            if ($chatbot_chatgpt_enable_custom_buttons == 'On' || $chatbot_chatgpt_enable_custom_buttons == 'Floating' || $chatbot_chatgpt_enable_custom_buttons == 'Both') {
                 ?>
                 <div id="chatbot-chatgpt-custom-buttons" style="justify-content: center; flex-grow: 0; display: flex; flex-direction: row; align-items: center; gap: 5px; padding: 5px;">
                     <?php

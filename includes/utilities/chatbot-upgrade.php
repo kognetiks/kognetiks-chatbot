@@ -297,7 +297,13 @@ function chatbot_chatgpt_upgrade() {
         // DIAG - Log the old option deletion
         // back_trace('NOTICE', 'chatbot_chatgpt_kn_dismissed option deleted');
     }
-    
+
+    // Replace option - chatbot_chatgpt_enable_custom_buttons - Ver 2.0.5
+    if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
+        $chatbot_chatgpt_enable_custom_buttons = 'Floating';
+        update_option('chatbot_chatgpt_enable_custom_buttons', 'Floating');
+    }
+
     // FIXME - DETERMINE WHAT OTHER 'OLD' OPTIONS SHOULD BE DELETED
     // FIXME - DETERMINE WHAT OPTION NAMES NEED TO BE CHANGED (DELETE, THEN REPLACE)
 
