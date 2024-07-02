@@ -299,6 +299,7 @@ function chatbot_chatgpt_upgrade() {
     }
 
     // Replace option - chatbot_chatgpt_enable_custom_buttons - Ver 2.0.5
+    $chatbot_chatgpt_enable_custom_buttons = get_option( 'chatbot_chatgpt_enable_custom_buttons' );
     if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
         $chatbot_chatgpt_enable_custom_buttons = 'Floating';
         update_option('chatbot_chatgpt_enable_custom_buttons', 'Floating');
