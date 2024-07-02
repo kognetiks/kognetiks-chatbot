@@ -64,7 +64,7 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
         return false;
     } else {
         // If no errors, print the Assistant's name
-        back_trace( 'NOTICE', 'Assistant Name: ' . $response['name']);
+        // back_trace( 'NOTICE', 'Assistant Name: ' . $response['name']);
         if ($response !== null) {
             return $response['name'];
         } else {

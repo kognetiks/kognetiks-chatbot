@@ -22,52 +22,26 @@ function chatbot_chatgpt_assistant_settings_section_callback($args) {
     <p>Tailor each Assistant to meet the unique needs of your audience, ensuring an engaging and personalized experience for all.</p>
     <p>If you have developed an Assistant in the OpenAI Playground, you will need the id of the assistant - it usually starts with "asst_".</p>
     <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</p>
-    <p>When you\'re ready to use an Assistant, simply add the shortcode <code>[chatbot assistant="Common Name"]</code> to your page.</p>
+    <p>When you're ready to use an Assistant, simply add the shortcode <code>[chatbot assistant="Common Name"]</code> to your page.</p>
     <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
     <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=manage-assistants.md">here</a>.</b></p>
-
-    <!-- <p>Configure settings for your GPT Assistants by adding your below.</p> -->
-    <!-- <p>If you have developed a GPT Assistant, you will need the id of the assistant - is usually starts with "asst_".</p> -->
-    <!-- <p>Enter your GPT Assistant ID instead of ChatGPT.  Set the 'Use GPT Assistant ID' to 'Yes'.</p> -->
-    <!-- <p>Otherwise, you can leave the GPT Assistant ID field blank and set the usage to 'No'.</p> -->
-    <!-- <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</p> -->
-    <!-- <p>See <a href="?page=chatbot-chatgpt&tab=support">Support</a> for more details on using multiple GPT assistants.</p> -->
-    <!-- <h2>Using Multiple GPT Assistants</h2> -->
-    <!-- <p>You can integrate GPT Assistants into your platform using one of shortcode configurations below.</p> -->
-    <!-- <p>Each configuration requires either 'primary', 'alternate' or a GPT Assistant ID, denoted as 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'.</p> -->
-    <!-- <p>GPT Assistants work with both 'floating' and 'embedded' styles.</p> -->
-
-    <!-- <p><b>NOTE:</b> The 'primary' and 'alternate' assistants are set in the ChatGPT settings page.</p> -->
-    <!-- <p><b>NOTE:</b> For best results ensure that the shortcode appears only once on the page.</p> -->
-    <!-- <p>Use the following format to invoke the primary or alternate assistant:</p> -->
-    <!-- <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;"> -->
-        <!-- <li><b><code>&#91;chatbot style="floating" assistant="primary"&#93;</code></b> - Floating style, GPT Assistant as set in Primary setting</li> -->
-        <!-- <li><b><code>&#91;chatbot style="embedded" assistant="alternate"&#93;</code></b> - Embedded style, GPT Assistant as set in Alternate setting</li> -->
-        <!-- <li><b><code>&#91;chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</code></b> - Floating style, GPT Assistant as set in GPT Assistant ID setting</li> -->
-        <!-- <li><b><code>&#91;chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"&#93;</code></b> - Embedded style, GPT Assistant as set in GPT Assistant ID setting</li> -->
-        <!-- <li><b>Mix and match the style and assistant attributes to suit your needs.</b></li> -->
-    <!-- </ul> -->
-    <!-- <p><b>NOTE:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p> -->
-    <!-- <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p> -->
     <?php
 }
 
 // General settings section callback - Ver 2.0.2.1
 function chatbot_chatgpt_gpt_assistants_section_callback($args) {
-
     ?>
-    <p>Configure the Chatbot to use Assistants, allow file uploads, and display the Assistant's name.</p>
-    <p><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
+    <p>Configure the Chatbot to allow file uploads and display the Assistant's name.</p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
-
 }
 
 // GPT Assistant ID section callback - Ver 1.7.2
 function chatbot_chatgpt_assistant_id_section_callback($args) {
     ?>
     <p>Configure a Primary and Alternate Assistant by entering the ID and any additional instructions.</p>
-    <p><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
 }
 
@@ -75,7 +49,7 @@ function chatbot_chatgpt_assistant_id_section_callback($args) {
 function chatbot_chatgpt_assistant_additional_settings_section_callback($args) {
     ?>
     <p>Configure the Advanced settings for Assistants prompt and response tokens, thread retention periods, and the Beta version setting.</p>
-    <p><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
 }
 
@@ -227,7 +201,7 @@ function chatbot_chatgpt_assistant_settings_init() {
         );
     
         // Settings Custom GPTs tab - Ver 1.7.2
-        register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7
+        // register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7 - REMOVED in Ver 2.0.5
         register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allow_file_uploads'); // Ver 1.7.6
         register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_display_custom_gpt_assistant_name'); // Ver 1.9.4
         register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id'); // Ver 1.6.7
@@ -247,14 +221,14 @@ function chatbot_chatgpt_assistant_settings_init() {
             'chatbot_chatgpt_gpt_assistants_settings'
         );
         
-        // Use GPT Assistant ID (Yes or No) - Ver 1.6.7
-        add_settings_field(
-            'chatbot_chatgpt_use_custom_gpt_assistant_id',
-            'Use GPT Assistant Id',
-            'chatbot_chatgpt_use_gpt_assistant_id_callback',
-            'chatbot_chatgpt_gpt_assistants_settings',
-            'chatbot_chatgpt_custom_gpts_section'
-        );
+        // Use GPT Assistant ID (Yes or No) - Ver 1.6.7 - REMOVED in Ver 2.0.5
+        // add_settings_field(
+        //     'chatbot_chatgpt_use_custom_gpt_assistant_id',
+        //     'Use GPT Assistant Id',
+        //     'chatbot_chatgpt_use_gpt_assistant_id_callback',
+        //     'chatbot_chatgpt_gpt_assistants_settings',
+        //     'chatbot_chatgpt_custom_gpts_section'
+        // );
     
         // Allow file uploads to the Assistant - Ver 1.7.6
         add_settings_field(

@@ -16,11 +16,11 @@ TIP: For best results ensure that the shortcode appears only once on the page.
 
 TIP: When using the ```embedded``` style, it's best to put the shortcode in a page or post, not in the footer.
 
-![Assistant Matix](assistant-matrix.png)
+![Managing Assistants](managing-assistants.png)
 
 ### Field Descriptions
 
-1. **Actions**:
+1. **Actions**: `Update`, `Delete`, `Add New Assistant`
    - **Update/Delete**: Use these buttons to update or delete an assistant.
    - **Add New Assistant**: Use this button to add a new assistant.
 
@@ -31,10 +31,12 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
 3. **Assistant ID**:
    - **Description**: The specific ID for the assistant provided by OpenAI at the time you setup your assistant (it usually starts with ```asst_```).
    - **Input**: Enter the OpenAI Assistant ID.
+   - **Required**: This is a required field.
 
 4. **Common Name**:
    - **Description**: A user-friendly name for the assistant.
    - **Input**: Enter a name that easily identifies the assistant.  You'll use this name to call the assistant form the shortcode.
+   - **Required**: This is a required field.
    - **Usage**: ```[chatbot assistant="Common Name"]```
    - **Tip**: Besure sure to use regular quote marks around the "Common Name" if there are any spaces.
 
@@ -47,7 +49,7 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
    - **Input**: Options include ```All```, ```Visitors```, and ```Logged-in```.
 
 7. **Voice**:
-   - **Description**: The voice used by the assistant, one of ```Alloy```, ```Echo```, ```Fable```, ```Onyx```, ```Nova```, or ```Shimmer```.
+   - **Description**: The voice used by the assistant, one of ```Alloy```, ```Echo```, ```Fable```, ```Onyx```, ```Nova```, or ```Shimmer```.  Select ```None``` to disable the Read Aloud options for this Assistant.
    - **Input**: Select from available voice options.
 
 8. **Allow File Uploads**:
@@ -59,21 +61,21 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
    - **Input**: Choose ```Yes``` or ```No```.
 
 10. **Show Assistant Name**:
-    - **Description**: Displays the assistant's name in interactions.
-    - **Input**: Choose ```Yes``` or ```No```.
+   - **Description**: Displays the assistant's name in interactions.
+   - **Input**: Choose ```Yes``` or ```No```.
 
 11. **Initial Greeting**:
-    - **Description**: The first message the assistant sends to users.
-    - **Input**: Enter the greeting message.
+   - **Description**: The first message the assistant sends to users.
+   - **Input**: Enter the greeting message.
 
 12. **Subsequent Greeting**:
-    - **Description**: Messages the assistant sends after the initial greeting.
-    - **Input**: Enter the follow-up greeting messages.
+   - **Description**: Messages the assistant sends after the initial greeting.
+   - **Input**: Enter the follow-up greeting messages.
 
 13. **Placeholder Prompt**:
-    - **Description**: A sample prompt shown in the input field.
-    - **Input**: Enter a placeholder prompt to guide user input.
+   - **Description**: A sample prompt shown in the input field.
+   - **Input**: Enter a placeholder prompt to guide user input.
 
 14. **Additional Instructions**:
-    - **Description**: Extra instructions or context for the assistant.
-    - **Input**: Enter any additional instructions needed for the assistant.
+   - **Description**: Extra instructions or context for the assistant.
+   - **Input**: Enter any additional instructions needed for the assistant.

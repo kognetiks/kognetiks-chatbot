@@ -33,7 +33,7 @@ function create_chatbot_chatgpt_assistants_table() {
         common_name VARCHAR(255) NOT NULL,
         style ENUM('embedded', 'floating') NOT NULL,
         audience ENUM('all', 'visitors', 'logged-in') NOT NULL,
-        voice ENUM('alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer') NOT NULL,
+        voice ENUM('alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer', 'none') NOT NULL,
         allow_file_uploads ENUM('Yes', 'No') NOT NULL,
         allow_transcript_downloads ENUM('Yes', 'No') NOT NULL,
         show_assistant_name ENUM('Yes', 'No') NOT NULL,
@@ -119,8 +119,8 @@ function update_chatbot_chatgpt_assistant($id, $assistant_id, $common_name, $sty
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
     // DIAG - Diagnostics - Ver 2.0.4
-    back_trace ( 'NOTICE', '$initial_greeting', $initial_greeting );
-    back_trace ( 'NOTICE', '$subsequent_greeting', $subsequent_greeting );
+    // back_trace ( 'NOTICE', '$initial_greeting', $initial_greeting );
+    // back_trace ( 'NOTICE', '$subsequent_greeting', $subsequent_greeting );
 
     $wpdb->update(
         $table_name,
@@ -235,6 +235,7 @@ function display_chatbot_chatgpt_assistants_table() {
         echo '<option value="onyx"' . ($assistant->voice == 'onyx' ? ' selected' : '') . '>Onyx</option>';
         echo '<option value="nova"' . ($assistant->voice == 'nova' ? ' selected' : '') . '>Nova</option>';
         echo '<option value="shimmer"' . ($assistant->voice == 'shimmer' ? ' selected' : '') . '>Shimmer</option>';
+        echo '<option value="none"' . ($assistant->voice == 'none' ? ' selected' : '') . '>None</option>';
         echo '</select></td>';
         echo '<td><select name="allow_file_uploads_' . $assistant->id . '">';
         echo '<option value="Yes"' . ($assistant->allow_file_uploads == 'Yes' ? ' selected' : '') . '>Yes</option>';
@@ -277,6 +278,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<option value="onyx">Onyx</option>';
     echo '<option value="nova">Nova</option>';
     echo '<option value="shimmer">Shimmer</option>';
+    echo '<option value="none">None</option>';
     echo '</select></td>';
     echo '<td><select name="new_allow_file_uploads">';
     echo '<option value="Yes">Yes</option>';

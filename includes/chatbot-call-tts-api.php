@@ -103,16 +103,16 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     if ( !empty($voice) ) {
         $voice = $voice;
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', '$voice from transient: ' . $voice);
+        // back_trace( 'NOTICE', '$voice from transient: ' . $voice);
     } elseif ( !empty($script_data_array['voice'])) {
         $voice = $script_data_array['voice'];
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', '$voice from script_data_array: ' . $voice);
+        // back_trace( 'NOTICE', '$voice from script_data_array: ' . $voice);
     } else {
         // Get the voice option from the settings (default is alloy)
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
         // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', '$voice from get_option: ' . $voice);
+        // back_trace( 'NOTICE', '$voice from get_option: ' . $voice);
     }
 
     // Belt and Suspender - Ver 1.9.5
@@ -282,10 +282,10 @@ function chatbot_chatgpt_read_aloud($message) {
     }
     // $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
 
-    back_trace( 'NOTICE', 'user_id: ' . $user_id);
-    back_trace( 'NOTICE', 'page_id: ' . $page_id);
-    back_trace( 'NOTICE', 'session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$t_voice: ' . $voice);
+    // back_trace( 'NOTICE', 'user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$t_voice: ' . $voice);
 
     if ( empty($voice) ) {
         $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
@@ -293,13 +293,13 @@ function chatbot_chatgpt_read_aloud($message) {
     $script_data_array['voice'] = $voice;
     
     // DIAG - Diagnostics - Ver 2.0.5
-    back_trace( 'NOTICE', '$model: ' . $model);
-    back_trace( 'NOTICE', '$t_model: ' . $t_model);
-    back_trace( 'NOTICE', '$voice: ' . $voice);
-    back_trace( 'NOTICE', '$t_voice: ' . $t_voice);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$t_model: ' . $t_model);
+    // back_trace( 'NOTICE', '$voice: ' . $voice);
+    // back_trace( 'NOTICE', '$t_voice: ' . $t_voice);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
 
     // Call the Text-to-Speech API
     $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice);

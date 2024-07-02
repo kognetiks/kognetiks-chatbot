@@ -57,7 +57,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 4. **Audience for Chatbot**:
    - **Description**: This setting allows you to specify the intended audience for the chatbot.
-   - **Options**: `All Audiences`, `Adults Only`, etc.
+   - **Options**: `All`, `Visitors`, `Logged-in` etc.
    - **Selection**: Choose the appropriate audience based on the content and purpose of your chatbot.
 
 5. **Input Rows**:

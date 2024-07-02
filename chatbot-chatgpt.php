@@ -601,7 +601,7 @@ function chatbot_chatgpt_send_message() {
 
         $use_assistant_id = 'No';
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE' , 'Using Original ChatGPT - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+        // back_trace( 'NOTICE' , 'Using Original ChatGPT - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
 
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
 
@@ -610,7 +610,7 @@ function chatbot_chatgpt_send_message() {
         $use_assistant_id = 'Yes';
 
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE' , 'Using Primary Assistant - $assistant_id: ' .  $assistant_id);
+        // back_trace( 'NOTICE' , 'Using Primary Assistant - $assistant_id: ' .  $assistant_id);
         
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
@@ -620,7 +620,7 @@ function chatbot_chatgpt_send_message() {
             $use_assistant_id = 'No';
         
             // DIAG - Diagnostics - Ver 2.0.5
-            back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
         }
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
 
@@ -629,7 +629,7 @@ function chatbot_chatgpt_send_message() {
         $use_assistant_id = 'Yes';
 
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE' , 'Using Altrnate Assistant - $assistant_id: ' .  $assistant_id);
+        // back_trace( 'NOTICE' , 'Using Altrnate Assistant - $assistant_id: ' .  $assistant_id);
 
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
@@ -639,7 +639,7 @@ function chatbot_chatgpt_send_message() {
             $use_assistant_id = 'No';
 
             // DIAG - Diagnostics - Ver 2.0.5
-            back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
         
         }
     } elseif (str_starts_with($assistant_id, 'asst_')) {
@@ -648,7 +648,7 @@ function chatbot_chatgpt_send_message() {
         $use_assistant_id = 'Yes';
 
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE' ,'Assistant ID pass as a parameter - $assistant_id: ' . $assistant_id );
+        // back_trace( 'NOTICE' ,'Assistant ID pass as a parameter - $assistant_id: ' . $assistant_id );
 
     } else {
 
@@ -656,25 +656,25 @@ function chatbot_chatgpt_send_message() {
         if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_')) {
 
             // DIAG - Diagnostics - 2.0.5
-            back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
+            // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
 
             // Override the $assistant_id with the GPT Assistant ID
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
 
             // DIAG - Diagnostics - Ver 2.0.5
-            back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
+            // back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
 
         } else {
 
             // DIAG - Diagnostics - Ver 2.0.5
-            back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
+            // back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
 
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             
             // DIAG - Diagnostics - Ver 1.8.1
-            back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
+            // back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
 
         }
 

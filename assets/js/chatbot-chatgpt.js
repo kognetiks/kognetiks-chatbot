@@ -1,9 +1,9 @@
 jQuery(document).ready(function ($) {
 
     // DIAG - Diagnotics - Ver 2.0.5
-    console.log('Chatbot: NOTICE: chatbot-chatgpt.js - ENTERING');
-    console.log('Chatbot: NOTICE: chatbot-chatgpt.js - chatbot_chatgpt_initial_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
-    console.log('Chatbot: NOTICE: chatbot-chatgpt.js - chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
+    // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - ENTERING');
+    // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - chatbot_chatgpt_initial_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
+    // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
 
     let chatGptChatBot = $('#chatbot-chatgpt').hide();
 
@@ -250,7 +250,7 @@ jQuery(document).ready(function ($) {
         } else {
             // Append the avatar and the bubble to the button and apply the class for the avatar icon
             chatGptOpenButton.empty().append(avatarImg, bubble).addClass('avatar-icon');
-            //console.log('Chatbot: NOTICE: Avatar greeting displayed.');
+            // console.log('Chatbot: NOTICE: Avatar greeting displayed.');
         }
 
     } else {
@@ -281,7 +281,7 @@ jQuery(document).ready(function ($) {
             let storedGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting');
             initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello! How can I help you today?';
 
-            console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+            // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
 
             if (conversation.text().includes(initialGreeting)) {
                 return;
@@ -302,7 +302,7 @@ jQuery(document).ready(function ($) {
             let storedGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting');
             initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello again! How can I help you?';
     
-            console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+            // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
     
             if (conversation.text().includes(initialGreeting)) {
                 return;

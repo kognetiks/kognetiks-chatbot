@@ -26,42 +26,76 @@ Assistants work with both 'floating' and 'embedded' styles.
 
 These settings allow you to configure the behavior and capabilities of the Assistant in your Kognetiks Chatbot. Follow these steps to set up these options:
 
-![Assistant General Settings](assistant-general-settings.png)
-
-1. **Use GPT Assistant Id**:
-   - **Description**: This toggle allows you to enable or disable the use of a specific Assistant ID.
-   - **Options**: `Yes` or `No`.
-   - **Selection**: Choose `Yes` to use a specific Assistant ID for personalized assistant configurations.
-
-2. **Allow File Uploads**:
-   - **Description**: This setting allows users to upload files through the chatbot interface.
-   - **Options**: `Yes` or `No`.
-   - **Selection**: Choose `Yes` if you want to enable file uploads, facilitating richer interactions.
-
-3. **Display GPT Assistant Name**:
-   - **Description**: This toggle controls whether the Assistant's name is displayed in interactions.
-   - **Options**: `Yes` or `No`.
-   - **Selection**: Choose `Yes` to display the assistant's name for a more personalized user experience.
-
 ## Assistant IDs and Additional Instructions
 
 ![Assistant IDs and Additional Instructions](assistant-ids-and-additional-instructions.png)
 
-1. **Primary GPT Assistant Id**:
+1. **Assistant Id**:
    - **Description**: This field is for specifying the primary Assistant ID.
    - **Input**: Enter the Assistant ID provided by OpenAI or your specific setup.
 
-2. **Assistant Instructions**:
+2. **Common Name**:
+   - **Description**: This field is for specifying the common name that you will refer to the assistant in the shortcode.
+   - **Input**: Enter name you want to use in the shortcode.
+
+3. **Style**:
+   - **Description**: This field sets the sytling for the chatbot either as embedded or floating.
+   - **Input**: Enter name you want to use in the shortcode.
+
+4. **Audience for Chatbot**:
+   - **Description**: This setting allows you to specify the intended audience for the chatbot.
+   - **Options**: `All`, `Visitors`, `Logged-in` etc.
+   - **Selection**: Choose the appropriate audience based on the content and purpose of your chatbot.
+
+5. **Voice**:
+   - **Description**: This setting lets you choose the specific voice the text-to-speech model will use.
+   - **Options**: Available voices include options like `Fable`, `Nova`, etc.
+   - **Selection**: Pick a voice that aligns with the desired personality and tone of your chatbot.
+   - **Tip**: Choose `None` to disable Read Aloud functionality or choose a voice to enable it.  This setting override the global setting.
+
+6. **Allow File Uploads**:
+   - **Description**: This setting allows users to upload files through the chatbot interface.
+   - **Options**: `Yes` or `No`.
+   - **Selection**: Choose `Yes` if you want to enable file uploads, facilitating richer interactions.
+   - **Tip**: This setting override the global setting.
+
+7. **Allow Transcript Downloads**:
+   - **Description**: This setting allows users to dowload a transcript of their interaction with the chatbot..
+   - **Options**: `Yes` or `No`.
+   - **Selection**: Choose `Yes` if you want to enable transcript downloads.
+   - **Tip**: This setting override the global setting.
+
+8. **Initial Greeting**:
+   - **Description**: This is the message the chatbot sends when a user first opens it.
+   - **Example**: "Hello [first_name]! How can I help you today?" Use placeholders like `[first_name]` to personalize the greeting.
+
+9. **Subsequent Greeting**:
+   - **Description**: This message appears when a returning user opens the chatbot.
+   - **Example**: "Hello again [first_name]! How can I help you?" Customize this to acknowledge returning visitors.
+
+10. **Chatbot Prompt**:
+   - **Description**: This is the initial prompt that appears in the chatbot input field.
+   - **Example**: "Tell me your deepest secrets ..." can be customized to something more appropriate for your audience and use case.
+
+11. **Additional Instructions**:
    - **Description**: This field allows you to provide specific instructions to the primary assistant.
    - **Input**: Enter any special instructions or context that will guide the assistant's responses.
 
-3. **Alternate GPT Assistant Id**:
-   - **Description**: This field is for specifying an alternate Assistant ID, used as a fallback.
-   - **Input**: Enter the alternate Assistant ID if you have one.
+## Assistant General Settings
 
-4. **Alternate Assistant Instructions**:
-   - **Description**: This field allows you to provide specific instructions to the alternate assistant.
-   - **Input**: Enter any special instructions or context for the alternate assistant.
+![Assistant General Settings](assistant-general-settings.png)
+
+1. **Allow File Uploads**:
+   - **Description**: This setting allows users to upload files through the chatbot interface.
+   - **Options**: `Yes` or `No`.
+   - **Selection**: Choose `Yes` if you want to enable file uploads, facilitating richer interactions.
+   - **Tip**: This is a global setting that will be overridden by assistant specific settings.
+
+2. **Display GPT Assistant Name**:
+   - **Description**: This toggle controls whether the Assistant's name is displayed in interactions.
+   - **Options**: `Yes` or `No`.
+   - **Selection**: Choose `Yes` to display the assistant's name for a more personalized user experience.## Advanced Additional Settings
+   - **Tip**: This is a global setting that will be overridden by assistant specific settings.
 
 ## Advanced Additional Settings
 
@@ -118,6 +152,8 @@ These settings allow you to configure the behavior and capabilities of the Assis
 ## Example Usage
 
 Use the following format to invoke the primary or alternate assistant:
+
+*-* `[chatbot assistant"my custom assistant"]` - Configuration is determined by setting in the section titled "Manage Assistants"
 
 *-* `[chatbot style="floating" assistant="primary"]` - Floating style, Assistant as set in Primary setting
 
