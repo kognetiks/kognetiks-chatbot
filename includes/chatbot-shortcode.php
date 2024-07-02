@@ -565,7 +565,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
     
     // Miscellaneous Other Setting to pass to localStorage - Ver 2.0.5
-    $chatbot_chatgpt_width_setting = esc_attr(get_option('chatbot_chatgpt_width_setting', '300'));
+    $chatbot_chatgpt_width_setting = esc_attr(get_option('chatbot_chatgpt_width_setting', 'Narrow'));
     // $assistant_details['chatbot_chatgpt_width_setting'] = $chatbot_chatgpt_width_setting;
     $chatbot_settings['chatbot_chatgpt_width_setting'] = $chatbot_chatgpt_width_setting;
 
@@ -606,8 +606,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // chatbot_chatgpt_shortcode_enqueue_script();
 
     // Last chance to set localStorage - Ver 2.0.5
-    $assistant_details['style'] = !empty($assistant_details['style']) ? $assistant_details['style'] : esc_attr(get_option('chatbot_chatgpt_width_setting', 'floating'));
-    $chatbot_settings['chatbot_chatgpt_width_setting'] = $assistant_details['style'];
+    $assistant_details['style'] = !empty($assistant_details['style']) ? $assistant_details['style'] : esc_attr(get_option('chatbot_chatgpt_display_style', 'floating'));
+    $chatbot_settings['chatbot_chatgpt_display_style'] = $assistant_details['style'];
 
     $assistant_details['audience'] = !empty($assistant_details['audience']) ? $assistant_details['audience'] : esc_attr(get_option('chatbot_chatgpt_audience_choice', 'All'));
     $chatbot_settings['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
@@ -700,7 +700,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             echo '<div id="chatgptTitle" class="title">' . $bot_name . '</div>';
             echo '</div>';
         } else {
+            echo '<div id="chatbot-chatgpt-header-embedded">';
             // DO NOTHING
+            echo '</div>';
         }
         ?>
         <div id="chatbot-chatgpt-conversation"></div>

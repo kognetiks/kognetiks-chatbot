@@ -92,7 +92,8 @@ if ($user_id == 0) {
 }
 // error_log('Session ID: ' . $session_id);
 
-ob_end_flush(); // End output buffering and send the buffer to the browser
+// REMOVED IN VER 2.0.5 - 2024 07 02
+// ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
