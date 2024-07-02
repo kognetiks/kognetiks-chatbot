@@ -26,7 +26,7 @@ function interactive_chat_history() {
     $current_user_id = get_current_user_id();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log'; // Adjust the table name as necessary
 
-    // New query with subquery for correct sorting
+    // New query with sub-query for correct sorting
     $query = $wpdb->prepare("SELECT c.message_text, c.user_type, c.thread_id, c.interaction_time, c.assistant_id, c.assistant_name, DATE(c.interaction_time) as interaction_date
     FROM $table_name c
     WHERE c.user_id = %d 

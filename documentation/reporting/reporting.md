@@ -1,6 +1,6 @@
 # Reporting
 
-The Reporting settings in your Kognetiks Chatbot plugin for WordPress help you manage, analyze, and export data related to chatbot interactions. These settings provide insights into user engagement, conversation logs, token usage, and interaction counts. This high-level overview will guide you through using these settings effectively. Detailed explanations will be provided in sub-sections.
+The Reporting settings in your Kognetiks Chatbot plugin for WordPress help you manage, analyze, and export data related to chatbot interactions. These settings provide insights into user engagement, conversation logs, token usage, and interaction counts. This high-level overview will guide you through using these settings effectively. Detailed explanations will be provided in the subsections.
 
 Please review the section [Conversation Logging and History](../support/conversation-logging-and-history.md) overview in the Support section of this plugin for more details.
 

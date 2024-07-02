@@ -14,7 +14,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 - [Getting Started](support/getting-started.md)
 
-- [Offical Sites](support/official-sites.md)
+- [Official Sites](support/official-sites.md)
 
 - [Frequently Asked Questions](support/faqs.md)
 
@@ -42,7 +42,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## Support
 
-- [How the Kogntiks Chatbot Works](support/how-it-works.md)
+- [How the Kognetiks Chatbot Works](support/how-it-works.md)
 
 - [Chatbots and Assistants](support/chatbots-and-assistants.md)
 

@@ -232,7 +232,7 @@ function chatbot_chatgpt_settings_setup_init() {
         'chatbot_chatgpt_name_section'
     );
 
-    // Chatbot Promts and Greetings: Chatbot Prompt, Initial Greeting, Subsequent Greeting
+    // Chatbot Prompts and Greetings: Chatbot Prompt, Initial Greeting, Subsequent Greeting
     add_settings_section(
         'chatbot_chatgpt_greetings_section',
         'Prompts and Greetings',

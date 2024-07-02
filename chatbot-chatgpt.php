@@ -46,7 +46,7 @@ global $user_id;
 // Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
 ob_start();
 
-// Assign a unique ID to the visitor and logged in users - Ver 2.0.4
+// Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
 function kognetiks_assign_unique_id() {
     if (!isset($_COOKIE['kognetiks_unique_id'])) {
         $unique_id = uniqid('kognetiks_', true);
@@ -67,7 +67,7 @@ function kognetiks_assign_unique_id() {
 }
 add_action('init', 'kognetiks_assign_unique_id');
 
-// Get the unique ID of the visitor or logged in user - Ver 2.0.4
+// Get the unique ID of the visitor or logged-in user - Ver 2.0.4
 function kognetiks_get_unique_id() {
     if (isset($_COOKIE['kognetiks_unique_id'])) {
         // error_log('Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
@@ -77,7 +77,7 @@ function kognetiks_get_unique_id() {
     return null;
 }
 
-// Fetch the unique ID of the visitor or logged in user - Ver 2.0.4
+// Fetch the unique ID of the visitor or logged-in user - Ver 2.0.4
 $session_id = kognetiks_get_unique_id();
 
 // Store the unique ID in a global variable - Ver 2.0.4

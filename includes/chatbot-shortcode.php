@@ -208,7 +208,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Validate and sanitize the style parameter - Ver 1.9.9
     $valid_styles = ['floating', 'embedded'];
-    $chatbot_chatgtp_display_style = 'floating'; // default value
+    $chatbot_chatgpt_display_style = 'floating'; // default value
     if (array_key_exists('style', $atts) && !is_null($atts['style'])) {
         if (in_array($atts['style'], $valid_styles)) {
             $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
@@ -337,7 +337,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         }
     }
    
-    // Get the current user ID and page ID for use with trnasients
+    // Get the current user ID and page ID for use with transients
     $user_id = get_current_user_id(); // Get current user ID
     if (empty($user_id)) {
         // Removed - Ver 1.9.0
@@ -1043,7 +1043,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
 
     // Preload avatar - Ver 2.0.3
     $avatar_icon_setting = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', ''));
-    $custom_avartar_icon_setting = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
+    $custom_avatar_icon_setting = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
 
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode_enqueue_script - at the beginning of the function');
@@ -1086,8 +1086,8 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
             if ('<?php echo $avatar_icon_setting; ?>' !== '') {
                 localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', '<?php echo $avatar_icon_setting; ?>');
             }
-            if ('<?php echo $custom_avartar_icon_setting; ?>' !== '') {
-                localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', '<?php echo $custom_avartar_icon_setting; ?>');
+            if ('<?php echo $custom_avatar_icon_setting; ?>' !== '') {
+                localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', '<?php echo $custom_avatar_icon_setting; ?>');
             }
         }
 

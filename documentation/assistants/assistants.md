@@ -1,8 +1,8 @@
-# Configurating the Assistant Settings
+# Configuring the Assistant Settings
 
 Configure settings for your Assistants by adding your below.
 
-If you have developed a Assistant, you will need the id of the assistant - is usually starts with "asst_".
+If you have developed an Assistant, you will need the id of the assistant - is usually starts with "asst_".
 
 Enter your Assistant ID instead of ChatGPT. Set the 'Use Assistant ID' to 'Yes'.
 
@@ -14,7 +14,7 @@ More information can be found here https://platform.openai.com/playground?mode=a
 
 You can integrate Assistants into your platform using one of shortcode configurations below.
 
-Each configuration requires either 'primary', 'alternate' or a Assistant ID, denoted as 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'.
+Each configuration requires either 'primary', 'alternate' or an Assistant ID, denoted as 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'.
 
 Assistants work with both 'floating' and 'embedded' styles.
 
@@ -39,7 +39,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Input**: Enter name you want to use in the shortcode.
 
 3. **Style**:
-   - **Description**: This field sets the sytling for the chatbot either as embedded or floating.
+   - **Description**: This field sets the styling for the chatbot either as embedded or floating.
    - **Input**: Enter name you want to use in the shortcode.
 
 4. **Audience for Chatbot**:
@@ -60,7 +60,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Tip**: This setting override the global setting.
 
 7. **Allow Transcript Downloads**:
-   - **Description**: This setting allows users to dowload a transcript of their interaction with the chatbot..
+   - **Description**: This setting allows users to download a transcript of their interaction with the chatbot.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` if you want to enable transcript downloads.
    - **Tip**: This setting override the global setting.
@@ -103,12 +103,12 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 1. **Max Prompt Tokens**:
    - **Description**: This setting determines the maximum number of tokens for the input prompt.
-   - **Options**: A numeric value betweem `1,000` and `20,000` (the default is `20000`).
+   - **Options**: A numeric value between `1,000` and `20,000` (the default is `20000`).
    - **Selection**: Set this based on the complexity of the queries you expect. Higher values allow for longer inputs.
 
 2. **Max Response Tokens**:
    - **Description**: This setting determines the maximum number of tokens for the assistant's response.
-   - **Options**: A numeric value betweem `1,000` and `20,000` (the default is `20000`).
+   - **Options**: A numeric value between `1,000` and `20,000` (the default is `20000`).
    - **Selection**: Set this based on the level of detail you want in the responses. Higher values allow for longer responses.
 
 3. **Thread Retention Period (hrs)**:

@@ -43,7 +43,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 1. **Allow Downloading Transcripts**:
    - **Description**: This toggle allows you to allow chatbot users to download transcripts.
    - **Options**: `Yes` or `No`.
-   - **Selection**: Choose `Yes` if you want to allow a transcript downaload.
+   - **Selection**: Choose `Yes` if you want to allow a transcript download.
 
 2. **Include "As an AI language model" disclaimer**:
    - **Description**: This toggle allows you to include a disclaimer about the AI nature of the chatbot.

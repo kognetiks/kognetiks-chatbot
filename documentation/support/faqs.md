@@ -8,7 +8,7 @@ Kognetiks Chatbot for WordPress is an AI-powered conversational agent developed 
 
 No, you should **not** put more than one chatbot shortcode on the same page or post.
 
-For now, it will **not** work as expected if you put a floating chatbot using the ```[chatbot style=floating]``` in the footer **and** an embedded chatbot ```[chatbot style=embedded```] on the a page or post.
+For now, it will **not** work as expected if you put a floating chatbot using the ```[chatbot style=floating]``` in the footer **and** an embedded chatbot ```[chatbot style=embedded```] on the page or post.
 
 You can put as many different chatbot on different pages, as long as there is only one chatbot per page.
 
@@ -157,7 +157,7 @@ See [Chatbots and Assistants](support/chatbots-and-assistants.md) for more detai
 
 ## How do I obtain support for the Kognetiks Chatbot for WordPress Plugin?
 
-Please use one of these resources to obtain support for the **Kognetisk Chatbot for WordPress** plugin.
+Please use one of these resources to obtain support for the **Kognetiks Chatbot for WordPress** plugin.
 
 - [Support @ Discord](https://discord.gg/nXRzxUKvya)
 

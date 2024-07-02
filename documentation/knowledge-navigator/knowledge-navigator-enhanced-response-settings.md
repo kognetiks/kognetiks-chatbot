@@ -7,7 +7,7 @@ The Enhanced Response settings allow you to customize how additional information
 1. **Suppress Learnings Messages**:
    - **Description**: This setting controls whether to display or suppress learning messages in the chatbot's responses.
    - **Options**: 
-     - `Random`: Display randome learning messages.
+     - `Random`: Display random learning messages.
      - `Custom`: Displays your custom learning messages.
      - `None`: Never display learning messages.
    - **Selection**: Choose the option that best fits your content strategy and user engagement goals.

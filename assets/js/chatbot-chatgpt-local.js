@@ -52,7 +52,7 @@ jQuery(document).ready(function ($) {
         // Audio Output Option - Ver 1.9.5
         let chatgptAudioOutputOptionInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_audio_output_option) ? chatbotSettings.chatbot_chatgpt_audio_output_option : 'Off';
 
-        // Force Page Reload on Converation Cleared - Ver 2.0.4
+        // Force Page Reload on Conversation Cleared - Ver 2.0.4
         let chatgptForcePageReloadInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_force_page_reload) ? chatbotSettings.chatbot_chatgpt_force_page_reload : 'No';
     
         // DIAG - Diagnostics - Ver 2.0.5
@@ -120,7 +120,7 @@ jQuery(document).ready(function ($) {
         // Audio Output Option - Ver 1.9.5
         chatgptAudioOutputOptionInput = document.getElementById('chatbot_chatgpt_audio_output_option');
 
-        // Force Page Reload on Converation Cleared - Ver 2.0.4
+        // Force Page Reload on Conversation Cleared - Ver 2.0.4
         chatgptForcePageReloadInput = document.getElementById('chatbot_chatgpt_force_page_reload');
 
         if(chatbotChatgptBotNameInput) {
@@ -338,7 +338,7 @@ jQuery(document).ready(function ($) {
             });
         }
 
-        // Force Page Reload on Converation Cleared - Ver 2.0.4
+        // Force Page Reload on Conversation Cleared - Ver 2.0.4
         if(chatgptForcePageReloadInput) {
             chatgptForcePageReloadInput.addEventListener('change', function() {
                 localStorage.setItem('chatbot_chatgpt_force_page_reload', this.value);
@@ -402,7 +402,7 @@ jQuery(document).ready(function ($) {
                 // Audio Output Option - Ver 1.9.5
                 let chatgptAudioOutputOptionInput = document.getElementById('chatbot_chatgpt_audio_output_option');
 
-                // Force Page Reload on Converation Cleared - Ver 2.0.4
+                // Force Page Reload on Conversation Cleared - Ver 2.0.4
                 let chatgptForcePageReloadInput = document.getElementById('chatbot_chatgpt_force_page_reload');
 
                 if(chatbotChatgptBotNameInput) {
@@ -518,7 +518,7 @@ jQuery(document).ready(function ($) {
                     localStorage.setItem('chatbot_chatgpt_audio_output_option', chatgptAudioOutputOptionInput.value);
                 }
 
-                // Force Page Reload on Converation Cleared - Ver 2.0.4
+                // Force Page Reload on Conversation Cleared - Ver 2.0.4
                 if(chatgptForcePageReloadInput) {
                     localStorage.setItem('chatbot_chatgpt_force_page_reload', chatgptForcePageReloadInput.value);
                 }
@@ -541,4 +541,3 @@ jQuery(document).ready(function ($) {
     // console.log('Chatbot: NOTICE: After call to chatbot_chatgpt_loccalize');
 
 });
-

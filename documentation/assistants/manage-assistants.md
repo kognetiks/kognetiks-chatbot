@@ -29,7 +29,7 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
    - **Input**: Automatically generated.
 
 3. **Assistant ID**:
-   - **Description**: The specific ID for the assistant provided by OpenAI at the time you setup your assistant (it usually starts with ```asst_```).
+   - **Description**: The specific ID for the assistant provided by OpenAI at the time you set up your assistant (it usually starts with ```asst_```).
    - **Input**: Enter the OpenAI Assistant ID.
    - **Required**: This is a required field.
 
@@ -38,7 +38,7 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
    - **Input**: Enter a name that easily identifies the assistant.  You'll use this name to call the assistant form the shortcode.
    - **Required**: This is a required field.
    - **Usage**: ```[chatbot assistant="Common Name"]```
-   - **Tip**: Besure sure to use regular quote marks around the "Common Name" if there are any spaces.
+   - **Tip**: Be sure sure to use regular quote marks around the "Common Name" if there are any spaces.
 
 5. **Style**:
    - **Description**: Determines how the assistant is displayed on your site.

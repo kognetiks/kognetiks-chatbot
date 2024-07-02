@@ -103,7 +103,7 @@ function chatbot_chatgpt_image_width_setting_callback() {
         update_option('chatbot_chatgpt_image_width_setting', '100%');
     } else {
         // Save the value
-        update_option('cchatbot_chatgpt_image_width_setting', $chatbot_chatgpt_image_width_setting);
+        update_option('chatbot_chatgpt_image_width_setting', $chatbot_chatgpt_image_width_setting);
     }
 }
 
@@ -113,6 +113,6 @@ function chatbot_chatgpt_appearance_image_width_custom_css_settings() {
 
     // Define CSS styles as global variables
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-image-width'] = ".chatbot-image-width { width: {$chatbot_chatgpt_image_width_setting} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-image-widthnarrow'] = "#chatbot-chatgpt.image-width { width: {$chatbot_chatgpt_image_width_setting} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-image-width'] = "#chatbot-chatgpt.image-width { width: {$chatbot_chatgpt_image_width_setting} !important; }";
 
 }

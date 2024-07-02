@@ -35,7 +35,7 @@ The Token Data settings allow you to monitor and export the token usage data col
 
 - The Reporting Period is set in the [Reporting Settings](reporting-settings.md) to display a summary of the data by `Daily`, `Monthly`, or `Yearly` totals.
 
-- **NOTE:** The token data is accumulated by each day and when exported retains this ganularity. 
+- **NOTE:** The token data is accumulated by each day and when exported retains this granularity. 
 
 By using these settings, you can effectively monitor and analyze the token usage data from your Kognetiks Chatbot, helping you manage costs and gain insights into chatbot activity.
 

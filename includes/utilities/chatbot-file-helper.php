@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Handle non-image attachements
+// Handle non-image attachments
 function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version) {
 
     // Set up the data payload
@@ -58,7 +58,7 @@ function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version) {
 
 }
 
-// Handle image attachements
+// Handle image attachments
 function chatbot_chatgpt_image_attachment($prompt, $file_id, $beta_version) {
 
     // Set up the data payload
@@ -103,4 +103,3 @@ function chatbot_chatgpt_image_attachment($prompt, $file_id, $beta_version) {
     return $data;
 
 }
-

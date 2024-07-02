@@ -25,7 +25,7 @@ The Appearance Settings allow you to customize the visual aspects of your chatbo
    - **Selection**: Click 'Select Color' to choose a color from the palette or enter a hex color code.
 
 6. **Bot Text Background Color**:
-   - **Description**: Sets the background color of the bot's messages.
+   - **Description**: Sets the background color of the chatbot's messages.
    - **Selection**: Click 'Select Color' to choose a color from the palette or enter a hex color code.
 
 7. **Greeting Text Color**:
