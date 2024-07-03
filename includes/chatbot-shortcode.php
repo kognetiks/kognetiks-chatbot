@@ -397,7 +397,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$voice: ' . $voice);
 
     // Retrieve the bot name - Ver 2.0.5
-    $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'No'));
+    $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'Yes'));
 
     // Assistant's Table Override - Ver 2.0.4
     if (!empty($assistant_details['show_assistant_name'])) {
@@ -581,7 +581,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $assistant_details = options_helper($assistant_details, 'initial_greeting', 'Hello! How can I help you today?');
 
     // Fetch and update subsequent greeting
-    $assistant_details = options_helper($assistant_details, 'subsequent_greeting', 'How can I help you further?');
+    $assistant_details = options_helper($assistant_details, 'subsequent_greeting', 'Hello again! How can I help you?');
 
     // Correctly use enqueue_greetings_script and handle its return
     $modified_greetings = enqueue_greetings_script($assistant_details['initial_greeting'], $assistant_details['subsequent_greeting']);

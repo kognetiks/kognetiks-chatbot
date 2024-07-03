@@ -25,7 +25,7 @@ function chatbot_chatgpt_assistant_settings_section_callback($args) {
     <p>When you're ready to use an Assistant, simply add the shortcode <code>[chatbot assistant="Common Name"]</code> to your page.</p>
     <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
     <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=manage-assistants.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation Assistant Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=manage-assistants.md">here</a>.</b></p>
     <?php
 }
 
@@ -33,7 +33,7 @@ function chatbot_chatgpt_assistant_settings_section_callback($args) {
 function chatbot_chatgpt_gpt_assistants_section_callback($args) {
     ?>
     <p>Configure the Chatbot to allow file uploads and display the Assistant's name.</p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Assistant General Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
 }
 
@@ -41,15 +41,15 @@ function chatbot_chatgpt_gpt_assistants_section_callback($args) {
 function chatbot_chatgpt_assistant_id_section_callback($args) {
     ?>
     <p>Configure a Primary and Alternate Assistant by entering the ID and any additional instructions.</p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the general Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
 }
 
 // GPT Assistant Instructions section callback - Ver 1.9.3
-function chatbot_chatgpt_assistant_additional_settings_section_callback($args) {
+function chatbot_chatgpt_assistant_advanced_settings_section_callback($args) {
     ?>
-    <p>Configure the Advanced settings for Assistants prompt and response tokens, thread retention periods, and the Beta version setting.</p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the general settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
+    <p>Configure the Advanced Settings for Assistants prompt and response tokens, thread retention periods, and the Beta version setting.</p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Advanced Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=assistants.md">here</a>.</b></p>
     <?php
 }
 
@@ -125,7 +125,7 @@ function chatbot_chatgpt_assistant_instructions_alternate_callback ($args) {
 
 // Use GPT Assistant Names field callback - Ver 1.9.4
 function chatbot_chatgpt_use_gpt_assistant_name_callback($args) {
-    $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'No'));
+    $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'Yes'));
     ?>
     <select id="chatbot_chatgpt_display_custom_gpt_assistant_name" name="chatbot_chatgpt_display_custom_gpt_assistant_name">
         <option value="Yes" <?php selected( $use_assistant_name, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
@@ -292,9 +292,9 @@ function chatbot_chatgpt_assistant_settings_init() {
     
         // Advanced Additional Settings
         add_settings_section(
-            'chatbot_chatgpt_assistant_additional_settings_section',
+            'chatbot_chatgpt_assistant_advanced_settings_section',
             'Advanced Additional Settings',
-            'chatbot_chatgpt_assistant_additional_settings_section_callback',
+            'chatbot_chatgpt_assistant_advanced_settings_section_callback',
             'chatbot_chatgpt_additional_assistant_settings'
         );
 
@@ -304,7 +304,7 @@ function chatbot_chatgpt_assistant_settings_init() {
             'Max Prompt Tokens',
             'chatbot_chatgpt_max_prompt_tokens_callback',
             'chatbot_chatgpt_additional_assistant_settings',
-            'chatbot_chatgpt_assistant_additional_settings_section'
+            'chatbot_chatgpt_assistant_advanced_settings_section'
         );
     
         // Max Response Tokens - Ver 2.0.1
@@ -313,7 +313,7 @@ function chatbot_chatgpt_assistant_settings_init() {
             'Max Response Tokens',
             'chatbot_chatgpt_max_completion_tokens_callback',
             'chatbot_chatgpt_additional_assistant_settings',
-            'chatbot_chatgpt_assistant_additional_settings_section'
+            'chatbot_chatgpt_assistant_advanced_settings_section'
         );
     
         // Thread Retention Period - Ver 1.9.9
@@ -322,7 +322,7 @@ function chatbot_chatgpt_assistant_settings_init() {
             'Thread Retention Period (hrs)',
             'chatbot_chatgpt_thread_retention_period_callback',
             'chatbot_chatgpt_additional_assistant_settings',
-            'chatbot_chatgpt_assistant_additional_settings_section'
+            'chatbot_chatgpt_assistant_advanced_settings_section'
         );
     
         add_settings_field(
@@ -330,7 +330,7 @@ function chatbot_chatgpt_assistant_settings_init() {
             'Beta Assistant Version',
             'chatbot_chatgpt_assistant_beta_version_callback',
             'chatbot_chatgpt_additional_assistant_settings',
-            'chatbot_chatgpt_assistant_additional_settings_section'
+            'chatbot_chatgpt_assistant_advanced_settings_section'
         );
         
 }
