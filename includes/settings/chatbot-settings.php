@@ -328,7 +328,7 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_kn_enhanced_response');
                 echo '</div>';
 
-                settings_fields('chatbot_chatgpt_kn_analysis');
+                // settings_fields('chatbot_chatgpt_kn_analysis'); // REMOVED FROM VER 2.0.5 - 2027 07 03
                 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_kn_analysis');

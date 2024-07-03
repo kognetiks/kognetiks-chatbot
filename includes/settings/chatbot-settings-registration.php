@@ -291,7 +291,7 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_custom_buttons',
         'chatbot_chatgpt_custom_button_section'
     );
-
+    
 }
 
 add_action('admin_init', 'chatbot_chatgpt_settings_init');
