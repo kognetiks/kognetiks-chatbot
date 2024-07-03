@@ -59,7 +59,7 @@ function chatbot_chatgpt_uninstall(){
 
         // Delete tables
         // back_trace( 'NOTICE', 'Deleting tables');
-        $wpdb->query("DROP TABLE IF EXISTS {$spdb->prefix}chatbot_chatgpt_assistants");
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_assistants");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_conversation_log");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_interactions");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_knowledge_base");
