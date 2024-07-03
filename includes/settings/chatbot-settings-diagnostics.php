@@ -109,17 +109,31 @@ function chatbot_chatgpt_delete_data_callback($args) {
     <?php
 }
 
-// Enhanced Error Logging if Diagnostic Mode is On - Ver 1.6.9
-// Call this function using back_trace( 'NOTICE', $message);
-// [ERROR], [WARNING], [NOTICE], or [SUCCESS]
-// back_trace( 'ERROR', 'Some message');
-// back_trace( 'WARNING', 'Some message');
-// back_trace( 'NOTICE', 'Some message');
-// back_trace( 'SUCCESS', 'Some message');
 function back_trace($message_type = "NOTICE", $message = "No message") {
 
+    // Usage Instructions
+    // 
+    // NOTE: Set WP_DEBUG and WP_DBUG_LOG to true in wp-config.php to log messages to the debug.log file
+    // 
+    // Call the function back_trace() from any file to log messages to your server's error log
+    // 
+    // Uncomment the back_trace() function in the file(s) where you want to log messages
+    // Or add new back_trace() calls to log messages at any point in the code
+    //
+    // Go to the Chatbot Settings, then the Messages tab
+    // Set the Chatbot Diagnotics to one of Off, Success, Notice, Failure, Warning, or Error
+    //
+    // Each level will log messages based on the following criteria (Off will not log any messages)
+    // [ERROR], [WARNING], [NOTICE], or [SUCCESS]
+    // 
+    // Call this function using back_trace( 'NOTICE', $message);
+    // back_trace( 'ERROR', 'Some message');
+    // back_trace( 'WARNING', 'Some message');
+    // back_trace( 'NOTICE', 'Some message');
+    // back_trace( 'SUCCESS', 'Some message');
+
     // Check if diagnostics is On
-    $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'ERROR'));
+    $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Error'));
     if ('Off' === $chatbot_chatgpt_diagnostics) {
         return;
     }
