@@ -31,11 +31,9 @@ function chatbot_chatgpt_admin_notices() {
         echo '<div class="notice notice-warning is-dismissible">
             <p><strong>Kognetiks Chatbot:</strong> Remember to set your data deletion preferences in the plugin settings on the Messages tab if you plan to uninstall the plugin.</p>
         </div>';
+        update_option('chatbot_chatgpt_delete_data', 'no');
 
     }
-
-    // Set the option to "no" to prevent the notice from displaying again
-    update_option('chatbot_chatgpt_delete_data', 'no');
 
 }
 

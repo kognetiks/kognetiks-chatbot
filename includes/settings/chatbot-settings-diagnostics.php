@@ -102,9 +102,9 @@ function chatbot_chatgpt_delete_data_callback($args) {
     global $chatbot_chatgpt_delete_data;
     $chatbot_chatgpt_delete_data = esc_attr(get_option('chatbot_chatgpt_delete_data', 'no'));
     ?>
-    <select id="chatbot_chatgpt_delete_data_setting" name = "chatbot_chatgpt_delete_data">
-        <option value="no" <?php selected( $chatbot_chatgpt_delete_data, 'no' ); ?>><?php echo esc_html( 'DO NOT DELETE' ); ?></option>
-        <option value="yes" <?php selected( $chatbot_chatgpt_delete_data, 'yes' ); ?>><?php echo esc_html( 'DELETE ALL DATA' ); ?></option>
+    <select id="chatgpt_delete_data_setting" name="chatbot_chatgpt_delete_data">
+    <option value="no" <?php selected( $chatbot_chatgpt_delete_data, 'no' ); ?>><?php echo esc_html( 'DO NOT DELETE' ); ?></option>
+    <option value="yes" <?php selected( $chatbot_chatgpt_delete_data, 'yes' ); ?>><?php echo esc_html( 'DELETE ALL DATA' ); ?></option>
     </select>
     <?php
 }
