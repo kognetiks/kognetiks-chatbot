@@ -94,7 +94,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     //
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
     //
-    $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context', 'Yes'));
+    $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context'), '');
 
     // DIAG Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$useEnhancedContext: ' . $useEnhancedContext);
