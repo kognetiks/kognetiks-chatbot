@@ -3,10 +3,7 @@ jQuery(document).ready(function ($) {
     function chatbot_chatgpt_localize() {
    
         // DIAG - Diagnostics - Ver 1.8.5
-        console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - ENTERING');
-
-        console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - chatbotSettings.chatbot_chatgpt_bot_name: ' + JSON.stringify(chatbotSettings.chatbot_chatgpt_bot_name));
-        console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - chatbotSettings.chatbot_chatgpt_start_status_new_visitor: ' + JSON.stringify(chatbotSettings.chatbot_chatgpt_start_status_new_visitor));
+        // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - ENTERING');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         let chatbotChatgptBotNameInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_name) ? chatbotSettings.chatbot_chatgpt_bot_name : 'Kognetiks Chatbot';

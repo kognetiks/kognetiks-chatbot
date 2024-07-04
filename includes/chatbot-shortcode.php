@@ -406,6 +406,18 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     }
 
+    //
+    // START HERE ON FRIDAY - AND FURTHER BELOW!!!
+    // 
+
+    back_trace ( 'NOTICE', $assistant_details['initial_greeting'] );
+    back_trace ( 'NOTICE', $assistant_details['subsequent_greeting'] );
+    $greetings = enqueue_greetings_script( $assistant_details['initial_greeting'], $assistant_details['subsequent_greeting'] );
+    $assistant_details['initial_greeting'] = $greetings['initial_greeting'];
+    $assistant_details['subsequent_greeting'] = $greetings['subsequent_greeting'];
+    back_trace ( 'NOTICE', $assistant_details['initial_greeting'] );
+    back_trace ( 'NOTICE', $assistant_details['subsequent_greeting'] );
+
     // Relocalize the $chatbot_settings array - Ver 2.0.5 - 2024 07 04
     if (array_key_exists('bot_name', $assistant_details)) {
         $chatbot_settings['chatbot_chatgpt_bot_name'] = $assistant_details['bot_name'];
@@ -616,7 +628,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_settings['chatbot_chatgpt_start_status_new_visitor'] = $chatbot_chatgpt_start_status_new_visitor;
 
     // Fetch and update initial greeting
-    $assistant_details = options_helper($assistant_details, 'initial_greeting', 'Hello! How can I help you today?');
+    // $assistant_details = options_helper($assistant_details, 'initial_greeting', 'Hello! How can I help you today?');
+
+    //
+    // START HERE ON FRIDAY
+    // 
 
     // Fetch and update subsequent greeting
     $assistant_details = options_helper($assistant_details, 'subsequent_greeting', 'Hello again! How can I help you?');
