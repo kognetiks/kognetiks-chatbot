@@ -397,7 +397,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
-        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value), $defaults[$key] ?? '');
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
