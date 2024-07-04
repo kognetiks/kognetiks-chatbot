@@ -16,6 +16,10 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 // function chatbot_chatgpt_shortcode( $atts ) {
 
+    if (!defined('DONOTCACHEPAGE')) {
+        define('DONOTCACHEPAGE', true);
+    }
+
     global $session_id;
     global $user_id;
     global $page_id;
