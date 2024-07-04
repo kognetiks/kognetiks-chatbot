@@ -94,6 +94,7 @@ if ($user_id == 0) {
 
 // REMOVED IN VER 2.0.5 - 2024 07 02
 // ob_end_flush(); // End output buffering and send the buffer to the browser
+ob_get_clean();
 
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
@@ -741,6 +742,7 @@ function chatbot_chatgpt_send_message() {
 
         // Clean (erase) the output buffer - Ver 1.6.8
         ob_clean();
+
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
             // Return response
             // back_trace( 'NOTICE', '$response ' . print_r($response,true));

@@ -29,7 +29,7 @@ function chatbot_chatgpt_enable_custom_buttons_callback($args) {
     if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
         $chatbot_chatgpt_enable_custom_buttons = 'Floating';
         update_option('chatbot_chatgpt_enable_custom_buttons', 'Floating');
-    } else {
+    } elseif ($chatbot_chatgpt_enable_custom_buttons == '') {
         $chatbot_chatgpt_enable_custom_buttons = 'Off';
     }
     ?>

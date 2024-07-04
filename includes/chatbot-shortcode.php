@@ -689,7 +689,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
-        // ob_start();
+        ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
         <!-- <script>
@@ -842,7 +842,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
-        // ob_start();
+        ob_start();
         ?>
         <div id="chatbot-chatgpt">
             <div id="chatbot-chatgpt-header">
