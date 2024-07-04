@@ -22,6 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Set up the Chatbot Main Menu Page - Ver 1.9.0
 function chatbot_chatgpt_menu_page() {
+
     add_menu_page(
         'Chatbot Settings',         // Page title
         'Kognetiks Chatbot',        // Menu title
@@ -30,14 +31,20 @@ function chatbot_chatgpt_menu_page() {
         'chatbot_chatgpt_settings_page_html', // Callback function
         'dashicons-format-chat'     // Icon URL (optional)
     );
+
 }
 add_action('admin_menu', 'chatbot_chatgpt_menu_page');
 
 // Settings page HTML - Ver 1.3.0
 function chatbot_chatgpt_settings_page_html() {
+    
     if (!current_user_can('manage_options')) {
         return;
     }
+
+    // Load the settings - Ver 2.0.5 - 2024 07 04
+    global $chatbot_settings;
+    wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
 
     // Localize the settings - Added back in for Ver 1.8.5
     chatbot_chatgpt_localize();

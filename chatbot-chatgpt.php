@@ -320,7 +320,6 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Defaults for Ver 1.6.1
     $defaults = array(
         'chatbot_chatgpt_bot_name' => 'Kognetiks Chatbot',
-        // TODO IDEA - Add a setting to fix or randomize the bot prompt
         'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
         'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatbot_chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
@@ -394,10 +393,11 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_force_page_reload',
     );
 
+    global $chatbot_settings; // Added in Ver 2.0.5 - 2024 07 04
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
-        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value), $defaults[$key] ?? '');
+        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
