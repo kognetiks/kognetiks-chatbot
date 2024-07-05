@@ -725,7 +725,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
-        ob_start();
+        // DON'T DO THIS FOR EMBEDDED - Ver 2.0.5 - 2024 07 05
+        // ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
         <!-- <script>
@@ -870,6 +871,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <!-- </div> -->
         <?php
         return ob_get_clean();
+        return;
     } elseif ($chatbot_chatgpt_display_style == 'floating') {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
@@ -878,6 +880,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
+        // ONLY DO THIS FOR FLOATING - Ver 2.0.5 - 2024 07 05
         ob_start();
         ?>
         <div id="chatbot-chatgpt">
