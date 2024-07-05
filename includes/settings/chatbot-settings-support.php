@@ -135,6 +135,10 @@ function chatbot_chatgpt_support_section_callback() {
 
     // DIAG - Diagnostics - Ver 2.0.2.1
     // back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
+
+    // DIAG - Diagnostics - Ver 2.0.5
+    // error_reporting(E_ALL);
+    // ini_set('display_errors', 1);
   
     $parsedown = new Parsedown();
     $markdownContent = file_get_contents($docLocation);
@@ -154,6 +158,19 @@ function chatbot_chatgpt_support_section_callback() {
         $basePath .= "&file=" . $file;
     }
     $adjustedHtmlContent = adjustPaths($htmlContent, $basePath);
+
+    // Add inline styling to <ul> and <li> tags
+    $adjustedHtmlContent = str_replace('<ul>', '<ul style="list-style-type: disc; margin-left: 20px;">', $adjustedHtmlContent);
+    $adjustedHtmlContent = str_replace('<li>', '<li style="margin-bottom: 10px;">', $adjustedHtmlContent);
+
+    // DIAG - Diagnostics - Ver 2.0.5
+    // $absolutePath = __DIR__ . '/debug_adjustedHtmlContent.html';
+    // $result = file_put_contents($absolutePath, $adjustedHtmlContent);
+    // if ($result === false) {
+    //     echo "Failed to write to file: $absolutePath";
+    // } else {
+    //     echo "File written successfully to: $absolutePath";
+    // }
 
     echo $adjustedHtmlContent;
 
