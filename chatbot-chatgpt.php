@@ -90,9 +90,7 @@ $user_id = get_current_user_id();
 if ($user_id == 0) {
     $user_id = $session_id;
 }
-// error_log('Session ID: ' . $session_id);
 
-// REMOVED IN VER 2.0.5 - 2024 07 02 - ADDED BACK 2024 07 04
 ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Main files
@@ -280,8 +278,8 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     // Enqueue the scripts
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_script('greetings.js', plugins_url('assets/js/greetings.js', __FILE__), array('jquery'), '1.0', true);
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
-    // wp_enqueue_script('greetings.js', plugins_url('assets/js/greetings.js', __FILE__), array('jquery'), '1.0', true);
 
     // Enqueue DOMPurify - Ver 1.8.1
     // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
@@ -393,7 +391,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_force_page_reload',
     );
 
-    global $chatbot_settings; // Added in Ver 2.0.5 - 2024 07 04
+    global $chatbot_settings;
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
@@ -410,7 +408,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         // back_trace( 'NOTICE', 'User is NOT logged in');
         $chatbot_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
     }
-
+   
     $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( '/assets/icons/', __FILE__ );
 
     // Localize the data for javascript
@@ -921,11 +919,11 @@ function concatenateHistory($transient_name) {
     return implode(' ', $context_history); // Concatenate the array values into a single string
 }
 
-// FIXME - MOVE CORE FUNCTIONS TO A SEPARATE FILE,LEAVING ONLY THE HOOKS HERE
+// FIXME - MOVE CORE FUNCTIONS TO A SEPARATE FILE, LEAVING ONLY THE HOOKS HERE
 // Initialize the Greetings - Ver 1.6.1
 function enqueue_greetings_script( $initial_greeting = null, $subsequent_greeting = null) {
 
-    // wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
+    wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
     // If user is logged in, then modify greeting if greeting contains "[...]" or remove if not logged in - Ver 1.9.4
     if (is_user_logged_in()) {

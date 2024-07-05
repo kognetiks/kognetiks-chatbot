@@ -1,10 +1,5 @@
 jQuery(document).ready(function ($) {
-
-    // DIAG - Diagnotics - Ver 2.0.5
-    // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - ENTERING');
-    // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - chatbot_chatgpt_initial_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
-    // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
-
+    
     let chatGptChatBot = $('#chatbot-chatgpt').hide();
 
     messageInput = $('#chatbot-chatgpt-message');
@@ -214,7 +209,7 @@ jQuery(document).ready(function ($) {
             avatarPath = plugins_url + '/assets/icons/' + selectedAvatar;
         } else {
             // Invalid avatar setting
-            console.error('Chatbot: ERROR: selectedAvatar: ' + selectedAvatar);
+            // console.error('Chatbot: ERROR: selectedAvatar: ' + selectedAvatar);
             avatarPath = plugins_url + '/assets/icons/icon-000.png';
         }
     } else {
@@ -280,7 +275,6 @@ jQuery(document).ready(function ($) {
             // Explicitly check for null to determine if a value exists for the key
             let storedGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting');
             initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello! How can I help you today?';
-
             // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
 
             if (conversation.text().includes(initialGreeting)) {
@@ -300,8 +294,7 @@ jQuery(document).ready(function ($) {
         } else {
 
             let storedGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting');
-            initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello again! How can I help you?';
-    
+            initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello again! How can I help you?'; 
             // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
     
             if (conversation.text().includes(initialGreeting)) {
@@ -626,7 +619,7 @@ jQuery(document).ready(function ($) {
                     botResponse = '';
                 } else {
                     // DIAG - Log the error - Ver 1.6.7
-                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
+                    // console.error('Chatbot: ERROR: ' + JSON.stringify(response));
                     // appendMessage('Error: ' + errorThrown, 'error');
                     appendMessage('Error: ' + error, 'error')
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
@@ -731,7 +724,7 @@ jQuery(document).ready(function ($) {
                     link.click();
                     document.body.removeChild(link);
                 } else {
-                    // console.error('Error: Download URL not provided or error in response.');
+                    // console.error('Chatbot: ERROR: Download URL not provided or error in response.');
                     // console.error(response.data || 'No additional error data.');
                     appendMessage('Oops! There was a problem downloading the transcript. Please try again later.', 'error');
                 }
