@@ -178,9 +178,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // 
 
 //     foreach ($capabilities as $capability) {
 //         if (current_user_can($capability)) {
-//             back_trace('NOTICE', 'User has the capability: ' . $capability);
+//             // back_trace('NOTICE', 'User has the capability: ' . $capability);
 //         } else {
-//             back_trace('ERROR', 'User does not have the capability: ' . $capability);
+//             // back_trace('ERROR', 'User does not have the capability: ' . $capability);
 //         }
 //     }
 

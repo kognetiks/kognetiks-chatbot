@@ -696,7 +696,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
     // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
-    // // Push data to local storage for the Chatbot - Ver 2.0.5
+    // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
+    ob_start();
+
+    // Push data to local storage for the Chatbot - Ver 2.0.5
     echo '<script type="text/javascript">
             window.onload = function() {
                 // console.log("Chatbot: NOTICE: chatbot-shortcode.php - STARTED");
@@ -725,7 +728,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
-        // DON'T DO THIS FOR EMBEDDED - Ver 2.0.5 - 2024 07 05
+        // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
@@ -871,7 +874,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <!-- </div> -->
         <?php
         return ob_get_clean();
-        return;
     } elseif ($chatbot_chatgpt_display_style == 'floating') {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
@@ -880,8 +882,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, null, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, null, null);
-        // ONLY DO THIS FOR FLOATING - Ver 2.0.5 - 2024 07 05
-        ob_start();
+        // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
+        // ob_start();
         ?>
         <div id="chatbot-chatgpt">
             <div id="chatbot-chatgpt-header">

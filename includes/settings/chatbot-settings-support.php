@@ -167,9 +167,9 @@ function chatbot_chatgpt_support_section_callback() {
     // $absolutePath = __DIR__ . '/debug_adjustedHtmlContent.html';
     // $result = file_put_contents($absolutePath, $adjustedHtmlContent);
     // if ($result === false) {
-    //     echo "Failed to write to file: $absolutePath";
+    //     back_trace (  "Failed to write to file: " . $absolutePath );
     // } else {
-    //     echo "File written successfully to: $absolutePath";
+    //     back_trace ( 'NOTICE', "File written successfully to: " . $absolutePath );
     // }
 
     echo $adjustedHtmlContent;
