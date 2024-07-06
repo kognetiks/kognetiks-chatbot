@@ -25,6 +25,22 @@ The Custom Buttons settings allow you to add personalized buttons to your chatbo
    - **Description**: This field allows you to specify the URL that the second custom button will link to.
    - **Input**: Enter the full URL (e.g., `https://yourwebsite.com/contact-us`).
 
+6. **Custom Button 3 Name**;
+   - **Description**: This field allows you to specify the URL that the second custom button will link to.
+   - **Input**: Enter the full URL (e.g., `Email Us`).
+
+7. **Custom Button 3 Link**;
+   - **Description**: This field allows you to specify the URL that the second custom button will link to.
+   - **Input**: Enter the full URL (e.g., `mailto:support@yourwebsite.com`).
+
+8. **Custom Button 3 Name**;
+   - **Description**: This field allows you to specify the URL that the second custom button will link to.
+   - **Input**: Enter the full URL (e.g., `FAQs`).
+
+9. **Custom Button 3 Link**;
+   - **Description**: This field allows you to specify the URL that the second custom button will link to.
+   - **Input**: Enter the full URL (e.g., `https://yourwebsite.com/faqs`).
+
 ## Steps to Configure
 
 1. Navigate to the Custom Buttons section of the Kognetiks Chatbot plugin in your WordPress dashboard.
@@ -39,9 +55,19 @@ The Custom Buttons settings allow you to add personalized buttons to your chatbo
 
 6. Enter the URL that the second button should link to in the `Custom Button 2 Link` field.
 
-7. Save the settings.
+7. Enter the desired name for the third button in the `Custom Button 3 Name` field.
+
+8. Enter the URL that the third button should link to in the `Custom Button 3 Link` field.
+
+9. Enter the desired name for the fourth button in the `Custom Button 4 Name` field.
+
+10. Enter the URL that the fourth  button should link to in the `Custom Button 4 Link` field.
+
+11. Save the settings.
 
 ## Tips
+
+- **Leave Blank**: Leave the Name and Link fields blank if the button/link is not used.
 
 - **Descriptive Names**: Use clear and concise names for the buttons to ensure users understand their purpose.
 

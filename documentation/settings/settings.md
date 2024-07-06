@@ -43,19 +43,24 @@ The General Settings allow you to customize the basic behavior and appearance of
 1. **Allow Downloading Transcripts**:
    - **Description**: This toggle allows you to allow chatbot users to download transcripts.
    - **Options**: `Yes` or `No`.
-   - **Selection**: Choose `Yes` if you want to allow a transcript downaload.
+   - **Selection**: Choose `Yes` if you want to allow a transcript download.
 
 2. **Include "As an AI language model" disclaimer**:
    - **Description**: This toggle allows you to include a disclaimer about the AI nature of the chatbot.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` if you want to display this disclaimer, which can help manage user expectations.
 
-3. **Audience for Chatbot**:
+3. **Force Page Reload on Conversation Clear**:
+   - **Description**: This toggle allows you to force the webpage to reload when the chatbot conversation is cleared.
+   - **Options**: `Yes` or `No`.
+   - **Selection**: Choose `Yes` if you want to for a page reload.
+
+4. **Audience for Chatbot**:
    - **Description**: This setting allows you to specify the intended audience for the chatbot.
-   - **Options**: `All Audiences`, `Adults Only`, etc.
+   - **Options**: `All`, `Visitors`, `Logged-in` etc.
    - **Selection**: Choose the appropriate audience based on the content and purpose of your chatbot.
 
-4. **Input Rows**:
+5. **Input Rows**:
    - **Description**: This setting determines the number of rows in the chatbot input field.
    - **Options**: Set a numeric value.
    - **Selection**: Choose a value like `5` to allow more space for user input, or adjust based on your layout preferences.

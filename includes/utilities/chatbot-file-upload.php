@@ -371,6 +371,18 @@ function chatbot_chatgpt_cleanup_uploads_directory() {
 add_action('chatbot_chatgpt_cleanup_upload_files', 'chatbot_chatgpt_cleanup_uploads_directory');
 
 function create_index_file($directory) {
+    // Ensure the directory ends with a slash
+    $directory = rtrim($directory, '/') . '/';
+
+    // Check if the directory exists, if not, create it
+    if (!is_dir($directory)) {
+        if (!mkdir($directory, 0755, true)) {
+            // If the directory could not be created, log an error and exit the function
+            error_log("Chatbot-Chatgpt - Failed to create directory: " . $directory);
+            return;
+        }
+    }
+
     $index_file_path = $directory . 'index.php';
 
     // Check if the index.php file already exists
@@ -385,7 +397,7 @@ function create_index_file($directory) {
             fclose($file);
         } else {
             // Handle the error
-            error_log("Failed to create index.php file in directory: $directory");
+            error_log("Chatbot-Chatgpt - Failed to create index.php file in directory: " . $directory);
         }
     }
 }

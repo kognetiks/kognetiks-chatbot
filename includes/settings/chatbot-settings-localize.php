@@ -28,9 +28,14 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_custom_avatar_icon_setting' => '',
         'chatbot_chatgpt_custom_button_name_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',
+        'chatbot_chatgpt_custom_button_name_3' => '',
+        'chatbot_chatgpt_custom_button_name_4' => '',
         'chatbot_chatgpt_custom_button_url_1' => '',
         'chatbot_chatgpt_custom_button_url_2' => '',
+        'chatbot_chatgpt_custom_button_url_3' => '',
+        'chatbot_chatgpt_custom_button_url_4' => '',
         'chatbot_chatgpt_disclaimer_setting' => 'No',
+        'chatbot_chatgpt_display_style' => 'floating',
         'chatbot_chatgpt_enable_custom_buttons' => 'Off',
         'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
@@ -38,6 +43,7 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_start_status_new_visitor' => 'closed',
         'chatbot_chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatbot_chatgpt_width_setting' => 'Narrow',
+        'chatbot_chatgpt_force_page_reload' => 'No',
         'chatbot_chatgpt_diagnostics' => 'Off'
     );
 
@@ -54,9 +60,14 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_custom_avatar_icon_setting',
         'chatbot_chatgpt_custom_button_name_1',
         'chatbot_chatgpt_custom_button_name_2',
+        'chatbot_chatgpt_custom_button_name_3',
+        'chatbot_chatgpt_custom_button_name_4',
         'chatbot_chatgpt_custom_button_url_1',
         'chatbot_chatgpt_custom_button_url_2',
+        'chatbot_chatgpt_custom_button_url_3',
+        'chatbot_chatgpt_custom_button_url_4',
         'chatbot_chatgpt_disclaimer_setting',
+        'chatbot_chatgpt_display_style',
         'chatbot_chatgpt_enable_custom_buttons',
         'chatbot_chatgpt_initial_greeting',
         'chatbot_chatgpt_model_choice',
@@ -64,6 +75,7 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_start_status_new_visitor',
         'chatbot_chatgpt_subsequent_greeting',
         'chatbot_chatgpt_width_setting',
+        'chatbot_chatgpt_force_page_reload',
         'chatbot_chatgpt_diagnostics'
     );
 
@@ -72,26 +84,25 @@ function chatbot_chatgpt_localize(){
         $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
-        // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // back_trace('NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
-
+    
     // FIXME - WAS ADDED IN 1.6.1
     // Update localStorage - Ver 1.6.1
-    echo "<script type=\"text/javascript\">
-    //DIAG - Diagnostics
-    // console.log('chatbot_chatgpt_settings_localize.php - start');
-    document.addEventListener('DOMContentLoaded', (event) => {
-        // Encode the chatbot settings array into JSON format for use in JavaScript
-        let chatbotSettings = " . json_encode($chatbot_settings) . ";
-        Object.keys(chatbotSettings).forEach((key) => {
-            // DIAG - Diagnostics
-            // console.log('VIA PHP LOCALIZE Setting ' + key + ' ' + chatbotSettings[key] + ' in localStorage');
-            localStorage.setItem(key, chatbotSettings[key]);
+    echo '<script type="text/javascript">
+        //DIAG - Diagnostics
+        // console.log("Chatbot: NOTICE: chatbot_settings_localize.php - STARTED");
+        document.addEventListener("DOMContentLoaded", function(event) {
+            // Encode the chatbot settings array into JSON format for use in JavaScript
+            chatbotSettings = ' . json_encode($chatbot_settings) . ';
+            Object.keys(chatbotSettings).forEach(function(key) {
+                // DIAG - Diagnostics
+                // console.log("Chatbot: NOTICE: chatbot-settings-localize.php - Key: " + key + " Value: " + chatbotSettings[key]);
+                localStorage.setItem(key, chatbotSettings[key]);
+            });
+            // Moved inside the DOMContentLoaded event listener
+            // console.log("Chatbot: NOTICE: chatbot_settings_localize.php - FINISHED");
         });
-        // Moved inside the DOMContentLoaded event listener
-        // console.log('chatbot_chatgpt_settings_localize.php - finish');
-    });
-    </script>";
-    
+    </script>';
 
 }

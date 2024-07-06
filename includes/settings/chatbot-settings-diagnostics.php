@@ -102,24 +102,38 @@ function chatbot_chatgpt_delete_data_callback($args) {
     global $chatbot_chatgpt_delete_data;
     $chatbot_chatgpt_delete_data = esc_attr(get_option('chatbot_chatgpt_delete_data', 'no'));
     ?>
-    <select id="chatbot_chatgpt_delete_data_setting" name = "chatbot_chatgpt_delete_data">
-        <option value="no" <?php selected( $chatbot_chatgpt_delete_data, 'no' ); ?>><?php echo esc_html( 'No' ); ?></option>
-        <option value="yes" <?php selected( $chatbot_chatgpt_delete_data, 'yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+    <select id="chatgpt_delete_data_setting" name="chatbot_chatgpt_delete_data">
+    <option value="no" <?php selected( $chatbot_chatgpt_delete_data, 'no' ); ?>><?php echo esc_html( 'DO NOT DELETE' ); ?></option>
+    <option value="yes" <?php selected( $chatbot_chatgpt_delete_data, 'yes' ); ?>><?php echo esc_html( 'DELETE ALL DATA' ); ?></option>
     </select>
     <?php
 }
 
-// Enhanced Error Logging if Diagnostic Mode is On - Ver 1.6.9
-// Call this function using back_trace( 'NOTICE', $message);
-// [ERROR], [WARNING], [NOTICE], or [SUCCESS]
-// back_trace( 'ERROR', 'Some message');
-// back_trace( 'WARNING', 'Some message');
-// back_trace( 'NOTICE', 'Some message');
-// back_trace( 'SUCCESS', 'Some message');
 function back_trace($message_type = "NOTICE", $message = "No message") {
 
+    // Usage Instructions
+    // 
+    // NOTE: Set WP_DEBUG and WP_DBUG_LOG to true in wp-config.php to log messages to the debug.log file
+    // 
+    // Call the function back_trace() from any file to log messages to your server's error log
+    // 
+    // Uncomment the back_trace() function in the file(s) where you want to log messages
+    // Or add new back_trace() calls to log messages at any point in the code
+    //
+    // Go to the Chatbot Settings, then the Messages tab
+    // Set the Chatbot Diagnotics to one of Off, Success, Notice, Failure, Warning, or Error
+    //
+    // Each level will log messages based on the following criteria (Off will not log any messages)
+    // [ERROR], [WARNING], [NOTICE], or [SUCCESS]
+    // 
+    // Call this function using back_trace( 'NOTICE', $message);
+    // back_trace( 'ERROR', 'Some message');
+    // back_trace( 'WARNING', 'Some message');
+    // back_trace( 'NOTICE', 'Some message');
+    // back_trace( 'SUCCESS', 'Some message');
+
     // Check if diagnostics is On
-    $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'ERROR'));
+    $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Error'));
     if ('Off' === $chatbot_chatgpt_diagnostics) {
         return;
     }
@@ -188,7 +202,34 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 function log_chatbot_error() {
     if (isset($_POST['error_message'])) {
         $error_message = sanitize_text_field($_POST['error_message']);
-        error_log('[Chatbot] [ERROR] [' . $error_message . ']');
+        $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';
+
+        // Ensure the directory and index file exist
+        create_directory_and_index_file($chatbot_logs_dir);
+
+        // Get the current date to create a daily log file
+        $current_date = date('Y-m-d');
+        $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
+
+        // Get additional info
+        $session_id = session_id();
+        $user_id = get_current_user_id();
+        $ip_address = $_SERVER['REMOTE_ADDR'];
+        $date_time = date('Y-m-d H:i:s');
+
+        // Construct the log message
+        $log_message = sprintf(
+            "[Chatbot] [ERROR] [%s] [Session ID: %s] [User ID: %s] [IP Address: %s] [%s]%s",
+            $date_time,
+            $session_id ? $session_id : 'N/A',
+            $user_id ? $user_id : 'N/A',
+            $ip_address,
+            $error_message,
+            PHP_EOL
+        );
+
+        // Append the error message to the log file
+        file_put_contents($log_file, $log_message, FILE_APPEND | LOCK_EX);
     }
     wp_die(); // this is required to terminate immediately and return a proper response
 }

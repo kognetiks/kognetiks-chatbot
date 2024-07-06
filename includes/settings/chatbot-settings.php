@@ -14,42 +14,40 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Set up the Setting Pages - Ver 1.9.0
-// function chatbot_chatgpt_settings_page() {
-//     add_options_page('Chatbot Settings', 'Kognetiks Chatbot', 'manage_options', 'chatbot-chatgpt', 'chatbot_chatgpt_settings_page_html');
-// }
-// add_action('admin_menu', 'chatbot_chatgpt_settings_page');
-
 // Set up the Chatbot Main Menu Page - Ver 1.9.0
 function chatbot_chatgpt_menu_page() {
+
     add_menu_page(
-        'Chatbot Settings',         // Page title
-        'Kognetiks Chatbot',        // Menu title
-        'manage_options',           // Capability
-        'chatbot-chatgpt',          // Menu slug
-        'chatbot_chatgpt_settings_page_html', // Callback function
-        'dashicons-format-chat'     // Icon URL (optional)
+        'Chatbot Settings',                     // Page title
+        'Kognetiks Chatbot',                    // Menu title
+        'manage_options',                       // Capability
+        'chatbot-chatgpt',                      // Menu slug
+        'chatbot_chatgpt_settings_page_html',   // Callback function
+        'dashicons-format-chat'                 // Icon URL (optional)
     );
+
 }
 add_action('admin_menu', 'chatbot_chatgpt_menu_page');
 
 // Settings page HTML - Ver 1.3.0
 function chatbot_chatgpt_settings_page_html() {
+    
     if (!current_user_can('manage_options')) {
         return;
     }
+
+    global $chatbot_settings;
+    // Original wp_localize_script call
+    // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
+    // Refactored wp_localize_script call - Ver 2.0.5 - 2024 07 06
+    $chatbot_settings_json = wp_json_encode($chatbot_settings);
+    wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof chatbotSettings === "undefined") { var chatbotSettings = ' . $chatbot_settings_json . '; } else { chatbotSettings = ' . $chatbot_settings_json . '; }', 'before');
 
     // Localize the settings - Added back in for Ver 1.8.5
     chatbot_chatgpt_localize();
 
     $active_tab = $_GET['tab'] ?? 'bot_settings';
-
-    // if (isset($_GET['settings-updated'])) {
-    //     // DIAG - Diagnostics - Ver 1.9.5
-    //     // back_trace( 'NOTICE', 'Settings Updated: ' . $_GET['settings-updated']);
-    //     add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
-    // }
-    
+   
     if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
         add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
         settings_errors('chatbot_chatgpt_messages');
@@ -87,8 +85,6 @@ function chatbot_chatgpt_settings_page_html() {
 
                     chatgptSettingsForm.addEventListener('submit', function() {
 
-                        // Changed const to var - Ver 1.5.0
-                        // Get the input elements by their ids
                         let chatgptNameInput = document.getElementById('chatbot_chatgpt_bot_name');
                         let chatgpt_chatbot_bot_promptInput = document.getElementById('chatbot_chatgpt_bot_prompt');
                         let chatgptInitialGreetingInput = document.getElementById('chatbot_chatgpt_initial_greeting');
@@ -96,24 +92,19 @@ function chatbot_chatgpt_settings_page_html() {
                         let chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
                         let chatbot_chatgpt_start_status_new_visitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
                         let chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
-                        // New options for max tokens and width - Ver 1.4.2
                         let chatgptMaxTokensSettingInput = document.getElementById('chatbot_chatgpt_max_tokens_setting');
                         let chatgptMessageLimitSettingInput = document.getElementById('chatbot_chatgpt_message_limit_setting');
                         let chatgptVisitorMessageLimitSettingInput = document.getElementById('chatbot_chatgpt_visitor_message_limit_setting');
                         let chatgptWidthSettingInput = document.getElementById('chatbot_chatgpt_width_setting');
-                        // New options for diagnostics on/off - Ver 1.5.0
                         let chatgptDiagnosticsSettingInput = document.getElementById('chatbot_chatgpt_diagnostics');
-                        // Avatar Settings - Ver 1.4.3
                         let chatgptAvatarIconSettingInput = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
                         let chatgptCustomAvatarIconSettingInput = document.getElementById('chatbot_chatgpt_custom_avatar_icon_setting');
                         let chatgptAvatarGreetingSettingInput = document.getElementById('chatbot_chatgpt_avatar_greeting_setting');
-                        // Custom Buttons - Ver 1.6.5
                         let chatgptEnableCustomButtonsInput = document.getElementById('chatbot_chatgpt_enable_custom_buttons');
                         let chatgptCustomButtonName1Input = document.getElementById('chatbot_chatgpt_custom_button_name_1');
                         let chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
                         let chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
                         let chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
-                        // Allow File Uploads - Ver 1.7.6
                         let chatgptAllowFileUploadsInput = document.getElementById('chatbot_chatgpt_allow_file_uploads');
 
                         // Update the local storage with the input values, if inputs exist
@@ -124,22 +115,18 @@ function chatbot_chatgpt_settings_page_html() {
                         if(chatgptStartStatusInput) localStorage.setItem('chatbot_chatgpt_start_status', chatgptStartStatusInput.value);
                         if(chatbot_chatgpt_start_status_new_visitorInput) localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', chatbot_chatgpt_start_status_new_visitorInput.value);
                         if(chatgptDisclaimerSettingInput) localStorage.setItem('chatbot_chatgpt_disclaimer_setting', chatgptDisclaimerSettingInput.value);
-                        // New options for max tokens and width - Ver 1.4.2
                         if(chatgptMaxTokensSettingInput) localStorage.setItem('chatbot_chatgpt_max_tokens_setting', chatgptMaxTokensSettingInput.value);
                         if(chatgptMessageLimitSettingInput) localStorage.setItem('chatbot_chatgpt_message_limit_setting', chatgptMessageLimitSettingInput.value);
                         if(chatgptVisitorMessageLimitSettingInput) localStorage.setItem('chatbot_chatgpt_visitor_message_limit_setting', chatgptVisitorMessageLimitSettingInput.value);
                         if(chatgptWidthSettingInput) localStorage.setItem('chatbot_chatgpt_width_setting', chatgptWidthSettingInput.value);
-                        // Avatar Settings - Ver 1.5.0
                         if(chatgptAvatarIconSettingInput) localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', chatgptAvatarIconSettingInput.value);
                         if(chatgptCustomAvatarIconSettingInput) localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', chatgptCustomAvatarIconSettingInput.value);
                         if(chatgptAvatarGreetingSettingInput) localStorage.setItem('chatbot_chatgpt_avatar_greeting_setting', chatgptAvatarGreetingSettingInput.value);
-                        // Custom Buttons - Ver 1.6.5
                         if(chatgptEnableCustomButtonsInput) localStorage.setItem('chatbot_chatgpt_enable_custom_buttons', chatgptEnableCustomButtonsInput.value);
                         if(chatgptCustomButtonName1Input) localStorage.setItem('chatbot_chatgpt_custom_button_name_1', chatgptCustomButtonName1Input.value);
                         if(chatgptCustomButtonURL1Input) localStorage.setItem('chatbot_chatgpt_custom_button_url_1', chatgptCustomButtonURL1Input.value);
                         if(chatgptCustomButtonName2Input) localStorage.setItem('chatbot_chatgpt_custom_button_name_2', chatgptCustomButtonName2Input.value);
                         if(chatgptCustomButtonURL2Input) localStorage.setItem('chatbot_chatgpt_custom_button_url_2', chatgptCustomButtonURL2Input.value);
-                        // Allow File Uploads - Ver 1.7.6
                         if(chatgptAllowFileUploadsInput) localStorage.setItem('chatbot_chatgpt_allow_file_uploads', chatgptAllowFileUploadsInput.value);
                     });
                 }
@@ -190,7 +177,7 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=appearance" class="nav-tab <?php echo $active_tab == 'appearance' ? 'nav-tab-active' : ''; ?>">Appearance</a>
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
             <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
-            <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Analysis</a>
+            <!-- <a href="?page=chatbot-chatgpt&tab=kn_analysis" class="nav-tab <?php echo $active_tab == 'kn_analysis' ? 'nav-tab-active' : ''; ?>">Analysis</a> -->
             <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
             <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Messages</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
@@ -265,17 +252,24 @@ function chatbot_chatgpt_settings_page_html() {
 
                 settings_fields('chatbot_chatgpt_custom_gpts');
 
+                // Manage Assistants - Ver 2.0.4
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_assistant_settings');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_chatgpt_assistants_management');
+                display_chatbot_chatgpt_assistants_table();
                 echo '</div>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_gpt_assistants_settings');
                 echo '</div>';
 
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_chatgpt_assistant_id_settings');
-                echo '</div>';
+                // Replaced by Manage Assistants - Ver 2.0.4
+                // echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_chatgpt_assistant_id_settings');
+                // echo '</div>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_additional_assistant_settings');
@@ -320,14 +314,19 @@ function chatbot_chatgpt_settings_page_html() {
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_kn_enhanced_response');
                 echo '</div>';
-
-            } elseif ($active_tab == 'kn_analysis') {
-
-                settings_fields('chatbot_chatgpt_kn_analysis');
-                
+              
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_kn_analysis');
                 echo '</div>';
+
+            // Added to the bottom of KN settings - Ver 2.0.5
+            // } elseif ($active_tab == 'kn_analysis') {
+
+                // settings_fields('chatbot_chatgpt_kn_analysis');
+                
+                // echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_chatgpt_kn_analysis');
+                // echo '</div>';
 
             } elseif ($active_tab == 'reporting') {
 
@@ -353,7 +352,7 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_appearance');
                 echo '</div>';
 
-            // IDEA Coming Soon in Ver 2.0.0
+            // IDEA Coming Soon in Ver 3.0.0
             // } elseif ($active_tab == 'premium') {
             //     settings_fields('chatbot_chatgpt_premium');
             //     do_settings_sections('chatbot_chatgpt_premium');

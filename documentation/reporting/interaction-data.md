@@ -34,7 +34,7 @@ The Interactions Data settings allow you to view, manage, and export the data re
 
 - The Reporting Period is set in the [Reporting Settings](reporting-settings.md) to display a summary of the data by `Daily`, `Monthly`, or `Yearly` totals.
 
-- **NOTE:** The Interaction data is accumulated by each day and when exported retains this ganularity. 
+- **NOTE:** The Interaction data is accumulated by each day and when exported retains this granularity. 
 
 By using these settings, you can effectively manage and analyze the interactions data from your Kognetiks Chatbot, helping you gain insights into user engagement and improve the chatbot's performance.
 

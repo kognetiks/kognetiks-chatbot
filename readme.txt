@@ -3,8 +3,8 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.5.4
-Stable tag: 2.0.4
+Tested up to: 6.5.5
+Stable tag: 2.0.5
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -51,7 +51,7 @@ Guide your visitors where you want them. Customizable buttons can link directly 
 Customize accessibility with three audience settings: All Audiences, Logged-in Only, or Visitors Only. Additionally, control presentation to specific audiences. Whether floating or embedded, tailor the chatbot's visibility for a seamless user experience across platforms.
 
 **🎭Personalized Greetings:**
-Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users or _usersmeta table in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [first_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
+Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users or _usermeta table in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [first_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
 
 **🤖Display Assistant's Name:**
 We've introduced a feature that allows the display of the Assistant's name, which is sourced directly from the OpenAI platform. This can be found and adjusted under Settings > Kognetiks Chatbot > GPT Assistants > Display GPT Assistant Name.
@@ -226,6 +226,17 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.0.5 =
+* **Enhanced Assistant Management**: A new intuitive interface for managing all your chatbot Assistants in one place.
+* **Assistant ID Integration**: Easily add Assistants developed in the OpenAI Playground using their unique ID.
+* **Improved Shortcode Usage**: Tips for optimal placement and usage of the `[chatbot assistant="Common Name"]` shortcode.
+* **Customizable Assistant Attributes**: Tailor each Assistant's settings such as Styling, Target Audience, Voice, Allow File Uploads, Allow Transcript Downloads, Show Assistant Name, Initial Greeting, Subsequent Greeting, Placeholder Prompt, and Additional Instructions.
+* **Support Tab**: Reverted the "Support" tab to correctly display the plugin's support documentation overview.
+* **Embedded Chatbot Formatting Updated**: Added a closing </div> tag to the embedded chatbot to ensure proper formatting.
+* **Force Page Reload on Conversation Cleared**: Added an option to force a page reload when the conversation is cleared.
+* **Knowledge Navigator Analysis**: Moved the Knowledge Navigator Analysis for export to the bottom of the Knowledge Navigator tab.
+* **Custom Buttons Expanded**: Now supports up to four custom buttons, on floating only, embedded only, or on both chatbot styles.
 
 = 2.0.4 =
 * Removed session id from the chatbot shortcode and replaced with a unique id for visitors and logged-in users alike.

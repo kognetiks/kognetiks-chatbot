@@ -8,13 +8,33 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
 
+## What's New in Version 2.0.5
+
+- **Enhanced Assistant Management**: A new intuitive interface for managing all your chatbot Assistants in one place.
+
+- **Assistant ID Integration**: Easily add Assistants developed in the OpenAI Playground using their unique ID.
+
+- **Improved Shortcode Usage**: Tips for optimal placement and usage of the `[chatbot assistant="Common Name"]` shortcode.
+
+- **Customizable Assistant Attributes**: Tailor each Assistant's settings such as Styling, Target Audience, Voice, Allow File Uploads, Allow Transcript Downloads, Show Assistant Name, Initial Greeting, Subsequent Greeting, Placeholder Prompt, and Additional Instructions.
+
+- **Support Tab**: Reverted the "Support" tab to correctly display the plugin's support documentation overview.
+
+- **Embedded Chatbot Formatting Updated**: Added a closing `</div>` tag to the embedded chatbot to ensure proper formatting.
+
+- **Force Page Reload on Conversation Cleared**: Added an option to force a page reload when the conversation is cleared.
+
+- **Knowledge Navigator Analysis**: Moved the Knowledge Navigator Analysis for export to the bottom of the Knowledge Navigator tab.
+
+- **Custom Buttons Expanded**: Now supports up to four custom buttons, available on floating only, embedded only, or on both chatbot styles.
+
 ## Quick Start
 
 - [Overview](support/overview.md)
 
 - [Getting Started](support/getting-started.md)
 
-- [Offical Sites](support/official-sites.md)
+- [Official Sites](support/official-sites.md)
 
 - [Frequently Asked Questions](support/faqs.md)
 
@@ -42,6 +62,8 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## Support
 
+- [How the Kognetiks Chatbot Works](support/how-it-works.md)
+
 - [Chatbots and Assistants](support/chatbots-and-assistants.md)
 
 - [Conversation Logging and History](support/conversation-logging-and-history.md)
@@ -53,6 +75,10 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 ## Demos
 
 - Coming Soon
+
+## Notice
+
+While AI-powered applications strive for accuracy, they can sometimes make mistakes. We recommend that you and your users verify critical information to ensure its reliability.
 
 ## Disclaimer
 

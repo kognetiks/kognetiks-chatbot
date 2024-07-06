@@ -15,6 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Create the interaction tracking table - Ver 1.6.3
 function create_chatbot_chatgpt_interactions_table() {
+    
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';

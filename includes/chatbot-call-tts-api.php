@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the ChatGPT API
-function chatbot_chatgpt_call_tts_api($api_key, $message) {
+function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_id = null, $page_id = null, $session_id = null) {
 
     global $session_id;
     global $user_id;
@@ -96,10 +96,12 @@ function chatbot_chatgpt_call_tts_api($api_key, $message) {
     }
 
     // Get the audio voice transient if it exists - Ver 1.9.5
-    $t_voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    if ( empty($voice) ) {
+        $voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    }
 
-    if ( !empty($t_voice) ) {
-        $voice = $t_voice;
+    if ( !empty($voice) ) {
+        $voice = $voice;
         // DIAG - Diagnostics - Ver 1.9.5
         // back_trace( 'NOTICE', '$voice from transient: ' . $voice);
     } elseif ( !empty($script_data_array['voice'])) {
@@ -258,31 +260,58 @@ function chatbot_chatgpt_read_aloud($message) {
 
     // Get the text to be read aloud
     $message = $_POST['message'];
+    $voice = $_POST['voice'];
+    $user_id = $_POST['user_id'];
+    $page_id = $_POST['page_id'];
+    $session_id = $_POST['session_id'];
 
     // Hold the model
-    $t_model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
-    // DIAG - Diagnostics - Ver 1.9.5
-    // back_trace( 'NOTICE', '$t_model: ' . $t_model);
-    if ( empty($t_model) ) {
-        $t_model = 'tts-1-1106';
-    }
-
+    // $t_model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
+    // if ( empty($t_model) ) {
+    //     $t_model = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
+    // }
+    // $model = $t_model;
+    $t_model = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
     set_chatbot_chatgpt_transients( 'model', esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106')), $user_id, $page_id);
-    $script_data_array['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
-    // DIAG - Diagnostics - Ver 1.9.5
-    // back_trace( 'NOTICE', 'esc_attr(get_option( chatbot_chatgpt_voice_model_option)): ' . esc_attr(get_option( 'chatbot_chatgpt_voice_model_option')));
+    $script_data_array['model'] = $t_model;
+
+    // Hold the voice
+    // $t_voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    if ( empty($voice) ) {
+        $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
+    }
+    // $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
+
+    // back_trace( 'NOTICE', 'user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$t_voice: ' . $voice);
+
+    if ( empty($voice) ) {
+        $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
+    }
+    $script_data_array['voice'] = $voice;
     
+    // DIAG - Diagnostics - Ver 2.0.5
+    // back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$t_model: ' . $t_model);
+    // back_trace( 'NOTICE', '$voice: ' . $voice);
+    // back_trace( 'NOTICE', '$t_voice: ' . $t_voice);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+
     // Call the Text-to-Speech API
-    $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+    $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice);
 
     // Reset the model
     set_chatbot_chatgpt_transients( 'model', $t_model, $user_id, $page_id);
     $script_data_array['model'] = $t_model;
-    // DIAG - Diagnostics - Ver 1.9.5
-    // back_trace( 'NOTICE', '$t_model: ' . $t_model);
-
-    // DIAG - Diagnostics - Ver 1.9.5
-    // back_trace( 'NOTICE', '$response: ' . $response);
+    // Reset the voice - IS THIS STILL NEEDED?
+    // set_chatbot_chatgpt_transients( 'voice', $t_voice, $user_id, $page_id);
+    // $script_data_array['voice'] = $t_voice;
+    set_chatbot_chatgpt_transients( 'voice', $voice, $user_id, $page_id);
+    $script_data_array['voice'] = $voice;
 
     // Return the response
     wp_send_json_success($response);

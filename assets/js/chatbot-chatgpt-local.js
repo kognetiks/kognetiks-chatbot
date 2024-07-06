@@ -3,7 +3,7 @@ jQuery(document).ready(function ($) {
     function chatbot_chatgpt_localize() {
    
         // DIAG - Diagnostics - Ver 1.8.5
-        // console.log('Entering chatbot_chatgpt_localize');
+        // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - ENTERING');
 
         // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
         let chatbotChatgptBotNameInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_name) ? chatbotSettings.chatbot_chatgpt_bot_name : 'Kognetiks Chatbot';
@@ -35,6 +35,10 @@ jQuery(document).ready(function ($) {
         let chatgptCustomButtonURL1Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_1) ? chatbotSettings.chatbot_chatgpt_custom_button_url_1 : '';
         let chatgptCustomButtonName2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_2) ? chatbotSettings.chatbot_chatgpt_custom_button_name_2 : '';
         let chatgptCustomButtonURL2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_2) ? chatbotSettings.chatbot_chatgpt_custom_button_url_2 : '';
+        let chatgptCustomButtonName3Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_3) ? chatbotSettings.chatbot_chatgpt_custom_button_name_3 : '';
+        let chatgptCustomButtonURL3Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_3) ? chatbotSettings.chatbot_chatgpt_custom_button_url_3 : '';
+        let chatgptCustomButtonName4Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_4) ? chatbotSettings.chatbot_chatgpt_custom_button_name_4 : '';
+        let chatgptCustomButtonURL4Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_4) ? chatbotSettings.chatbot_chatgpt_custom_button_url_4 : '';
 
         // Allow file uploads - Ver 1.7.6
         let chatgptAllowFileUploadsInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_allow_file_uploads) ? chatbotSettings.chatbot_chatgpt_allow_file_uploads : 'No';
@@ -47,21 +51,27 @@ jQuery(document).ready(function ($) {
 
         // Audio Output Option - Ver 1.9.5
         let chatgptAudioOutputOptionInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_audio_output_option) ? chatbotSettings.chatbot_chatgpt_audio_output_option : 'Off';
+
+        // Force Page Reload on Conversation Cleared - Ver 2.0.4
+        let chatgptForcePageReloadInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_force_page_reload) ? chatbotSettings.chatbot_chatgpt_force_page_reload : 'No';
     
-        // DIAG - Diagnostics - Ver 1.8.5
-        // console.log('Before localStorage.set Item loop');
+        // DIAG - Diagnostics - Ver 2.0.5
+        // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Before localStorage.set Item loop');
 
         Object.keys(chatbotSettings).forEach((key) => {
 
-            localStorage.setItem(key, chatbotSettings[key]);
+            // Skip the display style setting - Ver 2.0.4
+            if (key !== 'chatbot_chatgpt_display_style') {
+                localStorage.setItem(key, chatbotSettings[key]);
+            }
             
             // DIAG - Diagnostics - Ver 1.8.5
-            // console.log('Setting ' + key + ' Value ' + chatbotSettings[key] + ' in localStorage');
+            // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Key: ' + key + ' Value: ' + chatbotSettings[key]);
 
         });
 
-        // DIAG - Diagnostics - Ver 1.8.5
-        // console.log('After localStorage.set Item loop');
+        // DIAG - Diagnostics - Ver 2.0.5
+        // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - After localStorage.set Item loop');
 
         // Get the input elements
         chatbotChatgptBotNameInput = document.getElementById('chatbot_chatgpt_bot_name');
@@ -70,7 +80,7 @@ jQuery(document).ready(function ($) {
         chatgptInitialGreetingInput = document.getElementById('chatbot_chatgpt_initial_greeting');
         chatgptSubsequentGreetingInput = document.getElementById('chatbot_chatgpt_subsequent_greeting');
 
-        chatbotChatgptDisplayStyleInput = document.getElementById('chatbot_chatgpt_display_style');
+        // chatbotChatgptDisplayStyleInput = document.getElementById('chatbot_chatgpt_display_style');
         chatbotChatgptAssistantAliasInput = document.getElementById('chatbot_chatgpt_assistant_alias');
 
         chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
@@ -93,6 +103,10 @@ jQuery(document).ready(function ($) {
         chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
         chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
         chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
+        chatgptCustomButtonName3Input = document.getElementById('chatbot_chatgpt_custom_button_name_3');
+        chatgptCustomButtonURL3Input = document.getElementById('chatbot_chatgpt_custom_button_url_3');
+        chatgptCustomButtonName4Input = document.getElementById('chatbot_chatgpt_custom_button_name_4');
+        chatgptCustomButtonURL4Input = document.getElementById('chatbot_chatgpt_custom_button_url_4');
 
         // Allow file uploads - Ver 1.7.6
         chatgptAllowFileUploadsInput = document.getElementById('chatbot_chatgpt_allow_file_uploads');
@@ -105,6 +119,9 @@ jQuery(document).ready(function ($) {
 
         // Audio Output Option - Ver 1.9.5
         chatgptAudioOutputOptionInput = document.getElementById('chatbot_chatgpt_audio_output_option');
+
+        // Force Page Reload on Conversation Cleared - Ver 2.0.4
+        chatgptForcePageReloadInput = document.getElementById('chatbot_chatgpt_force_page_reload');
 
         if(chatbotChatgptBotNameInput) {
             chatbotChatgptBotNameInput.addEventListener('change', function() {
@@ -201,6 +218,30 @@ jQuery(document).ready(function ($) {
                 localStorage.setItem('chatbot_chatgpt_custom_button_url_2', this.value);
             });
         }
+
+        if(chatgptCustomButtonName3Input) {
+            chatgptCustomButtonName3Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_3', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonURL3Input) {
+            chatgptCustomButtonURL3Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_3', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonName4Input) {
+            chatgptCustomButtonName4Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_4', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonURL4Input) {
+            chatgptCustomButtonURL4Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_4', this.value);
+            });
+        }
         
         // Avatar Settings - Ver 1.5.0
         if(chatgptAvatarIconSettingInput) {
@@ -257,6 +298,18 @@ jQuery(document).ready(function ($) {
             });
         }
 
+        if(chatgptCustomButtonName3Input) {
+            chatgptCustomButtonName3Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_name_3', this.value);
+            });
+        }
+
+        if(chatgptCustomButtonURL3Input) {
+            chatgptCustomButtonURL3Input.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_custom_button_url_3', this.value);
+            });
+        }
+
         // Allow file uploads - Ver 1.7.6
         if(chatgptAllowFileUploadsInput) {
             chatgptAllowFileUploadsInput.addEventListener('change', function() {
@@ -285,6 +338,13 @@ jQuery(document).ready(function ($) {
             });
         }
 
+        // Force Page Reload on Conversation Cleared - Ver 2.0.4
+        if(chatgptForcePageReloadInput) {
+            chatgptForcePageReloadInput.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_force_page_reload', this.value);
+            });
+        }
+
         // Update the localStorage values when the form is submitted - Ver 1.4.1
         // chatgpt-settings-form vs. your-form-id
         let chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
@@ -304,7 +364,7 @@ jQuery(document).ready(function ($) {
                 let chatgptStartStatusInput = document.getElementById('chatbot_chatgpt_start_status');
                 let chatbotChatgptStartStatusNewVisitorInput = document.getElementById('chatbot_chatgpt_start_status_new_visitor');
 
-                let chatbotChatgptDisplayStyleInput = document.getElementById('chatbot_chatgpt_display_style');
+                // let chatbotChatgptDisplayStyleInput = document.getElementById('chatbot_chatgpt_display_style');
                 let chatbotChatgptAssistantAliasInput = document.getElementById('chatbot_chatgpt_assistant_alias');
 
                 let chatgptDisclaimerSettingInput = document.getElementById('chatbot_chatgpt_disclaimer_setting');
@@ -325,6 +385,10 @@ jQuery(document).ready(function ($) {
                 let chatgptCustomButtonURL1Input = document.getElementById('chatbot_chatgpt_custom_button_url_1');
                 let chatgptCustomButtonName2Input = document.getElementById('chatbot_chatgpt_custom_button_name_2');
                 let chatgptCustomButtonURL2Input = document.getElementById('chatbot_chatgpt_custom_button_url_2');
+                let chatgptCustomButtonName3Input = document.getElementById('chatbot_chatgpt_custom_button_name_3');
+                let chatgptCustomButtonURL3Input = document.getElementById('chatbot_chatgpt_custom_button_url_3');
+                let chatgptCustomButtonName4Input = document.getElementById('chatbot_chatgpt_custom_button_name_4');
+                let chatgptCustomButtonURL4Input = document.getElementById('chatbot_chatgpt_custom_button_url_4');
 
                 // Allow file uploads - Ver 1.7.6
                 let chatgptAllowFileUploadsInput = document.getElementById('chatbot_chatgpt_allow_file_uploads');
@@ -337,6 +401,9 @@ jQuery(document).ready(function ($) {
 
                 // Audio Output Option - Ver 1.9.5
                 let chatgptAudioOutputOptionInput = document.getElementById('chatbot_chatgpt_audio_output_option');
+
+                // Force Page Reload on Conversation Cleared - Ver 2.0.4
+                let chatgptForcePageReloadInput = document.getElementById('chatbot_chatgpt_force_page_reload');
 
                 if(chatbotChatgptBotNameInput) {
                     localStorage.setItem('chatbot_chatgpt_bot_name', chatbotChatgptBotNameInput.value);
@@ -419,6 +486,18 @@ jQuery(document).ready(function ($) {
                     localStorage.setItem('chatbot_chatgpt_custom_button_url_2', chatgptCustomButtonURL2Input.value);
                 }
 
+                if(chatgptCustomButtonName3Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_name_3', chatgptCustomButtonName3Input.value);
+                }
+
+                if(chatgptCustomButtonURL3Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_url_3', chatgptCustomButtonURL3Input.value);
+                }
+
+                if(chatgptCustomButtonName4Input) {
+                    localStorage.setItem('chatbot_chatgpt_custom_button_name_4', chatgptCustomButtonName4Input.value);
+                }
+
                 // Allow file uploads - Ver 1.7.6
                 if(chatgptAllowFileUploadsInput) {
                     localStorage.setItem('chatbot_chatgpt_allow_file_uploads', chatgptAllowFileUploadsInput.value);
@@ -439,22 +518,26 @@ jQuery(document).ready(function ($) {
                     localStorage.setItem('chatbot_chatgpt_audio_output_option', chatgptAudioOutputOptionInput.value);
                 }
 
+                // Force Page Reload on Conversation Cleared - Ver 2.0.4
+                if(chatgptForcePageReloadInput) {
+                    localStorage.setItem('chatbot_chatgpt_force_page_reload', chatgptForcePageReloadInput.value);
+                }
+
             });
         }
 
         // DIAG - Diagnostics - Ver 1.8.5
-        // console.log('Exiting chatbot_chatgpt_localize');
+        // console.log('Chatbot: NOTICE: Exiting chatbot_chatgpt_localize');
         
     }
 
     // DIAG - Diagnostics - Ver 1.8.5
-    // console.log(chatbotSettings);
+    // console.log('Chatbot: NOTICE: Before call to chatbot_chatgpt_localize');
 
     // Localize the chatbot settings
     chatbot_chatgpt_localize();
 
     // DIAG - Diagnostics - Ver 1.8.5
-    // console.log(chatbotSettings);
+    // console.log('Chatbot: NOTICE: After call to chatbot_chatgpt_loccalize');
 
 });
-

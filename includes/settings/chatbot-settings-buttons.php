@@ -19,16 +19,24 @@ function chatbot_chatgpt_custom_button_section_callback($args) {
     <p>Enter the names and links for your custom buttons below.</p>
     <p>Set Custom Buttons to 'On' to display one or both custom buttons.</p>
     <p>Set Custom Buttons to 'Off' to hide both custom buttons.</p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use custom buttons and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=buttons&file=buttons.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use custom Buttons and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=buttons&file=buttons.md">here</a>.</b></p>
     <?php
 }
 
-// Custom buttons on/off settings field callback - Ver 1.6.5
+// Custom buttons on/off settings field callback - Ver 1.6.5 - Updated in Ver 2.0.5
 function chatbot_chatgpt_enable_custom_buttons_callback($args) {
     $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
+    if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
+        $chatbot_chatgpt_enable_custom_buttons = 'Floating';
+        update_option('chatbot_chatgpt_enable_custom_buttons', 'Floating');
+    } elseif ($chatbot_chatgpt_enable_custom_buttons == '') {
+        $chatbot_chatgpt_enable_custom_buttons = 'Off';
+    }
     ?>
     <select id="chatbot_chatgpt_enable_custom_buttons" name="chatbot_chatgpt_enable_custom_buttons">
-        <option value="On" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
+        <option value="Floating" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'Floating' ); ?>><?php echo esc_html( 'Floating Only' ); ?></option>
+        <option value="Embedded" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'Embedded' ); ?>><?php echo esc_html( 'Embedded Only' ); ?></option>
+        <option value="Both" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'Both' ); ?>><?php echo esc_html( 'Both' ); ?></option>
         <option value="Off" <?php selected( $chatbot_chatgpt_enable_custom_buttons, 'Off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
     </select>
     <?php
@@ -64,5 +72,37 @@ function chatbot_chatgpt_custom_button_link_2_callback($args) {
     $value = isset($chatbot_chatgpt_custom_button_url_2) ? esc_url($chatbot_chatgpt_custom_button_url_2) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_url_2" name="chatbot_chatgpt_custom_button_url_2" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
+    <?php
+}
+
+function chatbot_chatgpt_custom_button_name_3_callback($args) {
+    $chatbot_chatgpt_custom_button_name_3 = get_option('chatbot_chatgpt_custom_button_name_3');
+    $value = isset($chatbot_chatgpt_custom_button_name_3) ? sanitize_text_field($chatbot_chatgpt_custom_button_name_3) : '';
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_button_name_3" name="chatbot_chatgpt_custom_button_name_3" value="<?php echo esc_attr($value); ?>" />
+    <?php
+}
+
+function chatbot_chatgpt_custom_button_link_3_callback($args) {
+    $chatbot_chatgpt_custom_button_url_3 = get_option('chatbot_chatgpt_custom_button_url_3');
+    $value = isset($chatbot_chatgpt_custom_button_url_3) ? esc_url($chatbot_chatgpt_custom_button_url_3) : '';
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_button_url_3" name="chatbot_chatgpt_custom_button_url_3" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
+    <?php
+}
+
+function chatbot_chatgpt_custom_button_name_4_callback($args) {
+    $chatbot_chatgpt_custom_button_name_4 = get_option('chatbot_chatgpt_custom_button_name_4');
+    $value = isset($chatbot_chatgpt_custom_button_name_4) ? sanitize_text_field($chatbot_chatgpt_custom_button_name_4) : '';
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_button_name_4" name="chatbot_chatgpt_custom_button_name_4" value="<?php echo esc_attr($value); ?>" />
+    <?php
+}
+
+function chatbot_chatgpt_custom_button_link_4_callback($args) {
+    $chatbot_chatgpt_custom_button_url_4 = get_option('chatbot_chatgpt_custom_button_url_4');
+    $value = isset($chatbot_chatgpt_custom_button_url_4) ? esc_url($chatbot_chatgpt_custom_button_url_4) : '';
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_button_url_4" name="chatbot_chatgpt_custom_button_url_4" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
     <?php
 }

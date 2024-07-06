@@ -135,40 +135,51 @@ function chatbot_chatgpt_support_section_callback() {
 
     // DIAG - Diagnostics - Ver 2.0.2.1
     // back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
+
+    // DIAG - Diagnostics - Ver 2.0.5
+    // error_reporting(E_ALL);
+    // ini_set('display_errors', 1);
   
     $parsedown = new Parsedown();
+    $markdownContent = file_get_contents($docLocation);
+    $htmlContent = $parsedown->text($markdownContent);
 
-    // Sanitize and construct the file path
     $dir = isset($_GET['dir']) ? sanitize_text_field($_GET['dir']) : '';
     $file = isset($_GET['file']) ? sanitize_text_field($_GET['file']) : '';
     
-    $baseDir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
-    $docLocation = realpath($baseDir . $dir . '/' . $file);
-    
-    // Validate the file path
-    if ($docLocation && strpos($docLocation, realpath($baseDir)) === 0 && file_exists($docLocation)) {
-        $markdownContent = file_get_contents($docLocation);
-        $htmlContent = $parsedown->text($markdownContent);
-    
-        $basePath = "?page=chatbot-chatgpt";
-        if ($dir !== '') {
-            $basePath .= "&tab=support&dir=" . $dir;
-        }
-        if ($file !== '') {
-            // Remove 'overview.md/' from the file parameter
-            $file = str_replace('overview.md/', '', $file);
-            $basePath .= "&file=" . $file;
-        }
-        $adjustedHtmlContent = adjustPaths($htmlContent, $basePath);
-    
-        echo $adjustedHtmlContent;
-    } else {
-        // Handle invalid file path
-        echo "Invalid file path.";
+    $basePath = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation/';
+    $basePath = "?page=chatbot-chatgpt";
+    if ($dir !== '') {
+        $basePath .= "&tab=support&dir=" . $dir;
     }
+    if ($file !== '') {
+        // Remove 'overview.md/' from the file parameter
+        $file = str_replace('overview.md/', '', $file);
+        $basePath .= "&file=" . $file;
+    }
+    $adjustedHtmlContent = adjustPaths($htmlContent, $basePath);
+
+    // Add inline styling to <ul> and <li> tags
+    $adjustedHtmlContent = str_replace('<ul>', '<ul style="list-style-type: disc; margin-left: 20px;">', $adjustedHtmlContent);
+    $adjustedHtmlContent = str_replace('<li>', '<li style="margin-bottom: 10px;">', $adjustedHtmlContent);
+
+    // DIAG - Diagnostics - Ver 2.0.5
+    // $absolutePath = __DIR__ . '/debug_adjustedHtmlContent.html';
+    // $result = file_put_contents($absolutePath, $adjustedHtmlContent);
+    // if ($result === false) {
+    //     back_trace (  "Failed to write to file: " . $absolutePath );
+    // } else {
+    //     back_trace ( 'NOTICE', "File written successfully to: " . $absolutePath );
+    // }
+
+    echo $adjustedHtmlContent;
 
 }
-    
+
+function file_exists_in_doc_location($docLocation) {
+    return file_exists($docLocation);
+}
+
 function adjustPaths($html, $basePath) {
     // Adjust image paths
     $html = preg_replace_callback(
@@ -217,8 +228,10 @@ function adjustImagePath($url, $basePath) {
         if (count($basePathParts) > 1) {
             $dirParts = explode('&file=', $basePathParts[1]);
             $dir = rtrim($dirParts[0], '/');
+            // FIXME - Check if the URL is a relative path - Ver 2.0.2.1
             $url = site_url() . '/wp-content/plugins/chatbot-chatgpt/documentation/' . $dir . '/' . $url;
         } else {
+            // FIXME - Check if the URL is a relative path - Ver 2.0.2.1
             $url = site_url() . '/wp-content/plugins/chatbot-chatgpt/documentation/' . $url;
         }
     }

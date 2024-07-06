@@ -80,6 +80,61 @@ The Diagnostics Settings help you monitor the health and performance of the **Ko
 
 By configuring these settings, you can effectively monitor and maintain the health and performance of your Kognetiks Chatbot, ensuring a smooth and reliable user experience.
 
+## How To Enable Error Logging
+
+To enable error logging in WordPress, you need to modify the `wp-config.php` file in your WordPress installation directory.
+
+**NOTE: Enabling debugging in WordPress is useful for troubleshooting issues, but it may expose sensitive information and affect site performance. Be sure to disable debugging on live sites after resolving issues to maintain security and optimal performance.**
+
+Here are the basic steps to enable error logging:
+
+1. **Access the `wp-config.php` File**:
+   - Use an FTP client or your hosting provider's file manager to navigate to the root directory of your WordPress installation. This is typically where you will find the `wp-config.php` file.
+
+2. **Edit the `wp-config.php` File**:
+   - Open the `wp-config.php` file in a text editor.
+
+3. **Enable Debugging**:
+   - Locate the following line in the file (if it exists):
+
+     ```define('WP_DEBUG', false);```
+
+   - Change `false` to `true` to enable debugging:
+
+     ```define('WP_DEBUG', true);```
+
+4. **Enable Debug Log**:
+   - Add or modify the following lines to enable the debug log:
+
+     ```define('WP_DEBUG_LOG', true);```
+
+     ```define('WP_DEBUG_DISPLAY', false);```
+     
+     ```@ini_set('display_errors', 0);```
+
+   - This will log errors to a file named `debug.log` located in the `wp-content` directory, but it will not display errors on the screen.
+
+5. **Save and Upload the File**:
+   - Save the changes to the `wp-config.php` file and upload it back to your server if you are using an FTP client.
+
+### Optional: More Detailed Logging
+
+If you want more detailed logging, you can also add the following lines to `wp-config.php`:
+
+```define('SCRIPT_DEBUG', true);```
+
+```define('SAVEQUERIES', true);```
+
+- `SCRIPT_DEBUG`: Forces WordPress to use the "dev" versions of core CSS and JavaScript files rather than the minified versions.
+
+- `SAVEQUERIES`: Saves the database queries to an array and makes them available via the global `$wpdb->queries`.
+
+### Accessing the Error Log
+
+- You can access the error log by navigating to the `wp-content` directory and opening the `debug.log` file.
+
+By enabling these settings, you can track and troubleshoot errors that occur within your WordPress site. If you need more advanced logging or custom error handling, consider using a logging plugin like WP Debugging or Error Log Monitor.
+
 ---
 
 - **[Back to the Overview](/overview.md)**

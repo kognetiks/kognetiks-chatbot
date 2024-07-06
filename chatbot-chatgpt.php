@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     2.0.4
+ * Version:     2.0.5
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.4');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.5');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -46,34 +46,48 @@ global $user_id;
 // Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
 ob_start();
 
-// Assign a unique ID to the visitor and logged in users - Ver 2.0.4
+// Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
 function kognetiks_assign_unique_id() {
     if (!isset($_COOKIE['kognetiks_unique_id'])) {
         $unique_id = uniqid('kognetiks_', true);
-        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/"); // Cookie expires in 30 days
+        
+        // Use the build-in setcookie function
+        // setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/"); // Cookie expires in 30 days
+
+        // Use the build-in setcookie function - Sets HttpOnly and Secure flags
+        // setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
+        
+        // Set SameSite attribute manually
+        // Sets HttpOnly, Secure, and SameSite = Strict, Lax or None
+        header('Set-Cookie: kognetiks_unique_id=' . $unique_id . '; expires=' . gmdate('D, d M Y H:i:s T', time() + (86400 * 30)) . '; path=/; HttpOnly; Secure; SameSite=Lax');
+        
         // Ensure the cookie is set for the current request
         $_COOKIE['kognetiks_unique_id'] = $unique_id;
     }
 }
 add_action('init', 'kognetiks_assign_unique_id');
 
-// Get the unique ID of the visitor or logged in user - Ver 2.0.4
+// Get the unique ID of the visitor or logged-in user - Ver 2.0.4
 function kognetiks_get_unique_id() {
     if (isset($_COOKIE['kognetiks_unique_id'])) {
+        // error_log('Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
         return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
     }
-    error_log('Unique ID not found');
+    // error_log('Unique ID not found');
     return null;
 }
 
-// Fetch the unique ID of the visitor or logged in user - Ver 2.0.4
+// Fetch the unique ID of the visitor or logged-in user - Ver 2.0.4
+
 $session_id = kognetiks_get_unique_id();
 
 // Store the unique ID in a global variable - Ver 2.0.4
 if (empty($session_id)) {
     $session_id = kognetiks_get_unique_id();
 }
+
 $user_id = get_current_user_id();
+
 if ($user_id == 0) {
     $user_id = $session_id;
 }
@@ -83,7 +97,7 @@ ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // Custom GPT Assistants - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // GPT Assistants - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-omni.php'; // ChatGPT API - Ver 2.0.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; // Image API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
@@ -132,6 +146,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-sup
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
 // Include necessary files - Utilities - Ver 1.9.0
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants.php'; // Assistants Management - Ver 2.0.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php'; // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php'; // Deactivation - Ver 1.9.9
@@ -144,6 +159,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php'; // Functions - Ver 2.0.5
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php'; // Ver 1.7.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-file.php'; // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
@@ -152,10 +168,26 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.p
 
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
 
-add_action('init', 'my_custom_buffer_start');
-function my_custom_buffer_start() {
-    ob_start();
-}
+// User Capability Check - Ver 2.0.5
+// function chatbot_chatgpt_check_user_capability() {
+
+//     $capabilities = array(
+//         'read',
+//         'edit_posts',
+//         'publish_posts',
+//         'manage_options'
+//     );
+
+//     foreach ($capabilities as $capability) {
+//         if (current_user_can($capability)) {
+//             // back_trace('NOTICE', 'User has the capability: ' . $capability);
+//         } else {
+//             // back_trace('ERROR', 'User does not have the capability: ' . $capability);
+//         }
+//     }
+
+// }
+// add_action('init', 'chatbot_chatgpt_check_user_capability');
 
 // Check for Upgrades - Ver 1.7.7
 if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
@@ -247,8 +279,9 @@ function chatbot_chatgpt_enqueue_scripts() {
     // }
 
     // Enqueue the scripts
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
     wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_script('greetings', plugins_url('assets/js/greetings.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
 
     // Enqueue DOMPurify - Ver 1.8.1
     // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
@@ -272,7 +305,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'assistant_id' => $assistant_id,
         'additional_instructions' => $additional_instructions,
         'model' => $model,
-        'voice' => 'alloy',
+        'voice' => $voice,
     );
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -287,7 +320,6 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Defaults for Ver 1.6.1
     $defaults = array(
         'chatbot_chatgpt_bot_name' => 'Kognetiks Chatbot',
-        // TODO IDEA - Add a setting to fix or randomize the bot prompt
         'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
         'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
         'chatbot_chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
@@ -313,10 +345,15 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_custom_button_url_1' => '',
         'chatbot_chatgpt_custom_button_name_2' => '',
         'chatbot_chatgpt_custom_button_url_2' => '',
+        'chatbot_chatgpt_custom_button_name_3' => '',
+        'chatbot_chatgpt_custom_button_url_3' => '',
+        'chatbot_chatgpt_custom_button_name_4' => '',
+        'chatbot_chatgpt_custom_button_url_4' => '',
         'chatbot_chatgpt_allow_file_uploads' => 'No',
         'chatbot_chatgpt_timeout_setting' => '240',
         'chatbot_chatgpt_voice_option' => 'alloy',
         'chatbot_chatgpt_audio_output_format' => 'mp3',
+        'chatbot_chatgpt_force_page_reload' => 'No',
     );
 
     // Revised for Ver 1.5.0 
@@ -345,12 +382,18 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_custom_button_url_1',
         'chatbot_chatgpt_custom_button_name_2',
         'chatbot_chatgpt_custom_button_url_2',
+        'chatbot_chatgpt_custom_button_name_3',
+        'chatbot_chatgpt_custom_button_url_3',
+        'chatbot_chatgpt_custom_button_name_4',
+        'chatbot_chatgpt_custom_button_url_4',
         'chatbot_chatgpt_allow_file_uploads',
         'chatbot_chatgpt_timeout_setting',
         'chatbot_chatgpt_voice_option',
         'chatbot_chatgpt_audio_output_format',
+        'chatbot_chatgpt_force_page_reload',
     );
 
+    global $chatbot_settings;
     $chatbot_settings = array();
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
@@ -367,29 +410,52 @@ function chatbot_chatgpt_enqueue_scripts() {
         // back_trace( 'NOTICE', 'User is NOT logged in');
         $chatbot_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
     }
-
+   
     $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( '/assets/icons/', __FILE__ );
 
-    // Localize the data for javascript
-    wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
-
-    wp_localize_script('chatbot-chatgpt-js', 'plugin_vars', array(
+    // Original wp_localize_script call
+    // wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
+    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
+    $script_data_json = wp_json_encode($script_data_array);
+    wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof php_vars === "undefined") { var php_vars = ' . $script_data_json . '; } else { php_vars = ' . $script_data_json . '; }', 'before');
+    
+    // Original wp_localize_script call
+    // wp_localize_script('chatbot-chatgpt-js', 'plugin_vars', array(
+    //     'plugins_url' => plugins_url('', __FILE__ ),
+    // ));
+    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
+    $plugin_vars = array(
         'plugins_url' => plugins_url('', __FILE__ ),
-    ));
+    );
+    $plugin_vars_json = wp_json_encode($plugin_vars);
+    wp_add_inline_script('chatbot-chatgpt-js', 'let plugin_vars = ' . $plugin_vars_json . ';', 'before');
 
-    wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
-
-    wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
-        'plugins_url' => plugins_url('', __FILE__ ),
-        'ajax_url' => admin_url('admin-ajax.php'),
-    ));
-
+    // Original wp_localize_script call
+    // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
+    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
+    $chatbotSettings_json = wp_json_encode($chatbot_settings);
+    wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof chatbotSettings === "undefined") { var chatbotSettings = ' . $chatbotSettings_json . '; } else { chatbotSettings = ' . $chatbotSettings_json . '; }', 'before');
+    
+    // Original wp_localize_script call
+    // wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
+    //     'plugins_url' => plugins_url('', __FILE__ ),
+    //     'ajax_url' => admin_url('admin-ajax.php'),
+    // ));
+    // Original wp_localize_script call
     // Upload files - Ver 1.7.6
-    wp_localize_script('chatbot-chatgpt-upload-trigger-js', 'chatbot_chatgpt_params', array(
+    // wp_localize_script('chatbot-chatgpt-upload-trigger-js', 'chatbot_chatgpt_params', array(
+    //     'plugins_url' => plugins_url('', __FILE__ ),
+    //     'ajax_url' => admin_url('admin-ajax.php'),
+    // ));
+    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
+    $chatbot_chatgpt_params = array(
         'plugins_url' => plugins_url('', __FILE__ ),
         'ajax_url' => admin_url('admin-ajax.php'),
-    ));
-
+    );
+    $chatbot_chatgpt_params_json = wp_json_encode($chatbot_chatgpt_params);
+    wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof chatbot_chatgpt_params === "undefined") { var chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; } else { chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; }', 'before');
+    wp_add_inline_script('chatbot-chatgpt-upload-trigger-js', 'if (typeof chatbot_chatgpt_params === "undefined") { var chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; } else { chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; }', 'before');
+    
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
@@ -445,6 +511,9 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_upload_files')) {
 if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
     wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_download_files');
 }
+
+// Add the Assistant table to the database - Ver 2.0.4
+create_chatbot_chatgpt_assistants_table();
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
@@ -522,6 +591,7 @@ function chatbot_chatgpt_send_message() {
     // back_trace ( 'NOTICE', 'chatbot_chatgpt_send_message $chatbot_settings[threadID]: ' . $chatbot_settings['threadID']);
     $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
     $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    $voice = $chatbot_settings['voice'];
 
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
@@ -552,53 +622,86 @@ function chatbot_chatgpt_send_message() {
   
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
+
         $use_assistant_id = 'No';
-        // DIAG - Diagnostics - Ver 1.8.1
-        // back_trace( 'NOTICE' , 'Using Original GPT Assistant ID');
+        // DIAG - Diagnostics - Ver 2.0.5
+        // back_trace( 'NOTICE' , 'Using Original ChatGPT - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
+
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
         $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions', ''));
         $use_assistant_id = 'Yes';
-        // DIAG - Diagnostics - Ver 1.8.1
-        // back_trace( 'NOTICE' , 'Using Primary GPT Assistant ID ' .  $assistant_id);
+
+        // DIAG - Diagnostics - Ver 2.0.5
+        // back_trace( 'NOTICE' , 'Using Primary Assistant - $assistant_id: ' .  $assistant_id);
+        
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
-            // Override the $use_assistant_id and set it to 'No'
+        
+            // Primary assistant_id not set
+            $chatbot_chatgpt_assistant_alias = 'original';
             $use_assistant_id = 'No';
-            // DIAG - Diagnostics - Ver 1.8.1
-            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API' );
+        
+            // DIAG - Diagnostics - Ver 2.0.5
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
         }
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
+
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
         $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate', ''));
         $use_assistant_id = 'Yes';
-        // DIAG - Diagnostics - Ver 1.8.1
-        // back_trace( 'NOTICE' , 'Using Alternate GPT Assistant ID ' .  $assistant_id);
+
+        // DIAG - Diagnostics - Ver 2.0.5
+        // back_trace( 'NOTICE' , 'Using Altrnate Assistant - $assistant_id: ' .  $assistant_id);
+
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
-            // Override the $use_assistant_id and set it to 'No'
+
+            /// Alternate assistant_id not set
+            $chatbot_chatgpt_assistant_alias = 'original';
             $use_assistant_id = 'No';
-            // DIAG - Diagnostics - Ver 1.8.1
-            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API' );
+
+            // DIAG - Diagnostics - Ver 2.0.5
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
+        
         }
+    } elseif (str_starts_with($assistant_id, 'asst_')) {
+
+        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
+        $use_assistant_id = 'Yes';
+
+        // DIAG - Diagnostics - Ver 2.0.5
+        // back_trace( 'NOTICE' ,'Assistant ID pass as a parameter - $assistant_id: ' . $assistant_id );
+
     } else {
+
         // Reference GPT Assistant IDs directly - Ver 1.7.3
         if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_')) {
-            // DIAG - Diagnostics
+
+            // DIAG - Diagnostics - 2.0.5
             // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
+
             // Override the $assistant_id with the GPT Assistant ID
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
-            // DIAG - Diagnostics - Ver 1.8.1
+
+            // DIAG - Diagnostics - Ver 2.0.5
             // back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
+
         } else {
-            // DIAG - Diagnostics
+
+            // DIAG - Diagnostics - Ver 2.0.5
             // back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
+
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
+            
             // DIAG - Diagnostics - Ver 1.8.1
             // back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
+
         }
+
     }
 
     // Decide whether to use Flow, Assistant or Original ChatGPT
@@ -660,7 +763,14 @@ function chatbot_chatgpt_send_message() {
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Clean (erase) the output buffer - Ver 1.6.8
-        ob_clean();
+        // Check if output buffering is active before attempting to clean it
+        if (ob_get_level() > 0) {
+            ob_clean();
+        } else {
+            // Optionally start output buffering if needed for your application
+            // ob_start();
+        }
+
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
             // Return response
             // back_trace( 'NOTICE', '$response ' . print_r($response,true));
@@ -704,8 +814,9 @@ function chatbot_chatgpt_send_message() {
         } elseif (str_starts_with($model, 'tts')) {
             // Reload the model - BELT & SUSPENDERS
             $script_data_array['model'] = $model;
+            $script_data_array['voice'] = $voice;
             // Send message to TTS API - Text-to-speech - Ver 1.9.5
-            $response = chatbot_chatgpt_call_tts_api($api_key, $message);
+            $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
         } elseif (str_starts_with($model,'whisper')) {
             $script_data_array['model'] = $model;
             // Send message to STT API - Speech-to-text - Ver 1.9.6
@@ -736,8 +847,12 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', 'Check for links and images in response before returning');
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
+        // DIAG - Diagnostics - Ver 2.0.5
+        // back_trace( 'NOTICE', 'Response: ' . $response);
+
         // Return response
         wp_send_json_success($response);
+
     }
 
     wp_send_json_error('Oops, I fell through the cracks!');
@@ -835,13 +950,11 @@ function concatenateHistory($transient_name) {
     return implode(' ', $context_history); // Concatenate the array values into a single string
 }
 
+// FIXME - MOVE CORE FUNCTIONS TO A SEPARATE FILE, LEAVING ONLY THE HOOKS HERE
 // Initialize the Greetings - Ver 1.6.1
-function enqueue_greetings_script() {
+function enqueue_greetings_script( $initial_greeting = null, $subsequent_greeting = null) {
 
-    // DIAG - Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', "enqueue_greetings_script() called");
-
-    wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
+    // wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
 
     // If user is logged in, then modify greeting if greeting contains "[...]" or remove if not logged in - Ver 1.9.4
     if (is_user_logged_in()) {
@@ -850,7 +963,9 @@ function enqueue_greetings_script() {
         $current_user = get_userdata($current_user_id);
 
         //Do this for Initial Greeting
-        $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+        if ( empty($initial_greeting) ) {
+            $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+        }
 
         // Determine what the field name is between the brackets
         $user_field_name = '';
@@ -858,14 +973,18 @@ function enqueue_greetings_script() {
         // If $initial_greeting contains "[$user_field_name]" then replace with field from DB
         if (strpos($initial_greeting, '[' . $user_field_name . ']') !== false) {
             $initial_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $initial_greeting);
-            // back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
-            // back_trace ( 'NOTICE', 'Initial Greeting: ' . $initial_greeting);
         } else {
             $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
+            // Remove the extra space when two spaces are present
+            $initial_greeting = str_replace('  ', ' ', $initial_greeting);
+            // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+            $initial_greeting = preg_replace('/\s*([.,!?])/', '$1', $initial_greeting);
         }
 
         // Do this for Subsequent Greeting
-        $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+        if ( empty($subsequent_greeting) ) {
+            $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+        }
 
         // Determine what the field name is between the brackets
         $user_field_name = '';
@@ -873,29 +992,45 @@ function enqueue_greetings_script() {
         // If $subsequent_greeting contains "[$user_field_name]" then replace with field from DB
         if (strpos($subsequent_greeting, '[' . $user_field_name . ']') !== false) {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $subsequent_greeting);
-            // back_trace ( 'NOTICE', 'User Field Name: ' . $user_field_name . ', User Field Value: ' . $current_user->$user_field_name);
-            // back_trace ( 'NOTICE', 'Subsequent Greeting: ' . $subsequent_greeting);
         } else {
             $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
+            // Remove the extra space when two spaces are present
+            $subsequent_greeting = str_replace('  ', ' ', $subsequent_greeting);
+            // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+            $subsequent_greeting = preg_replace('/\s*([.,!?])/', '$1', $subsequent_greeting);
         }
 
     } else {
 
-        $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+        //Do this for Initial Greeting
+        if ( empty($initial_greeting) ) {
+            $initial_greeting = esc_attr(get_option('chatbot_chatgpt_initial_greeting', 'Hello! How can I help you today?'));
+        }
 
         $user_field_name = '';
         $user_field_name = substr($initial_greeting, strpos($initial_greeting, '[') + 1, strpos($initial_greeting, ']') - strpos($initial_greeting, '[') - 1 );
 
-        // $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
-        $initial_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $initial_greeting);
+        // $initial_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $initial_greeting);
+        $initial_greeting = str_replace('[' . $user_field_name . ']', '', $initial_greeting);
+        // Remove the extra space when two spaces are present
+        $initial_greeting = str_replace('  ', ' ', $initial_greeting);
+        // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+        $initial_greeting = preg_replace('/\s*([.,!?])/', '$1', $initial_greeting);
 
-        $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+        //Do this for Subsequent Greeting
+        if ( empty($subsequent_greeting) ) {
+            $subsequent_greeting = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'Hello again! How can I help you?'));
+        }
 
         $user_field_name = '';
         $user_field_name = substr($subsequent_greeting, strpos($subsequent_greeting, '[') + 1, strpos($subsequent_greeting, ']') - strpos($subsequent_greeting, '[') - 1);
 
-        // $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
-        $subsequent_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $subsequent_greeting);
+        // $subsequent_greeting = preg_replace('/\s*\[' . preg_quote($user_field_name, '/') . '\]\s*/', '', $subsequent_greeting);
+        $subsequent_greeting = str_replace('[' . $user_field_name . ']', '', $subsequent_greeting);
+        // Remove the extra space when two spaces are present
+        $subsequent_greeting = str_replace('  ', ' ', $subsequent_greeting);
+        // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+        $subsequent_greeting = preg_replace('/\s*([.,!?])/', '$1', $subsequent_greeting);        
 
     }
 
@@ -904,36 +1039,18 @@ function enqueue_greetings_script() {
         'subsequent_greeting' => $subsequent_greeting,
     );
 
-    wp_localize_script('greetings', 'greetings_data', $greetings);
+    // Original wp_localize_script call
+    // wp_localize_script('greetings', 'greetings_data', $greetings);
+    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
+    $greetings_json = wp_json_encode($greetings);
+    // wp_add_inline_script('greetings', 'let greetings_data = ' . $greetings_json . ';', 'before');
+    wp_add_inline_script('greetings', 'if (typeof greetings_data === "undefined") { var greetings_data = ' . $greetings_json . '; } else { greetings_data = ' . $greetings_json . '; }', 'before');
+
+    return $greetings;
 
 }
+// 
 add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
-
-
-// Function to add the adaptive appearance settings to the Chatbot settings page
-function chatbot_chatgpt_settings_appearance() {
-
-    // Register the settings
-    register_setting('chatbot_chatgpt_settings_appearance', 'chatbot_chatgpt_appearance');
-
-    // Add the adaptive appearance settings section
-    add_settings_section(
-        'chatbot_chatgpt_settings_appearance_section',
-        'Adaptive Appearance Settings',
-        'chatbot_chatgpt_settings_appearance_section_callback',
-        'chatbot_chatgpt_settings_appearance'
-    );
-
-    // Add the adaptive appearance settings fields
-    add_settings_field(
-        'chatbot_chatgpt_settings_appearance_field',
-        'Adaptive Appearance Settings',
-        'chatbot_chatgpt_settings_appearance_field_callback',
-        'chatbot_chatgpt_settings_appearance',
-        'chatbot_chatgpt_settings_appearance_section'
-    );
-
-}
 
 // Add the color picker to the adaptive appearance settings section - Ver 1.8.1
 function enqueue_color_picker($hook_suffix) {

@@ -16,31 +16,25 @@ if ( ! defined( 'WPINC' ) ) {
 // Deactivation Hook - Revised 1.9.9
 function chatbot_chatgpt_deactivate() {
 
-    // DIAG - Log the activation
-    // back_trace( 'NOTICE', 'Plugin deactivation started');
-
-    $t_chatbot_chatgpt_delete_data = esc_attr(get_option('chatbot_chatgpt_delete_data'));
-
-    if (empty($t_chatbot_chatgpt_delete_data or $t_chatbot_chatgpt_delete_data == 'no')) {      
+    if (empty(esc_attr(get_option('chatbot_chatgpt_delete_data')))) {      
         chatbot_chatgpt_admin_notices();
     }
-
-    update_option('chatbot_chatgpt_delete_data', $t_chatbot_chatgpt_delete_data);
-
-    // DIAG - Log the activation
-    // back_trace( 'NOTICE', 'Plugin deactivation completed');
 
 }
 
 // Delete Plugin Data Notice - Ver 1.9.9
 add_action('admin_notices', 'chatbot_chatgpt_admin_notices');
 function chatbot_chatgpt_admin_notices() {
-    $chatbot_chatgpt_delete_data = esc_attr(get_option('chatbot_chatgpt_delete_data'));
-    if (empty($chatbot_chatgpt_delete_data)) {
+
+    if (empty(esc_attr(get_option('chatbot_chatgpt_delete_data')))) {     
+
         echo '<div class="notice notice-warning is-dismissible">
             <p><strong>Kognetiks Chatbot:</strong> Remember to set your data deletion preferences in the plugin settings on the Messages tab if you plan to uninstall the plugin.</p>
         </div>';
+        update_option('chatbot_chatgpt_delete_data', 'no');
+
     }
+
 }
 
 // Upgrade Logic - Revised 1.9.9
@@ -49,7 +43,7 @@ function chatbot_chatgpt_uninstall(){
     global $wpdb;
 
     // DIAG - Log the uninstall
-    // back_trace( 'NOTICE', 'Plugin uninstall started');
+    // back_trace( 'NOTICE', 'PLUGIN UNINSTALL STARTED');
 
     // Ask if the data should be removed, if not return
     if (get_option('chatbot_chatgpt_delete_data') != 'yes') {
@@ -65,6 +59,7 @@ function chatbot_chatgpt_uninstall(){
 
         // Delete tables
         // back_trace( 'NOTICE', 'Deleting tables');
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_assistants");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_conversation_log");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_interactions");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_knowledge_base");
@@ -95,7 +90,7 @@ function chatbot_chatgpt_uninstall(){
     }
 
     // DIAG - Log the uninstall
-    // back_trace( 'NOTICE', 'Plugin uninstall completed');
+    // back_trace( 'NOTICE', 'PLUGIN UNINSTALL COMPLETED');
 
     return;
 }
