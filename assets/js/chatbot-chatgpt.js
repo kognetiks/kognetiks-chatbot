@@ -670,7 +670,9 @@ jQuery(document).ready(function ($) {
             e.preventDefault();
             // console.log('Chatbot: NOTICE: Enter key pressed on upload file button');
             let $response = chatbot_chatgpt_upload_files();
-            $('#chatbot-chatgpt-upload-file-input').click();
+            // REFACTORED - Ver 2.0.5 - 2024 07 06
+            // $('#chatbot-chatgpt-upload-file-input').click();
+            $('#chatbot-chatgpt-upload-file-input').trigger('click');
             let button = $(this);  // Store a reference to the button
             setTimeout(function() {
                 button.blur();  // Remove focus from the button
@@ -684,7 +686,9 @@ jQuery(document).ready(function ($) {
             e.preventDefault();
             // console.log('Chatbot: NOTICE: Enter key pressed on upload mp3 button');
             let $response = chatbot_chatgpt_upload_mp3();
-            $('#chatbot-chatgpt-upload-mp3-input').click();
+            // REFACTORED - Ver 2.0.5 - 2024 07 06
+            // $('#chatbot-chatgpt-upload-mp3-input').click();
+            $('#chatbot-chatgpt-upload-mp3-input').trigger('click');
             let button = $(this);  // Store a reference to the button
             setTimeout(function() {
                 button.blur();  // Remove focus from the button
