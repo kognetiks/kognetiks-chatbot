@@ -78,6 +78,7 @@ function kognetiks_get_unique_id() {
 }
 
 // Fetch the unique ID of the visitor or logged-in user - Ver 2.0.4
+
 $session_id = kognetiks_get_unique_id();
 
 // Store the unique ID in a global variable - Ver 2.0.4
@@ -90,6 +91,7 @@ $user_id = get_current_user_id();
 if ($user_id == 0) {
     $user_id = $session_id;
 }
+// error_log('Session ID: ' . $session_id);
 
 ob_end_flush(); // End output buffering and send the buffer to the browser
 

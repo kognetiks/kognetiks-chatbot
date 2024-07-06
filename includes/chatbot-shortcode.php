@@ -43,6 +43,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     global $kflow_data;
 
+    // Fetch the unique ID of the visitor or logged in user - Ver 2.0.4
+    $session_id = kognetiks_get_unique_id();
+    $user_id = get_current_user_id();
+    if ($user_id == 0) {
+        $user_id = $session_id;
+    }
+
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -356,6 +363,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $additional_instructions = array_key_exists('instructions', $atts) ? sanitize_text_field($atts['instructions']) : '';
         $additional_details['additional_instructions'] = $additional_instructions;
     }
+
+    // Fetch the Kognetiks cookie
+    $session_id = kognetiks_get_unique_id();
+    // back_trace( 'NOTICE', 'session_id: ' . $session_id);
+    // if (empty($user_id)) {
+        $user_id = $session_id;
+    // }
 
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, null, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, null, null );
