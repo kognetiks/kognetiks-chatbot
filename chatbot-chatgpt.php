@@ -761,7 +761,13 @@ function chatbot_chatgpt_send_message() {
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Clean (erase) the output buffer - Ver 1.6.8
-        ob_clean();
+        // Check if output buffering is active before attempting to clean it
+        if (ob_get_level() > 0) {
+            ob_clean();
+        } else {
+            // Optionally start output buffering if needed for your application
+            // ob_start();
+        }
 
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
             // Return response
