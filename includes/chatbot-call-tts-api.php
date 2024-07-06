@@ -307,9 +307,11 @@ function chatbot_chatgpt_read_aloud($message) {
     // Reset the model
     set_chatbot_chatgpt_transients( 'model', $t_model, $user_id, $page_id);
     $script_data_array['model'] = $t_model;
-    // Reset the voice
-    set_chatbot_chatgpt_transients( 'voice', $t_voice, $user_id, $page_id);
-    $script_data_array['voice'] = $t_voice;
+    // Reset the voice - IS THIS STILL NEEDED?
+    // set_chatbot_chatgpt_transients( 'voice', $t_voice, $user_id, $page_id);
+    // $script_data_array['voice'] = $t_voice;
+    set_chatbot_chatgpt_transients( 'voice', $voice, $user_id, $page_id);
+    $script_data_array['voice'] = $voice;
 
     // Return the response
     wp_send_json_success($response);
