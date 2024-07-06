@@ -832,7 +832,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-upload-file-input').trigger('click');
+                        document.getElementById('chatbot-chatgpt-upload-file-input').click();
                     });
                 </script>
             <?php endif; ?>
@@ -843,7 +843,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-upload-mp3-input').trigger('click');
+                        document.getElementById('chatbot-chatgpt-upload-mp3-input').click();
                     });
                 </script>
             <?php endif; ?>
@@ -964,7 +964,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                            document.getElementById('chatbot-chatgpt-upload-file-input').trigger('click');
+                            document.getElementById('chatbot-chatgpt-upload-file-input').click();
                         });
                     </script>
                 <?php endif; ?>
@@ -975,7 +975,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
-                            document.getElementById('chatbot-chatgpt-upload-mp3-input').trigger('click');
+                            document.getElementById('chatbot-chatgpt-upload-mp3-input').click();
                         });
                     </script>
                 <?php endif; ?>
