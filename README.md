@@ -4,6 +4,10 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## Documentation
 
+## What's New in Version 2.0.6
+
+- **TBD**
+
 ## What's New in Version 2.0.5
 
 - **Enhanced Assistant Management**: A new intuitive interface for managing all your chatbot Assistants in one place.
