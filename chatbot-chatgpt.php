@@ -1048,8 +1048,10 @@ function enqueue_greetings_script( $initial_greeting = null, $subsequent_greetin
     return $greetings;
 
 }
+// 
 // Removed add_action to resolve syntax error having already been declared - Ver 2.0.5 - 2024 07 06
-// add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
+// 
+add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
 
 // Add the color picker to the adaptive appearance settings section - Ver 1.8.1
 function enqueue_color_picker($hook_suffix) {
