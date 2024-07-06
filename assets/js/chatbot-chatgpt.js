@@ -150,7 +150,6 @@ jQuery(document).ready(function ($) {
         chatbot_chatgpt_start_status_new_visitor = 'open'; // Force the chatbot to open if embedded
     }
 
-    // Removed css from here into the .css file - Refactored for Ver 1.7.3
     // Initially hide the chatbot
     if (chatbot_chatgpt_start_status === 'closed') {
         chatGptChatBot.hide();
@@ -670,12 +669,10 @@ jQuery(document).ready(function ($) {
             e.preventDefault();
             // console.log('Chatbot: NOTICE: Enter key pressed on upload file button');
             let $response = chatbot_chatgpt_upload_files();
-            // REFACTORED - Ver 2.0.5 - 2024 07 06
-            // $('#chatbot-chatgpt-upload-file-input').click();
             $('#chatbot-chatgpt-upload-file-input').trigger('click');
             let button = $(this);  // Store a reference to the button
             setTimeout(function() {
-                button.blur();  // Remove focus from the button
+                button.trigger('blur');  // Remove focus from the button
             }, 0);
         }
     });
@@ -686,12 +683,10 @@ jQuery(document).ready(function ($) {
             e.preventDefault();
             // console.log('Chatbot: NOTICE: Enter key pressed on upload mp3 button');
             let $response = chatbot_chatgpt_upload_mp3();
-            // REFACTORED - Ver 2.0.5 - 2024 07 06
-            // $('#chatbot-chatgpt-upload-mp3-input').click();
             $('#chatbot-chatgpt-upload-mp3-input').trigger('click');
             let button = $(this);  // Store a reference to the button
             setTimeout(function() {
-                button.blur();  // Remove focus from the button
+                button.trigger('blur');  // Remove focus from the button
             }, 0);
         }
     });
@@ -743,7 +738,7 @@ jQuery(document).ready(function ($) {
                 // Replace these functions with your own
                 removeTypingIndicator();
                 $('#submit-button').prop('disabled', false);
-                button.blur();  // Remove focus from the button
+                button.trigger('blur');  // Remove focus from the button
             },
         });
     });
@@ -804,7 +799,7 @@ jQuery(document).ready(function ($) {
             complete: function () {
                 removeTypingIndicator();
                 submitButton.prop('disabled', false);
-                button.blur();  // Remove focus from the button
+                button.trigger('blur');  // Remove focus from the button
             },
         });
     });
@@ -1052,8 +1047,7 @@ jQuery(document).ready(function ($) {
        
     });
     
-    // Moved the css to the .css file - Refactored for Ver 1.7.3
-    // Add the toggleChatbot() function - Ver 1.1.0
+    // Toggle the chatbot visibility
     function toggleChatbot() {
         if (chatGptChatBot.is(':visible')) {
             chatGptChatBot.hide();
