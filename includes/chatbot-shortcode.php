@@ -455,7 +455,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
     // Refactored wp_localize_script call - Ver 2.0.5 - 2024 07 06
     $chatbot_settings_json = wp_json_encode($chatbot_settings);
-    wp_add_inline_script('chatbot-chatgpt-local', 'window.chatbotSettings = ' . $chatbot_settings_json . ';', 'before');
+    wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof chatbotSettings === "undefined") { var chatbotSettings = ' . $chatbot_settings_json . '; } else { chatbotSettings = ' . $chatbot_settings_json . '; }', 'before');
 
     // DIAG - Diagnostics - Ver 2.0.5
     // back_trace('NOTICE', '$bot_name: ' . $bot_name);
@@ -623,7 +623,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $assistant_details = options_helper($assistant_details, 'initial_greeting', 'Hello! How can I help you today?');
     // Fetch and update subsequent greeting
     $assistant_details = options_helper($assistant_details, 'subsequent_greeting', 'Hello again! How can I help you?');
-    
+
     // Use enqueue_greetings_script and handle its return
     $modified_greetings = enqueue_greetings_script($assistant_details['initial_greeting'], $assistant_details['subsequent_greeting']);
 
@@ -832,7 +832,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                        document.getElementById('chatbot-chatgpt-upload-file-input').trigger('click');
                     });
                 </script>
             <?php endif; ?>
@@ -843,7 +843,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-upload-mp3-input').click();
+                        document.getElementById('chatbot-chatgpt-upload-mp3-input').trigger('click');
                     });
                 </script>
             <?php endif; ?>
@@ -964,7 +964,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                            document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                            document.getElementById('chatbot-chatgpt-upload-file-input').trigger('click');
                         });
                     </script>
                 <?php endif; ?>
@@ -975,7 +975,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
-                            document.getElementById('chatbot-chatgpt-upload-mp3-input').click();
+                            document.getElementById('chatbot-chatgpt-upload-mp3-input').trigger('click');
                         });
                     </script>
                 <?php endif; ?>

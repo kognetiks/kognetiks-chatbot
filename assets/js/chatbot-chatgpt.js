@@ -720,7 +720,9 @@ jQuery(document).ready(function ($) {
                     link.href = response.data;
                     link.download = ''; // Optionally set the filename
                     document.body.appendChild(link);
-                    link.click();
+                    // Refactored to use MouseEvent - Ver 2.0.5 - 2024 07 06
+                    // link.click();
+                    link.dispatchEvent(new MouseEvent('click')); // Use MouseEvent to simulate click
                     document.body.removeChild(link);
                 } else {
                     // console.error('Chatbot: ERROR: Download URL not provided or error in response.');
