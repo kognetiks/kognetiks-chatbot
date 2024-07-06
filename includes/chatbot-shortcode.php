@@ -451,8 +451,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     foreach ($chatbot_settings as $key => $value) {
         // back_trace('NOTICE', '$chatbot_settings - Key: ' . $key . ' Value: ' . $value);
     }
-    wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
-    
+    // Original wp_localize_script call
+    // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
+    // Refactored wp_localize_script call - Ver 2.0.5 - 2024 07 06
+    $chatbot_settings_json = wp_json_encode($chatbot_settings);
+    wp_add_inline_script('chatbot-chatgpt-local', 'const chatbotSettings = ' . $chatbot_settings_json . ';', 'before');
+
     // DIAG - Diagnostics - Ver 2.0.5
     // back_trace('NOTICE', '$bot_name: ' . $bot_name);
 
