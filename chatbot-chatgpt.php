@@ -143,6 +143,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reg
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reporting.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-support.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-tools.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
 // Include necessary files - Utilities - Ver 1.9.0
@@ -167,6 +168,18 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php'; // Ver 1.8.6
 
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
+
+require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
+require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
+
+// // Enable shortcode tester if diagnostics are on - Ver 2.0.6
+// if ($chatbot_chatgpt_diagnostics == 'Error') {
+//     require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
+//     // require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
+//     // back_trace( 'NOTICE', 'Shortcode Tester enabled. See the Tools tab.');
+//     // wporg_shortcodes_init();
+// }
+
 
 // User Capability Check - Ver 2.0.5
 // function chatbot_chatgpt_check_user_capability() {
@@ -940,7 +953,6 @@ function addEntry($transient_name, $newEntry) {
     set_transient($transient_name, $context_history); // Update the transient
 }
 
-
 // Function to return message and response - Ver 1.6.1
 function concatenateHistory($transient_name) {
     $context_history = get_transient($transient_name);
@@ -1076,3 +1088,4 @@ function kchat_get_plugin_version() {
     return $plugin_version;
 
 }
+

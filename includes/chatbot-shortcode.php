@@ -1073,7 +1073,7 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
     // Register numbered shortcodes dynamically
     for ($i = 1; $i <= $number_of_shortcodes; $i++) {
         add_shortcode('chatbot-' . $i, 'chatbot_chatgpt_shortcode');
-        error_log('Registered shortcode: chatbot-' . $i);
+        // back_trace( 'NOTICE', 'Registered shortcode: chatbot-' . $i);
     }
     
 }

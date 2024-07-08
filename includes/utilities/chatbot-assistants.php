@@ -118,7 +118,7 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
 
     update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 
-    back_trace ('NOTICE', 'chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
+    back_trace ('NOTICE', '$chatbot_chatgpt_number_of_shortcodes: ' . $number_of_shortcodes);
 
 }
 
@@ -200,7 +200,7 @@ function display_chatbot_chatgpt_assistants_table() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
     $assistants = $wpdb->get_results("SELECT * FROM $table_name");
 
-    // Update the number of assistants in the chatbot_chatgpt_number_of_shortcodes option - Ver 2.0.6
+    // Update the number of shortcodes - Ver 2.0.6
     update_chatbot_chatgpt_number_of_shortcodes();
 
     echo '<style>

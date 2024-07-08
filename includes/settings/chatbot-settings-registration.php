@@ -292,6 +292,26 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_custom_button_section'
     );
     
+    // Register tools settings
+    register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_tools');
+
+    // Add the tools section
+    add_settings_section(
+        'chatbot_chatgpt_tools_section',
+        'Tools Settings',
+        'chatbot_chatgpt_tools_section_callback',
+        'chatbot_chatgpt_tools'
+    );
+
+    // Add the tools field
+    add_settings_field(
+        'chatbot_chatgpt_tools',
+        'Shortcode Tester',
+        'chatbot_chatgpt_tools_setting_callback',
+        'chatbot_chatgpt_tools',
+        'chatbot_chatgpt_tools_section'
+    );
+
 }
 
 add_action('admin_init', 'chatbot_chatgpt_settings_init');
