@@ -298,7 +298,7 @@ function chatbot_chatgpt_settings_init() {
     // Add the tools section
     add_settings_section(
         'chatbot_chatgpt_tools_section',
-        'Tools Settings',
+        'Tools',
         'chatbot_chatgpt_tools_section_callback',
         'chatbot_chatgpt_tools'
     );

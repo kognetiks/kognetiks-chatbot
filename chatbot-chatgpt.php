@@ -177,7 +177,7 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.ph
 //     require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 //     // require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 //     // back_trace( 'NOTICE', 'Shortcode Tester enabled. See the Tools tab.');
-//     // wporg_shortcodes_init();
+//     // chatbot_chatgpt_short_code_tester_shortcodes_init();
 // }
 
 

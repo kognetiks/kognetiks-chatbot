@@ -19,7 +19,7 @@ function chatbot_chatgpt_tools_section_callback() {
 
 ?>
     <div>
-        <p>Tools summary for Chatbot ChatGPT</p>
+        <p>This tab provides tools, tests and diagnostics that are enabled when the Chatbot Diagnostics are enabled on the Messages tab.</p>
     </div>
     <?php
     

@@ -22,17 +22,17 @@ function chatbot_shortcode_tester() {
     ?>
     <h2>Test 1: Calling shortcode without any parameters</h2>
     <div>
-        <?php echo do_shortcode('[wporg]'); ?>
+        <?php echo do_shortcode('[chatbot_chatgpt_short_code_tester]'); ?>
     </div>
 
     <h2>Test 2: Calling shortcode with one parameter</h2>
     <div>
-        <?php echo do_shortcode('[wporg param1="cat"]'); ?>
+        <?php echo do_shortcode('[chatbot_chatgpt_short_code_tester param1="cat"]'); ?>
     </div>
 
     <h2>Test 3: Calling shortcode with three parameters</h2>
     <div>
-        <?php echo do_shortcode('[wporg param1="dog" param2="horse" param3="elephant"]'); ?>
+        <?php echo do_shortcode('[chatbot_chatgpt_short_code_tester param1="dog" param2="horse" param3="elephant"]'); ?>
     </div>
     <h3>Results:<h3>
     <div>

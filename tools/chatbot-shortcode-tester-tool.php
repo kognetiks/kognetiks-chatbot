@@ -17,13 +17,13 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function wporg_shortcode_tester($atts = [], $content = null, $tag = '') {
+function chatbot_chatgpt_short_code_tester_shortcode_tester($atts = [], $content = null, $tag = '') {
 
     // normalize attribute keys, lowercase
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
 
     // override default attributes with user attributes
-    $wporg_atts = shortcode_atts(
+    $chatbot_chatgpt_short_code_tester_atts = shortcode_atts(
         array(
             'param1' => 'No parameter passed for param1',
             'param2' => 'No parameter passed for param2',
@@ -32,12 +32,12 @@ function wporg_shortcode_tester($atts = [], $content = null, $tag = '') {
     );
 
     // start box
-    $o = '<div class="wporg-box">';
+    $o = '<div class="chatbot_chatgpt_short_code_tester-box">';
 
     // display parameters
-    $o .= '<p>Param1: ' . esc_html($wporg_atts['param1']) . '</p>';
-    $o .= '<p>Param2: ' . esc_html($wporg_atts['param2']) . '</p>';
-    $o .= '<p>Param3: ' . esc_html($wporg_atts['param3']) . '</p>';
+    $o .= '<p>Param1: ' . esc_html($chatbot_chatgpt_short_code_tester_atts['param1']) . '</p>';
+    $o .= '<p>Param2: ' . esc_html($chatbot_chatgpt_short_code_tester_atts['param2']) . '</p>';
+    $o .= '<p>Param3: ' . esc_html($chatbot_chatgpt_short_code_tester_atts['param3']) . '</p>';
 
     // enclosing tags
     if (!is_null($content)) {
@@ -55,8 +55,8 @@ function wporg_shortcode_tester($atts = [], $content = null, $tag = '') {
 /**
  * Central location to create all shortcodes.
  */
-function wporg_shortcodes_init() {
-    add_shortcode('wporg', 'wporg_shortcode_tester');
+function chatbot_chatgpt_short_code_tester_shortcodes_init() {
+    add_shortcode('chatbot_chatgpt_short_code_tester', 'chatbot_chatgpt_short_code_tester_shortcode_tester');
 }
-add_action('init', 'wporg_shortcodes_init');
+add_action('init', 'chatbot_chatgpt_short_code_tester_shortcodes_init');
 
