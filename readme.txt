@@ -228,7 +228,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 2.0.6 =
-* TBD
+* **Dynamic Shortcode**: Added support for dynamic shortcodes to allow for more flexible Assistant selection. Add all parameters to the shortcode, including the Assistant ID on the GTP Assistant tab. For example, `[chatbot-1]`.
 
 = 2.0.5 =
 * **Enhanced Assistant Management**: A new intuitive interface for managing all your chatbot Assistants in one place.

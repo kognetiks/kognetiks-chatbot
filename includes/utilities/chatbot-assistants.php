@@ -118,7 +118,7 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
 
     update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 
-    back_trace ('NOTICE', '$chatbot_chatgpt_number_of_shortcodes: ' . $number_of_shortcodes);
+    // back_trace ('NOTICE', '$chatbot_chatgpt_number_of_shortcodes: ' . $number_of_shortcodes);
 
 }
 

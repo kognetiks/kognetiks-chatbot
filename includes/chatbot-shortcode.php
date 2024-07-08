@@ -51,8 +51,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // DIAG - Diagnostics - Ver 1.9.3
-    back_trace( 'NOTICE', 'Shortcode tag: ' . $tag);
-    back_trace( 'NOTICE', 'Shortcode atts: ' . print_r($atts, true));
+    // back_trace( 'NOTICE', 'Shortcode tag: ' . $tag);
+    // back_trace( 'NOTICE', 'Shortcode atts: ' . print_r($atts, true));
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
@@ -153,7 +153,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Tag Processing - Ver 2.0.6
     if (strpos($tag, 'chatbot-') !== false) {
-        back_trace('NOTICE', 'Tag Processing: ' . $tag);
+        // back_trace('NOTICE', 'Tag Processing: ' . $tag);
         // Extract the Assistant ID from the tag
         $assistant_key = str_replace('chatbot-', '', $tag);
         // Fetch the common name of the Assistant Common Name from the Assistant table
@@ -163,8 +163,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             $atts[$key] = $value;
         }
         $atts['assistant'] = $assistant_details['assistant_id'];
-        back_trace('NOTICE', '$assistant_details: ' . print_r($atts['assistant'], true));
-        back_trace('NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
+        // back_trace('NOTICE', '$assistant_details: ' . print_r($atts['assistant'], true));
+        // back_trace('NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
     }
 
     // If the assistant is not set to 'original', 'primary', or 'alternate' then try to fetch the Assistant details
