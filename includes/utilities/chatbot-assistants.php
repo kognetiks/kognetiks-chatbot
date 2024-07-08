@@ -52,6 +52,9 @@ function create_chatbot_chatgpt_assistants_table() {
     // Call the upgrade function after creating the table
     upgrade_chatbot_chatgpt_assistants_table();
 
+    // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
+    update_chatbot_chatgpt_number_of_shortcodes();
+
 }
 
 // Drop the table for the chatbot assistants
@@ -82,6 +85,40 @@ function get_chatbot_chatgpt_assistant_by_common_name($common_name) {
     );
 
     return $assistant_details;
+
+}
+
+// Retrieve a row from the chatbot assistants table using the id - Ver 2.0.6
+function get_chatbot_chatgpt_assistant_by_key($id) {
+
+    global $wpdb;
+    
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+
+    $assistant_details = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM $table_name WHERE id = %s",
+            $id
+        ),
+        ARRAY_A
+    );
+
+    return $assistant_details;
+
+}
+
+// Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
+function update_chatbot_chatgpt_number_of_shortcodes() {
+
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+
+    $number_of_shortcodes = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+
+    update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
+
+    back_trace ('NOTICE', 'chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 
 }
 
@@ -163,6 +200,9 @@ function display_chatbot_chatgpt_assistants_table() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
     $assistants = $wpdb->get_results("SELECT * FROM $table_name");
 
+    // Update the number of assistants in the chatbot_chatgpt_number_of_shortcodes option - Ver 2.0.6
+    update_chatbot_chatgpt_number_of_shortcodes();
+
     echo '<style>
         .asst-templates-display {
             overflow-x: auto; /* Add horizontal scroll if needed */
@@ -176,6 +216,7 @@ function display_chatbot_chatgpt_assistants_table() {
             padding: 8px;
             padding: 10px !important; /* Adjust cell padding */
             white-space: normal !important; /* Allow cell content to wrap */
+            word-break: keep-all !important; /* Keep all words together */
             text-align: center !important; /* Center text-align */
         }
         .asst-templates-display th {
@@ -191,7 +232,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<thead>';
     echo '<tr>';
     echo '<th>Actions</th>';  // Column header for actions
-    echo '<th>ID</th>';
+    echo '<th>&#91;Shortcode&#93;</th>';
     echo '<th>Assistant ID</th>';
     echo '<th>Common Name</th>';
     echo '<th>Style</th>';
@@ -216,7 +257,7 @@ function display_chatbot_chatgpt_assistants_table() {
         // Delete button to trigger the deleteAssistant function
         echo '<button class="button-primary" onclick="deleteAssistant(' . $assistant->id . ')">Delete</button>';
         echo '</td>';
-        echo '<td>' . $assistant->id . '</td>';
+        echo '<td>' . '&#91;chatbot-' . $assistant->id . '&#93;' . '</td>';
         echo '<td><input type="text" name="assistant_id_' . $assistant->id . '" value="' . $assistant->assistant_id . '"></td>';
         echo '<td><input type="text" name="common_name_' . $assistant->id . '" value="' . $assistant->common_name . '"></td>';
         echo '<td><select name="style_' . $assistant->id . '">';

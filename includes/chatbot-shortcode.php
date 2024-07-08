@@ -51,6 +51,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // DIAG - Diagnostics - Ver 1.9.3
+    back_trace( 'NOTICE', 'Shortcode tag: ' . $tag);
+    back_trace( 'NOTICE', 'Shortcode atts: ' . print_r($atts, true));
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode - at the beginning of the function');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
@@ -148,6 +150,22 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // If (strpos($atts['assistant'], 'asst_') === false && $atts['assistant'] != 'original' && $atts['assistant'] != 'primary' && $atts['assistant'] != 'alternate') {
     // If (strpos($atts['assistant'], 'asst_') === false ) {
+
+    // Tag Processing - Ver 2.0.6
+    if (strpos($tag, 'chatbot-') !== false) {
+        back_trace('NOTICE', 'Tag Processing: ' . $tag);
+        // Extract the Assistant ID from the tag
+        $assistant_key = str_replace('chatbot-', '', $tag);
+        // Fetch the common name of the Assistant Common Name from the Assistant table
+        $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
+        // For each key in $assistant_details, set the $atts value
+        foreach ($assistant_details as $key => $value) {
+            $atts[$key] = $value;
+        }
+        $atts['assistant'] = $assistant_details['assistant_id'];
+        back_trace('NOTICE', '$assistant_details: ' . print_r($atts['assistant'], true));
+        back_trace('NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
+    }
 
     // If the assistant is not set to 'original', 'primary', or 'alternate' then try to fetch the Assistant details
     if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false ) {
@@ -1027,9 +1045,39 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
 }
-add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
-add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
+// add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
+// add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
+// add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
+// add_shortcode('chatbot-1', 'chatbot_chatgpt_shortcode');
+// add_shortcode('chatbot-2', 'chatbot_chatgpt_shortcode');
+// add_shortcode('chatbot-3', 'chatbot_chatgpt_shortcode');
+
+// Dynamic Shortcode - Ver 2.0.6
+function register_chatbot_shortcodes($number_of_shortcodes = null) {
+
+    // Fetch the number of shortcodes to register
+    $number_of_shortcodes = $number_of_shortcodes ?? esc_attr(get_option('chatbot_chatgpt_number_of_shortcodes', 1));
+
+    // Base shortcode names
+    $base_shortcodes = [
+        'chatbot',
+        'chatbot_chatgpt',
+        'kognetiks_chatbot'
+    ];
+
+    // Register base shortcodes
+    foreach ($base_shortcodes as $shortcode) {
+        add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
+    }
+
+    // Register numbered shortcodes dynamically
+    for ($i = 1; $i <= $number_of_shortcodes; $i++) {
+        add_shortcode('chatbot-' . $i, 'chatbot_chatgpt_shortcode');
+        error_log('Registered shortcode: chatbot-' . $i);
+    }
+    
+}
+register_chatbot_shortcodes();
 
 // Custom Buttons - Ver 2.0.5
 function chatbot_chatgpt_custom_buttons_display() {

@@ -22,7 +22,8 @@ function chatbot_chatgpt_assistant_settings_section_callback($args) {
     <p>Tailor each Assistant to meet the unique needs of your audience, ensuring an engaging and personalized experience for all.</p>
     <p>If you have developed an Assistant in the OpenAI Playground, you will need the id of the assistant - it usually starts with "asst_".</p>
     <p>More information can be found here <a href="https://platform.openai.com/playground?mode=assistant" target="_blank">https://platform.openai.com/playground?mode=assistant</a>.</p>
-    <p>When you're ready to use an Assistant, simply add the shortcode <code>[chatbot assistant="Common Name"]</code> to your page.</p>
+    <!-- <p>When you're ready to use an Assistant, simply add the shortcode <code>[chatbot assistant="Common Name"]</code> to your page.</p> -->
+    <p>When you're ready to use an Assistant, simply add a shortcode such as <code>[chatbot-1]</code>, <code>[chatbot-2]</code>, etc. to your page.</p>
     <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
     <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation Assistant Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=manage-assistants.md">here</a>.</b></p>
