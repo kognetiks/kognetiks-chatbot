@@ -153,16 +153,16 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Tag Processing - Ver 2.0.6
     if (strpos($tag, 'chatbot-') !== false) {
-        // back_trace('NOTICE', 'Tag Processing: ' . $tag);
+        back_trace('NOTICE', 'Tag Processing: ' . $tag);
         // Extract the Assistant ID from the tag
-        // $assistant_key = str_replace('chatbot-', '', $tag);
-        // // Fetch the common name of the Assistant Common Name from the Assistant table
-        // $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
-        // // For each key in $assistant_details, set the $atts value
-        // foreach ($assistant_details as $key => $value) {
-        //     $atts[$key] = $value;
-        // }
-        // $atts['assistant'] = $assistant_details['assistant_id'];
+        $assistant_key = str_replace('chatbot-', '', $tag);
+        // Fetch the common name of the Assistant Common Name from the Assistant table
+        $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
+        // For each key in $assistant_details, set the $atts value
+        foreach ($assistant_details as $key => $value) {
+            $atts[$key] = $value;
+        }
+        $atts['assistant'] = $assistant_details['assistant_id'];
 
         // Ensure $assistant_details is an array before proceeding
         if (!is_array($assistant_details)) {
@@ -1103,6 +1103,7 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
     // Register numbered shortcodes dynamically
     for ($i = 1; $i <= $number_of_shortcodes; $i++) {
         add_shortcode('chatbot-' . $i, 'chatbot_chatgpt_shortcode');
+        error_log('chabot-shortcode.php - Registered shortcode: chatbot-' . $i);
         // back_trace( 'NOTICE', 'Registered shortcode: chatbot-' . $i);
     }
     
