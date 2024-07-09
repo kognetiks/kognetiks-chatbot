@@ -32,24 +32,25 @@ function chatbot_chatgpt_short_code_tester_shortcode_tester($atts = [], $content
     );
 
     // start box
-    $o = '<div class="chatbot_chatgpt_short_code_tester-box">';
+    $output_results = '<div class="chatbot_chatgpt_short_code_tester-box">';
 
     // display parameters
-    $o .= '<p>Param1: ' . esc_html($chatbot_chatgpt_short_code_tester_atts['param1']) . '</p>';
-    $o .= '<p>Param2: ' . esc_html($chatbot_chatgpt_short_code_tester_atts['param2']) . '</p>';
-    $o .= '<p>Param3: ' . esc_html($chatbot_chatgpt_short_code_tester_atts['param3']) . '</p>';
+    $output_results .= '<p>Param1: ' . esc_html($chatbot_chatgpt_short_code_tester_atts['param1']) . '</p>';
+    $output_results .= '<p>Param2: ' . esc_html($chatbot_chatgpt_short_code_tester_atts['param2']) . '</p>';
+    $output_results .= '<p>Param3: ' . esc_html($chatbot_chatgpt_short_code_tester_atts['param3']) . '</p>';
 
     // enclosing tags
     if (!is_null($content)) {
         // Secure output by executing the_content filter hook on $content
-        $o .= apply_filters('the_content', $content);
+        $output_results .= apply_filters('the_content', $content);
     }
 
     // end box
-    $o .= '</div>';
+    $output_results .= '</div>';
 
     // return output
-    return $o;
+    return $output_results;
+
 }
 
 /**

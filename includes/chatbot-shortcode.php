@@ -153,11 +153,16 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Tag Processing - Ver 2.0.6
     if (strpos($tag, 'chatbot-') !== false) {
-        back_trace('NOTICE', 'Tag Processing: ' . $tag);
+        
+        // DIAG - Diagnostics - Ver 2.0.6
+        // back_trace('NOTICE', 'Tag Processing: ' . $tag);
+
         // Extract the Assistant ID from the tag
         $assistant_key = str_replace('chatbot-', '', $tag);
+
         // Fetch the common name of the Assistant Common Name from the Assistant table
         $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
+
         // For each key in $assistant_details, set the $atts value
         foreach ($assistant_details as $key => $value) {
             $atts[$key] = $value;

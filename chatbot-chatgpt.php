@@ -169,6 +169,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.p
 
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
 
+require_once plugin_dir_path(__FILE__) . 'tools/chatbot-capability-tester.php';
+require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
