@@ -1083,7 +1083,7 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
 
     update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 
-    error_log('chabot-shortcode.php - Number of shortcodes: ' . $number_of_shortcodes);
+    // error_log('chabot-shortcode.php - Number of shortcodes: ' . $number_of_shortcodes);
 
     // Fetch the number of shortcodes to 
     $number_of_shortcodes = $number_of_shortcodes ?? esc_attr(get_option('chatbot_chatgpt_number_of_shortcodes', 1));
@@ -1103,7 +1103,7 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
     // Register numbered shortcodes dynamically
     for ($i = 1; $i <= $number_of_shortcodes; $i++) {
         add_shortcode('chatbot-' . $i, 'chatbot_chatgpt_shortcode');
-        error_log('chabot-shortcode.php - Registered shortcode: chatbot-' . $i);
+        // error_log('chabot-shortcode.php - Registered shortcode: chatbot-' . $i);
         // back_trace( 'NOTICE', 'Registered shortcode: chatbot-' . $i);
     }
     
