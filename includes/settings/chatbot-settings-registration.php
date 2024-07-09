@@ -309,7 +309,7 @@ function chatbot_chatgpt_settings_init() {
     // Tools Overview
     add_settings_field(
         'chatbot_chatgpt_tools_field',
-        'General Settings',
+        'Sections',
         'chatbot_chatgpt_tools_setting_callback',
         'chatbot_chatgpt_tools',
         'chatbot_chatgpt_tools_section'
