@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-
+// Add the Tools section
 function chatbot_chatgpt_tools_section_callback() {
 
 ?>
@@ -25,9 +25,34 @@ function chatbot_chatgpt_tools_section_callback() {
     
 }
 
+// Add the Shortcode Tester
 function chatbot_chatgpt_tools_setting_callback($args) {
 
     chatbot_shortcode_tester();
 
 }
+
+// User Capability Check - Ver 2.0.5
+// function chatbot_chatgpt_check_user_capability_callback() {
+
+//     echo '<h2>User Capability Check</h2>';
+
+//     $capabilities = array(
+//         'read',
+//         'edit_posts',
+//         'publish_posts',
+//         'manage_options'
+//     );
+
+//     foreach ($capabilities as $capability) {
+//         if (current_user_can($capability)) {
+//             // back_trace('NOTICE', 'User has the capability: ' . $capability);
+//             echo '<p>User has the capability: ' . $capability . '</p>';
+//         } else {
+//             // back_trace('ERROR', 'User does not have the capability: ' . $capability);
+//             echo '<p>User does not have the capability: ' . $capability . '</p>';
+//         }
+//     }
+
+// }
 

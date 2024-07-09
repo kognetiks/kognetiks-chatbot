@@ -114,11 +114,14 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
-    $number_of_shortcodes = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+    // $number_of_shortcodes = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+
+    // The $number_of_shortcodes is id of the highest assistant in the table
+    $number_of_shortcodes = $wpdb->get_var("SELECT MAX(id) FROM $table_name");
 
     update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 
-    // back_trace ('NOTICE', '$chatbot_chatgpt_number_of_shortcodes: ' . $number_of_shortcodes);
+    // error_log('chatbot-assistants - Number of Shortcodes: ' . $number_of_shortcodes);
 
 }
 
@@ -249,6 +252,20 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '</thead>';
     echo '<tbody>';
 
+    echo '<script>
+    function copyToClipboard(text) {
+        const tempInput = document.createElement("input");
+        tempInput.style.position = "absolute";
+        tempInput.style.left = "-9999px";
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        alert("Shortcode copied to clipboard: " + text);
+    }
+    </script>';
+
     foreach ($assistants as $assistant) {
         echo '<tr>';
         echo '<td>';  // Actions column for each assistant row
@@ -257,7 +274,7 @@ function display_chatbot_chatgpt_assistants_table() {
         // Delete button to trigger the deleteAssistant function
         echo '<button class="button-primary" onclick="deleteAssistant(' . $assistant->id . ')">Delete</button>';
         echo '</td>';
-        echo '<td>' . '&#91;chatbot-' . $assistant->id . '&#93;' . '</td>';
+        echo '<td onclick="copyToClipboard(\'[chatbot-' . $assistant->id . ']\')"><b>' . '&#91;chatbot-' . $assistant->id . '&#93;' . '</b></td>';
         echo '<td><input type="text" name="assistant_id_' . $assistant->id . '" value="' . $assistant->assistant_id . '"></td>';
         echo '<td><input type="text" name="common_name_' . $assistant->id . '" value="' . $assistant->common_name . '"></td>';
         echo '<td><select name="style_' . $assistant->id . '">';

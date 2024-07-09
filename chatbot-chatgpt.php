@@ -172,36 +172,6 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // 
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
-// // Enable shortcode tester if diagnostics are on - Ver 2.0.6
-// if ($chatbot_chatgpt_diagnostics == 'Error') {
-//     require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
-//     // require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
-//     // back_trace( 'NOTICE', 'Shortcode Tester enabled. See the Tools tab.');
-//     // chatbot_chatgpt_short_code_tester_shortcodes_init();
-// }
-
-
-// User Capability Check - Ver 2.0.5
-// function chatbot_chatgpt_check_user_capability() {
-
-//     $capabilities = array(
-//         'read',
-//         'edit_posts',
-//         'publish_posts',
-//         'manage_options'
-//     );
-
-//     foreach ($capabilities as $capability) {
-//         if (current_user_can($capability)) {
-//             // back_trace('NOTICE', 'User has the capability: ' . $capability);
-//         } else {
-//             // back_trace('ERROR', 'User does not have the capability: ' . $capability);
-//         }
-//     }
-
-// }
-// add_action('init', 'chatbot_chatgpt_check_user_capability');
-
 // Check for Upgrades - Ver 1.7.7
 if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
     chatbot_chatgpt_upgrade();

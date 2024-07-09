@@ -155,14 +155,32 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if (strpos($tag, 'chatbot-') !== false) {
         // back_trace('NOTICE', 'Tag Processing: ' . $tag);
         // Extract the Assistant ID from the tag
-        $assistant_key = str_replace('chatbot-', '', $tag);
-        // Fetch the common name of the Assistant Common Name from the Assistant table
-        $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
+        // $assistant_key = str_replace('chatbot-', '', $tag);
+        // // Fetch the common name of the Assistant Common Name from the Assistant table
+        // $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
+        // // For each key in $assistant_details, set the $atts value
+        // foreach ($assistant_details as $key => $value) {
+        //     $atts[$key] = $value;
+        // }
+        // $atts['assistant'] = $assistant_details['assistant_id'];
+
+        // Ensure $assistant_details is an array before proceeding
+        if (!is_array($assistant_details)) {
+            $assistant_details = []; // Initialize as an empty array if not an array
+        }
+
         // For each key in $assistant_details, set the $atts value
         foreach ($assistant_details as $key => $value) {
             $atts[$key] = $value;
         }
-        $atts['assistant'] = $assistant_details['assistant_id'];
+
+        // Check if 'assistant_id' exists in $assistant_details before accessing it
+        if (isset($assistant_details['assistant_id'])) {
+            $atts['assistant'] = $assistant_details['assistant_id'];
+        } else {
+            $atts['assistant'] = null; // Or set a default value
+        }
+
         // back_trace('NOTICE', '$assistant_details: ' . print_r($atts['assistant'], true));
         // back_trace('NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
     }
@@ -1055,7 +1073,19 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 // Dynamic Shortcode - Ver 2.0.6
 function register_chatbot_shortcodes($number_of_shortcodes = null) {
 
-    // Fetch the number of shortcodes to register
+    // Make sure the number of shortcodes is set
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+
+    // The $number_of_shortcodes is id of the highest assistant in the table
+    $number_of_shortcodes = $wpdb->get_var("SELECT MAX(id) FROM $table_name");
+
+    update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
+
+    error_log('chabot-shortcode.php - Number of shortcodes: ' . $number_of_shortcodes);
+
+    // Fetch the number of shortcodes to 
     $number_of_shortcodes = $number_of_shortcodes ?? esc_attr(get_option('chatbot_chatgpt_number_of_shortcodes', 1));
 
     // Base shortcode names
