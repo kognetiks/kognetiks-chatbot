@@ -571,12 +571,18 @@ function chatbot_chatgpt_send_message() {
     $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
     $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
     $chatbot_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id);
-    // back_trace ( 'NOTICE', 'chatbot_chatgpt_send_message $chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
     $chatbot_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id);
-    // back_trace ( 'NOTICE', 'chatbot_chatgpt_send_message $chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
     $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
     $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
     $voice = $chatbot_settings['voice'];
+
+    // DIAG - Diagnostics - Ver 2.0.6
+    back_trace ( 'NOTICE', '$chatbot_settings[display_style]: ' . $chatbot_settings['display_style']);
+    back_trace ( 'NOTICE', '$chatbot_settings[assistant_alias]: ' . $chatbot_settings['assistant_alias']);
+    back_trace ( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
+    back_trace ( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
+    back_trace ( 'NOTICE', '$chatbot_settings[model]: ' . $chatbot_settings['model']);
+    back_trace ( 'NOTICE', '$chatbot_settings[voice]: ' . $chatbot_settings['voice']);
 
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
@@ -586,6 +592,14 @@ function chatbot_chatgpt_send_message() {
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
 
     $chatbot_settings['model'] = $temp_model; // Restore the model after overwriting $chatbot_settings
+
+    // DIAG - Diagnostics - Ver 2.0.6
+    back_trace ( 'NOTICE', '$chatbot_settings[display_style]: ' . $chatbot_settings['display_style']);
+    back_trace ( 'NOTICE', '$chatbot_settings[assistant_alias]: ' . $chatbot_settings['assistant_alias']);
+    back_trace ( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
+    back_trace ( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
+    back_trace ( 'NOTICE', '$chatbot_settings[model]: ' . $chatbot_settings['model']);
+    back_trace ( 'NOTICE', '$chatbot_settings[voice]: ' . $chatbot_settings['voice']);
 
     $assistant_id = isset($chatbot_settings['assistant_id']) ? $chatbot_settings['assistant_id'] : '';
     $thread_Id = isset($chatbot_settings['thread_id']) ? $chatbot_settings['thread_id'] : '';

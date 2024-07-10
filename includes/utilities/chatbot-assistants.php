@@ -123,8 +123,21 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
 
     // $number_of_shortcodes = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
 
-    // The $number_of_shortcodes is id of the highest assistant in the table
-    $number_of_shortcodes = $wpdb->get_var("SELECT MAX(id) FROM $table_name");
+    // Check if the table exists
+    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name;
+
+    if ($table_exists) {
+        // The table exists, proceed with the original query
+        $number_of_shortcodes = $wpdb->get_var("SELECT MAX(id) FROM $table_name");
+
+        // If the query fails for any other reason, set $number_of_shortcodes to 0
+        if ($number_of_shortcodes === NULL || $number_of_shortcodes === FALSE) {
+            $number_of_shortcodes = 0;
+        }
+    } else {
+        // The table doesn't exist, set $number_of_shortcodes to 0 directly
+        $number_of_shortcodes = 0;
+    }  
 
     update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 

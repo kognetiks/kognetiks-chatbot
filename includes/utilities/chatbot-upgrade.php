@@ -22,6 +22,13 @@ function chatbot_chatgpt_activate() {
     // Logic to run during activation
     chatbot_chatgpt_upgrade();
 
+    // Handle unexpect output during activation - Ver 2.0.6 - 2024 07 10
+    $unexpected_output = ob_get_clean();
+    if (!empty($unexpected_output)) {
+        // Log or handle unexpected output
+        error_log('Unexpected output during plugin activation: ' . $unexpected_output);
+    }
+
     // DIAG - Log the activation
     // back_trace( 'NOTICE', 'Plugin activation completed');
 
