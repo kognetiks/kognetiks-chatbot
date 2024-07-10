@@ -92,6 +92,8 @@ function get_chatbot_chatgpt_assistant_by_common_name($common_name) {
 function get_chatbot_chatgpt_assistant_by_key($id) {
 
     global $wpdb;
+
+    $assistant_details = array();
     
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
@@ -102,6 +104,11 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
         ),
         ARRAY_A
     );
+
+    // If the assistant is not found, return an empty array
+    if (!$assistant_details) {
+        return array();
+    }
 
     return $assistant_details;
 

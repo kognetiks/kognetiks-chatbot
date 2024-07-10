@@ -287,7 +287,7 @@ function chatbot_chatgpt_voice_model_option_callback($args) {
 
     // Limit the models to voice models
     $voice_models = array_filter($voice_models, function($voice_model) {
-        return strpos($voice_model['id'], 'tts') !== false;
+        return strpos($voice_model['id'], 'tts-1-1106') !== false;
     });
     
     // Check for errors

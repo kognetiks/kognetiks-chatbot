@@ -167,6 +167,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         foreach ($assistant_details as $key => $value) {
             $atts[$key] = $value;
         }
+
+        // If the assistant_id is null, then set it to original
+        if (empty($assistant_details['assistant_id'])) {
+            $assistant_details['assistant_id'] = 'original';
+        }
+
         $atts['assistant'] = $assistant_details['assistant_id'];
 
         // Ensure $assistant_details is an array before proceeding

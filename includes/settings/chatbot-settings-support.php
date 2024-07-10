@@ -109,14 +109,13 @@ function chatbot_chatgpt_support_section_callback() {
 
     // Get the 'documentation' parameter from the URL
     $docLocation = '';
-    $docLocation = '';
     if (isset($_GET['dir'])) {
-        $dir = sanitize_text_field($_GET['dir']);
+        $dir = basename(sanitize_text_field($_GET['dir']));
     } else {
         $dir = '';
     }
     if (isset($_GET['file'])) {
-        $file = sanitize_text_field($_GET['file']);
+        $file = basename(sanitize_text_field($_GET['file']));
     } else {
         $file = '';
     }
