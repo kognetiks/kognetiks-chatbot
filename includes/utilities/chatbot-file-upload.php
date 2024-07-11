@@ -235,12 +235,12 @@ function chatbot_chatgpt_upload_mp3() {
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace ( 'ERROR', 'Failed to create results directory.');
+        // back_trace( 'ERROR', 'Failed to create results directory.');
         $responses[] = array(
             'status' => 'error',
             'message' => 'Oops! File upload failed.'
         );
-        // back_trace ( 'ERROR', 'File upload failed');
+        // back_trace( 'ERROR', 'File upload failed');
         http_response_code(500); // Send a 500 Internal Server Error status code
         exit;
     } else {

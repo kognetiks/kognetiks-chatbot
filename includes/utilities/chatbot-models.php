@@ -120,7 +120,7 @@ function get_openai_models() {
     });
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace ( 'NOTICE' , '$models: ' . print_r($models, true));
+    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
 
     // Return the list of models
     return $models;

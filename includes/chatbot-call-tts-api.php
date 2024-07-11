@@ -31,14 +31,16 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     global $learningMessages;
     global $errorResponses;
 
-
     // DIAG - Diagnostics - Ver 1.8.6
+    // back_trace( 'NOTICE', '*********************************');
     // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'BEGIN $model: ' . $model);
+    // back_trace( 'NOTICE', 'BEGIN $voice: ' . $voice);
 
     // Check for the API key
     if (empty($api_key) or $api_key == '[private]') {
@@ -61,7 +63,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace ( 'ERROR', 'Failed to create directory.')
+        // back_trace( 'ERROR', 'Failed to create directory.')
         return;
     }
 
@@ -97,7 +99,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // Get the audio voice transient if it exists - Ver 1.9.5
     if ( empty($voice) ) {
-        $voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+        $voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
     }
 
     if ( !empty($voice) ) {
@@ -265,53 +267,51 @@ function chatbot_chatgpt_read_aloud($message) {
     $page_id = $_POST['page_id'];
     $session_id = $_POST['session_id'];
 
+    // FIXME - DON'T OVERRIDE THE MODEL
+
     // Hold the model
-    // $t_model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
+    // $t_model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
     // if ( empty($t_model) ) {
     //     $t_model = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
     // }
     // $model = $t_model;
-    $t_model = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
-    set_chatbot_chatgpt_transients( 'model', esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106')), $user_id, $page_id);
-    $script_data_array['model'] = $t_model;
+    // set_chatbot_chatgpt_transients( 'model', $model, $user_id, $page_id, $session_id);
+    $script_data_array['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
+
+    // FIXME - READ ALOUD PASSED FROM ASSISTANT MANAGEMENT
 
     // Hold the voice
-    // $t_voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
-    if ( empty($voice) ) {
-        $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
+    $t_voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
+    if ( empty($t_voice) ) {
+        $t_voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
     }
-    // $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
-
-    // back_trace( 'NOTICE', 'user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$t_voice: ' . $voice);
+    $voice = $t_voice;
+    set_chatbot_chatgpt_transients( 'voice', $voice, $user_id, $page_id, $session_id);
+    $script_data_array['voice'] = $voice;
 
     if ( empty($voice) ) {
         $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
     }
     $script_data_array['voice'] = $voice;
     
-    // DIAG - Diagnostics - Ver 2.0.5
-    // back_trace( 'NOTICE', '$model: ' . $model);
+    // DIAG - Diagnostics - Ver 2.0.6
+    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', 'user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$t_model: ' . $t_model);
+    // back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$t_voice: ' . $voice);
     // back_trace( 'NOTICE', '$voice: ' . $voice);
-    // back_trace( 'NOTICE', '$t_voice: ' . $t_voice);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
 
     // Call the Text-to-Speech API
     $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice);
 
-    // Reset the model
-    set_chatbot_chatgpt_transients( 'model', $t_model, $user_id, $page_id);
-    $script_data_array['model'] = $t_model;
-    // Reset the voice - IS THIS STILL NEEDED?
-    // set_chatbot_chatgpt_transients( 'voice', $t_voice, $user_id, $page_id);
+    // Reset the model - REMOVED - Ver 2.0.6 - 2024 07 11
+    // set_chatbot_chatgpt_transients( 'model', $t_model, $user_id, $page_id, $session_id);
+    // $script_data_array['model'] = $t_model;
+    // set_chatbot_chatgpt_transients( 'voice', $t_voice, $user_id, $page_id, $session_id);
     // $script_data_array['voice'] = $t_voice;
-    set_chatbot_chatgpt_transients( 'voice', $voice, $user_id, $page_id);
-    $script_data_array['voice'] = $voice;
 
     // Return the response
     wp_send_json_success($response);
@@ -367,7 +367,7 @@ function deleteAudioFile($file_id) {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace ( 'ERROR', 'Failed to create directory.')
+        // back_trace( 'ERROR', 'Failed to create directory.')
         return;
     }
 

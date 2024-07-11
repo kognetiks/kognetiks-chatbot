@@ -93,10 +93,15 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
         'voice' => $voice,
     );
     
-    // If $user_id is empty or zero then set it to $session_id
+    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    $user_id = get_current_user_id();
+    // Fetch the Kognetiks cookie
+    $session_id = kognetiks_get_unique_id();
     if (empty($user_id) || $user_id == 0) {
         $user_id = $session_id;
     }
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     // Construct the unique keys
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;

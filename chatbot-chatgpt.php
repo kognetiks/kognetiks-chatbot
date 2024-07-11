@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     2.0.5
+ * Version:     2.0.6
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.5');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.6');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -77,21 +77,13 @@ function kognetiks_get_unique_id() {
     return null;
 }
 
-// Fetch the unique ID of the visitor or logged-in user - Ver 2.0.4
-
-$session_id = kognetiks_get_unique_id();
-
-// Store the unique ID in a global variable - Ver 2.0.4
-if (empty($session_id)) {
-    $session_id = kognetiks_get_unique_id();
-}
-
+// Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
 $user_id = get_current_user_id();
-
-if ($user_id == 0) {
+// Fetch the Kognetiks cookie
+$session_id = kognetiks_get_unique_id();
+if (empty($user_id) || $user_id == 0) {
     $user_id = $session_id;
 }
-// error_log('Session ID: ' . $session_id);
 
 ob_end_flush(); // End output buffering and send the buffer to the browser
 
@@ -143,6 +135,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reg
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reporting.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-support.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-tools.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
 // Include necessary files - Utilities - Ver 1.9.0
@@ -168,26 +161,14 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.p
 
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
 
-// User Capability Check - Ver 2.0.5
-// function chatbot_chatgpt_check_user_capability() {
+require_once plugin_dir_path(__FILE__) . 'tools/chatbot-capability-tester.php';
+require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
+require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
+require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
-//     $capabilities = array(
-//         'read',
-//         'edit_posts',
-//         'publish_posts',
-//         'manage_options'
-//     );
-
-//     foreach ($capabilities as $capability) {
-//         if (current_user_can($capability)) {
-//             // back_trace('NOTICE', 'User has the capability: ' . $capability);
-//         } else {
-//             // back_trace('ERROR', 'User does not have the capability: ' . $capability);
-//         }
-//     }
-
-// }
-// add_action('init', 'chatbot_chatgpt_check_user_capability');
+// Log the User ID and Session ID - Ver 2.0.6 - 2024 07 11
+// back_trace( 'NOTICE', '$user_id: ' . $user_id);
+// back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
 // Check for Upgrades - Ver 1.7.7
 if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
@@ -205,7 +186,7 @@ if (get_option('chatbot_chatgpt_model_choice') == 'gpt-4-turbo') {
     $model = 'gpt-4-1106-preview';
     update_option('chatbot_chatgpt_model_choice', $model);
     // DIAG - Diagnostics
-    // back_trace ( 'NOTICE', 'Model upgraded: ' . $model);
+    // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
 }
 
 // Voice choice - Ver 1.9.5
@@ -214,7 +195,7 @@ if (get_option('chatbot_chatgpt_voice_option') == 'alloy') {
     $voice = 'alloy';
     update_option('chatbot_chatgpt_voice_option', $voice);
     // DIAG - Diagnostics
-    // back_trace ( 'NOTICE', 'Voice upgraded: ' . $voice);
+    // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
 }
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -292,10 +273,15 @@ function chatbot_chatgpt_enqueue_scripts() {
     $user_id = get_current_user_id();
     $page_id = get_the_id();
 
-    // if user is not logged in, then set user_id to $session_id
-    if (!is_user_logged_in()) {
+    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    $user_id = get_current_user_id();
+    // Fetch the Kognetiks cookie
+    $session_id = kognetiks_get_unique_id();
+    if (empty($user_id) || $user_id == 0) {
         $user_id = $session_id;
     }
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     $script_data_array = array(
         'user_id' => $user_id,
@@ -399,7 +385,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Set visitor and logged in user limits - Ver 2.0.1
@@ -542,18 +528,18 @@ function chatbot_chatgpt_send_message() {
     if (!empty($model)) {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         // DIAG - Diagnostics
-        // back_trace ( 'NOTICE', 'Model from options: ' . $model);
+        // back_trace( 'NOTICE', 'Model from options: ' . $model);
     } else {
         // SEE IF $script_data_array HAS THE MODEL
         if ( isset($script_data_array['model'])) {
             $model = $script_data_array['model'];
             // DIAG - Diagnostics
-            // back_trace ( 'NOTICE', 'Model set in global: ' . $model);
+            // back_trace( 'NOTICE', 'Model set in global: ' . $model);
         } else {
             // Set the model to the default
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
             // DIAG - Diagnostics
-            // back_trace ( 'ERROR', 'Model not set!!!');
+            // back_trace( 'ERROR', 'Model not set!!!');
             // wp_send_json_error('Invalid Model. Please set the model in the plugin settings.');
         }
     }
@@ -580,18 +566,25 @@ function chatbot_chatgpt_send_message() {
     $page_id = intval($_POST['page_id']);
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
 
-    $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
-    $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
-    $chatbot_settings['assistantID'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id);
-    // back_trace ( 'NOTICE', 'chatbot_chatgpt_send_message $chatbot_settings[assistantID]: ' . $chatbot_settings['assistantID']);
-    $chatbot_settings['threadID'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id);
-    // back_trace ( 'NOTICE', 'chatbot_chatgpt_send_message $chatbot_settings[threadID]: ' . $chatbot_settings['threadID']);
-    $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
-    $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
+    $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
+    $chatbot_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id, $session_id);
+    $chatbot_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id, $session_id);
+    $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
+    $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
     $voice = $chatbot_settings['voice'];
+    $display_style = $chatbot_settings['display_style'];
+
+    // DIAG - Diagnostics - Ver 2.0.6
+    // back_trace( 'NOTICE', '$chatbot_settings[display_style]: ' . $chatbot_settings['display_style']);
+    // back_trace( 'NOTICE', '$chatbot_settings[assistant_alias]: ' . $chatbot_settings['assistant_alias']);
+    // back_trace( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
+    // back_trace( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
+    // back_trace( 'NOTICE', '$chatbot_settings[model]: ' . $chatbot_settings['model']);
+    // back_trace( 'NOTICE', '$chatbot_settings[voice]: ' . $chatbot_settings['voice']);
 
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
@@ -602,17 +595,26 @@ function chatbot_chatgpt_send_message() {
 
     $chatbot_settings['model'] = $temp_model; // Restore the model after overwriting $chatbot_settings
 
-    $assistant_id = isset($chatbot_settings['assistantID']) ? $chatbot_settings['assistantID'] : '';
-    $thread_Id = isset($chatbot_settings['threadID']) ? $chatbot_settings['threadID'] : '';
+    // DIAG - Diagnostics - Ver 2.0.6
+    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
+    // back_trace( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
+    // back_trace( 'NOTICE', '$chatbot_settings[model]: ' . $chatbot_settings['model']);
+
+    $assistant_id = isset($chatbot_settings['assistant_id']) ? $chatbot_settings['assistant_id'] : '';
+    $thread_Id = isset($chatbot_settings['thread_id']) ? $chatbot_settings['thread_id'] : '';
     $model = isset($chatbot_settings['model']) ? $chatbot_settings['model'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
+    // back_trace( 'NOTICE', '*********************************');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
     // back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$voice: ' . $voice);
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
@@ -940,7 +942,6 @@ function addEntry($transient_name, $newEntry) {
     set_transient($transient_name, $context_history); // Update the transient
 }
 
-
 // Function to return message and response - Ver 1.6.1
 function concatenateHistory($transient_name) {
     $context_history = get_transient($transient_name);
@@ -1076,3 +1077,4 @@ function kchat_get_plugin_version() {
     return $plugin_version;
 
 }
+

@@ -180,14 +180,19 @@ function create_conversation_logging_table() {
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 
-    // Log errors or notify admin if there was an error
-    if (!empty($wpdb->last_error)) {
-        // back_trace( 'ERROR', 'Error creating/modifying chatbot_chatgpt_conversation_log table' . $wpdb->last_error);
-        return;
+    // Execute SQL query and create the table
+    if(dbDelta($sql)) {
+        return true;  // Table created successfully
+    } else {
+        // Log the error
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        // Log the specific reason for the failure
+        if($wpdb->last_error !== '') {
+            error_log('Error details: ' . $wpdb->last_error);
+        }
+        return false;  // Table creation failed
     }
-
-    // back_trace( 'SUCCESS', 'Successfully created/updated chatbot_chatgpt_conversation_log table');
-    return;
     
 }
 // Hook to run the function during plugin activation - Ver 1.7.6
@@ -214,7 +219,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
     }
 
     // Get the $assistant_name from the transient
-    $assistant_name = get_chatbot_chatgpt_transients('assistant_name', $user_id, $page_id);
+    $assistant_name = get_chatbot_chatgpt_transients('assistant_name', $user_id, $page_id, $session_id);
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 

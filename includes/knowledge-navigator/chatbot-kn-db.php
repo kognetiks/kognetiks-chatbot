@@ -40,6 +40,13 @@ function dbKNStore() {
     if(dbDelta($sql)) {
         return true;  // Table created successfully
     } else {
+        // Log the error
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        // Log the specific reason for the failure
+        if($wpdb->last_error !== '') {
+            error_log('Error details: ' . $wpdb->last_error);
+        }
         return false;  // Table creation failed
     }
 
@@ -69,6 +76,13 @@ function dbKNStoreTFIDF() {
     if(dbDelta($sql)) {
         return true;  // Table created successfully
     } else {
+        // Log the error
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        // Log the specific reason for the failure
+        if($wpdb->last_error !== '') {
+            error_log('Error details: ' . $wpdb->last_error);
+        }
         return false;  // Table creation failed
     }
 
@@ -95,12 +109,20 @@ function dbKNStoreWordCount() {
     
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     
-        // Execute SQL query and create the table
-        if(dbDelta($sql)) {
-            return true;  // Table created successfully
-        } else {
-            return false;  // Table creation failed
+    // Execute SQL query and create the table
+    if(dbDelta($sql)) {
+        return true;  // Table created successfully
+    } else {
+        // Log the error
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        // Log the specific reason for the failure
+        if($wpdb->last_error !== '') {
+            error_log('Error details: ' . $wpdb->last_error);
         }
+        return false;  // Table creation failed
+        
+    }
     
 }
 
@@ -165,7 +187,7 @@ function output_results() {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace ( 'ERROR', 'Failed to create directory.')
+        // back_trace( 'ERROR', 'Failed to create directory.')
         return;
     }
 

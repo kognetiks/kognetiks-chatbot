@@ -90,8 +90,8 @@ function validateDocumentation($dir, $file) {
         if (in_array($dir, $valid_directories) && in_array($file, $valid_files[$dir])) {
 
             // DIAG - Diagnostics - Ver 2.0.2.1
-            // back_trace ( 'NOTICE', 'validateDocumentation: $dir: '. $dir );
-            // back_trace ( 'NOTICE', 'validateDocumentation: $file: '. $file );
+            // back_trace( 'NOTICE', 'validateDocumentation: $dir: '. $dir );
+            // back_trace( 'NOTICE', 'validateDocumentation: $file: '. $file );
 
             // Return true if the directory and file are valid
             return true;
@@ -109,14 +109,13 @@ function chatbot_chatgpt_support_section_callback() {
 
     // Get the 'documentation' parameter from the URL
     $docLocation = '';
-    $docLocation = '';
     if (isset($_GET['dir'])) {
-        $dir = sanitize_text_field($_GET['dir']);
+        $dir = basename(sanitize_text_field($_GET['dir']));
     } else {
         $dir = '';
     }
     if (isset($_GET['file'])) {
-        $file = sanitize_text_field($_GET['file']);
+        $file = basename(sanitize_text_field($_GET['file']));
     } else {
         $file = '';
     }
@@ -134,7 +133,7 @@ function chatbot_chatgpt_support_section_callback() {
     }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace ( 'NOTICE', '$docLocation: '. $docLocation );
+    // back_trace( 'NOTICE', '$docLocation: '. $docLocation );
 
     // DIAG - Diagnostics - Ver 2.0.5
     // error_reporting(E_ALL);
@@ -167,9 +166,9 @@ function chatbot_chatgpt_support_section_callback() {
     // $absolutePath = __DIR__ . '/debug_adjustedHtmlContent.html';
     // $result = file_put_contents($absolutePath, $adjustedHtmlContent);
     // if ($result === false) {
-    //     back_trace (  "Failed to write to file: " . $absolutePath );
+    //     back_trace(  "Failed to write to file: " . $absolutePath );
     // } else {
-    //     back_trace ( 'NOTICE', "File written successfully to: " . $absolutePath );
+    //     back_trace( 'NOTICE', "File written successfully to: " . $absolutePath );
     // }
 
     echo $adjustedHtmlContent;

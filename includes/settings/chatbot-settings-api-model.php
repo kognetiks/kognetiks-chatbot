@@ -137,7 +137,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
     $models = get_openai_models();
 
     // DIAG - Ver 1.9.5
-    // back_trace ( 'NOTICE', '$models: ' . print_r($models, true) );
+    // back_trace( 'NOTICE', '$models: ' . print_r($models, true) );
 
     // Limit the models to chat models
     $models = array_filter($models, function($model) {
@@ -287,7 +287,7 @@ function chatbot_chatgpt_voice_model_option_callback($args) {
 
     // Limit the models to voice models
     $voice_models = array_filter($voice_models, function($voice_model) {
-        return strpos($voice_model['id'], 'tts') !== false;
+        return strpos($voice_model['id'], 'tts-1-1106') !== false;
     });
     
     // Check for errors

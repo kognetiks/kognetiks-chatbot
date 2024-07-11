@@ -193,6 +193,9 @@ jQuery(document).ready(function ($) {
     let selectedAvatar = encodeURIComponent(localStorage.getItem('chatbot_chatgpt_avatar_icon_setting') || '');
     let customAvatar = localStorage.getItem('chatbot_chatgpt_custom_avatar_icon_setting') || '';
 
+    customAvatar = DOMPurify.sanitize(customAvatar); // Sanitize the custom avatar URL
+    // customAvatar = document.createTextNode(customAvatar); // Create a text node from the custom avatar URL
+
     // Overrides for mobile devices - Ver 1.8.1
     // if (isMobile()) {
     //     // Set selectedAvatar to 'icon-000.png' for mobile devices, i.e., none
@@ -353,7 +356,7 @@ jQuery(document).ready(function ($) {
         messageElement = $('<div></div>').addClass('chat-message');
 
         // Convert HTML entities back to their original form
-        let decodedMessage = $('<textarea/>').html(message).text();
+        let decodedMessage = $('<textarea/>').html(DOMPurify.sanitize(message)).text();
 
         // Check if the message contains an audio tag
         if (decodedMessage.includes('<audio')) {
@@ -716,14 +719,24 @@ jQuery(document).ready(function ($) {
             },
             success: function(response) {
                 if (response.success && response.data) {
+                    // let link = document.createElement('a');
+                    // link.href = response.data;
+                    // link.download = ''; // Optionally set the filename
+                    // document.body.appendChild(link);
+                    // // Refactored to use MouseEvent - Ver 2.0.5 - 2024 07 06
+                    // // link.click();
+                    // link.dispatchEvent(new MouseEvent('click')); // Use MouseEvent to simulate click
+                    // document.body.removeChild(link);
+
                     let link = document.createElement('a');
-                    link.href = response.data;
+                    link.href = sanitizeUrl(response.data); // Sanitize the URL
                     link.download = ''; // Optionally set the filename
                     document.body.appendChild(link);
                     // Refactored to use MouseEvent - Ver 2.0.5 - 2024 07 06
                     // link.click();
                     link.dispatchEvent(new MouseEvent('click')); // Use MouseEvent to simulate click
                     document.body.removeChild(link);
+
                 } else {
                     // console.error('Chatbot: ERROR: Download URL not provided or error in response.');
                     // console.error(response.data || 'No additional error data.');
@@ -744,6 +757,13 @@ jQuery(document).ready(function ($) {
             },
         });
     });
+
+    function sanitizeUrl(url) {
+        // A simple implementation could check for a valid protocol (http or https)
+        // This is a basic example and might need to be expanded based on your requirements
+        const urlPattern = /^https?:\/\/[^ "]+$/;
+        return urlPattern.test(url) ? url : 'about:blank'; // Use 'about:blank' if the URL is invalid
+    }
 
     // Read Out Loud - Ver 1.9.5
     $('#chatbot-chatgpt-text-to-speech-btn').on('click', function(e) {

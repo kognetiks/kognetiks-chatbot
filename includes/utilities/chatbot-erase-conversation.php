@@ -73,8 +73,8 @@ function chatbot_chatgpt_erase_conversation_handler() {
 
     $transient_type = 'assistant_alias';
     
-    $assistant_id = get_chatbot_chatgpt_transients( $transient_type , $user_id, $page_id);
-    $voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    $assistant_id = get_chatbot_chatgpt_transients( $transient_type , $user_id, $page_id, $session_id);
+    $voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
 
     if ( $assistant_id == '' ) {
         $reset_type = 'original';

@@ -183,6 +183,13 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
             <!-- Coming Soon in Ver 2.0.0 -->
             <!-- <a href="?page=chatbot-chatgpt&tab=premium" class="nav-tab <?php echo $active_tab == 'premium' ? 'nav-tab-active' : ''; ?>">Premium</a> -->
+            <!-- Tools - Ver 2.0.6 -->
+            <?php 
+            // if diagnostics is enabled, then show the tools tab
+            if (get_option('chatbot_chatgpt_diagnostics', 'Off') != 'Off') {
+                echo '<a href="?page=chatbot-chatgpt&tab=tools" class="nav-tab ' . ($active_tab == 'tools' ? 'nav-tab-active' : '') . '">Tools</a>';
+            }
+            ?>
        </h2>
 
        <!-- Updated id - Ver 1.4.1 -->
@@ -356,6 +363,35 @@ function chatbot_chatgpt_settings_page_html() {
             // } elseif ($active_tab == 'premium') {
             //     settings_fields('chatbot_chatgpt_premium');
             //     do_settings_sections('chatbot_chatgpt_premium');
+
+            // Tools - Ver 2.0.6
+            } elseif ($active_tab == 'tools') {
+
+                settings_fields('chatbot_chatgpt_tools');
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_tools');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_shortcode_tools');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_capability_tools');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_options_exporter_tools');
+                echo '</div>';
+
+            } elseif ($active_tab == 'support') {
+
+                settings_fields('chatbot_chatgpt_support');
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_support');
+                echo '</div>';
 
             } elseif ($active_tab == 'support') {
 

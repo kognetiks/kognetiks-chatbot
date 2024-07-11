@@ -630,10 +630,10 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Add additional instructions to the prompt - Ver 1.9.3
     if (empty($additional_instructions)) {
         $prompt = $message;
-        // back_trace ('NOTICE', 'No additional instructions provided: ' . $prompt);
+        // back_trace('NOTICE', 'No additional instructions provided: ' . $prompt);
     } else {
         $prompt = $additional_instructions . ' ' . $message;
-        // back_trace ('NOTICE', 'Additional instructions provided: ' . $prompt);
+        // back_trace('NOTICE', 'Additional instructions provided: ' . $prompt);
     }
     // $prompt = $message;
     
@@ -642,8 +642,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 2.0.3
-    // back_trace ( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace ( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
 
     // DIAG - Diagnostics - Ver 2.0.3
     for ($i = 0; $i < count($file_id); $i++) {

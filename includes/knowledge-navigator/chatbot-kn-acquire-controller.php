@@ -697,7 +697,7 @@ function chatbot_kn_output_the_results() {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace ( 'ERROR', 'Failed to create directory.');
+        // back_trace( 'ERROR', 'Failed to create directory.');
         return;
     }
 
@@ -830,7 +830,7 @@ function chatbot_kn_wrap_up() {
 
     // FIXME - Drop the chatbot_chatgpt_knowledge_base_word_count table
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace ( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
+    // back_trace( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
     dbKNClean();
 
     // Save the results message value into the option
