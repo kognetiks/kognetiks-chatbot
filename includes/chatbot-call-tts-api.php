@@ -97,7 +97,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // Get the audio voice transient if it exists - Ver 1.9.5
     if ( empty($voice) ) {
-        $voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+        $voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
     }
 
     if ( !empty($voice) ) {
@@ -266,17 +266,17 @@ function chatbot_chatgpt_read_aloud($message) {
     $session_id = $_POST['session_id'];
 
     // Hold the model
-    // $t_model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
+    // $t_model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
     // if ( empty($t_model) ) {
     //     $t_model = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
     // }
     // $model = $t_model;
     $t_model = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
-    set_chatbot_chatgpt_transients( 'model', esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106')), $user_id, $page_id);
+    set_chatbot_chatgpt_transients( 'model', esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106')), $user_id, $page_id, $session_id);
     $script_data_array['model'] = $t_model;
 
     // Hold the voice
-    // $t_voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    // $t_voice = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
     if ( empty($voice) ) {
         $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
     }
@@ -305,12 +305,12 @@ function chatbot_chatgpt_read_aloud($message) {
     $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice);
 
     // Reset the model
-    set_chatbot_chatgpt_transients( 'model', $t_model, $user_id, $page_id);
+    set_chatbot_chatgpt_transients( 'model', $t_model, $user_id, $page_id, $session_id);
     $script_data_array['model'] = $t_model;
     // Reset the voice - IS THIS STILL NEEDED?
-    // set_chatbot_chatgpt_transients( 'voice', $t_voice, $user_id, $page_id);
+    // set_chatbot_chatgpt_transients( 'voice', $t_voice, $user_id, $page_id, $session_id);
     // $script_data_array['voice'] = $t_voice;
-    set_chatbot_chatgpt_transients( 'voice', $voice, $user_id, $page_id);
+    set_chatbot_chatgpt_transients( 'voice', $voice, $user_id, $page_id, $session_id);
     $script_data_array['voice'] = $voice;
 
     // Return the response

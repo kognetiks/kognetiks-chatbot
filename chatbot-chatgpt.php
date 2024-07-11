@@ -384,7 +384,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'chatbot-chatgpt.php: Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
 
     // Set visitor and logged in user limits - Ver 2.0.1
@@ -565,24 +565,24 @@ function chatbot_chatgpt_send_message() {
     $page_id = intval($_POST['page_id']);
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_send_message $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
 
-    $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id);
-    $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id);
-    $chatbot_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id);
-    $chatbot_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id);
-    $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id);
-    $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id);
+    $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
+    $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
+    $chatbot_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id, $session_id);
+    $chatbot_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id, $session_id);
+    $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
+    $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
     $voice = $chatbot_settings['voice'];
 
     // DIAG - Diagnostics - Ver 2.0.6
-    back_trace ( 'NOTICE', '$chatbot_settings[display_style]: ' . $chatbot_settings['display_style']);
-    back_trace ( 'NOTICE', '$chatbot_settings[assistant_alias]: ' . $chatbot_settings['assistant_alias']);
-    back_trace ( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
-    back_trace ( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
-    back_trace ( 'NOTICE', '$chatbot_settings[model]: ' . $chatbot_settings['model']);
-    back_trace ( 'NOTICE', '$chatbot_settings[voice]: ' . $chatbot_settings['voice']);
+    // back_trace ( 'NOTICE', '$chatbot_settings[display_style]: ' . $chatbot_settings['display_style']);
+    // back_trace ( 'NOTICE', '$chatbot_settings[assistant_alias]: ' . $chatbot_settings['assistant_alias']);
+    // back_trace ( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
+    // back_trace ( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
+    // back_trace ( 'NOTICE', '$chatbot_settings[model]: ' . $chatbot_settings['model']);
+    // back_trace ( 'NOTICE', '$chatbot_settings[voice]: ' . $chatbot_settings['voice']);
 
     $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
@@ -594,6 +594,7 @@ function chatbot_chatgpt_send_message() {
     $chatbot_settings['model'] = $temp_model; // Restore the model after overwriting $chatbot_settings
 
     // DIAG - Diagnostics - Ver 2.0.6
+    back_trace( 'NOTICE', '********************************* AT LINE 610');
     back_trace ( 'NOTICE', '$chatbot_settings[display_style]: ' . $chatbot_settings['display_style']);
     back_trace ( 'NOTICE', '$chatbot_settings[assistant_alias]: ' . $chatbot_settings['assistant_alias']);
     back_trace ( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
@@ -606,12 +607,15 @@ function chatbot_chatgpt_send_message() {
     $model = isset($chatbot_settings['model']) ? $chatbot_settings['model'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
+    back_trace( 'NOTICE', '********************************* AT LINE 610');
     back_trace( 'NOTICE', '$user_id: ' . $user_id);
     back_trace( 'NOTICE', '$page_id: ' . $page_id);
     back_trace( 'NOTICE', '$session_id: ' . $session_id);
     back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
     back_trace( 'NOTICE', '$model: ' . $model);
+    back_trace( 'NOTICE', '$voice: ' . $voice);
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default

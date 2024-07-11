@@ -16,29 +16,24 @@ if ( ! defined( 'WPINC' ) ) {
 // Set the transients based on the type - Ver 1.8.1
 function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null, $thread_id = null, $sequence_id = null, $step_id = null) {
 
-    global $session_id;
-    global $user_id;
-    global $page_id;
-    global $thread_id;
-    global $assistant_id;
-    global $sequence_id;
-    global $step_id;
-
-    // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // global $session_id;
+    // global $user_id;
+    // global $page_id;
+    // global $thread_id;
+    // global $assistant_id;
+    // global $sequence_id;
+    // global $step_id;
 
     // Check if the user ID and page ID are set
-    if (empty($user_id)) {
-        $user_id = get_current_user_id(); // Get current user ID
+    // if (empty($user_id)) {
+    //     $user_id = get_current_user_id(); // Get current user ID
     
-        if (0 === $user_id) { // If user is not logged in, get_current_user_id() will return 0
-            $user_id = $session_id; // Use session ID instead
-        }
-    }
+    //     if (0 === $user_id) { // If user is not logged in, get_current_user_id() will return 0
+    //         $user_id = $session_id; // Use session ID instead
+    //     }
+    // }
+    $user_id = $session_id;
+
     if (empty($page_id)) {
         $page_id = get_the_id(); // Get current page ID
         if (empty($page_id)) {
@@ -77,40 +72,45 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
     set_transient($transient_key, $transient_value, 60*60*24); // Store for 24 hours
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$transient_type ' . $transient_type);
-    // back_trace( 'NOTICE', '$user_id ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id ' . $session_id);
-    // back_trace( 'NOTICE', '$transient_value ' . $transient_value);
+    back_trace( 'NOTICE', '*********************************');
+    back_trace( 'NOTICE', 'PUT - $transient_type: ' . $transient_type);
+    back_trace( 'NOTICE', 'PUT - $transient_value: ' . $transient_value);
+    back_trace( 'NOTICE', 'PUT - $user_id: ' . $user_id);
+    back_trace( 'NOTICE', 'PUT - $page_id: ' . $page_id);
+    back_trace( 'NOTICE', 'PUT - $session_id: ' . $session_id);
 
 }
 
 // Get the transients based on the type - Ver 1.8.1
 function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page_id = null, $session_id = null ): string {
     
-    global $session_id;
-    global $user_id;
-    global $page_id;
-    global $thread_id;
-    global $assistant_id;
-    global $sequence_id;
-    global $step_id;
+    // global $session_id;
+    // global $user_id;
+    // global $page_id;
+    // global $thread_id;
+    // global $assistant_id;
+    // global $sequence_id;
+    // global $step_id;
 
-    // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE', '********************************* ENTRY');
+    back_trace( 'NOTICE', 'GET - $transient_type: ' . $transient_type);
+    back_trace( 'NOTICE', 'GET - $user_id: ' . $user_id);
+    back_trace( 'NOTICE', 'GET - $page_id: ' . $page_id);
+    back_trace( 'NOTICE', 'GET - $session_id: ' . $session_id);
 
     // Check if the user ID and page ID are set
-    if (empty($user_id)) {
-        $user_id = get_current_user_id(); // Get current user ID
+    // if (empty($user_id)) {
+    //     $user_id = get_current_user_id(); // Get current user ID
     
-        if (0 === $user_id) { // If user is not logged in, get_current_user_id() will return 0
-            $user_id = $session_id; // Use session ID instead
-        }
-    }
+    //     if (0 == $user_id) { // If user is not logged in, get_current_user_id() will return 0
+    //         $user_id = $session_id; // Use session ID instead
+    //     }
+    // }
+    
+    // VER 2.0.6 - 2024 07 10
+    $user_id = $session_id;
+
     if (empty($page_id)) {
         $page_id = get_the_id(); // Get current page ID
         if (empty($page_id)) {
@@ -159,7 +159,13 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     $transient_value = get_transient($transient_key);
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$transient_value ' . $transient_value);
+    back_trace( 'NOTICE', '*********************************');
+    back_trace( 'NOTICE', 'GET - $transient_value: ' . $transient_value);
+    back_trace( 'NOTICE', 'GET - $transient_type: ' . $transient_type);
+    back_trace( 'NOTICE', 'GET - $transient_value: ' . $transient_value);
+    back_trace( 'NOTICE', 'GET - $user_id: ' . $user_id);
+    back_trace( 'NOTICE', 'GET - $page_id: ' . $page_id);
+    back_trace( 'NOTICE', 'GET - $session_id: ' . $session_id);
 
     // Return the transient value if it's found, or an empty string if not
     return $transient_value !== false ? $transient_value : '';
