@@ -504,9 +504,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_settings['chatbot_chatgpt_subsequent_greeting'] = esc_attr(get_option('chatbot_chatgpt_subsequent_greeting', 'How can I help you further?'));
     }
     if (array_key_exists('style', $assistant_details)) {
+        // FIXME - USER 'display_style' or 'chatbot_chatgpt_display_style' BUT NOT BOTH
         $chatbot_settings['chatbot_chatgpt_display_style'] = $assistant_details['style'];
         $chatbot_settings['display_style'] = $assistant_details['style'];
     } else {
+        // FIXME - USER 'display_style' or 'chatbot_chatgpt_display_style' BUT NOT BOTH
         $chatbot_settings['chatbot_chatgpt_display_style'] = esc_attr(get_option('chatbot_chatgpt_display_style', 'floating'));
         $chatbot_settings['display_style'] = esc_attr(get_option('chatbot_chatgpt_display_style', 'floating'));
     }
@@ -516,9 +518,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_settings['chatbot_chatgpt_audience_choice'] = esc_attr(get_option('chatbot_chatgpt_audience_choice', 'all'));
     }
     if (array_key_exists('voice', $assistant_details)) {
+        // FIXME - USER 'voice' or 'chatbot_chatgpt_voice_option' BUT NOT BOTH
         $chatbot_settings['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
+        $chatbot_settings['voice'] = $assistant_details['voice'];
     } else {
+        // FIXME - USER 'voice' or 'chatbot_chatgpt_voice_option' BUT NOT BOTH
         $chatbot_settings['chatbot_chatgpt_voice_option'] = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+        $chatbot_settings['voice'] = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
     }
     if (array_key_exists('allow_file_uploads', $assistant_details)) {
         $chatbot_settings['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
