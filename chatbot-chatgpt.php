@@ -594,20 +594,17 @@ function chatbot_chatgpt_send_message() {
     $chatbot_settings['model'] = $temp_model; // Restore the model after overwriting $chatbot_settings
 
     // DIAG - Diagnostics - Ver 2.0.6
-    back_trace( 'NOTICE', '********************************* AT LINE 610');
-    back_trace ( 'NOTICE', '$chatbot_settings[display_style]: ' . $chatbot_settings['display_style']);
-    back_trace ( 'NOTICE', '$chatbot_settings[assistant_alias]: ' . $chatbot_settings['assistant_alias']);
+    back_trace( 'NOTICE', '********************************* AT LINE 597');
     back_trace ( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
     back_trace ( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
     back_trace ( 'NOTICE', '$chatbot_settings[model]: ' . $chatbot_settings['model']);
-    back_trace ( 'NOTICE', '$chatbot_settings[voice]: ' . $chatbot_settings['voice']);
 
     $assistant_id = isset($chatbot_settings['assistant_id']) ? $chatbot_settings['assistant_id'] : '';
     $thread_Id = isset($chatbot_settings['thread_id']) ? $chatbot_settings['thread_id'] : '';
     $model = isset($chatbot_settings['model']) ? $chatbot_settings['model'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', '********************************* AT LINE 610');
+    back_trace( 'NOTICE', '********************************* AT LINE 607');
     back_trace( 'NOTICE', '$user_id: ' . $user_id);
     back_trace( 'NOTICE', '$page_id: ' . $page_id);
     back_trace( 'NOTICE', '$session_id: ' . $session_id);
