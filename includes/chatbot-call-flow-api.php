@@ -49,7 +49,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     $kflow_data = kflow_get_sequence_data($kflow_sequence);
 
     // DIAG - Diagnostics - Ver 1.9.5
-    // back_trace ( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
+    // back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
 
     // Count the number of 'Steps' in the KFlow data
     $kflow_data['total_steps'] = count($kflow_data['Steps']);

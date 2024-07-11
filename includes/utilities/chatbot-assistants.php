@@ -49,6 +49,20 @@ function create_chatbot_chatgpt_assistants_table() {
     // Check if the table exists and create/upgrade it if necessary
     dbDelta($sql);
 
+    // Execute SQL query and create the table
+    if(dbDelta($sql)) {
+        // Table created successfully
+    } else {
+        // Log the error
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        // Log the specific reason for the failure
+        if($wpdb->last_error !== '') {
+            error_log('Error details: ' . $wpdb->last_error);
+        }
+        return false;  // Table creation failed
+    }
+
     // Call the upgrade function after creating the table
     upgrade_chatbot_chatgpt_assistants_table();
 
@@ -179,8 +193,8 @@ function update_chatbot_chatgpt_assistant($id, $assistant_id, $common_name, $sty
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
     // DIAG - Diagnostics - Ver 2.0.4
-    // back_trace ( 'NOTICE', '$initial_greeting', $initial_greeting );
-    // back_trace ( 'NOTICE', '$subsequent_greeting', $subsequent_greeting );
+    // back_trace( 'NOTICE', '$initial_greeting', $initial_greeting );
+    // back_trace( 'NOTICE', '$subsequent_greeting', $subsequent_greeting );
 
     $wpdb->update(
         $table_name,

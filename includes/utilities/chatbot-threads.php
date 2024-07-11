@@ -100,8 +100,8 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
     if (empty($user_id) || $user_id == 0) {
         $user_id = $session_id;
     }
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     // Construct the unique keys
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
