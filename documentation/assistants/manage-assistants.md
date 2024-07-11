@@ -79,3 +79,7 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
 14. **Additional Instructions**:
    - **Description**: Extra instructions or context for the assistant.
    - **Input**: Enter any additional instructions needed for the assistant.
+   
+---
+
+- **[Back to the Overview](/overview.md)**

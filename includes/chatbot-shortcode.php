@@ -39,12 +39,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     global $kflow_data;
 
-    // Fetch the unique ID of the visitor or logged in user - Ver 2.0.4
-    $session_id = kognetiks_get_unique_id();
+    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
     $user_id = get_current_user_id();
-    if ($user_id == 0) {
+    // Fetch the Kognetiks cookie
+    $session_id = kognetiks_get_unique_id();
+    if (empty($user_id) || $user_id == 0) {
         $user_id = $session_id;
     }
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', '********************************* AT LINE 50');
@@ -394,12 +397,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         }
     }
 
-    // Get the current user ID and page ID for use with transients
-    $user_id = get_current_user_id(); // Get current user ID
-    if (empty($user_id)) {
-        // Removed - Ver 1.9.0
-        // $user_id = $session_id; // Get the session ID if $user_id is not set
+    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    $user_id = get_current_user_id();
+    // Fetch the Kognetiks cookie
+    $session_id = kognetiks_get_unique_id();
+    if (empty($user_id) || $user_id == 0) {
+        $user_id = $session_id;
     }
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+
+    // Fetch the Page ID
     $page_id = get_the_id(); // Get current page ID
     if (empty($page_id)) {
         // $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
@@ -423,13 +431,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $additional_details['additional_instructions'] = $additional_instructions;
     }
 
+    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    $user_id = get_current_user_id();
     // Fetch the Kognetiks cookie
     $session_id = kognetiks_get_unique_id();
-    // back_trace( 'NOTICE', '********************************* AT LINE 428');
-    // back_trace( 'NOTICE', 'session_id: ' . $session_id);
-    // if (empty($user_id)) {
+    if (empty($user_id) || $user_id == 0) {
         $user_id = $session_id;
-    // }
+    }
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
@@ -1137,8 +1147,6 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
 
     update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 
-    error_log('chabot-shortcode.php - Number of shortcodes: ' . $number_of_shortcodes);
-
     // Fetch the number of shortcodes to 
     $number_of_shortcodes = $number_of_shortcodes ?? esc_attr(get_option('chatbot_chatgpt_number_of_shortcodes', 1));
 
@@ -1157,12 +1165,14 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
     // Register numbered shortcodes dynamically
     for ($i = 1; $i <= $number_of_shortcodes; $i++) {
         add_shortcode('chatbot-' . $i, 'chatbot_chatgpt_shortcode');
-        error_log('chabot-shortcode.php - Registered shortcode: chatbot-' . $i);
-        // back_trace( 'NOTICE', 'Registered shortcode: chatbot-' . $i);
+        error_log ('Registered shortcodes: ' . 'chatbot-' . $i );
     }
+
+    error_log ('chatbot_chatgpt_number_of_shortcodes: ' . $number_of_shortcodes );
     
 }
-register_chatbot_shortcodes();
+// Try to register the shortcodes on init - Ver 2.0.6 - 2024 07 11
+add_action('init', 'register_chatbot_shortcodes');
 
 // Custom Buttons - Ver 2.0.5
 function chatbot_chatgpt_custom_buttons_display() {

@@ -77,21 +77,13 @@ function kognetiks_get_unique_id() {
     return null;
 }
 
-// Fetch the unique ID of the visitor or logged-in user - Ver 2.0.4
-
-$session_id = kognetiks_get_unique_id();
-
-// Store the unique ID in a global variable - Ver 2.0.4
-if (empty($session_id)) {
-    $session_id = kognetiks_get_unique_id();
-}
-
+// Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
 $user_id = get_current_user_id();
-
-if ($user_id == 0) {
+// Fetch the Kognetiks cookie
+$session_id = kognetiks_get_unique_id();
+if (empty($user_id) || $user_id == 0) {
     $user_id = $session_id;
 }
-// error_log('Session ID: ' . $session_id);
 
 ob_end_flush(); // End output buffering and send the buffer to the browser
 
@@ -173,6 +165,10 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-capability-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
+
+// Log the User ID and Session ID - Ver 2.0.6 - 2024 07 11
+back_trace( 'NOTICE', '$user_id: ' . $user_id);
+back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
 // Check for Upgrades - Ver 1.7.7
 if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
@@ -277,10 +273,15 @@ function chatbot_chatgpt_enqueue_scripts() {
     $user_id = get_current_user_id();
     $page_id = get_the_id();
 
-    // if user is not logged in, then set user_id to $session_id
-    if (!is_user_logged_in()) {
+    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    $user_id = get_current_user_id();
+    // Fetch the Kognetiks cookie
+    $session_id = kognetiks_get_unique_id();
+    if (empty($user_id) || $user_id == 0) {
         $user_id = $session_id;
     }
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     $script_data_array = array(
         'user_id' => $user_id,
