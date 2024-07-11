@@ -424,6 +424,7 @@ function chatbot_chatgpt_assistants_scripts() {
             // Send the update request via AJAX
             jQuery.post(ajaxurl, data, function(response) {
                 alert('Assistant updated successfully!');
+                location.reload();  // Reload the page to reflect the deletion
             });
         }
 

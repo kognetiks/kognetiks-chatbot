@@ -824,6 +824,16 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             };
         </script>';
 
+    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    $user_id = get_current_user_id();
+    // Fetch the Kognetiks cookie
+    $session_id = kognetiks_get_unique_id();
+    if (empty($user_id) || $user_id == 0) {
+        $user_id = $session_id;
+    }
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
