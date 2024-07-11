@@ -575,6 +575,7 @@ function chatbot_chatgpt_send_message() {
     $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
     $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
     $voice = $chatbot_settings['voice'];
+    $display_style = $chatbot_settings['display_style'];
 
     // DIAG - Diagnostics - Ver 2.0.6
     // back_trace ( 'NOTICE', '$chatbot_settings[display_style]: ' . $chatbot_settings['display_style']);

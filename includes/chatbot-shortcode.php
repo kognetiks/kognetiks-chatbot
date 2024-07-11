@@ -505,8 +505,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
     if (array_key_exists('style', $assistant_details)) {
         $chatbot_settings['chatbot_chatgpt_display_style'] = $assistant_details['style'];
+        $chatbot_settings['display_style'] = $assistant_details['style'];
     } else {
         $chatbot_settings['chatbot_chatgpt_display_style'] = esc_attr(get_option('chatbot_chatgpt_display_style', 'floating'));
+        $chatbot_settings['display_style'] = esc_attr(get_option('chatbot_chatgpt_display_style', 'floating'));
     }
     if (array_key_exists('audience', $assistant_details)) {
         $chatbot_settings['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];

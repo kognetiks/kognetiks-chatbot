@@ -93,7 +93,7 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     // global $step_id;
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '********************************* ENTRY');
+    back_trace( 'NOTICE', '********************************* ENTRY');
     back_trace( 'NOTICE', 'GET - $transient_type: ' . $transient_type);
     back_trace( 'NOTICE', 'GET - $user_id: ' . $user_id);
     back_trace( 'NOTICE', 'GET - $page_id: ' . $page_id);
@@ -159,10 +159,9 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     $transient_value = get_transient($transient_key);
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', '*********************************');
+    back_trace( 'NOTICE', '********************************* EXIT');
     back_trace( 'NOTICE', 'GET - $transient_value: ' . $transient_value);
     back_trace( 'NOTICE', 'GET - $transient_type: ' . $transient_type);
-    back_trace( 'NOTICE', 'GET - $transient_value: ' . $transient_value);
     back_trace( 'NOTICE', 'GET - $user_id: ' . $user_id);
     back_trace( 'NOTICE', 'GET - $page_id: ' . $page_id);
     back_trace( 'NOTICE', 'GET - $session_id: ' . $session_id);
