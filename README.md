@@ -5,7 +5,8 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 ## Documentation
 
 ## What's New in Version 2.0.7
-- **TBD**
+
+- **Model Support**: The latest models available from OpenAI's are always dynamically added to model picklists, and now include gpt-4o and gpt-4o-mini.
 
 ## What's New in Version 2.0.6
 
@@ -202,7 +203,7 @@ Customize accessibility with three audience settings: All Audiences, Logged-in O
 **✨ Supported Models from OpenAI**
 
 - GPT-3 series of models
-- GPT-4 series of models
+- GPT-4 series of models (including gpt-4o and gpt-4o-mini)
 - dall-e series of models
 - tts series of models
 

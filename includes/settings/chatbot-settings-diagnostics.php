@@ -200,6 +200,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 
 // Log Chatbot Errors to the Server - Ver 2.0.3
 function log_chatbot_error() {
+    
     if (isset($_POST['error_message'])) {
         $error_message = sanitize_text_field($_POST['error_message']);
         $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';

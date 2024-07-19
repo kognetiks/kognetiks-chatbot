@@ -33,6 +33,7 @@ function chatbot_chatgpt_tools_setting_callback() {
         <p>Shortcode Tester</p>
         <p>Capability Check</p>
         <p>Options Exporter</p>
+        <p>Manage Error Logs</p>
     </div>
     <?php
 
@@ -82,5 +83,21 @@ function chatbot_chatgpt_options_exporter_tools_section_callback() {
 function chatbot_chatgpt_export_tools_callback() {
     // Output the settings field for export options
 }
+
+
+function chatbot_chatgpt_manage_error_logs_section_callback() {
+
+    ?>
+    <div>
+        <p>Click the <code>Download</code> button to retrieve a log file, or the <code>Delete</code> button to remove a log file.</p>
+        <p>Click the <code>Delete All</code> button to remove all log files.</p>
+    </div>
+    <?php
+
+    // Call the capability tester
+    chatbot_chatgpt_manage_error_logs();
+
+}
+
 
 

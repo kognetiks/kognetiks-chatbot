@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.5.5
+Tested up to: 6.6
 Stable tag: 2.0.7
 Requires PHP: 7.0
 License: GPLv3 or later
@@ -72,7 +72,7 @@ With the integration of Text-to-Speech (TTS) models, the chatbot can now convert
 
 **✨ Supported Models from OpenAI**
 ▪ GPT-3 series of models
-▪ GPT-4 series of models
+▪ GPT-4 series of models (including gpt-4o and gpt-4o-mini)
 ▪ dall-e series of models
 ▪ tts series of models
 
@@ -228,6 +228,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 2.0.7 =
+* **Model Support**: The latest models available from OpenAI's are always dynamically added to model picklists, and now include gpt-4o and gpt-4o-mini.
 
 = 2.0.6 =
 * **Dynamic Shortcode**: Added support for dynamic shortcodes to allow for more flexible Assistant selection. Add all parameters to the shortcode, including the Assistant ID on the GTP Assistant tab. For example, `[chatbot-1]`.

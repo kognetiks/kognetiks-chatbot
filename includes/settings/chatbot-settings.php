@@ -385,6 +385,10 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_options_exporter_tools');
                 echo '</div>';
 
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_manage_error_logs');
+                echo '</div>';
+
             } elseif ($active_tab == 'support') {
 
                 settings_fields('chatbot_chatgpt_support');

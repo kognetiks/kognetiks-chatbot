@@ -297,6 +297,7 @@ function chatbot_chatgpt_settings_init() {
     register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_shortcode_tester');
     register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_capability_tester');
     register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_options_exporter');
+    register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_manage_error_logs');
 
     // Tools Overview
     add_settings_section(
@@ -365,7 +366,23 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_tools',
         'chatbot_chatgpt_options_exporter_tools_section'
     );
-        
+
+    // Manage Error Logs
+    add_settings_section(
+        'chatbot_chatgpt_manage_error_logs_section',
+        'Manage Error Logs',
+        'chatbot_chatgpt_manage_error_logs_section_callback',
+        'chatbot_chatgpt_manage_error_logs'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_manage_error_logs_field',
+        'Manage Error Logs',
+        'chatbot_chatgpt_manage_error_logs_callback',
+        'chatbot_chatgpt_tools',
+        'chatbot_chatgpt_manage_error_logs_section'
+    );
+
 }
 
 add_action('admin_init', 'chatbot_chatgpt_settings_init');
