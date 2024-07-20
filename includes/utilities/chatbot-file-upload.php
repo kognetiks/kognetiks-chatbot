@@ -437,6 +437,7 @@ function upload_validation($file) {
         'txt' => 'text/plain',
         'wav' => 'audio/wav',
         'webm' => 'video/webm',
+        'webp' => 'image/webp',
         'xls' => 'application/vnd.ms-excel',
         'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'xml' => 'application/xml',
