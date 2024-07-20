@@ -856,7 +856,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <?php
         if ( $use_assistant_name == 'Yes' ) {
             echo '<div id="chatbot-chatgpt-header-embedded">';
-            echo '<div id="chatgptTitle" class="title">' . $bot_name . '</div>';
+            echo '<div id="chatgptTitle" class="title">' . htmlspecialchars($bot_name) . '</div>';
             echo '</div>';
         } else {
             echo '<div id="chatbot-chatgpt-header-embedded">';
@@ -927,7 +927,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             $chatbot_chatgpt_bot_prompt = $assistant_details['placeholder_prompt'];
                         }
                         $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
-                        echo "<center><textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea></center>";
+                        echo "<center><textarea id='chatbot-chatgpt-message' rows='" . htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
                     }
                 ?>
             </div>
@@ -1002,7 +1002,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         ?>
         <div id="chatbot-chatgpt">
             <div id="chatbot-chatgpt-header">
-                <div id="chatgptTitle" class="title"><?php echo $bot_name; ?></div>
+                <div id="chatgptTitle" class="title"><?php echo htmlspecialchars($bot_name); ?></div>
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
             <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
@@ -1059,7 +1059,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             if ( !empty($assistant_details['placeholder_prompt']) ) {
                                 $chatbot_chatgpt_bot_prompt = $assistant_details['placeholder_prompt'];
                             }
-                            echo "<center><textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea></center>";
+                            echo "<center><textarea id='chatbot-chatgpt-message' rows='" . htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
                         }
                     ?>
                 </div>
@@ -1279,42 +1279,42 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     ?>
     <script>
 
-        function updateChatbotLocalStorage() {
-            // Loop through the chatbot settings and set them in localStorage
-            // for use in the Chatbot
-            // Encode the chatbot settings array into JSON format for use in JavaScript
-            chatbotSettings = <?php echo json_encode($chatbot_settings); ?>;
-            if (chatbotSettings && typeof chatbotSettings === "object") {
-                Object.keys(chatbotSettings).forEach(function(key) {
-                    // DIAG - Diagnostics - Ver 2.0.4
-                    // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
-                    localStorage.setItem(key, chatbotSettings[key]);
-                });
+            function updateChatbotLocalStorage() {
+                // Loop through the chatbot settings and set them in localStorage
+                // for use in the Chatbot
+                // Encode the chatbot settings array into JSON format for use in JavaScript
+                chatbotSettings = <?php echo json_encode($chatbot_settings); ?>;
+                if (chatbotSettings && typeof chatbotSettings === "object") {
+                    Object.keys(chatbotSettings).forEach(function(key) {
+                        // DIAG - Diagnostics - Ver 2.0.4
+                        // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
+                        localStorage.setItem(key, chatbotSettings[key]);
+                    });
+                }
+
+                // Check if the variables are not empty before setting them in localStorage
+                if (<?php echo json_encode($style); ?> !== '') {
+                    localStorage.setItem('chatbot_chatgpt_display_style', <?php echo json_encode($style); ?>);
+                }
+                if (<?php echo json_encode($assistant); ?> !== '') {
+                    localStorage.setItem('chatbot_chatgpt_assistant_alias', <?php echo json_encode($assistant); ?>);
+                }
+                
+                // Preload avatar - Ver 2.0.3
+                if (<?php echo json_encode($avatar_icon_setting); ?> !== '') {
+                    localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', <?php echo json_encode($avatar_icon_setting); ?>);
+                }
+                if (<?php echo json_encode($custom_avatar_icon_setting); ?> !== '') {
+                    localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', <?php echo json_encode($custom_avatar_icon_setting); ?>);
+                }
             }
 
-            // Check if the variables are not empty before setting them in localStorage
-            if ('<?php echo $style; ?>' !== '') {
-                localStorage.setItem('chatbot_chatgpt_display_style', '<?php echo $style; ?>');
-            }
-            if ('<?php echo $assistant; ?>' !== '') {
-                localStorage.setItem('chatbot_chatgpt_assistant_alias', '<?php echo $assistant; ?>');
-            }
+            document.addEventListener('DOMContentLoaded', function() {
+                // Update the localStorage with the chatbot settings
+                updateChatbotLocalStorage();
+            }); 
             
-            // Preload avatar - Ver 2.0.3
-            if ('<?php echo $avatar_icon_setting; ?>' !== '') {
-                localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', '<?php echo $avatar_icon_setting; ?>');
-            }
-            if ('<?php echo $custom_avatar_icon_setting; ?>' !== '') {
-                localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', '<?php echo $custom_avatar_icon_setting; ?>');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update the localStorage with the chatbot settings
-            updateChatbotLocalStorage();
-        }); 
-        
-    </script>
+        </script>
     <?php
 
 }

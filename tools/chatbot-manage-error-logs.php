@@ -128,7 +128,7 @@ function handle_log_actions() {
             if (!wp_verify_nonce($nonce, 'download_log_' . sanitize_file_name($_GET['file']))) {
                 wp_die('Invalid nonce');
             }
-            $file = sanitize_file_name($_GET['file']);
+            $file = sanitize_file_name(basename($_GET['file']));
             $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';
             $file_path = $chatbot_logs_dir . $file;
 
@@ -151,7 +151,7 @@ function handle_log_actions() {
             if (!wp_verify_nonce($nonce, 'delete_log_' . sanitize_file_name($_GET['file']))) {
                 wp_die('Invalid nonce');
             }
-            $file = sanitize_file_name($_GET['file']);
+            $file = sanitize_file_name(basename($_GET['file']));
             $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';
             $file_path = $chatbot_logs_dir . $file;
 
