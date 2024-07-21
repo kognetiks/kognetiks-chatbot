@@ -53,8 +53,8 @@ function chatbot_chatgpt_manage_error_logs() {
         return;
     }
 
-    // Debugging: Log files for troubleshooting
-    back_trace('NOTICE', 'chatbot_chatgpt_manage_error_logs', 'Files: ' . print_r($files, true));
+    // DIAG - Log files for troubleshooting - Ver 2.0.7
+    // back_trace('NOTICE', 'chatbot_chatgpt_manage_error_logs', 'Files: ' . print_r($files, true));
 
     // Start HTML output with styling
     $output = '<style>
