@@ -19,6 +19,8 @@ Each tool is briefly described below.
 
 Export the Chatbot options to a file.  This excludes sensitive information such as your API key.
 
+![Options Exporter](options-exporter.png)
+
 ### Steps:
 
 1. **Choose the format for exporting the chatbot options**:
@@ -33,6 +35,8 @@ Export the Chatbot options to a file.  This excludes sensitive information such 
 ## Manage Error Logs:
 
 The Manage Error Logs section provides direct access to the chatbot's unique errors.  If you're experiencing a problem with the chatbot, please check the error logs to see if you can determine what might be the problem.
+
+![Manage Error Logs](manage-error-logs.png)
 
 ## Example Error Log
 
@@ -51,12 +55,15 @@ The Manage Error Logs section provides direct access to the chatbot's unique err
 
 ---
 
-## Shortcode Tester
+## Automated Shortcode Tester
 
 This tool allows you to test that shortcode are working as expected. The results are displayed accordingly.  If the parameter has been ignored, then the results will show ```No parameter pass for param1, 2 or 3```.  The expected results are documented below.
 
+![Shortcode Tester](shortcode-tester.png)
+
 ### Test 1: Calling shortcode without any parameters
 
+- **Input**: `[shortcode]`
 - **Output**:
   - Param1: No parameter passed for param1
   - Param2: No parameter passed for param2
@@ -78,7 +85,7 @@ This tool allows you to test that shortcode are working as expected. The results
   - Param2: horse
   - Param3: elephant
 
-### Results Interpretation
+### Expected Results and Interpretation
 
 - If Test 1 shows "No parameters passed for param1, 2, and 3", then the shortcode is working correctly.
 - If Test 2 shows "cat and no parameters passed for param2 and 3", then the shortcode is working correctly.
@@ -88,7 +95,9 @@ This tool allows you to test that shortcode are working as expected. The results
 
 ## Capability Check
 
-This tool allows you to check the permissions for various features.  If an capability is not listed, then the logged-in user is not authorized for the 
+This tool allows you to check the permissions for various roles.  If an capability is not listed, then the user is not authorized for the capability.  As an Administrator you should have read, edit, publish and manage capabilities.
+
+![Capability Check](capability-check.png)
 
 ### User Capability Check
 

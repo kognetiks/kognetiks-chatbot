@@ -35,7 +35,7 @@ function chatbot_shortcode_tester() {
         <div>
             <?php echo do_shortcode('[chatbot_chatgpt_short_code_tester param1="dog" param2="horse" param3="elephant"]'); ?>
         </div>
-        <h3>Results:<h3>
+        <h3>Expected Results:<h3>
         <div>
             <p>If Test 1 shows "No parameters passed for param1, 2 and 3", then this shortcode is working correctly.</p>
             <p>If Test 2 shows "cat and no parameters passed for param2 and 3", then this shortcode is working correctly.</p>

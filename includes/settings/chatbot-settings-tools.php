@@ -44,7 +44,7 @@ function chatbot_chatgpt_shortcode_tools_section_callback($args) {
 
     ?>
     <div>
-        <p>This tool allows you to test the Chatbot Shortcode. Enter the shortcode in the text box and click the Test button to see the Chatbot in action.</p>
+        <p>This tool automatically tests the Chatbot Shortcode. There are three tests in all. Test 1 checks calling shortcodes without any parameters.  Test 2 checks calling a shortcode with a single paramemter. And, Test 3 checks calling a shortcode with three parameters. The results are displayed below the tests.</p>
     </div>
     <?php
 
@@ -72,6 +72,7 @@ function chatbot_chatgpt_options_exporter_tools_section_callback() {
     ?>
     <div>
         <p>Export the Chatbot options to a file.</p>
+        <p><b>NOTE:</b> If you change the format from CSV to JSON, or vice versa, you will need to scoll to the bottom of the page and <code>Save Changes</code> to update the format.</p>
     </div>
     <?php
 
