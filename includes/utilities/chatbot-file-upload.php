@@ -475,7 +475,7 @@ function upload_validation($file) {
     return $file;
 
 }
-add_filter('wp_handle_upload_prefilter', 'upload_validation');
+// add_filter('wp_handle_upload_prefilter', 'upload_validation'); // REMOVED IN VER 2.0.7
 
 // Deep content-based security checks
 function deep_content_check($file_path) {

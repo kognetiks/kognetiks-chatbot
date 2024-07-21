@@ -30,10 +30,10 @@ function chatbot_chatgpt_tools_setting_callback() {
 
     ?>
     <div>
-        <p>Shortcode Tester</p>
-        <p>Capability Check</p>
         <p>Options Exporter</p>
         <p>Manage Error Logs</p>
+        <p>Shortcode Tester</p>
+        <p>Capability Check</p>
     </div>
     <?php
 

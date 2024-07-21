@@ -15,13 +15,13 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Create the table for the chatbot assistants
 function create_chatbot_chatgpt_assistants_table() {
- 
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
-    
+
     // Check if the table already exists
-    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
         return; // Exit if the table already exists
     }
     
@@ -46,20 +46,17 @@ function create_chatbot_chatgpt_assistants_table() {
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-    // Check if the table exists and create/upgrade it if necessary
+    // Execute SQL query and create the table
     dbDelta($sql);
 
-    // Execute SQL query and create the table
-    if(dbDelta($sql)) {
-        // Table created successfully
-    } else {
-        // Log the error
-        error_log('Failed to create table: ' . $table_name);
-        error_log('SQL: ' . $sql);
-        // Log the specific reason for the failure
-        if($wpdb->last_error !== '') {
-            error_log('Error details: ' . $wpdb->last_error);
-        }
+    // Check for errors after dbDelta
+    if ($wpdb->last_error) {
+        logErrorToServer('Failed to create table: ' . $table_name);
+        logErrorToServer('SQL: ' . $sql);
+        logErrorToServer('Error details: ' . $wpdb->last_error);
+        // error_log('Failed to create table: ' . $table_name);
+        // error_log('SQL: ' . $sql);
+        // error_log('Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
     }
 
