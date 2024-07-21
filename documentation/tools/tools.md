@@ -6,11 +6,48 @@ To enable the Tools tab, navigate to the Chatbot Settings, then to the Messages 
 
 There are three tools currently available:
 
+- Options Exporter
+- Manage Error Logs
 - Shorcode Tester
 - Capablity Check
-- Options Exporter
 
 Each tool is briefly described below.
+
+---
+
+## Options Exporter
+
+Export the Chatbot options to a file.  This excludes sensitive information such as your API key.
+
+### Steps:
+
+1. **Choose the format for exporting the chatbot options**:
+   - Options: JSON, CSV
+   - **TIP**: if you select a new output format, first click the ```Save Options``` button before clicking the ```Download Options Data```.
+
+2. **Download Options Data**:
+   - Use the ```Download Options Data``` button to retrieve the chatbot options and download the file.
+
+---
+
+## Manage Error Logs:
+
+The Manage Error Logs section provides direct access to the chatbot's unique errors.  If you're experiencing a problem with the chatbot, please check the error logs to see if you can determine what might be the problem.
+
+## Example Error Log
+
+![Example Error Log](example-error-log.png)
+
+### Steps:
+
+1. **Download**
+    - Choose ```Download``` to retireve and save locally the selected error log.
+
+2. **Delete**
+    - Choose ```Delete``` to delete the selected error log.
+
+3. **Delete All**
+    - Chose ```Delete All``` to delete ALL error logs listed.
 
 ---
 
@@ -60,21 +97,6 @@ This tool allows you to check the permissions for various features.  If an capab
   - User has the capability: edit_posts
   - User has the capability: publish_posts
   - User has the capability: manage_options
-
----
-
-## Options Exporter
-
-Export the Chatbot options to a file.  This excludes sensitive information such as your API key.
-
-### Steps:
-
-1. **Choose the format for exporting the chatbot options**:
-   - Options: JSON, CSV
-   - **TIP**: if you select a new output format, first click the ```Save Options``` button before clicking the ```Download Options Data```.
-
-2. **Download Options Data**:
-   - Use the ```Download Options Data``` button to retrieve the chatbot options and download the file.
 
 ---
 
