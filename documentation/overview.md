@@ -10,7 +10,9 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## What's New in Version 2.0.7
 
-- **Model Support**: The latest models available from OpenAI's are always dynamically added to model picklists, and now include gpt-4o and gpt-4o-mini.
+* **Model Support**: The latest models available from OpenAI's are always dynamically added to model picklists, and now include gpt-4o and gpt-4o-mini.
+* **Manage Chatbot Error Logs**: A new feature to manage chatbot error logs, including the ability to download and delete logs.
+* **Revised Reporting Settings Layout**: Revised and refreshed the Reporting Settings page layout for better visualization.
 
 ## What's New in Version 2.0.6
 
