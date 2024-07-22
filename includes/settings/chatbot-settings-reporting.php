@@ -15,46 +15,80 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Reporting section callback - Ver 1.6.3
-function chatbot_chatgpt_reporting_section_callback($args) {
+function chatbot_chatgpt_reporting_overview_section_callback($args) {
     ?>
     <div>
         <p>Use these setting to select the reporting period for Visitor Interactions.</p>
-        <p>By default, conversation logging is initially turned <b>Off</b>.</p>
         <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support&dir=support&file=conversation-logging-and-history.md">Support</a> tab of this plugin for more details.</p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Reporting and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=reporting&file=reporting.md">here</a>.</b></p>
-        <h3>Conversation Data</h3>
-            <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
-            <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
-            <p>Use the button (below) to retrieve the conversation data and download as a CSV file.</p>
-            <?php
-                if (is_admin()) {
-                    $header = " ";
-                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Conversation Data</a>';
-                    echo $header;
-                }
-            ?>
-        <h3>Interactions Data</h3>
-            <!-- TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8 -->
-            <!-- <p><?php echo do_shortcode('[chatbot_simple_chart from_database="true"]'); ?></p> -->
-            <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
-            <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
-            <?php
-                if (is_admin()) {
-                    $header = " ";
-                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Interaction Data</a>';
-                    echo $header;
-                }
-            ?>
-        <h3>Token Data</h3>
-            <p><?php echo chatbot_chatgpt_total_tokens() ?></p>
-            <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
-            <?php
-                if (is_admin()) {
-                    $header = " ";
-                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_token_usage_data')) . '">Download Token Usage Data</a>';
-                    echo $header;
-                }
-            ?>
+    </div>
+    <?php
+}
+
+function chatbot_chatgpt_reporting_settings_section_callback($args) {
+    ?>
+    <div>
+        <p>Use these settings to select the reporting period for Visitor Interactions.</p>
+        <p>You will need to Enable Conversation Logging if you want to record chatbot interactions. By default, conversation logging is initially turned <b>Off</b>.</p>
+        <p>Conversation Log Days to Keep sets the number of days to keep the conversation log data in the database.</p>
+    </div>
+    <?php
+}
+
+function chatbot_chatgpt_conversation_reporting_section_callback($args) {
+    ?>
+    <div>
+        <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
+        <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
+        <p>Use the button (below) to retrieve the conversation data and download as a CSV file.</p>
+        <?php
+            if (is_admin()) {
+                $header = " ";
+                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Conversation Data</a>';
+                echo $header;
+            }
+        ?>
+    </div>
+    <?php
+}
+
+function chatbot_chatgpt_interaction_reporting_section_callback($args) {
+    ?>
+    <div>
+        <!-- TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8 -->
+        <!-- <p><?php echo do_shortcode('[chatbot_simple_chart from_database="true"]'); ?></p> -->
+        <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
+        <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
+        <?php
+            if (is_admin()) {
+                $header = " ";
+                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Interaction Data</a>';
+                echo $header;
+            }
+        ?>
+    </div>
+    <?php
+}
+
+function chatbot_chatgpt_token_reporting_section_callback($args) {
+    ?>
+    <div>
+        <p><?php echo chatbot_chatgpt_total_tokens() ?></p>
+        <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
+        <?php
+            if (is_admin()) {
+                $header = " ";
+                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_token_usage_data')) . '">Download Token Usage Data</a>';
+                echo $header;
+            }
+        ?>
+    </div>
+    <?php
+}
+
+function chatbot_chatgpt_reporting_settings_callback($args){
+    ?>
+    <div>
         <h3>Reporting Settings</h3>
     </div>
     <?php

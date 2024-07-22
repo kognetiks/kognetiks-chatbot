@@ -166,42 +166,102 @@ function chatbot_chatgpt_settings_init() {
         'chatbot_chatgpt_avatar_section'
     );
 
-    // Reporting settings tab - Ver 1.6.1
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_reporting_period');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_enable_conversation_logging');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_log_days_to_keep');
+    // Register settings
+    register_setting('chatbot_chatgpt_reporting_settings', 'chatbot_chatgpt_reporting_period');
+    register_setting('chatbot_chatgpt_reporting_settings', 'chatbot_chatgpt_enable_conversation_logging');
+    register_setting('chatbot_chatgpt_reporting_settings', 'chatbot_chatgpt_conversation_log_days_to_keep');
 
+    // Reporting Overview Section
     add_settings_section(
-        'chatbot_chatgpt_reporting_section',
-        'Reporting',
-        'chatbot_chatgpt_reporting_section_callback',
-        'chatbot_chatgpt_reporting'
+        'chatbot_chatgpt_reporting_overview_section',
+        'Reporting Overview',
+        'chatbot_chatgpt_reporting_overview_section_callback',
+        'chatbot_chatgpt_reporting_overview'
     );
 
+    // Reporting Settings Section
+    add_settings_section(
+        'chatbot_chatgpt_reporting_settings_section',
+        'Reporting Settings',
+        'chatbot_chatgpt_reporting_settings_section_callback',
+        'chatbot_chatgpt_reporting_settings'
+    );
+
+    // Reporting Settings Field - Reporting Period
     add_settings_field(
         'chatbot_chatgpt_reporting_period',
         'Reporting Period',
         'chatbot_chatgpt_reporting_period_callback',
-        'chatbot_chatgpt_reporting',
-        'chatbot_chatgpt_reporting_section'
+        'chatbot_chatgpt_reporting_settings',
+        'chatbot_chatgpt_reporting_settings_section'
     );
 
+    // Reporting Settings Field - Enable Conversation Logging
     add_settings_field(
         'chatbot_chatgpt_enable_conversation_logging',
         'Enable Conversation Logging',
         'chatbot_chatgpt_enable_conversation_logging_callback',
-        'chatbot_chatgpt_reporting',
-        'chatbot_chatgpt_reporting_section'
+        'chatbot_chatgpt_reporting_settings',
+        'chatbot_chatgpt_reporting_settings_section'
     );
 
+    // Reporting Settings Field - Conversation Log Days to Keep
     add_settings_field(
         'chatbot_chatgpt_conversation_log_days_to_keep',
         'Conversation Log Days to Keep',
         'chatbot_chatgpt_conversation_log_days_to_keep_callback',
-        'chatbot_chatgpt_reporting',
-        'chatbot_chatgpt_reporting_section'
+        'chatbot_chatgpt_reporting_settings',
+        'chatbot_chatgpt_reporting_settings_section'
     );
 
+    // Conversation Data Section
+    add_settings_section(
+        'chatbot_chatgpt_conversation_reporting_section',
+        'Conversation Data',
+        'chatbot_chatgpt_conversation_reporting_section_callback',
+        'chatbot_chatgpt_conversation_reporting'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_conversation_reporting_field',
+        'Conversation Data',
+        'chatbot_chatgpt_conversation_reporting_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_conversation_reporting_section'
+    );
+
+    // Interaction Data Section
+    add_settings_section(
+        'chatbot_chatgpt_interaction_reporting_section',
+        'Interaction Data',
+        'chatbot_chatgpt_interaction_reporting_section_callback',
+        'chatbot_chatgpt_interaction_reporting'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_interaction_reporting_field',
+        'Interaction Data',
+        'chatbot_chatgpt_interaction_reporting_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_interaction_reporting_section'
+    );
+
+    // // Token Data Section
+    add_settings_section(
+        'chatbot_chatgpt_token_reporting_section',
+        'Token Data',
+        'chatbot_chatgpt_token_reporting_section_callback',
+        'chatbot_chatgpt_token_reporting'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_token_reporting_field',
+        'Token Data',
+        'chatbot_chatgpt_token_reporting_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_token_reporting_section'
+    );
+   
     // Custom Buttons settings tab - Ver 1.6.5
     register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_enable_custom_buttons');
     register_setting('chatbot_chatgpt_custom_buttons', 'chatbot_chatgpt_custom_button_name_1');
@@ -310,7 +370,7 @@ function chatbot_chatgpt_settings_init() {
     // Tools Overview
     add_settings_field(
         'chatbot_chatgpt_tools_field',
-        'Sections',
+        'Tools',
         'chatbot_chatgpt_tools_setting_callback',
         'chatbot_chatgpt_tools',
         'chatbot_chatgpt_tools_section'
