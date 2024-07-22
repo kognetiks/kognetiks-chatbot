@@ -43,7 +43,7 @@
     display: inline-block;
     font: inherit !important;
     /*font-family: inherit !important;*/
-    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
     box-sizing: border-box;
     min-width: 300px; /* Minimum width */
     max-width: 500px; /* Maximum width */
@@ -69,7 +69,6 @@
     flex-direction: column;
     z-index: 100;
     padding-bottom: 10px;
-    z-index: 1;
 }
 
 /* Support for a floating version of the chatbot - Ver 1.7.1 */
@@ -288,8 +287,7 @@
     background-color: #007bff;
     color: #ffffff;
     padding: 5px 10px;
-    border-radius: 12px;
-    border-bottom-right-radius: 0;
+    border-radius: 12px 12px 0 12px;
     overflow-wrap: anywhere;
     font: inherit;
 }
@@ -304,27 +302,23 @@
     background-color: #5BC236;
     color: #ffffff;
     padding: 5px 10px;
-    border-radius: 12px;
-    border-bottom-left-radius: 0;
+    border-radius: 12px 12px 12px 0;
     overflow-wrap: anywhere;
     font: inherit;
 }
 
 .error-message {
     display: inline-block;
-    /* font-weight: bold; */
     background-color: red;
     color: black;
     padding: 5px 10px;
-    border-radius: 12px;
-    border-bottom-left-radius: 0;
+    border-radius: 12px 12px 12px 0;
     overflow-wrap: anywhere;
     font: inherit;
 }
 
 .error-text {
     color: black;
-    font-weight: bolder;
     font: inherit;
 }
 
@@ -345,7 +339,7 @@
     border-radius: 1px;
     justify-content: center;
     flex-wrap: nowrap;
-    margin-top: 0px
+    margin-top: 0;
 }
 
 .chatbot-collapse-btn:hover {
@@ -484,8 +478,8 @@
 .chatbot-chatgpt-chatbot-history {
     display: flex;
     flex-direction: column;
-    align-items: left;
-    justify-content: left;
+    align-items: flex-start;
+    justify-content: flex-start;
     padding: 10px;
     background-color: #f1f1f1;
     border-radius: 5px;

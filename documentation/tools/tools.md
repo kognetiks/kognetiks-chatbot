@@ -1,15 +1,15 @@
 # Tools
 
-**NOTE:** The Tools tab is only visible when the ```Chatbot Diagnostics``` option is set to any value other than ```Off```.  By default the value is initially ```Off```.
+**NOTE:** The Tools tab is only visible when the ```Chatbot Diagnostics``` option is set to any value other than ```Off```.  By default, the value is initially ```Off```.
 
-To enable the Tools tab, navigate to the Chatbot Settings, then to the Messages tab.  Once there scroll down until you find the ```Chatbot Diagnostics``` setting, then choose ```Error```, then click ```Save Settings```.  When the Chatbot Settings are reloaded, the Tools tab will be avaliable for to select.
+To enable the Tools tab, navigate to the Chatbot Settings, then to the Messages tab.  Once there scroll down until you find the ```Chatbot Diagnostics``` setting, then choose ```Error```, then click ```Save Settings```.  When the Chatbot Settings are reloaded, the Tools tab will be available for to select.
 
 There are three tools currently available:
 
 - Options Exporter
 - Manage Error Logs
-- Shorcode Tester
-- Capablity Check
+- Shortcode Tester
+- Capability Check
 
 Each tool is briefly described below.
 
@@ -45,7 +45,7 @@ The Manage Error Logs section provides direct access to the chatbot's unique err
 ### Steps:
 
 1. **Download**
-    - Choose ```Download``` to retireve and save locally the selected error log.
+    - Choose ```Download``` to retrieve and save locally the selected error log.
 
 2. **Delete**
     - Choose ```Delete``` to delete the selected error log.
@@ -95,7 +95,7 @@ This tool allows you to test that shortcode are working as expected. The results
 
 ## Capability Check
 
-This tool allows you to check the permissions for various roles.  If an capability is not listed, then the user is not authorized for the capability.  As an Administrator you should have read, edit, publish and manage capabilities.
+This tool allows you to check the permissions for various roles.  If a capability is not listed, then the user is not authorized for the capability.  As an Administrator you should have read, edit, publish and manage capabilities.
 
 ![Capability Check](capability-check.png)
 

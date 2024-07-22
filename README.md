@@ -7,6 +7,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 ## What's New in Version 2.0.7
 
 - **Model Support**: The latest models available from OpenAI's are always dynamically added to model picklists, and now include gpt-4o and gpt-4o-mini.
+- **Manage Chatbot Error Logs**: A new feature to manage chatbot error logs, including the ability to download and delete logs.
 
 ## What's New in Version 2.0.6
 

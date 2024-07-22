@@ -371,11 +371,36 @@ function chatbot_chatgpt_count_conversations() {
 // Calculated size of the conversations stored - Ver 1.7.6
 function chatbot_chatgpt_size_conversations() {
     global $wpdb;
-    $database_name = $wpdb->dbname;
+
+    // Use the DB_NAME constant instead of directly accessing the protected property
+    $database_name = DB_NAME;
+
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
-    $results = $wpdb->get_results("SELECT table_name AS `Table`, round(((data_length + index_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES WHERE table_schema = '$database_name' AND table_name = '$table_name'");
-    // TODO - Handle errors
-    return $results[0]->{'Size in MB'};
+
+    // Prepare the SQL query
+    $query = $wpdb->prepare("
+        SELECT ROUND(((data_length + index_length) / 1024 / 1024), 2) AS `Size_in_MB`
+        FROM information_schema.TABLES
+        WHERE table_schema = %s
+          AND table_name = %s
+    ", $database_name, $table_name);
+
+    // Execute the query
+    $results = $wpdb->get_results($query);
+
+    // Handle errors
+    if (is_wp_error($results)) {
+        return 'Error: ' . $results->get_error_message();
+    }
+
+    // Check if results are returned
+    if (empty($results)) {
+        return 'No results found';
+    }
+
+    // Return the size in MB
+    return $results[0]->Size_in_MB;
+
 }
 
 // Total Prompt Tokens, Completion Tokens, and Total Tokens - Ver 1.8.5

@@ -229,6 +229,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 2.0.7 =
 * **Model Support**: The latest models available from OpenAI's are always dynamically added to model picklists, and now include gpt-4o and gpt-4o-mini.
+* **Manage Chatbot Error Logs**: A new feature to manage chatbot error logs, including the ability to download and delete logs.
 
 = 2.0.6 =
 * **Dynamic Shortcode**: Added support for dynamic shortcodes to allow for more flexible Assistant selection. Add all parameters to the shortcode, including the Assistant ID on the GTP Assistant tab. For example, `[chatbot-1]`.

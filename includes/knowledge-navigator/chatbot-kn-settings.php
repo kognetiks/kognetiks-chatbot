@@ -126,7 +126,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
 // Knowledge Navigator Introduction
 function chatbot_chatgpt_knowledge_navigator_section_callback($args) {
 
-    // See if the scanner is needs to run
+    // See if the scanner needs to run
     $results = chatbot_chatgpt_kn_results_callback(esc_attr(get_option('chatbot_chatgpt_kn_schedule')));
 
     // Force run the scanner

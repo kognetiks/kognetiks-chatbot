@@ -38,7 +38,7 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
    - **Input**: Enter a name that easily identifies the assistant.  You'll use this name to call the assistant form the shortcode.
    - **Required**: This is a required field.
    - **Usage**: ```[chatbot assistant="Common Name"]```
-   - **Tip**: Be sure sure to use regular quote marks around the "Common Name" if there are any spaces.
+   - **Tip**: Be sure to use regular quote marks around the "Common Name" if there are any spaces.
 
 5. **Style**:
    - **Description**: Determines how the assistant is displayed on your site.
@@ -61,24 +61,24 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
    - **Input**: Choose ```Yes``` or ```No```.
 
 10. **Show Assistant Name**:
-   - **Description**: Displays the assistant's name in interactions.
-   - **Input**: Choose ```Yes``` or ```No```.
+    - **Description**: Displays the assistant's name in interactions.
+    - **Input**: Choose `Yes` or `No`.
 
 11. **Initial Greeting**:
-   - **Description**: The first message the assistant sends to users.
-   - **Input**: Enter the greeting message.
+    - **Description**: The first message the assistant sends to users.
+    - **Input**: Enter the greeting message.
 
 12. **Subsequent Greeting**:
-   - **Description**: Messages the assistant sends after the initial greeting.
-   - **Input**: Enter the follow-up greeting messages.
+    - **Description**: Messages the assistant sends after the initial greeting.
+    - **Input**: Enter the follow-up greeting messages.
 
 13. **Placeholder Prompt**:
-   - **Description**: A sample prompt shown in the input field.
-   - **Input**: Enter a placeholder prompt to guide user input.
+    - **Description**: A sample prompt shown in the input field.
+    - **Input**: Enter a placeholder prompt to guide user input.
 
 14. **Additional Instructions**:
-   - **Description**: Extra instructions or context for the assistant.
-   - **Input**: Enter any additional instructions needed for the assistant.
+    - **Description**: Extra instructions or context for the assistant.
+    - **Input**: Enter any additional instructions needed for the assistant.
    
 ---
 
