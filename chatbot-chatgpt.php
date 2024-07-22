@@ -541,8 +541,8 @@ function chatbot_chatgpt_send_message() {
             // Set the model to the default
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
             // DIAG - Diagnostics
-            // back_trace( 'ERROR', 'Model not set!!!');
-            // wp_send_json_error('Invalid Model. Please set the model in the plugin settings.');
+            // back_trace( 'ERROR', 'Invalid Model.');
+            // wp_send_json_error('Error: Invalid Model. Please check the plugin settings.');
         }
     }
 
@@ -778,7 +778,7 @@ function chatbot_chatgpt_send_message() {
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
             // Return response
             // back_trace( 'NOTICE', '$response ' . print_r($response,true));
-            wp_send_json_error('Oops! Something went wrong on our end. Please try again later');
+            wp_send_json_error('Oops! Something went wrong on our end. Please try again later!');
         } else {
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Check for links and images in response before returning');
@@ -859,7 +859,7 @@ function chatbot_chatgpt_send_message() {
 
     }
 
-    wp_send_json_error('Oops, I fell through the cracks!');
+    wp_send_json_error('Oops! I fell through the cracks!');
 
 }
 

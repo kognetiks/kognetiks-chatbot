@@ -620,9 +620,6 @@ jQuery(document).ready(function ($) {
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
                 } else {
-                    // DIAG - Log the error - Ver 1.6.7
-                    // console.error('Chatbot: ERROR: ' + JSON.stringify(response));
-                    // appendMessage('Error: ' + errorThrown, 'error');
                     appendMessage('Error: ' + error, 'error')
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
                     botResponse = '';
@@ -746,7 +743,7 @@ jQuery(document).ready(function ($) {
             error: function(jqXHR, status, error) {
                 // Handle AJAX errors
                 appendMessage('Error: ' + error, 'error');
-                appendMessage('Oops! There was a problem downloading the transcript. Please try again late.', 'error');
+                appendMessage('Oops! There was a problem downloading the transcript. Please try again later.', 'error');
             },
             complete: function () {
                 // Remove typing indicator and enable submit button
