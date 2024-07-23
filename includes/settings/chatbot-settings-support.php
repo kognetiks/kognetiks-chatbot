@@ -236,3 +236,19 @@ function adjustImagePath($url, $basePath) {
     }
     return $url;
 }
+
+// Register Support settings - Ver 2.0.7
+function chatbot_chatgpt_support_settings_init() {
+
+    // Support settings tab - Ver 1.3.0
+    register_setting('chatbot_chatgpt_support', 'chatgpt_support_key');
+
+    add_settings_section(
+        'chatbot_chatgpt_support_section',
+        'Support',
+        'chatbot_chatgpt_support_section_callback',
+        'chatbot_chatgpt_support'
+    );
+
+}
+add_action('admin_init', 'chatbot_chatgpt_support_settings_init');

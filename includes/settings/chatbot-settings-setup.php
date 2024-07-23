@@ -19,6 +19,7 @@ function chatbot_chatgpt_bot_settings_section_callback($args) {
 
     ?>
     <p>Configure the general settings for the Chatbot plugin, including name of the chatbot, prompts and greetings, and general settings.</p>
+    <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save your changes.</i></b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the general Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=settings&file=settings.md">here</a>.</b></p>
     <?php
 

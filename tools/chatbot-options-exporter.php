@@ -69,8 +69,8 @@ function chatbot_chatgpt_download_options_data() {
 
     $options_file = $debug_dir_path . 'chatbot-chatgpt-options.' . $output_choice;
 
-    // back_trace('NOTICE', '$output_choice: ' . $output_choice);
-    // back_trace('NOTICE', '$options_file: ' . $options_file);
+    back_trace('NOTICE', '$output_choice: ' . $output_choice);
+    back_trace('NOTICE', '$options_file: ' . $options_file);
 
     // Fetch options from the database
     $options = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot%' AND option_name != 'chatbot_chatgpt_api_key'", ARRAY_A);

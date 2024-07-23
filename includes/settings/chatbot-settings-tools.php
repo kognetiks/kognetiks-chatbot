@@ -20,6 +20,7 @@ function chatbot_chatgpt_tools_section_callback() {
     ?>
     <div>
         <p>This tab provides tools, tests and diagnostics that are enabled when the Chatbot Diagnostics are enabled on the Messages tab.</p>
+        <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save your changes.</i></b></p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Tool settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=tools&file=tools.md">here</a>.</b></p>
     </div>
     <?php
@@ -28,14 +29,7 @@ function chatbot_chatgpt_tools_section_callback() {
 
 function chatbot_chatgpt_tools_setting_callback() {
 
-    ?>
-    <div>
-        <p>Options Exporter</p>
-        <p>Manage Error Logs</p>
-        <p>Shortcode Tester</p>
-        <p>Capability Check</p>
-    </div>
-    <?php
+    // PLACEHOLDER
 
 }
 
@@ -77,12 +71,14 @@ function chatbot_chatgpt_options_exporter_tools_section_callback() {
     <?php
 
     // Call the capability tester
-    chatbot_chatgpt_options_exporter();
+    // chatbot_chatgpt_options_exporter();
 
 }
 
 function chatbot_chatgpt_export_tools_callback() {
-    // Output the settings field for export options
+
+    // PLACEHOLDER - VER 2.0.7
+
 }
 
 
@@ -100,5 +96,100 @@ function chatbot_chatgpt_manage_error_logs_section_callback() {
 
 }
 
+// Register Tools settings - Ver 2.0.7
+function chatbot_chatgpt_tools_settings_init() {
 
+    // Register tools settings
+    // register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_tools');
+    // register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_shortcode_tester');
+    // register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_capability_tester');
+    register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_options_exporter');
+    register_setting('chatbot_chatgpt_tools', 'chatbot_chatgpt_manage_error_logs');
+
+    // Tools Overview
+    add_settings_section(
+        'chatbot_chatgpt_tools_section',
+        'Tools',
+        'chatbot_chatgpt_tools_section_callback',
+        'chatbot_chatgpt_tools'
+    );
+
+    // Tools Overview
+    // add_settings_field(
+    //     'chatbot_chatgpt_tools_field',
+    //     'Tools',
+    //     'chatbot_chatgpt_tools_setting_callback',
+    //     'chatbot_chatgpt_tools',
+    //     'chatbot_chatgpt_tools_section'
+    // );
+
+    // Shortcode Tester Overview
+    add_settings_section(
+        'chatbot_chatgpt_shortcode_tools_section',
+        'Shortcode Tester',
+        'chatbot_chatgpt_shortcode_tools_section_callback',
+        'chatbot_chatgpt_shortcode_tools'
+    );
+
+    // Shortcode Tester Tool
+    // add_settings_field(
+    //     'chatbot_chatgpt_shortcode_tester_field',
+    //     'Shortcode Tester',
+    //     'chatbot_chatgpt_shortcode_tools_callback',
+    //     'chatbot_chatgpt_tools',
+    //     'chatbot_chatgpt_shortcode_tools_section'
+    // );
+
+    // Capability Check Overview
+    add_settings_section(
+        'chatbot_chatgpt_capability_tools_section',
+        'Capability Check',
+        'chatbot_chatgpt_capability_tools_section_callback',
+        'chatbot_chatgpt_capability_tools'
+    );
+
+    // Capability Check Tool
+    // add_settings_field(
+    //     'chatbot_chatgpt_capability_tester_field',
+    //     'Capability Check',
+    //     'chatbot_chatgpt_capability_tools_callback',
+    //     'chatbot_chatgpt_tools',
+    //     'chatbot_chatgpt_capability_tools_section'
+    // );
+
+    // options_exporter Check Overview
+    add_settings_section(
+        'chatbot_chatgpt_options_exporter_tools_section',
+        'Options Exporter',
+        'chatbot_chatgpt_options_exporter_tools_section_callback',
+        'chatbot_chatgpt_options_exporter_tools'
+    );
+
+    // options_exporter Check Tool
+    add_settings_field(
+        'chatbot_chatgpt_options_exporter',
+        'Options Exporter',
+        'chatbot_chatgpt_options_exporter_callback',
+        'chatbot_chatgpt_tools',
+        'chatbot_chatgpt_options_exporter_tools_section'
+    );
+
+    // Manage Error Logs
+    add_settings_section(
+        'chatbot_chatgpt_manage_error_logs_section',
+        'Manage Error Logs',
+        'chatbot_chatgpt_manage_error_logs_section_callback',
+        'chatbot_chatgpt_manage_error_logs'
+    );
+
+    // add_settings_field(
+    //     'chatbot_chatgpt_manage_error_logs_field',
+    //     'Manage Error Logs',
+    //     'chatbot_chatgpt_manage_error_logs_callback',
+    //     'chatbot_chatgpt_tools',
+    //     'chatbot_chatgpt_manage_error_logs_section'
+    // );
+    
+}
+add_action('admin_init', 'chatbot_chatgpt_tools_settings_init');
 

@@ -21,6 +21,7 @@ function chatbot_chatgpt_diagnostics_overview_section_callback($args) {
         <p>You can turn on/off console and error logging (as of Version 1.6.5 most are now commented out).</p>
         <!-- <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p> -->
         <p>You can also suppress attribution ('Chatbot WordPress plugin by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
+        <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save your changes.</i></b></p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the diagnostics, messages, and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=messages&file=messages.md">here</a>.</b></p>
     <?php
 }
@@ -263,105 +264,97 @@ function log_chatbot_error() {
 add_action('wp_ajax_log_chatbot_error', 'log_chatbot_error');
 add_action('wp_ajax_nopriv_log_chatbot_error', 'log_chatbot_error');
 
+// Register Diagnostics settings - Ver 2.0.7
+function chatbot_chatgpt_diagnostics_settings_init() {
 
-// Register Reporting settings
-function chatbot_chatgpt_reporting_settings_init() {
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_diagnostics');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_error_message');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_delete_data');
 
-    // Register settings for Reporting
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_reporting_period');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_enable_conversation_logging');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_log_days_to_keep');
-
-    // Reporting Overview Section
     add_settings_section(
-        'chatbot_chatgpt_reporting_overview_section',
-        'Reporting Overview',
-        'chatbot_chatgpt_reporting_overview_section_callback',
-        'chatbot_chatgpt_reporting_overview'
+        'chatbot_chatgpt_diagnostics_overview_section',
+        'Messages and Diagnostics Overview',
+        'chatbot_chatgpt_diagnostics_overview_section_callback',
+        'chatbot_chatgpt_diagnostics_overview'
     );
 
-    // Reporting Settings Section
     add_settings_section(
-        'chatbot_chatgpt_reporting_section',
-        'Reporting Settings',
-        'chatbot_chatgpt_reporting_section_callback',
-        'chatbot_chatgpt_reporting'
+        'chatbot_chatgpt_diagnostics_system_settings_section',
+        'Platform Settings',
+        'chatbot_chatgpt_diagnostics_system_settings_section_callback',
+        'chatbot_chatgpt_diagnostics_system_settings'
     );
 
-    // Reporting Settings Field - Reporting Period
-    add_settings_field(
-        'chatbot_chatgpt_reporting_period',
-        'Reporting Period',
-        'chatbot_chatgpt_reporting_period_callback',
-        'chatbot_chatgpt_reporting',
-        'chatbot_chatgpt_reporting_section'
-    );
-
-    // Reporting Settings Field - Enable Conversation Logging
-    add_settings_field(
-        'chatbot_chatgpt_enable_conversation_logging',
-        'Enable Conversation Logging',
-        'chatbot_chatgpt_enable_conversation_logging_callback',
-        'chatbot_chatgpt_reporting',
-        'chatbot_chatgpt_reporting_section'
-    );
-
-    // Reporting Settings Field - Conversation Log Days to Keep
-    add_settings_field(
-        'chatbot_chatgpt_conversation_log_days_to_keep',
-        'Conversation Log Days to Keep',
-        'chatbot_chatgpt_conversation_log_days_to_keep_callback',
-        'chatbot_chatgpt_reporting',
-        'chatbot_chatgpt_reporting_section'
-    );
-
-    // Conversation Data Section
+    // Diagnotics API Status
     add_settings_section(
-        'chatbot_chatgpt_conversation_reporting_section',
-        'Conversation Data',
-        'chatbot_chatgpt_conversation_reporting_section_callback',
-        'chatbot_chatgpt_conversation_reporting'
+        'chatbot_chatgpt_diagnostics_api_status_section',
+        'API Status and Results',
+        'chatbot_chatgpt_diagnostics_api_status_section_callback',
+        'chatbot_chatgpt_diagnostics_api_status'
     );
 
     add_settings_field(
-        'chatbot_chatgpt_conversation_reporting_field',
-        'Conversation Data',
-        'chatbot_chatgpt_conversation_reporting_callback',
-        'chatbot_chatgpt_reporting',
-        'chatbot_chatgpt_conversation_reporting_section'
+        'chatbot_chatgpt_api_test',
+        'API Test Results',
+        'chatbot_chatgpt_api_test_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_api_status_section'
     );
 
-    // Interaction Data Section
+    // Diagnostic Settings Section
     add_settings_section(
-        'chatbot_chatgpt_interaction_reporting_section',
-        'Interaction Data',
-        'chatbot_chatgpt_interaction_reporting_section_callback',
-        'chatbot_chatgpt_interaction_reporting'
+        'chatbot_chatgpt_diagnostics_section',
+        'Messages and Diagnostics Settings',
+        'chatbot_chatgpt_diagnostics_section_callback',
+        'chatbot_chatgpt_diagnostics'
     );
 
+    // Option to set diagnostics on/off - Ver 1.5.0
     add_settings_field(
-        'chatbot_chatgpt_interaction_reporting_field',
-        'Interaction Data',
-        'chatbot_chatgpt_interaction_reporting_callback',
-        'chatbot_chatgpt_reporting',
-        'chatbot_chatgpt_interaction_reporting_section'
+        'chatbot_chatgpt_diagnostics',
+        'Chatbot Diagnostics',
+        'chatbot_chatgpt_diagnostics_setting_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
     );
 
-    // // Token Data Section
-    add_settings_section(
-        'chatbot_chatgpt_token_reporting_section',
-        'Token Data',
-        'chatbot_chatgpt_token_reporting_section_callback',
-        'chatbot_chatgpt_token_reporting'
-    );
-
+    // Custom Error Message - Ver 2.0.3
     add_settings_field(
-        'chatbot_chatgpt_token_reporting_field',
-        'Token Data',
-        'chatbot_chatgpt_token_reporting_callback',
-        'chatbot_chatgpt_reporting',
-        'chatbot_chatgpt_token_reporting_section'
+        'chatbot_chatgpt_custom_error_message',
+        'Custom Error Message',
+        'chatbot_chatgpt_custom_error_message_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
     );
-   
+
+    // Option to suppress notices and warnings - Ver 1.6.5
+    add_settings_field(
+        'chatbot_chatgpt_suppress_notices',
+        'Suppress Notices and Warnings',
+        'chatbot_chatgpt_suppress_notices_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to suppress attribution - Ver 1.6.5
+    add_settings_field(
+        'chatbot_chatgpt_suppress_attribution',
+        'Suppress Attribution',
+        'chatbot_chatgpt_suppress_attribution_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Option to delete data on uninstall - Ver 1.9.9
+    add_settings_field(
+        'chatbot_chatgpt_delete_data',
+        'Delete Plugin Data on Uninstall',
+        'chatbot_chatgpt_delete_data_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+    
 }
-add_action('admin_init', 'chatbot_chatgpt_reporting_settings_init');
+add_action('admin_init', 'chatbot_chatgpt_diagnostics_settings_init');

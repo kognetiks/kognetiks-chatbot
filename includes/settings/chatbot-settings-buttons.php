@@ -19,6 +19,7 @@ function chatbot_chatgpt_custom_button_section_callback($args) {
     <p>Enter the names and links for your custom buttons below.</p>
     <p>Set Custom Buttons to 'On' to display one or both custom buttons.</p>
     <p>Set Custom Buttons to 'Off' to hide both custom buttons.</p>
+    <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save your changes.</i></b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use custom Buttons and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=buttons&file=buttons.md">here</a>.</b></p>
     <?php
 }

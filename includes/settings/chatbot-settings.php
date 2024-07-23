@@ -287,6 +287,10 @@ function chatbot_chatgpt_settings_page_html() {
                 settings_fields('chatbot_chatgpt_avatar');
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_avatar_overview');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_avatar');
                 echo '</div>';
 
