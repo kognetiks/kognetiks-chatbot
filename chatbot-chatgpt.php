@@ -131,6 +131,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-not
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-premium.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-api.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-kn.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-reporting.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-reporting.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';

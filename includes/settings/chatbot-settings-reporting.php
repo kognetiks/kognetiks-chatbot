@@ -18,17 +18,17 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_reporting_overview_section_callback($args) {
     ?>
     <div>
-        <p>Use these setting to select the reporting period for Visitor Interactions.</p>
+        <p>Use these setting to select the reporting period for Visitor and User Interactions.</p>
         <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support&dir=support&file=conversation-logging-and-history.md">Support</a> tab of this plugin for more details.</p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Reporting and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=reporting&file=reporting.md">here</a>.</b></p>
     </div>
     <?php
 }
 
-function chatbot_chatgpt_reporting_settings_section_callback($args) {
+function chatbot_chatgpt_reporting_section_callback($args) {
     ?>
     <div>
-        <p>Use these settings to select the reporting period for Visitor Interactions.</p>
+        <p>Use these settings to select the reporting period for Visitor and User Interactions.</p>
         <p>You will need to Enable Conversation Logging if you want to record chatbot interactions. By default, conversation logging is initially turned <b>Off</b>.</p>
         <p>Conversation Log Days to Keep sets the number of days to keep the conversation log data in the database.</p>
     </div>
@@ -38,7 +38,7 @@ function chatbot_chatgpt_reporting_settings_section_callback($args) {
 function chatbot_chatgpt_conversation_reporting_section_callback($args) {
     ?>
     <div>
-        <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
+        <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both Visitor and User input and chatbot responses).</p>
         <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
         <p>Use the button (below) to retrieve the conversation data and download as a CSV file.</p>
         <?php
