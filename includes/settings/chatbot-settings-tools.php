@@ -92,34 +92,6 @@ function chatbot_chatgpt_tools_overview_section_callback() {
     
 }
 
-// Add the Shortcode Tester
-function chatbot_chatgpt_shortcode_tools_section_callback($args) {
-
-    ?>
-    <div>
-        <p>This tool automatically tests the Chatbot Shortcode. There are three tests in all. Test 1 checks calling shortcodes without any parameters.  Test 2 checks calling a shortcode with a single paramemter. And, Test 3 checks calling a shortcode with three parameters. The results are displayed below the tests.</p>
-    </div>
-    <?php
-
-    // Call the shortcode tester
-    chatbot_shortcode_tester();
-
-}
-
-// Capability Check Overview
-function chatbot_chatgpt_capability_tools_section_callback() {
-
-    ?>
-    <div>
-        <p>This tool allows you to check the permissions for various features.</p>
-    </div>
-    <?php
-
-    // Call the capability tester
-    chatbot_chatgpt_capability_tester();
-
-}
-
 // Options Exporter
 function chatbot_chatgpt_options_exporter_tools_section_callback() {
 
@@ -177,5 +149,33 @@ function chatbot_chatgpt_manage_error_logs_section_callback() {
 
     // Call the capability tester
     chatbot_chatgpt_manage_error_logs();
+
+}
+
+// Add the Shortcode Tester
+function chatbot_chatgpt_shortcode_tools_section_callback($args) {
+
+    ?>
+    <div>
+        <p>This tool automatically tests the Chatbot Shortcode. There are three tests in all. Test 1 checks calling shortcodes without any parameters.  Test 2 checks calling a shortcode with a single paramemter. And, Test 3 checks calling a shortcode with three parameters. The results are displayed below the tests.</p>
+    </div>
+    <?php
+
+    // Call the shortcode tester
+    chatbot_shortcode_tester();
+
+}
+
+// Capability Check Overview
+function chatbot_chatgpt_capability_tools_section_callback() {
+
+    ?>
+    <div>
+        <p>This tool allows you to check the permissions for various features.</p>
+    </div>
+    <?php
+
+    // Call the capability tester
+    chatbot_chatgpt_capability_tester();
 
 }

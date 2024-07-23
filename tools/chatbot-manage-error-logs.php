@@ -112,8 +112,6 @@ function chatbot_chatgpt_manage_error_logs() {
     return;
 }
 
-
-
 // Handle error log actions
 function handle_log_actions() {
     if (!isset($_GET['action']) || !isset($_GET['_wpnonce'])) {
