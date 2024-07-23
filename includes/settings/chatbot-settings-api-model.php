@@ -19,7 +19,7 @@ function chatbot_chatgpt_model_settings_section_callback($args) {
     ?>
     <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
-    <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save your changes.</i></b></p>
+    <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Model settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-model-settings&file=api-model-settings.md">here</a>.</b></p>
     <?php
 }

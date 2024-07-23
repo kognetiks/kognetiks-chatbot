@@ -20,7 +20,7 @@ function chatbot_chatgpt_reporting_overview_section_callback($args) {
     <div>
         <p>Use these setting to select the reporting period for Visitor and User Interactions.</p>
         <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support&dir=support&file=conversation-logging-and-history.md">Support</a> tab of this plugin for more details.</p>
-        <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save your changes.</i></b></p>
+        <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Reporting and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=reporting&file=reporting.md">here</a>.</b></p>
     </div>
     <?php

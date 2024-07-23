@@ -17,13 +17,13 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_options_exporter() {
 
     // Get the saved chatbot_chatgpt_kn_analysis_choice value or default to "CSV"
-    $output_choice = esc_attr(get_option('chatbot_chatgpt_options_exporter', 'CSV'));
+    $output_choice = esc_attr(get_option('chatbot_chatgpt_options_exporter_extension', 'CSV'));
     // DIAG - Log the output choice
     // back_trace( 'NOTICE', '$output_choice' . $output_choice);
     ?>
     <div>
         <p>Choose the format for exporting the chatbot options:</p>
-        <select id="chatbot_chatgpt_options_exporter" name="chatbot_chatgpt_options_exporter">
+        <select id="chatbot_chatgpt_options_exporter_extension" name="chatbot_chatgpt_options_exporter_extension">
             <option value="<?php echo esc_attr( 'csv' ); ?>" <?php selected( $output_choice, 'csv' ); ?>><?php echo esc_html( 'CSV' ); ?></option>
             <option value="<?php echo esc_attr( 'json' ); ?>" <?php selected( $output_choice, 'json' ); ?>><?php echo esc_html( 'JSON' ); ?></option>
         </select>
@@ -65,7 +65,7 @@ function chatbot_chatgpt_download_options_data() {
 
     global $wpdb;
 
-    $output_choice = strtolower(esc_attr(get_option('chatbot_chatgpt_options_exporter', 'csv')));
+    $output_choice = strtolower(esc_attr(get_option('chatbot_chatgpt_options_exporter_extension', 'csv')));
 
     $options_file = $debug_dir_path . 'chatbot-chatgpt-options.' . $output_choice;
 

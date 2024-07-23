@@ -154,7 +154,7 @@ function chatbot_chatgpt_appearance_section_callback(){
     ?>
     <div>
         <p>Choose a color combinations that best represents you and your brand.  You can change your color combinations at any time.</p>
-        <p><b><i>Don't forget to click 'Save Settings' to save your changes.</i><b></p>
+        <p><b><i>Don't forget to click 'Save Settings' to save any changes your might make.</i><b></p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Appearance settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=appearance&file=appearance.md">here</a>.</b></p>
 
     </div>
