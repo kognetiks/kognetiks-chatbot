@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Register settings
+// Register Knowledge Navigator settings
 function chatbot_chatgpt_kn_settings_init() {
 
     // Knowledge Navigator Tab

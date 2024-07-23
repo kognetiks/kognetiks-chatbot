@@ -14,37 +14,61 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Diagnostics settings section callback - Ver 1.6.5
-function chatbot_chatgpt_diagnostics_section_callback($args) {
+// Diagnostics overview section callback - Ver 2.0.7
+function chatbot_chatgpt_diagnostics_overview_section_callback($args) {
     ?>
-    <p>The Diagnostics tab checks the API status and set options for diagnostics and notices.</p>
-    <p>You can turn on/off console and error logging (as of Version 1.6.5 most are now commented out).</p>
-    <!-- <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p> -->
-    <p>You can also suppress attribution ('Chatbot WordPress plugin by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the diagnostics, messages, and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=messages&file=messages.md">here</a>.</b></p>
-    <h2>System and Plugin Information</h2>
+        <p>The Diagnostics tab checks the API status and set options for diagnostics and notices.</p>
+        <p>You can turn on/off console and error logging (as of Version 1.6.5 most are now commented out).</p>
+        <!-- <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p> -->
+        <p>You can also suppress attribution ('Chatbot WordPress plugin by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
+        <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the diagnostics, messages, and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=messages&file=messages.md">here</a>.</b></p>
     <?php
+}
+
+function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
+
     // Get PHP version
     $php_version = phpversion();
 
     // Get WordPress version
     global $wp_version;
 
-    echo '<p>PHP Version: <b>' . $php_version . '</b><br>';
+    echo '<p>Chatbot Version: <b>' . kchat_get_plugin_version() . '</b><br>';
+    echo 'PHP Version: <b>' . $php_version . '</b><br>';
     echo 'WordPress Version: <b>' . $wp_version . '</b><br>';
-    echo 'Chatbot Version: <b>' . kchat_get_plugin_version() . '</b><br>';
     echo 'WordPress Language Code: <b>' . get_locale() . '</b></p>';
-    echo '<h2>API Status and Other Settings</h2>';
+
+}
+
+// Diagnostics settings section callback - Ver 1.6.5
+function chatbot_chatgpt_diagnostics_section_callback($args) {
+    ?>
+        <p>Choose your settings for Diagnostics, a Custom Error Message, Suppress Notices, Suppress Attribution, and Plugin Data retention settings.</p>
+    <?php
+}
+
+// API Status and Results section callback - Ver 2.0.7
+function chatbot_chatgpt_diagnostics_api_status_section_callback($args) {
+
+        $api_key = get_option('chatbot_chatgpt_api_key');
+        test_chatgpt_api($api_key);
+        $updated_status = esc_attr(get_option('chatbot_chatgpt_api_status', 'NOT SET'));
+    ?>
+        <p>API STATUS: <b><?php echo esc_html( $updated_status ); ?></b></p>
+    <?php
+    
 }
 
 // Call the api-test.php file to test the API
 function chatbot_chatgpt_api_test_callback($args) {
+
     $api_key = get_option('chatbot_chatgpt_api_key');
     test_chatgpt_api($api_key);
     $updated_status = esc_attr(get_option('chatbot_chatgpt_api_status', 'NOT SET'));
     ?>
     <p>API STATUS: <b><?php echo esc_html( $updated_status ); ?></b></p>
     <?php
+
 }
 
 // Diagnostics On/Off - Ver 1.6.5

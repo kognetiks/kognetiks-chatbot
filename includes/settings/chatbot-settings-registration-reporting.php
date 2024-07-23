@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Register settings
+// Register Reporting settings
 function chatbot_chatgpt_reporting_settings_init() {
 
         // Register settings for Reporting
