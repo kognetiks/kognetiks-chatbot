@@ -367,6 +367,9 @@ jQuery(document).ready(function ($) {
         // Parse the HTML string
         let parsedHtml = $.parseHTML(decodedMessage);
 
+        // Assuming parsedHtml is the variable containing the parsed HTML elements
+        $(parsedHtml).find('a').addBack('a').attr('target', '_blank');
+
         // Create a new span element
         let textElement = $('<span></span>');
 
@@ -446,7 +449,11 @@ jQuery(document).ready(function ($) {
 
         // console.log("Original Markdown:", markdown);
     
-        // Step 1: Extract predefined HTML tags
+        // Step 1: Process links before any other inline elements
+        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+        // console.log("After Link Replacement:", markdown);
+    
+        // Step 2: Extract predefined HTML tags
         const predefinedHtmlRegex = /<.*?>/g;
         let predefinedHtml = [];
         markdown = markdown.replace(predefinedHtmlRegex, (match) => {
@@ -455,19 +462,15 @@ jQuery(document).ready(function ($) {
         });
         // console.log("After Extracting HTML Tags:", markdown);
     
-        // Step 2: Escape HTML outside of code blocks
+        // Step 3: Escape HTML outside of code blocks
         markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
             return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
         }).join('');
         // console.log("After HTML Escape:", markdown);
     
-        // Step 3: Process images first
+        // Step 4: Process images
         markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2">`);
         // console.log("After Image Replacement:", markdown);
-    
-        // Step 4: Process links before any other inline elements
-        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-        // console.log("After Link Replacement:", markdown);
     
         // Step 5: Headers
         markdown = markdown.replace(/^#### (.*)$/gim, '<h4>$1</h4>')
@@ -518,9 +521,9 @@ jQuery(document).ready(function ($) {
         // console.log("After Reinserting HTML Tags:", markdown);
     
         return `<div>${markdown.trim()}</div>`;
+    
+    } 
 
-    }
-        
     // Submit the message when the submit button is clicked
     submitButton.on('click', function () {
 
@@ -700,7 +703,7 @@ jQuery(document).ready(function ($) {
         let button = $(this);  // Store a reference to the button
     
         $.ajax({
-            url: chatbot_chatgpt_params.ajax_url,  // URL to WordPress AJAX handler
+            url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
             data: {
                 action: 'chatbot_chatgpt_download_transcript',

@@ -1826,48 +1826,22 @@ class Parsedown
     {
         $newElements = array();
 
-        // Loop until no more matches are found
         while (preg_match($regexp, $text, $matches, PREG_OFFSET_CAPTURE))
         {
-            // Debugging: Print matches to inspect the structure
-            var_dump($matches);
-
-            // Ensure matches are valid and prevent infinite loop
-            if (!isset($matches[0][1]) || !isset($matches[0][0])) {
-                break; // Exit loop if match is invalid
-            }
-
             $offset = $matches[0][1];
-            $matchLength = strlen($matches[0][0]);
-
-            // Debugging: Print offset and match length
-            echo "Offset: $offset, Match Length: $matchLength\n";
-
             $before = substr($text, 0, $offset);
-            $after = substr($text, $offset + $matchLength);
+            $after = substr($text, $offset + strlen($matches[0][0]));
 
-            // Debugging: Print before and after substrings
-            echo "Before: $before, After: $after\n";
-
-            // Add the text before the match to the new elements
             $newElements[] = array('text' => $before);
 
-            // Add the provided elements
             foreach ($Elements as $Element)
             {
                 $newElements[] = $Element;
             }
 
-            // Update the text to the remaining part after the match
             $text = $after;
-
-            // Ensure we are not stuck in an infinite loop
-            if ($text === $before) {
-                break;
-            }
         }
 
-        // Add any remaining text as the last element
         $newElements[] = array('text' => $text);
 
         return $newElements;

@@ -116,6 +116,17 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
         ARRAY_A
     );
 
+    // Before returning the $assistant_details, rename certain keys for compatibility with the chatbot shortcode
+    if ($assistant_details) {
+        $assistant_details['chatbot_chatbot_assistant_id'] = $assistant_details['assistant_id'];
+        $assistant_details['common_name'] = $assistant_details['common_name'];
+        $assistant_details['chatbot_chatbot_display_style'] = $assistant_details['style'];
+        $assistant_details['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
+        $assistant_details['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
+        $assistant_details['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
+        $assistant_details['chatbot_chatgpt_allow_download_transcript'] = $assistant_details['allow_transcript_downloads'];
+    }
+
     // If the assistant is not found, return an empty array
     if (!$assistant_details) {
         return array();
@@ -574,7 +585,7 @@ function upgrade_chatbot_chatgpt_assistants_table() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
     // Retrieve options from wp_options table
-    $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'), '');
+    $assistant_id = esc_attr(get_option('assistant_id'), '');
     $assistant_id_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'), '');
     $assistant_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions'), '');
     $assistant_instructions_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate'), '');
@@ -621,7 +632,7 @@ function upgrade_chatbot_chatgpt_assistants_table() {
     }
 
     // Delete options from wp_options table
-    delete_option('chatbot_chatgpt_assistant_id');
+    delete_option('assistant_id');
     delete_option('chatbot_chatgpt_assistant_id_alternate');
     delete_option('chatbot_chatgpt_assistant_instructions');
     delete_option('chatbot_chatgpt_assistant_instructions_alternate');

@@ -268,9 +268,21 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // $caller = array_shift($backtrace);
     $caller = $backtrace[1]; // Get the second element from the backtrace array
 
-    $file = basename($caller['file']); // Gets the file name
+    // $file = basename($caller['file']); // Gets the file name
+    // Check if the 'file' key exists and is not null before using it
+    if (isset($caller['file']) && $caller['file'] !== null) {
+        $file = basename($caller['file']); // Gets the file name
+    } else {
+        $file = 'unknown'; // Default or fallback value if 'file' key does not exist or is null
+    }
     $function = $caller['function']; // Gets the function name
-    $line = $caller['line']; // Gets the line number
+    // $line = $caller['line']; // Gets the line number
+    // Similarly, check if the 'line' key exists before using it
+    if (isset($caller['line'])) {
+        $line = $caller['line'];
+    } else {
+        $line = 'unknown'; // Default or fallback value if 'line' key does not exist
+    }
 
     if ($message === null || $message === '') {
         $message = "No message";

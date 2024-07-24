@@ -32,7 +32,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
@@ -295,7 +295,7 @@ function chatbot_chatgpt_read_aloud($message) {
     $script_data_array['voice'] = $voice;
     
     // DIAG - Diagnostics - Ver 2.0.6
-    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', 'user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'page_id: ' . $page_id);

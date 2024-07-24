@@ -29,7 +29,7 @@ function chatbot_chatgpt_assistant_settings_init() {
     // register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7 - REMOVED in Ver 2.0.5
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allow_file_uploads'); // Ver 1.7.6
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_display_custom_gpt_assistant_name'); // Ver 1.9.4
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id'); // Ver 1.6.7
+    register_setting('chatbot_chatgpt_custom_gpts', 'assistant_id'); // Ver 1.6.7
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions'); // Ver 1.9.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions_alternate'); // Alternate Assistant - Ver 1.9.3
@@ -83,7 +83,7 @@ function chatbot_chatgpt_assistant_settings_init() {
 
     // CustomGPT Assistant Id - Ver 1.6.7
     add_settings_field(
-        'chatbot_chatgpt_assistant_id',
+        'assistant_id',
         'Primary GPT Assistant Id',
         'chatbot_chatgpt_assistant_id_callback',
         'chatbot_chatgpt_assistant_id_settings',
@@ -212,7 +212,7 @@ function chatbot_chatgpt_use_gpt_assistant_id_callback($args) {
     </select>
     <?php
     if ($use_assistant_id == 'No') {
-        update_option('chatbot_chatgpt_assistant_id', '');
+        update_option('assistant_id', '');
         update_option('chatbot_chatgpt_assistant_id_alternate', '');
     }
 }
@@ -230,7 +230,7 @@ function chatbot_chatgpt_allow_file_uploads_callback($args) {
 
 // GPT Assistant ID field callback - Ver 1.6.7
 function chatbot_chatgpt_assistant_id_callback($args) {
-    $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id', 'Please provide the GPT Assistant Id.'));
+    $assistant_id = esc_attr(get_option('assistant_id', 'Please provide the GPT Assistant Id.'));
     $use_assistant_id = esc_attr(get_option('chatbot_chatgpt_use_custom_gpt_assistant_id', 'No'));
     if ($use_assistant_id == 'Yes' && ($assistant_id == 'Please provide the GPT Assistant Id.' or empty($assistant_id))) {
         $assistant_id = 'Please provide the GPT Assistant Id.';
