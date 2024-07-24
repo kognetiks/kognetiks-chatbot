@@ -10,7 +10,7 @@ If you have developed an Assistant in the OpenAI Playground, you will need the i
 
 More information can be found here https://platform.openai.com/playground?mode=assistant.
 
-When you\'re ready to use an Assistant, simply add the shortcode ```[chatbot assistant="Common Name"]``` to your page.
+When you're ready to use an Assistant, simply add a shortcode such as ```[chatbot-1]```, ```[chatbot-2]```, etc. to your page.
 
 TIP: For best results ensure that the shortcode appears only once on the page.
 
@@ -24,8 +24,9 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
    - **Update/Delete**: Use these buttons to update or delete an assistant.
    - **Add New Assistant**: Use this button to add a new assistant.
 
-2. **ID**:
-   - **Description**: The unique identifier for each assistant.
+2. **Shortcode**:
+   - **Description**: The unique identifier for each assistant, such as ```[chatbot-1]``` or ```[chatbot-2]```.
+   - **Usage**: ```[chatbot-n]``` where n=1, 2, etc. You'll use this name to call the assistant from your the shortcode.
    - **Input**: Automatically generated.
 
 3. **Assistant ID**:
@@ -35,9 +36,8 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
 
 4. **Common Name**:
    - **Description**: A user-friendly name for the assistant.
-   - **Input**: Enter a name that easily identifies the assistant.  You'll use this name to call the assistant form the shortcode.
+   - **Input**: Enter a name that easily identifies the assistant.
    - **Required**: This is a required field.
-   - **Usage**: ```[chatbot assistant="Common Name"]```
    - **Tip**: Be sure to use regular quote marks around the "Common Name" if there are any spaces.
 
 5. **Style**:

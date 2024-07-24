@@ -54,6 +54,9 @@ jQuery(document).ready(function ($) {
 
         // Force Page Reload on Conversation Cleared - Ver 2.0.4
         let chatgptForcePageReloadInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_force_page_reload) ? chatbotSettings.chatbot_chatgpt_force_page_reload : 'No';
+
+        // Conversation Continuation - Ver 2.0.7
+        let chatgptConversationContinuationInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_conversation_continuation) ? chatbotSettings.chatbot_chatgpt_conversation_continuation : 'Off';
     
         // DIAG - Diagnostics - Ver 2.0.5
         // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Before localStorage.set Item loop');
@@ -122,6 +125,9 @@ jQuery(document).ready(function ($) {
 
         // Force Page Reload on Conversation Cleared - Ver 2.0.4
         chatgptForcePageReloadInput = document.getElementById('chatbot_chatgpt_force_page_reload');
+
+        // Conversation Continuation - Ver 2.0.7
+        chatgptConversationContinuationInput = document.getElementById('chatbot_chatgpt_conversation_continuation');
 
         if(chatbotChatgptBotNameInput) {
             chatbotChatgptBotNameInput.addEventListener('change', function() {
@@ -345,6 +351,13 @@ jQuery(document).ready(function ($) {
             });
         }
 
+        // Conversation Continuation - Ver 2.0.7
+        if(chatgptConversationContinuationInput) {
+            chatgptConversationContinuationInput.addEventListener('change', function() {
+                localStorage.setItem('chatbot_chatgpt_conversation_continuation', this.value);
+            });
+        }
+
         // Update the localStorage values when the form is submitted - Ver 1.4.1
         // chatgpt-settings-form vs. your-form-id
         let chatgptSettingsForm = document.getElementById('chatgpt-settings-form');
@@ -404,6 +417,9 @@ jQuery(document).ready(function ($) {
 
                 // Force Page Reload on Conversation Cleared - Ver 2.0.4
                 let chatgptForcePageReloadInput = document.getElementById('chatbot_chatgpt_force_page_reload');
+
+                // Conversation Continuation - Ver 2.0.7
+                let chatgptConversationContinuationInput = document.getElementById('chatbot_chatgpt_conversation_continuation');
 
                 if(chatbotChatgptBotNameInput) {
                     localStorage.setItem('chatbot_chatgpt_bot_name', chatbotChatgptBotNameInput.value);
@@ -521,6 +537,11 @@ jQuery(document).ready(function ($) {
                 // Force Page Reload on Conversation Cleared - Ver 2.0.4
                 if(chatgptForcePageReloadInput) {
                     localStorage.setItem('chatbot_chatgpt_force_page_reload', chatgptForcePageReloadInput.value);
+                }
+
+                // Conversation Continuation - Ver 2.0.7
+                if(chatgptConversationContinuationInput) {
+                    localStorage.setItem('chatbot_chatgpt_conversation_continuation', chatgptConversationContinuationInput.value);
                 }
 
             });

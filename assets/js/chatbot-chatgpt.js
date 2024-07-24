@@ -1240,6 +1240,11 @@ jQuery(document).ready(function ($) {
         storedConversation = '';
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
 
+        // If conversation_continuation is enabled, load the conversation from local storage - Ver 2.0.7
+        if (localStorage.getItem('chatbot_chatgpt_conversation_continuation') === 'On') {
+            storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
+        }
+
         // FIXME - IS THIS USED ANYWHERE ??? - Ver 1.8.9
         if (storedConversation) {
             // DIAG - Diagnostics - Ver 1.5.0

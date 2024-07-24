@@ -23,11 +23,7 @@ Export the Chatbot options to a file.  This excludes sensitive information such 
 
 ### Steps:
 
-1. **Choose the format for exporting the chatbot options**:
-   - Options: JSON, CSV
-   - **TIP**: if you select a new output format, first click the ```Save Options``` button before clicking the ```Download Options Data```.
-
-2. **Download Options Data**:
+1. **Download Options Data**:
    - Use the ```Download Options Data``` button to retrieve the chatbot options and download the file.
 
 ---

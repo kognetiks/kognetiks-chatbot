@@ -553,6 +553,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Force Page Reload on Conversation Clear - Ver 2.0.4
     $chatbot_chatgpt_force_page_reload = esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No'));
 
+    // Conversation Continuation - Ver 2.0.7
+    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
+
     // Assistant's Table Override - Ver 2.0.4
     // FIXME - FORCE PAGE RELOAD
 
@@ -714,6 +717,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     $assistant_details['force_page_reload'] = !empty($assistant_details['force_page_reload']) ? $assistant_details['force_page_reload'] : esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No'));
     $chatbot_settings['chatbot_chatgpt_force_page_reload'] = $assistant_details['force_page_reload'];
+
+    $assistant_details['conversation_continuation'] = !empty($assistant_details['conversation_continuation']) ? $assistant_details['conversation_continuation'] : esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
+    $chatbot_settings['chatbot_chatgpt_conversation_continuation'] = $assistant_details['conversation_continuation'];
 
     $assistant_details['width'] = !empty($assistant_details['width']) ? $assistant_details['width'] : esc_attr(get_option('chatbot_chatgpt_width_setting', '300'));
     $chatbot_settings['chatbot_chatgpt_width_setting'] = $assistant_details['width'];

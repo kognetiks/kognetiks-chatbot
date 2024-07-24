@@ -140,6 +140,17 @@ function chatbot_chatgpt_force_page_reload_callback($args) {
     <?php    
 }
 
+// Conversation Continuation - Ver 2.0.7
+function chatbot_chatgpt_conversation_continuation_callback($args) {
+    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
+    ?>
+    <select id="chatbot_chatgpt_conversation_continuation" name="chatbot_chatgpt_conversation_continuation">
+        <option value="On" <?php selected( $chatbot_chatgpt_conversation_continuation, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
+        <option value="Off" <?php selected( $chatbot_chatgpt_conversation_continuation, 'Off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
+    </select>
+    <?php    
+}
+
 // Option to remove OpenAI disclaimer - Ver 1.4.1
 function chatbot_chatgpt_disclaimer_setting_callback($args) {
     $chatbot_chatgpt_disclaimer_setting = esc_attr(get_option('chatbot_chatgpt_disclaimer_setting', 'Yes'));
@@ -197,6 +208,7 @@ function chatbot_chatgpt_settings_setup_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_subsequent_greeting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_allow_download_transcript');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_force_page_reload');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_conversation_continuation');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_input_rows');
@@ -287,6 +299,15 @@ function chatbot_chatgpt_settings_setup_init() {
         'chatbot_chatgpt_force_page_reload',
         'Force Page Reload on Conversation Cleared',
         'chatbot_chatgpt_force_page_reload_callback',
+        'chatbot_chatgpt_additional_setup_settings',
+        'chatbot_chatgpt_additional_setup_section'
+    );
+
+    // Conversation Continuation - Ver 2.0.7
+    add_settings_field(
+        'chatbot_chatgpt_conversation_continuation',
+        'Conversation Continuation',
+        'chatbot_chatgpt_conversation_continuation_callback',
         'chatbot_chatgpt_additional_setup_settings',
         'chatbot_chatgpt_additional_setup_section'
     );
