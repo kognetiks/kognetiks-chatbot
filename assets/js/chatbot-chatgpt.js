@@ -1248,6 +1248,8 @@ jQuery(document).ready(function ($) {
         // If conversation_continuation is enabled, load the conversation from local storage - Ver 2.0.7
         if (localStorage.getItem('chatbot_chatgpt_conversation_continuation') === 'On') {
             storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
+            // remove autoplay attribute from the audio elements - Ver 2.0.7
+            storedConversation = storedConversation.replace(/autoplay/g, '');
         }
 
         if (storedConversation) {
@@ -1265,6 +1267,7 @@ jQuery(document).ready(function ($) {
 
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
+            removeTypingIndicator();
 
         } else {
 
