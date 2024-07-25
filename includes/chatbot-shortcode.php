@@ -63,9 +63,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'get_the_id(): ' . get_the_id());
     // back_trace( 'NOTICE', '$model: ' . $model);
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
-    foreach ($atts as $key => $value) {
-      // back_trace('NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
-    }
+    // back_trace( 'NOTICE', '========================================');
+    // foreach ($atts as $key => $value) {
+    //   back_trace('NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    // }
     // back_trace( 'NOTICE', '========================================');
    
     // BELT & SUSPENDERS - Ver 1.9.4
@@ -104,7 +105,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // [chatbot style="floating" model="gpt-4-turbo-preview"] - Floating style using the GPT-4 Turbo Preview model
     // [chatbot style="embedded" model="dall-e-3"] - Embedded style using the DALL-E 3 model
     // [chatbot style="embedded" model="tts-1"] - Embedded style using the TTS 1 model
-    // [chatbot style="embedded" model="tts-1-1106" voice="fable"] - Embedded style using the TTS 1 model with the voice of Fable
+    // [chatbot style="embedded" model="tts-1-hd" voice="fable"] - Embedded style using the TTS 1 model with the voice of Fable
 
     // Normalize attribute keys, lowercase
     $atts = array_change_key_case((array)$atts, CASE_LOWER);
@@ -308,10 +309,20 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if (!isset($atts['model'])) {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         $script_data_array['model'] = $model;
+        $script_data_array['chatbot_chatgpt_model_choice'] = $model;
+        $assistant_details['model'] = $model;
+        $assistant_details['chatbot_chatgpt_model_choice'] = $model;
+        $chatbot_settings['model'] = $model;
+        $chatbot_settings['chatbot_chatgpt_model_choice'] = $model;
         // back_trace('NOTICE', 'Model (defaulting): ' . $model);
     } else {
         $model = sanitize_text_field($atts['model']);
         $script_data_array['model'] = $model;
+        $script_data_array['chatbot_chatgpt_model_choice'] = $model;
+        $assistant_details['model'] = $model;
+        $assistant_details['chatbot_chatgpt_model_choice'] = $model;
+        $chatbot_settings['model'] = $model;
+        $chatbot_settings['chatbot_chatgpt_model_choice'] = $model;
         // back_trace('NOTICE', 'Model: ' . $model);
     }
 
@@ -322,21 +333,30 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $sanitized_voice = sanitize_text_field($atts['voice']);
         if (in_array($sanitized_voice, $valid_voices)) {
             $voice = $sanitized_voice;
+            $script_data_array['voice'] = $voice;
             $script_data_array['chatbot_chatgpt_voice_option'] = $voice;
+            $assistant_details['voice'] = $voice;
             $assistant_details['chatbot_chatgpt_voice_option'] = $voice;
+            $chatbot_settings['voice'] = $voice;
             $chatbot_settings['chatbot_chatgpt_voice_option'] = $voice;
             // back_trace('NOTICE', '$voice: ' . $voice);
         } else {
             $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+            $script_data_array['voice'] = $voice;
             $script_data_array['chatbot_chatgpt_voice_option'] = $voice;
+            $assistant_details['voice'] = $voice;
             $assistant_details['chatbot_chatgpt_voice_option'] = $voice;
+            $chatbot_settings['voice'] = $voice;
             $chatbot_settings['chatbot_chatgpt_voice_option'] = $voice;
             // back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
         }
     } else {
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+        $script_data_array['voice'] = $voice;
         $script_data_array['chatbot_chatgpt_voice_option'] = $voice;
+        $assistant_details['voice'] = $voice;
         $assistant_details['chatbot_chatgpt_voice_option'] = $voice;
+        $chatbot_settings['voice'] = $voice;
         $chatbot_settings['chatbot_chatgpt_voice_option'] = $voice;
         // back_trace('NOTICE', 'Voice (defaulting): ' . $voice);
     }

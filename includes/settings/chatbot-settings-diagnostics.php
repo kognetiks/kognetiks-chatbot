@@ -229,6 +229,7 @@ function chatbot_chatgpt_delete_data_callback($args) {
     <?php
 }
 
+// Back Trace Function - Revised in Ver 2.0.7
 function back_trace($message_type = "NOTICE", $message = "No message") {
 
     // Usage Instructions
@@ -265,23 +266,16 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     }
 
     $backtrace = debug_backtrace();
-    // $caller = array_shift($backtrace);
-    $caller = $backtrace[1]; // Get the second element from the backtrace array
+    $caller = isset($backtrace[1]) ? $backtrace[1] : null; // Get the second element from the backtrace array
 
-    // $file = basename($caller['file']); // Gets the file name
-    // Check if the 'file' key exists and is not null before using it
-    if (isset($caller['file']) && $caller['file'] !== null) {
-        $file = basename($caller['file']); // Gets the file name
+    if ($caller) {
+        $file = isset($caller['file']) ? basename($caller['file']) : 'unknown';
+        $function = isset($caller['function']) ? $caller['function'] : 'unknown';
+        $line = isset($caller['line']) ? $caller['line'] : 'unknown';
     } else {
-        $file = 'unknown'; // Default or fallback value if 'file' key does not exist or is null
-    }
-    $function = $caller['function']; // Gets the function name
-    // $line = $caller['line']; // Gets the line number
-    // Similarly, check if the 'line' key exists before using it
-    if (isset($caller['line'])) {
-        $line = $caller['line'];
-    } else {
-        $line = 'unknown'; // Default or fallback value if 'line' key does not exist
+        $file = 'unknown';
+        $function = 'unknown';
+        $line = 'unknown';
     }
 
     if ($message === null || $message === '') {
@@ -305,7 +299,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     if ('Error' === $chatbot_chatgpt_diagnostics) {
         // Print all types of messages
         error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
-    } elseif ('Success' === $chatbot_chatgpt_diagnostics || 'Failure' === $chatbot_chatgpt_diagnostics) {
+    } elseif (in_array($chatbot_chatgpt_diagnostics, ['Success', 'Failure'])) {
         // Print only SUCCESS and FAILURE messages
         if (in_array($message_type, ['SUCCESS', 'FAILURE'])) {
             error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");

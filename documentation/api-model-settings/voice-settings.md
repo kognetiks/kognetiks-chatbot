@@ -6,7 +6,7 @@ To enhance your Kognetiks Chatbot with text-to-speech capabilities, follow these
 
 1. **Voice Model Default**:
    - **Description**: This dropdown allows you to select the default text-to-speech model the chatbot will use.
-   - **Options**: Choose from various models such as `tts-1-1106` and others provided by OpenAI.
+   - **Options**: Choose from various models such as `tts-1`, `tts-1-1106`, `tts-1-hd`, `tts-1-hd-1106` and others provided by OpenAI.
    - **Selection**: Select the model that best fits your needs for voice synthesis quality and features.
 
 2. **Voice**:

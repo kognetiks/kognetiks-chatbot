@@ -526,6 +526,7 @@ function chatbot_chatgpt_send_message() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
+    // FIXME - STILL NEEDED - Ver 2.0.7 - 2024 07 25
     // Retrieve the GPT Model
     if (!empty($model)) {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
@@ -578,6 +579,7 @@ function chatbot_chatgpt_send_message() {
     $chatbot_settings['chatbot_chatgpt_model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
     $chatbot_settings['chatbot_chatgpt_voice_option'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
     $voice = $chatbot_settings['chatbot_chatgpt_voice_option'];
+    $model = $chatbot_settings['chatbot_chatgpt_model'];
     $display_style = $chatbot_settings['chatbot_chatgpt_display_style'];
 
     // DIAG - Diagnostics - Ver 2.0.6
@@ -798,6 +800,8 @@ function chatbot_chatgpt_send_message() {
         // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
         // TRY NOT TO FETCH MODEL AGAIN
         // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        $model = $script_data_array['model'];
+        $voice = $script_data_array['voice'];
         if (strpos($model, 'gpt-4o') !== false) {
             // The string 'gpt-4o' is found in $model
             // Reload the model - BELT & SUSPENDERS

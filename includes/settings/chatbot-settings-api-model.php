@@ -58,9 +58,9 @@ function chatbot_chatgpt_api_model_voice_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using audio models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-        <li><code>&#91;chatbot style="floating" model="tts-1-1106"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="floating" model="tts-1-hd"&#93;</code> - Style is floating, specific model</li>
         <li><code>&#91;chatbot style="embedded" model="tts-1-hd-1106"&#93;</code> - Style is embedded, default image model</li>
-        <li><code>&#91;chatbot style="floating" model="tts-1-1106" voice="nova"&#93;</code> - Style is floating, specific model, specific voice</li>
+        <li><code>&#91;chatbot style="floating" model="tts-1-hd" voice="nova"&#93;</code> - Style is floating, specific model, specific voice</li>
         <!-- <li><code>&#91;chatbot style=embedded model=speech&#93;</code> - Style is embedded, default image model</li> -->
     </ul>
     <p>There are also the default options for the "read aloud" button on the chatbot interface</p>
@@ -281,20 +281,20 @@ function chatbot_chatgpt_voice_model_option_callback($args) {
     // https://platform.openai.com/docs/models/tts
 
     // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
-    $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
+    $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-hd'));
 
     // Fetch models from the API
     $voice_models = get_openai_models();
 
     // Limit the models to voice models
     $voice_models = array_filter($voice_models, function($voice_model) {
-        return strpos($voice_model['id'], 'tts-1-1106') !== false;
+        return strpos($voice_model['id'], 'tts') !== false;
     });
     
     // Check for errors
     if (is_string($voice_models) && strpos($voice_models, 'Error:') === 0) {
         // If there's an error, display the hardcoded list
-        $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
+        $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-hd'));
         ?>
         <select id="chatbot_chatgpt_voice_model_option" name="chatbot_chatgpt_voice_model_option">
             <option value="<?php echo esc_attr( 'tts-1' ); ?>" <?php selected( $voice_model_option, 'tts-1' ); ?>><?php echo esc_html( 'tts-1' ); ?></option>
