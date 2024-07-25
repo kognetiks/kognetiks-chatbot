@@ -1171,8 +1171,9 @@ jQuery(document).ready(function ($) {
 
     }
 
-    // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
+    // Add this function to scroll to the bottom of the conversation - Ver 1.2.1 - Revised in Ver 2.0.7
     function scrollToBottom() {
+
         // setTimeout(() => {
         //     // DIAG - Diagnostics - Ver 1.5.0
         //     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
@@ -1183,6 +1184,10 @@ jQuery(document).ready(function ($) {
         //     }
         // }, 100);  // delay of 100 milliseconds
         //
+
+        // Call the function to scroll to the bottom of the conversation - Ver 2.0.7
+        scrollToLastBotResponse();
+
     }
 
     // Add this function to scroll to the top of the last chatbot response - Ver 2.0.3
@@ -1231,13 +1236,13 @@ jQuery(document).ready(function ($) {
         }, 200); // Adjust the delay as needed
     }    
    
-    // Load conversation from local storage if available - Ver 1.2.0
+    // Load conversation from local storage if available - Ver 1.2.0 - Revised in Ver 2.0.7
     function loadConversation() {
 
         // Removed in Ver 1.9.3
         // storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
         // Reset the conversation - Added in Ver 1.9.3
-        storedConversation = '';
+        let storedConversation = '';
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
 
         // If conversation_continuation is enabled, load the conversation from local storage - Ver 2.0.7
@@ -1245,20 +1250,14 @@ jQuery(document).ready(function ($) {
             storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
         }
 
-        // FIXME - IS THIS USED ANYWHERE ??? - Ver 1.8.9
         if (storedConversation) {
-            // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('Chatbot: NOTICE: loadConversation - IN THE IF STATEMENT');
-            // }
-
+ 
+            // console.log('Chatbot: NOTICE: loadConversation - IN THE IF STATEMENT');
+ 
             // Check if current conversation is different from stored conversation
-            // FIXME - ADDED THIS BACK IN VER 1.9.1 - 2024 03 04
             // if (conversation.html() !== storedConversation) {
             //     conversation.html(storedConversation);  // Set the conversation HTML to stored conversation
             // }
-            // Fix for XSS vulnerability - Ver 1.8.1
-            // FIXME - REMOVED THIS MAY BE BREAKING VER 1.9.1 - 2024 03 04
             if (conversation.html() !== storedConversation) {
                 let sanitizedConversation = DOMPurify.sanitize(storedConversation);
                 conversation.html(sanitizedConversation);  // Set the conversation HTML to sanitized stored conversation
@@ -1266,12 +1265,12 @@ jQuery(document).ready(function ($) {
 
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
+
         } else {
-            // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('Chatbot: NOTICE: loadConversation - IN THE ELSE STATEMENT');
-            // }
+
+            // console.log('Chatbot: NOTICE: loadConversation - IN THE ELSE STATEMENT');
             initializeChatbot();
+
         }
 
     }
