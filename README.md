@@ -6,10 +6,10 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's New in Version 2.0.7
 
-- **Model Support**: The latest models available from OpenAI's are always dynamically added to model picklists, and now include gpt-4o and gpt-4o-mini.
-- **Manage Chatbot Error Logs**: A new feature to manage chatbot error logs, including the ability to download and delete logs.
-- **Revised Reporting Settings Layout**: Revised and refreshed the Reporting Settings page layout for better visualization.
-- **Conversation Continuation**: Additional setting added to enable conversation continuation after returning to a page previously visited.
+- **Model Support**: The latest models available from OpenAI are dynamically added to model picklists.  Available models now include gpt-4o and gpt-4o-mini.  See Chatbot Settings > API/Model > Chat Settings.
+- **Manage Chatbot Error Logs**: Added the ability to manage chatbot error logs, including the ability to download and delete logs. See Chatbot Settings > Tools. TIP: You must enable Diagnostics access the Tools tab. See Chatbot Settings > Messages > Messages and Diagnostics.
+- **Revised Reporting Settings Layout**: Revised and refreshed the Reporting Settings page layout for better visualization. See Chatbot Settings > Reporting.
+- **Conversation Continuation**: Added an additional setting added to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
 
 ## What's New in Version 2.0.6
 
