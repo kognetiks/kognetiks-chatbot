@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function chatbot_chatgpt_appearance_settings() {
+function chatbot_chatgpt_appearance_settings_init() {
     
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_background_color');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_header_background_color');
@@ -32,6 +32,13 @@ function chatbot_chatgpt_appearance_settings() {
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_width_setting');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_reset');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_user_css_setting');
+
+    add_settings_section(
+        'chatbot_chatgpt_appearance_overview_section',
+        'Appearance Settings Overview',
+        'chatbot_chatgpt_appearance_overview_section_callback',
+        'chatbot_chatgpt_appearance_overview'
+    );
 
     add_settings_section(
         'chatbot_chatgpt_appearance_section',
@@ -147,18 +154,25 @@ function chatbot_chatgpt_appearance_settings() {
     );
 
 }
-add_action('admin_init', 'chatbot_chatgpt_appearance_settings');
+add_action('admin_init', 'chatbot_chatgpt_appearance_settings_init');
 
-// Custom Appearance Settings - Ver 1.8.1
-function chatbot_chatgpt_appearance_section_callback(){
+// Appearance Settings Overview
+function chatbot_chatgpt_appearance_overview_section_callback(){
     ?>
     <div>
-        <p>Choose a color combinations that best represents you and your brand.  You can change your color combinations at any time.</p>
-        <p><b><i>Don't forget to click 'Save Settings' to save your changes.</i><b></p>
+        <p>Choose the color combinations that best represents you and your brand.  You can change your color combinations at any time.</p>
+        <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Appearance settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=appearance&file=appearance.md">here</a>.</b></p>
 
     </div>
     <?php
+}
+
+// Custom Appearance Settings - Ver 1.8.1
+function chatbot_chatgpt_appearance_section_callback(){
+
+    // PLACEHOLDE - VER 2.0.7
+
 }
 
 // Reset the appearance settings - Ver 1.8.1

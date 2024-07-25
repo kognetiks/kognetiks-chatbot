@@ -72,6 +72,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     ];
 
     // DIAG - Diagnostics - Ver 1.9.3
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$url: ' . $url);
     // back_trace( 'NOTICE', '$headers: ' . ' PRIVATE DATA ');
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
@@ -109,6 +110,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
         $file_type = $file_type ? $file_type : 'unknown';
     
         // DIAG - Diagnostics - Ver 2.0.3
+        // back_trace( 'NOTICE', '========================================');
         // back_trace('NOTICE', '$file_type: ' . $file_type);
 
         // *********************************************************************************
@@ -130,6 +132,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     }
 
     // DIAG - Diagnostics
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
     // back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
     // back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));

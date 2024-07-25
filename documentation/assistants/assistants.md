@@ -30,7 +30,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 ![Assistant IDs and Additional Instructions](assistant-ids-and-additional-instructions.png)
 
-1. **Assistant Id**:
+1. **Assistant ID**:
    - **Description**: This field is for specifying the primary Assistant ID.
    - **Input**: Enter the Assistant ID provided by OpenAI or your specific setup.
 
@@ -74,12 +74,12 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Example**: "Hello again [first_name]! How can I help you?" Customize this to acknowledge returning visitors.
 
 10. **Chatbot Prompt**:
-   - **Description**: This is the initial prompt that appears in the chatbot input field.
-   - **Example**: "Tell me your deepest secrets ..." can be customized to something more appropriate for your audience and use case.
+    - **Description**: This is the initial prompt that appears in the chatbot input field.
+    - **Example**: "Tell me your deepest secrets ..." can be customized to something more appropriate for your audience and use case.
 
 11. **Additional Instructions**:
-   - **Description**: This field allows you to provide specific instructions to the primary assistant.
-   - **Input**: Enter any special instructions or context that will guide the assistant's responses.
+    - **Description**: This field allows you to provide specific instructions to the primary assistant.
+    - **Input**: Enter any special instructions or context that will guide the assistant's responses.
 
 ## Assistant General Settings
 

@@ -367,6 +367,9 @@ jQuery(document).ready(function ($) {
         // Parse the HTML string
         let parsedHtml = $.parseHTML(decodedMessage);
 
+        // Assuming parsedHtml is the variable containing the parsed HTML elements
+        $(parsedHtml).find('a').addBack('a').attr('target', '_blank');
+
         // Create a new span element
         let textElement = $('<span></span>');
 
@@ -446,7 +449,11 @@ jQuery(document).ready(function ($) {
 
         // console.log("Original Markdown:", markdown);
     
-        // Step 1: Extract predefined HTML tags
+        // Step 1: Process links before any other inline elements
+        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+        // console.log("After Link Replacement:", markdown);
+    
+        // Step 2: Extract predefined HTML tags
         const predefinedHtmlRegex = /<.*?>/g;
         let predefinedHtml = [];
         markdown = markdown.replace(predefinedHtmlRegex, (match) => {
@@ -455,19 +462,15 @@ jQuery(document).ready(function ($) {
         });
         // console.log("After Extracting HTML Tags:", markdown);
     
-        // Step 2: Escape HTML outside of code blocks
+        // Step 3: Escape HTML outside of code blocks
         markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
             return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
         }).join('');
         // console.log("After HTML Escape:", markdown);
     
-        // Step 3: Process images first
+        // Step 4: Process images
         markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2">`);
         // console.log("After Image Replacement:", markdown);
-    
-        // Step 4: Process links before any other inline elements
-        markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-        // console.log("After Link Replacement:", markdown);
     
         // Step 5: Headers
         markdown = markdown.replace(/^#### (.*)$/gim, '<h4>$1</h4>')
@@ -518,9 +521,9 @@ jQuery(document).ready(function ($) {
         // console.log("After Reinserting HTML Tags:", markdown);
     
         return `<div>${markdown.trim()}</div>`;
+    
+    } 
 
-    }
-        
     // Submit the message when the submit button is clicked
     submitButton.on('click', function () {
 
@@ -620,9 +623,6 @@ jQuery(document).ready(function ($) {
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
                 } else {
-                    // DIAG - Log the error - Ver 1.6.7
-                    // console.error('Chatbot: ERROR: ' + JSON.stringify(response));
-                    // appendMessage('Error: ' + errorThrown, 'error');
                     appendMessage('Error: ' + error, 'error')
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
                     botResponse = '';
@@ -703,7 +703,7 @@ jQuery(document).ready(function ($) {
         let button = $(this);  // Store a reference to the button
     
         $.ajax({
-            url: chatbot_chatgpt_params.ajax_url,  // URL to WordPress AJAX handler
+            url: chatbot_chatgpt_params.ajax_url,
             method: 'POST',
             data: {
                 action: 'chatbot_chatgpt_download_transcript',
@@ -746,7 +746,7 @@ jQuery(document).ready(function ($) {
             error: function(jqXHR, status, error) {
                 // Handle AJAX errors
                 appendMessage('Error: ' + error, 'error');
-                appendMessage('Oops! There was a problem downloading the transcript. Please try again late.', 'error');
+                appendMessage('Oops! There was a problem downloading the transcript. Please try again later.', 'error');
             },
             complete: function () {
                 // Remove typing indicator and enable submit button
@@ -1171,8 +1171,9 @@ jQuery(document).ready(function ($) {
 
     }
 
-    // Add this function to scroll to the bottom of the conversation - Ver 1.2.1
+    // Add this function to scroll to the bottom of the conversation - Ver 1.2.1 - Revised in Ver 2.0.7
     function scrollToBottom() {
+
         // setTimeout(() => {
         //     // DIAG - Diagnostics - Ver 1.5.0
         //     // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
@@ -1183,6 +1184,10 @@ jQuery(document).ready(function ($) {
         //     }
         // }, 100);  // delay of 100 milliseconds
         //
+
+        // Call the function to scroll to the bottom of the conversation - Ver 2.0.7
+        scrollToLastBotResponse();
+
     }
 
     // Add this function to scroll to the top of the last chatbot response - Ver 2.0.3
@@ -1231,29 +1236,30 @@ jQuery(document).ready(function ($) {
         }, 200); // Adjust the delay as needed
     }    
    
-    // Load conversation from local storage if available - Ver 1.2.0
+    // Load conversation from local storage if available - Ver 1.2.0 - Revised in Ver 2.0.7
     function loadConversation() {
 
         // Removed in Ver 1.9.3
         // storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
         // Reset the conversation - Added in Ver 1.9.3
-        storedConversation = '';
+        let storedConversation = '';
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
 
-        // FIXME - IS THIS USED ANYWHERE ??? - Ver 1.8.9
-        if (storedConversation) {
-            // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('Chatbot: NOTICE: loadConversation - IN THE IF STATEMENT');
-            // }
+        // If conversation_continuation is enabled, load the conversation from local storage - Ver 2.0.7
+        if (localStorage.getItem('chatbot_chatgpt_conversation_continuation') === 'On') {
+            storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
+            // remove autoplay attribute from the audio elements - Ver 2.0.7
+            storedConversation = storedConversation.replace(/autoplay/g, '');
+        }
 
+        if (storedConversation) {
+ 
+            // console.log('Chatbot: NOTICE: loadConversation - IN THE IF STATEMENT');
+ 
             // Check if current conversation is different from stored conversation
-            // FIXME - ADDED THIS BACK IN VER 1.9.1 - 2024 03 04
             // if (conversation.html() !== storedConversation) {
             //     conversation.html(storedConversation);  // Set the conversation HTML to stored conversation
             // }
-            // Fix for XSS vulnerability - Ver 1.8.1
-            // FIXME - REMOVED THIS MAY BE BREAKING VER 1.9.1 - 2024 03 04
             if (conversation.html() !== storedConversation) {
                 let sanitizedConversation = DOMPurify.sanitize(storedConversation);
                 conversation.html(sanitizedConversation);  // Set the conversation HTML to sanitized stored conversation
@@ -1261,12 +1267,13 @@ jQuery(document).ready(function ($) {
 
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
+            removeTypingIndicator();
+
         } else {
-            // DIAG - Diagnostics - Ver 1.5.0
-            // if (chatbotSettings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('Chatbot: NOTICE: loadConversation - IN THE ELSE STATEMENT');
-            // }
+
+            // console.log('Chatbot: NOTICE: loadConversation - IN THE ELSE STATEMENT');
             initializeChatbot();
+
         }
 
     }

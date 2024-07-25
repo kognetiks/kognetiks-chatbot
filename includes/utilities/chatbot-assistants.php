@@ -15,13 +15,13 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Create the table for the chatbot assistants
 function create_chatbot_chatgpt_assistants_table() {
- 
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
-    
+
     // Check if the table already exists
-    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
         return; // Exit if the table already exists
     }
     
@@ -46,20 +46,17 @@ function create_chatbot_chatgpt_assistants_table() {
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-    // Check if the table exists and create/upgrade it if necessary
+    // Execute SQL query and create the table
     dbDelta($sql);
 
-    // Execute SQL query and create the table
-    if(dbDelta($sql)) {
-        // Table created successfully
-    } else {
-        // Log the error
-        error_log('Failed to create table: ' . $table_name);
-        error_log('SQL: ' . $sql);
-        // Log the specific reason for the failure
-        if($wpdb->last_error !== '') {
-            error_log('Error details: ' . $wpdb->last_error);
-        }
+    // Check for errors after dbDelta
+    if ($wpdb->last_error) {
+        logErrorToServer('Failed to create table: ' . $table_name);
+        logErrorToServer('SQL: ' . $sql);
+        logErrorToServer('Error details: ' . $wpdb->last_error);
+        // error_log('Failed to create table: ' . $table_name);
+        // error_log('SQL: ' . $sql);
+        // error_log('Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
     }
 
@@ -118,6 +115,17 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
         ),
         ARRAY_A
     );
+
+    // Before returning the $assistant_details, rename certain keys for compatibility with the chatbot shortcode
+    if ($assistant_details) {
+        $assistant_details['chatbot_chatbot_assistant_id'] = $assistant_details['assistant_id'];
+        $assistant_details['common_name'] = $assistant_details['common_name'];
+        $assistant_details['chatbot_chatbot_display_style'] = $assistant_details['style'];
+        $assistant_details['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
+        $assistant_details['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
+        $assistant_details['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
+        $assistant_details['chatbot_chatgpt_allow_download_transcript'] = $assistant_details['allow_transcript_downloads'];
+    }
 
     // If the assistant is not found, return an empty array
     if (!$assistant_details) {
@@ -577,7 +585,7 @@ function upgrade_chatbot_chatgpt_assistants_table() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
     // Retrieve options from wp_options table
-    $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'), '');
+    $assistant_id = esc_attr(get_option('assistant_id'), '');
     $assistant_id_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'), '');
     $assistant_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions'), '');
     $assistant_instructions_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate'), '');
@@ -624,7 +632,7 @@ function upgrade_chatbot_chatgpt_assistants_table() {
     }
 
     // Delete options from wp_options table
-    delete_option('chatbot_chatgpt_assistant_id');
+    delete_option('assistant_id');
     delete_option('chatbot_chatgpt_assistant_id_alternate');
     delete_option('chatbot_chatgpt_assistant_instructions');
     delete_option('chatbot_chatgpt_assistant_instructions_alternate');

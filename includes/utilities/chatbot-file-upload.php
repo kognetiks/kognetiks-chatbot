@@ -68,7 +68,8 @@ function chatbot_chatgpt_upload_files() {
                 exit;
             }
 
-            $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
+            // $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
+            $validation_result = upload_validation(array('name' => basename($_FILES['file']['name'][$i]), 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
             if (is_array($validation_result) && isset($validation_result['error'])) {
                 $responses[] = array(
                     'status' => 'error',
@@ -295,7 +296,8 @@ function chatbot_chatgpt_upload_mp3() {
             // }
 
             // Checked for valid upload file types
-            $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
+            // $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
+            $validation_result = upload_validation(array('name' => basename($_FILES['file']['name'][$i]), 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
             if (is_array($validation_result) && isset($validation_result['error'])) {
                 $responses[] = array(
                     'status' => 'error',
@@ -405,6 +407,11 @@ function create_index_file($directory) {
 // File type validation - Ver 2.0.1
 function upload_validation($file) {
 
+
+    // DIAG - Diagnostics - Ver 2.0.7
+    // back_trace( 'NOTICE', 'File name: ' . $file['name']);
+    // back_trace( 'NOTICE', 'basename: ' . basename($file['name']));
+
     // Get the file type from the file name.
     $file_type = wp_check_filetype($file['name']);
 
@@ -437,6 +444,7 @@ function upload_validation($file) {
         'txt' => 'text/plain',
         'wav' => 'audio/wav',
         'webm' => 'video/webm',
+        'webp' => 'image/webp',
         'xls' => 'application/vnd.ms-excel',
         'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'xml' => 'application/xml',
@@ -474,7 +482,7 @@ function upload_validation($file) {
     return $file;
 
 }
-add_filter('wp_handle_upload_prefilter', 'upload_validation');
+// add_filter('wp_handle_upload_prefilter', 'upload_validation'); // REMOVED IN VER 2.0.7 - THE FILTER INTERFERES WITH WP CORE FUNCTIONS
 
 // Deep content-based security checks
 function deep_content_check($file_path) {

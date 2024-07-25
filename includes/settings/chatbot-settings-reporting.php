@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Reporting Page
+ * Kognetiks Chatbot for WordPress - Settings - Reporting
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the reporting settings and other parameters.
@@ -14,47 +14,184 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
+// Register Reporting settings - Ver 2.0.7
+function chatbot_chatgpt_reporting_settings_init() {
+
+    // Register settings for Reporting
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_reporting_period');
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_enable_conversation_logging');
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_log_days_to_keep');
+
+    // Reporting Overview Section
+    add_settings_section(
+        'chatbot_chatgpt_reporting_overview_section',
+        'Reporting Overview',
+        'chatbot_chatgpt_reporting_overview_section_callback',
+        'chatbot_chatgpt_reporting_overview'
+    );
+
+    // Reporting Settings Section
+    add_settings_section(
+        'chatbot_chatgpt_reporting_section',
+        'Reporting Settings',
+        'chatbot_chatgpt_reporting_section_callback',
+        'chatbot_chatgpt_reporting'
+    );
+
+    // Reporting Settings Field - Reporting Period
+    add_settings_field(
+        'chatbot_chatgpt_reporting_period',
+        'Reporting Period',
+        'chatbot_chatgpt_reporting_period_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_section'
+    );
+
+    // Reporting Settings Field - Enable Conversation Logging
+    add_settings_field(
+        'chatbot_chatgpt_enable_conversation_logging',
+        'Enable Conversation Logging',
+        'chatbot_chatgpt_enable_conversation_logging_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_section'
+    );
+
+    // Reporting Settings Field - Conversation Log Days to Keep
+    add_settings_field(
+        'chatbot_chatgpt_conversation_log_days_to_keep',
+        'Conversation Log Days to Keep',
+        'chatbot_chatgpt_conversation_log_days_to_keep_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_reporting_section'
+    );
+
+    // Conversation Data Section
+    add_settings_section(
+        'chatbot_chatgpt_conversation_reporting_section',
+        'Conversation Data',
+        'chatbot_chatgpt_conversation_reporting_section_callback',
+        'chatbot_chatgpt_conversation_reporting'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_conversation_reporting_field',
+        'Conversation Data',
+        'chatbot_chatgpt_conversation_reporting_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_conversation_reporting_section'
+    );
+
+    // Interaction Data Section
+    add_settings_section(
+        'chatbot_chatgpt_interaction_reporting_section',
+        'Interaction Data',
+        'chatbot_chatgpt_interaction_reporting_section_callback',
+        'chatbot_chatgpt_interaction_reporting'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_interaction_reporting_field',
+        'Interaction Data',
+        'chatbot_chatgpt_interaction_reporting_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_interaction_reporting_section'
+    );
+
+    // // Token Data Section
+    add_settings_section(
+        'chatbot_chatgpt_token_reporting_section',
+        'Token Data',
+        'chatbot_chatgpt_token_reporting_section_callback',
+        'chatbot_chatgpt_token_reporting'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_token_reporting_field',
+        'Token Data',
+        'chatbot_chatgpt_token_reporting_callback',
+        'chatbot_chatgpt_reporting',
+        'chatbot_chatgpt_token_reporting_section'
+    );
+   
+}
+add_action('admin_init', 'chatbot_chatgpt_reporting_settings_init');
+
 // Reporting section callback - Ver 1.6.3
+function chatbot_chatgpt_reporting_overview_section_callback($args) {
+    ?>
+    <div>
+        <p>Use these setting to select the reporting period for Visitor and User Interactions.</p>
+        <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support&dir=support&file=conversation-logging-and-history.md">Support</a> tab of this plugin for more details.</p>
+        <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
+        <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Reporting and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=reporting&file=reporting.md">here</a>.</b></p>
+    </div>
+    <?php
+}
+
 function chatbot_chatgpt_reporting_section_callback($args) {
     ?>
     <div>
-        <p>Use these setting to select the reporting period for Visitor Interactions.</p>
-        <p>By default, conversation logging is initially turned <b>Off</b>.</p>
-        <p>Please review the section <b>Conversation Logging Overview</b> on the <a href="?page=chatbot-chatgpt&tab=support&dir=support&file=conversation-logging-and-history.md">Support</a> tab of this plugin for more details.</p>
-        <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Reporting and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=reporting&file=reporting.md">here</a>.</b></p>
-        <h3>Conversation Data</h3>
-            <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both visitor input and chatbot responses).</p>
-            <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
-            <p>Use the button (below) to retrieve the conversation data and download as a CSV file.</p>
-            <?php
-                if (is_admin()) {
-                    $header = " ";
-                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Conversation Data</a>';
-                    echo $header;
-                }
-            ?>
-        <h3>Interactions Data</h3>
-            <!-- TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8 -->
-            <!-- <p><?php echo do_shortcode('[chatbot_simple_chart from_database="true"]'); ?></p> -->
-            <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
-            <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
-            <?php
-                if (is_admin()) {
-                    $header = " ";
-                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Interaction Data</a>';
-                    echo $header;
-                }
-            ?>
-        <h3>Token Data</h3>
-            <p><?php echo chatbot_chatgpt_total_tokens() ?></p>
-            <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
-            <?php
-                if (is_admin()) {
-                    $header = " ";
-                    $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_token_usage_data')) . '">Download Token Usage Data</a>';
-                    echo $header;
-                }
-            ?>
+        <p>Use these settings to select the reporting period for Visitor and User Interactions.</p>
+        <p>You will need to Enable Conversation Logging if you want to record chatbot interactions. By default, conversation logging is initially turned <b>Off</b>.</p>
+        <p>Conversation Log Days to Keep sets the number of days to keep the conversation log data in the database.</p>
+    </div>
+    <?php
+}
+
+function chatbot_chatgpt_conversation_reporting_section_callback($args) {
+    ?>
+    <div>
+        <p>Conversation items stored in your DB total <b><?php echo chatbot_chatgpt_count_conversations(); ?></b> rows (includes both Visitor and User input and chatbot responses).</p>
+        <p>Conversation items stored take up <b><?php echo chatbot_chatgpt_size_conversations(); ?> MB</b> in your database.</p>
+        <p>Use the button (below) to retrieve the conversation data and download as a CSV file.</p>
+        <?php
+            if (is_admin()) {
+                $header = " ";
+                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Conversation Data</a>';
+                echo $header;
+            }
+        ?>
+    </div>
+    <?php
+}
+
+function chatbot_chatgpt_interaction_reporting_section_callback($args) {
+    ?>
+    <div>
+        <!-- TEMPORARILY REMOVED AS SOME USERS ARE EXPERIENCING ISSUES WITH THE CHARTS - Ver 1.7.8 -->
+        <!-- <p><?php echo do_shortcode('[chatbot_simple_chart from_database="true"]'); ?></p> -->
+        <p><?php echo chatbot_chatgpt_interactions_table() ?></p>
+        <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
+        <?php
+            if (is_admin()) {
+                $header = " ";
+                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Interaction Data</a>';
+                echo $header;
+            }
+        ?>
+    </div>
+    <?php
+}
+
+function chatbot_chatgpt_token_reporting_section_callback($args) {
+    ?>
+    <div>
+        <p><?php echo chatbot_chatgpt_total_tokens() ?></p>
+        <p>Use the button (below) to retrieve the interactions data and download as a CSV file.</p>
+        <?php
+            if (is_admin()) {
+                $header = " ";
+                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_token_usage_data')) . '">Download Token Usage Data</a>';
+                echo $header;
+            }
+        ?>
+    </div>
+    <?php
+}
+
+function chatbot_chatgpt_reporting_settings_callback($args){
+    ?>
+    <div>
         <h3>Reporting Settings</h3>
     </div>
     <?php
@@ -371,11 +508,36 @@ function chatbot_chatgpt_count_conversations() {
 // Calculated size of the conversations stored - Ver 1.7.6
 function chatbot_chatgpt_size_conversations() {
     global $wpdb;
-    $database_name = $wpdb->dbname;
+
+    // Use the DB_NAME constant instead of directly accessing the protected property
+    $database_name = DB_NAME;
+
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
-    $results = $wpdb->get_results("SELECT table_name AS `Table`, round(((data_length + index_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES WHERE table_schema = '$database_name' AND table_name = '$table_name'");
-    // TODO - Handle errors
-    return $results[0]->{'Size in MB'};
+
+    // Prepare the SQL query
+    $query = $wpdb->prepare("
+        SELECT ROUND(((data_length + index_length) / 1024 / 1024), 2) AS `Size_in_MB`
+        FROM information_schema.TABLES
+        WHERE table_schema = %s
+          AND table_name = %s
+    ", $database_name, $table_name);
+
+    // Execute the query
+    $results = $wpdb->get_results($query);
+
+    // Handle errors
+    if (is_wp_error($results)) {
+        return 'Error: ' . $results->get_error_message();
+    }
+
+    // Check if results are returned
+    if (empty($results)) {
+        return 'No results found';
+    }
+
+    // Return the size in MB
+    return $results[0]->Size_in_MB;
+
 }
 
 // Total Prompt Tokens, Completion Tokens, and Total Tokens - Ver 1.8.5

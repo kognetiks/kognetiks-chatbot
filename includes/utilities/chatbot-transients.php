@@ -60,7 +60,7 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
     set_transient($transient_key, $transient_value, 60*60*24); // Store for 24 hours
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', 'PUT - $transient_type: ' . $transient_type);
     // back_trace( 'NOTICE', 'PUT - $transient_value: ' . $transient_value);
     // back_trace( 'NOTICE', 'PUT - $user_id: ' . $user_id);
@@ -126,7 +126,7 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     $transient_value = get_transient($transient_key);
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', 'GET - $transient_value: ' . $transient_value);
     // back_trace( 'NOTICE', 'GET - $transient_type: ' . $transient_type);
     // back_trace( 'NOTICE', 'GET - $user_id: ' . $user_id);
@@ -152,7 +152,7 @@ function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $p
     global $step_id;
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', 'DEL - $transient_value: ' . $transient_value);
     // back_trace( 'NOTICE', 'DEL - $transient_type: ' . $transient_type);
     // back_trace( 'NOTICE', 'DEL - $user_id: ' . $user_id);

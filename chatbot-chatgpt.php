@@ -2,8 +2,8 @@
 /*
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
- * Description: A simple plugin to add an AI powered chatbot to your WordPress website.
- * Version:     2.0.6
+ * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
+ * Version:     2.0.7
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.6');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.0.7');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
@@ -161,7 +161,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.p
 
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
 
+// Include necessary files - Tools - Ver 2.0.6
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-capability-tester.php';
+require_once plugin_dir_path(__FILE__) . 'tools/chatbot-manage-error-logs.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
@@ -524,6 +526,7 @@ function chatbot_chatgpt_send_message() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
+    // FIXME - STILL NEEDED - Ver 2.0.7 - 2024 07 25
     // Retrieve the GPT Model
     if (!empty($model)) {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
@@ -539,8 +542,8 @@ function chatbot_chatgpt_send_message() {
             // Set the model to the default
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
             // DIAG - Diagnostics
-            // back_trace( 'ERROR', 'Model not set!!!');
-            // wp_send_json_error('Invalid Model. Please set the model in the plugin settings.');
+            // back_trace( 'ERROR', 'Invalid Model.');
+            // wp_send_json_error('Error: Invalid Model. Please check the plugin settings.');
         }
     }
 
@@ -569,44 +572,44 @@ function chatbot_chatgpt_send_message() {
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
 
-    $chatbot_settings['display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
-    $chatbot_settings['assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
+    $chatbot_settings['chatbot_chatgpt_display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
+    $chatbot_settings['chatbot_chatgpt_assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
     $chatbot_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id, $session_id);
     $chatbot_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id, $session_id);
-    $chatbot_settings['model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
-    $chatbot_settings['voice'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
-    $voice = $chatbot_settings['voice'];
-    $display_style = $chatbot_settings['display_style'];
+    $chatbot_settings['chatbot_chatgpt_model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
+    $chatbot_settings['chatbot_chatgpt_voice_option'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
+    $voice = $chatbot_settings['chatbot_chatgpt_voice_option'];
+    $model = $chatbot_settings['chatbot_chatgpt_model'];
+    $display_style = $chatbot_settings['chatbot_chatgpt_display_style'];
 
     // DIAG - Diagnostics - Ver 2.0.6
-    // back_trace( 'NOTICE', '$chatbot_settings[display_style]: ' . $chatbot_settings['display_style']);
-    // back_trace( 'NOTICE', '$chatbot_settings[assistant_alias]: ' . $chatbot_settings['assistant_alias']);
+    // back_trace( 'NOTICE', '========================================');
+    // back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_display_style]: ' . $chatbot_settings['chatbot_chatgpt_display_style']);
+    // back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_assistant_alias]: ' . $chatbot_settings['chatbot_chatgpt_assistant_alias']);
     // back_trace( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
     // back_trace( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
-    // back_trace( 'NOTICE', '$chatbot_settings[model]: ' . $chatbot_settings['model']);
-    // back_trace( 'NOTICE', '$chatbot_settings[voice]: ' . $chatbot_settings['voice']);
+    // back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_model]: ' . $chatbot_settings['chatbot_chatgpt_model']);
+    // back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_voice]: ' . $chatbot_settings['chatbot_chatgpt_voice_option']);
 
-    $display_style = isset($chatbot_settings['display_style']) ? $chatbot_settings['display_style'] : '';
-    $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['assistant_alias']) ? $chatbot_settings['assistant_alias'] : '';
+    $display_style = isset($chatbot_settings['chatbot_chatgpt_display_style']) ? $chatbot_settings['chatbot_chatgpt_display_style'] : '';
+    $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['chatbot_chatgpt_assistant_alias']) ? $chatbot_settings['chatbot_chatgpt_assistant_alias'] : '';
 
-    $temp_model = $chatbot_settings['model']; // Store the model in a temporary variable before overwriting $chatbot_settings
-
+    // Get the thread information - Ver 2.0.7
     $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
 
-    $chatbot_settings['model'] = $temp_model; // Restore the model after overwriting $chatbot_settings
-
     // DIAG - Diagnostics - Ver 2.0.6
-    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
     // back_trace( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
-    // back_trace( 'NOTICE', '$chatbot_settings[model]: ' . $chatbot_settings['model']);
+    // back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_model]: ' . $chatbot_settings['chatbot_chatgpt_model']);
 
     $assistant_id = isset($chatbot_settings['assistant_id']) ? $chatbot_settings['assistant_id'] : '';
     $thread_Id = isset($chatbot_settings['thread_id']) ? $chatbot_settings['thread_id'] : '';
-    $model = isset($chatbot_settings['model']) ? $chatbot_settings['model'] : '';
+    $model = isset($chatbot_settings['chatbot_chatgpt_model']) ? $chatbot_settings['chatbot_chatgpt_model'] : '';
+    $voice = isset($chatbot_settings['chatbot_chatgpt_voice_option']) ? $chatbot_settings['chatbot_chatgpt_voice_option'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
@@ -631,7 +634,7 @@ function chatbot_chatgpt_send_message() {
 
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
 
-        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id'));
+        $assistant_id = esc_attr(get_option('assistant_id'));
         $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions', ''));
         $use_assistant_id = 'Yes';
 
@@ -776,7 +779,7 @@ function chatbot_chatgpt_send_message() {
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
             // Return response
             // back_trace( 'NOTICE', '$response ' . print_r($response,true));
-            wp_send_json_error('Oops! Something went wrong on our end. Please try again later');
+            wp_send_json_error('Oops! Something went wrong on our end. Please try again later!');
         } else {
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Check for links and images in response before returning');
@@ -797,6 +800,8 @@ function chatbot_chatgpt_send_message() {
         // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
         // TRY NOT TO FETCH MODEL AGAIN
         // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        $model = $script_data_array['model'];
+        $voice = $script_data_array['voice'];
         if (strpos($model, 'gpt-4o') !== false) {
             // The string 'gpt-4o' is found in $model
             // Reload the model - BELT & SUSPENDERS
@@ -857,7 +862,7 @@ function chatbot_chatgpt_send_message() {
 
     }
 
-    wp_send_json_error('Oops, I fell through the cracks!');
+    wp_send_json_error('Oops! I fell through the cracks!');
 
 }
 

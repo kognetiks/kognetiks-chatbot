@@ -95,9 +95,20 @@ function create_conversation_logging_table() {
         // DIAG - Diagnostics
         // back_trace('NOTICE', 'Table already exists: ' . $table_name);
 
+        // Modify interaction_time column to remove DEFAULT CURRENT_TIMESTAMP
+        $sql = "ALTER TABLE $table_name MODIFY COLUMN interaction_time datetime NOT NULL;";
+        $result = $wpdb->query($sql);
+        if ($result === false) {
+            // If there was an error, log it
+            // back_trace('ERROR', 'Error modifying interaction_time column: ' . $wpdb->last_error);
+        } else {
+            // If the operation was successful, log the success
+            // back_trace('SUCCESS', 'Successfully modified interaction_time column');
+        }
+
         if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'assistant_name')) === 'assistant_name') {
             // DIAG - Diagnostics
-            // back_trace('NOTICE', 'Column user_type already exists in table: ' . $table_name);
+            // back_trace('NOTICE', 'Column assistant_name already exists in table: ' . $table_name);
         } else {
             // Directly execute the ALTER TABLE command without prepare()
             $sql = "ALTER TABLE $table_name ADD COLUMN assistant_name VARCHAR(255) AFTER assistant_id";
@@ -166,7 +177,7 @@ function create_conversation_logging_table() {
             session_id VARCHAR(255) NOT NULL,
             user_id VARCHAR(255),
             page_id VARCHAR(255),
-            interaction_time datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            interaction_time datetime NOT NULL,
             user_type ENUM('Chatbot', 'Visitor', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens') NOT NULL,
             thread_id VARCHAR(255),
             assistant_id VARCHAR(255),
@@ -180,23 +191,17 @@ function create_conversation_logging_table() {
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 
-    // Execute SQL query and create the table
-    if(dbDelta($sql)) {
-        return true;  // Table created successfully
-    } else {
-        // Log the error
-        error_log('Failed to create table: ' . $table_name);
-        error_log('SQL: ' . $sql);
-        // Log the specific reason for the failure
-        if($wpdb->last_error !== '') {
-            error_log('Error details: ' . $wpdb->last_error);
-        }
-        return false;  // Table creation failed
+    // Log errors or notify admin if there was an error
+    if (!empty($wpdb->last_error)) {
+        // back_trace( 'ERROR', 'Error creating/modifying chatbot_chatgpt_conversation_log table' . $wpdb->last_error);
+        return;
     }
+
+    // back_trace( 'SUCCESS', 'Successfully created/updated chatbot_chatgpt_conversation_log table');
     
+    return;
+
 }
-// Hook to run the function during plugin activation - Ver 1.7.6
-// register_activation_hook(__FILE__, 'create_conversation_logging_table');
 
 // Append message to conversation log in the database - Ver 1.7.6
 function append_message_to_conversation_log($session_id, $user_id, $page_id, $user_type, $thread_id, $assistant_id, $message) {
@@ -234,6 +239,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
             'thread_id' => $thread_id,
             'assistant_id' => $assistant_id,
             'assistant_name' => $assistant_name,
+            'interaction_time' => current_time('mysql'),
             'message_text' => $message
         ),
         array(

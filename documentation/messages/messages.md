@@ -1,19 +1,31 @@
-# Configuring the Diagnostics Settings
+# Messages and Diagnostics Settings
 
-The Diagnostics Settings help you monitor the health and performance of the **Kognetiks Chatbot for WordPress**, providing tools for error logging, API connection checks, and other diagnostics. Follow these steps to configure these options effectively:
+The Messages and Diagnostics Settings help you monitor the health and performance of the **Kognetiks Chatbot for WordPress**, providing tools for error logging, API connection checks, and other diagnostics. Follow these steps to configure these options effectively:
 
-![Messages](messages.png)
+![Messages and Diagnotics Overview](messages-and-diagnostics-overiew.png)
+
+# Platform Settings Details
+
+![Platform Settings](platform-settings.png)
 
 1. **System and Plugin Information**:
-   - **Description**: Displays key information about your system and plugin, including PHP version, WordPress version, Chatbot version, and WordPress language code.
+   - **Description**: Displays key information about your system and the chatbot plugin, including PHP version, WordPress version, Chatbot version, and WordPress language code.
    - **Usage**: Use this information for troubleshooting and ensuring compatibility with your environment.
 
-2. **API Test Results**:
+# API Status and Results
+
+![API Status and Results](api-status-and-results.png)
+
+1. **API Status and Results**:
    - **Description**: Shows the status of the connection to the OpenAI API.
    - **Details**: Indicates whether the connection was successful.
    - **Usage**: Check this status to verify that the chatbot can communicate with the OpenAI API. A successful connection is necessary for the chatbot to function correctly.
 
-3. **Chatbot Diagnostics**:
+#Messages and Diagnostics Settings
+
+![Messages and Diagnostics Settings](messages-and-diagnostics-settings.png)
+
+1. **Chatbot Diagnostics**:
    - **Description**: Allows you to select the level of diagnostics to be logged.
    - **Options**: 
      - `Off`: No logging.
@@ -26,7 +38,7 @@ The Diagnostics Settings help you monitor the health and performance of the **Ko
 
    **NOTE:** You can enable error and console logging at anytime, however in the production releases of the chatbot all error logging has been commented.
 
-4. **Custom Error Message**:
+2. **Custom Error Message**:
    - **Description**: This setting allows administrators to define a custom error message that will be displayed to users when the chatbot encounters an issue. This ensures a more consistent and branded user experience, even in cases of unexpected errors.
    - **Options**: Any text string that you want to use as the error message.
    - **Selection**: Enter your preferred error message in the provided text field on the "Messages" tab. An example of a custom error message could be:
@@ -37,17 +49,17 @@ The Diagnostics Settings help you monitor the health and performance of the **Ko
      - **Chatbot Diagnostics**: Ensure that the Chatbot Diagnostics setting is turned from `Off` to `Error` to enable the display of custom error messages.
      - **WordPress Error Logging**: You may also need to turn on WordPress error logging to fully utilize this feature.
 
-5. **Suppress Notices and Warnings**:
+3. **Suppress Notices and Warnings**:
    - **Description**: Allows you to suppress notices and warnings such as those associated with the **Knowledge Navigator** and other administrative functions.  These messages and warnings are not shown to users, only to administrator.
    - **Options**: `On` or `Off`.
    - **Selection**: Choose `On` to suppress notices and warnings if you prefer a less verbose experience, otherwise set to `Off` to see all administrative messages associated with the chatbot.
 
-6. **Suppress Attribution**:
+4. **Suppress Attribution**:
    - **Description**: Allows you to suppress the attribution message ("Chatbot WordPress plugin by Kognetiks") displayed only in the `floating` style of the chatbot.
    - **Options**: `On` or `Off`.
    - **Selection**: Choose `On` to suppress the attribution message. Set to `Off` to display the message.
 
-7. **Delete Plugin Data on Uninstall**:
+5. **Delete Plugin Data on Uninstall**:
    - **Description**: Determines whether to delete all plugin data when the plugin is uninstalled.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` to delete all data when uninstalling the plugin, ensuring no residual data remains. Select `No` to retain data even after uninstallation, which can be useful if you plan to reinstall the plugin later.

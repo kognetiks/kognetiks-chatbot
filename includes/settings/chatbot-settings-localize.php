@@ -44,6 +44,7 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
         'chatbot_chatgpt_width_setting' => 'Narrow',
         'chatbot_chatgpt_force_page_reload' => 'No',
+        'chatbot_chatgpt_conversation_continuation' => 'Off',
         'chatbot_chatgpt_diagnostics' => 'Off'
     );
 
@@ -76,6 +77,7 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_subsequent_greeting',
         'chatbot_chatgpt_width_setting',
         'chatbot_chatgpt_force_page_reload',
+        'chatbot_chatgpt_conversation_continuation',
         'chatbot_chatgpt_diagnostics'
     );
 

@@ -14,17 +14,24 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
+function chatbot_chatgpt_avatar_overview_section_callback($args) {
+
+    ?>
+    <div>
+        <p>Choose an avatar that best represents you and your brand or link to your own avatar by adding a Custom Avatar URL (recommended 60x60px).</p>
+        <p>It's ok you don't want an Avatar.  Just select the 'None' option among the Avatar Icon Options below.</p>
+        <p>Besure to remove the Custom Avatar URL if you want to select 'None' or one from the set below.</p>
+        <p>You can change your avatar at any time.</p>
+        <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
+        <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=avatars&file=avatars.md">here</a>.</b></p>
+    </div>
+    <?php
+
+}
+
 // Custom Avatar Icon - Ver 1.5.0
 function chatbot_chatgpt_avatar_section_callback($args) {
 
-    echo '<div>
-        <p>Choose an avatar that best represents you and your brand or link to your own avatar by adding a Custom Avatar URL (recommended 60x60px).</p>
-        <p>It\'s ok you don\'t want an Avatar.  Just select the \'None\' option among the Avatar Icon Options below.</p>
-        <p>Besure to remove the Custom Avatar URL if you want to select \'None\' or one from the set below.</p>
-        <p>You can change your avatar at any time.</p>
-        <p><b><i>Don\'t forget to click \'Save Settings\' to save your changes.</i><b></p>
-        <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=avatars&file=avatars.md">here</a>.</b></p>
-    </div>';
 }
  
 // Custom Avatar Icon - Ver 1.5.0
@@ -145,3 +152,67 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
 
 }
 
+// Register Avatar settings - Ver 2.0.7
+function chatbot_chatgpt_avatar_settings_init() {
+
+    // Avatar settings tab - Ver 1.5.0
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_setting');
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_url_setting');
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_custom_avatar_icon_setting');
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_greeting_setting');
+    register_setting('chatbot_chatgpt_avatar', 'chatbot_chatgpt_avatar_icon_set');
+
+    // Register Avatar Overview
+    add_settings_section(
+        'chatbot_chatgpt_avatar_overview_section', 
+        'Avatar Settings Overview', 
+        'chatbot_chatgpt_avatar_overview_section_callback', 
+        'chatbot_chatgpt_avatar_overview'
+    );
+
+    // Register Avatar Setting
+    add_settings_section(
+        'chatbot_chatgpt_avatar_section', 
+        'Avatar Settings', 
+        'chatbot_chatgpt_avatar_section_callback', 
+        'chatbot_chatgpt_avatar'
+    );
+
+    // Avatar Greeting
+    add_settings_field(
+        'chatbot_chatgpt_avatar_greeting_setting',
+        'Avatar Greeting',
+        'chatbot_chatgpt_avatar_greeting_callback',
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_section'
+    );
+
+    // Custom Avatar URL
+    add_settings_field(
+        'chatbot_chatgpt_custom_avatar_icon_setting',
+        'Custom Avatar URL (60x60px)',
+        'chatbot_chatgpt_custom_avatar_callback',
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_section'
+    );
+
+    // Avatar Icon Set
+    // add_settings_field(
+    //     'chatbot_chatgpt_avatar_icon_set',
+    //     'Avatar Icon Set',
+    //     'chatbot_chatgpt_avatar_icon_set_callback',
+    //     'chatbot_chatgpt_avatar',
+    //     'chatbot_chatgpt_avatar_section'
+    // );
+    
+    // Avatar Icon Selection - None, Custom, or one from the various sets
+    add_settings_field(
+        'chatbot_chatgpt_avatar_icon_setting',
+        'Avatar Icon Options',
+        'chatbot_chatgpt_avatar_icon_callback',
+        'chatbot_chatgpt_avatar',
+        'chatbot_chatgpt_avatar_section'
+    );    
+
+}
+add_action('admin_init', 'chatbot_chatgpt_avatar_settings_init');

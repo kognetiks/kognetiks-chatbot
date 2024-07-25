@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_capability_tester() {
 
     echo '<div>';
-    echo '<h2>User Capability Check</h2>';
+    echo '<h2>Capability Check Results</h2>';
 
     $capabilities = array(
         'read',

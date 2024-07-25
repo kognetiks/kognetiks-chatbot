@@ -32,7 +32,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
@@ -41,6 +41,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', 'BEGIN $model: ' . $model);
     // back_trace( 'NOTICE', 'BEGIN $voice: ' . $voice);
+    // back_trace( 'NOTICE', 'BEGIN $message: ' . $message);
 
     // Check for the API key
     if (empty($api_key) or $api_key == '[private]') {
@@ -86,13 +87,13 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     $audio_output = null;
 
     // Select the OpenAI Model
-    // One of tts-1-1106, tts-1-hd, tts-1-hd-1106
+    // One of tts-1, tts-1-1106, tts-1-hd, tts-1-hd-1106
     if ( !empty($script_data_array['model']) ) {
         $model = $script_data_array['model'];
         // DIAG - Diagnostics - Ver 1.9.4
         // back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
     } else {
-        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'tts-1-1106'));
+        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'tts-1-hd'));
         // DIAG - Diagnostics - Ver 1.9.4
         // back_trace( 'NOTICE', '$model from get_option: ' . $model);
     }
@@ -119,8 +120,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // Belt and Suspender - Ver 1.9.5
     if ( empty($model) ) {
-        $model = 'tts-1-1106';
-        update_option( 'chatbot_chatgpt_model_choice', 'tts-1-1106');
+        $model = 'tts-1-hd';
+        update_option( 'chatbot_chatgpt_model_choice', 'tts-1-hd');
     }
     if ( empty($voice) ) {
         $voice = 'alloy';
@@ -135,6 +136,15 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // API URL for the TTS service
     $api_url = 'https://api.openai.com/v1/audio/speech';
+
+    // Message size limitation
+    if (strlen($message) > 4096) {
+        // Limit the message to 4096 characters
+        $message = substr($message, 0, 4096);
+        $long_message = true;
+    } else {
+        $long_message = false;
+    }
     
     // Creating the array to be converted to JSON
     $body = array(
@@ -161,6 +171,20 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // Execute the cURL request and capture the response
     $response = curl_exec($ch);
 
+    if (!$response) {
+        // Log error or handle it
+        // back_trace( 'NOTICE', 'cURL error: ' . curl_error($ch));
+        return 'Error: in cURL: ' . curl_error($ch);
+    }
+    
+    // Check the HTTP response code
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if ($http_code !== 200) {
+        // Log or handle API error response
+        // back_trace( 'NOTICE', 'API responded with HTTP code ' . $http_code . ': ' . $response);
+        return 'Error: API responded with HTTP code ' . $http_code;
+    }
+
     // Write the audio to a file
     $result = file_put_contents($audio_file, $response);
 
@@ -170,8 +194,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // Check for errors
     if (curl_errno($ch)) {
         // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', 'Error: ' . curl_error($ch));
-        echo 'Error in cURL: ' . curl_error($ch);
+        // back_trace( 'NOTICE', 'Error in cURL: ' . curl_error($ch));
+        return 'Error: ' . curl_error($ch);
     } else {
 
         // VERSION WITH CONTROLS AND LINK
@@ -272,11 +296,11 @@ function chatbot_chatgpt_read_aloud($message) {
     // Hold the model
     // $t_model = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
     // if ( empty($t_model) ) {
-    //     $t_model = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
+    //     $t_model = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-hd'));
     // }
     // $model = $t_model;
     // set_chatbot_chatgpt_transients( 'model', $model, $user_id, $page_id, $session_id);
-    $script_data_array['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-1106'));
+    $script_data_array['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-hd'));
 
     // FIXME - READ ALOUD PASSED FROM ASSISTANT MANAGEMENT
 
@@ -295,7 +319,7 @@ function chatbot_chatgpt_read_aloud($message) {
     $script_data_array['voice'] = $voice;
     
     // DIAG - Diagnostics - Ver 2.0.6
-    // back_trace( 'NOTICE', '*********************************');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', 'user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'page_id: ' . $page_id);

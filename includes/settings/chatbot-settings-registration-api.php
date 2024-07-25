@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Register settings
+// Register API settings
 function chatbot_chatgpt_api_settings_init() {
 
     add_settings_section(
