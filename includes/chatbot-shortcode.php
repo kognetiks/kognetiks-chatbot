@@ -122,6 +122,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // If (strpos($atts['assistant'], 'asst_') === false && $atts['assistant'] != 'original' && $atts['assistant'] != 'primary' && $atts['assistant'] != 'alternate') {
     // If (strpos($atts['assistant'], 'asst_') === false ) {
 
+    // DIAG - Diagnostics - Ver 2.0.8
+    // back_trace('NOTICE', 'Tag Processing: ' . $tag);
+
     // Tag Processing - Ver 2.0.6
     if (strpos($tag, 'chatbot-') !== false) {
         
@@ -808,7 +811,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <?php
         if ( $use_assistant_name == 'Yes' ) {
             echo '<div id="chatbot-chatgpt-header-embedded">';
-            echo '<div id="chatgptTitle" class="title">' . htmlspecialchars($bot_name) . '</div>';
+            echo '<div id="chatgptTitle" class="title">' . strip_tags($bot_name) . '</div>';
             echo '</div>';
         } else {
             echo '<div id="chatbot-chatgpt-header-embedded">';
@@ -854,7 +857,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                         $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
                         $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
-                        echo "<textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea>";
+                        echo "<textarea id='chatbot-chatgpt-message' rows='". htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . $chatbot_chatgpt_hot_bot_prompt . "</textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
                             var textarea = document.getElementById('chatbot-chatgpt-message');
@@ -960,7 +963,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
                 <div style="flex-grow: 1; max-width: 95%;">
                     <label for="chatbot-chatgpt-message"></label>
-                    <!-- <textarea id="chatbot-chatgpt-message" rows="2" placeholder="<?php echo esc_attr($chatbot_chatgpt_bot_prompt); ?>" style="width: 95%;"></textarea> -->
                     <?php
                         // Kick off Flow - Ver 1.9.5
                         if ($use_flow == 'Yes' and !empty($sequence_id)) {
@@ -991,7 +993,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                             $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
                             $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
-                            echo "<center><textarea id='chatbot-chatgpt-message' rows='$rows' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'>$chatbot_chatgpt_hot_bot_prompt</textarea></center>";
+                            echo "<center><textarea id='chatbot-chatgpt-message' rows='". htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . $chatbot_chatgpt_hot_bot_prompt . "</textarea>";
                             echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 var textarea = document.getElementById('chatbot-chatgpt-message');
