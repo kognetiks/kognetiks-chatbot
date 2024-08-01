@@ -6,7 +6,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's New in Version 2.0.8
 
-- **TBD**: TBD
+- **Logic Error Updated**: Corrected a logic error that prevented visitors and logged-in users from interacting with Assistants.
 
 ## What's New in Version 2.0.7
 

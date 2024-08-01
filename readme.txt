@@ -228,7 +228,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 2.0.8 =
-* **TBD**: TBD
+* **Logic Error Updated**: Corrected a logic error that prevented visitors and logged-in users from interacting with Assistants.
 
 = 2.0.7 =
 * **Model Support**: The latest models available from OpenAI are dynamically added to model picklists.  Available models now include gpt-4o and gpt-4o-mini.  See Chatbot Settings > API/Model > Chat Settings.

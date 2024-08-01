@@ -88,6 +88,7 @@ if (empty($user_id) || $user_id == 0) {
 ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Main files
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-ant-api.php'; // ANT API - Ver 2.0.7
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // GPT Assistants - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-omni.php'; // ChatGPT API - Ver 2.0.2.1
@@ -565,8 +566,10 @@ function chatbot_chatgpt_send_message() {
     // $page_id = '';
     
     // Check the transient for the Assistant ID - Ver 1.7.2
-    $user_id = intval($_POST['user_id']);
-    $page_id = intval($_POST['page_id']);
+    // $user_id = intval($_POST['user_id']); // REMOVED intval in Ver 2.0.8
+    // $page_id = intval($_POST['page_id']); // REMOVED intval in Ver 2.0.8
+    $user_id = $_POST['user_id'];
+    $page_id = $_POST['page_id'];
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
