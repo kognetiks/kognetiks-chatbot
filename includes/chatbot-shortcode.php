@@ -811,7 +811,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <?php
         if ( $use_assistant_name == 'Yes' ) {
             echo '<div id="chatbot-chatgpt-header-embedded">';
-            echo '<div id="chatgptTitle" class="title">' . htmlspecialchars($bot_name) . '</div>';
+            echo '<div id="chatgptTitle" class="title">' . strip_tags($bot_name) . '</div>';
             echo '</div>';
         } else {
             echo '<div id="chatbot-chatgpt-header-embedded">';
