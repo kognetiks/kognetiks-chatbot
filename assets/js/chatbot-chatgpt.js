@@ -1,32 +1,32 @@
 jQuery(document).ready(function ($) {
-    
+   
     let chatGptChatBot = $('#chatbot-chatgpt').hide();
 
-    messageInput = $('#chatbot-chatgpt-message');
+    let messageInput = $('#chatbot-chatgpt-message');
     
     let conversation = $('#chatbot-chatgpt-conversation');
 
-    submitButton = $('#chatbot-chatgpt-submit');
-    uploadfileButton = $('#chatbot-chatgpt-upload-file');
-    chatGptOpenButton = $('#chatgpt-open-btn');
+    let submitButton = $('#chatbot-chatgpt-submit');
+    let uploadfileButton = $('#chatbot-chatgpt-upload-file');
+    let chatGptOpenButton = $('#chatgpt-open-btn');
 
-    chatbotChatgptBotName = localStorage.getItem('chatbot_chatgpt_bot_name') || 'Kognetiks Chatbot';
-    chatbotChatgptBotPrompt = localStorage.getItem('chatbot_chatgpt_bot_prompt') || 'Enter your question ...';
+    let chatbotChatgptBotName = localStorage.getItem('chatbot_chatgpt_bot_name') || 'Kognetiks Chatbot';
+    let chatbotChatgptBotPrompt = localStorage.getItem('chatbot_chatgpt_bot_prompt') || 'Enter your question ...';
 
-    chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
-    chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
+    let chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
+    let chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
 
-    initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
-    subsequentGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
+    let initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
+    let subsequentGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
 
-    chatbot_chatgpt_start_status = localStorage.getItem('chatbot_chatgpt_start_status') || 'closed';
-    chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor') || 'closed';
+    let chatbot_chatgpt_start_status = localStorage.getItem('chatbot_chatgpt_start_status') || 'closed';
+    let chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor') || 'closed';
 
-    chatbot_chatgpt_disclaimer_setting = localStorage.getItem('chatbot_chatgpt_disclaimer_setting') || 'Yes';
-    chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
+    let chatbot_chatgpt_disclaimer_setting = localStorage.getItem('chatbot_chatgpt_disclaimer_setting') || 'Yes';
+    let chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
 
     // Add variables for the timeout setting - Ver 1.8.8
-    timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 240;
+    let timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 240;
     // console.log('Chatbot: NOTICE: timeout_setting: ' + timeout_setting);
     // Convert the timeout setting to a number
     timeout_setting = parseInt(timeout_setting);
@@ -276,8 +276,15 @@ jQuery(document).ready(function ($) {
 
             // Explicitly check for null to determine if a value exists for the key
             let storedGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting');
-            initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello! How can I help you today?';
-            // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+            // initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello! How can I help you today?';
+            if (storedGreeting != null) {
+                initialGreeting = storedGreeting;
+                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: was not null: ' + storedGreeting);
+                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+            } else {
+                initialGreeting = 'Hello again! How can I help you?';
+                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+            }
 
             if (conversation.text().includes(initialGreeting)) {
                 return;
@@ -296,9 +303,16 @@ jQuery(document).ready(function ($) {
         } else {
 
             let storedGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting');
-            initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello again! How can I help you?'; 
-            // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
-    
+            // initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello again! How can I help you?';
+            if (storedGreeting != null) {
+                initialGreeting = storedGreeting;
+                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: was not null: ' + storedGreeting);
+                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+            } else {
+                initialGreeting = 'Hello again! How can I help you?';
+                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+            }
+
             if (conversation.text().includes(initialGreeting)) {
                 return;
             }

@@ -5,12 +5,13 @@ jQuery(document).ready(function ($) {
     // console.log('Chatbot: NOTICE: greetings.js - chatbot_chatgpt_initial_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
     // console.log('Chatbot: NOTICE: greetings.js - chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
     
-    if (typeof greetings_data !== 'undefined') {
-        localStorage.setItem('chatbot_chatgpt_initial_greeting', greetings_data.initial_greeting);
-        localStorage.setItem('chatbot_chatgpt_subsequent_greeting', greetings_data.subsequent_greeting);
-    } else {
-        // console.error('Chatbot: ERROR: greetings_data is not defined.');
-    }
+    // if (typeof greetings_data != 'undefined') {
+    //     // console.error('Chatbot: ERROR: greetings_data is not defined.');
+    //     localStorage.setItem('chatbot_chatgpt_initial_greeting', greetings_data.initial_greeting);
+    //     localStorage.setItem('chatbot_chatgpt_subsequent_greeting', greetings_data.subsequent_greeting);
+    // } else {
+    //     console.error('Chatbot: ERROR: greetings_data is defined.');
+    // }
 
     // DIAG - Diagnostics - Ver 2.0.5
     // console.log('Chatbot: NOTICE: greetings.js - EXITING');

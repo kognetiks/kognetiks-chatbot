@@ -553,12 +553,16 @@ jQuery(document).ready(function ($) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.5
-    // console.log('Chatbot: NOTICE: Before call to chatbot_chatgpt_localize');
+    console.log('Chatbot: NOTICE: Before call to chatbot_chatgpt_localize');
+    console.log('Chatbot: NOTICE: chatbot_chatgpt_inital_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
+    console.log('Chatbot: NOTICE: chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
 
     // Localize the chatbot settings
     chatbot_chatgpt_localize();
 
     // DIAG - Diagnostics - Ver 1.8.5
-    // console.log('Chatbot: NOTICE: After call to chatbot_chatgpt_loccalize');
+    console.log('Chatbot: NOTICE: After call to chatbot_chatgpt_localize');
+    console.log('Chatbot: NOTICE: chatbot_chatgpt_inital_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
+    console.log('Chatbot: NOTICE: chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
 
 });

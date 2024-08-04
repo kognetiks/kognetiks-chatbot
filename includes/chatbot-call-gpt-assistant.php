@@ -16,6 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 // Step 1: Create an Assistant
 function createAnAssistant($api_key) {
 
+    global $additional_instructions;
+
     // DIAG - Diagnostics - Ver 2.0.9
     back_trace( 'NOTICE', 'Step 1: createAnAssistant()');
 
@@ -39,10 +41,20 @@ function createAnAssistant($api_key) {
         "Authorization: Bearer " . $api_key
     );
 
+    // TODO - SEE https://platform.openai.com/docs/api-reference/runs/createRun
+    // Request body additional features
+
+    // Add additional_instructions if provided
+    if ($additional_instructions !== null) {
+        $data["additional_instructions"] = $additional_instructions;
+        back_trace ( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    }
+
     $context = stream_context_create(array(
         'http' => array(
             'method' => 'POST',
             'header' => $headers,
+            'content' => $data,
             'ignore_errors' => true // This allows the function to proceed even if there's an HTTP error
         )
     ));
@@ -93,7 +105,6 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // *********************************************************************************
     // FILE ID IS NULL
     // *********************************************************************************
-
     if ( empty($file_id) ) {
 
         // No files attached, just send the prompt
@@ -308,7 +319,7 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
         }
 
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray, true));
+        // back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray, true));
         
         if ($status != "completed") {
             // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
@@ -583,7 +594,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$message: ' . $message);
-    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Globals added for Ver 1.7.2
@@ -672,16 +683,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // Step 3: Add a Message to a Thread
     // back_trace( 'NOTICE', 'Step 3: Add a Message to a Thread');
-    // Add additional instructions to the prompt - Ver 1.9.3
-    if (empty($additional_instructions)) {
-        $prompt = $message;
-        // back_trace('NOTICE', 'No additional instructions provided: ' . $prompt);
-    } else {
-        $prompt = $additional_instructions . ' ' . $message;
-        // back_trace('NOTICE', 'Additional instructions provided: ' . $prompt);
-    }
-    // $prompt = $message;
-    
+    $prompt = $message;
+        
     // Fetch the file id - Ver 1.7.9
     // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 1.9.2 - 2024 03 06
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);

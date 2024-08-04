@@ -140,6 +140,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // For each key in $assistant_details, set the $atts value
         foreach ($assistant_details as $key => $value) {
             $atts[$key] = $value;
+            // DIAG - Diagnostics - Ver 2.0.9
+            back_trace('NOTICE', '$key: ' . $key . ' Value: ' . $value);
         }
 
         // If the assistant_id is null, then set it to original
@@ -426,8 +428,60 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     } else {
         // Do nothing as either the assistant_id is set to the GPT Assistant ID or it is not set at all
         $additional_instructions = array_key_exists('instructions', $atts) ? sanitize_text_field($atts['instructions']) : '';
+        $additional_instructions = array_key_exists('additional_instructions', $atts) ? sanitize_text_field($atts['additional_instructions']) : '';
         $additional_details['additional_instructions'] = $additional_instructions;
     }
+
+    //Do this for additional instructions - Ver 2.0.9
+    if (array_key_exists('additional_instructions', $atts)) {
+
+        // DIAG - Diagnostics - Ver 2.0.9
+        back_trace('NOTICE', 'additional_instructions: ' . $atts['additional_instructions']);
+
+        $sanitized_additional_instructions = sanitize_text_field($atts['additional_instructions']);
+
+        if (is_user_logged_in()) {
+
+            $current_user_id = get_current_user_id();
+            $current_user = get_userdata($current_user_id);
+
+            // Determine what the field name is between the brackets
+            $user_field_name = '';
+            $user_field_name = substr($sanitized_additional_instructions, strpos($sanitized_additional_instructions, '[') + 1, strpos($sanitized_additional_instructions, ']') - strpos($sanitized_additional_instructions, '[') - 1);
+            back_trace('NOTICE', '$user_field_name: ' . $user_field_name);
+            // If $additional_instructions contains "[$user_field_name]" then replace with field from DB
+            if (strpos($sanitized_additional_instructions, '[' . $user_field_name . ']') !== false) {
+                $sanitized_additional_instructions = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $sanitized_additional_instructions);
+            } else {
+                $sanitized_additional_instructions = str_replace('[' . $user_field_name . ']', '', $sanitized_additional_instructions);
+                // Remove the extra space when two spaces are present
+                $sanitized_additional_instructions = str_replace('  ', ' ', $sanitized_additional_instructions);
+                // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+                $sanitized_additional_instructions = preg_replace('/\s*([.,!?])/', '$1', $sanitized_additional_instructions);
+            }
+
+        } else {
+
+            $user_field_name = '';
+            $user_field_name = substr($sanitized_additional_instructions, strpos($sanitized_additional_instructions, '[') + 1, strpos($sanitized_additional_instructions, ']') - strpos($sanitized_additional_instructions, '[') - 1);
+            back_trace('NOTICE', '$user_field_name: ' . $user_field_name);
+            $sanitized_additional_instructions = str_replace('[' . $user_field_name . ']', '', $sanitized_additional_instructions);
+            // Remove the extra space when two spaces are present
+            $sanitized_additional_instructions = str_replace('  ', ' ', $sanitized_additional_instructions);
+            // Remove the extra space before punctuation including period, comma, exclamation mark, and question mark
+            $sanitized_additional_instructions = preg_replace('/\s*([.,!?])/', '$1', $sanitized_additional_instructions);
+
+        }
+
+        $script_data_array['additional_instructions'] = $sanitized_additional_instructions;
+        $assistant_details['additional_instructions'] = $sanitized_additional_instructions;
+        $chatbot_settings['additional_instructions'] = $sanitized_additional_instructions;
+        $additional_instructions = $sanitized_additional_instructions;
+
+        // DIAG - Diagnostics - Ver 2.0.9
+        back_trace('NOTICE', '$sanitized_additional_instructions: ' . $sanitized_additional_instructions);
+    
+    }    
 
     // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
     $user_id = get_current_user_id();
@@ -685,8 +739,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['subsequent_greeting'] = $modified_greetings['subsequent_greeting'];
     }
 
-    // back_trace( 'NOTICE', 'AT 714 - $assistant_details[\'initial_greeting\']: ' . $assistant_details['initial_greeting']);
-    // back_trace( 'NOTICE', 'AT 714 - $assistant_details[\'subsequent_greeting\']: ' . $assistant_details['subsequent_greeting']);
+    back_trace( 'NOTICE', 'AT 688 - $assistant_details[\'initial_greeting\']: ' . $assistant_details['initial_greeting']);
+    back_trace( 'NOTICE', 'AT 689 - $assistant_details[\'subsequent_greeting\']: ' . $assistant_details['subsequent_greeting']);
 
     // FIXME - WHY DO I NEED TO DO THIS? - THE KEY SHOULD PROBABLY BE 'chatbot_chatgpt_initial_greeting' ALL ALONG
     $assistant_details['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
@@ -753,31 +807,33 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     
     // DIAG - Diagnostics - Ver 2.0.5
     // back_trace( 'NOTICE', '========================================');
-    // back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
-    // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
+    back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
+    back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
     // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
+    // Output the script to set localStorage keys
     ob_start();
-
-    // Push data to local storage for the Chatbot - Ver 2.0.5
-    echo '<script type="text/javascript">
-            window.onload = function() {
-                // console.log("Chatbot: NOTICE: chatbot-shortcode.php - STARTED");
-                // Encode the chatbot settings array into JSON format for use in JavaScript
-                let chatbotSettings = ' . json_encode($chatbot_settings) . ';
-                if (chatbotSettings && typeof chatbotSettings === "object") {
-                    Object.keys(chatbotSettings).forEach(function(key) {
-                        if (key === "assistant_id" || key === "chatbot_chatgpt_assistant_alias") {
-                            return;
-                        }
-                        // DIAG - Diagnostics - Ver 2.0.5
-                        // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
-                        localStorage.setItem(key, chatbotSettings[key]);
-                    });
-                }
-                // console.log("Chatbot: NOTICE: chatbot-shortcode.php - FINISHED");
-            };
-        </script>';
+    ?>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            let chatbotSettings = <?php echo json_encode($chatbot_settings); ?>;
+            if (chatbotSettings && typeof chatbotSettings === "object") {
+                Object.keys(chatbotSettings).forEach(function(key) {
+                    if (key === "assistant_id" ||
+                        key === "chatbot_chatgpt_assistant_alias" ||
+                        key === "thread_id"
+                    ) {
+                        return;
+                    }
+                    console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
+                    localStorage.setItem(key, chatbotSettings[key]);
+                });
+                // Dispatch custom event after setting localStorage keys
+                document.dispatchEvent(new Event('chatbotSettingsSet'));
+            }
+        });
+    </script>
+    <?php
 
     // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
     $user_id = get_current_user_id();
