@@ -320,28 +320,31 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
 
         $responseArray = json_decode($response, true);
 
+        // DIAG - Diagnostics - Ver 2.0.9
+        // back_trace ( 'NOTICE', '$responseArray: ' . print_r($responseArray, true));
+
         if (array_key_exists("status", $responseArray)) {
             $status = $responseArray["status"];
-        } else {
-            // Handle error here
-            $status = "failed";
-            // DIAG - Diagnostics
-            back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . $status);
-            back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
-            exit;
+            if ($status == "failed") {
+                // DIAG - Diagnostics
+                back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . $status);
+                back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
+                // exit;
+                break;
+            }
+            if ($status == "incomplete") {
+                if (array_key_exists("incomplete_details", $responseArray)) {
+                    $incomplete_details = $responseArray["incomplete_details"];
+                    // DIAG - Diagnostics
+                    back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . print_r($incomplete_details, true));
+                    back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
+                    // exit;
+                    break;
+                }
+            }      
         }
 
-        if ($status == "incomplete") {
-            if (array_key_exists("incomplete_details", $responseArray)) {
-                $incomplete_details = $responseArray["incomplete_details"];
-                // DIAG - Diagnostics
-                back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . $incomplete_details);
-                back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
-                exit;
-            }
-        }  
-
-        // DIAG - Diagnostics
+        // DIAG - Diagnostics - Ver 2.0.9
         // back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray, true));
         
         if ($status != "completed") {
@@ -351,6 +354,8 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
         }
 
     }
+
+    return $status;
     
 }
 
@@ -449,7 +454,7 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
         }
 
         if (!$status) {
-            // DIAG - Diagnostics - 2.0.9
+            // DIAG - Diagnostics - Ver 2.0.9
             // back_trace ( 'NOTICE', '$status: ' . print_r($responseArray, true));
             // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
             // sleep(5);
@@ -767,7 +772,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Step 5: Get the Run's Status
     // back_trace( 'NOTICE', 'Step 5: Get the Run\'s Status');
     $run_status = getTheRunsStatus($thread_id, $runId, $api_key);
-    // FIXME = Check the response for errors
+
+    if ($run_status == "failed" || $run_status == "incomplete") {
+        // back_trace( 'ERROR', 'Error - GPT Assistant - Step 5: ' . $run_status);
+        return "Error: GPT Assistant - Step 5: " . $run_status;
+    }
 
     // Step 6: Get the Run's Steps
     // back_trace( 'NOTICE', 'Step 6: Get the Run\'s Steps');

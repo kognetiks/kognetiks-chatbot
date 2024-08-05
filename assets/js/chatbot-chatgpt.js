@@ -633,11 +633,11 @@ jQuery(document).ready(function ($) {
             },
             error: function (jqXHR, status, error) {
                 if(status === "timeout") {
-                    appendMessage('Error: ' + error, 'error');
+                    // appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
                 } else {
-                    appendMessage('Error: ' + error, 'error')
+                    // appendMessage('Error: ' + error, 'error')
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
                     botResponse = '';
                 }

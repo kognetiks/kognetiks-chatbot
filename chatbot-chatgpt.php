@@ -759,7 +759,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
 
-        // DIAG - Diagnostics - 2.0.9
+        // DIAG - Diagnostics - Ver 2.0.9
         // back_trace( 'NOTICE', '========================================');
         // back_trace( 'NOTICE', 'BEFORE CALL TO MODULE $additional_instructions: ' . $additional_instructions);
 
