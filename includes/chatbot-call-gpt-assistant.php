@@ -16,13 +16,12 @@ if ( ! defined( 'WPINC' ) ) {
 // Step 1: Create an Assistant
 function createAnAssistant($api_key) {
 
-    global $assistant_details;
-
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', 'Step 1: createAnAssistant()');
 
     // $url = "https://api.openai.com/v1/threads";
     $url = get_threads_api_url();
+
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', '$url: ' . $url);
 
@@ -32,6 +31,7 @@ function createAnAssistant($api_key) {
     } else {
         $beta_version = "assistants=v1";
     }
+
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
 
@@ -41,26 +41,18 @@ function createAnAssistant($api_key) {
         "Authorization: Bearer " . $api_key
     );
 
-    // TODO - SEE https://platform.openai.com/docs/api-reference/runs/createRun
-    // Request body additional features
-
-    $data = array();
-
-    // Add additional_instructions if provided
-    if (isset($assistant_details['additional_instructions']) && $assistant_details['additional_instructions'] !== null) {
-        $data['additional_instructions'] = $additional_instructions;
-        // back_trace ( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
-    }
-
     $context = stream_context_create(array(
         'http' => array(
             'method' => 'POST',
             'header' => $headers,
-            'content' => json_encode($data),
             'ignore_errors' => true // This allows the function to proceed even if there's an HTTP error
         )
     ));
+
     $response = fetchDataUsingCurl($url, $context);
+
+    // DIAG - Diagnostics - Ver 2.0.9
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     return json_decode($response, true);
 }
@@ -199,6 +191,8 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 // Step 4: Run the Assistant
 function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
+    global $script_data_array;
+
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', 'Step 4: runTheAssistant()');
     
@@ -219,16 +213,28 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
     // Get the max prompt and completion tokens - Ver 2.0.1
     // https://platform.openai.com/docs/assistants/how-it-works/max-completion-and-max-prompt-tokens
+    
+    // Request body additional features - Ver 2.0.9
+    // https://platform.openai.com/docs/api-reference/runs/createRun
+
     $max_prompt_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_prompt_tokens', 20000));
     $max_completion_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_completion_tokens', 20000));
     $temperature = (float) esc_attr(get_option('chatbot_chatgpt_temperature', 1.0));
     $top_p = (float) esc_attr(get_option('chatbot_chatgpt_top_p', 1.0));
 
+    // Additional instructions - Ver 2.0.9
+    $additional_instruction = null;
+    if (isset($script_data_array['additional_instructions']) && $script_data_array['additional_instructions'] !== null) {
+        $additional_instructions = $script_data_array['additional_instructions'];
+        // back_trace ( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    }
+
     // DIAG - Diagnostics - Ver 2.0.9
-    back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
-    back_trace( 'NOTICE', '$max_completion_tokens: ' . $max_completion_tokens);
-    back_trace( 'NOTICE', '$temperature: ' . $temperature);
-    back_trace( 'NOTICE', '$top_p: ' . $top_p);
+    // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
+    // back_trace( 'NOTICE', '$max_completion_tokens: ' . $max_completion_tokens);
+    // back_trace( 'NOTICE', '$temperature: ' . $temperature);
+    // back_trace( 'NOTICE', '$top_p: ' . $top_p);
+    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
 
     // DIAG - Diagnostics - Ver 2.0.1
     // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
@@ -238,6 +244,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
         "OpenAI-Beta: " . $beta_version,
         "Authorization: Bearer " . $api_key
     );
+
     $data = array(
         "assistant_id" => $assistant_id,
         "max_prompt_tokens" => $max_prompt_tokens,
@@ -248,6 +255,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
             "type" => "auto",
             "last_messages" => null,
         ),
+        "additional_instructions" => $additional_instructions,
     );
 
     $context = stream_context_create(array(
@@ -285,7 +293,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 function getTheRunsStatus($thread_id, $runId, $api_key) {
 
     // DIAG - Diagnostics - Ver 2.0.9
-    back_trace( 'NOTICE', 'Step 5: getTheRunsStatus()');
+    // back_trace( 'NOTICE', 'Step 5: getTheRunsStatus()');
 
     $status = "";
 
@@ -294,7 +302,7 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
         // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/".$runId;
         $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId;
         // DIAG - Diagnostics - Ver 2.0.9
-        back_trace( 'NOTICE', '$url: ' . $url);
+        // back_trace( 'NOTICE', '$url: ' . $url);
 
         $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
         if ( $assistant_beta_version == 'v2' ) {
@@ -303,7 +311,7 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
             $beta_version = "assistants=v1";
         }
         // DIAG - Diagnostics - Ver 1.9.6
-        back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+        // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
     
         $headers = array(
             "Content-Type: application/json",
@@ -327,8 +335,8 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
             $status = $responseArray["status"];
             if ($status == "failed") {
                 // DIAG - Diagnostics
-                back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . $status);
-                back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
+                // back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . $status);
+                // back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
                 // exit;
                 break;
             }
@@ -336,8 +344,8 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
                 if (array_key_exists("incomplete_details", $responseArray)) {
                     $incomplete_details = $responseArray["incomplete_details"];
                     // DIAG - Diagnostics
-                    back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . print_r($incomplete_details, true));
-                    back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
+                    // back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . print_r($incomplete_details, true));
+                    // back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
                     // exit;
                     break;
                 }

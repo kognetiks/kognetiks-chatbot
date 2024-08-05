@@ -514,7 +514,6 @@ function chatbot_chatgpt_send_message() {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
     global $script_data_array;
     global $additional_instructions;
@@ -548,9 +547,6 @@ function chatbot_chatgpt_send_message() {
             // wp_send_json_error('Error: Invalid Model. Please check the plugin settings.');
         }
     }
-
-    // Retrieve the Max tokens - Ver 1.4.2
-    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 150));
 
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
@@ -587,11 +583,8 @@ function chatbot_chatgpt_send_message() {
     $chatbot_settings['additional_instructions'] = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
     $voice = $chatbot_settings['chatbot_chatgpt_voice_option'];
     $model = $chatbot_settings['chatbot_chatgpt_model'];
-    $display_style = $chatbot_settings['chatbot_chatgpt_display_style'];
     $additional_instructions = $chatbot_settings['additional_instructions'];
-
-    $display_style = isset($chatbot_settings['chatbot_chatgpt_display_style']) ? $chatbot_settings['chatbot_chatgpt_display_style'] : '';
-    $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['chatbot_chatgpt_assistant_alias']) ? $chatbot_settings['chatbot_chatgpt_assistant_alias'] : '';
+    $chatbot_chatgpt_assistant_alias = $chatbot_settings['chatbot_chatgpt_assistant_alias'];
 
     // Get the thread information - Ver 2.0.7
     // $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
@@ -614,9 +607,9 @@ function chatbot_chatgpt_send_message() {
     // back_trace( 'NOTICE', '$voice: ' . $voice);
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', '========================================');
-    foreach ($chatbot_settings as $key => $value) {
-        // back_trace( 'NOTICE', '$chatbot_settings[' . $key . ']: ' . $value);
-    }
+    // foreach ($chatbot_settings as $key => $value) {
+    //      back_trace( 'NOTICE', '$chatbot_settings[' . $key . ']: ' . $value);
+    // }
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
