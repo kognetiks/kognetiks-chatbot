@@ -303,7 +303,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     // back_trace( 'NOTICE', '$model: ' . $model);
     
     // Defaults for Ver 1.6.1
@@ -422,7 +422,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Original wp_localize_script call
     // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
     // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
-    back_trace ('NOTICE', 'chatbotSettings: ' . print_r($chatbot_settings, true));
+    // back_trace ('NOTICE', 'chatbotSettings: ' . print_r($chatbot_settings, true));
     $chatbotSettings_json = wp_json_encode($chatbot_settings);
     wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof chatbotSettings === "undefined") { var chatbotSettings = ' . $chatbotSettings_json . '; } else { chatbotSettings = ' . $chatbotSettings_json . '; }', 'before');
     
@@ -533,13 +533,13 @@ function chatbot_chatgpt_send_message() {
     if (!empty($model)) {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Model from options: ' . $model);
+        // back_trace( 'NOTICE', 'Model from options: ' . $model);
     } else {
         // SEE IF $script_data_array HAS THE MODEL
         if ( isset($script_data_array['model'])) {
             $model = $script_data_array['model'];
             // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Model set in global: ' . $model);
+            // back_trace( 'NOTICE', 'Model set in global: ' . $model);
         } else {
             // Set the model to the default
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
@@ -558,7 +558,7 @@ function chatbot_chatgpt_send_message() {
     // Check for missing API key or Message
     if (!$api_key || !$message) {
         // DIAG - Diagnostics
-        back_trace( 'ERROR', 'Invalid API Key or Message.');
+        // back_trace( 'ERROR', 'Invalid API Key or Message.');
         wp_send_json_error('Error: Invalid API key or Message. Please check the plugin settings.');
     }
 
@@ -584,18 +584,11 @@ function chatbot_chatgpt_send_message() {
     $chatbot_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id, $session_id);
     $chatbot_settings['chatbot_chatgpt_model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
     $chatbot_settings['chatbot_chatgpt_voice_option'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
+    $chatbot_settings['additional_instructions'] = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
     $voice = $chatbot_settings['chatbot_chatgpt_voice_option'];
     $model = $chatbot_settings['chatbot_chatgpt_model'];
     $display_style = $chatbot_settings['chatbot_chatgpt_display_style'];
-
-    // DIAG - Diagnostics - Ver 2.0.6
-    back_trace( 'NOTICE', '========================================');
-    back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_display_style]: ' . $chatbot_settings['chatbot_chatgpt_display_style']);
-    back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_assistant_alias]: ' . $chatbot_settings['chatbot_chatgpt_assistant_alias']);
-    back_trace( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
-    back_trace( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
-    back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_model]: ' . $chatbot_settings['chatbot_chatgpt_model']);
-    back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_voice]: ' . $chatbot_settings['chatbot_chatgpt_voice_option']);
+    $additional_instructions = $chatbot_settings['additional_instructions'];
 
     $display_style = isset($chatbot_settings['chatbot_chatgpt_display_style']) ? $chatbot_settings['chatbot_chatgpt_display_style'] : '';
     $chatbot_chatgpt_assistant_alias = isset($chatbot_settings['chatbot_chatgpt_assistant_alias']) ? $chatbot_settings['chatbot_chatgpt_assistant_alias'] : '';
@@ -604,27 +597,26 @@ function chatbot_chatgpt_send_message() {
     // $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
     $chatbot_settings = array_merge($chatbot_settings, get_chatbot_chatgpt_threads($user_id, $page_id));
 
-    // DIAG - Diagnostics - Ver 2.0.6
-    back_trace( 'NOTICE', '========================================');
-    back_trace( 'NOTICE', '$chatbot_settings[assistant_id]: ' . $chatbot_settings['assistant_id']);
-    back_trace( 'NOTICE', '$chatbot_settings[thread_id]: ' . $chatbot_settings['thread_id']);
-    back_trace( 'NOTICE', '$chatbot_settings[chatbot_chatgpt_model]: ' . $chatbot_settings['chatbot_chatgpt_model']);
-
     $assistant_id = isset($chatbot_settings['assistant_id']) ? $chatbot_settings['assistant_id'] : '';
     $thread_Id = isset($chatbot_settings['thread_id']) ? $chatbot_settings['thread_id'] : '';
     $model = isset($chatbot_settings['chatbot_chatgpt_model']) ? $chatbot_settings['chatbot_chatgpt_model'] : '';
     $voice = isset($chatbot_settings['chatbot_chatgpt_voice_option']) ? $chatbot_settings['chatbot_chatgpt_voice_option'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', '========================================');
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
-    back_trace( 'NOTICE', '$model: ' . $model);
-    back_trace( 'NOTICE', '$voice: ' . $voice);
+    // back_trace( 'NOTICE', '========================================');
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    // back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$voice: ' . $voice);
+    // DIAG - Diagnostics - Ver 2.0.9
+    // back_trace( 'NOTICE', '========================================');
+    foreach ($chatbot_settings as $key => $value) {
+        // back_trace( 'NOTICE', '$chatbot_settings[' . $key . ']: ' . $value);
+    }
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default
@@ -646,7 +638,7 @@ function chatbot_chatgpt_send_message() {
         $use_assistant_id = 'Yes';
 
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE' , 'Using Primary Assistant - $assistant_id: ' .  $assistant_id);
+        // back_trace( 'NOTICE' , 'Using Primary Assistant - $assistant_id: ' .  $assistant_id);
         
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
@@ -656,8 +648,9 @@ function chatbot_chatgpt_send_message() {
             $use_assistant_id = 'No';
         
             // DIAG - Diagnostics - Ver 2.0.5
-            back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
         }
+
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
 
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
@@ -665,7 +658,7 @@ function chatbot_chatgpt_send_message() {
         $use_assistant_id = 'Yes';
 
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE' , 'Using Altrnate Assistant - $assistant_id: ' .  $assistant_id);
+        // back_trace( 'NOTICE' , 'Using Altrnate Assistant - $assistant_id: ' .  $assistant_id);
 
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
@@ -675,16 +668,17 @@ function chatbot_chatgpt_send_message() {
             $use_assistant_id = 'No';
 
             // DIAG - Diagnostics - Ver 2.0.5
-            back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
         
         }
+
     } elseif (str_starts_with($assistant_id, 'asst_')) {
 
         $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
         $use_assistant_id = 'Yes';
 
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE' ,'Assistant ID pass as a parameter - $assistant_id: ' . $assistant_id );
+        // back_trace( 'NOTICE' ,'Assistant ID pass as a parameter - $assistant_id: ' . $assistant_id );
 
     } else {
 
@@ -692,35 +686,38 @@ function chatbot_chatgpt_send_message() {
         if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_')) {
 
             // DIAG - Diagnostics - 2.0.5
-            back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
+            // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
 
             // Override the $assistant_id with the GPT Assistant ID
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
 
             // DIAG - Diagnostics - Ver 2.0.5
-            back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
+            // back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
 
         } else {
 
             // DIAG - Diagnostics - Ver 2.0.5
-            back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
+            // back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
 
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             
             // DIAG - Diagnostics - Ver 1.8.1
-            back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
+            // back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
 
         }
 
     }
 
+    // Get any additional instructions - Ver 2.0.9
+    $additional_instructions = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
+
     // Decide whether to use Flow, Assistant or Original ChatGPT
     if ($model == 'flow'){
         
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Using ChatGPT Flow');
+        // back_trace( 'NOTICE', 'Using ChatGPT Flow');
 
         // Reload the model - BELT & SUSPENDERS
         $script_data_array['model'] = $model;
@@ -752,15 +749,20 @@ function chatbot_chatgpt_send_message() {
         wp_send_json_success($response);
 
     } elseif ($use_assistant_id == 'Yes') {
-        // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
-        back_trace( 'NOTICE', '$user_id ' . $user_id);
-        back_trace( 'NOTICE', '$page_id ' . $page_id);
 
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', '$message ' . $message);
+        // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
+
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
-        
+
+        // DIAG - Diagnostics - 2.0.9
+        // back_trace( 'NOTICE', '========================================');
+        // back_trace( 'NOTICE', 'BEFORE CALL TO MODULE $additional_instructions: ' . $additional_instructions);
+
         // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);
 
@@ -771,7 +773,7 @@ function chatbot_chatgpt_send_message() {
         }
 
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Clean (erase) the output buffer - Ver 1.6.8
@@ -779,12 +781,12 @@ function chatbot_chatgpt_send_message() {
         if (ob_get_level() > 0) {
             ob_clean();
             // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Output buffer cleaned');
+            // back_trace( 'NOTICE', 'Output buffer cleaned');
         } else {
             // Optionally start output buffering if needed for your application
             // ob_start();
             // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Output buffer not cleaned');
+            // back_trace( 'NOTICE', 'Output buffer not cleaned');
         }
 
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
@@ -798,12 +800,14 @@ function chatbot_chatgpt_send_message() {
             // Return response
             wp_send_json_success($response);
         }
+
     } else {
+
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Using ChatGPT');
-        back_trace( 'NOTICE', '$user_id ' . $user_id);
-        back_trace( 'NOTICE', '$page_id ' . $page_id);
-        back_trace( 'NOTICE', '$message ' . $message);
+        // back_trace( 'NOTICE', 'Using ChatGPT');
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // back_trace( 'NOTICE', '$message ' . $message);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
         // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
@@ -845,7 +849,7 @@ function chatbot_chatgpt_send_message() {
         }
         
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
+        // back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
         
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
@@ -853,18 +857,18 @@ function chatbot_chatgpt_send_message() {
             $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
         }
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);
+        // back_trace( 'NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);
 
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Check for links and images in response before returning');
+        // back_trace( 'NOTICE', 'Check for links and images in response before returning');
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE', 'Response: ' . $response);
+        // back_trace( 'NOTICE', 'Response: ' . $response);
 
         // Return response
         wp_send_json_success($response);
@@ -872,7 +876,7 @@ function chatbot_chatgpt_send_message() {
     }
 
     // DIAG - Diagnostics
-    back_trace( 'ERROR', 'Oops! I fell through the cracks!');
+    // back_trace( 'ERROR', 'Oops! I fell through the cracks!');
     wp_send_json_error('Oops! I fell through the cracks!');
 
 }
@@ -1093,4 +1097,3 @@ function kchat_get_plugin_version() {
     return $plugin_version;
 
 }
-

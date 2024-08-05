@@ -138,10 +138,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
 
         // For each key in $assistant_details, set the $atts value
+        // DIAG - Diagnostics - Ver 2.0.9
+        // back_trace( 'NOTICE', '========================================');
         foreach ($assistant_details as $key => $value) {
             $atts[$key] = $value;
             // DIAG - Diagnostics - Ver 2.0.9
-            back_trace( 'NOTICE', '$key: ' . $key . ' Value: ' . $value);
+            // back_trace( 'NOTICE', '$key: ' . $key . ' Value: ' . $value);
         }
 
         // If the assistant_id is null, then set it to original
@@ -436,7 +438,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if (array_key_exists('additional_instructions', $atts)) {
 
         // DIAG - Diagnostics - Ver 2.0.9
-        back_trace( 'NOTICE', 'additional_instructions: ' . $atts['additional_instructions']);
+        // back_trace( 'NOTICE', 'additional_instructions: ' . $atts['additional_instructions']);
 
         $sanitized_additional_instructions = sanitize_text_field($atts['additional_instructions']);
 
@@ -448,7 +450,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             // Determine what the field name is between the brackets
             $user_field_name = '';
             $user_field_name = substr($sanitized_additional_instructions, strpos($sanitized_additional_instructions, '[') + 1, strpos($sanitized_additional_instructions, ']') - strpos($sanitized_additional_instructions, '[') - 1);
-            back_trace( 'NOTICE', '$user_field_name: ' . $user_field_name);
+            // back_trace( 'NOTICE', '$user_field_name: ' . $user_field_name);
             // If $additional_instructions contains "[$user_field_name]" then replace with field from DB
             if (strpos($sanitized_additional_instructions, '[' . $user_field_name . ']') !== false) {
                 $sanitized_additional_instructions = str_replace('[' . $user_field_name . ']', $current_user->$user_field_name, $sanitized_additional_instructions);
@@ -464,7 +466,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
             $user_field_name = '';
             $user_field_name = substr($sanitized_additional_instructions, strpos($sanitized_additional_instructions, '[') + 1, strpos($sanitized_additional_instructions, ']') - strpos($sanitized_additional_instructions, '[') - 1);
-            back_trace( 'NOTICE', '$user_field_name: ' . $user_field_name);
+            // back_trace( 'NOTICE', '$user_field_name: ' . $user_field_name);
             $sanitized_additional_instructions = str_replace('[' . $user_field_name . ']', '', $sanitized_additional_instructions);
             // Remove the extra space when two spaces are present
             $sanitized_additional_instructions = str_replace('  ', ' ', $sanitized_additional_instructions);
@@ -479,7 +481,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $additional_instructions = $sanitized_additional_instructions;
 
         // DIAG - Diagnostics - Ver 2.0.9
-        back_trace( 'NOTICE', '$sanitized_additional_instructions: ' . $sanitized_additional_instructions);
+        // back_trace( 'NOTICE', '$sanitized_additional_instructions: ' . $sanitized_additional_instructions);
     
     }    
 
@@ -500,6 +502,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'assistant_id: ' . $assistant_id);
     set_chatbot_chatgpt_transients( 'thread_id', $thread_id, $user_id, $page_id, $session_id, null);
     // back_trace( 'NOTICE', 'thread_id: ' . $thread_id);
+
+    set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null);
 
     // DUPLICATE ADDED THIS HERE - VER 1.9.1
     $script_data_array = array(
@@ -739,8 +743,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['subsequent_greeting'] = $modified_greetings['subsequent_greeting'];
     }
 
-    back_trace( 'NOTICE', 'AT 688 - $assistant_details[\'initial_greeting\']: ' . $assistant_details['initial_greeting']);
-    back_trace( 'NOTICE', 'AT 689 - $assistant_details[\'subsequent_greeting\']: ' . $assistant_details['subsequent_greeting']);
+    // back_trace( 'NOTICE', 'AT 746 - $assistant_details[\'initial_greeting\']: ' . $assistant_details['initial_greeting']);
+    // back_trace( 'NOTICE', 'AT 747 - $assistant_details[\'subsequent_greeting\']: ' . $assistant_details['subsequent_greeting']);
 
     // FIXME - WHY DO I NEED TO DO THIS? - THE KEY SHOULD PROBABLY BE 'chatbot_chatgpt_initial_greeting' ALL ALONG
     $assistant_details['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
@@ -807,8 +811,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     
     // DIAG - Diagnostics - Ver 2.0.5
     // back_trace( 'NOTICE', '========================================');
-    back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
-    back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
+    // back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
+    // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
     // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
     // Output the script to set localStorage keys
@@ -825,7 +829,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     ) {
                         return;
                     }
-                    console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
+                    // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + chatbotSettings[key]);
                     localStorage.setItem(key, chatbotSettings[key]);
                 });
                 // Dispatch custom event after setting localStorage keys

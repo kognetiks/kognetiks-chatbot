@@ -279,11 +279,11 @@ jQuery(document).ready(function ($) {
             // initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello! How can I help you today?';
             if (storedGreeting != null) {
                 initialGreeting = storedGreeting;
-                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: was not null: ' + storedGreeting);
-                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+                // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: was not null: ' + storedGreeting);
+                // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
             } else {
                 initialGreeting = 'Hello again! How can I help you?';
-                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+                // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
             }
 
             if (conversation.text().includes(initialGreeting)) {
@@ -306,11 +306,11 @@ jQuery(document).ready(function ($) {
             // initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello again! How can I help you?';
             if (storedGreeting != null) {
                 initialGreeting = storedGreeting;
-                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: was not null: ' + storedGreeting);
-                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+                // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: was not null: ' + storedGreeting);
+                // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
             } else {
                 initialGreeting = 'Hello again! How can I help you?';
-                console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
+                // console.log('Chatbot: NOTICE: chatbot-chatgpt.js - Greeting: ' + initialGreeting);
             }
 
             if (conversation.text().includes(initialGreeting)) {
