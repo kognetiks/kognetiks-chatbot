@@ -44,9 +44,11 @@ function createAnAssistant($api_key) {
     // TODO - SEE https://platform.openai.com/docs/api-reference/runs/createRun
     // Request body additional features
 
+    $data = array();
+
     // Add additional_instructions if provided
     if ($additional_instructions !== null) {
-        $data["additional_instructions"] = $additional_instructions;
+        $data['additional_instructions'] = $additional_instructions;
         back_trace ( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     }
 
@@ -132,7 +134,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     
         // DIAG - Diagnostics - Ver 2.0.3
         // back_trace( 'NOTICE', '========================================');
-        // back_trace('NOTICE', '$file_type: ' . $file_type);
+        // back_trace( 'NOTICE', '$file_type: ' . $file_type);
 
         // *********************************************************************************
         // NON-IMAGE ATTACHMENTS - Ver 2.0.3
@@ -157,7 +159,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
     // back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
     // back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));
-    // back_trace('NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
+    // back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
 
     // Initialize cURL session
     $ch = curl_init();
@@ -259,7 +261,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     // Check HTTP response code
     if (http_response_code() != 200) {
         // DIAG - Diagnostics
-        // back_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code(), true));
+        back_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code(), true));
         // return "Error: HTTP response code " . http_response_code();
     }
 
@@ -424,7 +426,8 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
         }
 
         if (!$status) {
-            print_r($responseArray, true);
+            // DIAG - Diagnostics - 2.0.9
+            // back_trace ( 'NOTICE', '$status: ' . print_r($responseArray, true));
             // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
             // sleep(5);
             usleep(500000);
@@ -461,7 +464,7 @@ function getTheMessage($thread_id, $api_key) {
     $response_data = json_decode($response, true);
 
     // DIAG - Diagnostics - Ver 2.0.3
-    // back_trace('NOTICE', '$response_data: ' . print_r($response_data, true));
+    // back_trace( 'NOTICE', '$response_data: ' . print_r($response_data, true));
 
     // Download any file attachments - Ver 2.0.3
     if (isset($response_data['data']) && is_array($response_data['data'])) {
@@ -482,7 +485,7 @@ function getTheMessage($thread_id, $api_key) {
                             $value = $annotation['offset_key'];
                         } else {
                             // Handle the error appropriately
-                            // back_trace('NOTICE', '$annotation: offset_key does not exist');
+                            // back_trace( 'NOTICE', '$annotation: offset_key does not exist');
                             continue;
                         }
 
@@ -496,13 +499,13 @@ function getTheMessage($thread_id, $api_key) {
                         $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
 
                         // DIAG - Diagnostics - Ver 2.0.3
-                        // back_trace('NOTICE', '$file_id: ' . $file_id);
+                        // back_trace( 'NOTICE', '$file_id: ' . $file_id);
 
                         // Call the function to download the file
                         $file_url = download_openai_file($file_id, $file_name);
 
                         // DIAG - Diagnostics - Ver 2.0.3
-                        // back_trace('NOTICE', '$file_url: ' . $file_url);
+                        // back_trace( 'NOTICE', '$file_url: ' . $file_url);
 
                         if ($file_url) {
                             // Append the local URL to the message (modify as needed for your use case)
@@ -533,13 +536,13 @@ function getTheMessage($thread_id, $api_key) {
                                 $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
 
                                 // DIAG - Diagnostics - Ver 2.0.3
-                                // back_trace('NOTICE', '$file_id: ' . $file_id . ', $file_name: ' . $file_name);
+                                // back_trace( 'NOTICE', '$file_id: ' . $file_id . ', $file_name: ' . $file_name);
 
                                 // Call the function to download the file
                                 $file_url = download_openai_file($file_id, $file_name);
 
                                 // DIAG - Diagnostics - Ver 2.0.3
-                                // back_trace('NOTICE', '$file_url: ' . $file_url);
+                                // back_trace( 'NOTICE', '$file_url: ' . $file_url);
 
                                 if ($file_url) {
                                     // Replace the placeholder link with the actual URL
@@ -565,7 +568,7 @@ function getTheMessage($thread_id, $api_key) {
     } else {
 
         // DIAG - Diagnostics - Ver 2.0.3
-        // back_trace('NOTICE', 'No data or attachments found in the response.');
+        // back_trace( 'NOTICE', 'No data or attachments found in the response.');
 
     }
 
@@ -696,10 +699,10 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // DIAG - Diagnostics - Ver 2.0.3
     for ($i = 0; $i < count($file_id); $i++) {
         if (isset($file_id[$i])) {
-            // back_trace('NOTICE', '$file_id[' . $i . ']: ' . $file_id[$i]);
+            // back_trace( 'NOTICE', '$file_id[' . $i . ']: ' . $file_id[$i]);
         } else {
             // Handle the error appropriately
-            // back_trace('NOTICE', '$file_id[' . $i . ']: index does not exist');
+            // back_trace( 'NOTICE', '$file_id[' . $i . ']: index does not exist');
             unset($file_id[$i]); // Remove the non-existent key
         }
     }

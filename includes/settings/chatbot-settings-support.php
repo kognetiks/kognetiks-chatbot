@@ -98,8 +98,8 @@ function validateDocumentation($dir, $file) {
     }
 
     // Diagnostics
-    // back_trace('NOTICE', '$valid_directories: ' . print_r($valid_directories, true));
-    // back_trace('NOTICE', '$valid_files: ' . print_r($valid_files, true));
+    // back_trace( 'NOTICE', '$valid_directories: ' . print_r($valid_directories, true));
+    // back_trace( 'NOTICE', '$valid_files: ' . print_r($valid_files, true));
 
     if (!empty($valid_directories) && !empty($valid_files) && !empty($dir) && !empty($file)) {
         // If the $dir and $file are found in the list of $valid_directories and $valid_files, return true

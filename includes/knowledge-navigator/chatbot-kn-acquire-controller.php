@@ -364,12 +364,12 @@ function chatbot_kn_run_phase_3() {
         $results = $wpdb->get_results($prepared_query, ARRAY_A);
     
         // DIAG - Diagnostics - Ver 1.9.6
-        // back_trace('NOTICE', '$prepared_query: ' . $prepared_query);
+        // back_trace( 'NOTICE', '$prepared_query: ' . $prepared_query);
 
     } else {
 
         // DIAG - Diagnostics - Ver 1.9.6
-        // back_trace('NOTICE', 'Exclude comments');
+        // back_trace( 'NOTICE', 'Exclude comments');
 
         unset($results);
 

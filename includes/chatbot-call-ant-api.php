@@ -198,7 +198,7 @@ function chatbot_call_ant_api($api_key, $message) {
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
         $error_message = $response->get_error_message();
-        back_trace('ERROR', 'Request failed: ' . $error_message);
+        back_trace( 'ERROR', 'Request failed: ' . $error_message);
     } else {
         $response_body = wp_remote_retrieve_body($response);
         back_trace( 'NOTICE', '$response: ' . print_r($response, true));

@@ -93,32 +93,32 @@ function create_conversation_logging_table() {
 
     if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
         // DIAG - Diagnostics
-        // back_trace('NOTICE', 'Table already exists: ' . $table_name);
+        // back_trace( 'NOTICE', 'Table already exists: ' . $table_name);
 
         // Modify interaction_time column to remove DEFAULT CURRENT_TIMESTAMP
         $sql = "ALTER TABLE $table_name MODIFY COLUMN interaction_time datetime NOT NULL;";
         $result = $wpdb->query($sql);
         if ($result === false) {
             // If there was an error, log it
-            // back_trace('ERROR', 'Error modifying interaction_time column: ' . $wpdb->last_error);
+            // back_trace( 'ERROR', 'Error modifying interaction_time column: ' . $wpdb->last_error);
         } else {
             // If the operation was successful, log the success
-            // back_trace('SUCCESS', 'Successfully modified interaction_time column');
+            // back_trace( 'SUCCESS', 'Successfully modified interaction_time column');
         }
 
         if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'assistant_name')) === 'assistant_name') {
             // DIAG - Diagnostics
-            // back_trace('NOTICE', 'Column assistant_name already exists in table: ' . $table_name);
+            // back_trace( 'NOTICE', 'Column assistant_name already exists in table: ' . $table_name);
         } else {
             // Directly execute the ALTER TABLE command without prepare()
             $sql = "ALTER TABLE $table_name ADD COLUMN assistant_name VARCHAR(255) AFTER assistant_id";
             $result = $wpdb->query($sql);
             if ($result === false) {
                 // If there was an error, log it
-                // back_trace('ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+                // back_trace( 'ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
             } else {
                 // If the operation was successful, log the success
-                // back_trace('SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
+                // back_trace( 'SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
             }
         }
     }
@@ -126,16 +126,16 @@ function create_conversation_logging_table() {
     // Check if the table already exists
     if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
         // DIAG - Diagnostics
-        // back_trace('NOTICE', 'Table already exists: ' . $table_name);
+        // back_trace( 'NOTICE', 'Table already exists: ' . $table_name);
         // Directly execute the ALTER TABLE command without prepare()
         $sql = "ALTER TABLE $table_name MODIFY COLUMN user_type ENUM('Chatbot', 'Visitor', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens')";
         $result = $wpdb->query($sql);
         if ($result === false) {
             // If there was an error, log it
-            // back_trace('ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+            // back_trace( 'ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
         } else {
             // If the operation was successful, log the success
-            // back_trace('SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
+            // back_trace( 'SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
         }
 
         // Fetch rows where user_type is missing
@@ -158,19 +158,19 @@ function create_conversation_logging_table() {
 
             if ($update_result === false) {
                 // If there was an error, log it
-                // back_trace('ERROR', 'Error updating missing chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+                // back_trace( 'ERROR', 'Error updating missing chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
             } else {
                 // If the operation was successful, log the success
-                // back_trace('SUCCESS', 'Successfully updated missing values in chatbot_chatgpt_conversation_log table');
+                // back_trace( 'SUCCESS', 'Successfully updated missing values in chatbot_chatgpt_conversation_log table');
             }
         }
         
         // DIAG - Diagnostics - Ver 1.9.9
-        // back_trace('SUCCESS', 'Successfully updated chatbot_chatgpt_conversation_log table');
+        // back_trace( 'SUCCESS', 'Successfully updated chatbot_chatgpt_conversation_log table');
 
     } else {
         // DIAG - Diagnostics
-        // back_trace('NOTICE', 'Table does not exist: ' . $table_name);
+        // back_trace( 'NOTICE', 'Table does not exist: ' . $table_name);
         // SQL to create the conversation logging table
         $sql = "CREATE TABLE $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
