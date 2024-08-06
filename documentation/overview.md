@@ -10,7 +10,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## What's New in Version 2.0.9
 
-* **TBD**: TBD
+* **Adjusted Module Name Conflict**: Renamed one module that was had a name found to be in conflict with another vendor's plugin.
 
 ## What's New in Version 2.0.8
 
@@ -26,28 +26,28 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## What's New in Version 2.0.6
 
-- **Dynamic Shortcode**: Added support for dynamic shortcodes to allow for more flexible Assistant selection. Add all parameters to the shortcode, including the Assistant ID on the GTP Assistant tab. For example, `[chatbot-1]`.
-- **Logic Error Updated**: Corrected a logic error that prevented visitors and logged-in users from interacting with Assistants.
+* **Dynamic Shortcode**: Added support for dynamic shortcodes to allow for more flexible Assistant selection. Add all parameters to the shortcode, including the Assistant ID on the GTP Assistant tab. For example, `[chatbot-1]`.
+* **Logic Error Updated**: Corrected a logic error that prevented visitors and logged-in users from interacting with Assistants.
 
 ## What's New in Version 2.0.5
 
-- **Enhanced Assistant Management**: A new intuitive interface for managing all your chatbot Assistants in one place.
+* **Enhanced Assistant Management**: A new intuitive interface for managing all your chatbot Assistants in one place.
 
-- **Assistant ID Integration**: Easily add Assistants developed in the OpenAI Playground using their unique ID.
+* **Assistant ID Integration**: Easily add Assistants developed in the OpenAI Playground using their unique ID.
 
-- **Improved Shortcode Usage**: Tips for optimal placement and usage of the `[chatbot assistant="Common Name"]` shortcode.
+* **Improved Shortcode Usage**: Tips for optimal placement and usage of the `[chatbot assistant="Common Name"]` shortcode.
 
-- **Customizable Assistant Attributes**: Tailor each Assistant's settings such as Styling, Target Audience, Voice, Allow File Uploads, Allow Transcript Downloads, Show Assistant Name, Initial Greeting, Subsequent Greeting, Placeholder Prompt, and Additional Instructions.
+* **Customizable Assistant Attributes**: Tailor each Assistant's settings such as Styling, Target Audience, Voice, Allow File Uploads, Allow Transcript Downloads, Show Assistant Name, Initial Greeting, Subsequent Greeting, Placeholder Prompt, and Additional Instructions.
 
-- **Support Tab**: Reverted the "Support" tab to correctly display the plugin's support documentation overview.
+* **Support Tab**: Reverted the "Support" tab to correctly display the plugin's support documentation overview.
 
-- **Embedded Chatbot Formatting Updated**: Added a closing `</div>` tag to the embedded chatbot to ensure proper formatting.
+* **Embedded Chatbot Formatting Updated**: Added a closing `</div>` tag to the embedded chatbot to ensure proper formatting.
 
-- **Force Page Reload on Conversation Cleared**: Added an option to force a page reload when the conversation is cleared.
+* **Force Page Reload on Conversation Cleared**: Added an option to force a page reload when the conversation is cleared.
 
-- **Knowledge Navigator Analysis**: Moved the Knowledge Navigator Analysis for export to the bottom of the Knowledge Navigator tab.
+* **Knowledge Navigator Analysis**: Moved the Knowledge Navigator Analysis for export to the bottom of the Knowledge Navigator tab.
 
-- **Custom Buttons Expanded**: Now supports up to four custom buttons, available on floating only, embedded only, or on both chatbot styles.
+* **Custom Buttons Expanded**: Now supports up to four custom buttons, available on floating only, embedded only, or on both chatbot styles.
 
 ## Quick Start
 
@@ -109,4 +109,4 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 ---
 
-- **[Back to the Overview](/overview.md)**
+* **[Back to the Overview](/overview.md)**
