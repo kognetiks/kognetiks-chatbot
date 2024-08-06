@@ -444,7 +444,7 @@ function chatbot_kn_run_phase_3() {
 }
 
 // Phase 4 - Compute the TF-IDF
-function chatbot_kn_run_phase_4 () {
+function chatbot_kn_run_phase_4() {
 
     global $wpdb;
 
@@ -508,7 +508,7 @@ function chatbot_kn_run_phase_4 () {
 }
 
 // Phase 5 - Reinitialize the batch acquisition for pages, posts, and products
-function chatbot_kn_run_phase_5 () {
+function chatbot_kn_run_phase_5() {
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', 'chatbot_kn_run_phase_5' );
@@ -531,7 +531,7 @@ function chatbot_kn_run_phase_5 () {
 }
 
 // Phase 6 - Assign scores to the top 10% of the words in pages, posts, and products
-function chatbot_kn_run_phase_6 () {
+function chatbot_kn_run_phase_6() {
 
     global $wpdb;
 

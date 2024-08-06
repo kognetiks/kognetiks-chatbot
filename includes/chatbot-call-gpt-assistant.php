@@ -55,6 +55,7 @@ function createAnAssistant($api_key) {
     // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     return json_decode($response, true);
+    
 }
 
 // Step 2: EMPTY STEP
