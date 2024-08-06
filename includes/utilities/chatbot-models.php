@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Function to get the Assistant's name
-function get_openai_models() {
+function chatbot_chatgpt_get_openai_models() {
 
     // Global variables
     global $session_id;
