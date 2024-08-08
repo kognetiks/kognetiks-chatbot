@@ -605,7 +605,7 @@ function chatbot_chatgpt_send_message() {
     back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
     back_trace( 'NOTICE', '$model: ' . $model);
     back_trace( 'NOTICE', '$voice: ' . $voice);
-    DIAG - Diagnostics - Ver 2.0.9
+    // DIAG - Diagnostics - Ver 2.0.9
     back_trace( 'NOTICE', '========================================');
     foreach ($chatbot_settings as $key => $value) {
          back_trace( 'NOTICE', '$chatbot_settings[' . $key . ']: ' . $value);
