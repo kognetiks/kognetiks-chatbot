@@ -7,6 +7,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 ## What's New in Version 2.0.9
 
 * **Adjusted Module Name Conflict**: Renamed one module that was had a name found to be in conflict with another vendor's plugin.
+* **Refactored Inline Styles**: Moved inline styles to an external CSS file for better maintainability and separation of concerns.
 
 ## What's New in Version 2.0.8
 

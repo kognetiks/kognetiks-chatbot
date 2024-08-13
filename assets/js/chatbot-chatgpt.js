@@ -33,7 +33,7 @@ jQuery(document).ready(function ($) {
     // Convert the timeout setting to milliseconds
     timeout_setting = timeout_setting * 1000;
 
-    plugins_url = plugin_vars.plugins_url;
+    plugins_url = kchat_plugin_vars.plugins_url;
 
     // Get an open icon for the chatbot - Ver 1.8.6
     chatbotopenicon = plugins_url + '/assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';

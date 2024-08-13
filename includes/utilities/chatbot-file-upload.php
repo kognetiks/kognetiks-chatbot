@@ -290,7 +290,7 @@ function chatbot_chatgpt_upload_mp3() {
             //         'message' => 'Invalid file type. Please upload an MP3, WAV, MP4, or WEBM file.'
             //     );
             //     $error_flag = true;
-            //     back_trace( 'NOTICE', 'Invalid file type.');
+            //     // back_trace( 'NOTICE', 'Invalid file type.');
             //     http_response_code(415); // Send a 415 Unsupported Media Type status code
             //     exit;
             // }

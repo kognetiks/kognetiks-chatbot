@@ -236,10 +236,10 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // 
     // NOTE: Set WP_DEBUG and WP_DBUG_LOG to true in wp-config.php to log messages to the debug.log file
     // 
-    // Call the function back_trace() from any file to log messages to your server's error log
+    // Call the function // back_trace() from any file to log messages to your server's error log
     // 
-    // Uncomment the back_trace() function in the file(s) where you want to log messages
-    // Or add new back_trace() calls to log messages at any point in the code
+    // Uncomment the // back_trace() function in the file(s) where you want to log messages
+    // Or add new // back_trace() calls to log messages at any point in the code
     //
     // Go to the Chatbot Settings, then the Messages tab
     // Set the Chatbot Diagnotics to one of Off, Success, Notice, Failure, Warning, or Error
@@ -247,7 +247,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // Each level will log messages based on the following criteria (Off will not log any messages)
     // [ERROR], [WARNING], [NOTICE], or [SUCCESS]
     // 
-    // Call this function using back_trace( 'NOTICE', $message);
+    // Call this function using // back_trace( 'NOTICE', $message);
     // back_trace( 'ERROR', 'Some message');
     // back_trace( 'WARNING', 'Some message');
     // back_trace( 'NOTICE', 'Some message');

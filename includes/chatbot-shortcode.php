@@ -65,7 +65,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
     // back_trace( 'NOTICE', '========================================');
     // foreach ($atts as $key => $value) {
-    //   back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    //   // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     // }
     // back_trace( 'NOTICE', '========================================');
    
@@ -229,6 +229,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     }
 
+    // DIAG - Diagnostics - Ver 2.0.9.1
+    back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
+
+    // Set the $kcb_id to $assistant_details['id']
+    if (key_exists('id', $assistant_details)) {
+        $kcb_id = $assistant_details['id'];
+        back_trace ('NOTICE', 'assistant_id: ' . $kcb_id);
+    } else {
+        $kcb_id = random_int(1, 9999999);
+    }
+    
     // DIAG - Diagnostics - Ver 2.0.6
     // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -862,6 +873,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // ob_start();
         ?>
         <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
+        <!-- <div id="<?php echo $kcb_id; ?>" style="display: flex;" class="embedded-style chatbot-full"> -->
         <!-- <script>
             $(document).ready(function() {
                 $('#chatbot-chatgpt').removeClass('floating-style').addClass('embedded-style');
@@ -880,8 +892,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         }
         ?>
         <div id="chatbot-chatgpt-conversation"></div>
-        <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 100%;">
-            <div style="flex-grow: 1; max-width: 95%;">
+        <div id="chatbot-chatgpt-input">
+            <div id="chatbot-chatgpt-input-area">
                 <label for="chatbot-chatgpt-message"></label>
                 <?php
                     // FIXME - ADD THIS TO FLOATING STYLE BELOW - Ver 1.9.5
@@ -1016,12 +1028,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // ob_start();
         ?>
         <div id="chatbot-chatgpt">
+        <!-- <div id="<?php echo $kcb_id; ?>"> -->
             <div id="chatbot-chatgpt-header">
                 <div id="chatgptTitle" class="title"><?php echo htmlspecialchars($bot_name); ?></div>
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
-            <div id="chatbot-chatgpt-input" style="display: flex; justify-content: center; align-items: start; gap: 5px; width: 95%;">
-                <div style="flex-grow: 1; max-width: 95%;">
+            <div id="chatbot-chatgpt-input">
+                <div id="chatbot-chatgpt-input-area">
                     <label for="chatbot-chatgpt-message"></label>
                     <?php
                         // Kick off Flow - Ver 1.9.5
@@ -1078,7 +1091,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     ?>
                 </div>
             </div>
-            <div id="chatbot-chatgpt-buttons-container" style="justify-content: center; flex-grow: 0; display: flex; flex-direction: row; align-items: center; gap: 5px;">
+            <div id="chatbot-chatgpt-buttons-container">
                 <button id="chatbot-chatgpt-submit" title="Send Message">
                     <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
                 </button>
@@ -1201,7 +1214,7 @@ add_action('init', 'register_chatbot_shortcodes');
 // Custom Buttons - Ver 2.0.5
 function chatbot_chatgpt_custom_buttons_display() {
     ?>
-    <div id="chatbot-chatgpt-custom-buttons" style="justify-content: center; flex-grow: 0; display: flex; flex-direction: row; align-items: center; gap: 5px; padding: 5px;">
+    <div id="chatbot-chatgpt-custom-buttons">
         <?php
         $button_names = [];
         $button_urls = [];
@@ -1236,14 +1249,14 @@ function chatbot_chatgpt_attribution () {
     // back_trace( 'NOTICE', 'chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);
     if ($chatbot_chatgpt_suppress_attribution == 'Off') {
         ?>
-        <div style="text-align: center;">
-            <!-- <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" style="text-decoration:none; font-size: 10px;"><?php echo esc_html('Chatbot & Knowledge Navigator by Kognetiks'); ?></a> -->
-            <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" style="text-decoration:none; font-size: 10px;"><?php echo esc_html('Chatbot WordPress plugin by Kognetiks'); ?></a>
+        <div class="chatbot-attribution">
+            <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" class="chatbot-attribution-link"><?php echo esc_html('Chatbot WordPress plugin by Kognetiks'); ?></a>
         </div>
         <?php
     }
 
 }
+
 
 // Fix Updating failed. The response is not a valid JSON response. - Version 1.7.3
 // Function to output the script

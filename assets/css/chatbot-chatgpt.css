@@ -167,14 +167,28 @@
     max-height: 90vh; /* Adjust the percentage as needed */
 }
 
-#chatbot-chatgpt-input {
+/* REPLACED IN V2.0.9 WITH BELOW */
+/* #chatbot-chatgpt-input {
     display: flex;
     padding: 10px;
     align-content: stretch;
     justify-content: center;
     align-items: center;
+} */
+
+/* REPLACED IN V2.0.9 INSTEAD OF ABOVE */
+#chatbot-chatgpt-input {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    gap: 5px;
+    width: 100%;
 }
 
+#chatbot-chatgpt-input-area {
+    flex-grow: 1;
+    max-width: 95%;
+}
 
 #chatbot-chatgpt-message {
     flex-grow: 1;
@@ -195,6 +209,15 @@
     padding: 1px 1px;
     margin-left: 1px;
     cursor: pointer;
+}
+
+#chatbot-chatgpt-buttons-container {
+    justify-content: center;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
 }
 
 #chatbot-chatgpt-submit:hover {
@@ -409,8 +432,20 @@
     background-color: #dcdcdc;
 }
 
-#chatbot-chatgpt-custom-buttons {
+/* REPLACED IN V2.0.9 WITH BELOW */
+/* #chatbot-chatgpt-custom-buttons {
     text-align: center;
+} */
+
+/* REPLACED IN V2.0.9 INSTEAD OF ABOVE */
+#chatbot-chatgpt-custom-buttons {
+    justify-content: center;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    padding: 5px;
 }
 
 #chatgptTitle.title {
@@ -439,6 +474,15 @@
 
 .typing-dot:nth-child(3) {
     animation-delay: 0.4s;
+}
+
+.chatbot-attribution {
+    text-align: center;
+}
+
+.chatbot-attribution-link {
+    text-decoration: none;
+    font-size: 10px;
 }
 
 @keyframes typing {
