@@ -607,9 +607,9 @@ function chatbot_chatgpt_send_message() {
     // back_trace( 'NOTICE', '$voice: ' . $voice);
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', '========================================');
-    foreach ($chatbot_settings as $key => $value) {
+    // foreach ($chatbot_settings as $key => $value) {
          // back_trace( 'NOTICE', '$chatbot_settings[' . $key . ']: ' . $value);
-    }
+    // }
 
     // Assistants
     // $chatbot_chatgpt_assistant_alias == 'original'; // Default

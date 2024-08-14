@@ -65,7 +65,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
     // back_trace( 'NOTICE', '========================================');
     // foreach ($atts as $key => $value) {
-    //   // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    //   back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     // }
     // back_trace( 'NOTICE', '========================================');
    
@@ -869,17 +869,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
-        <div id="chatbot-chatgpt" style="display: flex;" class="embedded-style chatbot-full">
+        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full">
         <!-- <script>
             $(document).ready(function() {
-                $('#chatbot-chatgpt').removeClass('floating-style').addClass('embedded-style');
+                $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
             });
         </script> -->
         <!-- REMOVED FOR EMBEDDED -->
         <?php
         if ( $use_assistant_name == 'Yes' ) {
             echo '<div id="chatbot-chatgpt-header-embedded">';
-            echo '<div id="chatgptTitle" class="title">' . strip_tags($bot_name) . '</div>';
+            echo '<div id="chatbot-chatgpt-title" class="title">' . strip_tags($bot_name) . '</div>';
             echo '</div>';
         } else {
             echo '<div id="chatbot-chatgpt-header-embedded">';
@@ -1022,7 +1022,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         ?>
         <div id="chatbot-chatgpt">
             <div id="chatbot-chatgpt-header">
-                <div id="chatgptTitle" class="title"><?php echo htmlspecialchars($bot_name); ?></div>
+                <div id="chatbot-chatgpt-title" class="title"><?php echo htmlspecialchars($bot_name); ?></div>
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
             <div id="chatbot-chatgpt-input">

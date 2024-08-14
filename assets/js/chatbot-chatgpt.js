@@ -75,16 +75,16 @@ jQuery(document).ready(function ($) {
     
     if (chatbot_chatgpt_display_style === 'embedded') {
         // Apply configurations for embedded style
-        $('#chatbot-chatgpt').addClass('embedded-style').removeClass('floating-style');
+        $('#chatbot-chatgpt').addClass('chatbot-embedded-style').removeClass('chatbot-floating-style');
         // Other configurations specific to embedded style
         chatbot_chatgpt_start_status = 'open'; // Force the chatbot to open if embedded
         chatbot_chatgpt_start_status_new_visitor = 'open'; // Force the chatbot to open if embedded
         localStorage.setItem('chatbot_chatgpt_start_status', chatbot_chatgpt_start_status);
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', chatbot_chatgpt_start_status_new_visitor);
-        chatGptChatBot.addClass('embedded-style').removeClass('floating-style');
+        chatGptChatBot.addClass('chatbot-embedded-style').removeClass('chatbot-floating-style');
     } else {
         // Apply configurations for floating style
-        $('#chatbot-chatgpt').addClass('floating-style').removeClass('embedded-style');
+        $('#chatbot-chatgpt').addClass('chatbot-floating-style').removeClass('chatbot-embedded-style');
         // Other configurations specific to floating style
         if (chatbot_chatgpt_width_setting === 'Wide') {
             chatGptChatBot.addClass('wide');
@@ -400,16 +400,16 @@ jQuery(document).ready(function ($) {
 
         if (sender === 'user') {
             messageElement.addClass('user-message');
-            textElement.addClass('user-text');
+            textElement.addClass('chatbot-user-text');
         // } else if (sender === 'bot') {
         //     messageElement.addClass('bot-message');
-        //     textElement.addClass('bot-text');
+        //     textElement.addClass('chatbot-bot-text');
         // } else {
         //     messageElement.addClass('error-message');
         //     textElement.addClass('error-text');
         } else {
             messageElement.addClass('bot-message');
-            textElement.addClass('bot-text');
+            textElement.addClass('chatbot-bot-text');
         }
 
         messageElement.append(textElement);
@@ -442,10 +442,10 @@ jQuery(document).ready(function ($) {
     }
 
     function showTypingIndicator() {
-        typingIndicator = $('<div></div>').addClass('typing-indicator');
-        dot1 = $('<span>.</span>').addClass('typing-dot');
-        dot2 = $('<span>.</span>').addClass('typing-dot');
-        dot3 = $('<span>.</span>').addClass('typing-dot');
+        typingIndicator = $('<div></div>').addClass('chatbot-typing-indicator');
+        dot1 = $('<span>.</span>').addClass('chatbot-typing-dot');
+        dot2 = $('<span>.</span>').addClass('chatbot-typing-dot');
+        dot3 = $('<span>.</span>').addClass('chatbot-typing-dot');
         
         typingIndicator.append(dot1, dot2, dot3);
         conversation.append(typingIndicator);
@@ -455,7 +455,7 @@ jQuery(document).ready(function ($) {
     }
 
     function removeTypingIndicator() {
-        $('.typing-indicator').remove();
+        $('.chatbot-typing-indicator').remove();
     }
 
     // markdownToHtml - Ver 1.9.2
@@ -785,7 +785,7 @@ jQuery(document).ready(function ($) {
         // console.log('Chatbot: NOTICE: Text-to-Speech button clicked');
 
         // Read out loud the last bot response
-        let lastMessage = $('#chatbot-chatgpt-conversation .bot-message:last .bot-text').text();
+        let lastMessage = $('#chatbot-chatgpt-conversation .bot-message:last .chatbot-bot-text').text();
         let button = $(this);  // Store a reference to the button
 
         // console.log('Chatbot: NOTICE: lastMessage: ' + lastMessage);
@@ -1214,7 +1214,7 @@ jQuery(document).ready(function ($) {
             //    console.log('Chatbot: NOTICE: scrollToLastBotResponse');
             // }
     
-            const botTexts = document.querySelectorAll('.bot-text');
+            const botTexts = document.querySelectorAll('.chatbot-bot-text');
             const conversation = document.querySelector('#chatbot-chatgpt-conversation');
     
             // DIAG - Diagnostics - Ver 2.0.3

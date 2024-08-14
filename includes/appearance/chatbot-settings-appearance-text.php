@@ -44,13 +44,13 @@ function chatbot_chatgpt_appearance_text_color_custom_css_settings() {
 
     // Define CSS styles as global variables
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bubble'] = ".chatbot-bubble { color: {$chatbot_chatgpt_appearance_text_color} !important; background-color: {$chatbot_chatgpt_appearance_background_greeting_text_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['floating-style'] = ".floating-style { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['embedded-style'] = ".embedded-style { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-floating-style'] = ".chatbot-floating-style { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-embedded-style'] = ".chatbot-embedded-style { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $user_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_bot_text_background_color', '#007bff'));
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['user-text'] = ".user-text { color: {$chatbot_chatgpt_appearance_text_color} !important; background-color: {$user_text_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-user-text'] = ".chatbot-user-text { color: {$chatbot_chatgpt_appearance_text_color} !important; background-color: {$user_text_background_color} !important; }";
     $bot_text_background_color = esc_attr(get_option('chatbot_chatgpt_appearance_bot_text_background_color', '#5BC236'));
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['bot-text'] = ".bot-text { color: {$chatbot_chatgpt_appearance_text_color} !important; background-color: {$bot_text_background_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['typing-dot'] = ".typing-dot { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bot-text'] = ".chatbot-bot-text { color: {$chatbot_chatgpt_appearance_text_color} !important; background-color: {$bot_text_background_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-typing-dot'] = ".chatbot-typing-dot { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
     $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-custom-button-class'] = ".chatbot-chatgpt-custom-button-class { color: {$chatbot_chatgpt_appearance_text_color} !important; }";
 
 }
@@ -84,7 +84,7 @@ function chatbot_chatgpt_appearance_user_text_background_custom_css_settings() {
     // Check for text color
     $text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
     // Define CSS styles as global variables
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['user-text'] = ".user-text { background-color: {$chatbot_chatgpt_appearance_user_text_background_color} !important; color: {$text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-user-text'] = ".chatbot-user-text { background-color: {$chatbot_chatgpt_appearance_user_text_background_color} !important; color: {$text_color} !important; }";
 
 }
 
@@ -144,7 +144,7 @@ function chatbot_chatgpt_appearance_header_text_color_custom_css_settings() {
     $chatbot_chatgpt_appearance_header_text_color = esc_attr(get_option('chatbot_chatgpt_appearance_header_text_color', '#ffffff'));
 
     // Define CSS styles as global variables
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatgptTitle.title'] = "#chatgptTitle.title { color: {$chatbot_chatgpt_appearance_header_text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-chatgpt-title.title'] = "#chatbot-chatgpt-title.title { color: {$chatbot_chatgpt_appearance_header_text_color} !important; }";
 
 }
 
@@ -177,7 +177,7 @@ function chatbot_chatgpt_appearance_bot_text_background_custom_css_settings() {
     $text_color = esc_attr(get_option('chatbot_chatgpt_appearance_text_color', '#ffffff'));
 
     // Define CSS styles as global variables
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['bot-text'] = ".bot-text { background-color: {$chatbot_chatgpt_appearance_bot_text_background_color} !important; color: {$text_color} !important; }";
-    $GLOBALS['chatbotChatGPTAppearanceCSS']['typing-indicator'] = ".typing-indicator { background-color: {$chatbot_chatgpt_appearance_bot_text_background_color} !important; color: {$text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-bot-text'] = ".chatbot-bot-text { background-color: {$chatbot_chatgpt_appearance_bot_text_background_color} !important; color: {$text_color} !important; }";
+    $GLOBALS['chatbotChatGPTAppearanceCSS']['chatbot-typing-indicator'] = ".chatbot-typing-indicator { background-color: {$chatbot_chatgpt_appearance_bot_text_background_color} !important; color: {$text_color} !important; }";
 
 }

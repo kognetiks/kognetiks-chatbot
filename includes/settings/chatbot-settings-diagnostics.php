@@ -293,35 +293,37 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // Upper case the message type
     $message_type = strtoupper($message_type);
 
+    $date_time = (new DateTime())->format('d-M-Y H:i:s \U\T\C');
+
     // Message Type: Indicating whether the log is an error, warning, notice, or success message.
     // Prefix the message with [ERROR], [WARNING], [NOTICE], or [SUCCESS].
     // Check for other levels and print messages accordingly
     if ('Error' === $chatbot_chatgpt_diagnostics) {
         // Print all types of messages
         error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
-        chatbot_error_log( "[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
+        chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
     } elseif (in_array($chatbot_chatgpt_diagnostics, ['Success', 'Failure'])) {
         // Print only SUCCESS and FAILURE messages
         if (in_array($message_type, ['SUCCESS', 'FAILURE'])) {
             error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
-            chatbot_error_log( "[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
+            chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
         }
     } elseif ('Warning' === $chatbot_chatgpt_diagnostics) {
         // Print only ERROR and WARNING messages
         if (in_array($message_type, ['ERROR', 'WARNING'])) {
             error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
-            chatbot_error_log( "[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
+            chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
         }
     } elseif ('Notice' === $chatbot_chatgpt_diagnostics) {
         // Print ERROR, WARNING, and NOTICE messages
         if (in_array($message_type, ['ERROR', 'WARNING', 'NOTICE'])) {
             error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
-            chatbot_error_log( "[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
+            chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
         }
     } elseif ('Debug' === $chatbot_chatgpt_diagnostics) {
         // Print all types of messages
         error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
-        chatbot_error_log( "[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
+        chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
     } else {
         // Exit if none of the conditions are met
         return;
@@ -369,7 +371,7 @@ function log_chatbot_error() {
 
         // Construct the log message
         $log_message = sprintf(
-            "[Chatbot] [ERROR] [%s] [Session ID: %s] [User ID: %s] [IP Address: %s] [%s]%s",
+            "[Chatbot] [ERROR] [%s] [Session ID: %s] [User ID: %s] [IP Address: %s] [%s] [%s]",
             $date_time,
             $session_id ? $session_id : 'N/A',
             $user_id ? $user_id : 'N/A',
