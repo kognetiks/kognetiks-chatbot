@@ -108,8 +108,9 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 2. **Max Response Tokens**:
    - **Description**: This setting determines the maximum number of tokens for the assistant's response.
-   - **Options**: A numeric value between `1,000` and `20,000` (the default is `20000`).
+   - **Options**: A numeric value between `1,000` and `100,000` (the default is `20000`).
    - **Selection**: Set this based on the level of detail you want in the responses. Higher values allow for longer responses.
+   - **Additional Info**: For a deeper explanation, please see [Max Completion and Max Prompt Tokens](https://platform.openai.com/docs/assistants/deep-dive/max-completion-and-max-prompt-tokens).
 
 3. **Thread Retention Period (hrs)**:
     - **Description**: This setting specifies how long conversation threads are retained.
@@ -120,6 +121,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
     - **Description**: This setting allows you to select the version of the beta assistant to use.
     - **Options**: Versions `V1` and `v2` (the default is now `V2`).
     - **Selection**: Choose the version that fits your needs, typically the latest for the most up-to-date features.
+    - **Additional Info**: For a deeper explanation, please see [Migration Guide](https://platform.openai.com/docs/assistants/migration/agents).
 
 ## Steps to Configure
 

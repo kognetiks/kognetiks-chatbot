@@ -138,12 +138,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
 
         // For each key in $assistant_details, set the $atts value
-        // DIAG - Diagnostics - Ver 2.0.9
-        // back_trace( 'NOTICE', '========================================');
         foreach ($assistant_details as $key => $value) {
             $atts[$key] = $value;
             // DIAG - Diagnostics - Ver 2.0.9
-            // back_trace( 'NOTICE', '$key: ' . $key . ' Value: ' . $value);
+            // back_trace( 'ERROR', '$key: ' . $key . ' Value: ' . $value);
         }
 
         // If the assistant_id is null, then set it to original
@@ -229,17 +227,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     }
 
-    // DIAG - Diagnostics - Ver 2.0.9.1
-    back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
-
-    // Set the $kcb_id to $assistant_details['id']
-    if (key_exists('id', $assistant_details)) {
-        $kcb_id = $assistant_details['id'];
-        back_trace ('NOTICE', 'assistant_id: ' . $kcb_id);
-    } else {
-        $kcb_id = random_int(1, 9999999);
-    }
-    
     // DIAG - Diagnostics - Ver 2.0.6
     // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -250,10 +237,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$atts: ' . print_r($atts, true));
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
     // back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
+    // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
     // Validate and sanitize the style parameter - Ver 1.9.9
     $valid_styles = ['floating', 'embedded'];
     $chatbot_chatgpt_display_style = 'floating'; // default value
+    
     // Check if 'style' exists in $atts and is not null
     if (array_key_exists('style', $atts) && !is_null($atts['style'])) {
         // Check if the provided style is valid
@@ -566,9 +555,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // back_trace( 'NOTICE', '========================================');
     // log each $chatbot_settings key and value
-    foreach ($chatbot_settings as $key => $value) {
-        // back_trace( 'NOTICE', '$chatbot_settings - Key: ' . $key . ' Value: ' . $value);
-    }
+    // foreach ($chatbot_settings as $key => $value) {
+    //     back_trace( 'NOTICE', '$chatbot_settings - Key: ' . $key . ' Value: ' . $value);
+    // }
+
     // Original wp_localize_script call
     // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
     // Refactored wp_localize_script call - Ver 2.0.5 - 2024 07 06
@@ -723,7 +713,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // Handle the case where the function does not exist
         // Throw an error or return a default value, etc.
         // DIAG - Diagnostics - Ver 1.9.5
-        // back_trace( 'WARNING', 'kflow modules not installed');
+        // back_trace( 'ERROR', 'kflow modules not installed');
 
     }
     
@@ -769,6 +759,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // REMOVED - Ver 2.0.5
     // chatbot_chatgpt_shortcode_enqueue_script();
+
+    // DiAG - Diagnostics - Ver 2.0.9
+    // back_trace( 'ERROR', '========================================');
+    // back_trace( 'ERROR', '$assistant_details[\'style\']: ' . $assistant_details['style']);
+    // back_trace( 'ERROR', '$chatbot_settings[\'chatbot_chatgpt_display_style\']: ' . $chatbot_settings['chatbot_chatgpt_display_style']);
+    // back_trace( 'ERROR', '$assistant_details[\'audience\']: ' . $assistant_details['audience']);
+    // back_trace( 'ERROR', '$chatbot_settings[\'chatbot_chatgpt_audience_choice\']: ' . $chatbot_settings['chatbot_chatgpt_audience_choice']);
 
     // Last chance to set localStorage - Ver 2.0.5
     $assistant_details['style'] = !empty($assistant_details['style']) ? $assistant_details['style'] : esc_attr(get_option('chatbot_chatgpt_display_style', 'floating'));
@@ -872,8 +869,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
-        <div id="chatbot-chatgpt"  style="display: flex;" class="embedded-style chatbot-full">
-        <!-- <div id="<?php echo $kcb_id; ?>" style="display: flex;" class="embedded-style chatbot-full"> -->
+        <div id="chatbot-chatgpt" style="display: flex;" class="embedded-style chatbot-full">
         <!-- <script>
             $(document).ready(function() {
                 $('#chatbot-chatgpt').removeClass('floating-style').addClass('embedded-style');
@@ -959,7 +955,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 ?>
             </div>
         </div>
-        <div id="chatbot-chatgpt-buttons-container" style="justify-content: center; flex-grow: 0; display: flex; flex-direction: row; align-items: center; gap: 5px;">
+        <div id="chatbot-chatgpt-buttons-container">
             <button id="chatbot-chatgpt-submit" title="Send Message">
                 <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
             </button>
@@ -999,7 +995,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </button>
             <?php endif; ?>
             </div>
-            <!-- Custom buttons - Ver 1.6.5 -->
             <?php
             $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
             if ($chatbot_chatgpt_enable_custom_buttons == 'Embedded' || $chatbot_chatgpt_enable_custom_buttons == 'Both') {
@@ -1010,10 +1005,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             ?>
         </div>
         <button id="chatgpt-open-btn" style="display: none;">
-        <!-- <i class="dashicons dashicons-format-chat"></i> -->
         <i class="chatbot-open-icon"></i>
         </button>
-        <!-- </div> -->
         <?php
         return ob_get_clean();
     } elseif ($chatbot_chatgpt_display_style == 'floating') {
@@ -1028,7 +1021,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // ob_start();
         ?>
         <div id="chatbot-chatgpt">
-        <!-- <div id="<?php echo $kcb_id; ?>"> -->
             <div id="chatbot-chatgpt-header">
                 <div id="chatgptTitle" class="title"><?php echo htmlspecialchars($bot_name); ?></div>
             </div>
@@ -1131,7 +1123,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </button>
                 <?php endif; ?>
             </div>
-            <!-- Custom buttons - Ver 1.6.5 -->
             <?php
             $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
             if ($chatbot_chatgpt_enable_custom_buttons == 'On' || $chatbot_chatgpt_enable_custom_buttons == 'Floating' || $chatbot_chatgpt_enable_custom_buttons == 'Both') {
@@ -1141,11 +1132,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             chatbot_chatgpt_attribution();
             ?>
         </div>
-        <button id="chatgpt-open-btn" style="display: none;">
-        <!-- <i class="dashicons dashicons-format-chat"></i> -->
-        <i class="chatbot-open-icon"></i>
-        </button>
-        <!-- </div> OMIT THE CLOSING /DIV STATEMENT FOR FLOATING -->
+        <div>
+            <button id="chatgpt-open-btn" style="display: none;" aria-hidden="true">
+                <i class="chatbot-open-icon"></i>
+            </button>
+        </div>
         <?php
         return ob_get_clean();
     }
@@ -1323,6 +1314,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
                 if (<?php echo json_encode($style); ?> !== '') {
                     localStorage.setItem('chatbot_chatgpt_display_style', <?php echo json_encode($style); ?>);
                 }
+
                 if (<?php echo json_encode($assistant); ?> !== '') {
                     localStorage.setItem('chatbot_chatgpt_assistant_alias', <?php echo json_encode($assistant); ?>);
                 }
@@ -1331,6 +1323,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
                 if (<?php echo json_encode($avatar_icon_setting); ?> !== '') {
                     localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', <?php echo json_encode($avatar_icon_setting); ?>);
                 }
+
                 if (<?php echo json_encode($custom_avatar_icon_setting); ?> !== '') {
                     localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', <?php echo json_encode($custom_avatar_icon_setting); ?>);
                 }

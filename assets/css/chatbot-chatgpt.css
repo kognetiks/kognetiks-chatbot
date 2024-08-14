@@ -432,22 +432,6 @@
     background-color: #dcdcdc;
 }
 
-/* REPLACED IN V2.0.9 WITH BELOW */
-/* #chatbot-chatgpt-custom-buttons {
-    text-align: center;
-} */
-
-/* REPLACED IN V2.0.9 INSTEAD OF ABOVE */
-#chatbot-chatgpt-custom-buttons {
-    justify-content: center;
-    flex-grow: 0;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 5px;
-    padding: 5px;
-}
-
 #chatgptTitle.title {
     color: #ffffff;
     font-size: inherit;
@@ -497,12 +481,30 @@
     }
 }
 
+/* REPLACED IN V2.0.9 WITH BELOW */
+/* #chatbot-chatgpt-custom-buttons {
+    text-align: center;
+} */
+
+/* REPLACED IN V2.0.9 INSTEAD OF ABOVE */
+#chatbot-chatgpt-custom-buttons {
+    justify-content: center;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    padding: 5px;
+}
+
 .chatbot-chatgpt-custom-button-class {
     background-color: #3B82F6;
     color: #ffffff;
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
     text-decoration: none;
+    align-items: center;
+    display: inline-flex;
   }
 
 .chatbot-chatgpt-custom-button-class:hover {
