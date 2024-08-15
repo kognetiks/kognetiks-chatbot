@@ -739,6 +739,7 @@ function chatbot_chatgpt_send_message() {
 
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_flow_api($api_key, $message);
+
         wp_send_json_success($response);
 
     } elseif ($use_assistant_id == 'Yes') {
@@ -790,6 +791,12 @@ function chatbot_chatgpt_send_message() {
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Check for links and images in response before returning');
             $response = chatbot_chatgpt_check_for_links_and_images($response);
+
+            // FIXME - Append extra message - Ver 2.0.9
+            $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
+            $extra_message = '\r\nDanger Will Robinson! Danger!';
+            $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
+
             // Return response
             wp_send_json_success($response);
         }
@@ -863,6 +870,11 @@ function chatbot_chatgpt_send_message() {
         // DIAG - Diagnostics - Ver 2.0.5
         // back_trace( 'NOTICE', 'Response: ' . $response);
 
+        // FIXME - Append extra message - Ver 2.0.9
+        $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
+        // $extra_message = '  Danger Will Robinson! Danger!';
+        $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
+
         // Return response
         wp_send_json_success($response);
 
@@ -892,6 +904,15 @@ add_action('wp_ajax_nopriv_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt
 
 // Settings and Deactivation - Ver 1.5.0
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
+
+// Append an extra message to the response - Ver 2.0.9
+function chatbot_chatgpt_append_extra_message($response, $extra_message) {
+
+    // Append the extra message to the response
+    $response = $response . ' ' . $extra_message;
+    return $response;
+
+}
 
 // Crawler aka Knowledge Navigator - Ver 1.6.1
 function chatbot_chatgpt_kn_status_activation() {
