@@ -642,7 +642,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // FIXME - FORCE PAGE RELOAD
 
     // Assume that the chatbot is NOT using KFlow - Ver 1.9.5
-    $use_flow = 'No';
+    $kflow_enabled = false;
+    $kflow_enabled = esc_attr(get_option( 'kflow_flow_mode', false ));
+    // back_trace( 'NOTICE', '$kflow_enabled: ' . esc_attr(get_option( 'kflow_flow_mode', false )));
 
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
     // $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
@@ -652,10 +654,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$atts[\'sequence\']: ' . $atts['sequence']);
 
     // KFlow - Call kflow_prompt_and_response() - Ver 1.9.5
-    if (function_exists('kflow_prompt_and_response') and !empty($atts['sequence'])) {
+    if (function_exists('kflow_prompt_and_response') && !empty($atts['sequence']) && $kflow_enabled) {
 
         // BELT & SUSPENDERS - Ver 1.9.5
-        $use_flow = 'Yes';
+        $kflow_enabled = true;
 
         // Get the sequence ID
         $sequence_id = array_key_exists('sequence', $atts) ? sanitize_text_field($atts['sequence']) : '';
@@ -700,7 +702,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         } else {
 
             // BELT & SUSPENDERS - Ver 1.9.5
-            $use_flow = 'No';
+            $kflow_enabled = false;
 
             // No prompt was returned
             // Use the default prompt
@@ -898,7 +900,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <?php
                     // FIXME - ADD THIS TO FLOATING STYLE BELOW - Ver 1.9.5
                     // Kick off Flow - Ver 1.9.5
-                    if ($use_flow == 'Yes' and !empty($sequence_id)) {
+                    if ($kflow_enabled == true and !empty($sequence_id)) {
                         // back_trace( 'NOTICE', 'Kick off Flow');
                         // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                         // Store the prompt in a hidden input instead of directly in the textarea
@@ -923,7 +925,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         </script>";
                     }
                     // Preload with a prompt if it is set - Ver 1.9.5
-                    if ($use_flow != 'Yes' and !empty($chatbot_chatgpt_hot_bot_prompt)) {
+                    if ($kflow_enabled != true and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                         // DIAG - Diagnostics - Ver 1.9.0
                         back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
                         $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
@@ -1034,7 +1036,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <label for="chatbot-chatgpt-message"></label>
                     <?php
                         // Kick off Flow - Ver 1.9.5
-                        if ($use_flow == 'Yes' and !empty($sequence_id)) {
+                        if ($kflow_enabled == true and !empty($sequence_id)) {
                             back_trace( 'NOTICE', 'Kick off Flow');
                             back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                             // Store the prompt in a hidden input instead of directly in the textarea
@@ -1059,7 +1061,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             </script>";
                         }
                         // Preload with a prompt if it is set - Ver 1.9.5
-                        if ($use_flow != 'Yes' and !empty($chatbot_chatgpt_hot_bot_prompt)) {
+                        if ($kflow_enabled != true and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                             $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                             $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
                             $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
