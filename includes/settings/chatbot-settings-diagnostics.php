@@ -21,6 +21,7 @@ function chatbot_chatgpt_diagnostics_settings_init() {
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_error_message');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_attribution');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_delete_data');
 
     add_settings_section(
@@ -93,6 +94,14 @@ function chatbot_chatgpt_diagnostics_settings_init() {
         'chatbot_chatgpt_suppress_attribution',
         'Suppress Attribution',
         'chatbot_chatgpt_suppress_attribution_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_attribution',
+        'Custom Attribution Message',
+        'chatbot_chatgpt_custom_attribution_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
     );
@@ -214,6 +223,17 @@ function chatbot_chatgpt_suppress_attribution_callback($args) {
         <option value="On" <?php selected( $chatbot_chatgpt_suppress_attribution, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
         <option value="Off" <?php selected( $chatbot_chatgpt_suppress_attribution, 'Off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
     </select>
+    <?php
+}
+
+// Alternate Attribution Text - Ver 2.0.9
+function chatbot_chatgpt_custom_attribution_callback($args) {
+    $chatbot_chatgpt_custom_attribution = esc_attr(get_option('chatbot_chatgpt_custom_attribution', 'Your custom attribution message goes here.'));
+    if ( $chatbot_chatgpt_custom_attribution === null || $chatbot_chatgpt_custom_attribution === '' ) {
+        $chatbot_chatgpt_custom_attribution = 'Your custom attribution message goes here.';
+    }
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_attribution" name="chatbot_chatgpt_custom_attribution" value="<?php echo esc_html( $chatbot_chatgpt_custom_attribution ); ?>" size="50">
     <?php
 }
 

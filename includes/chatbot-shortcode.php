@@ -647,6 +647,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Retrieve the custom buttons on/off setting - Ver 1.6.5
     // $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
 
+    // DIAG - Diagnostics - Ver 2.0.9
+    // back_trace( 'NOTICE', 'kflow_prompt_and_response function status: ' . function_exists('kflow_prompt_and_response'));
+    // back_trace( 'NOTICE', '$atts[\'sequence\']: ' . $atts['sequence']);
+
     // KFlow - Call kflow_prompt_and_response() - Ver 1.9.5
     if (function_exists('kflow_prompt_and_response') and !empty($atts['sequence'])) {
 
@@ -671,9 +675,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $kflow_prompt = $kflow_data['Prompts'][0];
 
         // DIAG - Diagnostics - Ver 1.9.5
-        // back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
-        // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
-        // back_trace( 'NOTICE', '$kflow_prompt: ' . $kflow_prompt);
+        back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
+        back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+        back_trace( 'NOTICE', '$kflow_prompt: ' . $kflow_prompt);
 
         // A prompt was returned
         if ( $kflow_prompt != '' ) {
@@ -912,7 +916,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                                 });
                                 // Optionally trigger the click if you need to automatically submit on page load
                                 setTimeout(function() {
-                                    submitButton.trigger('click');
+                                    submitButton.click(); // Use plain JS click
                                 }, 500); // Delay of 1 second
                             }
                         });
@@ -921,7 +925,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     // Preload with a prompt if it is set - Ver 1.9.5
                     if ($use_flow != 'Yes' and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                         // DIAG - Diagnostics - Ver 1.9.0
-                        // back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
+                        back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
                         $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                         $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
                         $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
@@ -1031,8 +1035,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <?php
                         // Kick off Flow - Ver 1.9.5
                         if ($use_flow == 'Yes' and !empty($sequence_id)) {
-                            // back_trace( 'NOTICE', 'Kick off Flow');
-                            // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+                            back_trace( 'NOTICE', 'Kick off Flow');
+                            back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                             // Store the prompt in a hidden input instead of directly in the textarea
                             echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
                             // echo "<textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
@@ -1044,10 +1048,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                                     submitButton.addEventListener('click', function() {
                                         // Use the value from the hidden input when submitting
                                         var promptToSubmit = hiddenInput.value;
+    
                                     });
                                     // Optionally trigger the click if you need to automatically submit on page load
                                     setTimeout(function() {
-                                        submitButton.trigger('click');
+                                        submitButton.click(); // Use plain JS click
                                     }, 500); // Delay of 1 second
                                 }
                             });
@@ -1236,14 +1241,23 @@ function chatbot_chatgpt_custom_buttons_display() {
 function chatbot_chatgpt_attribution () {
 
     $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+    $chatbot_chatgpt_custom_attribution = esc_attr(get_option('chatbot_chatgpt_custom_attribution', 'Your custom attribution message goes here.'));
     // DIAG - Diagnostics - Ver 1.6.5
     // back_trace( 'NOTICE', 'chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);
     if ($chatbot_chatgpt_suppress_attribution == 'Off') {
-        ?>
-        <div class="chatbot-attribution">
-            <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" class="chatbot-attribution-link"><?php echo esc_html('Chatbot WordPress plugin by Kognetiks'); ?></a>
-        </div>
-        <?php
+        if ($chatbot_chatgpt_custom_attribution == 'Your custom attribution message goes here.' || empty($chatbot_chatgpt_custom_attribution)) { 
+            ?>
+            <div class="chatbot-attribution">
+                <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" class="chatbot-attribution-link"><?php echo esc_html('Chatbot WordPress plugin by Kognetiks'); ?></a>
+            </div>
+            <?php
+        } else {
+            ?>
+            <div class="chatbot-attribution">
+                <p><?php echo $chatbot_chatgpt_custom_attribution; ?></p>
+            </div>
+            <?php
+        }
     }
 
 }

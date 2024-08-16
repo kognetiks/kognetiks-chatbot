@@ -794,7 +794,7 @@ function chatbot_chatgpt_send_message() {
 
             // FIXME - Append extra message - Ver 2.0.9
             $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
-            $extra_message = '\r\nDanger Will Robinson! Danger!';
+            // $extra_message = '  Danger Will Robinson! Danger!';
             $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
             // Return response

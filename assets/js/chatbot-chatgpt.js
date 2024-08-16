@@ -646,6 +646,13 @@ jQuery(document).ready(function ($) {
                 removeTypingIndicator();
                 if (botResponse) {
                     appendMessage(botResponse, 'bot');
+                    // FIXME - Add custom JS to the bot's response - Ver 2.0.9
+                    // Append custom JS to the bot's response - Ver 2.0.9
+                    if (typeof appendCustomJsToBotResponse === 'function') {
+                        let customMessage = '';
+                        customMessage = appendCustomJsToBotResponse(botResponse);
+                        appendMessage(customMessage, 'bot');
+                    };
                 }
                 scrollToLastBotResponse();
                 submitButton.prop('disabled', false);
@@ -1261,9 +1268,15 @@ jQuery(document).ready(function ($) {
 
         // If conversation_continuation is enabled, load the conversation from local storage - Ver 2.0.7
         if (localStorage.getItem('chatbot_chatgpt_conversation_continuation') === 'On') {
-            storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
-            // remove autoplay attribute from the audio elements - Ver 2.0.7
-            storedConversation = storedConversation.replace(/autoplay/g, '');
+            let storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation');
+            
+            // Check if storedConversation is not null before trying to replace
+            if (storedConversation) {
+                // remove autoplay attribute from the audio elements - Ver 2.0.7
+                storedConversation = storedConversation.replace(/autoplay/g, '');
+            } else {
+                // console.log('No conversation found in session storage.');
+            }
         }
 
         if (storedConversation) {
