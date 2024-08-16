@@ -377,7 +377,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
     // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
-    // back_trace( 'NOTICE', '$chatbot_settigns: ' . print_r($chatbot_settings, true));
+    // back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
 
     // Determine if the user is logged in
     $user_logged_in = is_user_logged_in();

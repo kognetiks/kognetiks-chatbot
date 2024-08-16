@@ -171,7 +171,7 @@ function chatbot_chatgpt_appearance_overview_section_callback(){
 // Custom Appearance Settings - Ver 1.8.1
 function chatbot_chatgpt_appearance_section_callback(){
 
-    // PLACEHOLDE - VER 2.0.7
+    // PLACEHOLDER - VER 2.0.7
 
 }
 

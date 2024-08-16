@@ -7,6 +7,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 ## What's New in Version 2.0.9
 
 * **Adjusted Module Name Conflict**: Renamed one module that was had a name found to be in conflict with another vendor's plugin.
+* **Reworked Conversation Continuity**: Improved the way the chatbot handles conversation continuity for visitors and logged-in users, ensuring a seamless experience across pages.
 * **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WOrdPress plugin by Kognetiks' with a text message of your choosing.
 * **Refactored Inline Styles**: Moved inline styles to an external CSS file for better maintainability and separation of concerns.
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
@@ -337,7 +338,7 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 
 ## Support
 
-💬 Looking for **plugin support**, please visit [https://kognetiks.com/wordpress-plugins/plugin-support/](https://kognetiks.com/wordpress-plugins/plugin-support/).
+💬 Looking for **plugin support**, please visit [https://kognetiks.com/plugin-support/](https://kognetiks.com/plugin-support/).
 
 📜 For **frequently asked questions**, please visit [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
 

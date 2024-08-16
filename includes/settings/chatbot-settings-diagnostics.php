@@ -254,7 +254,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 
     // Usage Instructions
     // 
-    // NOTE: Set WP_DEBUG and WP_DBUG_LOG to true in wp-config.php to log messages to the debug.log file
+    // NOTE: Set WP_DEBUG and WP_DEBUG_LOG to true in wp-config.php to log messages to the debug.log file
     // 
     // Call the function // back_trace() from any file to log messages to your server's error log
     // 

@@ -20,7 +20,7 @@ function chatbot_chatgpt_avatar_overview_section_callback($args) {
     <div>
         <p>Choose an avatar that best represents you and your brand or link to your own avatar by adding a Custom Avatar URL (recommended 60x60px).</p>
         <p>It's ok you don't want an Avatar.  Just select the 'None' option among the Avatar Icon Options below.</p>
-        <p>Besure to remove the Custom Avatar URL if you want to select 'None' or one from the set below.</p>
+        <p>Be sure to remove the Custom Avatar URL if you want to select 'None' or one from the set below.</p>
         <p>You can change your avatar at any time.</p>
         <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Avatars and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=avatars&file=avatars.md">here</a>.</b></p>
