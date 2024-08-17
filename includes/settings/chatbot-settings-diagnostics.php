@@ -21,6 +21,7 @@ function chatbot_chatgpt_diagnostics_settings_init() {
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_error_message');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_notices');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_attribution');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_delete_data');
 
     add_settings_section(
@@ -93,6 +94,14 @@ function chatbot_chatgpt_diagnostics_settings_init() {
         'chatbot_chatgpt_suppress_attribution',
         'Suppress Attribution',
         'chatbot_chatgpt_suppress_attribution_callback',
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_diagnostics_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_custom_attribution',
+        'Custom Attribution Message',
+        'chatbot_chatgpt_custom_attribution_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
     );
@@ -217,6 +226,17 @@ function chatbot_chatgpt_suppress_attribution_callback($args) {
     <?php
 }
 
+// Alternate Attribution Text - Ver 2.0.9
+function chatbot_chatgpt_custom_attribution_callback($args) {
+    $chatbot_chatgpt_custom_attribution = esc_attr(get_option('chatbot_chatgpt_custom_attribution', 'Your custom attribution message goes here.'));
+    if ( $chatbot_chatgpt_custom_attribution === null || $chatbot_chatgpt_custom_attribution === '' ) {
+        $chatbot_chatgpt_custom_attribution = 'Your custom attribution message goes here.';
+    }
+    ?>
+    <input type="text" id="chatbot_chatgpt_custom_attribution" name="chatbot_chatgpt_custom_attribution" value="<?php echo esc_html( $chatbot_chatgpt_custom_attribution ); ?>" size="50">
+    <?php
+}
+
 // Delete Plugin Data on Uninstall - Ver 1.9.9
 function chatbot_chatgpt_delete_data_callback($args) {
     global $chatbot_chatgpt_delete_data;
@@ -234,12 +254,12 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 
     // Usage Instructions
     // 
-    // NOTE: Set WP_DEBUG and WP_DBUG_LOG to true in wp-config.php to log messages to the debug.log file
+    // NOTE: Set WP_DEBUG and WP_DEBUG_LOG to true in wp-config.php to log messages to the debug.log file
     // 
-    // Call the function back_trace() from any file to log messages to your server's error log
+    // Call the function // back_trace() from any file to log messages to your server's error log
     // 
-    // Uncomment the back_trace() function in the file(s) where you want to log messages
-    // Or add new back_trace() calls to log messages at any point in the code
+    // Uncomment the // back_trace() function in the file(s) where you want to log messages
+    // Or add new // back_trace() calls to log messages at any point in the code
     //
     // Go to the Chatbot Settings, then the Messages tab
     // Set the Chatbot Diagnotics to one of Off, Success, Notice, Failure, Warning, or Error
@@ -247,7 +267,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // Each level will log messages based on the following criteria (Off will not log any messages)
     // [ERROR], [WARNING], [NOTICE], or [SUCCESS]
     // 
-    // Call this function using back_trace( 'NOTICE', $message);
+    // Call this function using // back_trace( 'NOTICE', $message);
     // back_trace( 'ERROR', 'Some message');
     // back_trace( 'WARNING', 'Some message');
     // back_trace( 'NOTICE', 'Some message');
@@ -293,36 +313,61 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // Upper case the message type
     $message_type = strtoupper($message_type);
 
+    $date_time = (new DateTime())->format('d-M-Y H:i:s \U\T\C');
+
     // Message Type: Indicating whether the log is an error, warning, notice, or success message.
     // Prefix the message with [ERROR], [WARNING], [NOTICE], or [SUCCESS].
     // Check for other levels and print messages accordingly
     if ('Error' === $chatbot_chatgpt_diagnostics) {
         // Print all types of messages
-        error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
+        error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
+        chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
     } elseif (in_array($chatbot_chatgpt_diagnostics, ['Success', 'Failure'])) {
         // Print only SUCCESS and FAILURE messages
         if (in_array($message_type, ['SUCCESS', 'FAILURE'])) {
-            error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
+            error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
+            chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
         }
     } elseif ('Warning' === $chatbot_chatgpt_diagnostics) {
         // Print only ERROR and WARNING messages
         if (in_array($message_type, ['ERROR', 'WARNING'])) {
-            error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
+            error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
+            chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
         }
     } elseif ('Notice' === $chatbot_chatgpt_diagnostics) {
         // Print ERROR, WARNING, and NOTICE messages
         if (in_array($message_type, ['ERROR', 'WARNING', 'NOTICE'])) {
-            error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
+            error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
+            chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
         }
     } elseif ('Debug' === $chatbot_chatgpt_diagnostics) {
         // Print all types of messages
-        error_log("[Chatbot] [$file] [$function] [$line] [$message_type] [$message]");
+        error_log("[Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]");
+        chatbot_error_log( "[". $date_time ."] [Chatbot] [". $file ."] [". $function ."] [". $line  ."] [". $message_type ."] [" .$message ."]" );
     } else {
         // Exit if none of the conditions are met
         return;
     }
 
 }
+
+// Log Chatbot Errors to the Server - Ver 2.0.9
+function chatbot_error_log($message) {
+
+    $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';
+
+    // Ensure the directory and index file exist
+    create_directory_and_index_file($chatbot_logs_dir);
+
+    // Get the current date to create a daily log file
+    $current_date = date('Y-m-d');
+    $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
+
+    // Append the error message to the log file
+    file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+
+}
+
 
 // Log Chatbot Errors to the Server - Ver 2.0.3
 function log_chatbot_error() {
@@ -346,7 +391,7 @@ function log_chatbot_error() {
 
         // Construct the log message
         $log_message = sprintf(
-            "[Chatbot] [ERROR] [%s] [Session ID: %s] [User ID: %s] [IP Address: %s] [%s]%s",
+            "[Chatbot] [ERROR] [%s] [Session ID: %s] [User ID: %s] [IP Address: %s] [%s] [%s]",
             $date_time,
             $session_id ? $session_id : 'N/A',
             $user_id ? $user_id : 'N/A',

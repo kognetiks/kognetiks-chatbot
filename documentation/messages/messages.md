@@ -59,7 +59,12 @@ The Messages and Diagnostics Settings help you monitor the health and performanc
    - **Options**: `On` or `Off`.
    - **Selection**: Choose `On` to suppress the attribution message. Set to `Off` to display the message.
 
-5. **Delete Plugin Data on Uninstall**:
+5. **Custom Attribution Message**:
+   - **Description**: This setting allows administrators to define a custom attribution message that will be displayed to users.
+   - **Options**: Any text string that you want to use as the attribution message.
+   - **Tip**: To remove custom attribution, just delete the value and save your settings.
+
+6. **Delete Plugin Data on Uninstall**:
    - **Description**: Determines whether to delete all plugin data when the plugin is uninstalled.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` to delete all data when uninstalling the plugin, ensuring no residual data remains. Select `No` to retain data even after uninstallation, which can be useful if you plan to reinstall the plugin later.

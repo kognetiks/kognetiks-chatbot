@@ -135,7 +135,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
 
     // Fetch models from the API
-    $models = get_openai_models();
+    $models = chatbot_chatgpt_get_openai_models();
 
     // DIAG - Ver 1.9.5
     // back_trace( 'NOTICE', '$models: ' . print_r($models, true) );
@@ -284,7 +284,7 @@ function chatbot_chatgpt_voice_model_option_callback($args) {
     $voice_model_option = esc_attr(get_option('chatbot_chatgpt_voice_model_option', 'tts-1-hd'));
 
     // Fetch models from the API
-    $voice_models = get_openai_models();
+    $voice_models = chatbot_chatgpt_get_openai_models();
 
     // Limit the models to voice models
     $voice_models = array_filter($voice_models, function($voice_model) {
@@ -380,7 +380,7 @@ function chatbot_chatgpt_image_model_option_callback($args) {
     $image_model_option = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-3'));
 
     // Fetch models from the API
-    $image_models = get_openai_models();
+    $image_models = chatbot_chatgpt_get_openai_models();
 
     // Limit the models to image models
     $image_models = array_filter($image_models, function($image_model) {
@@ -547,7 +547,7 @@ function chatbot_chatgpt_whisper_model_option_callback($args) {
         $whisper_model_option = esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1'));
     
         // Fetch models from the API
-        $whisper_models = get_openai_models();
+        $whisper_models = chatbot_chatgpt_get_openai_models();
     
         // Limit the models to whisper models
         $whisper_models = array_filter($whisper_models, function($whisper_model) {

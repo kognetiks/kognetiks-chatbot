@@ -161,13 +161,13 @@ Please use one of these resources to obtain support for the **Kognetiks Chatbot 
 
 - [Support @ Discord](https://discord.gg/nXRzxUKvya)
 
-- [Support @ Kognetiks.com](https://kognetiks.com/wordpress-plugins/plugin-support/)
+- [Support @ Kognetiks.com](https://kognetiks.com/plugin-support/)
 
 - [Support @ WordPress.org](https://wordpress.org/support/plugin/chatbot-chatgpt/)
 
 - [Support @ GitHub.com](https://github.com/kognetiks/kognetiks-chatbot/issues)
 
-You can also contact support by visiting our support page [here](https://kognetiks.com/wordpress-plugins/plugin-support/) and filling out the form.
+You can also contact support by visiting our support page [here](https://kognetiks.com/plugin-support/) and filling out the form.
 
 ---
 

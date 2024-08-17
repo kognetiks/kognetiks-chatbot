@@ -14,7 +14,7 @@ Please use one of these resources to obtain support for the **Kognetiks Chatbot 
 
 - [Support @ Discord](https://discord.gg/nXRzxUKvya)
 
-- [Support @ Kognetiks.com](https://kognetiks.com/wordpress-plugins/plugin-support/)
+- [Support @ Kognetiks.com](https://kognetiks.com/plugin-support/)
 
 - [Support @ WordPress.org](https://wordpress.org/support/plugin/chatbot-chatgpt/)
 

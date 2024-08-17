@@ -86,7 +86,7 @@ function chatbot_chatgpt_localize(){
         $default_value = $defaults[$key] ?? '';
         $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
-        // back_trace('NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
     }
     
     // FIXME - WAS ADDED IN 1.6.1

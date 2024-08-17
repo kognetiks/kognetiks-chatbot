@@ -1,8 +1,8 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Anthorpic API - Ver 2.0.8
+ * Kognetiks Chatbot for WordPress - Anthropic API - Ver 2.0.8
  *
- * This file contains the code accessing the Anthoric's API.
+ * This file contains the code accessing the Anthropic's API.
  * 
  *
  * @package chatbot-chatgpt
@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Call the Anthorpic API
+// Call the Anthropic API
 function chatbot_call_ant_api($api_key, $message) {
 
     global $session_id;
@@ -40,7 +40,7 @@ function chatbot_call_ant_api($api_key, $message) {
     // Anthropic.com API Documentation
     // https://docs.anthropic.com/en/api/messages
 
-    // The current Anthoripic API URL endpoint for claude-3-5-sonnet-20240620
+    // The current Anthropic API URL endpoint for claude-3-5-sonnet-20240620
     // $api_url = get_chat_completions_api_url();
     // FIXME - TEMP OVERRIDE
     $api_url = 'https://api.anthoric.com/v1/messages';
@@ -198,10 +198,10 @@ function chatbot_call_ant_api($api_key, $message) {
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
         $error_message = $response->get_error_message();
-        back_trace('ERROR', 'Request failed: ' . $error_message);
+        // back_trace( 'ERROR', 'Request failed: ' . $error_message);
     } else {
         $response_body = wp_remote_retrieve_body($response);
-        back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+        // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
     }
 
     // Return json_decode(wp_remote_retrieve_body($response), true);

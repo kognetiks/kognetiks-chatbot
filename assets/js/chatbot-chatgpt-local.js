@@ -552,13 +552,24 @@ jQuery(document).ready(function ($) {
         
     }
 
+    // Function to check if the chatbot shortcode is present on the page
+    function isChatbotShortcodePresent() {
+        return document.querySelector('.chatbot-chatgpt') !== null;
+    }
+
     // DIAG - Diagnostics - Ver 1.8.5
     // console.log('Chatbot: NOTICE: Before call to chatbot_chatgpt_localize');
+    // console.log('Chatbot: NOTICE: chatbot_chatgpt_initial_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
+    // console.log('Chatbot: NOTICE: chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
 
-    // Localize the chatbot settings
-    chatbot_chatgpt_localize();
+    // Only call the function if the chatbot shortcode is present
+    if (isChatbotShortcodePresent()) {
+        chatbot_chatgpt_localize();
+    }
 
     // DIAG - Diagnostics - Ver 1.8.5
-    // console.log('Chatbot: NOTICE: After call to chatbot_chatgpt_loccalize');
+    // console.log('Chatbot: NOTICE: After call to chatbot_chatgpt_localize');
+    // console.log('Chatbot: NOTICE: chatbot_chatgpt_initial_greeting: ' + localStorage.getItem('chatbot_chatgpt_initial_greeting'));
+    // console.log('Chatbot: NOTICE: chatbot_chatgpt_subsequent_greeting: ' + localStorage.getItem('chatbot_chatgpt_subsequent_greeting'));
 
 });

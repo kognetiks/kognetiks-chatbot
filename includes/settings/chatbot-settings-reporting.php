@@ -690,6 +690,9 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Write results to file
     foreach ($results as $result) {
+        $result = array_map(function($value) {
+            return mb_convert_encoding($value, 'UTF-8', 'auto');
+        }, $result);
         fputcsv($file, $result);
     }
 
