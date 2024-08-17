@@ -676,10 +676,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // Get the first prompt
         $kflow_prompt = $kflow_data['Prompts'][0];
 
-        // DIAG - Diagnostics - Ver 1.9.5
-        back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
-        back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
-        back_trace( 'NOTICE', '$kflow_prompt: ' . $kflow_prompt);
+        // // DIAG - Diagnostics - Ver 1.9.5
+        // back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
+        // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+        // back_trace( 'NOTICE', '$kflow_prompt: ' . $kflow_prompt);
 
         // A prompt was returned
         if ( $kflow_prompt != '' ) {
@@ -927,7 +927,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     // Preload with a prompt if it is set - Ver 1.9.5
                     if ($kflow_enabled != true and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                         // DIAG - Diagnostics - Ver 1.9.0
-                        back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
+                        // back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
                         $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                         $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
                         $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
@@ -1037,8 +1037,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <?php
                         // Kick off Flow - Ver 1.9.5
                         if ($kflow_enabled == true and !empty($sequence_id)) {
-                            back_trace( 'NOTICE', 'Kick off Flow');
-                            back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+                            // back_trace( 'NOTICE', 'Kick off Flow');
+                            // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                             // Store the prompt in a hidden input instead of directly in the textarea
                             echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
                             // echo "<textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
