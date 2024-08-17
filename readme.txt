@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.6.1
-Stable tag: 2.0.9
+Stable tag: 2.1.0
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -221,7 +221,10 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
-= 2.0.9 =
+= 2.1.0 - Released TBD =
+* **TBD**: TBD
+
+= 2.0.9 - Released 08-17-2024 =
 * **Adjusted Module Name Conflict**: Renamed one module that was had a name found to be in conflict with another vendor's plugin.
 * **Reworked Conversation Continuity**: Improved the way the chatbot handles conversation continuity for visitors and logged-in users, ensuring a seamless experience across pages.
 * **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WOrdPress plugin by Kognetiks' with a text message of your choosing.
@@ -232,21 +235,21 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **chatbot-user-text CSS Class Rename**: Renamed the user-text CSSclass to chatbot-user-text to avoid conflicts with other plugins or themes.
 * **bot-text CSS Class Rename**: Renamed the bot-text CSSclass to chatbot-bot-text to avoid conflicts with other plugins or themes.
 
-= 2.0.8 =
+= 2.0.8 - Released 08-01-2024 =
 * **Logic Error Updated**: Corrected a logic error that was causing some visitors and logged-in users to lose their session continuity with the Assistants. This ensures a smoother and more consistent experience for all users.
 * **Fixed Special Characters Display Issue**: Improved the way special characters are handled in chatbot names. Previously, the code was converting special characters like '&' into their HTML equivalents (e.g., '&' became '&').
 
-= 2.0.7 =
+= 2.0.7 - Released 07-25-2024 =
 * **Model Support**: The latest models available from OpenAI are dynamically added to model picklists.  Available models now include gpt-4o and gpt-4o-mini.  See Chatbot Settings > API/Model > Chat Settings.
 * **Manage Chatbot Error Logs**: Added the ability to manage chatbot error logs, including the ability to download and delete logs. See Chatbot Settings > Tools. TIP: You must enable Diagnostics access the Tools tab. See Chatbot Settings > Messages > Messages and Diagnostics.
 * **Revised Reporting Settings Layout**: Revised and refreshed the Reporting Settings page layout for better visualization. See Chatbot Settings > Reporting.
 * **Conversation Continuation**: Added an additional setting added to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
 
-= 2.0.6 =
+= 2.0.6 - Released 07-11-2024 =
 * **Dynamic Shortcode**: Added support for dynamic shortcodes to allow for more flexible Assistant selection. Add all parameters to the shortcode, including the Assistant ID on the GTP Assistant tab. For example, `[chatbot-1]`.
 * **Logic Error Updated**: Corrected a logic error that prevented visitors and logged-in users from interacting with Assistants.
 
-= 2.0.5 =
+= 2.0.5 - Released 07-06-2024 =
 * **Enhanced Assistant Management**: A new intuitive interface for managing all your chatbot Assistants in one place.
 * **Assistant ID Integration**: Easily add Assistants developed in the OpenAI Playground using their unique ID.
 * **Improved Shortcode Usage**: Tips for optimal placement and usage of the `[chatbot assistant="Common Name"]` shortcode.
@@ -257,10 +260,10 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **Knowledge Navigator Analysis**: Moved the Knowledge Navigator Analysis for export to the bottom of the Knowledge Navigator tab.
 * **Custom Buttons Expanded**: Now supports up to four custom buttons, on floating only, embedded only, or on both chatbot styles.
 
-= 2.0.4 =
+= 2.0.4 - Released - 06-21-2024 =
 * Removed session id from the chatbot shortcode and replaced with a unique id for visitors and logged-in users alike.
 
-= 2.0.3 =
+= 2.0.3 - Released - 06-12-2024 =
 * **Transcript Download Option**: You can now choose whether users can download a transcript of their conversations with the chatbot.
 * **Improved Image Sizing**: Images smaller than the chatbot's message view now display in their actual size for better clarity.
 * **Knowledge Navigator Settings**: We've added an option to disable the Knowledge Navigator if you only want to use assistants for chatbot interactions.
@@ -268,12 +271,12 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **File Download Support**: The chatbot now supports downloading files generated on the OpenAI platform.
 * **Custom Error Handling**: When there's an issue with the chatbot, you can now display a custom error message to users.
 
-= 2.0.2 =
+= 2.0.2 - Released 05-27-2024 =
 * Overhauled the Support documentation with extensive information on the chatbot settings - See the Support tab in Settings
 * Revised the export function for Conversation Data, Interaction Data and Token Usage Data
 * Reverted the function ```str_contains``` to ```strpos``` as the latter is only available in PHP 8
 
-= 2.0.1 =
+= 2.0.1 - Released 05-16-2024 =
 * Support for OpenAI's latest models: gpt-4o and gpt-4o-2024-05-13
 
 = 2.0.1 Configuration Options =
