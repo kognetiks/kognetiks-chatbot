@@ -169,6 +169,12 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
+// FIXME - Include necessary files - Widgets - Ver 2.1.0
+if (file_exists(plugin_dir_path(__FILE__) . 'widgets/chatbot-chatgpt-widget-end-point.php')) {
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_widget_end_point() called');
+    require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-chatgpt-widget-end-point.php';
+}
+
 // Log the User ID and Session ID - Ver 2.0.6 - 2024 07 11
 // back_trace( 'NOTICE', '$user_id: ' . $user_id);
 // back_trace( 'NOTICE', '$session_id: ' . $session_id);
@@ -227,7 +233,7 @@ $context_history = [];
 
 function chatbot_chatgpt_enqueue_admin_scripts() {
     wp_enqueue_script('jquery'); // Ensure jQuery is enqueued
-    wp_enqueue_script('chatbot_chatgpt_admin', plugins_url('assets/js/chatbot-chatgpt-admin.js', __FILE__), array('jquery'), '1.0.0', true);
+    wp_enqueue_script('chatbot_chatgpt_admin', plugins_url('assets/js/chatbot-chatgpt-admin.js', __FILE__), array('jquery'), 'CHATBOT_CHATGPT_VERSION', true);
 }
 add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
 
@@ -253,27 +259,21 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
-    wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__));
+    wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__), array(), 'CHATBOT_CHATGPT_VERSION');
 
     // Now override the default styles with the custom styles - Ver 1.8.1
     chatbot_chatgpt_appearance_custom_css_settings();
 
-    // Custom css overrides - Ver 1.8.1
-    // $customer_css_path = plugins_url(assets/css/chatbot-chatgpt-custom.css', __FILE__));
-    // if ( file_exists ( $customer_css_path )) {
-    //     wp_enqueue_style('chatbot-chatgpt-custom-css', plugins_url('assets/css/chatbot-chatgpt-custom.css', __FILE__));
-    // }
-
     // Enqueue the scripts
     wp_enqueue_script('jquery');
-    wp_enqueue_script('greetings', plugins_url('assets/js/greetings.js', __FILE__), array('jquery'), '1.0', true);
-    wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), '1.0', true);
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_script('greetings', plugins_url('assets/js/greetings.js', __FILE__), array('jquery'), 'CHATBOT_CHATGPT_VERSION', true);
+    wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), 'CHATBOT_CHATGPT_VERSION', true);
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), 'CHATBOT_CHATGPT_VERSION', true);
 
     // Enqueue DOMPurify - Ver 1.8.1
     // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
     // https://chat.openai.com/c/275770c1-fa72-404b-97c2-2dad2e8a0230
-    wp_enqueue_script( 'dompurify', plugin_dir_url(__FILE__) . 'assets/js/purify.min.js', array(), '1.0.0', true );
+    wp_enqueue_script( 'dompurify', plugin_dir_url(__FILE__) . 'assets/js/purify.min.js', array(), 'CHATBOT_CHATGPT_VERSION', true );
 
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
@@ -992,8 +992,6 @@ function concatenateHistory($transient_name) {
 // Initialize the Greetings - Ver 1.6.1
 function enqueue_greetings_script( $initial_greeting = null, $subsequent_greeting = null) {
 
-    // wp_enqueue_script('greetings', plugin_dir_url(__FILE__) . 'assets/js/greetings.js', array('jquery'), null, true);
-
     // If user is logged in, then modify greeting if greeting contains "[...]" or remove if not logged in - Ver 1.9.4
     if (is_user_logged_in()) {
 
@@ -1094,7 +1092,7 @@ add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
 function enqueue_color_picker($hook_suffix) {
     // first check that $hook_suffix is appropriate for your admin page
     wp_enqueue_style('wp-color-picker');
-    wp_enqueue_script('my-script-handle', plugin_dir_url(__FILE__) . 'assets/js/chatbot-chatgpt-color-picker.js', array('wp-color-picker'), false, true);
+    wp_enqueue_script('my-script-handle', plugin_dir_url(__FILE__) . 'assets/js/chatbot-chatgpt-color-picker.js', array('wp-color-picker'), 'CHATBOT_CHATGPT_VERSION', true);
 }
 add_action('admin_enqueue_scripts', 'enqueue_color_picker');
 

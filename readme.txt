@@ -222,7 +222,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 == Changelog ==
 
 = 2.1.0 - Released TBD =
-* **TBD**: TBD
+* **JavaScript Version Control**: Added JavaScript version control to help with cache busting.
+* **Conversation Log CSV Export**: Added a check to determine if $value is not null before calling mb_convert_encoding to prevent PHP warnings.
 
 = 2.0.9 - Released 08-17-2024 =
 * **Adjusted Module Name Conflict**: Renamed one module that was had a name found to be in conflict with another vendor's plugin.

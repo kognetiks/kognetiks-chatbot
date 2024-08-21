@@ -6,7 +6,8 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's New in Version 2.1.0
 
-* **TBD**: TBD
+* **JavaScript Version Control**: Added JavaScript version control to help with cache busting.
+* **Conversation Log CSV Export**: Added a check to determine if $value is not null before calling mb_convert_encoding to prevent PHP warnings.
 
 ## What's New in Version 2.0.9
 

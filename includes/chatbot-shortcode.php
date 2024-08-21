@@ -16,6 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 // Main Chatbot Shortcode
 function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
+    ob_start();
+    
     global $session_id;
     global $user_id;
     global $page_id;
@@ -39,6 +41,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     global $kflow_data;
 
+    header("Cache-Control: no-cache, must-revalidate, max-age=0");
+    header("Pragma: no-cache");
+
     // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
     $user_id = get_current_user_id();
     // Fetch the Kognetiks cookie
@@ -46,8 +51,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if (empty($user_id) || $user_id == 0) {
         $user_id = $session_id;
     }
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+
+    // DIAG - Diagnostics - Ver 2.1.0
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', 'Shortcode tag: ' . $tag);
+    back_trace( 'NOTICE', 'Shortcode atts: ' . print_r($atts, true));
 
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', '========================================');
@@ -823,14 +832,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_settings['chatbot_chatgpt_bot_name'] = $assistant_details['common_name'];
     $chatbot_settings['chatbot_chatgpt_bot_name'] = !empty($assistant_details['common_name']) ? $assistant_details['common_name'] : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     
-    // DIAG - Diagnostics - Ver 2.0.5
+    // DIAG - Diagnostics - Ver 2.1.0
     // back_trace( 'NOTICE', '========================================');
-    // back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
+    // back_trace( 'NOTICE', '$atts: ' . print_r($atts, true));
+    back_trace( 'NOTICE', '$chatbot_settings: ' . print_r($chatbot_settings, true));
     // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
     // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
     // Output the script to set localStorage keys
-    ob_start();
+    // ob_start(); // MOVED TO TOP OF FUNCTION - Ver 2.1.0 - 2024 08 21
     ?>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
@@ -863,6 +873,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
+    // Generate a unique cache-busting parameter
+    $cache_buster = '?cb=' . time();
+
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
@@ -875,7 +888,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
-        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full">
+        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo time(); ?>">
         <!-- <script>
             $(document).ready(function() {
                 $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
@@ -1027,7 +1040,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // ob_start();
         ?>
         <div id="chatbot-chatgpt">
-            <div id="chatbot-chatgpt-header">
+            <div id="chatbot-chatgpt-header" data-cache-buster="<?php echo time(); ?>">
                 <div id="chatbot-chatgpt-title" class="title"><?php echo htmlspecialchars($bot_name); ?></div>
             </div>
             <div id="chatbot-chatgpt-conversation"></div>
