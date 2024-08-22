@@ -50,9 +50,6 @@ function chatbot_chatgpt_kn_acquire() {
     $chatbot_chatgpt_no_of_items_analyzed = 0;
     update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
 
-    // Reset the $chatbot_chatgpt_no_of_items_analyzed to zero
-    $chatbot_chatgpt_no_of_items_analyzed = 0;
-
     // Initialize the $topWords array
     $topWords = [];
     $topWordPairs = [];
