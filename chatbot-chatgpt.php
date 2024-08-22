@@ -408,6 +408,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Original wp_localize_script call
     // wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
     // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
+    $script_data_array['version'] = CHATBOT_CHATGPT_VERSION;
     $script_data_json = wp_json_encode($script_data_array);
     wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof php_vars === "undefined") { var php_vars = ' . $script_data_json . '; } else { php_vars = ' . $script_data_json . '; }', 'before');
     
@@ -419,6 +420,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     $kchat_plugin_vars = array(
         'plugins_url' => plugins_url('', __FILE__ ),
     );
+    $kchat_plugin_vars['version'] = CHATBOT_CHATGPT_VERSION;
     $kchat_plugin_vars_json = wp_json_encode($kchat_plugin_vars);
     wp_add_inline_script('chatbot-chatgpt-js', 'let kchat_plugin_vars = ' . $kchat_plugin_vars_json . ';', 'before');
 
@@ -426,6 +428,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
     // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
     // back_trace ('NOTICE', 'chatbotSettings: ' . print_r($chatbot_settings, true));
+    $chatbot_Settings['version'] = CHATBOT_CHATGPT_VERSION;
     $chatbotSettings_json = wp_json_encode($chatbot_settings);
     wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof chatbotSettings === "undefined") { var chatbotSettings = ' . $chatbotSettings_json . '; } else { chatbotSettings = ' . $chatbotSettings_json . '; }', 'before');
     
@@ -445,6 +448,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'plugins_url' => plugins_url('', __FILE__ ),
         'ajax_url' => admin_url('admin-ajax.php'),
     );
+    $chatbot_chatgpt_params['version'] = CHATBOT_CHATGPT_VERSION;
     $chatbot_chatgpt_params_json = wp_json_encode($chatbot_chatgpt_params);
     wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof chatbot_chatgpt_params === "undefined") { var chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; } else { chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; }', 'before');
     wp_add_inline_script('chatbot-chatgpt-upload-trigger-js', 'if (typeof chatbot_chatgpt_params === "undefined") { var chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; } else { chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; }', 'before');
@@ -1078,8 +1082,8 @@ function enqueue_greetings_script( $initial_greeting = null, $subsequent_greetin
     // Original wp_localize_script call
     // wp_localize_script('greetings', 'greetings_data', $greetings);
     // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
+    $greetings['version'] = CHATBOT_CHATGPT_VERSION;
     $greetings_json = wp_json_encode($greetings);
-    // wp_add_inline_script('greetings', 'let greetings_data = ' . $greetings_json . ';', 'before');
     wp_add_inline_script('greetings', 'if (typeof greetings_data === "undefined") { var greetings_data = ' . $greetings_json . '; } else { greetings_data = ' . $greetings_json . '; }', 'before');
 
     return $greetings;
