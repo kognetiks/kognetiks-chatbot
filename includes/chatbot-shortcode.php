@@ -1270,7 +1270,7 @@ function chatbot_chatgpt_attribution () {
         } else {
             ?>
             <div class="chatbot-attribution">
-                <p><?php echo $chatbot_chatgpt_custom_attribution; ?></p>
+                <p class="chatbot-attribution-text"><?php echo $chatbot_chatgpt_custom_attribution; ?></p>
             </div>
             <?php
         }
