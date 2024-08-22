@@ -157,7 +157,7 @@ function chatbot_chatgpt_kn_status_section_callback($args) {
             <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
 
                 <p><b>Scheduled to Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_scan_interval', 'No Schedule')); ?></p>
-                <p><b>Status of Last Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_kn_status', 'In Process')); ?></p>
+                <p><b>Status of Last Run: </b><?php echo esc_attr(get_option('chatbot_chatgpt_kn_status', 'Please select a Run Schedule below.')); ?></p>
                 <p><b>Content Items Analyzed: </b><?php echo esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0)); ?></p>
             </div>
             <p>Refresh this page to determine the progress and status of Knowledge Navigation!</p>
