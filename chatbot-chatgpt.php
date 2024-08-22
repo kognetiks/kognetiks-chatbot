@@ -259,7 +259,7 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
-    wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__), array(), 'CHATBOT_CHATGPT_VERSION');
+    wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__), array(), 'CHATBOT_CHATGPT_VERSION', 'all');
 
     // Now override the default styles with the custom styles - Ver 1.8.1
     chatbot_chatgpt_appearance_custom_css_settings();
