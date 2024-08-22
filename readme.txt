@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, ai, chat
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.6.1
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -221,7 +221,11 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
-= 2.1.0 - Released TBD =
+= 2.1.1 - Released TBD =
+
+* **TBD**: TBD
+
+= 2.1.0 - Released 08-22-2024 =
 * **JavaScript Version Control**: Added JavaScript version control to help with cache busting.
 * **Conversation Log CSV Export**: Added a check to determine if $value is not null before calling mb_convert_encoding to prevent PHP warnings.
 
