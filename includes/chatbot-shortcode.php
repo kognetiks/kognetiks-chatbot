@@ -571,7 +571,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Original wp_localize_script call
     // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
     // Refactored wp_localize_script call - Ver 2.0.5 - 2024 07 06
-    $chatbot_settings['version'] = CHATBOT_CHATGPT_VERSION;
+    $chatbot_settings['chatbot-chatgpt-version'] = CHATBOT_CHATGPT_VERSION;
     $chatbot_settings_json = wp_json_encode($chatbot_settings);
     wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof chatbotSettings === "undefined") { var chatbotSettings = ' . $chatbot_settings_json . '; } else { chatbotSettings = ' . $chatbot_settings_json . '; }', 'before');
 

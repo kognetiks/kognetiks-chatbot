@@ -40,7 +40,7 @@ function chatbot_chatgpt_settings_page_html() {
     // Original wp_localize_script call
     // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
     // Refactored wp_localize_script call - Ver 2.0.5 - 2024 07 06
-    $chatbot_settings['version'] = CHATBOT_CHATGPT_VERSION;
+    $chatbot_settings['chatbot-chatgpt-version'] = CHATBOT_CHATGPT_VERSION;
     $chatbot_settings_json = wp_json_encode($chatbot_settings);
     $escaped_chatbot_settings_json = esc_js($chatbot_settings_json);   
     wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof chatbotSettings === "undefined") { var chatbotSettings = ' . $escaped_chatbot_settings_json . '; } else { chatbotSettings = ' . $escaped_chatbot_settings_json . '; }', 'before');

@@ -44,24 +44,24 @@ jQuery(document).ready(function ($) {
     // Convert the timeout setting to milliseconds
     timeout_setting = timeout_setting * 1000;
 
-    plugins_url = kchat_plugin_vars.plugins_url;
+    plugins_url = kchat_plugin_vars['plugins_url'];
 
     // Get an open icon for the chatbot - Ver 1.8.6
-    chatbotopenicon = plugins_url + '/assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    chatbotopenicon = plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
     chatbotopenicon = $('<img>')
     .attr('id', 'chatbot-open-icon')
     .attr('class', 'chatbot-open-icon')
     .attr('src', chatbotopenicon);
 
     // Get a collapse icon for the chatbot - Ver 1.8.6
-    chatbotcollapseicon = plugins_url + '/assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
+    chatbotcollapseicon = plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
     chatbotcollapseicon = $('<img>')
     .attr('id', 'chatbot-collapse-icon')
     .attr('class', 'chatbot-collapse-icon')
     .attr('src', chatbotcollapseicon);
 
     // Get am erase icon for the chatbot - Ver 1.8.6
-    chatboteraseicon = plugins_url + '/assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
+    chatboteraseicon = plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
     chatboteraseicon = $('<img>')
     .attr('id', 'chatbot-erase-icon')
     .attr('class', 'chatbot-erase-icon')
@@ -566,7 +566,7 @@ jQuery(document).ready(function ($) {
     
         return `<div>${markdown.trim()}</div>`;
     
-    } 
+    }
 
     // Submit the message when the submit button is clicked
     submitButton.on('click', function () {
