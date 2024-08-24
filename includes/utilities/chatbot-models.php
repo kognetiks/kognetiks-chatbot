@@ -22,7 +22,7 @@ function chatbot_chatgpt_get_openai_models() {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;

@@ -21,7 +21,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;

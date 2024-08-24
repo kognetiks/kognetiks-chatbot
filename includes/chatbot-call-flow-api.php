@@ -24,7 +24,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     global $thread_id;
     global $assistant_id;
     global $learningMessages;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;
@@ -42,7 +42,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Fetch the KFlow data
-    // $sequence_id = $script_data_array['sequence_id'];
+    // $sequence_id = $kchat_settings['sequence_id'];
     $kflow_sequence = get_chatbot_chatgpt_transients('kflow_sequence', null, null, $session_id);
     $kflow_step = (int) get_chatbot_chatgpt_transients('kflow_step', null, null, $session_id);
 
@@ -89,7 +89,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
         // $thread_id
         // $thread_id = '[answer=' . $kflow_step . ']';
         
-        // Add +1 to $script_data_array['next_step']
+        // Add +1 to $kchat_settings['next_step']
         // $kflow_step = $kflow_step + 1;
 
         // Update the transients

@@ -21,7 +21,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;
@@ -47,8 +47,8 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
 
     // Select the OpenAI Model
     // One of dall-e-2, dall-e-3
-    if ( !empty($script_data_array['model']) ) {
-        $model = $script_data_array['model'];
+    if ( !empty($kchat_settings['model']) ) {
+        $model = $kchat_settings['model'];
         // DIAG - Diagnostics - Ver 1.9.4
         // back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
     } else {

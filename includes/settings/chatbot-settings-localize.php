@@ -81,12 +81,12 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_diagnostics'
     );
 
-    $chatbot_settings = array();
+    $kchat_settings = [];
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
-        $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
+        $kchat_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Log key and value
-        // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
+        // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $kchat_settings[$key]);
     }
     
     // FIXME - WAS ADDED IN 1.6.1
@@ -96,11 +96,11 @@ function chatbot_chatgpt_localize(){
         // console.log("Chatbot: NOTICE: chatbot_settings_localize.php - STARTED");
         document.addEventListener("DOMContentLoaded", function(event) {
             // Encode the chatbot settings array into JSON format for use in JavaScript
-            chatbotSettings = ' . json_encode($chatbot_settings) . ';
-            Object.keys(chatbotSettings).forEach(function(key) {
+            kchat_settings = ' . json_encode($kchat_settings) . ';
+            Object.keys(kchat_settings).forEach(function(key) {
                 // DIAG - Diagnostics
-                // console.log("Chatbot: NOTICE: chatbot-settings-localize.php - Key: " + key + " Value: " + chatbotSettings[key]);
-                localStorage.setItem(key, chatbotSettings[key]);
+                // console.log("Chatbot: NOTICE: chatbot-settings-localize.php - Key: " + key + " Value: " + kchat_settings[key]);
+                localStorage.setItem(key, kchat_settings[key]);
             });
             // Moved inside the DOMContentLoaded event listener
             // console.log("Chatbot: NOTICE: chatbot_settings_localize.php - FINISHED");

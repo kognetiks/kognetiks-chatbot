@@ -23,7 +23,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;
@@ -88,8 +88,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // Select the OpenAI Model
     // One of tts-1, tts-1-1106, tts-1-hd, tts-1-hd-1106
-    if ( !empty($script_data_array['model']) ) {
-        $model = $script_data_array['model'];
+    if ( !empty($kchat_settings['model']) ) {
+        $model = $kchat_settings['model'];
         // DIAG - Diagnostics - Ver 1.9.4
         // back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
     } else {
@@ -107,8 +107,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         $voice = $voice;
         // DIAG - Diagnostics - Ver 1.9.5
         // back_trace( 'NOTICE', '$voice from transient: ' . $voice);
-    } elseif ( !empty($script_data_array['voice'])) {
-        $voice = $script_data_array['voice'];
+    } elseif ( !empty($kchat_settings['voice'])) {
+        $voice = $kchat_settings['voice'];
         // DIAG - Diagnostics - Ver 1.9.5
         // back_trace( 'NOTICE', '$voice from script_data_array: ' . $voice);
     } else {
@@ -129,7 +129,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     }
 
     // DIAG - Diagnostics - Ver 1.9.5
-    // back_trace( 'NOTICE', '$script_data_array: ' . print_r($script_data_array, true));
+    // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
     // back_trace( 'NOTICE', '$model: ' . $model);
     // back_trace( 'NOTICE', '$voice: ' . $voice);
     // back_trace( 'NOTICE', '$audio_format: ' . $audio_format);
@@ -276,7 +276,7 @@ function chatbot_chatgpt_read_aloud($message) {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;
@@ -300,7 +300,7 @@ function chatbot_chatgpt_read_aloud($message) {
     // }
     // $model = $t_model;
     // set_chatbot_chatgpt_transients( 'model', $model, $user_id, $page_id, $session_id);
-    $script_data_array['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-hd'));
+    $kchat_settings['model'] = esc_attr(get_option( 'chatbot_chatgpt_voice_model_option', 'tts-1-hd'));
 
     // FIXME - READ ALOUD PASSED FROM ASSISTANT MANAGEMENT
 
@@ -311,12 +311,12 @@ function chatbot_chatgpt_read_aloud($message) {
     }
     $voice = $t_voice;
     set_chatbot_chatgpt_transients( 'voice', $voice, $user_id, $page_id, $session_id);
-    $script_data_array['voice'] = $voice;
+    $kchat_settings['voice'] = $voice;
 
     if ( empty($voice) ) {
         $voice = esc_attr(get_option( 'chatbot_chatgpt_voice_option', 'alloy') );
     }
-    $script_data_array['voice'] = $voice;
+    $kchat_settings['voice'] = $voice;
     
     // DIAG - Diagnostics - Ver 2.0.6
     // back_trace( 'NOTICE', '========================================');
@@ -333,9 +333,9 @@ function chatbot_chatgpt_read_aloud($message) {
 
     // Reset the model - REMOVED - Ver 2.0.6 - 2024 07 11
     // set_chatbot_chatgpt_transients( 'model', $t_model, $user_id, $page_id, $session_id);
-    // $script_data_array['model'] = $t_model;
+    // $kchat_settings['model'] = $t_model;
     // set_chatbot_chatgpt_transients( 'voice', $t_voice, $user_id, $page_id, $session_id);
-    // $script_data_array['voice'] = $t_voice;
+    // $kchat_settings['voice'] = $t_voice;
 
     // Return the response
     wp_send_json_success($response);

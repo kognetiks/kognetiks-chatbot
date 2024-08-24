@@ -223,7 +223,7 @@ function chatbot_chatgpt_upload_mp3() {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;

@@ -5,71 +5,71 @@ jQuery(document).ready(function ($) {
         // DIAG - Diagnostics - Ver 1.8.5
         // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - ENTERING');
 
-        // Access the variables passed from PHP using the chatbotSettings object - Ver 1.4.1
-        let chatbotChatgptBotNameInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_name) ? chatbotSettings.chatbot_chatgpt_bot_name : 'Kognetiks Chatbot';
-        let chatbotChatgptBotPromptInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_bot_prompt) ? chatbotSettings.chatbot_chatgpt_bot_prompt : 'Enter your question ...';
+        // Access the variables passed from PHP using the kchat_settings object - Ver 1.4.1
+        let chatbotChatgptBotNameInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_bot_name) ? kchat_settings.chatbot_chatgpt_bot_name : 'Kognetiks Chatbot';
+        let chatbotChatgptBotPromptInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_bot_prompt) ? kchat_settings.chatbot_chatgpt_bot_prompt : 'Enter your question ...';
 
-        let chatgptInitialGreetingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.initial_greeting) ? chatbotSettings.initial_greeting : 'Hello! How can I help you today?';
-        let chatgptSubsequentGreetingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_subsequent_greeting) ? chatbotSettings.chatbot_chatgpt_subsequent_greeting : 'Hello again! How can I help you?';
+        let chatgptInitialGreetingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.initial_greeting) ? kchat_settings.initial_greeting : 'Hello! How can I help you today?';
+        let chatgptSubsequentGreetingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_subsequent_greeting) ? kchat_settings.chatbot_chatgpt_subsequent_greeting : 'Hello again! How can I help you?';
 
-        let chatbotChatgptDisplayStyleInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_display_style) ? chatbotSettings.chatbot_chatgpt_display_style : 'floating';
-        let chatbotChatgptAssistantAliasInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_assistant_alias) ? chatbotSettings.chatbot_chatgpt_assistant_alias : 'primary';
+        let chatbotChatgptDisplayStyleInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_display_style) ? kchat_settings.chatbot_chatgpt_display_style : 'floating';
+        let chatbotChatgptAssistantAliasInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_assistant_alias) ? kchat_settings.chatbot_chatgpt_assistant_alias : 'primary';
 
-        let chatgptStartStatusInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbotStartStatus) ? chatbotSettings.chatbotStartStatus : 'closed';
-        let chatbotChatgptAudienceChoiceInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_audience_choice) ? chatbotSettings.chatbot_chatgpt_audience_choice : 'all';
-        let chatbotChatgptStartStatusNewVisitorInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_start_status_new_visitor) ? chatbotSettings.chatbot_chatgpt_start_status_new_visitor : 'closed';
+        let chatgptStartStatusInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbotStartStatus) ? kchat_settings.chatbotStartStatus : 'closed';
+        let chatbotChatgptAudienceChoiceInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_audience_choice) ? kchat_settings.chatbot_chatgpt_audience_choice : 'all';
+        let chatbotChatgptStartStatusNewVisitorInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_start_status_new_visitor) ? kchat_settings.chatbot_chatgpt_start_status_new_visitor : 'closed';
 
-        let chatgptDisclaimerSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_disclaimer_setting) ? chatbotSettings.chatbot_chatgpt_disclaimer_setting : 'Yes';
-        let chatgptWidthSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_width_setting) ? chatbotSettings.chatbot_chatgpt_width_setting : 'Narrow';
-        let chatgptDiagnosticsSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatgpt_diagnotics) ? chatbotSettings.chatbot_chatgpt_diagnostics : 'Off';
-        let chatgptCustomErrorMessageInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_error_message) ? chatbotSettings.chatbot_chatgpt_custom_error_message : 'Your custom error message goes here.';
+        let chatgptDisclaimerSettingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_disclaimer_setting) ? kchat_settings.chatbot_chatgpt_disclaimer_setting : 'Yes';
+        let chatgptWidthSettingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_width_setting) ? kchat_settings.chatbot_chatgpt_width_setting : 'Narrow';
+        let chatgptDiagnosticsSettingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatgpt_diagnotics) ? kchat_settings.chatbot_chatgpt_diagnostics : 'Off';
+        let chatgptCustomErrorMessageInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_error_message) ? kchat_settings.chatbot_chatgpt_custom_error_message : 'Your custom error message goes here.';
 
         // Avatar Setting - Ver 1.5.0
-        let chatgptAvatarIconSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_avatar_icon_setting) ? chatbotSettings.chatbot_chatgpt_avatar_icon_setting : 'icon-001.png';
-        let chatgptAvatarIconURLSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_avatar_icon_url_setting) ? chatbotSettings.chatbot_chatgpt_avatar_icon_url_setting : '';
-        let chatgptCustomAvatarIconSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_avatar_icon_setting) ? chatbotSettings.chatbot_chatgpt_custom_avatar_icon_setting : '';
-        let chatgptAvatarGreetingSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_avatar_greeting_setting) ? chatbotSettings.chatbot_chatgpt_avatar_greeting_setting : 'Great to see you today! How can I help you?';
+        let chatgptAvatarIconSettingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_avatar_icon_setting) ? kchat_settings.chatbot_chatgpt_avatar_icon_setting : 'icon-001.png';
+        let chatgptAvatarIconURLSettingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_avatar_icon_url_setting) ? kchat_settings.chatbot_chatgpt_avatar_icon_url_setting : '';
+        let chatgptCustomAvatarIconSettingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_avatar_icon_setting) ? kchat_settings.chatbot_chatgpt_custom_avatar_icon_setting : '';
+        let chatgptAvatarGreetingSettingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_avatar_greeting_setting) ? kchat_settings.chatbot_chatgpt_avatar_greeting_setting : 'Great to see you today! How can I help you?';
 
-        let chatgptEnableCustomButtonsInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_enable_custom_buttons) ? chatbotSettings.chatbot_chatgpt_enable_custom_buttons : 'Off';
-        let chatgptCustomButtonName1Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_1) ? chatbotSettings.chatbot_chatgpt_custom_button_name_1 : '';
-        let chatgptCustomButtonURL1Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_1) ? chatbotSettings.chatbot_chatgpt_custom_button_url_1 : '';
-        let chatgptCustomButtonName2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_2) ? chatbotSettings.chatbot_chatgpt_custom_button_name_2 : '';
-        let chatgptCustomButtonURL2Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_2) ? chatbotSettings.chatbot_chatgpt_custom_button_url_2 : '';
-        let chatgptCustomButtonName3Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_3) ? chatbotSettings.chatbot_chatgpt_custom_button_name_3 : '';
-        let chatgptCustomButtonURL3Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_3) ? chatbotSettings.chatbot_chatgpt_custom_button_url_3 : '';
-        let chatgptCustomButtonName4Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_name_4) ? chatbotSettings.chatbot_chatgpt_custom_button_name_4 : '';
-        let chatgptCustomButtonURL4Input = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_custom_button_url_4) ? chatbotSettings.chatbot_chatgpt_custom_button_url_4 : '';
+        let chatgptEnableCustomButtonsInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_enable_custom_buttons) ? kchat_settings.chatbot_chatgpt_enable_custom_buttons : 'Off';
+        let chatgptCustomButtonName1Input = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_button_name_1) ? kchat_settings.chatbot_chatgpt_custom_button_name_1 : '';
+        let chatgptCustomButtonURL1Input = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_button_url_1) ? kchat_settings.chatbot_chatgpt_custom_button_url_1 : '';
+        let chatgptCustomButtonName2Input = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_button_name_2) ? kchat_settings.chatbot_chatgpt_custom_button_name_2 : '';
+        let chatgptCustomButtonURL2Input = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_button_url_2) ? kchat_settings.chatbot_chatgpt_custom_button_url_2 : '';
+        let chatgptCustomButtonName3Input = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_button_name_3) ? kchat_settings.chatbot_chatgpt_custom_button_name_3 : '';
+        let chatgptCustomButtonURL3Input = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_button_url_3) ? kchat_settings.chatbot_chatgpt_custom_button_url_3 : '';
+        let chatgptCustomButtonName4Input = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_button_name_4) ? kchat_settings.chatbot_chatgpt_custom_button_name_4 : '';
+        let chatgptCustomButtonURL4Input = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_custom_button_url_4) ? kchat_settings.chatbot_chatgpt_custom_button_url_4 : '';
 
         // Allow file uploads - Ver 1.7.6
-        let chatgptAllowFileUploadsInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_allow_file_uploads) ? chatbotSettings.chatbot_chatgpt_allow_file_uploads : 'No';
+        let chatgptAllowFileUploadsInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_allow_file_uploads) ? kchat_settings.chatbot_chatgpt_allow_file_uploads : 'No';
 
         // Timeout Setting - Ver 1.8.8
-        let chatgptTimeoutSettingInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_timeout_setting) ? chatbotSettings.chatbot_chatgpt_timeout_setting : '240';
+        let chatgptTimeoutSettingInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_timeout_setting) ? kchat_settings.chatbot_chatgpt_timeout_setting : '240';
 
         // Voice Option - Ver 1.9.5
-        let chatgptVoiceOptionInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_voice_option) ? chatbotSettings.chatbot_chatgpt_voice_option : 'Off';
+        let chatgptVoiceOptionInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_voice_option) ? kchat_settings.chatbot_chatgpt_voice_option : 'Off';
 
         // Audio Output Option - Ver 1.9.5
-        let chatgptAudioOutputOptionInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_audio_output_option) ? chatbotSettings.chatbot_chatgpt_audio_output_option : 'Off';
+        let chatgptAudioOutputOptionInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_audio_output_option) ? kchat_settings.chatbot_chatgpt_audio_output_option : 'Off';
 
         // Force Page Reload on Conversation Cleared - Ver 2.0.4
-        let chatgptForcePageReloadInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_force_page_reload) ? chatbotSettings.chatbot_chatgpt_force_page_reload : 'No';
+        let chatgptForcePageReloadInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_force_page_reload) ? kchat_settings.chatbot_chatgpt_force_page_reload : 'No';
 
         // Conversation Continuation - Ver 2.0.7
-        let chatgptConversationContinuationInput = (typeof chatbotSettings !== 'undefined' && chatbotSettings.chatbot_chatgpt_conversation_continuation) ? chatbotSettings.chatbot_chatgpt_conversation_continuation : 'Off';
+        let chatgptConversationContinuationInput = (typeof kchat_settings !== 'undefined' && kchat_settings.chatbot_chatgpt_conversation_continuation) ? kchat_settings.chatbot_chatgpt_conversation_continuation : 'Off';
     
         // DIAG - Diagnostics - Ver 2.0.5
         // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Before localStorage.set Item loop');
 
-        Object.keys(chatbotSettings).forEach((key) => {
+        Object.keys(kchat_settings).forEach((key) => {
 
             // Skip the display style setting - Ver 2.0.4
             if (key !== 'chatbot_chatgpt_display_style') {
-                localStorage.setItem(key, chatbotSettings[key]);
+                localStorage.setItem(key, kchat_settings[key]);
             }
             
             // DIAG - Diagnostics - Ver 1.8.5
-            // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Key: ' + key + ' Value: ' + chatbotSettings[key]);
+            // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Key: ' + key + ' Value: ' + kchat_settings[key]);
 
         });
 
