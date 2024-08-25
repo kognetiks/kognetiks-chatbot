@@ -72,11 +72,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'get_the_id(): ' . get_the_id());
     // back_trace( 'NOTICE', '$model: ' . $model);
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
-    // back_trace( 'NOTICE', '========================================');
-    // foreach ($atts as $key => $value) {
-    //   back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
-    // }
-    // back_trace( 'NOTICE', '========================================');
+    back_trace( 'NOTICE', '========================================');
+    foreach ($atts as $key => $value) {
+      back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    }
    
     // BELT & SUSPENDERS - Ver 1.9.4
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
@@ -185,7 +184,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false ) {
 
         // Initialize the Assistant details
-        $assistant_details = array();
+        $assistant_details = [];
         
         // Try to fetch the Assistant details from the Assistant table using the passed assistant $atts value
         $assistantCommonName = $atts['assistant'];
@@ -258,11 +257,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         if (in_array($atts['style'], $valid_styles)) {
             // Sanitize and set the display style
             $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
+            back_trace( 'NOTICE', 'Display style: ' . $chatbot_chatgpt_display_style);
         } else {
             // Handle invalid style by logging an error or taking other actions
-            // For now, we'll keep the default style
-            // Optional: Log the error with the invalid style value
+            $chatbot_chatgpt_display_style = 'floating'; // default value
             // back_trace( 'ERROR', 'Invalid display style: ' . sanitize_text_field($atts['style']));
+            // back_trace( 'ERROR', 'Invalid display style: ' . $chatbot_chatgpt_display_style);
         }
         // Remove the 'style' key from the $atts array
         unset($atts['style']);
@@ -796,7 +796,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'ERROR', '$kchat_settings[\'chatbot_chatgpt_audience_choice\']: ' . $kchat_settings['chatbot_chatgpt_audience_choice']);
 
     // Last chance to set localStorage - Ver 2.0.5
+    back_trace( 'NOTICE', 'BEFORE: $assistant_details[\'style\']: ' . $assistant_details['style']);
     $assistant_details['style'] = !empty($assistant_details['style']) ? $assistant_details['style'] : esc_attr(get_option('chatbot_chatgpt_display_style', 'floating'));
+    back_trace( 'NOTICE', 'AFTER: $assistant_details[\'style\']: ' . $assistant_details['style']);
     $kchat_settings['chatbot_chatgpt_display_style'] = $assistant_details['style'];
 
     $assistant_details['audience'] = !empty($assistant_details['audience']) ? $assistant_details['audience'] : esc_attr(get_option('chatbot_chatgpt_audience_choice', 'All'));

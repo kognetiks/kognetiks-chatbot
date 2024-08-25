@@ -18,37 +18,22 @@ jQuery(document).ready(function ($) {
     }
 
     let chatGptChatBot = $('#chatbot-chatgpt').hide();
-
     let messageInput = $('#chatbot-chatgpt-message');
-    
     let conversation = $('#chatbot-chatgpt-conversation');
-
     let submitButton = $('#chatbot-chatgpt-submit');
-    let uploadfileButton = $('#chatbot-chatgpt-upload-file');
     let chatGptOpenButton = $('#chatgpt-open-btn');
 
-    let chatbotChatgptBotName = localStorage.getItem('chatbot_chatgpt_bot_name') || 'Kognetiks Chatbot';
-    let chatbotChatgptBotPrompt = localStorage.getItem('chatbot_chatgpt_bot_prompt') || 'Enter your question ...';
+    let chatbot_chatgpt_display_style = kchat_settings['chatbot_chatgpt_display_style'] || 'floating';
+    let chatbot_chatgpt_width_setting = kchat_settings['chatbot_chatgpt_width_setting'] || 'Narrow';
 
-    let chatbot_chatgpt_display_style = localStorage.getItem('chatbot_chatgpt_display_style') || 'floating';
-    let chatbot_chatgpt_assistant_alias = localStorage.getItem('chatbot_chatgpt_assistant_alias') || 'original';
+    let initialGreeting = kchat_settings['chatbot_chatgpt_initial_greeting'] || 'Hello! How can I help you today?';
+    let subsequentGreeting = kchat_settings['chatbot_chatgpt_subsequent_greeting'] || 'Hello again! How can I help you?';
 
-    let initialGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting') || 'Hello! How can I help you today?';
-    let subsequentGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting') || 'Hello again! How can I help you?';
+    let chatbot_chatgpt_start_status = kchat_settings['chatbot_chatgpt_start_status'] || 'closed';
+    let chatbot_chatgpt_start_status_new_visitor = kchat_settings['chatbot_chatgpt_start_status_new_visitor'] || 'closed';
 
-    let chatbot_chatgpt_start_status = localStorage.getItem('chatbot_chatgpt_start_status') || 'closed';
-    let chatbot_chatgpt_start_status_new_visitor = localStorage.getItem('chatbot_chatgpt_start_status_new_visitor') || 'closed';
-
-    let chatbot_chatgpt_disclaimer_setting = localStorage.getItem('chatbot_chatgpt_disclaimer_setting') || 'Yes';
-    let chatbot_chatgpt_width_setting = localStorage.getItem('chatbot_chatgpt_width_setting') || 'Narrow';
-
-    // Add variables for the timeout setting - Ver 1.8.8
-    let timeout_setting = localStorage.getItem('chatbot_chatgpt_timeout_setting') || 240;
-    // console.log('Chatbot: NOTICE: timeout_setting: ' + timeout_setting);
-    // Convert the timeout setting to a number
-    timeout_setting = parseInt(timeout_setting);
     // Convert the timeout setting to milliseconds
-    timeout_setting = timeout_setting * 1000;
+    let timeout_setting = (parseInt(kchat_settings['chatbot_chatgpt_timeout_setting']) || 240) * 1000;
 
     plugins_url = kchat_settings['plugins_url'];
 
@@ -207,8 +192,8 @@ jQuery(document).ready(function ($) {
     chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
     // Avatar and Custom Message - Ver 1.5.0 - Upgraded - Ver 2.0.3 - 2024 05 28
-    let selectedAvatar = encodeURIComponent(localStorage.getItem('chatbot_chatgpt_avatar_icon_setting') || '');
-    let customAvatar = localStorage.getItem('chatbot_chatgpt_custom_avatar_icon_setting') || '';
+    let selectedAvatar = kchat_settings['chatbot_chatgpt_avatar_icon_setting'] || '';
+    let customAvatar = kchat_settings['chatbot_chatgpt_custom_avatar_icon_setting'] || '';
 
     customAvatar = DOMPurify.sanitize(customAvatar); // Sanitize the custom avatar URL
     // customAvatar = document.createTextNode(customAvatar); // Create a text node from the custom avatar URL
@@ -248,7 +233,7 @@ jQuery(document).ready(function ($) {
             .attr('src', avatarPath);
 
         // Get the stored greeting message. If it's not set, default to a custom value.
-        let avatarGreeting = localStorage.getItem('chatbot_chatgpt_avatar_greeting_setting') || 'Howdy!!! Great to see you today! How can I help you?';
+        let avatarGreeting = kchat_settings['chatbot_chatgpt_avatar_greeting_setting'] || 'Howdy!!! Great to see you today! How can I help you?';
 
         // Create a bubble with the greeting message
         // Using .text() for safety, as it automatically escapes HTML
@@ -287,7 +272,7 @@ jQuery(document).ready(function ($) {
         let session_id = kchat_settings.session_id;
         let assistant_id = kchat_settings.assistant_id;
         let thread_id = kchat_settings.thread_id;
-        let chatbot_chatgpt_force_page_reload = localStorage.getItem('chatbot_chatgpt_force_page_reload');
+        let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
 
         isFirstTime = !localStorage.getItem('chatbot_chatgpt_opened') || false;
 
@@ -299,7 +284,7 @@ jQuery(document).ready(function ($) {
         if (isFirstTime) {
 
             // Explicitly check for null to determine if a value exists for the key
-            let storedGreeting = localStorage.getItem('chatbot_chatgpt_initial_greeting');
+            let storedGreeting = kchat_settings['chatbot_chatgpt_initial_greeting'];
             // initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello! How can I help you today?';
             if (storedGreeting != null) {
                 initialGreeting = storedGreeting;
@@ -326,7 +311,7 @@ jQuery(document).ready(function ($) {
 
         } else {
 
-            let storedGreeting = localStorage.getItem('chatbot_chatgpt_subsequent_greeting');
+            let storedGreeting = kchat_settings['chatbot_chatgpt_subsequent_greeting'];
             // initialGreeting = storedGreeting !== null ? storedGreeting : 'Hello again! How can I help you?';
             if (storedGreeting != null) {
                 initialGreeting = storedGreeting;
@@ -383,7 +368,7 @@ jQuery(document).ready(function ($) {
 
         // Check if the message starts with "Error" or "Oops" - Ver 2.0.3
         const defaultCustomErrorMessage = 'Your custom error message goes here.';
-        let customErrorMessage = localStorage.getItem('chatbot_chatgpt_custom_error_message');
+        let customErrorMessage = kchat_settings['chatbot_chatgpt_custom_error_message'] || 'Your custom error message goes here.';
     
         if (typeof message !== 'undefined' && message !== null) {
             if (message.startsWith('Error')) {
@@ -627,7 +612,7 @@ jQuery(document).ready(function ($) {
         let session_id = kchat_settings.session_id;
         let assistant_id = kchat_settings.assistant_id;
         let thread_id = kchat_settings.thread_id;
-        let chatbot_chatgpt_force_page_reload = localStorage.getItem('chatbot_chatgpt_force_page_reload');
+        let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
 
         console.log('Chatbot: NOTICE: user_id: ' + user_id);
         console.log('Chatbot: NOTICE: page_id: ' + page_id);
@@ -1086,7 +1071,7 @@ jQuery(document).ready(function ($) {
         let session_id = kchat_settings.session_id;
         let assistant_id = kchat_settings.assistant_id;
         let thread_id = kchat_settings.thread_id;
-        let chatbot_chatgpt_force_page_reload = localStorage.getItem('chatbot_chatgpt_force_page_reload');
+        let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
 
         // DIAG - Diagnostics - Ver 1.9.1
         // console.log('Chatbot: NOTICE: assistant_id: ' + assistant_id);
@@ -1327,7 +1312,7 @@ jQuery(document).ready(function ($) {
         let session_id = kchat_settings.session_id;
         let assistant_id = kchat_settings.assistant_id;
         let thread_id = kchat_settings.thread_id;
-        let chatbot_chatgpt_force_page_reload = localStorage.getItem('chatbot_chatgpt_force_page_reload');
+        let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
 
         // Removed in Ver 1.9.3
         // storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
