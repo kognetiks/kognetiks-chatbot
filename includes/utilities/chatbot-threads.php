@@ -34,6 +34,11 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
     // back_trace( 'NOTICE', 'SET $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'SET $assistant_id: ' . $assistant_id);
 
+    // Initialize $kchat_settings if it is null
+    if (!is_array($kchat_settings)) {
+        $kchat_settings = [];
+    }
+
     $kchat_settings = array_merge($kchat_settings, array(
         'user_id' => $user_id,
         'page_id' => $page_id,
@@ -81,6 +86,11 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
     // back_trace( 'NOTICE', 'GET PART 1 $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'GET PART 1 $assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', 'GET PART 1 $additional_instructions: ' . $additional_instructions);
+
+    // Initialize $kchat_settings if it is null
+    if (!is_array($kchat_settings)) {
+        $kchat_settings = [];
+    }
 
     $kchat_settings = array_merge($kchat_settings, array(
         'user_id' => $user_id,
@@ -149,6 +159,11 @@ function delete_chatbot_chatgpt_threads($user_id, $page_id) {
     // back_trace( 'NOTICE', 'DEL $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'DEL $assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', 'DEL $additional_instructions: ' . $additional_instructions);
+
+    // Initialize $kchat_settings if it is null
+    if (!is_array($kchat_settings)) {
+        $kchat_settings = [];
+    }
 
     $kchat_settings = array_merge($kchat_settings, array(
         'user_id' => $user_id,

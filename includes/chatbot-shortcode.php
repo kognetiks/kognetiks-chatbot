@@ -441,6 +441,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $additional_instructions = array_key_exists('instructions', $atts) ? sanitize_text_field($atts['instructions']) : '';
         $additional_instructions = array_key_exists('additional_instructions', $atts) ? sanitize_text_field($atts['additional_instructions']) : '';
         $additional_details['additional_instructions'] = $additional_instructions;
+        $kchat_settings['additional_instructions'] = $additional_instructions;
     }
 
     //Do this for additional instructions - Ver 2.0.9
@@ -504,30 +505,24 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
+    // Check that $page_id is not empty or null - Ver 2.1.1.1
+    if (empty($page_id) || is_null($page_id)) {
+        $page_id = 999999;
+    }
+
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
     
     set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null);
-    // back_trace( 'NOTICE', 'assistant_id: ' . $assistant_id);
     set_chatbot_chatgpt_transients( 'thread_id', $thread_id, $user_id, $page_id, $session_id, null);
-    // back_trace( 'NOTICE', 'thread_id: ' . $thread_id);
 
     set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null);
 
     // Localize the data for the chatbot - Ver 2.1.1.1
     $kchat_settings = array_merge($kchat_settings, array(
         'chatbot-chatgpt-version' => CHATBOT_CHATGPT_VERSION,
-        'plugins_url' => plugins_url('../', __FILE__),
-        'ajax_url' => admin_url('admin-ajax.php')
-    ));
-
-    // Check that $page_id is not empty or null - Ver 2.1.1.1
-    if (empty($page_id) || is_null($page_id)) {
-        $page_id = 999999;
-    }
-
-    // DUPLICATE ADDED THIS HERE - VER 1.9.1
-    $kchat_settings = array_merge($kchat_settings, array(
+        'plugins_url' => plugins_url('/', dirname(__FILE__)),
+        'ajax_url' => admin_url('admin-ajax.php'),
         'user_id' => $user_id,
         'page_id' => $page_id,
         'session_id' => $session_id,
@@ -536,8 +531,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'additional_instructions' => $additional_instructions,
         'model' => $model,
         'voice' => $voice,
-    ));
-    
+        'chatbot_chatgpt_timeout_setting' => esc_attr(get_option('chatbot_chatgpt_timeout_setting', '240')),
+        'chatbot_chatgpt_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', '')),
+        'chatbot_chatgpt_custom_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', '')),
+        'chatbot_chatgpt_avatar_greeting_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_greeting_setting', 'Howdy!!! Great to see you today! How can I help you?')),
+        'chatbot_chatgpt_force_page_reload' => esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No')),
+        'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
+        'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
+    ));   
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
@@ -551,10 +552,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
     // back_trace( 'NOTICE', '$voice: ' . $voice);
     // back_trace( 'NOTICE', '$model: ' . $model);
-
-    // Add $assistant_id and $thread_id to $kchat_settings - Ver 2.0.6 - 2024 07 10
-    $kchat_settings['assistant_id'] = $assistant_id;
-    $kchat_settings['thread_id'] = $thread_id;
 
     // Retrieve the bot name - Ver 2.0.5
     $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'Yes'));
@@ -796,10 +793,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'ERROR', '$kchat_settings[\'chatbot_chatgpt_audience_choice\']: ' . $kchat_settings['chatbot_chatgpt_audience_choice']);
 
     // Last chance to set localStorage - Ver 2.0.5
-    back_trace( 'NOTICE', 'BEFORE: $assistant_details[\'style\']: ' . $assistant_details['style']);
-    $assistant_details['style'] = !empty($assistant_details['style']) ? $assistant_details['style'] : esc_attr(get_option('chatbot_chatgpt_display_style', 'floating'));
-    back_trace( 'NOTICE', 'AFTER: $assistant_details[\'style\']: ' . $assistant_details['style']);
-    $kchat_settings['chatbot_chatgpt_display_style'] = $assistant_details['style'];
+    // back_trace( 'NOTICE', 'BEFORE: $assistant_details[\'style\']: ' . $assistant_details['style']);
+    // $assistant_details['style'] = !empty($assistant_details['style']) ? $assistant_details['style'] : esc_attr(get_option('chatbot_chatgpt_display_style', 'floating'));
+    // back_trace( 'NOTICE', 'AFTER: $assistant_details[\'style\']: ' . $assistant_details['style']);
+    // $kchat_settings['chatbot_chatgpt_display_style'] = $assistant_details['style'];
 
     $assistant_details['audience'] = !empty($assistant_details['audience']) ? $assistant_details['audience'] : esc_attr(get_option('chatbot_chatgpt_audience_choice', 'All'));
     $kchat_settings['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];

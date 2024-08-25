@@ -137,7 +137,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
 
                                 $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
                                 echo '<td style="padding: 15px;">';
-                                echo '<img src="' . plugins_url('../../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:60px;height:60px;cursor:pointer;"/>';
+                                echo '<img src="' . plugins_url('assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:60px;height:60px;cursor:pointer;"/>';
                                 echo '</td>';
                                 $iconIndex++;
                             }
