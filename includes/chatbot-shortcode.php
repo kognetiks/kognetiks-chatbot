@@ -572,21 +572,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     }
 
-    // back_trace( 'NOTICE', '========================================');
-    // log each $kchat_settings key and value
-    // foreach ($kchat_settings as $key => $value) {
-    //     back_trace( 'NOTICE', '$kchat_settings - Key: ' . $key . ' Value: ' . $value);
-    // }
-
-    // Original wp_localize_script call
-    // wp_localize_script('chatbot-chatgpt-local', 'kchat_settings', $kchat_settings);
-    // Refactored wp_localize_script call - Ver 2.0.5 - 2024 07 06
     $kchat_settings['chatbot-chatgpt-version'] = CHATBOT_CHATGPT_VERSION;
     $kchat_settings_json = wp_json_encode($kchat_settings);
-    wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
-
-    // DIAG - Diagnostics - Ver 2.0.5
-    // back_trace( 'NOTICE', '$bot_name: ' . $bot_name);
+    $escaped_kchat_settings_json = esc_js($kchat_settings_json); 
+    wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $escaped_kchat_settings_json . '; } else { kchat_settings = ' . $escaped_kchat_settings_json . '; }', 'before');
 
     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
 
@@ -770,9 +759,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['subsequent_greeting'] = $modified_greetings['subsequent_greeting'];
     }
 
-    // back_trace( 'NOTICE', 'AT 746 - $assistant_details[\'initial_greeting\']: ' . $assistant_details['initial_greeting']);
-    // back_trace( 'NOTICE', 'AT 747 - $assistant_details[\'subsequent_greeting\']: ' . $assistant_details['subsequent_greeting']);
-
     $assistant_details['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
     $kchat_settings['chatbot_chatgpt_initial_greeting'] = $assistant_details['initial_greeting'];
 
@@ -781,9 +767,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // DIAG - Diagnostics - Ver 2.0.5
     // back_trace( 'NOTICE', '$modified_greetings: ' . print_r($modified_greetings, true));
-
-    // REMOVED - Ver 2.0.5
-    // chatbot_chatgpt_shortcode_enqueue_script();
 
     // DiAG - Diagnostics - Ver 2.0.9
     // back_trace( 'ERROR', '========================================');
@@ -847,12 +830,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // DIAG - Diagnostics - Ver 2.1.0
     // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$atts: ' . print_r($atts, true));
-    back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
     // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
+    back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
 
-    // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
-    // Output the script to set localStorage keys
-    // ob_start(); // MOVED TO TOP OF FUNCTION - Ver 2.1.0 - 2024 08 21
     ?>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {

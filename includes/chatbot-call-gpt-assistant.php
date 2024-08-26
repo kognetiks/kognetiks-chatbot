@@ -658,7 +658,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // Step 2: Get The Thread ID
         // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
         $thread_id = $assistants_response["id"];
-        $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024 08 26
+        $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024-08-26
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         // back_trace( 'NOTICE', '$assistant_id ' . $assistant_id);
