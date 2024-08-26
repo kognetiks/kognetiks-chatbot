@@ -775,7 +775,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     if (isset($assistants_response["id"])) {
         $runId = $assistants_response["id"];
     } else {
-        // back_trace( 'ERROR', '\'$runId\' key not found in response');
+        // back_trace( 'ERROR', 'runId key not found in response');
         return "Error: 'id' key not found in response.";
     }
     // DIAG - Print the response

@@ -955,7 +955,7 @@ jQuery(document).ready(function ($) {
         if (hasDisallowedFile) {
             return;
         }
-        // console.log('Chatbot: NOTICE: Files selected ', fileField.files);
+        // console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_files');
     
         $.ajax({
@@ -1026,7 +1026,7 @@ jQuery(document).ready(function ($) {
             return;
 
         }
-        // console.log('Chatbot: NOTICE: Files selected ', fileField.files);
+        // console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_mp3');
     
         $.ajax({

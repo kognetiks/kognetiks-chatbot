@@ -1024,7 +1024,7 @@ function kchat_get_plugin_version() {
     $plugin_version = $plugin_data['chatbot-chatgpt-version'];
     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
     // DIAG - Log the plugin version
-    // back_trace( 'NOTICE', 'Plugin version '. $plugin_version);
+    // back_trace( 'NOTICE', 'Plugin version ' . $plugin_version);
 
     return $plugin_version;
 
