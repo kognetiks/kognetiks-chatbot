@@ -23,17 +23,17 @@ jQuery(document).ready(function ($) {
     let submitButton = $('#chatbot-chatgpt-submit');
     let chatGptOpenButton = $('#chatgpt-open-btn');
 
-    let chatbot_chatgpt_display_style = kchat_settings['chatbot_chatgpt_display_style'] || 'floating';
-    let chatbot_chatgpt_width_setting = kchat_settings['chatbot_chatgpt_width_setting'] || 'Narrow';
+    let chatbot_chatgpt_display_style = kchat_settings.chatbot_chatgpt_display_style || 'floating';
+    let chatbot_chatgpt_width_setting = kchat_settings.chatbot_chatgpt_width_setting || 'Narrow';
 
-    let initialGreeting = kchat_settings['chatbot_chatgpt_initial_greeting'] || 'Hello! How can I help you today?';
-    let subsequentGreeting = kchat_settings['chatbot_chatgpt_subsequent_greeting'] || 'Hello again! How can I help you?';
+    let initialGreeting = kchat_settings.chatbot_chatgpt_initial_greeting || 'Hello! How can I help you today?';
+    let subsequentGreeting = kchat_settings.chatbot_chatgpt_subsequent_greeting || 'Hello again! How can I help you?';
 
-    let chatbot_chatgpt_start_status = kchat_settings['chatbot_chatgpt_start_status'] || 'closed';
-    let chatbot_chatgpt_start_status_new_visitor = kchat_settings['chatbot_chatgpt_start_status_new_visitor'] || 'closed';
+    let chatbot_chatgpt_start_status = kchat_settings.chatbot_chatgpt_start_status || 'closed';
+    let chatbot_chatgpt_start_status_new_visitor = kchat_settings.chatbot_chatgpt_start_status_new_visitor || 'closed';
 
     // Convert the timeout setting to milliseconds
-    let timeout_setting = (parseInt(kchat_settings['chatbot_chatgpt_timeout_setting']) || 240) * 1000;
+    let timeout_setting = (parseInt(kchat_settings.chatbot_chatgpt_timeout_setting) || 240) * 1000;
 
     plugins_url = kchat_settings['plugins_url'];
 
@@ -192,8 +192,8 @@ jQuery(document).ready(function ($) {
     chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
 
     // Avatar and Custom Message - Ver 1.5.0 - Upgraded - Ver 2.0.3 - 2024 05 28
-    let selectedAvatar = kchat_settings['chatbot_chatgpt_avatar_icon_setting'] || '';
-    let customAvatar = kchat_settings['chatbot_chatgpt_custom_avatar_icon_setting'] || '';
+    let selectedAvatar = kchat_settings.chatbot_chatgpt_avatar_icon_setting || '';
+    let customAvatar = kchat_settings.chatbot_chatgpt_custom_avatar_icon_setting || '';
 
     customAvatar = DOMPurify.sanitize(customAvatar); // Sanitize the custom avatar URL
     // customAvatar = document.createTextNode(customAvatar); // Create a text node from the custom avatar URL
@@ -210,14 +210,14 @@ jQuery(document).ready(function ($) {
     } else if (selectedAvatar && selectedAvatar !== 'icon-000.png') {
         // Valid avatar setting
         if (isValidAvatarSetting(selectedAvatar)) {
-            avatarPath = plugins_url + '/assets/icons/' + selectedAvatar;
+            avatarPath = plugins_url + 'assets/icons/' + selectedAvatar;
         } else {
             // Invalid avatar setting
             // console.error('Chatbot: ERROR: selectedAvatar: ' + selectedAvatar);
-            avatarPath = plugins_url + '/assets/icons/icon-000.png';
+            avatarPath = plugins_url + 'assets/icons/icon-000.png';
         }
     } else {
-        avatarPath = plugins_url + '/assets/icons/icon-000.png'; // Default avatar
+        avatarPath = plugins_url + 'assets/icons/icon-000.png'; // Default avatar
     }
 
     // IDEA - Add option to suppress avatar greeting in setting options page
@@ -226,7 +226,7 @@ jQuery(document).ready(function ($) {
 
     // Updated to address cross-site scripting - Ver 1.8.1
     // If an avatar is selected, and it's not 'icon-000.png', use the avatar
-    if (avatarPath !== plugins_url + '/assets/icons/icon-000.png') {
+    if (avatarPath !== plugins_url + 'assets/icons/icon-000.png') {
         avatarImg = $('<img>')
             .attr('id', 'chatbot_chatgpt_avatar_icon_setting')
             .attr('class', 'chatbot-avatar')
@@ -272,7 +272,7 @@ jQuery(document).ready(function ($) {
         let session_id = kchat_settings.session_id;
         let assistant_id = kchat_settings.assistant_id;
         let thread_id = kchat_settings.thread_id;
-        let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
+        let chatbot_chatgpt_force_page_reload = kchat_settings.chatbot_chatgpt_force_page_reload || 'No';
 
         isFirstTime = !localStorage.getItem('chatbot_chatgpt_opened') || false;
 
@@ -364,7 +364,7 @@ jQuery(document).ready(function ($) {
         let session_id = kchat_settings.session_id;
         let assistant_id = kchat_settings.assistant_id;
         let thread_id = kchat_settings.thread_id;
-        let chatbot_chatgpt_force_page_reload = localStorage.getItem('chatbot_chatgpt_force_page_reload');
+        let chatbot_chatgpt_force_page_reload = kchat_settings.chatbot_chatgpt_force_page_reload || 'No';
 
         // Check if the message starts with "Error" or "Oops" - Ver 2.0.3
         const defaultCustomErrorMessage = 'Your custom error message goes here.';
@@ -641,7 +641,7 @@ jQuery(document).ready(function ($) {
                 console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
                 botResponse = response.data;
                 // Revision to how disclaimers are handled - Ver 1.5.0
-                if (localStorage.getItem('chatbot_chatgpt_disclaimer_setting') === 'No') {
+                if (kchat_settings.chatbot_chatgpt_disclaimer_setting === 'No') {
                     const prefixes = [
                         "As an AI, ",
                         "As an AI language model, ",
@@ -664,10 +664,12 @@ jQuery(document).ready(function ($) {
             error: function (jqXHR, status, error) {
                 if(status === "timeout") {
                     // appendMessage('Error: ' + error, 'error');
+                    console.log('Chatbot: ERROR: ' + error);
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
                 } else {
                     // appendMessage('Error: ' + error, 'error')
+                    console.log('Chatbot: ERROR: ' + error);
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
                     botResponse = '';
                 }
@@ -844,7 +846,7 @@ jQuery(document).ready(function ($) {
             data: {
                 action: 'chatbot_chatgpt_read_aloud',
                 message: lastMessage,
-                voice: localStorage.getItem('chatbot_chatgpt_voice_option') || 'alloy',  // Default voice: 'alloy',
+                voice: kchat_settings.chatbot_chatgpt_voice_option || 'alloy',
                 user_id: kchat_settings.user_id,
                 page_id: kchat_settings.page_id,
                 session_id: kchat_settings.session_id,
@@ -1100,7 +1102,7 @@ jQuery(document).ready(function ($) {
                 // console.log('Chatbot: SUCCESS:', response.data);
                 appendMessage( response.data, 'bot');
                 // Check localStorage setting and force a page reload if equal to 'Yes' - Ver 2.0.4
-                if (localStorage.getItem('chatbot_chatgpt_force_page_reload') === 'Yes') {
+                if (kchat_settings.chatbot_chatgpt_force_page_reload === 'Yes') {
                     location.reload(); // Force a page reload after clearing the conversation
                 }
             },
@@ -1312,7 +1314,7 @@ jQuery(document).ready(function ($) {
         let session_id = kchat_settings.session_id;
         let assistant_id = kchat_settings.assistant_id;
         let thread_id = kchat_settings.thread_id;
-        let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
+        let chatbot_chatgpt_force_page_reload = kchat_settings.chatbot_chatgpt_force_page_reload || 'No';
 
         // Removed in Ver 1.9.3
         // storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
@@ -1322,7 +1324,7 @@ jQuery(document).ready(function ($) {
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
 
         // If conversation_continuation is enabled, load the conversation from local storage - Ver 2.0.7
-        if (localStorage.getItem('chatbot_chatgpt_conversation_continuation') === 'On') {
+        if (kchat_settings.chatbot_chatgpt_conversation_continuation === 'On') {
             storedConversation = sessionStorage.getItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
             
             // Check if storedConversation is not null before trying to replace

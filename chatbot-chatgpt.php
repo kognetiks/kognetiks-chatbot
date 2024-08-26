@@ -35,6 +35,7 @@ defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.1.1
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
+define('CHATBOT_CHATGPT_PLUGIN_DIR_URL', plugins_url('/', __FILE__));
 
 // Declare Globals
 global $wpdb;
@@ -266,8 +267,8 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     // Enqueue the scripts
     wp_enqueue_script('jquery');
-    wp_enqueue_script('greetings', plugins_url('assets/js/greetings.js', __FILE__), array('jquery'), CHATBOT_CHATGPT_VERSION, true);
-    wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), CHATBOT_CHATGPT_VERSION, true);
+    // wp_enqueue_script('greetings', plugins_url('assets/js/greetings.js', __FILE__), array('jquery'), CHATBOT_CHATGPT_VERSION, true); // REMOVED IN VER 2.1.1.1 - 2024 08 26
+    // wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), CHATBOT_CHATGPT_VERSION, true); // REMOVED IN VER 2.1.1.1 - 2024 08 26
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), CHATBOT_CHATGPT_VERSION, true);
 
     // Enqueue DOMPurify - Ver 1.8.1
@@ -331,8 +332,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Localize the data for the chatbot - Ver 2.1.1.1
     $kchat_settings = array_merge($kchat_settings, array(
         'chatbot-chatgpt-version' => CHATBOT_CHATGPT_VERSION,
-        'plugins_url' => plugins_url('/', __FILE__),
-        'plugins_url' => plugins_url('/', dirname(__FILE__)),
+        'plugins_url' => CHATBOT_CHATGPT_PLUGIN_DIR_URL,
         'ajax_url' => admin_url('admin-ajax.php'),
         'user_id' => $user_id,
         'page_id' => $page_id,
@@ -354,7 +354,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     $kchat_settings_json = wp_json_encode($kchat_settings);
     
     wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
-    wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
+    // wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before'); // REMOVED IN VER 2.1.1.1 - 2024 08 26
     wp_add_inline_script('chatbot-chatgpt-upload-trigger-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
     
     // Enqueue the main script

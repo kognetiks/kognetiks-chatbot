@@ -85,11 +85,11 @@ function chatbot_chatgpt_localize(){
     foreach ($option_keys as $key) {
         $default_value = $defaults[$key] ?? '';
         $kchat_settings[$key] = esc_attr(get_option($key, $default_value));
-        // DIAG - Log key and value
+        // DIAG - Diagnostics - Ver 1.6.1
         // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $kchat_settings[$key]);
     }
     
-    // FIXME - REMOVED IN 2.1.1.1
+    // FIXME - REMOVED IN 2.1.1.1 - 2024-08-26
     // FIXME - WAS ADDED IN 1.6.1
     // Update localStorage - Ver 1.6.1
     // echo '<script type="text/javascript">

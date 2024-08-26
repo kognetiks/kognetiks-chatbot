@@ -521,7 +521,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Localize the data for the chatbot - Ver 2.1.1.1
     $kchat_settings = array_merge($kchat_settings, array(
         'chatbot-chatgpt-version' => CHATBOT_CHATGPT_VERSION,
-        'plugins_url' => plugins_url('/', dirname(__FILE__)),
+        'plugins_url' => CHATBOT_CHATGPT_PLUGIN_DIR_URL,
         'ajax_url' => admin_url('admin-ajax.php'),
         'user_id' => $user_id,
         'page_id' => $page_id,
@@ -858,15 +858,23 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         document.addEventListener("DOMContentLoaded", function() {
             let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
             if (kchat_settings && typeof kchat_settings === "object") {
+                // Resolve LocalStorage - Ver 2.1.1.1
+                const includeKeys = [
+                    'chatbot_chatgpt_last_reset',
+                    'chatbot_chatgpt_message_count',
+                    'chatbot_chatgpt_message_limit_setting',
+                    'chatbot_chatgpt_start_status',
+                    'chatbot_chatgpt_start_status_new_visitor',
+                    'chatbot_chatgpt_opened',
+                    'chatbot_chatgpt_last_reset'
+                ];
+                
                 Object.keys(kchat_settings).forEach(function(key) {
-                    if (key === "assistant_id" ||
-                        key === "chatbot_chatgpt_assistant_alias" ||
-                        key === "thread_id"
-                    ) {
-                        return;
+                    if (includeKeys.includes(key)) {
+                        localStorage.setItem(key, kchat_settings[key]);
+                        // DiAG - Ver 2.1.1.1
+                        // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
                     }
-                    // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
-                    localStorage.setItem(key, kchat_settings[key]);
                 });
                 // Dispatch custom event after setting localStorage keys
                 document.dispatchEvent(new Event('kchat_settingsSet'));
@@ -1336,45 +1344,32 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
 
     ?>
-    <script>
-
-            function updateChatbotLocalStorage() {
-                // Loop through the chatbot settings and set them in localStorage
-                // for use in the Chatbot
-                // Encode the chatbot settings array into JSON format for use in JavaScript
-                kchat_settings = <?php echo json_encode($kchat_settings); ?>;
+        <script type="text/javascript">
+            document.addEventListener("DOMContentLoaded", function() {
+                let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
                 if (kchat_settings && typeof kchat_settings === "object") {
+                    // Resolve LocalStorage - Ver 2.1.1.1
+                    const includeKeys = [
+                        'chatbot_chatgpt_last_reset',
+                        'chatbot_chatgpt_message_count',
+                        'chatbot_chatgpt_message_limit_setting',
+                        'chatbot_chatgpt_start_status',
+                        'chatbot_chatgpt_start_status_new_visitor',
+                        'chatbot_chatgpt_opened',
+                        'chatbot_chatgpt_last_reset'
+                    ];
+                    
                     Object.keys(kchat_settings).forEach(function(key) {
-                        // DIAG - Diagnostics - Ver 2.0.4
-                        // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
-                        localStorage.setItem(key, kchat_settings[key]);
+                        if (includeKeys.includes(key)) {
+                            localStorage.setItem(key, kchat_settings[key]);
+                            // DiAG - Ver 2.1.1.1
+                            // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
+                        }
                     });
+                    // Dispatch custom event after setting localStorage keys
+                    document.dispatchEvent(new Event('kchat_settingsSet'));
                 }
-
-                // Check if the variables are not empty before setting them in localStorage
-                if (<?php echo json_encode($style); ?> !== '') {
-                    localStorage.setItem('chatbot_chatgpt_display_style', <?php echo json_encode($style); ?>);
-                }
-
-                if (<?php echo json_encode($assistant); ?> !== '') {
-                    localStorage.setItem('chatbot_chatgpt_assistant_alias', <?php echo json_encode($assistant); ?>);
-                }
-                
-                // Preload avatar - Ver 2.0.3
-                if (<?php echo json_encode($avatar_icon_setting); ?> !== '') {
-                    localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', <?php echo json_encode($avatar_icon_setting); ?>);
-                }
-
-                if (<?php echo json_encode($custom_avatar_icon_setting); ?> !== '') {
-                    localStorage.setItem('chatbot_chatgpt_custom_avatar_icon_setting', <?php echo json_encode($custom_avatar_icon_setting); ?>);
-                }
-            }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                // Update the localStorage with the chatbot settings
-                updateChatbotLocalStorage();
-            }); 
-            
+            });
         </script>
     <?php
 

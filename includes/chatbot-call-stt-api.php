@@ -65,12 +65,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
         $api_url = 'https://api.openai.com/v1/audio/translations';
     }
 
-    // Get the URL of the plugins directory
-    $plugins_url = plugins_url();
-
-    // Get the plugin name
-    $plugin_name = plugin_basename(dirname(__FILE__, 2));
-
     // Get the audio file name
     $counter = 1;
     $audio_file_name = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);

@@ -75,14 +75,9 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     $audio_file_name = 'audio_' . generate_random_string() . '_' . date('Y-m-d_H-i-s') . '.' . $audio_format;
     $audio_file = $audio_dir_path . $audio_file_name;
 
-    // Get the URL of the plugins directory
-    $plugins_url = plugins_url();
-
-    // Get the plugin name
-    $plugin_name = plugin_basename(dirname(__FILE__, 2));
-
     // Generate the URL of the audio file
-    $audio_file_url = $plugins_url . '/' . $plugin_name . '/audio/' . $audio_file_name;
+    // $audio_file_url = $plugins_url . '/' . $plugin_name . '/audio/' . $audio_file_name;
+    $audio_file_url = plugins_url('audio/' . $audio_file_name, CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-chatgpt');
 
     $audio_output = null;
 

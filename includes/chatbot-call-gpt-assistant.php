@@ -153,11 +153,11 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '========================================');
+    back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
     // back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
     // back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));
-    // back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
+    back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
 
     // Initialize cURL session
     $ch = curl_init();
@@ -236,14 +236,12 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     }
 
     // DIAG - Diagnostics - Ver 2.0.9
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
     // back_trace( 'NOTICE', '$max_completion_tokens: ' . $max_completion_tokens);
     // back_trace( 'NOTICE', '$temperature: ' . $temperature);
     // back_trace( 'NOTICE', '$top_p: ' . $top_p);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
-
-    // DIAG - Diagnostics - Ver 2.0.1
-    // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
 
     $headers = array(
         "Content-Type: application/json",
@@ -660,6 +658,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // Step 2: Get The Thread ID
         // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
         $thread_id = $assistants_response["id"];
+        $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024 08 26
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         // back_trace( 'NOTICE', '$assistant_id ' . $assistant_id);

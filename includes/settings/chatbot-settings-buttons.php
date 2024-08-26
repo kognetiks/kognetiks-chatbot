@@ -138,8 +138,8 @@ function chatbot_chatgpt_custom_button_section_callback($args) {
 function chatbot_chatgpt_enable_custom_buttons_callback($args) {
     $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
     if ($chatbot_chatgpt_enable_custom_buttons == 'On') {
-        $chatbot_chatgpt_enable_custom_buttons = 'Floating';
-        update_option('chatbot_chatgpt_enable_custom_buttons', 'Floating');
+        $chatbot_chatgpt_enable_custom_buttons = 'Floating Only';
+        update_option('chatbot_chatgpt_enable_custom_buttons', 'Floating Only');
     } elseif ($chatbot_chatgpt_enable_custom_buttons == '') {
         $chatbot_chatgpt_enable_custom_buttons = 'Off';
     }
