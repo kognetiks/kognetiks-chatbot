@@ -53,10 +53,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // DIAG - Diagnostics - Ver 2.1.0
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', 'Shortcode tag: ' . $tag);
-    back_trace( 'NOTICE', 'Shortcode atts: ' . print_r($atts, true));
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'Shortcode tag: ' . $tag);
+    // back_trace( 'NOTICE', 'Shortcode atts: ' . print_r($atts, true));
 
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', '========================================');
@@ -72,10 +72,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'get_the_id(): ' . get_the_id());
     // back_trace( 'NOTICE', '$model: ' . $model);
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
-    back_trace( 'NOTICE', '========================================');
-    foreach ($atts as $key => $value) {
-      back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
-    }
+    // back_trace( 'NOTICE', '========================================');
+    // foreach ($atts as $key => $value) {
+    //   back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    // }
    
     // BELT & SUSPENDERS - Ver 1.9.4
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
@@ -257,7 +257,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         if (in_array($atts['style'], $valid_styles)) {
             // Sanitize and set the display style
             $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
-            back_trace( 'NOTICE', 'Display style: ' . $chatbot_chatgpt_display_style);
+            // back_trace( 'NOTICE', 'Display style: ' . $chatbot_chatgpt_display_style);
         } else {
             // Handle invalid style by logging an error or taking other actions
             $chatbot_chatgpt_display_style = 'floating'; // default value
@@ -831,7 +831,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$atts: ' . print_r($atts, true));
     // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
-    back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
+    // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
 
     ?>
     <script type="text/javascript">

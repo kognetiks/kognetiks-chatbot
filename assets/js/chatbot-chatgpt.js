@@ -12,10 +12,10 @@ jQuery(document).ready(function ($) {
     }
    
     // DIAG - Diagnostic - Ver 2.1.1.1
-    const sortedKeys = Object.keys(kchat_settings).sort();
-    for (const key of sortedKeys) {
-        console.log('Chatbot: NOTICE: kchat_settings: ' + key + ': ' + kchat_settings[key]);
-    }
+    // const sortedKeys = Object.keys(kchat_settings).sort();
+    // for (const key of sortedKeys) {
+    //     console.log('Chatbot: NOTICE: kchat_settings: ' + key + ': ' + kchat_settings[key]);
+    // }
 
     let chatGptChatBot = $('#chatbot-chatgpt').hide();
     let messageInput = $('#chatbot-chatgpt-message');
@@ -614,9 +614,9 @@ jQuery(document).ready(function ($) {
         let thread_id = kchat_settings.thread_id;
         let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
 
-        console.log('Chatbot: NOTICE: user_id: ' + user_id);
-        console.log('Chatbot: NOTICE: page_id: ' + page_id);
-        console.log('Chatbot: NOTICE: message: ' + message);
+        // console.log('Chatbot: NOTICE: user_id: ' + user_id);
+        // console.log('Chatbot: NOTICE: page_id: ' + page_id);
+        // console.log('Chatbot: NOTICE: message: ' + message);
 
         $.ajax({
             url: kchat_settings.ajax_url,
@@ -638,7 +638,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function (response) {
-                console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
+                // console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
                 botResponse = response.data;
                 // Revision to how disclaimers are handled - Ver 1.5.0
                 if (kchat_settings.chatbot_chatgpt_disclaimer_setting === 'No') {
@@ -658,18 +658,18 @@ jQuery(document).ready(function ($) {
                     }
                 }
                 // markdownToHtml - Ver 1.9.2
-                console.log('Chatbot: NOTICE: botResponse: ' + botResponse);
+                // console.log('Chatbot: NOTICE: botResponse: ' + botResponse);
                 botResponse = markdownToHtml(botResponse);
             },
             error: function (jqXHR, status, error) {
                 if(status === "timeout") {
                     // appendMessage('Error: ' + error, 'error');
-                    console.log('Chatbot: ERROR: ' + error);
+                    // console.log('Chatbot: ERROR: ' + error);
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
                 } else {
                     // appendMessage('Error: ' + error, 'error')
-                    console.log('Chatbot: ERROR: ' + error);
+                    // console.log('Chatbot: ERROR: ' + error);
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
                     botResponse = '';
                 }

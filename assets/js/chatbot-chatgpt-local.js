@@ -3,7 +3,7 @@ jQuery(document).ready(function ($) {
     function chatbot_chatgpt_localize() {
     
         // DIAG - Diagnostics - Ver 2.1.1.1
-        console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Before localStorage.set Item loop');
+        // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Before localStorage.set Item loop');
 
         // Resolve LocalStorage - Ver 2.1.1.1
         const includeKeys = [
@@ -25,19 +25,19 @@ jQuery(document).ready(function ($) {
         });
 
         // DIAG - Diagnostics - Ver 2.1.1.1
-        console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - After localStorage.set Item loop');
+        // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - After localStorage.set Item loop');
 
     }
 
     // Function to check if the chatbot shortcode is present on the page
     function isChatbotShortcodePresent() {
-        console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - isChatbotShortcodePresent: ' + document.querySelector('.chatbot-chatgpt') !== null);
+        // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - isChatbotShortcodePresent: ' + document.querySelector('.chatbot-chatgpt') !== null);
         return document.querySelector('.chatbot-chatgpt') !== null;
     }
 
     // Only call the function if the chatbot shortcode is present
     if (isChatbotShortcodePresent()) {
-        console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - isChatbotShortcodePresent: ' + isChatbotShortcodePresent());
+        // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - isChatbotShortcodePresent: ' + isChatbotShortcodePresent());
         chatbot_chatgpt_localize();
     }
 

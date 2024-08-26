@@ -56,7 +56,7 @@ function chatbot_chatgpt_download_transcript() {
     $url = plugins_url('transcripts/' . $transcriptFileName, CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-chatgpt');
 
     // DIAG - Diagnostics - Ver 1.9.9
-    back_trace( 'Notice', 'Transcript URL: ' . $url );
+    // back_trace( 'Notice', 'Transcript URL: ' . $url );
 
     wp_send_json_success($url);
 

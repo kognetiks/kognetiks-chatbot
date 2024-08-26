@@ -620,9 +620,9 @@ function chatbot_chatgpt_send_message() {
     if ($model == 'flow'){
         
         // DIAG - Diagnostics - Ver 2.1.1.1
-        back_trace( 'NOTICE', 'Using ChatGPT Flow');
-        back_trace( 'NOTICE', '$user_id ' . $user_id);
-        back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // back_trace( 'NOTICE', 'Using ChatGPT Flow');
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
 
         // Reload the model - BELT & SUSPENDERS
         $kchat_settings['model'] = $model;
@@ -657,9 +657,9 @@ function chatbot_chatgpt_send_message() {
     } elseif ($use_assistant_id == 'Yes') {
 
         // DIAG - Diagnostics - Ver 2.1.1.1
-        back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
-        back_trace( 'NOTICE', '$user_id ' . $user_id);
-        back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
         // back_trace( 'NOTICE', '$message ' . $message);
 
 
@@ -718,9 +718,9 @@ function chatbot_chatgpt_send_message() {
     } else {
 
         // DIAG - Diagnostics - Ver 2.1.1.1
-        back_trace( 'NOTICE', 'Using ChatGPT');
-        back_trace( 'NOTICE', '$user_id ' . $user_id);
-        back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // back_trace( 'NOTICE', 'Using ChatGPT');
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
         // back_trace( 'NOTICE', '$message ' . $message);
 
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
