@@ -4,6 +4,10 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## Documentation
 
+## What's New in Version 2.1.2
+
+* **TBD**: TBD
+
 ## What's New in Version 2.1.1
 
 * **Code Cleanup and Optimization**: Refined and optimized the codebase for improved performance and maintainability.
