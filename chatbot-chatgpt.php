@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.1.0
+ * Version:     2.1.1
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -31,10 +31,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define the plugin version
-defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.1.0');
+defined ('CHATBOT_CHATGPT_VERSION') || define ('CHATBOT_CHATGPT_VERSION', '2.1.1.1');
 
 // Main plugin file
 define('CHATBOT_CHATGPT_PLUGIN_DIR_PATH', plugin_dir_path(__FILE__));
+define('CHATBOT_CHATGPT_PLUGIN_DIR_URL', plugins_url('/', __FILE__));
 
 // Declare Globals
 global $wpdb;
@@ -212,8 +213,6 @@ $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_en
 
 // Allow file uploads on/off setting can be found on the Settings tab - Ver 1.7.6
 global $chatbot_chatgpt_allow_file_uploads;
-// TEMP OVERRIDE - Ver 1.7.6
-// update_option('chatbot_chatgpt_allow_file_uploads', 'No');
 $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
 
 // Suppress Notices on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -233,7 +232,7 @@ $context_history = [];
 
 function chatbot_chatgpt_enqueue_admin_scripts() {
     wp_enqueue_script('jquery'); // Ensure jQuery is enqueued
-    wp_enqueue_script('chatbot_chatgpt_admin', plugins_url('assets/js/chatbot-chatgpt-admin.js', __FILE__), array('jquery'), 'CHATBOT_CHATGPT_VERSION', true);
+    wp_enqueue_script('chatbot_chatgpt_admin', plugins_url('assets/js/chatbot-chatgpt-admin.js', __FILE__), array('jquery'), CHATBOT_CHATGPT_VERSION, true);
 }
 add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
 
@@ -252,28 +251,26 @@ function chatbot_chatgpt_enqueue_scripts() {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;
 
     // Enqueue the styles
     wp_enqueue_style('dashicons');
-    wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__), array(), 'CHATBOT_CHATGPT_VERSION', 'all');
+    wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__), array(), CHATBOT_CHATGPT_VERSION, 'all');
 
     // Now override the default styles with the custom styles - Ver 1.8.1
     chatbot_chatgpt_appearance_custom_css_settings();
 
     // Enqueue the scripts
     wp_enqueue_script('jquery');
-    wp_enqueue_script('greetings', plugins_url('assets/js/greetings.js', __FILE__), array('jquery'), 'CHATBOT_CHATGPT_VERSION', true);
-    wp_enqueue_script('chatbot-chatgpt-local', plugins_url('assets/js/chatbot-chatgpt-local.js', __FILE__), array('jquery'), 'CHATBOT_CHATGPT_VERSION', true);
-    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), 'CHATBOT_CHATGPT_VERSION', true);
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array('jquery'), CHATBOT_CHATGPT_VERSION, true);
 
     // Enqueue DOMPurify - Ver 1.8.1
     // https://raw.githubusercontent.com/cure53/DOMPurify/main/dist/purify.min.js
     // https://chat.openai.com/c/275770c1-fa72-404b-97c2-2dad2e8a0230
-    wp_enqueue_script( 'dompurify', plugin_dir_url(__FILE__) . 'assets/js/purify.min.js', array(), 'CHATBOT_CHATGPT_VERSION', true );
+    wp_enqueue_script( 'dompurify', plugin_dir_url(__FILE__) . 'assets/js/purify.min.js', array(), CHATBOT_CHATGPT_VERSION, true );
 
     // Localize the data for user id and page id
     $user_id = get_current_user_id();
@@ -282,14 +279,23 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
     $user_id = get_current_user_id();
     // Fetch the Kognetiks cookie
-    $session_id = kognetiks_get_unique_id();
+    if (empty($session_id) || $session_id == 0) {
+        $session_id = kognetiks_get_unique_id();
+    }
+    // $session_id = kognetiks_get_unique_id();
     if (empty($user_id) || $user_id == 0) {
         $user_id = $session_id;
     }
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
-    $script_data_array = array(
+    // Check if the $kchat_settings array is empty
+    if (is_null($kchat_settings)) {
+        $kchat_settings = [];
+    }
+
+    // Initial settings
+    $kchat_settings = array_merge($kchat_settings, array(
         'user_id' => $user_id,
         'page_id' => $page_id,
         'session_id' => $session_id,
@@ -298,7 +304,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'additional_instructions' => $additional_instructions,
         'model' => $model,
         'voice' => $voice,
-    );
+    ));
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -309,150 +315,46 @@ function chatbot_chatgpt_enqueue_scripts() {
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     // back_trace( 'NOTICE', '$model: ' . $model);
     
-    // Defaults for Ver 1.6.1
-    // $defaults = array(
-    //     'chatbot_chatgpt_bot_name' => 'Kognetiks Chatbot',
-    //     'chatbot_chatgpt_bot_prompt' => 'Enter your question ...',
-    //     'chatbot_chatgpt_initial_greeting' => 'Hello! How can I help you today?',
-    //     'chatbot_chatgpt_subsequent_greeting' => 'Hello again! How can I help you?',
-    //     'chatbot_chatgpt_display_style' => 'floating',
-    //     'chatbot_chatgpt_assistant_alias' => 'primary',
-    //     'chatbot_chatgpt_start_status' => 'closed',
-    //     'chatbot_chatgpt_start_status_new_visitor' => 'closed',
-    //     'chatbot_chatgpt_disclaimer_setting' => 'No',
-    //     'chatbot_chatgpt_audience_choice' => 'all',
-    //     'chatbot_chatgpt_max_tokens_setting' => '150',
-    //     'chatbot_chatgpt_message_limit_setting' => '999',
-    //     'chatbot_chatgpt_width_setting' => 'Narrow',
-    //     'chatbot_chatgpt_diagnostics' => 'Off',
-    //     'chatbot_chatgpt_custom_error_message' => 'Your custom error message goes here.',
-    //     'chatbot_chatgpt_avatar_icon_setting' => 'icon-001.png',
-    //     'chatbot_chatgpt_avatar_icon_url_setting' => '',
-    //     'chatbot_chatgpt_custom_avatar_icon_setting' => '',
-    //     'chatbot_chatgpt_avatar_greeting_setting' => 'Howdy!!! Great to see you today! How can I help you?',
-    //     'chatbot_chatgpt_model_choice' => 'gpt-3.5-turbo',
-    //     'chatbot_chatgpt_conversation_context' => 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.',
-    //     'chatbot_chatgpt_enable_custom_buttons' => 'Off',
-    //     'chatbot_chatgpt_custom_button_name_1' => '',
-    //     'chatbot_chatgpt_custom_button_url_1' => '',
-    //     'chatbot_chatgpt_custom_button_name_2' => '',
-    //     'chatbot_chatgpt_custom_button_url_2' => '',
-    //     'chatbot_chatgpt_custom_button_name_3' => '',
-    //     'chatbot_chatgpt_custom_button_url_3' => '',
-    //     'chatbot_chatgpt_custom_button_name_4' => '',
-    //     'chatbot_chatgpt_custom_button_url_4' => '',
-    //     'chatbot_chatgpt_allow_file_uploads' => 'No',
-    //     'chatbot_chatgpt_timeout_setting' => '240',
-    //     'chatbot_chatgpt_voice_option' => 'alloy',
-    //     'chatbot_chatgpt_audio_output_format' => 'mp3',
-    //     'chatbot_chatgpt_force_page_reload' => 'No',
-    // );
-
-    // Revised for Ver 1.5.0 
-    // $option_keys = array(
-    //     'chatbot_chatgpt_bot_name',
-    //     'chatbot_chatgpt_bot_prompt',
-    //     'chatbot_chatgpt_initial_greeting',
-    //     'chatbot_chatgpt_subsequent_greeting',
-    //     'chatbot_chatgpt_display_style',
-    //     'chatbot_chatgpt_assistant_alias',
-    //     'chatbot_chatgpt_start_status',
-    //     'chatbot_chatgpt_start_status_new_visitor',
-    //     'chatbot_chatgpt_disclaimer_setting',
-    //     'chatbot_chatgpt_audience_choice',
-    //     'chatbot_chatgpt_max_tokens_setting',
-    //     'chatbot_chatgpt_message_limit_setting',
-    //     'chatbot_chatgpt_width_setting',
-    //     'chatbot_chatgpt_diagnostics',
-    //     'chatbot_chatgpt_custom_error_message',
-    //     'chatbot_chatgpt_avatar_icon_setting',
-    //     'chatbot_chatgpt_avatar_icon_url_setting',
-    //     'chatbot_chatgpt_custom_avatar_icon_setting',
-    //     'chatbot_chatgpt_avatar_greeting_setting',
-    //     'chatbot_chatgpt_enable_custom_buttons',
-    //     'chatbot_chatgpt_custom_button_name_1',
-    //     'chatbot_chatgpt_custom_button_url_1',
-    //     'chatbot_chatgpt_custom_button_name_2',
-    //     'chatbot_chatgpt_custom_button_url_2',
-    //     'chatbot_chatgpt_custom_button_name_3',
-    //     'chatbot_chatgpt_custom_button_url_3',
-    //     'chatbot_chatgpt_custom_button_name_4',
-    //     'chatbot_chatgpt_custom_button_url_4',
-    //     'chatbot_chatgpt_allow_file_uploads',
-    //     'chatbot_chatgpt_timeout_setting',
-    //     'chatbot_chatgpt_voice_option',
-    //     'chatbot_chatgpt_audio_output_format',
-    //     'chatbot_chatgpt_force_page_reload',
-    // );
-
-    // global $chatbot_settings;
-    // $chatbot_settings = array();
-    // foreach ($option_keys as $key) {
-    //     $default_value = $defaults[$key] ?? '';
-    //     $chatbot_settings[$key] = esc_attr(get_option($key, $default_value));
-    //     // DIAG - Diagnostics
-    //     // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $chatbot_settings[$key]);
-    // }
-
     // Set visitor and logged in user limits - Ver 2.0.1
     if (is_user_logged_in()) {
         // back_trace( 'NOTICE', 'User is logged in');
-        $chatbot_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
+        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
     } else {
         // back_trace( 'NOTICE', 'User is NOT logged in');
-        $chatbot_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
     }
-   
-    $chatbot_settings['chatbot_chatgpt_icon_base_url'] = plugins_url( '/assets/icons/', __FILE__ );
 
-    // Original wp_localize_script call
-    // wp_localize_script('chatbot-chatgpt-js', 'php_vars', $script_data_array);
-    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
-    $script_data_array['version'] = CHATBOT_CHATGPT_VERSION;
-    $script_data_json = wp_json_encode($script_data_array);
-    wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof php_vars === "undefined") { var php_vars = ' . $script_data_json . '; } else { php_vars = ' . $script_data_json . '; }', 'before');
-    
-    // Original wp_localize_script call
-    // wp_localize_script('chatbot-chatgpt-js', 'kchat_plugin_vars', array(
-    //     'plugins_url' => plugins_url('', __FILE__ ),
-    // ));
-    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
-    $kchat_plugin_vars = array(
-        'plugins_url' => plugins_url('', __FILE__ ),
-    );
-    $kchat_plugin_vars['version'] = CHATBOT_CHATGPT_VERSION;
-    $kchat_plugin_vars_json = wp_json_encode($kchat_plugin_vars);
-    wp_add_inline_script('chatbot-chatgpt-js', 'let kchat_plugin_vars = ' . $kchat_plugin_vars_json . ';', 'before');
-
-    // Original wp_localize_script call
-    // wp_localize_script('chatbot-chatgpt-local', 'chatbotSettings', $chatbot_settings);
-    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
-    // back_trace ('NOTICE', 'chatbotSettings: ' . print_r($chatbot_settings, true));
-    $chatbot_Settings['version'] = CHATBOT_CHATGPT_VERSION;
-    $chatbotSettings_json = wp_json_encode($chatbot_settings);
-    wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof chatbotSettings === "undefined") { var chatbotSettings = ' . $chatbotSettings_json . '; } else { chatbotSettings = ' . $chatbotSettings_json . '; }', 'before');
-    
-    // Original wp_localize_script call
-    // wp_localize_script('chatbot-chatgpt-js', 'chatbot_chatgpt_params', array(
-    //     'plugins_url' => plugins_url('', __FILE__ ),
-    //     'ajax_url' => admin_url('admin-ajax.php'),
-    // ));
-    // Original wp_localize_script call
-    // Upload files - Ver 1.7.6
-    // wp_localize_script('chatbot-chatgpt-upload-trigger-js', 'chatbot_chatgpt_params', array(
-    //     'plugins_url' => plugins_url('', __FILE__ ),
-    //     'ajax_url' => admin_url('admin-ajax.php'),
-    // ));
-    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
-    $chatbot_chatgpt_params = array(
-        'plugins_url' => plugins_url('', __FILE__ ),
+    // Localize the data for the chatbot - Ver 2.1.1.1
+    $kchat_settings = array_merge($kchat_settings, array(
+        'chatbot-chatgpt-version' => CHATBOT_CHATGPT_VERSION,
+        'plugins_url' => CHATBOT_CHATGPT_PLUGIN_DIR_URL,
         'ajax_url' => admin_url('admin-ajax.php'),
-    );
-    $chatbot_chatgpt_params['version'] = CHATBOT_CHATGPT_VERSION;
-    $chatbot_chatgpt_params_json = wp_json_encode($chatbot_chatgpt_params);
-    wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof chatbot_chatgpt_params === "undefined") { var chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; } else { chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; }', 'before');
-    wp_add_inline_script('chatbot-chatgpt-upload-trigger-js', 'if (typeof chatbot_chatgpt_params === "undefined") { var chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; } else { chatbot_chatgpt_params = ' . $chatbot_chatgpt_params_json . '; }', 'before');
+        'user_id' => $user_id,
+        'page_id' => $page_id,
+        'session_id' => $session_id,
+        'thread_id' => $thread_id,
+        'assistant_id' => $assistant_id,
+        'additional_instructions' => $additional_instructions,
+        'model' => $model,
+        'voice' => $voice,
+        'chatbot_chatgpt_timeout_setting' => esc_attr(get_option('chatbot_chatgpt_timeout_setting', '240')),
+        'chatbot_chatgpt_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', '')),
+        'chatbot_chatgpt_custom_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', '')),
+        'chatbot_chatgpt_avatar_greeting_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_greeting_setting', 'Howdy!!! Great to see you today! How can I help you?')),
+        'chatbot_chatgpt_force_page_reload' => esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No')),
+        'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
+        'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
+
+    ));
+    $kchat_settings_json = wp_json_encode($kchat_settings);
     
+    wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
+    wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
+    wp_add_inline_script('chatbot-chatgpt-upload-trigger-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
+    
+    // Enqueue the main script
+    wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array(), CHATBOT_CHATGPT_VERSION, true);
+
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
@@ -522,7 +424,7 @@ function chatbot_chatgpt_send_message() {
     global $thread_id;
     global $assistant_id;
     global $chatbot_chatgpt_assistant_alias;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;
@@ -541,9 +443,9 @@ function chatbot_chatgpt_send_message() {
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'Model from options: ' . $model);
     } else {
-        // SEE IF $script_data_array HAS THE MODEL
-        if ( isset($script_data_array['model'])) {
-            $model = $script_data_array['model'];
+        // SEE IF $kchat_settings HAS THE MODEL
+        if ( isset($kchat_settings['model'])) {
+            $model = $kchat_settings['model'];
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Model set in global: ' . $model);
         } else {
@@ -581,26 +483,27 @@ function chatbot_chatgpt_send_message() {
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
 
-    $chatbot_settings['chatbot_chatgpt_display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
-    $chatbot_settings['chatbot_chatgpt_assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
-    $chatbot_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id, $session_id);
-    $chatbot_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id, $session_id);
-    $chatbot_settings['chatbot_chatgpt_model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
-    $chatbot_settings['chatbot_chatgpt_voice_option'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
-    $chatbot_settings['additional_instructions'] = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
-    $voice = $chatbot_settings['chatbot_chatgpt_voice_option'];
-    $model = $chatbot_settings['chatbot_chatgpt_model'];
-    $additional_instructions = $chatbot_settings['additional_instructions'];
-    $chatbot_chatgpt_assistant_alias = $chatbot_settings['chatbot_chatgpt_assistant_alias'];
+    $kchat_settings['chatbot_chatgpt_display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
+    $kchat_settings['chatbot_chatgpt_assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
+    $kchat_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id, $session_id);
+    $kchat_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id, $session_id);
+    $kchat_settings['chatbot_chatgpt_model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
+    $kchat_settings['chatbot_chatgpt_voice_option'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
+    $kchat_settings['additional_instructions'] = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
+    $voice = $kchat_settings['chatbot_chatgpt_voice_option'];
+    $model = $kchat_settings['chatbot_chatgpt_model'];
+    $additional_instructions = $kchat_settings['additional_instructions'];
+    $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
 
     // Get the thread information - Ver 2.0.7
-    // $chatbot_settings = get_chatbot_chatgpt_threads($user_id, $page_id);
-    $chatbot_settings = array_merge($chatbot_settings, get_chatbot_chatgpt_threads($user_id, $page_id));
+    $thread_id = get_chatbot_chatgpt_threads($user_id, $page_id);
+    $kchat_settings['thread_id'] = $thread_id;
+    // $kchat_settings = array_merge($kchat_settings, get_chatbot_chatgpt_threads($user_id, $page_id));
 
-    $assistant_id = isset($chatbot_settings['assistant_id']) ? $chatbot_settings['assistant_id'] : '';
-    $thread_Id = isset($chatbot_settings['thread_id']) ? $chatbot_settings['thread_id'] : '';
-    $model = isset($chatbot_settings['chatbot_chatgpt_model']) ? $chatbot_settings['chatbot_chatgpt_model'] : '';
-    $voice = isset($chatbot_settings['chatbot_chatgpt_voice_option']) ? $chatbot_settings['chatbot_chatgpt_voice_option'] : '';
+    $assistant_id = isset($kchat_settings['assistant_id']) ? $kchat_settings['assistant_id'] : '';
+    $thread_Id = isset($kchat_settings['thread_id']) ? $kchat_settings['thread_id'] : '';
+    $model = isset($kchat_settings['chatbot_chatgpt_model']) ? $kchat_settings['chatbot_chatgpt_model'] : '';
+    $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
@@ -614,8 +517,8 @@ function chatbot_chatgpt_send_message() {
     // back_trace( 'NOTICE', '$voice: ' . $voice);
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', '========================================');
-    // foreach ($chatbot_settings as $key => $value) {
-         // back_trace( 'NOTICE', '$chatbot_settings[' . $key . ']: ' . $value);
+    // foreach ($kchat_settings as $key => $value) {
+         // back_trace( 'NOTICE', '$kchat_settings[' . $key . ']: ' . $value);
     // }
 
     // Assistants
@@ -716,11 +619,13 @@ function chatbot_chatgpt_send_message() {
     // Decide whether to use Flow, Assistant or Original ChatGPT
     if ($model == 'flow'){
         
-        // DIAG - Diagnostics
+        // DIAG - Diagnostics - Ver 2.1.1.1
         // back_trace( 'NOTICE', 'Using ChatGPT Flow');
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
 
         // Reload the model - BELT & SUSPENDERS
-        $script_data_array['model'] = $model;
+        $kchat_settings['model'] = $model;
 
         // Get the step from the transient
         $kflow_step = get_chatbot_chatgpt_transients( 'kflow_step', null, null, $session_id);
@@ -731,7 +636,7 @@ function chatbot_chatgpt_send_message() {
         // $thread_id
         $thread_id = '[answer=' . $kflow_step + 1 . ']';
         
-        // Add +1 to $script_data_array['next_step']
+        // Add +1 to $kchat_settings['next_step']
         $kflow_step = $kflow_step + 1;
 
         // Set the next step
@@ -751,10 +656,12 @@ function chatbot_chatgpt_send_message() {
 
     } elseif ($use_assistant_id == 'Yes') {
 
-        // DIAG - Diagnostics
+        // DIAG - Diagnostics - Ver 2.1.1.1
         // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // back_trace( 'NOTICE', '$message ' . $message);
+
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$message ' . $message);
@@ -799,9 +706,9 @@ function chatbot_chatgpt_send_message() {
             // back_trace( 'NOTICE', 'Check for links and images in response before returning');
             $response = chatbot_chatgpt_check_for_links_and_images($response);
 
-            // FIXME - Append extra message - Ver 2.0.9
+            // FIXME - Append extra message - Ver 2.1.1.1.1
+            // Danger Will Robinson! Danger!
             $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
-            // $extra_message = '  Danger Will Robinson! Danger!';
             $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
             // Return response
@@ -810,47 +717,48 @@ function chatbot_chatgpt_send_message() {
 
     } else {
 
-        // DIAG - Diagnostics
+        // DIAG - Diagnostics - Ver 2.1.1.1
         // back_trace( 'NOTICE', 'Using ChatGPT');
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
         // back_trace( 'NOTICE', '$message ' . $message);
+
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
         // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
         // TRY NOT TO FETCH MODEL AGAIN
         // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-        $model = $script_data_array['model'];
-        $voice = $script_data_array['voice'];
+        $model = $kchat_settings['model'];
+        $voice = $kchat_settings['voice'];
         if (strpos($model, 'gpt-4o') !== false) {
             // The string 'gpt-4o' is found in $model
             // Reload the model - BELT & SUSPENDERS
-            $script_data_array['model'] = $model;
+            $kchat_settings['model'] = $model;
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_omni($api_key, $message);
         } elseif (str_starts_with($model, 'gpt')) {
             // Reload the model - BELT & SUSPENDERS
-            $script_data_array['model'] = $model;
+            $kchat_settings['model'] = $model;
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_api($api_key, $message);
         } elseif (str_starts_with($model, 'dall')) {
             // Reload the model - BELT & SUSPENDERS
-            $script_data_array['model'] = $model;
+            $kchat_settings['model'] = $model;
             // Send message to Image API - Ver 1.9.4
             $response = chatbot_chatgpt_call_image_api($api_key, $message);
         } elseif (str_starts_with($model, 'tts')) {
             // Reload the model - BELT & SUSPENDERS
-            $script_data_array['model'] = $model;
-            $script_data_array['voice'] = $voice;
+            $kchat_settings['model'] = $model;
+            $kchat_settings['voice'] = $voice;
             // Send message to TTS API - Text-to-speech - Ver 1.9.5
             $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
         } elseif (str_starts_with($model,'whisper')) {
-            $script_data_array['model'] = $model;
+            $kchat_settings['model'] = $model;
             // Send message to STT API - Speech-to-text - Ver 1.9.6
             $response = chatbot_chatgpt_call_stt_api($api_key, $message);
         } else {
             // Reload the model - BELT & SUSPENDERS
-            $script_data_array['model'] = $model;
+            $kchat_settings['model'] = $model;
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_api($api_key, $message);
         }
@@ -877,9 +785,9 @@ function chatbot_chatgpt_send_message() {
         // DIAG - Diagnostics - Ver 2.0.5
         // back_trace( 'NOTICE', 'Response: ' . $response);
 
-        // FIXME - Append extra message - Ver 2.0.9
+        // FIXME - Append extra message - Ver 2.1.1.1.1
+        // Danger Will Robinson! Danger!
         $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
-        // $extra_message = '  Danger Will Robinson! Danger!';
         $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
         // Return response
@@ -1079,13 +987,6 @@ function enqueue_greetings_script( $initial_greeting = null, $subsequent_greetin
         'subsequent_greeting' => $subsequent_greeting,
     );
 
-    // Original wp_localize_script call
-    // wp_localize_script('greetings', 'greetings_data', $greetings);
-    // Refactored using wp_add_inline_script - Ver 2.0.5 - 2024 07 06
-    $greetings['version'] = CHATBOT_CHATGPT_VERSION;
-    $greetings_json = wp_json_encode($greetings);
-    wp_add_inline_script('greetings', 'if (typeof greetings_data === "undefined") { var greetings_data = ' . $greetings_json . '; } else { greetings_data = ' . $greetings_json . '; }', 'before');
-
     return $greetings;
 
 }
@@ -1096,7 +997,7 @@ add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
 function enqueue_color_picker($hook_suffix) {
     // first check that $hook_suffix is appropriate for your admin page
     wp_enqueue_style('wp-color-picker');
-    wp_enqueue_script('my-script-handle', plugin_dir_url(__FILE__) . 'assets/js/chatbot-chatgpt-color-picker.js', array('wp-color-picker'), 'CHATBOT_CHATGPT_VERSION', true);
+    wp_enqueue_script('my-script-handle', plugin_dir_url(__FILE__) . 'assets/js/chatbot-chatgpt-color-picker.js', array('wp-color-picker'), CHATBOT_CHATGPT_VERSION, true);
 }
 add_action('admin_enqueue_scripts', 'enqueue_color_picker');
 
@@ -1108,10 +1009,10 @@ function kchat_get_plugin_version() {
     }
 
     $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
-    $plugin_version = $plugin_data['Version'];
+    $plugin_version = $plugin_data['chatbot-chatgpt-version'];
     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
     // DIAG - Log the plugin version
-    // back_trace( 'NOTICE', 'Plugin version '. $plugin_version);
+    // back_trace( 'NOTICE', 'Plugin version ' . $plugin_version);
 
     return $plugin_version;
 

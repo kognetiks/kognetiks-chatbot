@@ -104,7 +104,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
 
     ?>
         <p>Select your icon by clicking on an image to select it.  Don't forget to click 'Save Settings'.</p>
-        <!-- <input type="hidden" id="chatbot_chatgpt_avatar_icon_setting" name="chatbot_chatgpt_avatar_icon_setting" value="<?php echo esc_attr( $selectedIcon ); ?>"> -->
+        <input type="hidden" id="chatbot_chatgpt_avatar_icon_setting" name="chatbot_chatgpt_avatar_icon_setting" value="<?php echo esc_attr( $selectedIcon ); ?>">
         <table>
             <?php
                 $iconSets = [
@@ -137,7 +137,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
 
                                 $selected = ($iconName === $selectedIcon) ? 'class="selected-icon"' : '';
                                 echo '<td style="padding: 15px;">';
-                                echo '<img src="' . plugins_url('../../assets/icons/'.$iconName, __FILE__) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:60px;height:60px;cursor:pointer;"/>';
+                                echo '<img src="' . plugins_url('assets/icons/'.$iconName, dirname(__FILE__, 2)) . '" id="'. $iconName .'" onclick="selectIcon(\''.$iconName.'\')" '.$selected.' style="width:60px;height:60px;cursor:pointer;"/>';
                                 echo '</td>';
                                 $iconIndex++;
                             }

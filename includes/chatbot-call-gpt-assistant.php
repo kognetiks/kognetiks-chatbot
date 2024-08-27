@@ -52,7 +52,6 @@ function createAnAssistant($api_key) {
     $response = fetchDataUsingCurl($url, $context);
 
     // DIAG - Diagnostics - Ver 2.0.9
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     return json_decode($response, true);
     
@@ -67,6 +66,10 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', 'Step 3: addAMessage()');
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$prompt: ' . $prompt);
+    // back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     // Set the URL
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
@@ -192,7 +195,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 // Step 4: Run the Assistant
 function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
-    global $script_data_array;
+    global $kchat_settings;
 
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', 'Step 4: runTheAssistant()');
@@ -225,20 +228,18 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
     // Additional instructions - Ver 2.0.9
     $additional_instruction = null;
-    if (isset($script_data_array['additional_instructions']) && $script_data_array['additional_instructions'] !== null) {
-        $additional_instructions = $script_data_array['additional_instructions'];
+    if (isset($kchat_settings['additional_instructions']) && $kchat_settings['additional_instructions'] !== null) {
+        $additional_instructions = $kchat_settings['additional_instructions'];
         // back_trace ( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     }
 
     // DIAG - Diagnostics - Ver 2.0.9
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
     // back_trace( 'NOTICE', '$max_completion_tokens: ' . $max_completion_tokens);
     // back_trace( 'NOTICE', '$temperature: ' . $temperature);
     // back_trace( 'NOTICE', '$top_p: ' . $top_p);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
-
-    // DIAG - Diagnostics - Ver 2.0.1
-    // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
 
     $headers = array(
         "Content-Type: application/json",
@@ -621,7 +622,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;
@@ -655,6 +656,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // Step 2: Get The Thread ID
         // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
         $thread_id = $assistants_response["id"];
+        $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024-08-26
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         // back_trace( 'NOTICE', '$assistant_id ' . $assistant_id);
@@ -672,8 +674,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    
-    $script_data_array = array(
+    $kchat_settings = array_merge($kchat_settings, array(
         'user_id' => $user_id,
         'page_id' => $page_id,
         'session_id' => $session_id,
@@ -682,7 +683,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         'additional_instructions' => $additional_instructions,
         'model' => $model,
         'voice' => $voice,
-    );
+    ));
 
     // Step 1: Create an Assistant
     // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
@@ -772,7 +773,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     if (isset($assistants_response["id"])) {
         $runId = $assistants_response["id"];
     } else {
-        // back_trace( 'ERROR', '\'$runId\' key not found in response');
+        // back_trace( 'ERROR', 'runId key not found in response');
         return "Error: 'id' key not found in response.";
     }
     // DIAG - Print the response

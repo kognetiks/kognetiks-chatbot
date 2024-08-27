@@ -22,7 +22,7 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
     global $page_id;
     global $thread_id;
     global $assistant_id;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;

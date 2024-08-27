@@ -24,7 +24,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     global $thread_id;
     global $assistant_id;
     global $learningMessages;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;
@@ -34,22 +34,22 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     global $kflow_data;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_call_flow_api()');
-    back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_flow_api()');
+    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Fetch the KFlow data
-    // $sequence_id = $script_data_array['sequence_id'];
+    // $sequence_id = $kchat_settings['sequence_id'];
     $kflow_sequence = get_chatbot_chatgpt_transients('kflow_sequence', null, null, $session_id);
     $kflow_step = (int) get_chatbot_chatgpt_transients('kflow_step', null, null, $session_id);
 
     $kflow_data = kflow_get_sequence_data($kflow_sequence);
 
     // DIAG - Diagnostics - Ver 1.9.5
-    back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
+    // back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
 
     // Count the number of 'Steps' in the KFlow data
     $kflow_data['total_steps'] = count($kflow_data['Steps']);
@@ -89,7 +89,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
         // $thread_id
         // $thread_id = '[answer=' . $kflow_step . ']';
         
-        // Add +1 to $script_data_array['next_step']
+        // Add +1 to $kchat_settings['next_step']
         // $kflow_step = $kflow_step + 1;
 
         // Update the transients
@@ -115,7 +115,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
 
     // Add message to conversation log
     // DIAG Diagnostics
-    back_trace( 'NOTICE', '$message: ' . $message);
+    // back_trace( 'NOTICE', '$message: ' . $message);
 
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $message);
 
