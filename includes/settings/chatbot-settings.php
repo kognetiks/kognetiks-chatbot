@@ -138,10 +138,10 @@ function chatbot_chatgpt_settings_page_html() {
             window.onload = function() {
                 // Assign the function to the window object to make it globally accessible
                 window.selectIcon = function(id) {
-                    let chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
-                    if(chatgptElement) {
+                    let chatbot_chatgpt_Element = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
+                    if(chatbot_chatgpt_Element) {
                         // Clear border from previously selected icon
-                        let previousIconId = chatgptElement.value;
+                        let previousIconId = chatbot_chatgpt_Element.value;
                         let previousIcon = document.getElementById(previousIconId);
                         if(previousIcon) previousIcon.style.border = "none";  // Change "" to "none"
 
@@ -150,7 +150,7 @@ function chatbot_chatgpt_settings_page_html() {
                         if(selectedIcon) selectedIcon.style.border = "2px solid red";
 
                         // Set selected icon value in hidden input
-                        chatgptElement.value = id;
+                        chatbot_chatgpt_Element.value = id;
 
                         // Save selected icon in local storage
                         localStorage.setItem('chatbot_chatgpt_avatar_icon_setting', id);
@@ -159,11 +159,11 @@ function chatbot_chatgpt_settings_page_html() {
 
                 // If no icon has been selected, select the first one by default
                 let iconFromStorage = localStorage.getItem('chatbot_chatgpt_avatar_icon_setting');
-                let chatgptElement = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
-                if(chatgptElement) {
+                let chatbot_chatgpt_Element = document.getElementById('chatbot_chatgpt_avatar_icon_setting');
+                if(chatbot_chatgpt_Element) {
                     if (iconFromStorage) {
                         window.selectIcon(iconFromStorage);
-                    } else if (chatgptElement.value === '') {
+                    } else if (chatbot_chatgpt_Element.value === '') {
                         window.selectIcon('icon-001.png');
                     }
                 }
