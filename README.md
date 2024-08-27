@@ -6,7 +6,10 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's New in Version 2.1.1
 
-* **TBD**: TBD
+* **Code Cleanup and Optimization**: Refined and optimized the codebase for improved performance and maintainability.
+* **Variable Unification**: Standardized variable names across the project to ensure consistency and reduce potential errors.
+* **User Experience Consistency**: Addressed inconsistencies in the chatbot experience between logged-in and non-logged-in users, ensuring a uniform experience.
+* **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 ## What's New in Version 2.1.0
 
