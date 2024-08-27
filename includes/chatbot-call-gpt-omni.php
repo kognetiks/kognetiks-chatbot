@@ -22,7 +22,7 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
     global $thread_id;
     global $assistant_id;
     global $learningMessages;
-    global $script_data_array;
+    global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;

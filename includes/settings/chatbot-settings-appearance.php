@@ -250,6 +250,8 @@ function chatbot_chatgpt_appearance_custom_css_settings() {
 // Inject the custom css settings
 function chatbot_chatgpt_appearance_inject_custom_css_settings() {
 
+    global $page_id;
+
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Injecting custom CSS settings...');
     // back_trace( 'NOTICE', print_r($GLOBALS['chatbotChatGPTAppearanceCSS'], true));
