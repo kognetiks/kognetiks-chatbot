@@ -52,8 +52,6 @@ function createAnAssistant($api_key) {
     $response = fetchDataUsingCurl($url, $context);
 
     // DIAG - Diagnostics - Ver 2.0.9
-    back_trace( 'NOTICE', '**** I THINK IT\'S BREAKING HERE ****');
-    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     return json_decode($response, true);
     
@@ -67,11 +65,11 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     global $session_id;
 
     // DIAG - Diagnostics - Ver 2.0.9
-    back_trace( 'NOTICE', 'Step 3: addAMessage()');
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', '$prompt: ' . $prompt);
-    back_trace( 'NOTICE', '$context: ' . $context);
-    back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
+    // back_trace( 'NOTICE', 'Step 3: addAMessage()');
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$prompt: ' . $prompt);
+    // back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     // Set the URL
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
@@ -153,11 +151,11 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     }
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', '========================================');
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
     // back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
     // back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));
-    back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
+    // back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
 
     // Initialize cURL session
     $ch = curl_init();
@@ -658,7 +656,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // Step 2: Get The Thread ID
         // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
         $thread_id = $assistants_response["id"];
-        $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024 08 26
+        $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024-08-26
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         // back_trace( 'NOTICE', '$assistant_id ' . $assistant_id);

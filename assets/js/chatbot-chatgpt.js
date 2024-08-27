@@ -12,12 +12,12 @@ jQuery(document).ready(function ($) {
     }
    
     // DIAG - Diagnostic - Ver 2.1.1.1
-    const sortedKeys = Object.keys(kchat_settings).sort();
-    for (const key of sortedKeys) {
-        console.log('Chatbot: NOTICE: kchat_settings: ' + key + ': ' + kchat_settings[key]);
-    }
+    // const sortedKeys = Object.keys(kchat_settings).sort();
+    // for (const key of sortedKeys) {
+    //     console.log('Chatbot: NOTICE: kchat_settings: ' + key + ': ' + kchat_settings[key]);
+    // }
 
-    let chatGptChatBot = $('#chatbot-chatgpt').hide();
+    let chatbot_chatgpt_Elements = $('#chatbot-chatgpt').hide();
     let messageInput = $('#chatbot-chatgpt-message');
     let conversation = $('#chatbot-chatgpt-conversation');
     let submitButton = $('#chatbot-chatgpt-submit');
@@ -83,16 +83,16 @@ jQuery(document).ready(function ($) {
         chatbot_chatgpt_start_status_new_visitor = 'open'; // Force the chatbot to open if embedded
         localStorage.setItem('chatbot_chatgpt_start_status', chatbot_chatgpt_start_status);
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', chatbot_chatgpt_start_status_new_visitor);
-        chatGptChatBot.addClass('chatbot-embedded-style').removeClass('chatbot-floating-style');
+        chatbot_chatgpt_Elements.addClass('chatbot-embedded-style').removeClass('chatbot-floating-style');
     } else {
         // Apply configurations for floating style
         $('#chatbot-chatgpt').addClass('chatbot-floating-style').removeClass('chatbot-embedded-style');
         // Other configurations specific to floating style
         if (chatbot_chatgpt_width_setting === 'Wide') {
-            chatGptChatBot.addClass('wide');
+            chatbot_chatgpt_Elements.addClass('wide');
         } else {
-            // chatGptChatBot.removeClass('wide').css('display', 'none');
-            chatGptChatBot.removeClass('wide');
+            // chatbot_chatgpt_Elements.removeClass('wide').css('display', 'none');
+            chatbot_chatgpt_Elements.removeClass('wide');
         }
     }
     
@@ -154,7 +154,7 @@ jQuery(document).ready(function ($) {
 
     // Initially hide the chatbot
     if (chatbot_chatgpt_start_status === 'closed') {
-        chatGptChatBot.hide();
+        chatbot_chatgpt_Elements.hide();
         chatGptOpenButton.show();
     } else {
         if (chatbot_chatgpt_display_style === 'floating') {
@@ -176,7 +176,7 @@ jQuery(document).ready(function ($) {
                 window.addEventListener('resize', updateChatbotStyles);
             }
 
-            chatGptChatBot.show();
+            chatbot_chatgpt_Elements.show();
             chatGptOpenButton.hide();
         } else {
             $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-narrow').addClass('chatbot-full');
@@ -339,7 +339,7 @@ jQuery(document).ready(function ($) {
 
         // Add chatbot header, body, and other elements
         chatbotHeader = $('<div></div>').addClass('chatbot-header');
-        chatGptChatBot.append(chatbotHeader);
+        chatbot_chatgpt_Elements.append(chatbotHeader);
 
         // Add the chatbot button to the header
         $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
@@ -614,9 +614,9 @@ jQuery(document).ready(function ($) {
         let thread_id = kchat_settings.thread_id;
         let chatbot_chatgpt_force_page_reload = kchat_settings['chatbot_chatgpt_force_page_reload'] || 'No';
 
-        console.log('Chatbot: NOTICE: user_id: ' + user_id);
-        console.log('Chatbot: NOTICE: page_id: ' + page_id);
-        console.log('Chatbot: NOTICE: message: ' + message);
+        // console.log('Chatbot: NOTICE: user_id: ' + user_id);
+        // console.log('Chatbot: NOTICE: page_id: ' + page_id);
+        // console.log('Chatbot: NOTICE: message: ' + message);
 
         $.ajax({
             url: kchat_settings.ajax_url,
@@ -638,7 +638,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function (response) {
-                console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
+                // console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
                 botResponse = response.data;
                 // Revision to how disclaimers are handled - Ver 1.5.0
                 if (kchat_settings.chatbot_chatgpt_disclaimer_setting === 'No') {
@@ -658,18 +658,18 @@ jQuery(document).ready(function ($) {
                     }
                 }
                 // markdownToHtml - Ver 1.9.2
-                console.log('Chatbot: NOTICE: botResponse: ' + botResponse);
+                // console.log('Chatbot: NOTICE: botResponse: ' + botResponse);
                 botResponse = markdownToHtml(botResponse);
             },
             error: function (jqXHR, status, error) {
                 if(status === "timeout") {
                     // appendMessage('Error: ' + error, 'error');
-                    console.log('Chatbot: ERROR: ' + error);
+                    // console.log('Chatbot: ERROR: ' + error);
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
                 } else {
                     // appendMessage('Error: ' + error, 'error')
-                    console.log('Chatbot: ERROR: ' + error);
+                    // console.log('Chatbot: ERROR: ' + error);
                     appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
                     botResponse = '';
                 }
@@ -1127,8 +1127,8 @@ jQuery(document).ready(function ($) {
     
     // Toggle the chatbot visibility
     function toggleChatbot() {
-        if (chatGptChatBot.is(':visible')) {
-            chatGptChatBot.hide();
+        if (chatbot_chatgpt_Elements.is(':visible')) {
+            chatbot_chatgpt_Elements.hide();
             chatGptOpenButton.show();
             localStorage.setItem('chatbot_chatgpt_start_status', 'closed');
         } else {
@@ -1138,12 +1138,12 @@ jQuery(document).ready(function ($) {
                 } else {
                     $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-full').addClass('chatbot-narrow');
                 }
-                chatGptChatBot.show();
+                chatbot_chatgpt_Elements.show();
                 chatGptOpenButton.hide();
             } else {
                 $('#chatbot-chatgpt').removeClass('chatbot-wide chatbot-narrow').addClass('chatbot-full');
             }
-            chatGptChatBot.show();
+            chatbot_chatgpt_Elements.show();
             chatGptOpenButton.hide();
             localStorage.setItem('chatbot_chatgpt_start_status', 'open');
             // Removed in Ver 1.9.3
@@ -1228,10 +1228,10 @@ jQuery(document).ready(function ($) {
         
         // If the chatbot status is not set in local storage, use chatbot_chatgpt_start_status - Ver 1.5.1
         if (chatbot_chatgpt_start_status === 'closed') {
-            chatGptChatBot.hide();
+            chatbot_chatgpt_Elements.hide();
             chatGptOpenButton.show();
         } else {
-            chatGptChatBot.show();
+            chatbot_chatgpt_Elements.show();
             chatGptOpenButton.hide();
             // Load the conversation if the chatbot is open on page load
             // Removed in Ver 1.9.3

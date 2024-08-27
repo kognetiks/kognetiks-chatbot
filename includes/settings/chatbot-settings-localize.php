@@ -88,24 +88,6 @@ function chatbot_chatgpt_localize(){
         // DIAG - Diagnostics - Ver 1.6.1
         // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $kchat_settings[$key]);
     }
-    
-    // FIXME - REMOVED IN 2.1.1.1 - 2024-08-26
-    // FIXME - WAS ADDED IN 1.6.1
-    // Update localStorage - Ver 1.6.1
-    // echo '<script type="text/javascript">
-    //     //DIAG - Diagnostics
-    //     // console.log("Chatbot: NOTICE: chatbot_settings_localize.php - STARTED");
-    //     document.addEventListener("DOMContentLoaded", function(event) {
-    //         // Encode the chatbot settings array into JSON format for use in JavaScript
-    //         kchat_settings = ' . json_encode($kchat_settings) . ';
-    //         Object.keys(kchat_settings).forEach(function(key) {
-    //             // DIAG - Diagnostics
-    //             // console.log("Chatbot: NOTICE: chatbot-settings-localize.php - Key: " + key + " Value: " + kchat_settings[key]);
-    //             localStorage.setItem(key, kchat_settings[key]);
-    //         });
-    //         // Moved inside the DOMContentLoaded event listener
-    //         // console.log("Chatbot: NOTICE: chatbot_settings_localize.php - FINISHED");
-    //     });
-    // </script>';
+
 
 }

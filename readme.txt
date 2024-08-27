@@ -157,9 +157,11 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
-= 2.1.1 - Released TBD =
-
-* **TBD**: TBD
+= 2.1.1 - Released 08-27-2024 =
+* **Code Cleanup and Optimization**: Refined and optimized the codebase for improved performance and maintainability.
+* **Variable Unification**: Standardized variable names across the project to ensure consistency and reduce potential errors.
+* **User Experience Consistency**: Addressed inconsistencies in the chatbot experience between logged-in and non-logged-in users, ensuring a uniform experience.
+* **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 = 2.1.0 - Released 08-22-2024 =
 * **JavaScript Version Control**: Added JavaScript version control to help with cache busting.
