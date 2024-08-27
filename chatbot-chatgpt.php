@@ -706,9 +706,9 @@ function chatbot_chatgpt_send_message() {
             // back_trace( 'NOTICE', 'Check for links and images in response before returning');
             $response = chatbot_chatgpt_check_for_links_and_images($response);
 
-            // FIXME - Append extra message - Ver 2.0.9
+            // FIXME - Append extra message - Ver 2.1.1.1.1
+            // Danger Will Robinson! Danger!
             $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
-            // $extra_message = '  Danger Will Robinson! Danger!';
             $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
             // Return response
@@ -785,9 +785,9 @@ function chatbot_chatgpt_send_message() {
         // DIAG - Diagnostics - Ver 2.0.5
         // back_trace( 'NOTICE', 'Response: ' . $response);
 
-        // FIXME - Append extra message - Ver 2.0.9
+        // FIXME - Append extra message - Ver 2.1.1.1.1
+        // Danger Will Robinson! Danger!
         $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
-        // $extra_message = '  Danger Will Robinson! Danger!';
         $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
         // Return response
