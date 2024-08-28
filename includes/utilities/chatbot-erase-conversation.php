@@ -20,6 +20,9 @@ function chatbot_chatgpt_erase_conversation_handler() {
     // ITS NOT SETTING THE $page_id CORRECTLY
     // THEREFORE ITS NOT DELETING THE CORRECT TRANSIENT (ANY TRANSIENT)
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $session_id;
     global $user_id;
     global $page_id;
@@ -132,7 +135,13 @@ function chatbot_chatgpt_erase_conversation_handler() {
 // Delete any file transients - Ver 1.9.3
 // THIS IS VERY AGGRESSIVE - USE WITH CAUTION
 function delete_any_file_transients($session_id) {
+
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
+
     $sql = "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_chatbot_chatgpt_file_id_$session_id%'";
     $wpdb->query($sql);
+    
 }

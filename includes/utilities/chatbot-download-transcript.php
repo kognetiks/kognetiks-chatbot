@@ -30,7 +30,7 @@ function chatbot_chatgpt_download_transcript() {
     $conversation_content = wp_strip_all_tags($conversation_content);
 
     // Define the path to the transcripts directory
-    $transcript_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
+    $transcript_dir = $chatbot_chatgpt_pluign_dir_path . 'transcripts/';
 
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($transcript_dir)) {
@@ -53,7 +53,7 @@ function chatbot_chatgpt_download_transcript() {
     }
 
     // Construct the URL for download
-    $url = plugins_url('transcripts/' . $transcriptFileName, CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-chatgpt');
+    $url = plugins_url('transcripts/' . $transcriptFileName, $chatbot_chatgpt_pluign_dir_path . 'chatbot-chatgpt');
 
     // DIAG - Diagnostics - Ver 1.9.9
     // back_trace( 'Notice', 'Transcript URL: ' . $url );
@@ -66,7 +66,7 @@ add_action('wp_ajax_nopriv_chatbot_chatgpt_download_transcript', 'chatbot_chatgp
 
 // Delete old transcripts - Ver 1.9.9   
 function chatbot_chatgpt_cleanup_transcripts_directory() {
-    $transcripts_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'transcripts/';
+    $transcripts_dir = $chatbot_chatgpt_pluign_dir_path . 'transcripts/';
     foreach (glob($transcripts_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {

@@ -16,6 +16,9 @@ if ( ! defined( 'WPINC' ) ) {
 // Database Management - drop the table if it exists, then add it if it doesn't exist - Ver 1.6.3
 function dbKNStore() {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
 
     $charset_collate = $wpdb->get_charset_collate();
@@ -55,6 +58,9 @@ function dbKNStore() {
 // Database Management - drop a table if it exists, then add it if it doesn't exist to store the TF-IDF words and score - Ver 1.6.3
 function dbKNStoreTFIDF() {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
 
     $charset_collate = $wpdb->get_charset_collate();
@@ -91,7 +97,10 @@ function dbKNStoreTFIDF() {
 // Database Management - drop a table if it exists, then add it if it doesn't exist to store the words and score - Ver 1.9.6
 function dbKNStoreWordCount() {
     
-        global $wpdb;
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
+    global $wpdb;
     
         $charset_collate = $wpdb->get_charset_collate();
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_word_count';
@@ -129,6 +138,9 @@ function dbKNStoreWordCount() {
 // Database Management - drop a table if it exists to clean up the database - Ver 1.9.6
 function dbKNClean() {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_word_count';
@@ -141,7 +153,11 @@ function dbKNClean() {
 // Store the top words for context
 function store_top_words() {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
+
     global $topWords;
 
     // Call the dbKNStoreTFIDF function - Ver 1.6.3
@@ -175,6 +191,9 @@ function store_top_words() {
 
 // Save the results to a file
 function output_results() {
+
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
     
     global $topWords;
 
@@ -182,7 +201,7 @@ function output_results() {
     // back_trace( 'NOTICE', 'ENTER: output_results()');
 
     // Generate the directory path
-    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
+    $results_dir_path = $chatbot_chatgpt_pluign_dir_path . 'results/';
 
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {

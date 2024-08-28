@@ -40,6 +40,9 @@ function chatbot_chatgpt_admin_notices() {
 // Upgrade Logic - Revised 1.9.9
 function chatbot_chatgpt_uninstall(){
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
 
     // DIAG - Log the uninstall

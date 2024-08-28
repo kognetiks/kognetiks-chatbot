@@ -18,6 +18,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     ob_start();
     
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+    global $chatbot_chatgpt_plugin_version;
+
     global $session_id;
     global $user_id;
     global $page_id;
@@ -257,12 +261,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         if (in_array($atts['style'], $valid_styles)) {
             // Sanitize and set the display style
             $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
-            // back_trace( 'NOTICE', 'Display style: ' . $chatbot_chatgpt_display_style);
+            back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
         } else {
             // Handle invalid style by logging an error or taking other actions
             $chatbot_chatgpt_display_style = 'floating'; // default value
-            // back_trace( 'ERROR', 'Invalid display style: ' . sanitize_text_field($atts['style']));
-            // back_trace( 'ERROR', 'Invalid display style: ' . $chatbot_chatgpt_display_style);
+            back_trace( 'ERROR', 'Invalid display style: ' . sanitize_text_field($atts['style']));
+            back_trace( 'ERROR', 'Invalid display style: ' . $chatbot_chatgpt_display_style);
         }
         // Remove the 'style' key from the $atts array
         unset($atts['style']);
@@ -520,8 +524,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Localize the data for the chatbot - Ver 2.1.1.1
     $kchat_settings = array_merge($kchat_settings, array(
-        'chatbot-chatgpt-version' => CHATBOT_CHATGPT_VERSION,
-        'plugins_url' => CHATBOT_CHATGPT_PLUGIN_DIR_URL,
+        'chatbot-chatgpt-version' => $chatbot_chatgpt_plugin_version,
+        'plugins_url' => $chatbot_chatgpt_plugin_dir_url,
         'ajax_url' => admin_url('admin-ajax.php'),
         'user_id' => $user_id,
         'page_id' => $page_id,
@@ -572,7 +576,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     }
 
-    $kchat_settings['chatbot-chatgpt-version'] = CHATBOT_CHATGPT_VERSION;
+    $kchat_settings['chatbot-chatgpt-version'] = $chatbot_chatgpt_plugin_version;
     $kchat_settings_json = wp_json_encode($kchat_settings);
     $escaped_kchat_settings_json = esc_js($kchat_settings_json); 
     wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $escaped_kchat_settings_json . '; } else { kchat_settings = ' . $escaped_kchat_settings_json . '; }', 'before');
@@ -889,11 +893,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // ob_start();
         ?>
         <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo time(); ?>">
-        <!-- <script>
+        <script>
             $(document).ready(function() {
                 $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
             });
-        </script> -->
+        </script>
         <!-- REMOVED FOR EMBEDDED -->
         <?php
         if ( $use_assistant_name == 'Yes' ) {
@@ -1172,6 +1176,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 // Dynamic Shortcode - Ver 2.0.6
 function register_chatbot_shortcodes($number_of_shortcodes = null) {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     // Make sure the number of shortcodes is set
     global $wpdb;
 
@@ -1282,7 +1289,9 @@ function chatbot_chatgpt_attribution () {
 // Function to output the script
 function chatbot_chatgpt_shortcode_enqueue_script() {
 
-    // Added these lines to get the global variables - Ver 1.9.3 - 2024 03 16
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+    
     global $session_id;
     global $user_id;
     global $page_id;

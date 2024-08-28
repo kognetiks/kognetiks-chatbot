@@ -6,7 +6,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's New in Version 2.1.2
 
-* **TBD**: TBD
+* **Changed Script Load Order**: Adjusted the loading order of scripts to ensure that critical settings are defined before the main chatbot script executes, preventing incorrect style application.
 
 ## What's New in Version 2.1.1
 

@@ -250,6 +250,9 @@ function chatbot_chatgpt_appearance_custom_css_settings() {
 // Inject the custom css settings
 function chatbot_chatgpt_appearance_inject_custom_css_settings() {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $page_id;
 
     // DIAG - Diagnostics

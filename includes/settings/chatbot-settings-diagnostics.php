@@ -132,6 +132,9 @@ function chatbot_chatgpt_diagnostics_overview_section_callback($args) {
 
 function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     // Get PHP version
     $php_version = phpversion();
 
@@ -354,7 +357,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 // Log Chatbot Errors to the Server - Ver 2.0.9
 function chatbot_error_log($message) {
 
-    $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';
+    $chatbot_logs_dir = $chatbot_chatgpt_pluign_dir_path . 'chatbot-logs/';
 
     // Ensure the directory and index file exist
     create_directory_and_index_file($chatbot_logs_dir);
@@ -374,7 +377,7 @@ function log_chatbot_error() {
     
     if (isset($_POST['error_message'])) {
         $error_message = sanitize_text_field($_POST['error_message']);
-        $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';
+        $chatbot_logs_dir = $chatbot_chatgpt_pluign_dir_path . 'chatbot-logs/';
 
         // Ensure the directory and index file exist
         create_directory_and_index_file($chatbot_logs_dir);

@@ -16,6 +16,9 @@ if ( ! defined( 'WPINC' ) ) {
 // Create the table for the chatbot assistants
 function create_chatbot_chatgpt_assistants_table() {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -71,6 +74,9 @@ function create_chatbot_chatgpt_assistants_table() {
 // Drop the table for the chatbot assistants
 function drop_chatbot_chatgpt_assistants_table() {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -82,6 +88,9 @@ function drop_chatbot_chatgpt_assistants_table() {
 
 // Retrieve a row from the chatbot assistants table using the Common Name
 function get_chatbot_chatgpt_assistant_by_common_name($common_name) {
+
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
     
@@ -101,6 +110,9 @@ function get_chatbot_chatgpt_assistant_by_common_name($common_name) {
 
 // Retrieve a row from the chatbot assistants table using the id - Ver 2.0.6
 function get_chatbot_chatgpt_assistant_by_key($id) {
+
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -139,6 +151,9 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
 // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
 function update_chatbot_chatgpt_number_of_shortcodes() {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -170,6 +185,9 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
 // Add a row to the chatbot assistants table
 function add_chatbot_chatgpt_assistant($assistant_id, $common_name, $style, $audience, $voice, $allow_file_uploads, $allow_transcript_downloads, $show_assistant_name, $initial_greeting, $subsequent_greeting, $placeholder_prompt, $additional_instructions) {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -195,6 +213,9 @@ function add_chatbot_chatgpt_assistant($assistant_id, $common_name, $style, $aud
 
 // Update a row in the chatbot assistants table
 function update_chatbot_chatgpt_assistant($id, $assistant_id, $common_name, $style, $audience, $voice, $allow_file_uploads, $allow_transcript_downloads, $show_assistant_name, $initial_greeting, $subsequent_greeting, $placeholder_prompt, $additional_instructions) {
+
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -227,6 +248,9 @@ function update_chatbot_chatgpt_assistant($id, $assistant_id, $common_name, $sty
 // Delete a row from the chatbot assistants table
 function delete_chatbot_chatgpt_assistant($id) {
 
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -239,6 +263,9 @@ function delete_chatbot_chatgpt_assistant($id) {
 
 // Display the chatbot assistants table
 function display_chatbot_chatgpt_assistants_table() {
+
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -482,6 +509,9 @@ add_action('admin_footer', 'chatbot_chatgpt_assistants_scripts');
 
 
 function update_assistant() {
+
+    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
