@@ -261,12 +261,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         if (in_array($atts['style'], $valid_styles)) {
             // Sanitize and set the display style
             $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
-            back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+            // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
         } else {
             // Handle invalid style by logging an error or taking other actions
             $chatbot_chatgpt_display_style = 'floating'; // default value
-            back_trace( 'ERROR', 'Invalid display style: ' . sanitize_text_field($atts['style']));
-            back_trace( 'ERROR', 'Invalid display style: ' . $chatbot_chatgpt_display_style);
+            // back_trace( 'ERROR', 'Invalid display style: ' . sanitize_text_field($atts['style']));
+            // back_trace( 'ERROR', 'Invalid display style: ' . $chatbot_chatgpt_display_style);
         }
         // Remove the 'style' key from the $atts array
         unset($atts['style']);

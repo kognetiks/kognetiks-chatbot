@@ -1,19 +1,18 @@
 jQuery(document).ready(function ($) {
 
-    if (typeof kchat_settings === 'undefined') {
-        console.error('Chatbot: NOTICE: kchat_settings is not defined.');
-        return;
-    } else {
-        // Proceed with the rest of your code using kchat_settings
-        console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
-    }
+    // if (typeof kchat_settings === 'undefined') {
+    //     console.error('Chatbot: NOTICE: kchat_settings is not defined.');
+    //     return;
+    // } else {
+    //     console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
+    // }
 
     // Only call the function if the chatbot shortcode is present
     if (isChatbotShortcodePresent()) {
-        console.log('Chatbot: NOTICE: Chatbot shortcode not found.');
+        // console.log('Chatbot: NOTICE: Chatbot shortcode not found.');
         return;
     } else {
-        console.log('Chatbot: NOTICE: Chatbot shortcode found.');
+        // console.log('Chatbot: NOTICE: Chatbot shortcode found.');
     }
 
     // Function to check if the chatbot shortcode is present on the page
@@ -33,7 +32,7 @@ jQuery(document).ready(function ($) {
     let submitButton = $('#chatbot-chatgpt-submit');
     let chatGptOpenButton = $('#chatgpt-open-btn');
 
-    console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + kchat_settings.chatbot_chatgpt_display_style);
+    // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + kchat_settings.chatbot_chatgpt_display_style);
 
     let chatbot_chatgpt_display_style = kchat_settings.chatbot_chatgpt_display_style || 'floating';
     let chatbot_chatgpt_width_setting = kchat_settings.chatbot_chatgpt_width_setting || 'Narrow';
@@ -88,7 +87,7 @@ jQuery(document).ready(function ($) {
     // }
     
     if (chatbot_chatgpt_display_style === 'embedded') {
-        console.log('Chatbot: NOTICE: Embedded style detected.');
+        // console.log('Chatbot: NOTICE: Embedded style detected.');
         // Apply configurations for embedded style
         $('#chatbot-chatgpt').addClass('chatbot-embedded-style').removeClass('chatbot-floating-style');
         // Other configurations specific to embedded style
@@ -98,7 +97,7 @@ jQuery(document).ready(function ($) {
         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', chatbot_chatgpt_start_status_new_visitor);
         chatbot_chatgpt_Elements.addClass('chatbot-embedded-style').removeClass('chatbot-floating-style');
     } else {
-        console.log('Chatbot: NOTICE: Floating style detected.');
+        // console.log('Chatbot: NOTICE: Floating style detected.');
         // Apply configurations for floating style
         $('#chatbot-chatgpt').addClass('chatbot-floating-style').removeClass('chatbot-embedded-style');
         // Other configurations specific to floating style
