@@ -250,7 +250,6 @@ register_deactivation_hook(__FILE__, 'chatbot_chatgpt_deactivate');
 register_uninstall_hook(__FILE__, 'chatbot_chatgpt_uninstall');
 add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10, 2);
 
-
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
 

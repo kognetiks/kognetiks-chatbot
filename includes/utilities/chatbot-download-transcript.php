@@ -15,6 +15,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_download_transcript() {
 
+    global $chatbot_chatgpt_plugin_dir_path;
+
     if (!isset($_POST['user_id'], $_POST['page_id'], $_POST['conversation_content'])) {
         wp_send_json_error('Missing required POST fields');
         return;
@@ -66,6 +68,9 @@ add_action('wp_ajax_nopriv_chatbot_chatgpt_download_transcript', 'chatbot_chatgp
 
 // Delete old transcripts - Ver 1.9.9   
 function chatbot_chatgpt_cleanup_transcripts_directory() {
+
+    global $chatbot_chatgpt_plugin_dir_path;
+
     $transcripts_dir = $chatbot_chatgpt_plugin_dir_path . 'transcripts/';
     foreach (glob($transcripts_dir . '*') as $file) {
         // Delete files older than 1 hour
