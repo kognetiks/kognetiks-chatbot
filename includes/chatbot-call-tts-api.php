@@ -422,6 +422,9 @@ add_action( 'chatbot_chatgpt_delete_audio_file', 'deleteAudioFile' );
 
 // Delete old audio files - Ver 1.9.9
 function chatbot_chatgpt_cleanup_audio_directory() {
+
+    global $chatbot_chatgpt_plugin_dir_path;
+    
     $audio_dir = $chatbot_chatgpt_plugin_dir_path . 'audio/';
     foreach (glob($audio_dir . '*') as $file) {
         // Delete files older than 1 hour

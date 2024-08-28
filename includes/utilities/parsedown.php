@@ -1999,6 +1999,8 @@ class ParsedownCustom extends Parsedown {
 
         $Link = parent::inlineLink($Excerpt);
 
+        global $chatbot_chatgpt_plugin_dir_path;
+
         // Modify the URL in the link
         if (isset($Link['element']['attributes']['href'])) {
             $href = $Link['element']['attributes']['href'];
@@ -2023,6 +2025,8 @@ class ParsedownCustom extends Parsedown {
 
     protected function inlineImage($Excerpt) {
         $Image = parent::inlineImage($Excerpt);
+
+        global $chatbot_chatgpt_plugin_dir_path;
 
         // Modify the URL in the image
         if (isset($Image['element']['attributes']['src'])) {

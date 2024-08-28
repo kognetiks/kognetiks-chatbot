@@ -266,6 +266,8 @@ function chatbot_chatgpt_enqueue_scripts() {
     global $model;
     global $voice;
 
+    global $chatbot_chatgpt_display_style;
+
     // Enqueue the styles
     wp_enqueue_style('dashicons');
     wp_enqueue_style('chatbot-chatgpt-css', plugins_url('assets/css/chatbot-chatgpt.css', __FILE__), array(), $chatbot_chatgpt_plugin_version, 'all');
@@ -336,7 +338,8 @@ function chatbot_chatgpt_enqueue_scripts() {
 
     // Localize the data for the chatbot - Ver 2.1.1.1
     $kchat_settings = array_merge($kchat_settings, array(
-        'chatbot-chatgpt-version' => $chatbot_chatgpt_plugin_version,
+        'chatbot_chatgpt_display_style' => $chatbot_chatgpt_display_style,
+        'chatbot_chatgpt_version' => $chatbot_chatgpt_plugin_version,
         'plugins_url' => $chatbot_chatgpt_plugin_dir_url,
         'ajax_url' => admin_url('admin-ajax.php'),
         'user_id' => $user_id,
@@ -497,10 +500,12 @@ function chatbot_chatgpt_send_message() {
     // $page_id = intval($_POST['page_id']); // REMOVED intval in Ver 2.0.8
     $user_id = $_POST['user_id'];
     $page_id = $_POST['page_id'];
+    $session_id = $_POST['session_id'];
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     $kchat_settings['chatbot_chatgpt_display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
     $kchat_settings['chatbot_chatgpt_assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
@@ -1034,7 +1039,7 @@ function kchat_get_plugin_version() {
     }
 
     // $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
-    // $plugin_version = $plugin_data['chatbot-chatgpt-version'];
+    // $plugin_version = $plugin_data['chatbot_chatgpt_version'];
     $plugin_version = $chatbot_chatgpt_plugin_version;
     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
     // DIAG - Log the plugin version

@@ -90,6 +90,9 @@ function download_openai_file($file_id, $filename) {
 
 // Delete old download files - Ver 2.0.3
 function chatbot_chatgpt_cleanup_download_directory() {
+
+    global $chatbot_chatgpt_plugin_dir_path;
+
     $download_dir = $chatbot_chatgpt_plugin_dir_path . 'downloads/';
     foreach (glob($download_dir . '*') as $file) {
         // Delete files older than 1 hour
@@ -99,5 +102,6 @@ function chatbot_chatgpt_cleanup_download_directory() {
     }
     // Create the index.php file if it does not exist
     create_directory_and_index_file($download_dir);
+    
 }
 add_action('chatbot_chatgpt_cleanup_download_files', 'chatbot_chatgpt_cleanup_download_directory');

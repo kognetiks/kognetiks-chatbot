@@ -1,11 +1,11 @@
 jQuery(document).ready(function ($) {
 
-    // if (typeof kchat_settings === 'undefined') {
-    //     console.error('Chatbot: NOTICE: kchat_settings is not defined.');
-    //     return;
-    // } else {
-    //     console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
-    // }
+    if (typeof kchat_settings === 'undefined') {
+        console.error('Chatbot: NOTICE: kchat_settings is not defined.');
+        return;
+    } else {
+        console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
+    }
 
     // Only call the function if the chatbot shortcode is present
     if (isChatbotShortcodePresent()) {

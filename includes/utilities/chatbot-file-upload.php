@@ -365,6 +365,9 @@ function generate_random_string($length = 26) {
 
 // Delete old upload files - Ver 1.9.9
 function chatbot_chatgpt_cleanup_uploads_directory() {
+
+    global $chatbot_chatgpt_plugin_dir_path;
+    
     $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
     foreach (glob($uploads_dir . '*') as $file) {
         // Delete files older than 1 hour
