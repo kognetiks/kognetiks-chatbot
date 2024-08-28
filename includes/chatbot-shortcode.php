@@ -276,7 +276,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Set the sanitized display style in $atts and $kchat_settings
     $atts['chatbot_chatgpt_display_style'] = $chatbot_chatgpt_display_style;
     $kchat_settings['chatbot_chatgpt_display_style'] = $chatbot_chatgpt_display_style;
-    back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
     // Validate and sanitize the assistant parameter and set the assistant_id - Ver 1.9.9
     $valid_ids = ['original', 'primary', 'alternate'];
@@ -525,7 +525,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null);
 
-    back_trace( 'NOTICE', 'LINE 528 - $chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    // back_trace( 'NOTICE', 'LINE 528 - $chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
     // Localize the data for the chatbot - Ver 2.1.1.1 - 2024 08 28 - THIS IS THE SPOT
     $kchat_settings = array_merge($kchat_settings, array(
@@ -550,7 +550,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
     ));
 
-    back_trace('NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));
+    // back_trace('NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
@@ -896,7 +896,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Generate a unique cache-busting parameter
     $cache_buster = '?cb=' . time();
 
-    back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
