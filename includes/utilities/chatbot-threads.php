@@ -16,9 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Set the threads transient
 function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $session_id;
     global $user_id;
     global $page_id;
@@ -69,9 +66,6 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
 
 // Get the threads
 function get_chatbot_chatgpt_threads($user_id, $page_id) {
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $session_id;
     global $user_id;
@@ -145,9 +139,6 @@ function get_chatbot_chatgpt_threads($user_id, $page_id) {
 // Delete the threads
 function delete_chatbot_chatgpt_threads($user_id, $page_id) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-    
     global $session_id;
     global $user_id;
     global $page_id;

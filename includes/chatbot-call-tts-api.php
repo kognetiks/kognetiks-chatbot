@@ -18,8 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Call the ChatGPT API
 function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_id = null, $page_id = null, $session_id = null) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
+    global $chatbot_chatgpt_plugin_dir_path;
 
     global $session_id;
     global $user_id;
@@ -61,7 +60,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     }
 
     // Generate directory path
-    $audio_dir_path = $chatbot_chatgpt_pluign_dir_path . 'audio/';
+    $audio_dir_path = $chatbot_chatgpt_plugin_dir_path . 'audio/';
     // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
     // Ensure the directory exists or attempt to create it
@@ -80,7 +79,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // Generate the URL of the audio file
     // $audio_file_url = $plugins_url . '/' . $plugin_name . '/audio/' . $audio_file_name;
-    $audio_file_url = plugins_url('audio/' . $audio_file_name, $chatbot_chatgpt_pluign_dir_path . 'chatbot-chatgpt');
+    $audio_file_url = plugins_url('audio/' . $audio_file_name, $chatbot_chatgpt_plugin_dir_path . 'chatbot-chatgpt');
 
     $audio_output = null;
 
@@ -269,9 +268,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 // Call the Text-to-Speech API
 function chatbot_chatgpt_read_aloud($message) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $session_id;
     global $user_id;
     global $page_id;
@@ -352,9 +348,6 @@ add_action('wp_ajax_nopriv_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_al
 // Set up the cron job to delete the audio file after 2 hours
 function chatbot_chatgpt_delete_audio_file_id( $file_id ) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $session_id;
     global $user_id;
     global $page_id;
@@ -379,8 +372,7 @@ function chatbot_chatgpt_delete_audio_file_id( $file_id ) {
 // Cleanup in Aisle 4 on OpenAI - Ver 1.7.9
 function deleteAudioFile($file_id) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
+    global $chatbot_chatgpt_plugin_dir_path;
 
     global $session_id;
     global $user_id;
@@ -392,7 +384,7 @@ function deleteAudioFile($file_id) {
     // back_trace( 'NOTICE', 'Delete the audio file: ' . print_r($file_id, true));
 
     // Generate directory path
-    $audio_dir_path = $chatbot_chatgpt_pluign_dir_path . 'audio/';
+    $audio_dir_path = $chatbot_chatgpt_plugin_dir_path . 'audio/';
     // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
     // Ensure the directory exists or attempt to create it
@@ -430,7 +422,7 @@ add_action( 'chatbot_chatgpt_delete_audio_file', 'deleteAudioFile' );
 
 // Delete old audio files - Ver 1.9.9
 function chatbot_chatgpt_cleanup_audio_directory() {
-    $audio_dir = $chatbot_chatgpt_pluign_dir_path . 'audio/';
+    $audio_dir = $chatbot_chatgpt_plugin_dir_path . 'audio/';
     foreach (glob($audio_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {

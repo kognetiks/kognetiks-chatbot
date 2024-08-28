@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Retrieve error log file names
 function chatbot_chatgpt_manage_error_logs() {
 
-    $chatbot_logs_dir = $chatbot_chatgpt_pluign_dir_path . 'chatbot-logs/';
+    $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
 
     // Ensure the directory and index file exist
     create_directory_and_index_file($chatbot_logs_dir);
@@ -127,7 +127,7 @@ function handle_log_actions() {
                 wp_die('Invalid nonce');
             }
             $file = sanitize_file_name(basename($_GET['file']));
-            $chatbot_logs_dir = $chatbot_chatgpt_pluign_dir_path . 'chatbot-logs/';
+            $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
             $file_path = $chatbot_logs_dir . $file;
 
             if (file_exists($file_path)) {
@@ -150,7 +150,7 @@ function handle_log_actions() {
                 wp_die('Invalid nonce');
             }
             $file = sanitize_file_name(basename($_GET['file']));
-            $chatbot_logs_dir = $chatbot_chatgpt_pluign_dir_path . 'chatbot-logs/';
+            $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
             $file_path = $chatbot_logs_dir . $file;
 
             if (file_exists($file_path)) {
@@ -166,7 +166,7 @@ function handle_log_actions() {
             if (!wp_verify_nonce($nonce, 'delete_all_logs')) {
                 wp_die('Invalid nonce');
             }
-            $chatbot_logs_dir = $chatbot_chatgpt_pluign_dir_path . 'chatbot-logs/';
+            $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
             $files = array_diff(scandir($chatbot_logs_dir), array('..', '.'));
 
             foreach ($files as $file) {

@@ -18,7 +18,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     ob_start();
     
-    global $chatbot_chatgpt_pluign_dir_path;
+    global $chatbot_chatgpt_plugin_dir_path;
     global $chatbot_chatgpt_plugin_dir_url;
     global $chatbot_chatgpt_plugin_version;
 
@@ -1176,9 +1176,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 // Dynamic Shortcode - Ver 2.0.6
 function register_chatbot_shortcodes($number_of_shortcodes = null) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     // Make sure the number of shortcodes is set
     global $wpdb;
 
@@ -1289,9 +1286,6 @@ function chatbot_chatgpt_attribution () {
 // Function to output the script
 function chatbot_chatgpt_shortcode_enqueue_script() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-    
     global $session_id;
     global $user_id;
     global $page_id;

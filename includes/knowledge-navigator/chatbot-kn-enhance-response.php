@@ -16,9 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Enhance the response with TF-IDF - Ver 1.6.9
 function chatbot_chatgpt_enhance_with_tfidf($message) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $wpdb;
 
     global $learningMessages;

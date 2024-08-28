@@ -35,8 +35,8 @@ global $chatbot_chatgpt_plugin_version;
 $chatbot_chatgpt_plugin_version = '2.1.2';
 
 // Plugin directory path
-global $chatbot_chatgpt_pluign_dir_path;
-$chatbot_chatgpt_pluign_dir_path = plugin_dir_path( __FILE__ );
+global $chatbot_chatgpt_plugin_dir_path;
+$chatbot_chatgpt_plugin_dir_path = plugin_dir_path( __FILE__ );
 
 // Plugin directory URL
 global $chatbot_chatgpt_plugin_dir_url;

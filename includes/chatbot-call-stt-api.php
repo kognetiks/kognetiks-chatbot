@@ -16,8 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Call the ChatGPT API
 function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
+    global $chatbot_chatgpt_plugin_dir_path;
 
     global $session_id;
     global $user_id;
@@ -75,7 +74,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     // DIAG - Diagnostics - Ver 2.0.1
     // back_trace( 'NOTICE', '$audio_file_name: ' . $audio_file_name);
 
-    $audio_file_name = $chatbot_chatgpt_pluign_dir_path . 'uploads/' . $audio_file_name;
+    $audio_file_name = $chatbot_chatgpt_plugin_dir_path . 'uploads/' . $audio_file_name;
 
     // Ensure the audio file exists
     if (!file_exists($audio_file_name)) {

@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-global $chatbot_chatgpt_pluign_dir_path;
+global $chatbot_chatgpt_plugin_dir_path;
 global $chatbot_chatgpt_plugin_dir_url;
 
 global $topwords, $words, $start_url, $domain, $max_top_words, $chatbot_chatgpt_diagnostics, $plugin_dir_path, $results_dir_path, $chatbot_chatgpt_no_of_items_analyzed;
@@ -32,9 +32,6 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
     // update_option('chatbot_chatgpt_kn_schedule', 'No');
-    
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
     
     global $topWords;
 

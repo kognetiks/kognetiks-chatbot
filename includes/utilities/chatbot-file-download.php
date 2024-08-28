@@ -15,12 +15,11 @@ if ( ! defined( 'WPINC' ) ) {
 
 function download_openai_file($file_id, $filename) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
+    global $chatbot_chatgpt_plugin_dir_path;
 
     global $session_id;
 
-    $downloads_dir = $chatbot_chatgpt_pluign_dir_path . 'downloads/';
+    $downloads_dir = $chatbot_chatgpt_plugin_dir_path . 'downloads/';
 
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($downloads_dir)) {
@@ -79,7 +78,7 @@ function download_openai_file($file_id, $filename) {
         file_put_contents($file_path, $response);
 
         // Return the file URL
-        return content_url('plugins/' . basename($chatbot_chatgpt_pluign_dir_path) . '/downloads/' . $filename);
+        return content_url('plugins/' . basename($chatbot_chatgpt_plugin_dir_path) . '/downloads/' . $filename);
 
     } else {
 
@@ -91,7 +90,7 @@ function download_openai_file($file_id, $filename) {
 
 // Delete old download files - Ver 2.0.3
 function chatbot_chatgpt_cleanup_download_directory() {
-    $download_dir = $chatbot_chatgpt_pluign_dir_path . 'downloads/';
+    $download_dir = $chatbot_chatgpt_plugin_dir_path . 'downloads/';
     foreach (glob($download_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {

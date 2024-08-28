@@ -15,9 +15,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_download_options_data() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-    
+    global $chatbot_chatgpt_plugin_dir_path;
+
     global $wpdb;
 
     // Ensure the current user has the capability to export options
@@ -30,7 +29,7 @@ function chatbot_chatgpt_download_options_data() {
         wp_die(__('Headers already sent. Cannot proceed with the download.', 'chatbot-chatgpt'));
     }
 
-    $debug_dir_path = $chatbot_chatgpt_pluign_dir_path . 'debug/';
+    $debug_dir_path = $chatbot_chatgpt_plugin_dir_path . 'debug/';
 
     // Create debug directory if it doesn't exist
     if (!file_exists($debug_dir_path)) {

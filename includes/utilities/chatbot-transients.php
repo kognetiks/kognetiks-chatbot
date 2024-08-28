@@ -147,9 +147,6 @@ function delete_chatbot_chatgpt_transients( $transient_type, $user_id = null, $p
 
     // FIXME - DECIDE - Should we delete the transients
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $session_id;
     global $user_id;
     global $page_id;

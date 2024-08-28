@@ -47,9 +47,6 @@ function create_chatbot_chatgpt_interactions_table() {
 // Update Interaction Tracking - Ver 1.6.3
 function update_interaction_tracking() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $wpdb;
 
     // Check version and create table if necessary
@@ -84,9 +81,6 @@ function update_interaction_tracking() {
 
 // Conversation Tracking - Ver 1.7.6
 function create_conversation_logging_table() {
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -212,9 +206,6 @@ function create_conversation_logging_table() {
 // Append message to conversation log in the database - Ver 1.7.6
 function append_message_to_conversation_log($session_id, $user_id, $page_id, $user_type, $thread_id, $assistant_id, $message) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $wpdb;
 
     // $user_type can be 'chatbot', 'visitor', 'prompt_tokens', 'completion_tokens', 'total_tokens'
@@ -270,8 +261,6 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 // Function to delete specific expired transients - Ver 1.7.6
 function clean_specific_expired_transients() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -306,9 +295,6 @@ function clean_specific_expired_transients() {
 
 // Function to purge conversation log entries that are older than the specified number of days - Ver 1.7.6
 function chatbot_chatgpt_conversation_log_cleanup() {
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 

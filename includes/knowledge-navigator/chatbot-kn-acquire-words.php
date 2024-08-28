@@ -17,8 +17,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Knowledge Navigator - Acquire Top Words using TF-IDF - Ver 1.9.6
 function kn_acquire_words( $content, $option = null ) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 

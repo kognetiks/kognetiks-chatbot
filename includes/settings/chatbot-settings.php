@@ -36,9 +36,6 @@ function chatbot_chatgpt_settings_page_html() {
         return;
     }
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $kchat_settings;
 
     $kchat_settings['chatbot-chatgpt-version'] = $chatbot_chatgpt_plugin_version;

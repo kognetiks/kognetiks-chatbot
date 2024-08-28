@@ -15,11 +15,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 function kn_enhance_context( $message ) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $wpdb;
-    
+
     global $stopWords;
 
     // Split the text into words based on spaces

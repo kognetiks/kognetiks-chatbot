@@ -344,9 +344,6 @@ function generate_gd_bar_chart($labels, $data, $colors, $name) {
 // Chatbot Charts - Ver 1.6.3
 function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     // Check is GD Library is installed - Ver 1.6.3
     if (!extension_loaded('gd')) {
         // GD Library is installed and loaded
@@ -443,10 +440,8 @@ add_action('chatbot_chatgpt_delete_chart', 'chatbot_chatgpt_delete_chart');
 // Return Interactions data in a table - Ver 1.7.8
 function chatbot_chatgpt_interactions_table() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $wpdb;
+
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
 
     // Get the reporting period from the options
@@ -506,21 +501,17 @@ function chatbot_chatgpt_interactions_table() {
 // Count the number of conversations stored - Ver 1.7.6
 function chatbot_chatgpt_count_conversations() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $wpdb;
+
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     $results = $wpdb->get_results("SELECT COUNT(id) AS count FROM $table_name");
     // TODO - Handle errors
     return $results[0]->count;
+
 }
 
 // Calculated size of the conversations stored - Ver 1.7.6
 function chatbot_chatgpt_size_conversations() {
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -557,9 +548,6 @@ function chatbot_chatgpt_size_conversations() {
 
 // Total Prompt Tokens, Completion Tokens, and Total Tokens - Ver 1.8.5
 function chatbot_chatgpt_total_tokens() {
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -643,8 +631,7 @@ function chatbot_chatgpt_download_token_usage_data() {
 // Download the conversation data - Ver 1.7.6
 function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
+    global $chatbot_chatgpt_plugin_dir_path;
 
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
     global $wpdb;
@@ -676,7 +663,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     $filename = $t_file_name . '-' . date('Y-m-d') . '.csv';
     // Replace spaces with - in the filename
     $filename = str_replace(' ', '-', $filename);
-    $results_dir_path = $chatbot_chatgpt_pluign_dir_path . 'results/';
+    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
 
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {

@@ -17,8 +17,6 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_call_flow_api($api_key, $message) {
 
     global $wpdb;
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $session_id;
     global $user_id;
@@ -143,9 +141,6 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
 function chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assistant_id, $max_answers) {
 
     global $wpdb;
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 

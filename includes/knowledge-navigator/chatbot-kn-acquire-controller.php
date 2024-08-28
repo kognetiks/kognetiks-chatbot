@@ -106,9 +106,6 @@ add_action( 'chatbot_kn_acquire_controller', 'chatbot_kn_acquire_controller' );
 // Initialize the knowledge acquisition process
 function chatbot_kn_initialization() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -152,9 +149,6 @@ function chatbot_kn_initialization() {
 
 function chatbot_kn_reinitialization() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -176,10 +170,6 @@ function chatbot_kn_reinitialization() {
 // Count the number of posts, pages, and products
 function chatbot_kn_count_documents() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
-    
     global $wpdb;
 
     $document_count = 0;
@@ -232,9 +222,6 @@ function chatbot_kn_count_documents() {
 
 // Acquire the content for each page, post, or product in the run
 function chatbot_kn_run_phase_1() {
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -340,9 +327,6 @@ function chatbot_kn_run_phase_1() {
 
 // Acquire the content for each comment in the run
 function chatbot_kn_run_phase_3() {
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -462,9 +446,6 @@ function chatbot_kn_run_phase_3() {
 // Phase 4 - Compute the TF-IDF
 function chatbot_kn_run_phase_4() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $wpdb;
 
     // Maximum number of top words
@@ -551,9 +532,6 @@ function chatbot_kn_run_phase_5() {
 
 // Phase 6 - Assign scores to the top 10% of the words in pages, posts, and products
 function chatbot_kn_run_phase_6() {
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $wpdb;
 
@@ -710,13 +688,12 @@ function chatbot_kn_run_phase_6() {
 // Output the results
 function chatbot_kn_output_the_results() {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
+    global $chatbot_chatgpt_plugin_dir_path;
 
     global $wpdb;
 
     // Generate directory path
-    $results_dir_path = $chatbot_chatgpt_pluign_dir_path . 'results/';
+    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
     // back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
 
     // Ensure the directory exists or attempt to create it

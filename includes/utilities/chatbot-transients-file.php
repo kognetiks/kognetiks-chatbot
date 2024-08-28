@@ -16,8 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Set the transients based on the type - Ver 1.8.1
 function set_chatbot_chatgpt_transients_files( $transient_type, $transient_value, $session_id, $file_no ) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $session_id;
     global $user_id;
@@ -41,8 +39,6 @@ function set_chatbot_chatgpt_transients_files( $transient_type, $transient_value
 // Get the transients based on the type - Ver 1.8.1
 function get_chatbot_chatgpt_transients_files( $transient_type, $session_id, $file_no ): string {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
     
     global $session_id;
     global $user_id;
@@ -70,9 +66,6 @@ function get_chatbot_chatgpt_transients_files( $transient_type, $session_id, $fi
 function delete_chatbot_chatgpt_transients_files( $transient_type, $session_id, $file_no ) {
 
     // FIXME - DECIDE - Should we delete the transients
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $session_id;
     global $user_id;

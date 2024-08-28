@@ -62,9 +62,6 @@ function createAnAssistant($api_key) {
 // Step 3: Add a Message to a Thread
 function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $session_id;
 
     // DIAG - Diagnostics - Ver 2.0.9
@@ -197,9 +194,6 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
 // Step 4: Run the Assistant
 function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
-    
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $kchat_settings;
 
@@ -623,9 +617,6 @@ function getTheMessage($thread_id, $api_key) {
 // CustomGPT - Assistants - Ver 1.7.2
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id) {
 
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
-
     global $session_id;
     global $user_id;
     global $page_id;
@@ -864,9 +855,6 @@ function fetchDataUsingCurl($url, $context) {
 
 // Retrieve the first file id - Ver 1.9.2
 function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id) {
-
-    global $chatbot_chatgpt_pluign_dir_path;
-    global $chatbot_chatgpt_plugin_dir_url;
 
     global $session_id;
     global $user_id;
