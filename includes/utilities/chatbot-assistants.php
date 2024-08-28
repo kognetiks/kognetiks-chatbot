@@ -16,6 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Create the table for the chatbot assistants
 function create_chatbot_chatgpt_assistants_table() {
 
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -138,6 +139,7 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
 
 // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
 function update_chatbot_chatgpt_number_of_shortcodes() {
+
 
     global $wpdb;
 
@@ -638,4 +640,3 @@ function upgrade_chatbot_chatgpt_assistants_table() {
     delete_option('chatbot_chatgpt_assistant_instructions_alternate');
     
 }
-

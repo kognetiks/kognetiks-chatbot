@@ -16,6 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Database Management - drop the table if it exists, then add it if it doesn't exist - Ver 1.6.3
 function dbKNStore() {
 
+
     global $wpdb;
 
     $charset_collate = $wpdb->get_charset_collate();
@@ -90,8 +91,8 @@ function dbKNStoreTFIDF() {
 
 // Database Management - drop a table if it exists, then add it if it doesn't exist to store the words and score - Ver 1.9.6
 function dbKNStoreWordCount() {
-    
-        global $wpdb;
+
+    global $wpdb;
     
         $charset_collate = $wpdb->get_charset_collate();
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_word_count';
@@ -142,6 +143,7 @@ function dbKNClean() {
 function store_top_words() {
 
     global $wpdb;
+
     global $topWords;
 
     // Call the dbKNStoreTFIDF function - Ver 1.6.3
@@ -175,14 +177,16 @@ function store_top_words() {
 
 // Save the results to a file
 function output_results() {
-    
+
+    global $chatbot_chatgpt_plugin_dir_path;
+
     global $topWords;
 
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', 'ENTER: output_results()');
 
     // Generate the directory path
-    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
+    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
 
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {

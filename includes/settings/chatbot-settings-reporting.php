@@ -367,6 +367,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         ), $atts );
 
     if(isset($atts['from_database']) && $atts['from_database'] == 'true') {
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
         
@@ -440,6 +441,7 @@ add_action('chatbot_chatgpt_delete_chart', 'chatbot_chatgpt_delete_chart');
 function chatbot_chatgpt_interactions_table() {
 
     global $wpdb;
+
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
 
     // Get the reporting period from the options
@@ -498,15 +500,19 @@ function chatbot_chatgpt_interactions_table() {
 
 // Count the number of conversations stored - Ver 1.7.6
 function chatbot_chatgpt_count_conversations() {
+
     global $wpdb;
+
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     $results = $wpdb->get_results("SELECT COUNT(id) AS count FROM $table_name");
     // TODO - Handle errors
     return $results[0]->count;
+
 }
 
 // Calculated size of the conversations stored - Ver 1.7.6
 function chatbot_chatgpt_size_conversations() {
+
     global $wpdb;
 
     // Use the DB_NAME constant instead of directly accessing the protected property
@@ -544,6 +550,7 @@ function chatbot_chatgpt_size_conversations() {
 function chatbot_chatgpt_total_tokens() {
 
     global $wpdb;
+
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     
     // Get the reporting period from the options
@@ -624,6 +631,8 @@ function chatbot_chatgpt_download_token_usage_data() {
 // Download the conversation data - Ver 1.7.6
 function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
+    global $chatbot_chatgpt_plugin_dir_path;
+
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
     global $wpdb;
     $table_name = $wpdb->prefix . $t_table_name;
@@ -654,7 +663,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     $filename = $t_file_name . '-' . date('Y-m-d') . '.csv';
     // Replace spaces with - in the filename
     $filename = str_replace(' ', '-', $filename);
-    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
+    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
 
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {

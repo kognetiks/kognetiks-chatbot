@@ -15,9 +15,12 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Upload Multiple files to the Assistant
 function chatbot_chatgpt_upload_files() {
+
+    global $chatbot_chatgpt_plugin_dir_path;
+
     global $session_id;
 
-    $uploads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
+    $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
 
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
@@ -218,6 +221,8 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
 // Upload files - Ver 2.0.1
 function chatbot_chatgpt_upload_mp3() {
 
+    global $chatbot_chatgpt_plugin_dir_path;
+
     global $session_id;
     global $user_id;
     global $page_id;
@@ -231,7 +236,7 @@ function chatbot_chatgpt_upload_mp3() {
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
 
-    $uploads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
+    $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
 
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
@@ -360,7 +365,10 @@ function generate_random_string($length = 26) {
 
 // Delete old upload files - Ver 1.9.9
 function chatbot_chatgpt_cleanup_uploads_directory() {
-    $uploads_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'uploads/';
+
+    global $chatbot_chatgpt_plugin_dir_path;
+    
+    $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
     foreach (glob($uploads_dir . '*') as $file) {
         // Delete files older than 1 hour
         if (filemtime($file) < time() - 60 * 60 * 1) {

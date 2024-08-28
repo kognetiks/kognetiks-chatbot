@@ -36,9 +36,11 @@ function chatbot_chatgpt_settings_page_html() {
         return;
     }
 
+    global $chatbot_chatgpt_plugin_version;
+
     global $kchat_settings;
 
-    $kchat_settings['chatbot-chatgpt-version'] = CHATBOT_CHATGPT_VERSION;
+    $kchat_settings['chatbot_chatgpt_version'] = $chatbot_chatgpt_plugin_version;
     $kchat_settings_json = wp_json_encode($kchat_settings);
     $escaped_kchat_settings_json = esc_js($kchat_settings_json);   
     wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $escaped_kchat_settings_json . '; } else { kchat_settings = ' . $escaped_kchat_settings_json . '; }', 'before');

@@ -29,7 +29,10 @@ $totalWordPairCount = 0;
 // Output Knowledge Navigator Data to log files for pages, posts and comments - Ver 1.6.3
 function chatbot_chatgpt_kn_acquire() {
 
+    global $chatbot_chatgpt_plugin_dir_path;
+
     global $wpdb;
+
     global $topWords;
     global $topWordPairs;
     global $max_top_words;
@@ -58,7 +61,7 @@ function chatbot_chatgpt_kn_acquire() {
     dbKNStore();
     
     // Generate directory path
-    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
+    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
     // back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
 
     // Ensure the directory exists or attempt to create it

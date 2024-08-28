@@ -261,6 +261,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 // Function to delete specific expired transients - Ver 1.7.6
 function clean_specific_expired_transients() {
 
+
     global $wpdb;
 
     // Prefix for transients in the options table.

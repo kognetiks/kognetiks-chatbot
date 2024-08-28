@@ -16,6 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Set the transients based on the type - Ver 1.8.1
 function set_chatbot_chatgpt_transients_files( $transient_type, $transient_value, $session_id, $file_no ) {
 
+
     global $session_id;
     global $user_id;
     global $page_id;
@@ -37,6 +38,7 @@ function set_chatbot_chatgpt_transients_files( $transient_type, $transient_value
 
 // Get the transients based on the type - Ver 1.8.1
 function get_chatbot_chatgpt_transients_files( $transient_type, $session_id, $file_no ): string {
+
     
     global $session_id;
     global $user_id;

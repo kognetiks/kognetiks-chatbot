@@ -17,6 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     global $wpdb;
+
     global $learningMessages;
     global $stopWords;
     $enhanced_response = "";

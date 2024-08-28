@@ -169,54 +169,54 @@ function chatbot_kn_reinitialization() {
 
 // Count the number of posts, pages, and products
 function chatbot_kn_count_documents() {
-    
-        global $wpdb;
 
-        $document_count = 0;
-    
-        // Count the number of published pages
-        $page_count = 0;
-        if ( esc_attr(get_option('chatbot_chatgpt_kn_include_pages', 'No')) === 'Yes') {
-            $page_count = $wpdb->get_var(
-                "SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'page' AND post_status = 'publish'"
-            );
-            $document_count += $page_count;
-        }
-    
-        // Count the number of published posts
-        $post_count = 0;
-        if ( esc_attr(get_option('chatbot_chatgpt_kn_include_posts', 'No')) === 'Yes') {
-            $post_count = $wpdb->get_var(
-                "SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'post' AND post_status = 'publish'"
-            );
-            $document_count += $post_count;
-        }
-    
-        // Count the number of published products
-        $product_count = 0;
-        if ( esc_attr(get_option('chatbot_chatgpt_kn_include_products', 'No')) === 'Yes') {
-            $product_count = $wpdb->get_var(
-                "SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'product' AND post_status = 'publish'"
-            );
-            $document_count += $product_count;
-        }
-    
-        // Count the number of approved comments
-        // FIXME - EXCLUDE COMMENTS FOR NOW
-        update_option('chatbot_chatgpt_kn_include_comments', 'No');
-        $comment_count = 0;
-        if ( esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'No')) === 'Yes') {
-            $comment_count = $wpdb->get_var(
-                "SELECT COUNT(comment_post_ID) FROM {$wpdb->prefix}comments WHERE comment_approved = '1'"
-            );
-            $document_count += $comment_count;
-        }
-    
-        // Update the total number of documents
-        update_option('chatbot_chatgpt_kn_document_count', $document_count);
+    global $wpdb;
 
-        // DIAG - Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', 'chatbot_kn_count_documents: ' . $document_count );
+    $document_count = 0;
+
+    // Count the number of published pages
+    $page_count = 0;
+    if ( esc_attr(get_option('chatbot_chatgpt_kn_include_pages', 'No')) === 'Yes') {
+        $page_count = $wpdb->get_var(
+            "SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'page' AND post_status = 'publish'"
+        );
+        $document_count += $page_count;
+    }
+
+    // Count the number of published posts
+    $post_count = 0;
+    if ( esc_attr(get_option('chatbot_chatgpt_kn_include_posts', 'No')) === 'Yes') {
+        $post_count = $wpdb->get_var(
+            "SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'post' AND post_status = 'publish'"
+        );
+        $document_count += $post_count;
+    }
+
+    // Count the number of published products
+    $product_count = 0;
+    if ( esc_attr(get_option('chatbot_chatgpt_kn_include_products', 'No')) === 'Yes') {
+        $product_count = $wpdb->get_var(
+            "SELECT COUNT(ID) FROM {$wpdb->prefix}posts WHERE post_type = 'product' AND post_status = 'publish'"
+        );
+        $document_count += $product_count;
+    }
+
+    // Count the number of approved comments
+    // FIXME - EXCLUDE COMMENTS FOR NOW
+    update_option('chatbot_chatgpt_kn_include_comments', 'No');
+    $comment_count = 0;
+    if ( esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'No')) === 'Yes') {
+        $comment_count = $wpdb->get_var(
+            "SELECT COUNT(comment_post_ID) FROM {$wpdb->prefix}comments WHERE comment_approved = '1'"
+        );
+        $document_count += $comment_count;
+    }
+
+    // Update the total number of documents
+    update_option('chatbot_chatgpt_kn_document_count', $document_count);
+
+    // DIAG - Diagnostics - Ver 1.9.6
+    // back_trace( 'NOTICE', 'chatbot_kn_count_documents: ' . $document_count );
 
 }
 
@@ -688,10 +688,12 @@ function chatbot_kn_run_phase_6() {
 // Output the results
 function chatbot_kn_output_the_results() {
 
+    global $chatbot_chatgpt_plugin_dir_path;
+
     global $wpdb;
 
     // Generate directory path
-    $results_dir_path = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'results/';
+    $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
     // back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
 
     // Ensure the directory exists or attempt to create it

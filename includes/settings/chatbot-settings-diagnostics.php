@@ -354,7 +354,9 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 // Log Chatbot Errors to the Server - Ver 2.0.9
 function chatbot_error_log($message) {
 
-    $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';
+    global $chatbot_chatgpt_plugin_dir_path;
+
+    $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
 
     // Ensure the directory and index file exist
     create_directory_and_index_file($chatbot_logs_dir);
@@ -368,13 +370,14 @@ function chatbot_error_log($message) {
 
 }
 
-
 // Log Chatbot Errors to the Server - Ver 2.0.3
 function log_chatbot_error() {
+
+    global $chatbot_chatgpt_plugin_dir_path;
     
     if (isset($_POST['error_message'])) {
         $error_message = sanitize_text_field($_POST['error_message']);
-        $chatbot_logs_dir = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'chatbot-logs/';
+        $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
 
         // Ensure the directory and index file exist
         create_directory_and_index_file($chatbot_logs_dir);

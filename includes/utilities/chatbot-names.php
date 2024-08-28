@@ -16,7 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Function to get the Assistant's name
 function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
-    // Global variables
     global $session_id;
     global $user_id;
     global $page_id;

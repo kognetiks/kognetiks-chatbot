@@ -8,6 +8,10 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
 
+## What's New in Version 2.1.2
+
+* **Changed Script Load Order**: Adjusted the loading order of scripts to ensure that critical settings are defined before the main chatbot script executes, preventing incorrect style application.
+
 ## What's New in Version 2.1.1
 
 * **Code Cleanup and Optimization**: Refined and optimized the codebase for improved performance and maintainability.

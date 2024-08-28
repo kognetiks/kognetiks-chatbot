@@ -1999,11 +1999,13 @@ class ParsedownCustom extends Parsedown {
 
         $Link = parent::inlineLink($Excerpt);
 
+        global $chatbot_chatgpt_plugin_dir_path;
+
         // Modify the URL in the link
         if (isset($Link['element']['attributes']['href'])) {
             $href = $Link['element']['attributes']['href'];
 
-            $href = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\';
+            $href = $chatbot_chatgpt_plugin_dir_path . 'documentation\\';
             
             if (strpos($href, 'http') !== 0) {
                 $Link['element']['attributes']['href'] = add_query_arg(array(
@@ -2024,11 +2026,13 @@ class ParsedownCustom extends Parsedown {
     protected function inlineImage($Excerpt) {
         $Image = parent::inlineImage($Excerpt);
 
+        global $chatbot_chatgpt_plugin_dir_path;
+
         // Modify the URL in the image
         if (isset($Image['element']['attributes']['src'])) {
             $src = $Image['element']['attributes']['src'];
 
-            $src = CHATBOT_CHATGPT_PLUGIN_DIR_PATH . 'documentation\\';
+            $src = $chatbot_chatgpt_plugin_dir_path . 'documentation\\';
 
             if (strpos($src, 'http') !== 0) {
                 $Image['element']['attributes']['src'] = add_query_arg(array(

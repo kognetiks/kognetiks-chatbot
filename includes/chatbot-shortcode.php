@@ -18,6 +18,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     ob_start();
     
+    global $chatbot_chatgpt_plugin_dir_path;
+    global $chatbot_chatgpt_plugin_dir_url;
+    global $chatbot_chatgpt_plugin_version;
+
     global $session_id;
     global $user_id;
     global $page_id;
@@ -257,19 +261,22 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         if (in_array($atts['style'], $valid_styles)) {
             // Sanitize and set the display style
             $chatbot_chatgpt_display_style = sanitize_text_field($atts['style']);
-            // back_trace( 'NOTICE', 'Display style: ' . $chatbot_chatgpt_display_style);
+            $kchat_settings['chatbot_chatgpt_display_style'] = $chatbot_chatgpt_display_style;
+            // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
         } else {
             // Handle invalid style by logging an error or taking other actions
             $chatbot_chatgpt_display_style = 'floating'; // default value
+            $kchat_settings['chatbot_chatgpt_display_style'] = $chatbot_chatgpt_display_style;
             // back_trace( 'ERROR', 'Invalid display style: ' . sanitize_text_field($atts['style']));
             // back_trace( 'ERROR', 'Invalid display style: ' . $chatbot_chatgpt_display_style);
         }
         // Remove the 'style' key from the $atts array
         unset($atts['style']);
     }
-        // Set the sanitized display style in $atts and $kchat_settings
+    // Set the sanitized display style in $atts and $kchat_settings
     $atts['chatbot_chatgpt_display_style'] = $chatbot_chatgpt_display_style;
     $kchat_settings['chatbot_chatgpt_display_style'] = $chatbot_chatgpt_display_style;
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
     // Validate and sanitize the assistant parameter and set the assistant_id - Ver 1.9.9
     $valid_ids = ['original', 'primary', 'alternate'];
@@ -518,10 +525,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null);
 
-    // Localize the data for the chatbot - Ver 2.1.1.1
+    // back_trace( 'NOTICE', 'LINE 528 - $chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+
+    // Localize the data for the chatbot - Ver 2.1.1.1 - 2024 08 28 - THIS IS THE SPOT
     $kchat_settings = array_merge($kchat_settings, array(
-        'chatbot-chatgpt-version' => CHATBOT_CHATGPT_VERSION,
-        'plugins_url' => CHATBOT_CHATGPT_PLUGIN_DIR_URL,
+        'chatbot_chatgpt_display_style' => $chatbot_chatgpt_display_style,
+        'chatbot_chatgpt_version' => $chatbot_chatgpt_plugin_version,
+        'plugins_url' => $chatbot_chatgpt_plugin_dir_url,
         'ajax_url' => admin_url('admin-ajax.php'),
         'user_id' => $user_id,
         'page_id' => $page_id,
@@ -538,7 +548,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'chatbot_chatgpt_force_page_reload' => esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No')),
         'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
         'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
-    ));   
+    ));
+
+    // back_trace('NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
@@ -572,10 +584,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     }
 
-    $kchat_settings['chatbot-chatgpt-version'] = CHATBOT_CHATGPT_VERSION;
-    $kchat_settings_json = wp_json_encode($kchat_settings);
-    $escaped_kchat_settings_json = esc_js($kchat_settings_json); 
-    wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $escaped_kchat_settings_json . '; } else { kchat_settings = ' . $escaped_kchat_settings_json . '; }', 'before');
+    // MOVED FURTHER DOWN - Ver 2.1.2 - 2024 08 28
+    // $kchat_settings['chatbot_chatgpt_version'] = $chatbot_chatgpt_plugin_version;
+    // $kchat_settings_json = wp_json_encode($kchat_settings);
+    // $escaped_kchat_settings_json = esc_js($kchat_settings_json);
+    // wp_add_inline_script('chatbot-chatgpt-local-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $escaped_kchat_settings_json . '; } else { kchat_settings = ' . $escaped_kchat_settings_json . '; }', 'before');
+    // wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $escaped_kchat_settings_json . '; } else { kchat_settings = ' . $escaped_kchat_settings_json . '; }', 'before');
 
     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
 
@@ -826,6 +840,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $assistant_details['common_name'] = !empty($assistant_details['common_name']) ? $assistant_details['common_name'] : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     $kchat_settings['chatbot_chatgpt_bot_name'] = $assistant_details['common_name'];
     $kchat_settings['chatbot_chatgpt_bot_name'] = !empty($assistant_details['common_name']) ? $assistant_details['common_name'] : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+
+    // THIS WAS HIGHER UP
+    $kchat_settings['chatbot_chatgpt_version'] = $chatbot_chatgpt_plugin_version;
+    $kchat_settings_json = wp_json_encode($kchat_settings);
+    wp_add_inline_script('chatbot-chatgpt-local-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
+    wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
     
     // DIAG - Diagnostics - Ver 2.1.0
     // back_trace( 'NOTICE', '========================================');
@@ -876,6 +896,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Generate a unique cache-busting parameter
     $cache_buster = '?cb=' . time();
 
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+
     // Depending on the style, adjust the output - Ver 1.7.1
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
@@ -889,11 +911,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // ob_start();
         ?>
         <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo time(); ?>">
-        <!-- <script>
-            $(document).ready(function() {
+        <script>
+            jQuery(document).ready(function($) {
                 $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
             });
-        </script> -->
+        </script>
         <!-- REMOVED FOR EMBEDDED -->
         <?php
         if ( $use_assistant_name == 'Yes' ) {
@@ -1282,7 +1304,6 @@ function chatbot_chatgpt_attribution () {
 // Function to output the script
 function chatbot_chatgpt_shortcode_enqueue_script() {
 
-    // Added these lines to get the global variables - Ver 1.9.3 - 2024 03 16
     global $session_id;
     global $user_id;
     global $page_id;
