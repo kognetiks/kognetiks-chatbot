@@ -16,6 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 // Retrieve error log file names
 function chatbot_chatgpt_manage_error_logs() {
 
+    global $chatbot_chatgpt_plugin_dir_path;
+
     $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
 
     // Ensure the directory and index file exist
@@ -114,6 +116,9 @@ function chatbot_chatgpt_manage_error_logs() {
 
 // Handle error log actions
 function handle_log_actions() {
+
+    global $chatbot_chatgpt_plugin_dir_path;
+
     if (!isset($_GET['action']) || !isset($_GET['_wpnonce'])) {
         return;
     }

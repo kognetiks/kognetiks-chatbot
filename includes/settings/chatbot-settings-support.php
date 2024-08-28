@@ -33,6 +33,8 @@ add_action('admin_init', 'chatbot_chatgpt_support_settings_init');
 // Get the list of documentation contents
 function listDocumentationContents() {
 
+    global $chatbot_chatgpt_plugin_dir_path;
+
     $documentationPath = $chatbot_chatgpt_plugin_dir_path . '/documentation';
     
     if (!file_exists($documentationPath)) {
@@ -122,6 +124,8 @@ function validateDocumentation($dir, $file) {
 
 // Support settings section callback - Ver 1.3.0
 function chatbot_chatgpt_support_section_callback() {
+
+    global $chatbot_chatgpt_plugin_dir_path;
 
     // Get the 'documentation' parameter from the URL
     $docLocation = '';

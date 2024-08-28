@@ -236,6 +236,9 @@ $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppr
 $context_history = [];
 
 function chatbot_chatgpt_enqueue_admin_scripts() {
+
+    global $chatbot_chatgpt_plugin_version;
+
     wp_enqueue_script('jquery'); // Ensure jQuery is enqueued
     wp_enqueue_script('chatbot_chatgpt_admin', plugins_url('assets/js/chatbot-chatgpt-admin.js', __FILE__), array('jquery'), $chatbot_chatgpt_plugin_version, true);
 }
@@ -250,6 +253,9 @@ add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10,
 
 // Enqueue plugin scripts and styles
 function chatbot_chatgpt_enqueue_scripts() {
+
+    global $chatbot_chatgpt_plugin_dir_url;
+    global $chatbot_chatgpt_plugin_version;
 
     global $session_id;
     global $user_id;
@@ -1009,14 +1015,20 @@ add_action('wp_enqueue_scripts', 'enqueue_greetings_script');
 
 // Add the color picker to the adaptive appearance settings section - Ver 1.8.1
 function enqueue_color_picker($hook_suffix) {
+
+    global $chatbot_chatgpt_plugin_version;
+
     // first check that $hook_suffix is appropriate for your admin page
     wp_enqueue_style('wp-color-picker');
     wp_enqueue_script('my-script-handle', plugin_dir_url(__FILE__) . 'assets/js/chatbot-chatgpt-color-picker.js', array('wp-color-picker'), $chatbot_chatgpt_plugin_version, true);
+
 }
 add_action('admin_enqueue_scripts', 'enqueue_color_picker');
 
 // Determine if the plugin is installed
 function kchat_get_plugin_version() {
+
+    global $chatbot_chatgpt_plugin_version;
 
     if (!function_exists('get_plugin_data')) {
         require_once(ABSPATH . 'wp-admin/includes/plugin.php');
