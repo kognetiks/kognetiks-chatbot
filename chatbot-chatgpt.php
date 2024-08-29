@@ -377,6 +377,10 @@ add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 // https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js
 // https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js
 function enqueue_mathjax_with_custom_config() {
+
+    global $chatbot_chatgpt_plugin_version;
+    global $chatbot_chatgpt_plugin_dir_url;
+
     // Add the MathJax configuration script
     $mathjax_config = "
     window.MathJax = {
@@ -392,10 +396,11 @@ function enqueue_mathjax_with_custom_config() {
 
     // Enqueue the MathJax script
     // wp_enqueue_script( 'mathjax', plugin_dir_url(__FILE__) . 'assets/js/tex-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
-    wp_enqueue_script( 'mathjax', plugin_dir_url(__FILE__) . 'assets/js/tex-mml-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
+    wp_enqueue_script( 'mathjax', $chatbot_chatgpt_plugin_dir_url . 'assets/js/tex-mml-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
 
     // Add the inline script before MathJax script
     wp_add_inline_script( 'mathjax', $mathjax_config, 'before' );
+
 }
 add_action( 'wp_enqueue_scripts', 'enqueue_mathjax_with_custom_config' );
 

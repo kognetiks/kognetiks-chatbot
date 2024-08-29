@@ -162,7 +162,7 @@
 
 #chatbot-chatgpt-conversation {
     flex-grow: 1;
-    padding: 10px;
+    padding: 10px 10px 10px 20px !important;
     overflow-y: auto;
     max-height: 90vh; /* Adjust the percentage as needed */
 }
