@@ -473,6 +473,13 @@ jQuery(document).ready(function ($) {
             sessionStorage.setItem('chatbot_chatgpt_conversation' + '_' + assistant_id, conversation.html());
         }
 
+        // MathJax rendering - Ver 2.1.2 - 2024 08 29
+        MathJax.typesetPromise([messageElement[0]])
+        .then(() => {
+            console.log("MathJax rendering complete");
+        })
+        .catch((err) => console.log("MathJax rendering failed: ", err));
+
     }
 
     function showTypingIndicator() {
@@ -640,6 +647,7 @@ jQuery(document).ready(function ($) {
                 message: message,
                 user_id: user_id, // pass the user ID here
                 page_id: page_id, // pass the page ID here
+                session_id: session_id, // pass the session ID here
             },
             headers: {  // Adding headers to prevent caching
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -1370,6 +1378,13 @@ jQuery(document).ready(function ($) {
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
             removeTypingIndicator();
+
+            // Re-render MathJax for any formulas in the stored conversation - Ver 2.1.2 - 2024 08 29
+            MathJax.typesetPromise([conversation[0]])
+            .then(() => {
+                console.log("MathJax re-rendering complete for stored conversation");
+            })
+            .catch((err) => console.log("MathJax re-rendering failed: ", err));
 
         } else {
 

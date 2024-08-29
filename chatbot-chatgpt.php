@@ -372,6 +372,33 @@ function chatbot_chatgpt_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
+// Enqueue MathJax with custom configuration - Ver 2.1.2
+// https://docs.mathjax.org/en/latest/
+// https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js
+// https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js
+function enqueue_mathjax_with_custom_config() {
+    // Add the MathJax configuration script
+    $mathjax_config = "
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+            displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
+        },
+        chtml: {
+            fontURL: '" . plugin_dir_url(__FILE__) . "assets/fonts/woff-v2'
+        }
+    };
+    ";
+
+    // Enqueue the MathJax script
+    // wp_enqueue_script( 'mathjax', plugin_dir_url(__FILE__) . 'assets/js/tex-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
+    wp_enqueue_script( 'mathjax', plugin_dir_url(__FILE__) . 'assets/js/tex-mml-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
+
+    // Add the inline script before MathJax script
+    wp_add_inline_script( 'mathjax', $mathjax_config, 'before' );
+}
+add_action( 'wp_enqueue_scripts', 'enqueue_mathjax_with_custom_config' );
+
 // CORS - Cross Origin Resource Sharing - CAUTION: This allows all domains to access the end point - Ver 2.1.2
 // function allow_cross_domain_requests() {
 //     header("Access-Control-Allow-Origin: *");
@@ -503,9 +530,9 @@ function chatbot_chatgpt_send_message() {
     $session_id = $_POST['session_id'];
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     $kchat_settings['chatbot_chatgpt_display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
     $kchat_settings['chatbot_chatgpt_assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);

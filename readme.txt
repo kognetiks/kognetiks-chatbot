@@ -159,7 +159,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 2.1.3 - Released TBD =
 
-* **TBD**: TBD
+* **MathJax Integration**: This update includes the integration of MathJax for rendering mathematical content within the chatbot.  This enhancement improves the chatbot's capability to handle and render complex mathematical expressions.
 
 = 2.1.2 - Released 08-28-2024 =
 
