@@ -615,26 +615,26 @@ function getTheMessage($thread_id, $api_key) {
 }
 
 // CustomGPT - Assistants - Ver 1.7.2
-function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id) {
+function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id) {
 
-    global $session_id;
-    global $user_id;
-    global $page_id;
-    global $thread_id;
-    global $assistant_id;
-    global $kchat_settings;
-    global $additional_instructions;
-    global $model;
-    global $voice;
+    // global $session_id;
+    // global $user_id;
+    // global $page_id;
+    global $thread_id; // Global because it's not being passed back later - Ver 2.1.2 - 2024 08 29
+    // global $assistant_id;
+    // global $kchat_settings;
+    // global $additional_instructions;
+    // global $model;
+    // global $voice;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    // back_trace( 'NOTICE', '$message: ' . $message);
+    back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$message: ' . $message);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     // back_trace( 'NOTICE', '$model: ' . $model);
 
@@ -664,6 +664,10 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
         set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
         
+    } else {
+
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $page_id);
+
     }
 
     // Localize the data for user id and page id
@@ -674,16 +678,16 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    $kchat_settings = array_merge($kchat_settings, array(
-        'user_id' => $user_id,
-        'page_id' => $page_id,
-        'session_id' => $session_id,
-        'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions,
-        'model' => $model,
-        'voice' => $voice,
-    ));
+    // $kchat_settings = array_merge($kchat_settings, array(
+    //     'user_id' => $user_id,
+    //     'page_id' => $page_id,
+    //     'session_id' => $session_id,
+    //     'thread_id' => $thread_id,
+    //     'assistant_id' => $assistant_id,
+    //     'additional_instructions' => $additional_instructions,
+    //     'model' => $model,
+    //     'voice' => $voice,
+    // ));
 
     // Step 1: Create an Assistant
     // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
@@ -854,7 +858,7 @@ function fetchDataUsingCurl($url, $context) {
 }
 
 // Retrieve the first file id - Ver 1.9.2
-function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id) {
+function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id ) {
 
     global $session_id;
     global $user_id;
