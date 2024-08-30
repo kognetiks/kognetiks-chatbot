@@ -28,10 +28,12 @@ if (file_exists($path . '/wp-load.php')) {
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
 // $chatbot_chatgpt_plugin_dir_path = plugin_dir_path( __FILE__ );
+// error_log('chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
 
 // Plugin directory URL
 global $chatbot_chatgpt_plugin_dir_url;
 // $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
+// error_log('chatbot_chatgpt_plugin_dir_url: ' . $chatbot_chatgpt_plugin_dir_url);
 
 // Include necessary files - Widgets - Ver 2.1.3
 require_once $chatbot_chatgpt_plugin_dir_path . 'widgets/chatbot-chatgpt-widget-logging.php';
