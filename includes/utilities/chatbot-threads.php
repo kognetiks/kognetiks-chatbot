@@ -52,22 +52,22 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
 
     // Create unique keys for transients
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
-    back_trace( 'NOTICE', '$thread_id_thread_key: ' . $thread_id_thread_key);
+    // back_trace( 'NOTICE', '$thread_id_thread_key: ' . $thread_id_thread_key);
     $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
-    back_trace( 'NOTICE', '$assistant_id_thread_key: ' . $assistant_id_thread_key);
+    // back_trace( 'NOTICE', '$assistant_id_thread_key: ' . $assistant_id_thread_key);
 
     // Retrieve the chatbot_chatgpt_thread_retention_period option
     $thread_retention_period = (int) get_option('chatbot_chatgpt_thread_retention_period', 36);
-    back_trace( 'NOTICE', '$thread_retention_period: ' . $thread_retention_period);
+    // back_trace( 'NOTICE', '$thread_retention_period: ' . $thread_retention_period);
 
     // Store the style and the assistant value with unique keys
     // Store transients for 1 day 12 hours (60 seconds * 60 minutes * 36 hours)
     set_transient($thread_id_thread_key, $thread_id, 60*60*$thread_retention_period); // Store for 36 hours
-    back_trace( 'NOTICE', '$thread_id_thread_key: ' . $thread_id_thread_key);
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$thread_id_thread_key: ' . $thread_id_thread_key);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     set_transient($assistant_id_thread_key, $assistant_id, 60*60*$thread_retention_period); // Store for 36 hours
-    back_trace( 'NOTICE', '$assistant_id_thread_key: ' . $assistant_id_thread_key);
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$assistant_id_thread_key: ' . $assistant_id_thread_key);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
 }
 
@@ -105,25 +105,25 @@ function get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant
 
     // Construct the unique keys
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
-    back_trace( 'NOTICE', '$thread_id_thread_key: ' . $thread_id_thread_key);
+    // back_trace( 'NOTICE', '$thread_id_thread_key: ' . $thread_id_thread_key);
     $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
-    back_trace( 'NOTICE', '$assistant_id_thread_key: ' . $assistant_id_thread_key);
+    // back_trace( 'NOTICE', '$assistant_id_thread_key: ' . $assistant_id_thread_key);
 
     // Retrieve the stored values
     $thread_id = get_transient($thread_id_thread_key);
     if ($thread_id === false) {
         $thread_id = '';
-        back_trace( 'NOTICE', '$thread_id not found');
+        // back_trace( 'NOTICE', '$thread_id not found');
     } else {
-        back_trace( 'NOTICE', '$thread_id found: ' . $thread_id);
+        // back_trace( 'NOTICE', '$thread_id found: ' . $thread_id);
     }
     
     $assistant_id = get_transient($assistant_id_thread_key);
     if ($assistant_id === false) {
         $assistant_id = '';
-        back_trace( 'NOTICE', '$assistant_id not found');
+        // back_trace( 'NOTICE', '$assistant_id not found');
     } else {
-        back_trace( 'NOTICE', '$assistant_id found: ' . $assistant_id);
+        // back_trace( 'NOTICE', '$assistant_id found: ' . $assistant_id);
     }
 
     // Initialize $kchat_settings if it is null

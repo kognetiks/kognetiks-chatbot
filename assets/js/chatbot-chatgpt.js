@@ -476,7 +476,7 @@ jQuery(document).ready(function ($) {
         // MathJax rendering - Ver 2.1.2 - 2024 08 29
         MathJax.typesetPromise([messageElement[0]])
         .then(() => {
-            console.log("MathJax rendering complete");
+            // console.log("MathJax rendering complete");
         })
         .catch((err) => console.log("MathJax rendering failed: ", err));
 
@@ -1382,7 +1382,7 @@ jQuery(document).ready(function ($) {
             // Re-render MathJax for any formulas in the stored conversation - Ver 2.1.2 - 2024 08 29
             MathJax.typesetPromise([conversation[0]])
             .then(() => {
-                console.log("MathJax re-rendering complete for stored conversation");
+                // console.log("MathJax re-rendering complete for stored conversation");
             })
             .catch((err) => console.log("MathJax re-rendering failed: ", err));
 

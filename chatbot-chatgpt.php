@@ -535,9 +535,9 @@ function chatbot_chatgpt_send_message() {
     $session_id = $_POST['session_id'];
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     $kchat_settings['chatbot_chatgpt_display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
     $kchat_settings['chatbot_chatgpt_assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
