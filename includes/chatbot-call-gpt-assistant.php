@@ -620,7 +620,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // global $session_id;
     // global $user_id;
     // global $page_id;
-    global $thread_id; // Global because it's not being passed back later - Ver 2.1.2 - 2024 08 29
+    // global $thread_id; // Global because it's not being passed back later - Ver 2.1.2 - 2024 08 29
     // global $assistant_id;
     // global $kchat_settings;
     // global $additional_instructions;
@@ -643,6 +643,20 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $errorResponses;
     global $stopWords;
 
+    // See if there is a $thread_id
+    if (empty($thread_id)) {
+        back_trace( 'NOTICE', '$thread_id is empty');
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        if (empty($thread_id)) {
+            back_trace( 'NOTICE', '$thread_id was empty');
+        } else {
+            back_trace( 'NOTICE', '$thread_id was empty but found a $thread_id: ' . $thread_id);
+        }
+    } else {
+        back_trace( 'NOTICE', '$thread_id was NOT empty');
+        back_trace( 'NOTICE', '$thread_id was NOT empty but passed as $thread_id: ' . $thread_id);
+    }
+
     // If the threadId is not set, create a new thread
     if (empty($thread_id)) {
 
@@ -651,7 +665,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         $api_key = get_option('chatbot_chatgpt_api_key', '');
         $assistants_response = createAnAssistant($api_key);
         // DIAG - Print the response
-        // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
+        back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
         // Step 2: Get The Thread ID
         // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
@@ -666,7 +680,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         
     } else {
 
-        $thread_id = get_chatbot_chatgpt_threads($user_id, $page_id);
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
 
     }
 

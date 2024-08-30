@@ -552,7 +552,7 @@ function chatbot_chatgpt_send_message() {
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
 
     // Get the thread information - Ver 2.0.7
-    $thread_id = get_chatbot_chatgpt_threads($user_id, $page_id);
+    $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
     $kchat_settings['thread_id'] = $thread_id;
     // $kchat_settings = array_merge($kchat_settings, get_chatbot_chatgpt_threads($user_id, $page_id));
 
