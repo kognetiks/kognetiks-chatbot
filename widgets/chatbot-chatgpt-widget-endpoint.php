@@ -26,10 +26,15 @@ if (file_exists($path . '/wp-load.php')) {
 }
 
 // Plugin directory path
-$chatbot_chatgpt_plugin_dir_path = plugin_dir_path( __FILE__ );
+global $chatbot_chatgpt_plugin_dir_path;
+// $chatbot_chatgpt_plugin_dir_path = plugin_dir_path( __FILE__ );
+
+// Plugin directory URL
+global $chatbot_chatgpt_plugin_dir_url;
+// $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
 
 // Include necessary files - Widgets - Ver 2.1.3
-require_once $chatbot_chatgpt_plugin_dir_path . 'chatbot-chatgpt-widget-logging.php';
+require_once $chatbot_chatgpt_plugin_dir_path . 'widgets/chatbot-chatgpt-widget-logging.php';
 
 // If remote access is not allowed, abort.
 $chatbot_chatgpt_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
@@ -44,8 +49,8 @@ if ($chatbot_chatgpt_enable_remote_widget !== 'Yes') {
 
 // Allowed domain examples - Ver 2.1.3
 // $allowed_domains = [
-//     'http://localhost/',
-//     'https://www.kognetiks.com/',
+//     'localhost',
+//     'kognetiks.com',
 // ];
 
 // Retrieve the allowed domains from the WordPress options

@@ -16,8 +16,6 @@
 // Widget logging
 function chatbot_chatgpt_widget_logging($message) {
 
-    error_log('chatbot_chatgpt_widget_logging: ' . $message);
-
     $chatbot_chatgpt_widget_logging = esc_attr(get_option('chatbot_chatgpt_widget_logging', 'No'));
 
     if ($chatbot_chatgpt_widget_logging === 'No') {
@@ -26,28 +24,27 @@ function chatbot_chatgpt_widget_logging($message) {
 
     $date_time = (new DateTime())->format('d-M-Y H:i:s \U\T\C');
 
-    chatbot_chatgpt_widget_log_usage($message);
+    chatbot_chatgpt_widget_log_usage( $date_time, $message );
 
 }
 
 // Log widget usage
-function chatbot_chatgpt_widget_log_usage($message) {
-
-    // Plugin directory path
-    $chatbot_chatgpt_plugin_dir_path = dirname(plugin_dir_path( __FILE__ ));
-
-    error_log('chatbot_chatgpt_widget_log_usage: ' . $message);
+function chatbot_chatgpt_widget_log_usage( $date_time, $message) {
 
     global $chatbot_chatgpt_plugin_dir_path;
 
-    $chatbot_chatgpt_widget_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'widget-logs/';
+    $chatbot_chatgpt_widget_logs_dir = $chatbot_chatgpt_plugin_dir_path . '/widget-logs/';
 
     // Ensure the directory and index file exist
     create_directory_and_index_file($chatbot_chatgpt_widget_logs_dir);
 
     // Get the current date to create a daily log file
     $current_date = date('Y-m-d');
-    $log_file = chatbot_chatgpt_widget_log_dir . 'chatbot-usage-log-' . $current_date . '.log';
+    $log_file = $chatbot_chatgpt_widget_logs_dir . 'chatbot-usage-log-' . $current_date . '.log';
+
+    error_log( $message );
+
+    $message = '[' . $date_time . '] ' . $message;
 
     // Append the error message to the log file
     file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
