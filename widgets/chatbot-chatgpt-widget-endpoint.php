@@ -1,8 +1,17 @@
 <?php
 /**
- * Chatbot Endpoint for Remote Server
- * This file handles requests from the remote server and serves the chatbot.
+ * Kognetiks Chatbot for WordPress - Chatbot ChatGPT WIDGET ENDPOINT - Ver 2.1.3
+ *
+ * This file contains the code accessing the Chatbot ChatGPT endpoint.
+ * 
+ *
+ * @package chatbot-chatgpt
  */
+
+// If this file is called directly, abort.
+// if ( ! defined( 'WPINC' ) ) {
+//     die;
+// }
 
 // Load WordPress
 $path = dirname(__FILE__);
@@ -97,6 +106,25 @@ $kchat_settings_json = wp_json_encode($kchat_settings);
     <?php wp_footer(); // Ensure all WordPress footer actions are triggered ?>
     <script type="text/javascript">
         var kchat_settings = <?php echo $kchat_settings_json; ?>;
+
+Yes, you can set values in local storage using JavaScript within the script block in your HTML. Here’s how you can modify your script to set the specified local storage values:
+
+Updated Script Section
+Add the following JavaScript code to set the values in local storage:
+
+php
+Copy code
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+        // Set values for the chatbot
+        var kchat_settings = <?php echo $kchat_settings_json; ?>;
+
+        // Set values in local storage
+        localStorage.setItem('chatbot_chatgpt_opened', 'true');
+        localStorage.setItem('chatbot_chatgpt_start_status', 'open');
+        localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'open');
+        
     </script>
 </body>
 </html>
