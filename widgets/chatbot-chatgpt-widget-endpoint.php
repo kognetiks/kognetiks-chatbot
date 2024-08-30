@@ -25,16 +25,74 @@ if (file_exists($path . '/wp-load.php')) {
     die('wp-load.php not found');
 }
 
+// If remote access is not allowed, abort.
+$chatbot_chatgpt_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
+if ($chatbot_chatgpt_enable_remote_widget !== 'Yes') {
+    die('Remote access is not allowed');
+}
+
+// Allowed domain examples - Ver 2.1.3
+// $allowed_domains = [
+//     'http://localhost/',
+//     'https://www.kognetiks.com/',
+// ];
+
+// Retrieve the allowed domains from the WordPress options
+$allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
+
+// Convert the comma-separated string to an array
+$allowed_domains = array_map('trim', explode(',', $allowed_domains_string));
+
+// Log the allowed domains for debugging purposes
+error_log('Allowed Domains: ' . $allowed_domains_string);
+
+// Check if allowed domains list is empty
+if (empty($allowed_domains_string)) {
+    $is_allowed = false;
+} else {
+    // Check the HTTP_REFERER to ensure the request is from an allowed server
+    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+
+    // Normalize referer to strip www if present
+    $normalized_referer = preg_replace('/^www\./', '', parse_url($referer, PHP_URL_HOST));
+
+    $is_allowed = false;
+    foreach ($allowed_domains as $allowed_domain) {
+        // Normalize allowed domain to strip www if present
+        $normalized_domain = preg_replace('/^www\./', '', $allowed_domain);
+
+        if (!empty($normalized_domain) && strpos($normalized_referer, $normalized_domain) !== false) {
+            $is_allowed = true;
+            // Log the referer for accounting, monitoring, and debugging purposes
+            error_log('Allowed: ' . $referer);
+            break;
+        }
+    }
+}
+
+if (!$is_allowed) {
+    // Log the referer for accounting, monitoring, and debugging purposes
+    error_log('Disallowed: ' . $referer);
+    die('Unauthorized access');
+}
+
 // Access the global shortcodes array
 global $shortcode_tags;
 
 // Get the shortcode parameter from the URL and sanitize it
-$shortcode_param = isset($_GET['assistant']) ? sanitize_text_field($_GET['assistant']) : 'chatbot-1';
+$shortcode_param = isset($_GET['assistant']) ? sanitize_text_field($_GET['assistant']) : '';
 
 // Check if the sanitized shortcode exists in the list of registered shortcodes
 if (!array_key_exists($shortcode_param, $shortcode_tags)) {
+    // Log the referer for accounting, monitoring, and debugging purposes
+    // chatbot_chatgpt_remote_access( 'Allowed: ' . $referer . ' Invalid shortcode: ' . $shortcode_param );
+    error_log ( 'Allowed: ' . $referer . ' Invalid shortcode: ' . $shortcode_param );
     // Terminate script if the shortcode is not registered
     die('Invalid shortcode');
+} else {
+    // Log the referer for accounting, monitoring, and debugging purposes
+    // chatbot_chatgpt_remote_access( 'Allowed: ' . $referer . ' Valid shortcode: ' . $shortcode_param );
+    error_log ( 'Allowed: ' . $referer . ' Valid shortcode: ' . $shortcode_param );
 }
 
 // Since we're confident that $shortcode_param is a valid registered shortcode,

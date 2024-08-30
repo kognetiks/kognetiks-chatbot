@@ -278,6 +278,10 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_additional_assistant_settings');
                 echo '</div>';
 
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_remote_widget_settings');
+                echo '</div>';
+
             } elseif ($active_tab == 'avatar') {
 
                 settings_fields('chatbot_chatgpt_avatar');
