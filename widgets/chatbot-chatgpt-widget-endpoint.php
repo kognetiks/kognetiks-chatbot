@@ -65,7 +65,9 @@ $kchat_settings = array_merge($kchat_settings,array(
     'chatbot_chatgpt_force_page_reload' => esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No')),
     'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
     'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
-));
+    'chatbot_chatgpt_start_status' => esc_attr(get_option('chatbot_chatgpt_start_status', 'closed')),
+    'chatbot_chatgpt_start_status_new_visitor' => esc_attr(get_option('chatbot_chatgpt_start_status_new_visitor', 'closed')),
+    ));
 
 $kchat_settings_json = wp_json_encode($kchat_settings);
 
@@ -105,17 +107,6 @@ $kchat_settings_json = wp_json_encode($kchat_settings);
     </div>
     <?php wp_footer(); // Ensure all WordPress footer actions are triggered ?>
     <script type="text/javascript">
-        var kchat_settings = <?php echo $kchat_settings_json; ?>;
-
-Yes, you can set values in local storage using JavaScript within the script block in your HTML. Here’s how you can modify your script to set the specified local storage values:
-
-Updated Script Section
-Add the following JavaScript code to set the values in local storage:
-
-php
-Copy code
-<script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function() {
 
         // Set values for the chatbot
         var kchat_settings = <?php echo $kchat_settings_json; ?>;

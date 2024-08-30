@@ -1189,8 +1189,8 @@ jQuery(document).ready(function ($) {
             chatbot_chatgpt_start_status = 'open'; // Force the chatbot to open if embedded
             chatbot_chatgpt_start_status_new_visitor = 'open'; // Force the chatbot to open if embedded
         } else {
-            chatbot_chatgpt_start_status = 'closed';
-            chatbot_chatgpt_start_status_new_visitor = 'closed';
+            // chatbot_chatgpt_start_status = 'closed';
+            // chatbot_chatgpt_start_status_new_visitor = 'closed';
         }
 
         // Nuclear option to clear session conversation - Ver 1.5.0
@@ -1224,17 +1224,25 @@ jQuery(document).ready(function ($) {
         // }
 
         // REPLACED ABOVE IN Ver 2.0.9
-        if (chatbot_chatgpt_start_status_new_visitor != 'open' && chatbot_chatgpt_start_status_new_visitor != 'closed') {
-            if (chatbot_chatgpt_start_status_new_visitor === null) {
-                // Override initial status
-                chatbot_chatgpt_start_status = 'open';
-                chatbot_chatgpt_start_status_new_visitor = 'closed';
-                localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
-            } else {
-                // Override initial status
-                chatbot_chatgpt_start_status_new_visitor = 'closed';
-                localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
-            }
+        // if (chatbot_chatgpt_start_status_new_visitor != 'open' && chatbot_chatgpt_start_status_new_visitor != 'closed') {
+        //     if (chatbot_chatgpt_start_status_new_visitor === null) {
+        //         // Override initial status
+        //         chatbot_chatgpt_start_status = 'open';
+        //         chatbot_chatgpt_start_status_new_visitor = 'closed';
+        //         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
+        //     } else {
+        //         // Override initial status
+        //         chatbot_chatgpt_start_status_new_visitor = 'closed';
+        //         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
+        //     }
+        // }
+
+        // Just check for null value - Ver 2.1.3 - 2024 08 30
+        if (chatbot_chatgpt_start_status_new_visitor === null) {
+            chatbot_chatgpt_start_status = 'closed';
+            localStorage.setItem('chatbot_chatgpt_start_status', 'closed');
+            chatbot_chatgpt_start_status_new_visitor = 'closed';
+            localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
         }
 
         // DIAG - Diagnostics - Ver 1.5.0
