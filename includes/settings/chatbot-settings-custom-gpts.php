@@ -39,6 +39,7 @@ function chatbot_chatgpt_assistant_settings_init() {
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_completion_tokens'); // Max Response Tokens - Ver 2.0.1
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_enable_remote_widget'); // Enable Remote Widget - Ver 2.1.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allowed_remote_domains'); // Allowed Remote Domains - Ver 2.1.3
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_widget_logging'); // Widget Logging - Ver 2.1.3
 
     // General Settings for Assistants
     add_settings_section(
@@ -182,6 +183,15 @@ function chatbot_chatgpt_assistant_settings_init() {
         'chatbot_chatgpt_allowed_remote_domains',
         'Allowed Remote Domains',
         'chatbot_chatgpt_allowed_remote_domains_callback',
+        'chatbot_chatgpt_remote_widget_settings',
+        'chatbot_chatgpt_remote_widget_settings_section'
+    );
+
+    // Widget Logging - Ver 2.1.3
+    add_settings_field(
+        'chatbot_chatgpt_widget_logging',
+        'Widget Logging',
+        'chatbot_chatgpt_widget_logging_callback',
         'chatbot_chatgpt_remote_widget_settings',
         'chatbot_chatgpt_remote_widget_settings_section'
     );
@@ -393,3 +403,13 @@ function chatbot_chatgpt_allowed_remote_domains_callback($args) {
     <?php
 }
 
+// Widget logging field callback - Ver 2.1.3
+function chatbot_chatgpt_widget_logging_callback($args) {
+    $widget_logging = esc_attr(get_option('chatbot_chatgpt_widget_logging', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_widget_logging" name="chatbot_chatgpt_widget_logging">
+        <option value="Yes" <?php selected( $widget_logging, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $widget_logging, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php
+}

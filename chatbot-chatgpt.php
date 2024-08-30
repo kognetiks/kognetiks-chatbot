@@ -175,11 +175,9 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
-// FIXME - Include necessary files - Widgets - Ver 2.1.0
-if (file_exists(plugin_dir_path(__FILE__) . 'widgets/chatbot-chatgpt-widget-end-point.php')) {
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_widget_end_point() called');
-    require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-chatgpt-widget-end-point.php';
-}
+// Include necessary files - Widgets - Ver 2.1.3
+require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-chatgpt-widget-endpoint.php';
+require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-chatgpt-widget-logging.php';
 
 // Log the User ID and Session ID - Ver 2.0.6 - 2024 07 11
 // back_trace( 'NOTICE', '$user_id: ' . $user_id);

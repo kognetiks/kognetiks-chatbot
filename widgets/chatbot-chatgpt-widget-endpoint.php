@@ -25,10 +25,21 @@ if (file_exists($path . '/wp-load.php')) {
     die('wp-load.php not found');
 }
 
+// Plugin directory path
+$chatbot_chatgpt_plugin_dir_path = plugin_dir_path( __FILE__ );
+
+// Include necessary files - Widgets - Ver 2.1.3
+require_once $chatbot_chatgpt_plugin_dir_path . 'chatbot-chatgpt-widget-logging.php';
+
 // If remote access is not allowed, abort.
 $chatbot_chatgpt_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
+
 if ($chatbot_chatgpt_enable_remote_widget !== 'Yes') {
-    die('Remote access is not allowed');
+
+    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+    chatbot_chatgpt_widget_logging('Remote access is not allowed for ' . $referer );
+    die;
+
 }
 
 // Allowed domain examples - Ver 2.1.3
@@ -44,12 +55,15 @@ $allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_do
 $allowed_domains = array_map('trim', explode(',', $allowed_domains_string));
 
 // Log the allowed domains for debugging purposes
-error_log('Allowed Domains: ' . $allowed_domains_string);
+chatbot_chatgpt_widget_logging('Allowed Domains: ' . $allowed_domains_string);
 
 // Check if allowed domains list is empty
 if (empty($allowed_domains_string)) {
+
     $is_allowed = false;
+
 } else {
+
     // Check the HTTP_REFERER to ensure the request is from an allowed server
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 
@@ -58,13 +72,15 @@ if (empty($allowed_domains_string)) {
 
     $is_allowed = false;
     foreach ($allowed_domains as $allowed_domain) {
+
         // Normalize allowed domain to strip www if present
         $normalized_domain = preg_replace('/^www\./', '', $allowed_domain);
 
         if (!empty($normalized_domain) && strpos($normalized_referer, $normalized_domain) !== false) {
+
             $is_allowed = true;
             // Log the referer for accounting, monitoring, and debugging purposes
-            error_log('Allowed: ' . $referer);
+            chatbot_chatgpt_widget_logging('Allowed: ' . $referer);
             break;
         }
     }
@@ -72,8 +88,8 @@ if (empty($allowed_domains_string)) {
 
 if (!$is_allowed) {
     // Log the referer for accounting, monitoring, and debugging purposes
-    error_log('Disallowed: ' . $referer);
-    die('Unauthorized access');
+    chatbot_chatgpt_widget_logging('Unauthorized access: ' . $referer);
+    die;
 }
 
 // Access the global shortcodes array
@@ -84,15 +100,20 @@ $shortcode_param = isset($_GET['assistant']) ? sanitize_text_field($_GET['assist
 
 // Check if the sanitized shortcode exists in the list of registered shortcodes
 if (!array_key_exists($shortcode_param, $shortcode_tags)) {
+
     // Log the referer for accounting, monitoring, and debugging purposes
     // chatbot_chatgpt_remote_access( 'Allowed: ' . $referer . ' Invalid shortcode: ' . $shortcode_param );
     error_log ( 'Allowed: ' . $referer . ' Invalid shortcode: ' . $shortcode_param );
     // Terminate script if the shortcode is not registered
-    die('Invalid shortcode');
+    chatbot_chatgpt_widget_logging('Invalid shortcode');
+    die;
+
 } else {
+
     // Log the referer for accounting, monitoring, and debugging purposes
     // chatbot_chatgpt_remote_access( 'Allowed: ' . $referer . ' Valid shortcode: ' . $shortcode_param );
-    error_log ( 'Allowed: ' . $referer . ' Valid shortcode: ' . $shortcode_param );
+    chatbot_chatgpt_widget_logging('Allowed: ' . $referer . ' Valid shortcode: ' . $shortcode_param );
+
 }
 
 // Since we're confident that $shortcode_param is a valid registered shortcode,
@@ -101,9 +122,13 @@ $chatbot_html = do_shortcode('[' . esc_html($shortcode_param) . ']');
 
 // Set the initial chatbot settings
 if (is_user_logged_in()) {
+
     $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
+
 } else {
+
     $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+    
 }
 
 // Localize the data for the chatbot - Ver 2.1.1.1
