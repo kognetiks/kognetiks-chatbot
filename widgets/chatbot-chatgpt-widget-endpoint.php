@@ -16,28 +16,39 @@ if (file_exists($path . '/wp-load.php')) {
     die('wp-load.php not found');
 }
 
+// Access the global shortcodes array
+global $shortcode_tags;
+
+// Get the shortcode parameter from the URL and sanitize it
+$shortcode_param = isset($_GET['assistant']) ? sanitize_text_field($_GET['assistant']) : 'chatbot-1';
+
+// Check if the sanitized shortcode exists in the list of registered shortcodes
+if (!array_key_exists($shortcode_param, $shortcode_tags)) {
+    // Terminate script if the shortcode is not registered
+    die('Invalid shortcode');
+}
+
+// Since we're confident that $shortcode_param is a valid registered shortcode,
+// it's safe to pass it to the do_shortcode function.
+$chatbot_html = do_shortcode('[' . esc_html($shortcode_param) . ']');
+
+// Set the initial chatbot settings
 if (is_user_logged_in()) {
-    // back_trace( 'NOTICE', 'User is logged in');
     $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
 } else {
-    // back_trace( 'NOTICE', 'User is NOT logged in');
     $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
 }
 
 // Localize the data for the chatbot - Ver 2.1.1.1
 $kchat_settings = array_merge($kchat_settings,array(
-    'chatbot-chatgpt-version' => $chatbot_chatgpt_plugin_version,
-    'plugins_url' => $chatbot_chatgpt_plugin_dir_url,
-    'ajax_url' => admin_url('admin-ajax.php'),
-    'user_id' => $user_id,
-    'session_id' => $session_id,
-    'page_id' => 999999,
-    'session_id' => $session_id,
-    // 'thread_id' => $thread_id,
-    // 'assistant_id' => $assistant_id,
-    // 'additional_instructions' => $additional_instructions,
-    'model' => $model,
-    'voice' => $voice,
+    'chatbot-chatgpt-version' => esc_attr($chatbot_chatgpt_plugin_version),
+    'plugins_url' => esc_url($chatbot_chatgpt_plugin_dir_url),
+    'ajax_url' => esc_url(admin_url('admin-ajax.php')),
+    'user_id' => esc_html($user_id),
+    'session_id' => esc_html($session_id),
+    'page_id' => esc_html(999999),
+    'model' => esc_html($model),
+    'voice' => esc_html($voice),
     'chatbot_chatgpt_timeout_setting' => esc_attr(get_option('chatbot_chatgpt_timeout_setting', '240')),
     'chatbot_chatgpt_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', '')),
     'chatbot_chatgpt_custom_avatar_icon_setting' => esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', '')),
@@ -48,9 +59,6 @@ $kchat_settings = array_merge($kchat_settings,array(
 ));
 
 $kchat_settings_json = wp_json_encode($kchat_settings);
-
-// Process the shortcode to get the chatbot HTML and settings
-$chatbot_html = do_shortcode('[chatbot-4]');
 
 // Output the HTML and necessary scripts
 ?>
@@ -92,3 +100,4 @@ $chatbot_html = do_shortcode('[chatbot-4]');
     </script>
 </body>
 </html>
+
