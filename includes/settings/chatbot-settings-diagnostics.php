@@ -361,14 +361,6 @@ function chatbot_error_log($message) {
     // Ensure the directory and index file exist
     create_directory_and_index_file($chatbot_logs_dir);
 
-    // Retrieve the timezone setting from WordPress
-    $timezone = get_option('timezone_string');
-    // Set the default timezone if available
-    if ($timezone) {
-        date_default_timezone_set($timezone);
-    } else {
-        date_default_timezone_set('UTC');
-    }
     // Get the current date to create a daily log file
     $current_date = date('Y-m-d');
     
@@ -391,14 +383,6 @@ function log_chatbot_error() {
         // Ensure the directory and index file exist
         create_directory_and_index_file($chatbot_logs_dir);
 
-        // Retrieve the timezone setting from WordPress
-        $timezone = get_option('timezone_string');
-        // Set the default timezone if available
-        if ($timezone) {
-            date_default_timezone_set($timezone);
-        } else {
-            date_default_timezone_set('UTC');
-        }
         // Get the current date to create a daily log file
         $current_date = date('Y-m-d');
 
