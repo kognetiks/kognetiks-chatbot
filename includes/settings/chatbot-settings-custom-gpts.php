@@ -413,3 +413,18 @@ function chatbot_chatgpt_widget_logging_callback($args) {
     </select>
     <?php
 }
+
+// Manage Error Logs
+function chatbot_chatgpt_manage_widget_logs_section_callback() {
+
+    ?>
+    <div>
+        <p>Click the <code>Download</code> button to retrieve a widget access log file, or the <code>Delete</code> button to remove a widget access log file.</p>
+        <p>Click the <code>Delete All</code> button to remove all widget access log files.</p>
+    </div>
+    <?php
+
+    // Call the capability tester
+    chatbot_chatgpt_manage_widget_logs();
+
+}

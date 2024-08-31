@@ -40,7 +40,7 @@ function chatbot_chatgpt_widget_logging( $message, $referer = null, $request_ip 
     // Get the current date to create a daily log file
     $current_date = date('Y-m-d');
 
-    $log_file = $chatbot_chatgpt_widget_logs_dir . 'chatbot-usage-log-' . $current_date . '.log';
+    $log_file = $chatbot_chatgpt_widget_logs_dir . 'chatbot-chatgpt-widget-access-' . $current_date . '.log';
 
     error_log( $message );
 

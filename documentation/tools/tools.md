@@ -51,6 +51,29 @@ The Manage Error Logs section provides direct access to the chatbot's unique err
 
 ---
 
+## Manage Widget Access Logs:
+
+The Manage Widget Access Logs section provides direct access to the chatbot's widget usage by remote sites.  If you've enabled access via a remote widget, and enabled logging to the widget, these logs will record allowed and disallowed access to whitelisted domains and OpenAI Assistants.
+
+![Manage Widget Access Logs](manage-widget-access-logs.png)
+
+## Example Widget Log
+
+![Example Widget Access Log](example-widget-access-log.png)
+
+### Steps:
+
+1. **Download**
+    - Choose ```Download``` to retrieve and save locally the selected widget access log.
+
+2. **Delete**
+    - Choose ```Delete``` to delete the selected ewidget accessrror log.
+
+3. **Delete All**
+    - Chose ```Delete All``` to delete ALL widget access logs listed.
+
+---
+
 ## Automated Shortcode Tester
 
 This tool allows you to test that shortcode are working as expected. The results are displayed accordingly.  If the parameter has been ignored, then the results will show ```No parameter pass for param1, 2 or 3```.  The expected results are documented below.
