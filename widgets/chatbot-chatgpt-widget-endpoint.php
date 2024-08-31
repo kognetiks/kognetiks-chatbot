@@ -54,55 +54,11 @@ if ($chatbot_chatgpt_enable_remote_widget !== 'Yes') {
 
 }
 
-// Allowed domain examples - Ver 2.1.3
+// Allowed domain, shortcode examples - Ver 2.1.3
 // $allowed_domains = [
-//     'localhost',
-//     'kognetiks.com',
+//     'localhost,chatbot-4',
+//     'kognetiks.com,chatbot-4',
 // ];
-
-// Retrieve the allowed domains from the WordPress options
-$allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
-
-// Convert the comma-separated string to an array
-$allowed_domains = array_map('trim', explode(',', $allowed_domains_string));
-
-// Log the allowed domains for debugging purposes
-chatbot_chatgpt_widget_logging('Allowed Domains: ' . $allowed_domains_string );
-
-// Check if allowed domains list is empty
-if (empty($allowed_domains_string)) {
-
-    $is_allowed = false;
-
-} else {
-
-    // Check the HTTP_REFERER to ensure the request is from an allowed server
-    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-
-    // Normalize referer to strip www if present
-    $normalized_referer = preg_replace('/^www\./', '', parse_url($referer, PHP_URL_HOST));
-
-    $is_allowed = false;
-    foreach ($allowed_domains as $allowed_domain) {
-
-        // Normalize allowed domain to strip www if present
-        $normalized_domain = preg_replace('/^www\./', '', $allowed_domain);
-
-        if (!empty($normalized_domain) && strpos($normalized_referer, $normalized_domain) !== false) {
-
-            $is_allowed = true;
-            // Log the referer for accounting, monitoring, and debugging purposes
-            chatbot_chatgpt_widget_logging('Allowed', $referer , $request_ip );
-            break;
-        }
-    }
-}
-
-if (!$is_allowed) {
-    // Log the referer for accounting, monitoring, and debugging purposes
-    chatbot_chatgpt_widget_logging('Unauthorized Access', $referer, $request_ip) ;
-    die;
-}
 
 // Access the global shortcodes array
 global $shortcode_tags;
@@ -110,22 +66,63 @@ global $shortcode_tags;
 // Get the shortcode parameter from the URL and sanitize it
 $shortcode_param = isset($_GET['assistant']) ? sanitize_text_field($_GET['assistant']) : '';
 
+// Retrieve the allowed domains and assistants from the WordPress options
+$allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
+
+// Convert the string to an array of domain-assistant pairs, assuming they are newline-separated
+$allowed_pairs = array_map('trim', explode("\n", $allowed_domains_string));
+
+// Log the allowed pairs for debugging purposes
+chatbot_chatgpt_widget_logging('Allowed Domain-Assistant Pairs: ' . $allowed_domains_string );
+
+// Check if allowed pairs list is empty
+if (empty($allowed_pairs)) {
+    $is_allowed = false;
+} else {
+    // Check the HTTP_REFERER to ensure the request is from an allowed server
+    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+
+    // Normalize referer to strip www if present
+    $normalized_referer = preg_replace('/^www\./', '', parse_url($referer, PHP_URL_HOST));
+
+    $is_allowed = false;
+
+    foreach ($allowed_pairs as $allowed_pair) {
+        // Split the pair into domain and shortcode
+        $pair_parts = array_map('trim', explode(',', $allowed_pair));
+
+        // Ensure the pair contains both domain and shortcode
+        if (count($pair_parts) === 2) {
+            list($allowed_domain, $allowed_shortcode) = $pair_parts;
+
+            // Normalize allowed domain to strip www if present
+            $normalized_domain = preg_replace('/^www\./', '', $allowed_domain);
+
+            // Debugging: Log the normalized referer and domain for comparison
+            chatbot_chatgpt_widget_logging('Checking Pair', $normalized_referer, $normalized_domain);
+
+            if (!empty($normalized_domain) && strpos($normalized_referer, $normalized_domain) !== false && $allowed_shortcode === $shortcode_param) {
+                $is_allowed = true;
+                // Log the valid referer and shortcode pair
+                chatbot_chatgpt_widget_logging('Allowed Pair', $referer, $shortcode_param);
+                break;
+            }
+        }
+    }
+}
+
+if (!$is_allowed) {
+    // Log the unauthorized access attempt
+    chatbot_chatgpt_widget_logging('Unauthorized Access', $referer, $shortcode_param);
+    die('Unauthorized access');
+}
+
 // Check if the sanitized shortcode exists in the list of registered shortcodes
 if (!array_key_exists($shortcode_param, $shortcode_tags)) {
-
-    // Log the referer for accounting, monitoring, and debugging purposes
-    // chatbot_chatgpt_remote_access( 'Allowed: ' . $referer . ' Invalid shortcode: ' . $shortcode_param );
-    error_log ( 'Allowed: ' . $referer . ' Invalid shortcode: ' . $shortcode_param );
-    // Terminate script if the shortcode is not registered
-    chatbot_chatgpt_widget_logging('Invalid shortcode: ' . $shortcode_param , $referer , $request_ip );
-    die;
-
+    chatbot_chatgpt_widget_logging('Invalid shortcode: ' . $shortcode_param, $referer, $request_ip);
+    die('Invalid shortcode');
 } else {
-
-    // Log the referer for accounting, monitoring, and debugging purposes
-    // chatbot_chatgpt_remote_access( 'Allowed: ' . $referer . ' Valid shortcode: ' . $shortcode_param );
-    chatbot_chatgpt_widget_logging('Valid shortcode: ' . $shortcode_param, $referer , $request_ip );
-
+    chatbot_chatgpt_widget_logging('Valid shortcode: ' . $shortcode_param, $referer, $request_ip);
 }
 
 // Since we're confident that $shortcode_param is a valid registered shortcode,

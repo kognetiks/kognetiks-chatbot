@@ -160,7 +160,7 @@ function handle_widget_log_actions() {
 
             if (file_exists($file_path)) {
                 unlink($file_path);
-                wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=gpt_assistants')); // Redirect to plugin page
+                wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=tools')); // Redirect to plugin page
                 exit;
             } else {
                 wp_die('File not found');
@@ -181,7 +181,7 @@ function handle_widget_log_actions() {
                 }
             }
 
-            wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=gpt_assistants')); // Redirect to plugin page
+            wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=tools')); // Redirect to plugin page
             exit;
             break;
 
