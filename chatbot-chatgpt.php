@@ -361,7 +361,7 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Enqueue the main chatbot script - CHANGED TO LOAD ORDER IN V2.1.2
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
 
-    // Add the inline script to define kchat_settings before the main script runs - CHANGED THE LOAD ORDER IN V2.1.2
+    // Add the inline script to define kchat_settings before the main script runs - CHANGED THE LOAD ORDER IN VER 2.1.2
     wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
     // FIXME - REMOVED IN V2.1.2
     // wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
