@@ -11,7 +11,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Knowledge Navigator - Acquire Top Words using TF-IDF - Ver 1.9.6

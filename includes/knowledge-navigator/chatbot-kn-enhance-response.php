@@ -10,7 +10,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Enhance the response with TF-IDF - Ver 1.6.9

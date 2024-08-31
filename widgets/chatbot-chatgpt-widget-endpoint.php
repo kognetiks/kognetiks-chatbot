@@ -10,7 +10,7 @@
 
 // If this file is called directly, abort.
 // if ( ! defined( 'WPINC' ) ) {
-//     die;
+//     die();
 // }
 
 // Load WordPress
@@ -43,7 +43,7 @@ if ($chatbot_chatgpt_enable_remote_widget !== 'Yes') {
 
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     chatbot_chatgpt_widget_logging('Remote access is not allowed', $referer );
-    die;
+    die();
 
 } else {
 
@@ -114,13 +114,13 @@ if (empty($allowed_pairs)) {
 if (!$is_allowed) {
     // Log the unauthorized access attempt
     chatbot_chatgpt_widget_logging('Unauthorized Access', $referer, $shortcode_param);
-    die('Unauthorized access');
+    die();
 }
 
 // Check if the sanitized shortcode exists in the list of registered shortcodes
 if (!array_key_exists($shortcode_param, $shortcode_tags)) {
     chatbot_chatgpt_widget_logging('Invalid shortcode: ' . $shortcode_param, $referer, $request_ip);
-    die('Invalid shortcode');
+    die();
 } else {
     chatbot_chatgpt_widget_logging('Valid shortcode: ' . $shortcode_param, $referer, $request_ip);
 }

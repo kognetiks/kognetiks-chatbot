@@ -10,7 +10,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Database Management - drop the table if it exists, then add it if it doesn't exist - Ver 1.6.3

@@ -11,7 +11,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // API/Model settings section callback - Ver 1.3.0 - Updated Ver 2.0.2.1

@@ -24,7 +24,7 @@
 */
 
 // If this file is called directly, die.
-defined( 'WPINC' ) || die;
+defined( 'WPINC' ) || die();
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
