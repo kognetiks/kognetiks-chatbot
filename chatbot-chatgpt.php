@@ -371,6 +371,7 @@ add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 
 // Enqueue MathJax with custom configuration - Ver 2.1.2
 // https://docs.mathjax.org/en/latest/
+// https://github.com/mathjax/MathJax/blob/master/LICENSE
 // https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js
 // https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js
 function enqueue_mathjax_with_custom_config() {
