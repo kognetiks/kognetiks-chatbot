@@ -125,7 +125,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 ## Remote Widget Access
 
-The **Kognetiks Chatbot for WordPress** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with advanced security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. However, to ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes, for example ```kognetiks.com,chatbot-4``` which will only allow calls from kognetiks.com and only then to chatbot-4.  Your resources are valuable, take appropriate precautions when allowing remote server access.
+The **Kognetiks Chatbot for WordPress** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes, for example ```kognetiks.com,chatbot-4``` which will only allow calls from kognetiks.com and only then to chatbot-4.  Your resources are valuable, take appropriate precautions when allowing remote server access.
 
 ![Remote Widget Settings](remote-widget-settings.png)
 

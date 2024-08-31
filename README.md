@@ -6,7 +6,9 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's new in Version 2.1.3
 
+* **Remote Server Access**: The **Kognetiks Chatbot for WordPress** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
 * **MathJax Integration**: This update includes the integration of MathJax for rendering mathematical content within the chatbot.  This enhancement improves the chatbot's capability to handle and render complex mathematical expressions.
+* **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 ## What's New in Version 2.1.2
 
