@@ -39,7 +39,7 @@ The **Kognetiks Chatbot for WordPress** now includes the advanced feature to all
 ### Key Security Features:
 
 1. **Domain-Assistant Pair Whitelisting**:
-   - The core of the security model lies in the ability to whitelist pairs of domains and chatbot shortcodes. Each remote server that calls the chatbot endpoint must be pre-approved by listing its domain along with the specific chatbot it is authorized to access. For example, the pair `kognetiks.com,chatbot-4` explicitly allows only `kognetiks.com` to access `chatbot-4`.
+   - The core of the security model lies in the ability to whitelist pairs of domains and chatbot shortcodes. Each remote server that calls the chatbot endpoint must be pre-approved by listing its domain along with the specific chatbot it is authorized to access. For example, the pair ```kognetiks.com,chatbot-4``` explicitly allows only ```kognetiks.com``` to access ```chatbot-4```.
    - **Security Level**: This pairing provides a robust layer of security, ensuring that even if a domain is compromised, it cannot access unauthorized chatbots. This measure helps prevent misuse of your chatbot resources and protects your OpenAI API quota from unauthorized use.
 
 2. **Request Validation and Logging**:
@@ -47,7 +47,7 @@ The **Kognetiks Chatbot for WordPress** now includes the advanced feature to all
    - **Logging**: Detailed logs of both successful and failed access attempts are recorded. This logging not only helps in auditing but also in detecting any unauthorized access patterns. The **Manage Widget Access Logs** feature on the **Tools** tab allows you to download or delete these logs, helping you manage your resources effectively.
 
 3. **Global Remote Access Control**:
-   - The **Enable Remote Widget** setting allows you to control remote access on a global basis. When disabled (`No`), no remote servers can access the chatbot endpoint, regardless of the domain-assistant pairs listed. This feature provides an immediate and effective way to halt all remote access, should the need arise.
+   - The **Enable Remote Widget** setting allows you to control remote access on a global basis. When disabled (```No```), no remote servers can access the chatbot endpoint, regardless of the domain-assistant pairs listed. This feature provides an immediate and effective way to halt all remote access, should the need arise.
 
 ### Implementation Considerations:
 
@@ -59,5 +59,3 @@ By implementing these security measures, you significantly enhance the protectio
 ---
 
 - **[Back to the Overview](/overview.md)**
-
-
