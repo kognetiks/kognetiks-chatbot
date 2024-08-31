@@ -37,6 +37,14 @@ function chatbot_chatgpt_widget_logging( $message, $referer = null, $request_ip 
     // Ensure the directory and index file exist
     create_directory_and_index_file($chatbot_chatgpt_widget_logs_dir);
 
+    // Retrieve the timezone setting from WordPress
+    $timezone = get_option('timezone_string');
+    // Set the default timezone if available
+    if ($timezone) {
+        date_default_timezone_set($timezone);
+    } else {
+        date_default_timezone_set('UTC');
+    }
     // Get the current date to create a daily log file
     $current_date = date('Y-m-d');
     $log_file = $chatbot_chatgpt_widget_logs_dir . 'chatbot-usage-log-' . $current_date . '.log';
@@ -52,7 +60,7 @@ function chatbot_chatgpt_widget_logging( $message, $referer = null, $request_ip 
 
 // IP address logging
 function getUserIP() {
-    
+
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         // Check IP from shared internet
         $ip = $_SERVER['HTTP_CLIENT_IP'];
