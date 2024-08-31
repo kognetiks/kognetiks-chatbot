@@ -836,6 +836,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Remove citations from the response
     $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
 
+    // Check for missing $thread_id in $kchat_settings
+    if (!isset($kchat_settings['thread_id'])) {
+        $kchat_settings['thread_id'] = $thread_id;
+    }
+
     return $assistants_response["data"][0]["content"][0]["text"]["value"];
 
 }
