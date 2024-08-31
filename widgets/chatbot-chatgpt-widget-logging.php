@@ -18,11 +18,11 @@ function chatbot_chatgpt_widget_logging( $message, $referer = null, $request_ip 
 
     // Plugin directory path
     $chatbot_chatgpt_plugin_dir_path = dirname(plugin_dir_path( __FILE__ ));
-    error_log('chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
+    // error_log('chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
 
     // Plugin directory URL
     $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
-    error_log('chatbot_chatgpt_plugin_dir_url: ' . $chatbot_chatgpt_plugin_dir_url);
+    // error_log('chatbot_chatgpt_plugin_dir_url: ' . $chatbot_chatgpt_plugin_dir_url);
 
     $chatbot_chatgpt_widget_logging = esc_attr(get_option('chatbot_chatgpt_widget_logging', 'No'));
 
@@ -41,8 +41,6 @@ function chatbot_chatgpt_widget_logging( $message, $referer = null, $request_ip 
     $current_date = date('Y-m-d');
 
     $log_file = $chatbot_chatgpt_widget_logs_dir . 'chatbot-widget-access-' . $current_date . '.log';
-
-    error_log( $message );
 
     $message = '[' . $date_time . '] [' . $request_ip . '] [' . $referer . '] ' .$message;
 
