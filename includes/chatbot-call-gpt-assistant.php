@@ -10,7 +10,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Step 1: Create an Assistant
@@ -615,17 +615,17 @@ function getTheMessage($thread_id, $api_key) {
 }
 
 // CustomGPT - Assistants - Ver 1.7.2
-function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id) {
+function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id) {
 
-    global $session_id;
-    global $user_id;
-    global $page_id;
-    global $thread_id;
-    global $assistant_id;
-    global $kchat_settings;
-    global $additional_instructions;
-    global $model;
-    global $voice;
+    // global $session_id;
+    // global $user_id;
+    // global $page_id;
+    // global $thread_id; // Global because it's not being passed back later - Ver 2.1.2 - 2024 08 29
+    // global $assistant_id;
+    // global $kchat_settings;
+    // global $additional_instructions;
+    // global $model;
+    // global $voice;
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
@@ -643,6 +643,20 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     global $errorResponses;
     global $stopWords;
 
+    // See if there is a $thread_id
+    if (empty($thread_id)) {
+        // back_trace( 'NOTICE', '$thread_id is empty');
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        if (empty($thread_id)) {
+            // back_trace( 'NOTICE', '$thread_id was empty');
+        } else {
+            // back_trace( 'NOTICE', '$thread_id was empty but found a $thread_id: ' . $thread_id);
+        }
+    } else {
+        // back_trace( 'NOTICE', '$thread_id was NOT empty');
+        // back_trace( 'NOTICE', '$thread_id was NOT empty but passed as $thread_id: ' . $thread_id);
+    }
+
     // If the threadId is not set, create a new thread
     if (empty($thread_id)) {
 
@@ -650,7 +664,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
         $api_key = get_option('chatbot_chatgpt_api_key', '');
         $assistants_response = createAnAssistant($api_key);
-        // DIAG - Print the response
+        // DIAG - Diagnostics - Ver 2.1.3 - 2024 08 30
         // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
         // Step 2: Get The Thread ID
@@ -664,6 +678,10 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
         set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
         
+    } else {
+
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+
     }
 
     // Localize the data for user id and page id
@@ -674,16 +692,16 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    $kchat_settings = array_merge($kchat_settings, array(
-        'user_id' => $user_id,
-        'page_id' => $page_id,
-        'session_id' => $session_id,
-        'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions,
-        'model' => $model,
-        'voice' => $voice,
-    ));
+    // $kchat_settings = array_merge($kchat_settings, array(
+    //     'user_id' => $user_id,
+    //     'page_id' => $page_id,
+    //     'session_id' => $session_id,
+    //     'thread_id' => $thread_id,
+    //     'assistant_id' => $assistant_id,
+    //     'additional_instructions' => $additional_instructions,
+    //     'model' => $model,
+    //     'voice' => $voice,
+    // ));
 
     // Step 1: Create an Assistant
     // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
@@ -818,6 +836,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Remove citations from the response
     $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
 
+    // Check for missing $thread_id in $kchat_settings
+    if (!isset($kchat_settings['thread_id'])) {
+        $kchat_settings['thread_id'] = $thread_id;
+    }
+
     return $assistants_response["data"][0]["content"][0]["text"]["value"];
 
 }
@@ -854,7 +877,7 @@ function fetchDataUsingCurl($url, $context) {
 }
 
 // Retrieve the first file id - Ver 1.9.2
-function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id) {
+function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id ) {
 
     global $session_id;
     global $user_id;

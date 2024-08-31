@@ -11,7 +11,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Register Assistant settings - Ver 2.0.2.1
@@ -37,6 +37,9 @@ function chatbot_chatgpt_assistant_settings_init() {
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_thread_retention_period'); // Thread Retention Period - Ver 1.9.9
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_prompt_tokens'); // Max Prompt Tokens - Ver 2.0.1
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_completion_tokens'); // Max Response Tokens - Ver 2.0.1
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_enable_remote_widget'); // Enable Remote Widget - Ver 2.1.3
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allowed_remote_domains'); // Allowed Remote Domains - Ver 2.1.3
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_widget_logging'); // Widget Logging - Ver 2.1.3
 
     // General Settings for Assistants
     add_settings_section(
@@ -156,6 +159,41 @@ function chatbot_chatgpt_assistant_settings_init() {
         'chatbot_chatgpt_assistant_beta_version_callback',
         'chatbot_chatgpt_additional_assistant_settings',
         'chatbot_chatgpt_assistant_advanced_settings_section'
+    );
+
+    // Remote Widget Settings - Ver 2.1.3
+    add_settings_section(
+        'chatbot_chatgpt_remote_widget_settings_section',
+        'Remote Widget Settings',
+        'chatbot_chatgpt_remote_widget_settings_section_callback',
+        'chatbot_chatgpt_remote_widget_settings'
+    );
+
+    // Max Response Tokens - Ver 2.1.3
+    add_settings_field(
+        'chatbot_chatgpt_enable_remote_widget',
+        'Enable Remote Widget',
+        'chatbot_chatgpt_enable_remote_widget_callback',
+        'chatbot_chatgpt_remote_widget_settings',
+        'chatbot_chatgpt_remote_widget_settings_section'
+    );
+
+    // Max Prompt Tokens - Ver 2.1.3
+    add_settings_field(
+        'chatbot_chatgpt_allowed_remote_domains',
+        'Allowed Remote Domains',
+        'chatbot_chatgpt_allowed_remote_domains_callback',
+        'chatbot_chatgpt_remote_widget_settings',
+        'chatbot_chatgpt_remote_widget_settings_section'
+    );
+
+    // Widget Logging - Ver 2.1.3
+    add_settings_field(
+        'chatbot_chatgpt_widget_logging',
+        'Widget Logging',
+        'chatbot_chatgpt_widget_logging_callback',
+        'chatbot_chatgpt_remote_widget_settings',
+        'chatbot_chatgpt_remote_widget_settings_section'
     );
     
 }
@@ -336,4 +374,57 @@ function chatbot_chatgpt_max_completion_tokens_callback($args) {
     ?>
     </select>
     <?php
+}
+
+// Remote Widget Settings section callback - Ver 2.1.3
+function chatbot_chatgpt_remote_widget_settings_section_callback($args) {
+    ?>
+    <p>Configure the Remote Widget settings to allow access from specific domains.</p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Remote Widget Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=remote-widget.md">here</a>.</b></p>
+    <?php
+}
+
+// Enable Remote Widget field callback - Ver 2.1.3
+function chatbot_chatgpt_enable_remote_widget_callback($args) {
+    $enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_enable_remote_widget" name="chatbot_chatgpt_enable_remote_widget">
+        <option value="Yes" <?php selected( $enable_remote_widget, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $enable_remote_widget, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php
+}
+
+// Allowed Remote Domains field callback - Ver 2.1.3
+function chatbot_chatgpt_allowed_remote_domains_callback($args) {
+    $allowed_remote_domains = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
+    ?>
+    <textarea id="chatbot_chatgpt_allowed_remote_domains" name="chatbot_chatgpt_allowed_remote_domains" placeholder="Enter the allowed remote domains separated by a comma." rows="5" cols="50"><?php echo esc_attr( $allowed_remote_domains ); ?></textarea>
+    <?php
+}
+
+// Widget logging field callback - Ver 2.1.3
+function chatbot_chatgpt_widget_logging_callback($args) {
+    $widget_logging = esc_attr(get_option('chatbot_chatgpt_widget_logging', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_widget_logging" name="chatbot_chatgpt_widget_logging">
+        <option value="Yes" <?php selected( $widget_logging, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $widget_logging, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php
+}
+
+// Manage Error Logs
+function chatbot_chatgpt_manage_widget_logs_section_callback() {
+
+    ?>
+    <div>
+        <p>Click the <code>Download</code> button to retrieve a widget access log file, or the <code>Delete</code> button to remove a widget access log file.</p>
+        <p>Click the <code>Delete All</code> button to remove all widget access log files.</p>
+    </div>
+    <?php
+
+    // Call the capability tester
+    chatbot_chatgpt_manage_widget_logs();
+
 }

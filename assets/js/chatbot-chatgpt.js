@@ -4,7 +4,7 @@ jQuery(document).ready(function ($) {
         // console.error('Chatbot: NOTICE: kchat_settings is not defined.');
         return;
     } else {
-        //console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
+        // console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
     }
 
     // Only call the function if the chatbot shortcode is present
@@ -473,6 +473,13 @@ jQuery(document).ready(function ($) {
             sessionStorage.setItem('chatbot_chatgpt_conversation' + '_' + assistant_id, conversation.html());
         }
 
+        // MathJax rendering - Ver 2.1.2 - 2024 08 29
+        MathJax.typesetPromise([messageElement[0]])
+        .then(() => {
+            // console.log("MathJax rendering complete");
+        })
+        .catch((err) => console.log("MathJax rendering failed: ", err));
+
     }
 
     function showTypingIndicator() {
@@ -640,6 +647,7 @@ jQuery(document).ready(function ($) {
                 message: message,
                 user_id: user_id, // pass the user ID here
                 page_id: page_id, // pass the page ID here
+                session_id: session_id, // pass the session ID here
             },
             headers: {  // Adding headers to prevent caching
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -1181,8 +1189,8 @@ jQuery(document).ready(function ($) {
             chatbot_chatgpt_start_status = 'open'; // Force the chatbot to open if embedded
             chatbot_chatgpt_start_status_new_visitor = 'open'; // Force the chatbot to open if embedded
         } else {
-            chatbot_chatgpt_start_status = 'closed';
-            chatbot_chatgpt_start_status_new_visitor = 'closed';
+            // chatbot_chatgpt_start_status = 'closed';
+            // chatbot_chatgpt_start_status_new_visitor = 'closed';
         }
 
         // Nuclear option to clear session conversation - Ver 1.5.0
@@ -1216,17 +1224,25 @@ jQuery(document).ready(function ($) {
         // }
 
         // REPLACED ABOVE IN Ver 2.0.9
-        if (chatbot_chatgpt_start_status_new_visitor != 'open' && chatbot_chatgpt_start_status_new_visitor != 'closed') {
-            if (chatbot_chatgpt_start_status_new_visitor === null) {
-                // Override initial status
-                chatbot_chatgpt_start_status = 'open';
-                chatbot_chatgpt_start_status_new_visitor = 'closed';
-                localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
-            } else {
-                // Override initial status
-                chatbot_chatgpt_start_status_new_visitor = 'closed';
-                localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
-            }
+        // if (chatbot_chatgpt_start_status_new_visitor != 'open' && chatbot_chatgpt_start_status_new_visitor != 'closed') {
+        //     if (chatbot_chatgpt_start_status_new_visitor === null) {
+        //         // Override initial status
+        //         chatbot_chatgpt_start_status = 'open';
+        //         chatbot_chatgpt_start_status_new_visitor = 'closed';
+        //         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
+        //     } else {
+        //         // Override initial status
+        //         chatbot_chatgpt_start_status_new_visitor = 'closed';
+        //         localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
+        //     }
+        // }
+
+        // Just check for null value - Ver 2.1.3 - 2024 08 30
+        if (chatbot_chatgpt_start_status_new_visitor === null) {
+            chatbot_chatgpt_start_status = 'closed';
+            localStorage.setItem('chatbot_chatgpt_start_status', 'closed');
+            chatbot_chatgpt_start_status_new_visitor = 'closed';
+            localStorage.setItem('chatbot_chatgpt_start_status_new_visitor', 'closed');
         }
 
         // DIAG - Diagnostics - Ver 1.5.0
@@ -1370,6 +1386,13 @@ jQuery(document).ready(function ($) {
             // Use setTimeout to ensure scrollToBottom is called after the conversation is rendered
             setTimeout(scrollToBottom, 0);
             removeTypingIndicator();
+
+            // Re-render MathJax for any formulas in the stored conversation - Ver 2.1.2 - 2024 08 29
+            MathJax.typesetPromise([conversation[0]])
+            .then(() => {
+                // console.log("MathJax re-rendering complete for stored conversation");
+            })
+            .catch((err) => console.log("MathJax re-rendering failed: ", err));
 
         } else {
 

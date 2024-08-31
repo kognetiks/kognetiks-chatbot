@@ -11,7 +11,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Register Tools settings - Ver 2.0.7
@@ -58,6 +58,14 @@ function chatbot_chatgpt_tools_settings_init() {
         'Manage Error Logs',
         'chatbot_chatgpt_manage_error_logs_section_callback',
         'chatbot_chatgpt_manage_error_logs'
+    );
+
+    // Manage Widget Logs
+    add_settings_section(
+        'chatbot_chatgpt_manage_widget_logs_section',
+        'Manage Widget Access Logs',
+        'chatbot_chatgpt_manage_widget_logs_section_callback',
+        'chatbot_chatgpt_manage_widget_logs'
     );
     
     // Shortcode Tester Overview

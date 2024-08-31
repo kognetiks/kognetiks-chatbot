@@ -11,7 +11,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Register Diagnostics settings - Ver 2.0.7
@@ -363,6 +363,7 @@ function chatbot_error_log($message) {
 
     // Get the current date to create a daily log file
     $current_date = date('Y-m-d');
+    
     $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
     // Append the error message to the log file
@@ -384,6 +385,7 @@ function log_chatbot_error() {
 
         // Get the current date to create a daily log file
         $current_date = date('Y-m-d');
+
         $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
         // Get additional info

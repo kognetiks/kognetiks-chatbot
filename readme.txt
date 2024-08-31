@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, artificial intelligence, customer support
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.6.1
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -156,6 +156,12 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.1.3 - Released 08-31-2024 =
+
+* **Remote Server Access**: The **Kognetiks Chatbot for WordPress** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
+* **MathJax Integration**: This update includes the integration of MathJax for rendering mathematical content within the chatbot.  This enhancement improves the chatbot's capability to handle and render complex mathematical expressions.
+* **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 = 2.1.2 - Released 08-28-2024 =
 

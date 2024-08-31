@@ -12,7 +12,7 @@
 use JetBrains\PhpStorm\NoReturn;
 
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Call the ChatGPT API

@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.1.2
+ * Version:     2.1.3
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -24,7 +24,7 @@
 */
 
 // If this file is called directly, die.
-defined( 'WPINC' ) || die;
+defined( 'WPINC' ) || die();
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.1.2';
+$chatbot_chatgpt_plugin_version = '2.1.3';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -175,11 +175,8 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
-// FIXME - Include necessary files - Widgets - Ver 2.1.0
-if (file_exists(plugin_dir_path(__FILE__) . 'widgets/chatbot-chatgpt-widget-end-point.php')) {
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_widget_end_point() called');
-    require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-chatgpt-widget-end-point.php';
-}
+// Include necessary files - Widgets - Ver 2.1.3
+require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-manage-widget-logs.php';
 
 // Log the User ID and Session ID - Ver 2.0.6 - 2024 07 11
 // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -364,13 +361,46 @@ function chatbot_chatgpt_enqueue_scripts() {
     // Enqueue the main chatbot script - CHANGED TO LOAD ORDER IN V2.1.2
     wp_enqueue_script('chatbot-chatgpt-js', plugins_url('assets/js/chatbot-chatgpt.js', __FILE__), array(), $chatbot_chatgpt_plugin_version, true);
 
-    // Add the inline script to define kchat_settings before the main script runs - CHANGED THE LOAD ORDER IN V2.1.2
+    // Add the inline script to define kchat_settings before the main script runs - CHANGED THE LOAD ORDER IN VER 2.1.2
     wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
     // FIXME - REMOVED IN V2.1.2
     // wp_add_inline_script('chatbot-chatgpt-local', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
 
 }
 add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
+
+// Enqueue MathJax with custom configuration - Ver 2.1.2
+// https://docs.mathjax.org/en/latest/
+// https://github.com/mathjax/MathJax/blob/master/LICENSE
+// https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js
+// https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js
+function enqueue_mathjax_with_custom_config() {
+
+    global $chatbot_chatgpt_plugin_version;
+    global $chatbot_chatgpt_plugin_dir_url;
+
+    // Add the MathJax configuration script
+    $mathjax_config = "
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+            displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
+        },
+        chtml: {
+            fontURL: '" . plugin_dir_url(__FILE__) . "assets/fonts/woff-v2'
+        }
+    };
+    ";
+
+    // Enqueue the MathJax script
+    // wp_enqueue_script( 'mathjax', plugin_dir_url(__FILE__) . 'assets/js/tex-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
+    wp_enqueue_script( 'mathjax', $chatbot_chatgpt_plugin_dir_url . 'assets/js/tex-mml-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
+
+    // Add the inline script before MathJax script
+    wp_add_inline_script( 'mathjax', $mathjax_config, 'before' );
+
+}
+add_action( 'wp_enqueue_scripts', 'enqueue_mathjax_with_custom_config' );
 
 // CORS - Cross Origin Resource Sharing - CAUTION: This allows all domains to access the end point - Ver 2.1.2
 // function allow_cross_domain_requests() {
@@ -520,7 +550,7 @@ function chatbot_chatgpt_send_message() {
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
 
     // Get the thread information - Ver 2.0.7
-    $thread_id = get_chatbot_chatgpt_threads($user_id, $page_id);
+    $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
     $kchat_settings['thread_id'] = $thread_id;
     // $kchat_settings = array_merge($kchat_settings, get_chatbot_chatgpt_threads($user_id, $page_id));
 
@@ -696,7 +726,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', 'BEFORE CALL TO MODULE $additional_instructions: ' . $additional_instructions);
 
         // Send message to Custom GPT API - Ver 1.6.7
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);
+        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
 
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));

@@ -10,7 +10,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Call the ChatGPT API
@@ -74,7 +74,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
         // Call the ChatGPT Assistant API
         $api_key = ''; // Not needed as this is stored in the assistant
         $thread_id = ''; // Not needed as this is the end of the script so no thread_id
-        $message = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $user_id, $page_id);
+        $message = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
 
     } else {
 

@@ -14,7 +14,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 function chatbot_chatgpt_short_code_tester_shortcode_tester($atts = [], $content = null, $tag = '') {

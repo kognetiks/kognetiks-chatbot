@@ -10,7 +10,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-    die;
+    die();
 }
 
 // Set the transients based on the type - Ver 1.8.1
@@ -138,7 +138,13 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     // back_trace( 'NOTICE', 'GET - $session_id: ' . $session_id);
 
     // Return the transient value if it's found, or an empty string if not
-    return $transient_value !== false ? $transient_value : '';
+    // return $transient_value !== false ? $transient_value : '';
+
+    // Get the transient value
+    $transient_value = get_transient($transient_key);
+
+    // Ensure the return value is a string
+    return is_string($transient_value) ? $transient_value : '';
    
 }
 
