@@ -25,14 +25,6 @@ if (file_exists($path . '/wp-load.php')) {
     die('wp-load.php not found');
 }
 
-// Plugin directory path
-// $chatbot_chatgpt_plugin_dir_path = plugin_dir_path( __FILE__ );
-// error_log('chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
-
-// Plugin directory URL
-// $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
-// error_log('chatbot_chatgpt_plugin_dir_url: ' . $chatbot_chatgpt_plugin_dir_url);
-
 // Include necessary files - Widgets - Ver 2.1.3
 require_once plugin_dir_path( __FILE__ ) . 'chatbot-chatgpt-widget-logging.php';
 
@@ -172,8 +164,8 @@ $iframe_width = isset($_GET['width']) ? intval($_GET['width']) : 500;  // Defaul
 $iframe_height = isset($_GET['height']) ? intval($_GET['height']) : 600;  // Default to 600 if not set
 
 // Widget Sizing Controls
-$chatbot_chatgpt_widget_width = $iframe_width . 'px';
-$chatbot_chatgpt_widget_height = $iframe_height . 'px';
+$chatbot_chatgpt_widget_width = ($iframe_width - 20) . 'px';
+$chatbot_chatgpt_widget_height = ($iframe_height - 20) . 'px';
 
 // Output the HTML and necessary scripts
 ?>
@@ -196,6 +188,7 @@ $chatbot_chatgpt_widget_height = $iframe_height . 'px';
             position: fixed;
             bottom: 10px;
             right: 10px;
+            padding: 20px;
             background: transparent;
             z-index: 9999;
             }

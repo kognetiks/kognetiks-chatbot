@@ -29,7 +29,7 @@ The **Kognetiks Chatbot for WordPress** now includes the advanced feature to all
     ```
     <script>
     <iframe src="https://www.kognetiks.com/wp-content/plugins/chatbot-chatgpt/widgets/chatbot-chatgpt-widget-endpoint.php?assistant=chatbot-4"
-        style="width: 1000px; height: 1000px; border: none; position: fixed; bottom: 0px; right: 0px; background: transparent;"
+        style="width: 1000px; height: 1000px; border: none; position: fixed; bottom: 10px; right: 10px; background: transparent;"
         allowtransparency="true"></iframe>
     </script>
     ```
