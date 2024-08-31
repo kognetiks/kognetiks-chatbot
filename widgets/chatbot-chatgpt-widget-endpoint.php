@@ -26,17 +26,15 @@ if (file_exists($path . '/wp-load.php')) {
 }
 
 // Plugin directory path
-global $chatbot_chatgpt_plugin_dir_path;
 // $chatbot_chatgpt_plugin_dir_path = plugin_dir_path( __FILE__ );
 // error_log('chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
 
 // Plugin directory URL
-global $chatbot_chatgpt_plugin_dir_url;
 // $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
 // error_log('chatbot_chatgpt_plugin_dir_url: ' . $chatbot_chatgpt_plugin_dir_url);
 
 // Include necessary files - Widgets - Ver 2.1.3
-require_once $chatbot_chatgpt_plugin_dir_path . 'widgets/chatbot-chatgpt-widget-logging.php';
+require_once plugin_dir_path( __FILE__ ) . 'chatbot-chatgpt-widget-logging.php';
 
 // If remote access is not allowed, abort.
 $chatbot_chatgpt_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
@@ -44,8 +42,15 @@ $chatbot_chatgpt_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_ena
 if ($chatbot_chatgpt_enable_remote_widget !== 'Yes') {
 
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-    chatbot_chatgpt_widget_logging('Remote access is not allowed for ' . $referer );
+    chatbot_chatgpt_widget_logging('Remote access is not allowed', $referer );
     die;
+
+} else {
+
+    // Log the referer for accounting, monitoring, and debugging purposes
+    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+    $request_ip = getUserIP();
+    chatbot_chatgpt_widget_logging('Remote access is allowed' , $referer , $request_ip);
 
 }
 
@@ -62,7 +67,7 @@ $allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_do
 $allowed_domains = array_map('trim', explode(',', $allowed_domains_string));
 
 // Log the allowed domains for debugging purposes
-chatbot_chatgpt_widget_logging('Allowed Domains: ' . $allowed_domains_string);
+chatbot_chatgpt_widget_logging('Allowed Domains: ' . $allowed_domains_string );
 
 // Check if allowed domains list is empty
 if (empty($allowed_domains_string)) {
@@ -87,7 +92,7 @@ if (empty($allowed_domains_string)) {
 
             $is_allowed = true;
             // Log the referer for accounting, monitoring, and debugging purposes
-            chatbot_chatgpt_widget_logging('Allowed: ' . $referer);
+            chatbot_chatgpt_widget_logging('Allowed', $referer , $request_ip );
             break;
         }
     }
@@ -95,7 +100,7 @@ if (empty($allowed_domains_string)) {
 
 if (!$is_allowed) {
     // Log the referer for accounting, monitoring, and debugging purposes
-    chatbot_chatgpt_widget_logging('Unauthorized access: ' . $referer);
+    chatbot_chatgpt_widget_logging('Unauthorized Access', $referer, $request_ip) ;
     die;
 }
 
@@ -112,14 +117,14 @@ if (!array_key_exists($shortcode_param, $shortcode_tags)) {
     // chatbot_chatgpt_remote_access( 'Allowed: ' . $referer . ' Invalid shortcode: ' . $shortcode_param );
     error_log ( 'Allowed: ' . $referer . ' Invalid shortcode: ' . $shortcode_param );
     // Terminate script if the shortcode is not registered
-    chatbot_chatgpt_widget_logging('Invalid shortcode');
+    chatbot_chatgpt_widget_logging('Invalid shortcode: ' . $shortcode_param , $referer , $request_ip );
     die;
 
 } else {
 
     // Log the referer for accounting, monitoring, and debugging purposes
     // chatbot_chatgpt_remote_access( 'Allowed: ' . $referer . ' Valid shortcode: ' . $shortcode_param );
-    chatbot_chatgpt_widget_logging('Allowed: ' . $referer . ' Valid shortcode: ' . $shortcode_param );
+    chatbot_chatgpt_widget_logging('Valid shortcode: ' . $shortcode_param, $referer , $request_ip );
 
 }
 
@@ -161,6 +166,18 @@ $kchat_settings = array_merge($kchat_settings,array(
 
 $kchat_settings_json = wp_json_encode($kchat_settings);
 
+// Widget Sizing Controls
+// $chatbot_chatgpt_widget_width = esc_attr(get_option('chatbot_chatgpt_widget_width', '500'));
+// $chatbot_chatgpt_widget_height = '45hv';
+
+// Retrieve the width and height from the URL query parameters
+$iframe_width = isset($_GET['width']) ? intval($_GET['width']) : 500;  // Default to 500 if not set
+$iframe_height = isset($_GET['height']) ? intval($_GET['height']) : 600;  // Default to 600 if not set
+
+// Widget Sizing Controls
+$chatbot_chatgpt_widget_width = $iframe_width . 'px';
+$chatbot_chatgpt_widget_height = $iframe_height . 'px';
+
 // Output the HTML and necessary scripts
 ?>
 <!DOCTYPE html>
@@ -173,11 +190,11 @@ $kchat_settings_json = wp_json_encode($kchat_settings);
             background: transparent !important;
         }
         .chatbot-wrapper {
-            width: 1000px;
-            max-width: 600px;
+            width: <?php echo $chatbot_chatgpt_widget_width; ?>;
+            max-width: 1000px;
             margin: 0 auto;
-            height: 600px;
-            max-height: 550px;
+            height: <?php echo $chatbot_chatgpt_widget_height; ?>;
+            max-height: 1000px;
             overflow: hidden;
             position: fixed;
             bottom: 10px;
@@ -186,8 +203,12 @@ $kchat_settings_json = wp_json_encode($kchat_settings);
             z-index: 9999;
             }
         #chatbot-chatgpt {
-            height: 550px !important;
-            width: 500px !important
+            /* Start minimized to reduce flashing */
+            height: 1px;
+            width: 1px;
+        }
+        .chatbot-wide {
+            height: 55vh !important}
         }
     </style>
 </head>
@@ -209,4 +230,3 @@ $kchat_settings_json = wp_json_encode($kchat_settings);
     </script>
 </body>
 </html>
-

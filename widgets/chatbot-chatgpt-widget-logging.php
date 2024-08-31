@@ -14,7 +14,15 @@
 // }
 
 // Widget logging
-function chatbot_chatgpt_widget_logging($message) {
+function chatbot_chatgpt_widget_logging( $message, $referer = null, $request_ip = null ) {
+
+    // Plugin directory path
+    $chatbot_chatgpt_plugin_dir_path = dirname(plugin_dir_path( __FILE__ ));
+    error_log('chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
+
+    // Plugin directory URL
+    $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
+    error_log('chatbot_chatgpt_plugin_dir_url: ' . $chatbot_chatgpt_plugin_dir_url);
 
     $chatbot_chatgpt_widget_logging = esc_attr(get_option('chatbot_chatgpt_widget_logging', 'No'));
 
@@ -23,15 +31,6 @@ function chatbot_chatgpt_widget_logging($message) {
     }
 
     $date_time = (new DateTime())->format('d-M-Y H:i:s \U\T\C');
-
-    chatbot_chatgpt_widget_log_usage( $date_time, $message );
-
-}
-
-// Log widget usage
-function chatbot_chatgpt_widget_log_usage( $date_time, $message) {
-
-    global $chatbot_chatgpt_plugin_dir_path;
 
     $chatbot_chatgpt_widget_logs_dir = $chatbot_chatgpt_plugin_dir_path . '/widget-logs/';
 
@@ -44,10 +43,35 @@ function chatbot_chatgpt_widget_log_usage( $date_time, $message) {
 
     error_log( $message );
 
-    $message = '[' . $date_time . '] ' . $message;
+    $message = '[' . $date_time . '] [' . $request_ip . '] [' . $referer . '] ' .$message;
 
     // Append the error message to the log file
     file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
 
+}
+
+// IP address logging
+function getUserIP() {
+    
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        // Check IP from shared internet
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // Check IP passed from proxy
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        // In case of multiple IPs, take the first one
+        $ip = explode(',', $ip)[0];
+    } else {
+        // Default fallback to REMOTE_ADDR
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+
+    // If the IP is still localhost, you might want to handle it differently
+    if ($ip === '::1' || $ip === '127.0.0.1') {
+        // Handle localhost IP differently if needed
+        $ip = '127.0.0.1'; // or any other fallback IP
+    }
+
+    return $ip;
 }
 
