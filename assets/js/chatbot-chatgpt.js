@@ -526,13 +526,12 @@ jQuery(document).ready(function ($) {
                            .replace(/^## (.*)$/gim, '<h2>$1</h2>')
                            .replace(/^# (.*)$/gim, '<h1>$1</h1>');
     
-        // Step 6: Process Text-Based Tables and wrap entire table in <pre>
-        markdown = markdown.replace(/^\|(.+?)\|\n\|([ \-:|]+)\|\n([\s\S]+?)\n*(?=\n|$)/gm, (match, headers, alignments, rows) => {
-            // Split headers and rows into arrays
-            const headersArray = headers.split('|').map(h => h.trim()).filter(h => h !== '');
-            const rowsArray = rows.trim().split('\n').map(row => row.split('|').map(cell => cell.trim()).filter(cell => cell !== ''));
+        // Step 6: Process tables as a block and wrap the entire table in <pre>
+        markdown = markdown.replace(/(\|.+?\|\n\|[-:|]+\|)\n([\s\S]+?)\n(?=\n|$)/gm, (match, header, body) => {
+            const headersArray = header.split('|').map(h => h.trim()).filter(h => h !== '');
+            const rowsArray = body.trim().split('\n').map(row => row.split('|').map(cell => cell.trim()).filter(cell => cell !== ''));
     
-            // Ensure that each row has the correct number of cells by filling missing cells with empty strings
+            // Ensure all rows have the correct number of columns
             rowsArray.forEach(row => {
                 while (row.length < headersArray.length) {
                     row.push(''); // Add empty cells to match header length
@@ -542,7 +541,7 @@ jQuery(document).ready(function ($) {
                 }
             });
     
-            // Calculate maximum column widths
+            // Calculate column widths
             const colWidths = headersArray.map((header, i) => {
                 return Math.max(
                     header.length,
@@ -550,19 +549,15 @@ jQuery(document).ready(function ($) {
                 );
             });
     
-            // Generate header row with padding, adding the leading pipe
+            // Build the table with consistent column widths
             const headerRow = '| ' + headersArray.map((header, i) => header.padEnd(colWidths[i])).join(' | ') + ' |';
-    
-            // Generate separator row, adding the leading pipe
             const separatorRow = '|-' + colWidths.map(width => '-'.repeat(width)).join('-|-') + '-|';
-    
-            // Generate rows with padding, keeping the leading pipe
-            const paddedRows = rowsArray.map(row => {
+            const rows = rowsArray.map(row => {
                 return '| ' + row.map((cell, i) => (cell || '').padEnd(colWidths[i])).join(' | ') + ' |';
             }).join('\n');
     
-            // Wrap the entire table content in <pre> to apply the monospaced font
-            return `<pre style="font-family: monospace;">${headerRow}\n${separatorRow}\n${paddedRows.trim()}</pre>`;
+            // Return the entire table wrapped in <pre>
+            return `<pre style="font-family: monospace;">${headerRow}\n${separatorRow}\n${rows.trim()}</pre>`;
         });
     
         // Step 7: Bold, Italic, Strikethrough
