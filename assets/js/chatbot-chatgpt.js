@@ -516,17 +516,17 @@ jQuery(document).ready(function ($) {
         markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
             return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
         }).join('');
-        
+    
         // Step 4: Process images
         markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2">`);
-        
+    
         // Step 5: Headers
         markdown = markdown.replace(/^#### (.*)$/gim, '<h4>$1</h4>')
                            .replace(/^### (.*)$/gim, '<h3>$1</h3>')
                            .replace(/^## (.*)$/gim, '<h2>$1</h2>')
                            .replace(/^# (.*)$/gim, '<h1>$1</h1>');
-        
-        // Step 6: Process Text-Based Tables
+    
+        // Step 6: Process Text-Based Tables and wrap entire table in <pre>
         markdown = markdown.replace(/^\|(.+?)\|\n\|([ \-:|]+)\|\n([\s\S]+?)\n*(?=\n|$)/gm, (match, headers, alignments, rows) => {
             // Split headers and rows into arrays
             const headersArray = headers.split('|').map(h => h.trim()).filter(h => h !== '');
@@ -561,7 +561,8 @@ jQuery(document).ready(function ($) {
                 return '| ' + row.map((cell, i) => (cell || '').padEnd(colWidths[i])).join(' | ') + ' |';
             }).join('\n');
     
-            return `${headerRow}\n${separatorRow}\n${paddedRows}`;
+            // Wrap the entire table content in <pre> to apply the monospaced font
+            return `<pre style="font-family: monospace;">${headerRow}\n${separatorRow}\n${paddedRows.trim()}</pre>`;
         });
     
         // Step 7: Bold, Italic, Strikethrough
@@ -598,7 +599,7 @@ jQuery(document).ready(function ($) {
             return predefinedHtml[parseInt(index)];
         });
     
-        return `<div><pre style="white-space: pre-wrap;">${markdown.trim()}</pre></div>`;
+        return `<div>${markdown.trim()}</div>`;
     }
 
     // Submit the message when the submit button is clicked

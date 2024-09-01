@@ -10,7 +10,8 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## What's new in Version 2.1.4
 
-* **TBD**: TBD
+* **Improved Table Formatting**: Enhanced the appearance of tables in chatbot responses for better readability.
+* **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 ## What's new in Version 2.1.3
 

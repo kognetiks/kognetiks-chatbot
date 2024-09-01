@@ -157,9 +157,10 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
-= 2.1.4 - Released TBD =
+= 2.1.4 - Released 09-01-2024 =
 
-* **TBD**: TBD
+* **Improved Table Formatting**: Enhanced the appearance of tables in chatbot responses for better readability.
+* **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 = 2.1.3 - Released 08-31-2024 =
 
