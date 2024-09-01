@@ -527,7 +527,7 @@ jQuery(document).ready(function ($) {
                            .replace(/^# (.*)$/gim, '<h1>$1</h1>');
     
         // Step 6: Process tables as a block and wrap the entire table in <pre>
-        markdown = markdown.replace(/(\|.+?\|\n\|[-:|]+\|)\n([\s\S]+?)\n(?=\n|$)/gm, (match, header, body) => {
+        markdown = markdown.replace(/(\|.+?\|)\n(\|[-:|]+\|)\n([\s\S]+?)(\n|$)/gm, (match, header, separator, body) => {
             const headersArray = header.split('|').map(h => h.trim()).filter(h => h !== '');
             const rowsArray = body.trim().split('\n').map(row => row.split('|').map(cell => cell.trim()).filter(cell => cell !== ''));
     
@@ -554,10 +554,10 @@ jQuery(document).ready(function ($) {
             const separatorRow = '|-' + colWidths.map(width => '-'.repeat(width)).join('-|-') + '-|';
             const rows = rowsArray.map(row => {
                 return '| ' + row.map((cell, i) => (cell || '').padEnd(colWidths[i])).join(' | ') + ' |';
-            }).join('\n');
+            });
     
             // Return the entire table wrapped in <pre>
-            return `<pre style="font-family: monospace;">${headerRow}\n${separatorRow}\n${rows.trim()}</pre>`;
+            return `<pre style="font-family: monospace;">${headerRow}\n${separatorRow}\n${rows.join('\n').trim()}</pre>`;
         });
     
         // Step 7: Bold, Italic, Strikethrough
