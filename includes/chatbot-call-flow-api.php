@@ -116,7 +116,8 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     // Add message to conversation log
     // DIAG Diagnostics
     // back_trace( 'NOTICE', '$message: ' . $message);
-
+    $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+    // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $message);
 
     // Get the user ID and page ID
