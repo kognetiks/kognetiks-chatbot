@@ -187,9 +187,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **Conversation Log CSV Export**: Added a check to determine if $value is not null before calling mb_convert_encoding to prevent PHP warnings.
 
 = 2.0.9 - Released 08-17-2024 =
-* **Adjusted Module Name Conflict**: Renamed one module that was had a name found to be in conflict with another vendor's plugin.
+* **Adjusted Module Name Conflict**: Renamed one module that had a name conflict with another vendor's plugin.
 * **Reworked Conversation Continuity**: Improved the way the chatbot handles conversation continuity for visitors and logged-in users, ensuring a seamless experience across pages.
-* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WOrdPress plugin by Kognetiks' with a text message of your choosing.
+* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WordPress plugin by Kognetiks' with a text message of your choosing.
 * **Refactored Inline Styles**: Moved inline styles to an external CSS file for better maintainability and separation of concerns.
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.

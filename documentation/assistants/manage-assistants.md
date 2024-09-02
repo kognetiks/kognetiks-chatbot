@@ -127,7 +127,7 @@ The **Kognetiks Chatbot for WordPress** now includes the advanced feature to all
 3. **Widget Logging**:
     - **Description**: Widget logging records valid and invalid access to your chatbot(s) from remote servers.  This is especially helpful to ensure that your resources are used only by those that you have allowed.  On the ```Tools``` tab you will find a section titled **Manage Widget Access Logs** where you can download and delete remote widget access.
 
-For more information refer to the [anaging Remote Assess to the Kognetiks Chatbot for WordPress](remote-widget-settings.md) section for details on how to configure a remote server.
+For more information refer to the [Managing Remote Assess to the Kognetiks Chatbot for WordPress](remote-widget-settings.md) section for details on how to configure a remote server.
    
 ---
 
