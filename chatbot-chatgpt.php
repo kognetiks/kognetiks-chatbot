@@ -49,13 +49,6 @@ global $wpdb;
 global $session_id;
 global $user_id;
 
-// Custom polyfill for str_starts_with to ensure compatibility with PHP 7 and 8 - Ver 2.1.4 
-// if (!function_exists('str_starts_with')) {
-//     function str_starts_with($haystack, $needle) {
-//         return is_string($haystack) && strpos($haystack, $needle) === 0;
-//     }
-// }
-
 // Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
 ob_start();
 
