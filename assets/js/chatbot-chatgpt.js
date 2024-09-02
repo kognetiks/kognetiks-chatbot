@@ -584,14 +584,21 @@ jQuery(document).ready(function ($) {
         });
     
         // Step 12: Convert line breaks to <br>, except for code blocks and blockquotes
-        markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>|<\/?h[1-6]>)/g).map((chunk, index) => {
-            // Only convert newlines to <br> outside of code blocks, blockquotes, and handle header tags
-            if (index % 2 === 0) {
-                // Convert \n to <br>, then remove any double <br> tags
-                return chunk.replace(/\n/g, '<br>').replace(/(<br>\s*){2,}/g, '<br>');
-            } else {
-                return chunk;
-            }
+        // markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>|<\/?h[1-6]>)/g).map((chunk, index) => {
+        //     // Only convert newlines to <br> outside of code blocks, blockquotes, and handle header tags
+        //     if (index % 2 === 0) {
+        //         // Convert \n to <br>, then remove any double <br> tags
+        //         return chunk.replace(/\n/g, '<br>').replace(/(<br>\s*){2,}/g, '<br>');
+        //     } else {
+        //         return chunk;
+        //     }
+        // }).join('');
+    
+        // REVERTED TO VER 2.1.3 - 2024 09 02
+        // FIXME - LOOK AT USING <p> TAGS INSTEAD OF <BR> TAGS
+        markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>)/g).map((chunk, index) => {
+            // Only convert newlines to <br> outside of code blocks and blockquotes
+            return index % 2 === 0 ? chunk.replace(/\n/g, '<br>') : chunk;
         }).join('');
     
         // Step 13: Reinsert predefined HTML tags
