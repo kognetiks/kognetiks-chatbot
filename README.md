@@ -4,6 +4,10 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## Documentation
 
+## What's new in Version 2.1.5
+
+* **TBD**: TBD
+
 ## What's new in Version 2.1.4
 
 * **Improved Table Formatting**: Enhanced the appearance of tables in chatbot responses for better readability.
