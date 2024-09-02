@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.1.3
+ * Version:     2.1.4
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.1.3';
+$chatbot_chatgpt_plugin_version = '2.1.4';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -698,6 +698,8 @@ function chatbot_chatgpt_send_message() {
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$message: ' . $message);
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
 
         // BELT & SUSPENDERS
@@ -719,6 +721,8 @@ function chatbot_chatgpt_send_message() {
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$message ' . $message);
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
 
         // DIAG - Diagnostics - Ver 2.0.9
@@ -736,6 +740,8 @@ function chatbot_chatgpt_send_message() {
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // Clean (erase) the output buffer - Ver 1.6.8
@@ -777,36 +783,38 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
         // back_trace( 'NOTICE', '$message ' . $message);
 
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
         
         // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
         // TRY NOT TO FETCH MODEL AGAIN
         // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-        $model = $kchat_settings['model'];
-        $voice = $kchat_settings['voice'];
-        if (strpos($model, 'gpt-4o') !== false) {
+        $model = isset($kchat_settings['model']) ? $kchat_settings['model'] : null;
+        $voice = isset($kchat_settings['voice']) ? $kchat_settings['voice'] : null;
+        if (str_starts_with($model !== null && $model, 'gpt-4o') !== false) {
             // The string 'gpt-4o' is found in $model
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_omni($api_key, $message);
-        } elseif (str_starts_with($model, 'gpt')) {
+        } elseif ($model !== null && str_starts_with($model, 'gpt')) {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_api($api_key, $message);
-        } elseif (str_starts_with($model, 'dall')) {
+        } elseif ($model !== null && str_starts_with($model, 'dall')) {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
             // Send message to Image API - Ver 1.9.4
             $response = chatbot_chatgpt_call_image_api($api_key, $message);
-        } elseif (str_starts_with($model, 'tts')) {
+        } elseif ($model !== null && str_starts_with($model, 'tts')) {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
             $kchat_settings['voice'] = $voice;
             // Send message to TTS API - Text-to-speech - Ver 1.9.5
             $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
-        } elseif (str_starts_with($model,'whisper')) {
+        } elseif ($model !== null && str_starts_with($model,'whisper')) {
             $kchat_settings['model'] = $model;
             // Send message to STT API - Speech-to-text - Ver 1.9.6
             $response = chatbot_chatgpt_call_stt_api($api_key, $message);
@@ -830,6 +838,8 @@ function chatbot_chatgpt_send_message() {
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', '$response ' . print_r($response,true));
+        $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
 
         // DIAG - Diagnostics

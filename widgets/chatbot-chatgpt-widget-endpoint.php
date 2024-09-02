@@ -132,6 +132,12 @@ if (is_user_logged_in()) {
     
 }
 
+// Get the tail number from the session id and assign it to page id - Ver 2.1.4
+// $session_id_parts = explode('.', $session_id);
+// $page_id = $session_id_parts[1];
+// error_log('Widget Endpoint - $page_id: ' . $page_id);
+$page_id = '999999';
+
 // Localize the data for the chatbot - Ver 2.1.1.1
 $kchat_settings = array_merge($kchat_settings,array(
     'chatbot-chatgpt-version' => esc_attr($chatbot_chatgpt_plugin_version),
@@ -139,7 +145,7 @@ $kchat_settings = array_merge($kchat_settings,array(
     'ajax_url' => esc_url(admin_url('admin-ajax.php')),
     'user_id' => esc_html($user_id),
     'session_id' => esc_html($session_id),
-    'page_id' => esc_html(999999),
+    'page_id' => esc_html($page_id),
     'model' => esc_html($model),
     'voice' => esc_html($voice),
     'chatbot_chatgpt_timeout_setting' => esc_attr(get_option('chatbot_chatgpt_timeout_setting', '240')),

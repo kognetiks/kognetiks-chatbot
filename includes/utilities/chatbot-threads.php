@@ -16,39 +16,13 @@ if ( ! defined( 'WPINC' ) ) {
 // Set the threads transient
 function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id) {
 
-    // global $session_id;
-    // global $user_id;
-    // global $page_id;
-    // global $thread_id;
-    // global $assistant_id;
-    // global $kchat_settings;
-    // global $additional_instructions;
-    // global $model;
-    // global $voice;
-
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'set_chatbot_chatgpt_threads');
     // back_trace( 'NOTICE', 'SET $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'SET $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'SET $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'SET $session_id: ' . $session_id); // NOT USED???
     // back_trace( 'NOTICE', 'SET $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'SET $assistant_id: ' . $assistant_id);
-
-    // Initialize $kchat_settings if it is null
-    // if (!is_array($kchat_settings)) {
-    //     $kchat_settings = [];
-    // }
-
-    // $kchat_settings = array_merge($kchat_settings, array(
-    //     'user_id' => $user_id,
-    //     'page_id' => $page_id,
-    //     'session_id' => $session_id,
-    //     'thread_id' => $thread_id,
-    //     'assistant_id' => $assistant_id,
-    //     'additional_instructions' => $additional_instructions,
-    //     'model' => $model,
-    //     'voice' => $voice,
-    // ));
 
     // Create unique keys for transients
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
@@ -74,34 +48,12 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
 // Get the threads
 function get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id) {
 
-    // global $session_id;
-    // global $user_id;
-    // global $page_id;
-    // global $thread_id;
-    // global $assistant_id;
-    // global $kchat_settings;
-    // global $additional_instructions;
-    // global $model;
-    // global $voice;
-
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'get_chatbot_chatgpt_thread');
-    // back_trace( 'NOTICE', 'GET PART 1 $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'GET PART 1 $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'GET PART 1 $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'GET PART 1 $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'GET PART 1 $assistant_id: ' . $assistant_id);
-    // back_trace( 'NOTICE', 'GET PART 1 $additional_instructions: ' . $additional_instructions);
-    
-    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
-    // $user_id = get_current_user_id();
-    // // Fetch the Kognetiks cookie
-    // $session_id = kognetiks_get_unique_id();
-    // if (empty($user_id) || $user_id == 0) {
-    //     $user_id = $session_id;
-    // }
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // Construct the unique keys
     $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
@@ -131,17 +83,6 @@ function get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant
     //     $kchat_settings = [];
     // }
 
-    // $kchat_settings = array_merge($kchat_settings, array(
-    //     'user_id' => $user_id,
-    //     'page_id' => $page_id,
-    //     'session_id' => $session_id,
-    //     'thread_id' => $thread_id,
-    //     'assistant_id' => $assistant_id,
-    //     'additional_instructions' => $additional_instructions,
-    //     'model' => $model,
-    //     'voice' => $voice,
-    // ));
-    
     // Return the values, also handle the case where the transient might have expired
     // return array(
     //     'thread_id' => $thread_id,
@@ -154,66 +95,19 @@ function get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant
 // Delete the threads
 function delete_chatbot_chatgpt_threads($user_id, $page_id) {
 
-    global $session_id;
-    global $user_id;
-    global $page_id;
-    global $thread_id;
-    global $assistant_id;
-    global $kchat_settings;
-    global $additional_instructions;
-    global $model;
-    global $voice;
-
-    // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'delete_chatbot_chatgpt_threads');
-    // back_trace( 'NOTICE', 'DEL $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'DEL $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'DEL $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'DEL $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'DEL $assistant_id: ' . $assistant_id);
-    // back_trace( 'NOTICE', 'DEL $additional_instructions: ' . $additional_instructions);
-
-    // Initialize $kchat_settings if it is null
-    if (!is_array($kchat_settings)) {
-        $kchat_settings = [];
-    }
-
-    $kchat_settings = array_merge($kchat_settings, array(
-        'user_id' => $user_id,
-        'page_id' => $page_id,
-        'session_id' => $session_id,
-        'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions,
-        'model' => $model,
-        'voice' => $voice,
-    ));
-
-    // Construct the unique keys
-    $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
-    $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
-
-    // Delete the stored values
-    delete_transient($thread_id_thread_key);
-    delete_transient($assistant_id_thread_key);
-
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'delete_chatbot_chatgpt_threads');
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
-    $kchat_settings = array_merge($kchat_settings, array(
-        'user_id' => $user_id,
-        'page_id' => $page_id,
-        'session_id' => $session_id,
-        'thread_id' => $thread_id,
-        'assistant_id' => $assistant_id,
-        'additional_instructions' => $additional_instructions,
-        'model' => $model,
-        'voice' => $voice,
-    ));
+    // Construct the unique keys
+    $thread_id_thread_key = 'chatbot_chatgpt_thread_id_' . $user_id . '_' . $page_id;
+    // back_trace( 'NOTICE', '$thread_id_thread_key: ' . $thread_id_thread_key);
+    $assistant_id_thread_key = 'chatbot_chatgpt_assistant_id_' . $user_id . '_' . $page_id;
+    // back_trace( 'NOTICE', '$assistant_id_thread_key: ' . $assistant_id_thread_key);
+
+    // Delete the stored values
+    delete_transient($thread_id_thread_key);
+    delete_transient($assistant_id_thread_key);
     
 }
