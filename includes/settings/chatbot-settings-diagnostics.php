@@ -249,6 +249,14 @@ function chatbot_chatgpt_delete_data_callback($args) {
     <?php
 }
 
+// Production Back Trace Function - Revised in Ver 2.1.5
+function prod_trace($message_type = "NOTICE", $message = "No message") {
+
+    // Trace production messages to the error log
+    back_trace($message_type, $message);
+
+}
+
 // Back Trace Function - Revised in Ver 2.0.7
 function back_trace($message_type = "NOTICE", $message = "No message") {
 
