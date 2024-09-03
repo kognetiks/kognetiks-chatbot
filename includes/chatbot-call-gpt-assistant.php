@@ -285,10 +285,11 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
         // return "Error: HTTP response code " . http_response_code();
     }
 
-    prod_trace('ERROR', print_r($response, true));
-
     // Check for an error response without decoding
     if (strpos($response, '"error"') !== false && strpos($response, '"message"') !== false) {
+
+        // prod_trace('ERROR', print_r($response, true));
+
         // Extract the error message and type using regular expressions
         preg_match('/"message"\s*:\s*"([^"]+)"/', $response, $messageMatch);
         preg_match('/"type"\s*:\s*"([^"]+)"/', $response, $typeMatch);
@@ -301,14 +302,14 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
         prod_trace('ERROR', $errorType);
     } else {
         // No error found, proceed with normal logic
-        prod_trace('INFO', 'No errors found. Proceeding with the operation.');
+        // prod_trace('INFO', 'No errors found. Proceeding with the operation.');
     }
     
     // DIAG - Diagnostics  Ver 2.0.1
     // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
     
     return json_decode($response, true);
-    
+
 }
 
 // Step 5: Get the Run's Status
