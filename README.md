@@ -6,7 +6,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's new in Version 2.1.5
 
-* **TBD**: TBD
+* **Speech Recognition Integration**: Added support for speech recognition to enhance user interaction with the chatbot. Users can now speak to the chatbot, which will transcribe the speech into text for processing.
 
 ## What's new in Version 2.1.4
 

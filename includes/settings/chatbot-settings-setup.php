@@ -300,7 +300,7 @@ function chatbot_chatgpt_settings_setup_init() {
     // Speech Recognition - Ver 2.1.5.1
     add_settings_field(
         'chatbot_chatgpt_speech_recognition',
-        'Speech Recognition',
+        'Allow Speech Recognition',
         'chatbot_chatgpt_speech_recognition_callback',
         'chatbot_chatgpt_additional_setup_settings',
         'chatbot_chatgpt_additional_setup_section'
