@@ -614,7 +614,7 @@ jQuery(document).ready(function ($) {
 
         // Sanitize the input - Ver 2.0.0
         message = sanitizeInput(messageInput.val().trim());
-        // console.log('Chatbot: NOTICE: Message: ' + message);
+        console.log('Chatbot: NOTICE: submitButton.on Message: ' + message);
 
         if (!message) {
             return;
@@ -932,6 +932,74 @@ jQuery(document).ready(function ($) {
             },
         });
     });
+
+    // Speech Recognition Integration - Ver 2.1.5.1
+    $('#chatbot-chatgpt-speech-recognition-btn').on('click', function(e) {
+
+        e.preventDefault();  // Prevent default action if necessary
+
+        // Ensure browser support for the Web Speech API
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if ('SpeechRecognition' in window) {
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';  // You can change the language if needed
+            recognition.interimResults = false;  // Use false if you want final results only
+
+            // When the user clicks the button, start the speech recognition
+            recognition.start();
+
+            // Handle the result from speech recognition
+            recognition.addEventListener('result', (event) => {
+                const transcript = event.results[0][0].transcript;
+                $('#chatbot-chatgpt-message').val(transcript);  // Assuming you have an input field for the transcript
+                sendToChatbot(transcript);  // Send the recognized text to your chatbot
+            });
+
+            // Handle any errors from speech recognition
+            recognition.addEventListener('error', (event) => {
+                console.error('Speech Recognition Error:', event.error);
+                alert("Speech recognition error: " + event.error);
+            });
+
+            // Stop recognition after it's done
+            recognition.addEventListener('end', () => {
+                recognition.stop();
+            });
+
+        } else {
+
+            alert('Speech Recognition API not supported in this browser.');
+
+        }
+
+    });
+
+    // Function to send recognized speech text to chatbot input - V2.1.5.1
+    function sendToChatbot(message) {
+
+        console.log("Sending message to chatbot:", message);
+    
+        // Update the input field with the recognized speech
+        $('#chatbot-chatgpt-message').val(message);
+    
+        // Ensure that the value is updated before trying to submit
+        let updatedMessage = $('#chatbot-chatgpt-message').val().trim();
+    
+        console.log("Updated message in input field:", updatedMessage);
+    
+        if (updatedMessage) {
+
+            // Trigger the submit button's click event programmatically
+            $('#chatbot-chatgpt-submit').trigger('click');
+
+        } else {
+
+            console.error("Message is empty, cannot submit.");
+
+        }
+    }
 
     // List of allowed MIME types - Ver 2.0.1
     var allowedFileTypes = [

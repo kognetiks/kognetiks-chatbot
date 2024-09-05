@@ -896,6 +896,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Generate a unique cache-busting parameter
     $cache_buster = '?cb=' . time();
 
+    // Speech Recognition - Ver 2.1.5.1
+    $chatbot_chatgpt_speech_recognition = esc_attr(get_option('chatbot_chatgpt_speech_recognition', 'No'));
+
     // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
     // Depending on the style, adjust the output - Ver 1.7.1
@@ -1035,6 +1038,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
                 </button>
             <?php endif; ?>
+            <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
+                <button id="chatbot-chatgpt-speech-recognition-btn" title="Speech Recognition">
+                    <img src="<?php echo plugins_url('../assets/icons/speech_to_text_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
+                </button>
+            <?php endif; ?>
             </div>
             <?php
             $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
@@ -1162,6 +1170,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
                     <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
                         <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
+                    </button>
+                <?php endif; ?>
+                <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
+                    <button id="chatbot-chatgpt-speech-recognition-btn" title="Speech Recognition">
+                        <img src="<?php echo plugins_url('../assets/icons/speech_to_text_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
                     </button>
                 <?php endif; ?>
             </div>
