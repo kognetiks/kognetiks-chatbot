@@ -732,8 +732,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             $chatbot_chatgpt_hot_bot_prompt = '';
 
             // BELT & SUSPENDERS - Ver 1.9.5
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-            $kchat_settings['model'] = $model;
+            // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+            // $kchat_settings['model'] = $model;
 
         }
 
@@ -1033,14 +1033,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
                 </button>
             <?php endif; ?>
-            <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
-                <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                    <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
-                </button>
-            <?php endif; ?>
             <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
                 <button id="chatbot-chatgpt-speech-recognition-btn" title="Speech Recognition">
                     <img src="<?php echo plugins_url('../assets/icons/speech_to_text_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
+                </button>
+            <?php endif; ?>
+            <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
+                <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                    <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
                 </button>
             <?php endif; ?>
             </div>
@@ -1167,14 +1167,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
                     </button>
                 <?php endif; ?>
-                <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
-                    <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                        <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
-                    </button>
-                <?php endif; ?>
                 <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
                     <button id="chatbot-chatgpt-speech-recognition-btn" title="Speech Recognition">
                         <img src="<?php echo plugins_url('../assets/icons/speech_to_text_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
+                    </button>
+                <?php endif; ?>
+                <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
+                    <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                        <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
                     </button>
                 <?php endif; ?>
             </div>

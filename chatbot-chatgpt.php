@@ -783,6 +783,18 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
         // back_trace( 'NOTICE', '$message ' . $message);
 
+        // Belt & Suspenders - Ver 2.1.5.1
+        if (!isset($kchat_settings['model'])) {
+            $kchat_settings['model'] = $model;
+        };
+        // back_trace( 'NOTICE', '$model: ' . $model);
+        // back_trace( 'NOTICE', '$kchat_settings[model]: ' . $kchat_settings['model']);
+        // if (str_starts_with($model,'dall')) {
+        //     back_trace ( 'NOTICE', 'Using Image API');
+        // } else {
+        //     back_trace ( 'NOTICE', 'Using ChatGPT API');
+        // }
+
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
