@@ -223,7 +223,7 @@ $chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppres
 
 // Suppress Attribution on/off setting can be found on the Settings tab - Ver 1.6.5
 global $chatbot_chatgpt_suppress_attribution;
-$chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+$chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'On'));
 
 // Suppress Learnings Message - Ver 1.7.1
 global $chatbot_chatgpt_suppress_learnings;

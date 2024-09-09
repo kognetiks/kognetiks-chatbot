@@ -217,7 +217,7 @@ function chatbot_chatgpt_suppress_notices_callback($args) {
 // Suppress Attribution On/Off - Ver 1.6.5
 function chatbot_chatgpt_suppress_attribution_callback($args) {
     global $chatbot_chatgpt_suppress_attribution;
-    $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+    $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'On'));
     ?>
     <select id="chatgpt_suppress_attribution_setting" name = "chatbot_chatgpt_suppress_attribution">
         <option value="On" <?php selected( $chatbot_chatgpt_suppress_attribution, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>

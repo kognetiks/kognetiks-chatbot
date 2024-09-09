@@ -1290,7 +1290,7 @@ function chatbot_chatgpt_custom_buttons_display() {
 // Attribution - Ver 2.0.5
 function chatbot_chatgpt_attribution () {
 
-    $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+    $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'On'));
     $chatbot_chatgpt_custom_attribution = esc_attr(get_option('chatbot_chatgpt_custom_attribution', 'Your custom attribution message goes here.'));
     // DIAG - Diagnostics - Ver 1.6.5
     // back_trace( 'NOTICE', 'chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);
