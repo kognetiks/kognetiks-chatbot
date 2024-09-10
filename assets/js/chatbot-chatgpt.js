@@ -933,6 +933,10 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    //
+    // BEGIN - Speech Recognition - Ver 2.1.5.1
+    //
+
     // Get a microphone icon for the chatbot
     const micIcon = $('<img>')
         .attr('id', 'chatbot-mic-icon')
@@ -1100,6 +1104,10 @@ jQuery(document).ready(function ($) {
 
         }
     }
+
+    //
+    // END - Speech Recognition - Ver 2.1.5.1
+    //
 
     // List of allowed MIME types - Ver 2.0.1
     var allowedFileTypes = [

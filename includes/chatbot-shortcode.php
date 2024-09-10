@@ -1034,7 +1034,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
-                <button id="chatbot-chatgpt-speech-recognition-btn" title="Speech Recognition">
+                <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
                     <img src="<?php echo plugins_url('../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
                 </button>
             <?php endif; ?>
@@ -1168,7 +1168,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
-                    <button id="chatbot-chatgpt-speech-recognition-btn" title="Speech Recognition">
+                    <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
                         <img src="<?php echo plugins_url('../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
                     </button>
                 <?php endif; ?>
