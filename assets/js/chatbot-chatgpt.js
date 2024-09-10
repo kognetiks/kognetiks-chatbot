@@ -998,6 +998,7 @@ jQuery(document).ready(function ($) {
                         recognition.start();  // Restart immediately for continuous listening
                     } else {
                         console.log('Speech recognition ended due to manual stop.');
+                        isManuallyStopping = false;  // Reset the manual stop flag
                     }
                 });
 
@@ -1018,7 +1019,6 @@ jQuery(document).ready(function ($) {
     // Function to reset recognition state and icon
     function resetRecognition() {
         isRecognizing = false;
-        isManuallyStopping = false;  // Reset the manual stop flag
         // Switch back to the "microphone on" icon
         $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
     }
