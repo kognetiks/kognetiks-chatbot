@@ -958,17 +958,14 @@ jQuery(document).ready(function ($) {
     let recognition;  // Declare recognition globally
     let restartTimeout; // To store any pending restart timeout
 
-    // Initialize recognition
+    // Initialize the recognition state
     recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognition.continuous = false;  // Disable continuous mode
+    recognition.continuous = true;  // Enable continuous listening
 
     // Add the initial icon (microphone on) to the button
     $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
 
-        console.log('Running version 5.0.6 of the speech recognition feature.');
+        console.log('Running version 5.0.7 of the speech recognition feature.');
 
         e.preventDefault();  // Prevent default action if necessary
 
@@ -990,7 +987,7 @@ jQuery(document).ready(function ($) {
                 recognition.lang = 'en-US';
                 recognition.interimResults = false;
                 recognition.maxAlternatives = 1;
-                recognition.continuous = true;  // Keep recognition active for longer periods
+                recognition.continuous = false;  // Disable continuous listening
 
                 console.log('Starting speech recognition...');
 
@@ -1011,7 +1008,6 @@ jQuery(document).ready(function ($) {
                         console.log('No speech detected, stopping recognition...');
                         recognition.stop();  // Stop recognition when no speech is detected
                     } else {
-                        recognition.continuous = false;  // Stop continuous recognition on error
                         alert("Speech recognition error: " + event.error);
                     }
                     resetRecognition();  // Stop recognition on error
@@ -1089,7 +1085,6 @@ jQuery(document).ready(function ($) {
     // Function to reset recognition state and icon
     function resetRecognition() {
         isRecognizing = false;
-        console.log('Resetting recognition state...');
         // Switch back to the "microphone on" icon
         $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
     }
