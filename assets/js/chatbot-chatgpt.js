@@ -958,6 +958,10 @@ jQuery(document).ready(function ($) {
     let recognition;  // Declare recognition globally
     let restartTimeout; // To store any pending restart timeout
 
+    // Initialize the recognition state
+    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
+    recognition.continuous = true;  // Enable continuous listening
+
     // Add the initial icon (microphone on) to the button
     $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
 
@@ -1040,16 +1044,21 @@ jQuery(document).ready(function ($) {
                 $('#chatbot-chatgpt-speech-recognition-btn').html(micSlashIcon);
 
             } else {
+
                 // If recognition is already active, stop it when the button is clicked again
                 isManuallyStopping = true;  // Indicate that we're stopping manually
                 recognition.stop();  // Stop the recognition
                 clearTimeout(restartTimeout); // Clear any pending restart to avoid looping
                 resetRecognition();  // Reset the recognition state and icon
                 console.log('Speech recognition stopped manually.');
+
             }
 
         } else {
+
             alert('Speech Recognition API not supported in this browser.');
+            console.error('Speech Recognition API not supported in this browser.');
+
         }
 
     });
