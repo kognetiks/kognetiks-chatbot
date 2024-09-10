@@ -961,7 +961,7 @@ jQuery(document).ready(function ($) {
     // Add the initial icon (microphone on) to the button
     $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
 
-        console.log('Running version 5.0.3 of the speech recognition feature.');
+        console.log('Running version 5.0.4 of the speech recognition feature.');
 
         e.preventDefault();  // Prevent default action if necessary
 
@@ -983,7 +983,7 @@ jQuery(document).ready(function ($) {
                 recognition.lang = 'en-US';
                 recognition.interimResults = false;
                 recognition.maxAlternatives = 1;
-                recognition.continuous = false;  // Disable continuous listening
+                recognition.continuous = true;  // Keep recognition active for longer periods
 
                 console.log('Starting speech recognition...');
 
@@ -1026,7 +1026,7 @@ jQuery(document).ready(function ($) {
                                     console.error('Failed to restart recognition:', error);
                                 }
                             }
-                        }, 2000);  // Adjust delay as needed
+                        }, 1000);  // Adjust delay as needed
                     } else {
                         console.log('Manual stop detected, not restarting recognition.');
                         isManuallyStopping = false;  // Reset the manual stop flag
