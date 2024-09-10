@@ -933,11 +933,11 @@ jQuery(document).ready(function ($) {
         });
     });
 
-// Get a microphone icon for the chatbot
-const micIcon = $('<img>')
-    .attr('id', 'chatbot-mic-icon')
-    .attr('class', 'chatbot-mic-icon')
-    .attr('src', plugins_url + 'assets/icons/' + 'mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png');
+    // Get a microphone icon for the chatbot
+    const micIcon = $('<img>')
+        .attr('id', 'chatbot-mic-icon')
+        .attr('class', 'chatbot-mic-icon')
+        .attr('src', plugins_url + 'assets/icons/' + 'mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png');
 
     // Get a microphone slash icon for the chatbot
     const micSlashIcon = $('<img>')
@@ -956,7 +956,7 @@ const micIcon = $('<img>')
     // Add the initial icon (microphone on) to the button
     $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
 
-        console.log('Running version 1.0');
+        console.log('Running version 2.0.0 of the speech recognition feature.');
 
         e.preventDefault();  // Prevent default action if necessary
 
@@ -1008,12 +1008,17 @@ const micIcon = $('<img>')
                 recognition.addEventListener('end', () => {
                     console.log('Speech recognition ended.');
                     isRecognizing = false;
-                    // Restart the recognition if it wasn't stopped manually
+
+                    // Restart the recognition only if it wasn't manually stopped
                     if (!isManuallyStopping) {
                         setTimeout(() => {
-                            recognition.start();  // Restart recognition if it was not manually stopped
+                            if (!isRecognizing) {  // Check to prevent multiple starts
+                                console.log('Restarting speech recognition...');
+                                recognition.start();  // Restart recognition if it was not manually stopped
+                            }
                         }, 1000);  // Adjust delay as needed
                     } else {
+                        console.log('Manual stop detected, not restarting recognition.');
                         isManuallyStopping = false;  // Reset the manual stop flag
                     }
                 });
@@ -1042,10 +1047,12 @@ const micIcon = $('<img>')
         // After sending transcript to chatbot, reset the recognition state and icon
         console.log('Resetting recognition state and icon...');
         resetRecognition();
-        
+
         // Manually stop recognition and restart after a slight delay
         setTimeout(() => {
-            recognition.stop();  // Ensure the recognition is stopped
+            if (!isManuallyStopping) {  // Prevent restarts during manual stops
+                recognition.stop();  // Ensure the recognition is stopped
+            }
         }, 500);
     }
 
