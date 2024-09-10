@@ -62,7 +62,7 @@ jQuery(document).ready(function ($) {
     .attr('class', 'chatbot-collapse-icon')
     .attr('src', chatbotcollapseicon);
 
-    // Get am erase icon for the chatbot - Ver 1.8.6
+    // Get an erase icon for the chatbot - Ver 1.8.6
     chatboteraseicon = plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
     chatboteraseicon = $('<img>')
     .attr('id', 'chatbot-erase-icon')
@@ -933,48 +933,95 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    // Speech Recognition Integration - Ver 2.1.5.1
-    $('#chatbot-chatgpt-speech-recognition-btn').on('click', function(e) {
+    // Get a microphone icon for the chatbot - Ver 2.1.5
+    const micIcon = $('<img>')
+        .attr('id', 'chatbot-mic-icon')
+        .attr('class', 'chatbot-mic-icon')
+        .attr('src', plugins_url + 'assets/icons/' + 'mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png');
 
+    // Get a microphone slash icon for the chatbot - Ver 2.1.5
+    const micSlashIcon = $('<img>')
+        .attr('id', 'chatbot-mic-slash-icon')
+        .attr('class', 'chatbot-mic-icon')
+        .attr('src', plugins_url + 'assets/icons/' + 'mic_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.png');
+
+    // Add the initial icon (microphone on) to the button
+    $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
+
+    // Flag to track the recognition state
+    let isRecognizing = false;  // Track if recognition is active
+    let isManuallyStopping = false;  // Track if recognition is being manually stopped
+    let recognition;  // Declare recognition globally
+
+    $('#chatbot-chatgpt-speech-recognition-btn').on('click', function(e) {
         e.preventDefault();  // Prevent default action if necessary
 
-        // Ensure browser support for the Web Speech API
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (SpeechRecognition) {
 
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';  // You can change the language if needed
-            recognition.interimResults = false;  // Use false if for final results only
+            // Initialize recognition only if it's not already active
+            if (!isRecognizing) {
+                recognition = new SpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+                recognition.continuous = true;  // Allow it to listen for longer periods
 
-            // When the user clicks the button, start the speech recognition
-            recognition.start();
+                console.log('Starting speech recognition...');
 
-            // Handle the result from speech recognition
-            recognition.addEventListener('result', (event) => {
-                const transcript = event.results[0][0].transcript;
-                $('#chatbot-chatgpt-message').val(transcript);  // This is the input field for the transcript
-                sendToChatbot(transcript);  // Send the recognized text to the input field
-            });
+                recognition.start();
+                isRecognizing = true;  // Update flag
 
-            // Handle any errors from speech recognition
-            recognition.addEventListener('error', (event) => {
-                // console.error('Speech Recognition Error:', event.error);
-                alert("Speech recognition error: " + event.error);
-            });
+                // Switch to the "microphone off" icon
+                $('#chatbot-chatgpt-speech-recognition-btn').html(micSlashIcon);
 
-            // Stop recognition after it's done
-            recognition.addEventListener('end', () => {
-                recognition.stop();
-            });
+                // Handle the result from speech recognition
+                recognition.addEventListener('result', (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    console.log('Speech recognized:', transcript);
+                    $('#chatbot-chatgpt-message').val(transcript);
+                    sendToChatbot(transcript);  // Send the recognized speech to the chatbot
+                });
+
+                // Handle errors
+                recognition.addEventListener('error', (event) => {
+                    console.error('Speech Recognition Error:', event.error);
+                    alert("Speech recognition error: " + event.error);
+                    resetRecognition();  // Stop recognition on error
+                });
+
+                // Handle recognition end and restart for a new input
+                recognition.addEventListener('end', () => {
+                    if (!isManuallyStopping) {
+                        console.log('Speech recognition ended. Restarting for new input...');
+                        recognition.start();  // Restart immediately for continuous listening
+                    } else {
+                        console.log('Speech recognition ended due to manual stop.');
+                    }
+                });
+
+            } else {
+                // If recognition is already active, stop it when the button is clicked again
+                isManuallyStopping = true;  // Indicate that we're stopping manually
+                recognition.stop();  // Stop the recognition
+                resetRecognition();
+                console.log('Speech recognition stopped manually.');
+            }
 
         } else {
-
             alert('Speech Recognition API not supported in this browser.');
-
         }
 
     });
+
+    // Function to reset recognition state and icon
+    function resetRecognition() {
+        isRecognizing = false;
+        isManuallyStopping = false;  // Reset the manual stop flag
+        // Switch back to the "microphone on" icon
+        $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
+    }
 
     // Function to send recognized speech text to chatbot input - V2.1.5.1
     function sendToChatbot(message) {
