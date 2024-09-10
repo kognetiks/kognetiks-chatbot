@@ -933,13 +933,13 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    // Get a microphone icon for the chatbot - Ver 2.1.5
-    const micIcon = $('<img>')
+// Get a microphone icon for the chatbot
+const micIcon = $('<img>')
     .attr('id', 'chatbot-mic-icon')
     .attr('class', 'chatbot-mic-icon')
     .attr('src', plugins_url + 'assets/icons/' + 'mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png');
 
-    // Get a microphone slash icon for the chatbot - Ver 2.1.5
+    // Get a microphone slash icon for the chatbot
     const micSlashIcon = $('<img>')
         .attr('id', 'chatbot-mic-slash-icon')
         .attr('class', 'chatbot-mic-icon')
@@ -953,7 +953,10 @@ jQuery(document).ready(function ($) {
     let isManuallyStopping = false;  // Track if recognition is being manually stopped
     let recognition;  // Declare recognition globally
 
-    $('#chatbot-chatgpt-speech-recognition-btn').on('click', function(e) {
+    // Add the initial icon (microphone on) to the button
+    $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
+
+        console.log('Running version 1.0');
 
         e.preventDefault();  // Prevent default action if necessary
 
@@ -975,7 +978,7 @@ jQuery(document).ready(function ($) {
                 recognition.lang = 'en-US';
                 recognition.interimResults = false;
                 recognition.maxAlternatives = 1;
-                recognition.continuous = true;  // Allow it to listen for longer periods
+                recognition.continuous = false;  // Disable continuous listening
 
                 console.log('Starting speech recognition...');
 
@@ -991,23 +994,31 @@ jQuery(document).ready(function ($) {
                 // Handle errors
                 recognition.addEventListener('error', (event) => {
                     console.error('Speech Recognition Error:', event.error);
-                    alert("Speech recognition error: " + event.error);
+
+                    if (event.error === 'no-speech') {
+                        console.log('No speech detected, stopping recognition...');
+                        recognition.stop();  // Stop recognition when no speech is detected
+                    } else {
+                        alert("Speech recognition error: " + event.error);
+                    }
                     resetRecognition();  // Stop recognition on error
                 });
 
-                // Handle recognition end and restart for a new input
+                // Handle recognition end
                 recognition.addEventListener('end', () => {
+                    console.log('Speech recognition ended.');
+                    isRecognizing = false;
+                    // Restart the recognition if it wasn't stopped manually
                     if (!isManuallyStopping) {
-                        console.log('Speech recognition ended. Restarting for new input...');
-                        recognition.start();  // Restart immediately for continuous listening
+                        setTimeout(() => {
+                            recognition.start();  // Restart recognition if it was not manually stopped
+                        }, 1000);  // Adjust delay as needed
                     } else {
-                        console.log('Speech recognition ended due to manual stop.');
                         isManuallyStopping = false;  // Reset the manual stop flag
                     }
                 });
 
             } else {
-
                 // If recognition is already active, stop it when the button is clicked again
                 isManuallyStopping = true;  // Indicate that we're stopping manually
                 recognition.stop();  // Stop the recognition
@@ -1016,9 +1027,7 @@ jQuery(document).ready(function ($) {
             }
 
         } else {
-
             alert('Speech Recognition API not supported in this browser.');
-
         }
 
     });
@@ -1033,7 +1042,11 @@ jQuery(document).ready(function ($) {
         // After sending transcript to chatbot, reset the recognition state and icon
         console.log('Resetting recognition state and icon...');
         resetRecognition();
-
+        
+        // Manually stop recognition and restart after a slight delay
+        setTimeout(() => {
+            recognition.stop();  // Ensure the recognition is stopped
+        }, 500);
     }
 
     // Function to reset recognition state and icon
