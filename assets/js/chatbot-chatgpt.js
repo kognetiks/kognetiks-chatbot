@@ -938,11 +938,6 @@ jQuery(document).ready(function ($) {
 
         e.preventDefault();  // Prevent default action if necessary
 
-        // // Ensure browser support for the Web Speech API
-        // window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-        // if ('SpeechRecognition' in window) {
-
         // Ensure browser support for the Web Speech API
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -950,7 +945,7 @@ jQuery(document).ready(function ($) {
 
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US';  // You can change the language if needed
-            recognition.interimResults = false;  // Use false if you want final results only
+            recognition.interimResults = false;  // Use false if for final results only
 
             // When the user clicks the button, start the speech recognition
             recognition.start();
@@ -958,8 +953,8 @@ jQuery(document).ready(function ($) {
             // Handle the result from speech recognition
             recognition.addEventListener('result', (event) => {
                 const transcript = event.results[0][0].transcript;
-                $('#chatbot-chatgpt-message').val(transcript);  // Assuming you have an input field for the transcript
-                sendToChatbot(transcript);  // Send the recognized text to your chatbot
+                $('#chatbot-chatgpt-message').val(transcript);  // This is the input field for the transcript
+                sendToChatbot(transcript);  // Send the recognized text to the input field
             });
 
             // Handle any errors from speech recognition
