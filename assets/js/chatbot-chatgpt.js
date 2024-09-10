@@ -938,10 +938,15 @@ jQuery(document).ready(function ($) {
 
         e.preventDefault();  // Prevent default action if necessary
 
-        // Ensure browser support for the Web Speech API
-        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        // // Ensure browser support for the Web Speech API
+        // window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        if ('SpeechRecognition' in window) {
+        // if ('SpeechRecognition' in window) {
+
+        // Ensure browser support for the Web Speech API
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
 
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US';  // You can change the language if needed
