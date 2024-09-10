@@ -223,7 +223,7 @@ $chatbot_chatgpt_suppress_notices = esc_attr(get_option('chatbot_chatgpt_suppres
 
 // Suppress Attribution on/off setting can be found on the Settings tab - Ver 1.6.5
 global $chatbot_chatgpt_suppress_attribution;
-$chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+$chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'On'));
 
 // Suppress Learnings Message - Ver 1.7.1
 global $chatbot_chatgpt_suppress_learnings;
@@ -782,6 +782,18 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
         // back_trace( 'NOTICE', '$message ' . $message);
+
+        // Belt & Suspenders - Ver 2.1.5.1
+        if (!isset($kchat_settings['model'])) {
+            $kchat_settings['model'] = $model;
+        };
+        // back_trace( 'NOTICE', '$model: ' . $model);
+        // back_trace( 'NOTICE', '$kchat_settings[model]: ' . $kchat_settings['model']);
+        // if (str_starts_with($model,'dall')) {
+        //     back_trace ( 'NOTICE', 'Using Image API');
+        // } else {
+        //     back_trace ( 'NOTICE', 'Using ChatGPT API');
+        // }
 
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
