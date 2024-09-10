@@ -957,7 +957,7 @@ jQuery(document).ready(function ($) {
     // Add the initial icon (microphone on) to the button
     $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
 
-        console.log('Running version 3.0.0 of the speech recognition feature.');
+        console.log('Running version 4.0.0 of the speech recognition feature.');
 
         e.preventDefault();  // Prevent default action if necessary
 
@@ -983,14 +983,14 @@ jQuery(document).ready(function ($) {
 
                 console.log('Starting speech recognition...');
 
-                recognition.start();
-                isRecognizing = true;  // Update flag
-
-                // Switch to the "microphone off" icon
-                $('#chatbot-chatgpt-speech-recognition-btn').html(micSlashIcon);
-
                 // Attach the result event handler
                 recognition.addEventListener('result', handleRecognitionResult);
+
+                // Ensure we update the recognition state when it starts
+                recognition.addEventListener('start', () => {
+                    console.log('Speech recognition started.');
+                    isRecognizing = true;
+                });
 
                 // Handle errors
                 recognition.addEventListener('error', (event) => {
@@ -1028,6 +1028,12 @@ jQuery(document).ready(function ($) {
                         isManuallyStopping = false;  // Reset the manual stop flag
                     }
                 });
+
+                // Start recognition
+                recognition.start();
+
+                // Switch to the "microphone off" icon
+                $('#chatbot-chatgpt-speech-recognition-btn').html(micSlashIcon);
 
             } else {
                 // If recognition is already active, stop it when the button is clicked again
