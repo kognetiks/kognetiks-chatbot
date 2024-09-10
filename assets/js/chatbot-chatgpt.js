@@ -952,11 +952,12 @@ jQuery(document).ready(function ($) {
     let isRecognizing = false;  // Track if recognition is active
     let isManuallyStopping = false;  // Track if recognition is being manually stopped
     let recognition;  // Declare recognition globally
+    let restartTimeout; // To store any pending restart timeout
 
     // Add the initial icon (microphone on) to the button
     $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
 
-        console.log('Running version 2.0.0 of the speech recognition feature.');
+        console.log('Running version 3.0.0 of the speech recognition feature.');
 
         e.preventDefault();  // Prevent default action if necessary
 
@@ -1011,10 +1012,15 @@ jQuery(document).ready(function ($) {
 
                     // Restart the recognition only if it wasn't manually stopped
                     if (!isManuallyStopping) {
-                        setTimeout(() => {
-                            if (!isRecognizing) {  // Check to prevent multiple starts
+                        console.log('Scheduling speech recognition restart...');
+                        restartTimeout = setTimeout(() => {
+                            if (!isRecognizing && !isManuallyStopping) {  // Check to prevent multiple starts
                                 console.log('Restarting speech recognition...');
-                                recognition.start();  // Restart recognition if it was not manually stopped
+                                try {
+                                    recognition.start();  // Restart recognition if it was not manually stopped
+                                } catch (error) {
+                                    console.error('Failed to restart recognition:', error);
+                                }
                             }
                         }, 1000);  // Adjust delay as needed
                     } else {
@@ -1027,6 +1033,7 @@ jQuery(document).ready(function ($) {
                 // If recognition is already active, stop it when the button is clicked again
                 isManuallyStopping = true;  // Indicate that we're stopping manually
                 recognition.stop();  // Stop the recognition
+                clearTimeout(restartTimeout); // Clear any pending restart to avoid looping
                 resetRecognition();  // Reset the recognition state and icon
                 console.log('Speech recognition stopped manually.');
             }
@@ -1050,7 +1057,7 @@ jQuery(document).ready(function ($) {
 
         // Manually stop recognition and restart after a slight delay
         setTimeout(() => {
-            if (!isManuallyStopping) {  // Prevent restarts during manual stops
+            if (!isManuallyStopping && isRecognizing) {  // Prevent restarts during manual stops
                 recognition.stop();  // Ensure the recognition is stopped
             }
         }, 500);
