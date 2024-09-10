@@ -45,8 +45,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     global $kflow_data;
 
-    header("Cache-Control: no-cache, must-revalidate, max-age=0");
-    header("Pragma: no-cache");
+    // header("Cache-Control: no-cache, must-revalidate, max-age=0");
+    // header("Pragma: no-cache");
 
     // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
     $user_id = get_current_user_id();

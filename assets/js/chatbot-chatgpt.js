@@ -397,7 +397,7 @@ jQuery(document).ready(function ($) {
                 }
             }
         } else {
-            // console.error('Received undefined or null message:', message);
+            // console.error('Chatbot: ERROR: Received undefined or null message:', message);
             return;  // Optionally, return early if the message is undefined or null
         }
 
@@ -614,7 +614,7 @@ jQuery(document).ready(function ($) {
 
         // Sanitize the input - Ver 2.0.0
         message = sanitizeInput(messageInput.val().trim());
-        console.log('Chatbot: NOTICE: submitButton.on Message: ' + message);
+        // console.log('Chatbot: NOTICE: submitButton.on Message: ' + message);
 
         if (!message) {
             return;
@@ -959,7 +959,7 @@ jQuery(document).ready(function ($) {
 
             // Handle any errors from speech recognition
             recognition.addEventListener('error', (event) => {
-                console.error('Speech Recognition Error:', event.error);
+                // console.error('Speech Recognition Error:', event.error);
                 alert("Speech recognition error: " + event.error);
             });
 
@@ -979,7 +979,7 @@ jQuery(document).ready(function ($) {
     // Function to send recognized speech text to chatbot input - V2.1.5.1
     function sendToChatbot(message) {
 
-        console.log("Sending message to chatbot:", message);
+        // console.log("Sending message to chatbot:", message);
     
         // Update the input field with the recognized speech
         $('#chatbot-chatgpt-message').val(message);
@@ -987,7 +987,7 @@ jQuery(document).ready(function ($) {
         // Ensure that the value is updated before trying to submit
         let updatedMessage = $('#chatbot-chatgpt-message').val().trim();
     
-        console.log("Updated message in input field:", updatedMessage);
+        // console.log("Updated message in input field:", updatedMessage);
     
         if (updatedMessage) {
 
@@ -996,7 +996,7 @@ jQuery(document).ready(function ($) {
 
         } else {
 
-            console.error("Message is empty, cannot submit.");
+            // console.error("Message is empty, cannot submit.");
 
         }
     }
@@ -1089,7 +1089,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                // console.log('Chatbot: NOTICE: Response from server', response);
+                // console.error('Chatbot: NOTICE: Response from server', response);
                 $('#chatbot-chatgpt-upload-file-input').val(''); // Clear the file input after successful upload
                 appendMessage('File(s) successfully uploaded.', 'bot');
             },
@@ -1119,7 +1119,7 @@ jQuery(document).ready(function ($) {
     
         // Check if any files are selected
         if (!fileField.files.length) {
-            // console.log('Chatbot: WARNING: No file selected');
+            // console.warn('Chatbot: WARNING: No file selected');
             return;
         }
     
@@ -1170,7 +1170,7 @@ jQuery(document).ready(function ($) {
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                 } else {
                     // DIAG - Log the error - Ver 1.6.7
-                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
+                    // console.error('Chatbot: ERROR: ' + JSON.stringify(response));
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! Failed to upload file. Please try again.', 'error');
                 }
@@ -1231,7 +1231,7 @@ jQuery(document).ready(function ($) {
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                 } else {
                     // DIAG - Log the error - Ver 1.6.7
-                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
+                    // console.error('Chatbot: ERROR: ' + JSON.stringify(response));
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! Unable to clear conversation. Please try again.', 'error');
                 }
@@ -1460,9 +1460,9 @@ jQuery(document).ready(function ($) {
                 // console.log('Chatbot: NOTICE: loadConversation - storedConversation: ' + storedConversation);
                 storedConversation = storedConversation.replace(/autoplay/g, '');
                 // console.log('Chatbot: NOTICE: loadConversation - storedConversation: ' + storedConversation);
-                // console.log('Conversation found in session storage.');
+                // console.warn('Chatbot: WARNING: Conversation found in session storage.');
             } else {
-                // console.log('No conversation found in session storage.');
+                // console.warn('Chatbot: WARNING: No conversation found in session storage.');
             }
         }
 
@@ -1490,7 +1490,7 @@ jQuery(document).ready(function ($) {
             .then(() => {
                 // console.log("MathJax re-rendering complete for stored conversation");
             })
-            .catch((err) => console.log("MathJax re-rendering failed: ", err));
+            .catch((err) => console.error("Chatbot: ERROR: MathJax re-rendering failed: ", err));
 
         } else {
 
