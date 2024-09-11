@@ -959,19 +959,18 @@ jQuery(document).ready(function ($) {
     let restartTimeout; // To store any pending restart timeout
 
     // Initialize the recognition state
-    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
-    recognition.continuous = true;  // Enable continuous listening
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
 
-    // Add the initial icon (microphone on) to the button
-    $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;  // Enable continuous listening
 
-        console.log('Running version 5.0.7 of the speech recognition feature.');
+        // Add the initial icon (microphone on) to the button
+        $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
 
-        e.preventDefault();  // Prevent default action if necessary
+            console.log('Running version 5.0.8 of the speech recognition feature.');
 
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-        if (SpeechRecognition) {
+            e.preventDefault();  // Prevent default action if necessary
 
             // Initialize recognition only if it's not already active
             if (!isRecognizing) {
@@ -998,70 +997,54 @@ jQuery(document).ready(function ($) {
                 recognition.addEventListener('start', () => {
                     console.log('Speech recognition started.');
                     isRecognizing = true;
+                    isManuallyStopping = false;
                 });
 
-                // Handle errors
-                recognition.addEventListener('error', (event) => {
-                    console.error('Speech Recognition Error:', event.error);
-
-                    if (event.error === 'no-speech') {
-                        console.log('No speech detected, stopping recognition...');
-                        recognition.stop();  // Stop recognition when no speech is detected
-                    } else {
-                        alert("Speech recognition error: " + event.error);
-                    }
-                    resetRecognition();  // Stop recognition on error
-                });
-
-                // Handle recognition end
+                // Handle recognition end event
                 recognition.addEventListener('end', () => {
                     console.log('Speech recognition ended.');
                     isRecognizing = false;
-
-                    // Restart the recognition only if it wasn't manually stopped
                     if (!isManuallyStopping) {
-                        console.log('Scheduling speech recognition restart...');
+                        // Restart recognition if it wasn't manually stopped
                         restartTimeout = setTimeout(() => {
-                            if (!isRecognizing && !isManuallyStopping) {  // Check to prevent multiple starts
-                                console.log('Restarting speech recognition...');
-                                try {
-                                    recognition.start();  // Restart recognition if it was not manually stopped
-                                } catch (error) {
-                                    console.error('Failed to restart recognition:', error);
-                                }
-                            }
-                        }, 1000);  // Adjust delay as needed
-                    } else {
-                        console.log('Manual stop detected, not restarting recognition.');
-                        isManuallyStopping = false;  // Reset the manual stop flag
+                            recognition.start();
+                        }, 1000);
                     }
+                });
+
+                // Handle recognition error event
+                recognition.addEventListener('error', (event) => {
+                    console.error('Speech Recognition Error:', event.error);
+                    // alert("Speech recognition error: " + event.error);
+                    isRecognizing = false;
                 });
 
                 // Start recognition
                 recognition.start();
-
-                // Switch to the "microphone off" icon
-                $('#chatbot-chatgpt-speech-recognition-btn').html(micSlashIcon);
-
             } else {
 
-                // If recognition is already active, stop it when the button is clicked again
-                isManuallyStopping = true;  // Indicate that we're stopping manually
-                recognition.stop();  // Stop the recognition
-                clearTimeout(restartTimeout); // Clear any pending restart to avoid looping
-                resetRecognition();  // Reset the recognition state and icon
-                console.log('Speech recognition stopped manually.');
+                // Manually stop recognition if it's already active
+                isManuallyStopping = true;
+                recognition.stop();
 
             }
 
-        } else {
+        });
 
-            alert('Speech Recognition API not supported in this browser.');
-            console.error('Speech Recognition API not supported in this browser.');
+    } else {
 
-        }
+        // Speech Recognition API not supported in this browser
 
-    });
+        // Disable the speech recognition button
+        $('#chatbot-chatgpt-speech-recognition-btn').prop('disabled', true);
+
+        // Change the hover text to indicate that the feature is not supported
+        $('#chatbot-chatgpt-speech-recognition-btn').attr('title', 'Speech Recognition API not supported in this browser.');
+
+        // alert('Speech Recognition API not supported in this browser.');
+        console.log('Speech Recognition API not supported in this browser.');
+
+    }
 
     // Separate function to handle recognition results
     function handleRecognitionResult(event) {
