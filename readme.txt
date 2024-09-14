@@ -4,7 +4,7 @@ Tags: chatbot, chatgpt, openai, artificial intelligence, customer support
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.6.2
-Stable tag: 2.1.5
+Stable tag: 2.1.6
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -156,6 +156,10 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.1.6 - Released TBD =
+
+* **TBD**: TBD
 
 = 2.1.5 - Released 09-14-2024 =
 
