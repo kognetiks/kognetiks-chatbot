@@ -62,7 +62,7 @@ jQuery(document).ready(function ($) {
     .attr('class', 'chatbot-collapse-icon')
     .attr('src', chatbotcollapseicon);
 
-    // Get am erase icon for the chatbot - Ver 1.8.6
+    // Get an erase icon for the chatbot - Ver 1.8.6
     chatboteraseicon = plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
     chatboteraseicon = $('<img>')
     .attr('id', 'chatbot-erase-icon')
@@ -397,7 +397,7 @@ jQuery(document).ready(function ($) {
                 }
             }
         } else {
-            // console.error('Received undefined or null message:', message);
+            // console.error('Chatbot: ERROR: Received undefined or null message:', message);
             return;  // Optionally, return early if the message is undefined or null
         }
 
@@ -614,7 +614,7 @@ jQuery(document).ready(function ($) {
 
         // Sanitize the input - Ver 2.0.0
         message = sanitizeInput(messageInput.val().trim());
-        // console.log('Chatbot: NOTICE: Message: ' + message);
+        // console.log('Chatbot: NOTICE: submitButton.on Message: ' + message);
 
         if (!message) {
             return;
@@ -933,6 +933,174 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    //
+    // BEGIN - Speech Recognition - Ver 2.1.5.1
+    //
+
+    // Get a microphone icon for the chatbot
+    const micIcon = $('<img>')
+        .attr('id', 'chatbot-mic-icon')
+        .attr('class', 'chatbot-mic-icon')
+        .attr('src', plugins_url + 'assets/icons/' + 'mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png');
+
+    // Get a microphone slash icon for the chatbot
+    const micSlashIcon = $('<img>')
+        .attr('id', 'chatbot-mic-slash-icon')
+        .attr('class', 'chatbot-mic-icon')
+        .attr('src', plugins_url + 'assets/icons/' + 'mic_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.png');
+
+    // Add the initial icon (microphone on) to the button
+    $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
+
+    // Flag to track the recognition state
+    let isRecognizing = false;  // Track if recognition is active
+    let isManuallyStopping = false;  // Track if recognition is being manually stopped
+    let recognition;  // Declare recognition globally
+    let restartTimeout; // To store any pending restart timeout
+
+    // Initialize the recognition state
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;  // Enable continuous listening
+
+        // Add the initial icon (microphone on) to the button
+        $('#chatbot-chatgpt-speech-recognition-btn').on('click', function (e) {
+
+            console.log('Running version 5.0.8 of the speech recognition feature.');
+
+            e.preventDefault();  // Prevent default action if necessary
+
+            // Initialize recognition only if it's not already active
+            if (!isRecognizing) {
+
+                // Clear any existing recognition instance
+                if (recognition) {
+                    recognition.removeEventListener('result', handleRecognitionResult);  // Clear event listener
+                    recognition.abort();  // Stop any existing instance
+                }
+
+                // Create a new SpeechRecognition instance
+                recognition = new SpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+                recognition.continuous = false;  // Disable continuous listening
+
+                console.log('Starting speech recognition...');
+
+                // Attach the result event handler
+                recognition.addEventListener('result', handleRecognitionResult);
+
+                // Ensure we update the recognition state when it starts
+                recognition.addEventListener('start', () => {
+                    console.log('Speech recognition started.');
+                    isRecognizing = true;
+                    isManuallyStopping = false;
+                });
+
+                // Handle recognition end event
+                recognition.addEventListener('end', () => {
+                    console.log('Speech recognition ended.');
+                    isRecognizing = false;
+                    if (!isManuallyStopping) {
+                        // Restart recognition if it wasn't manually stopped
+                        restartTimeout = setTimeout(() => {
+                            recognition.start();
+                        }, 1000);
+                    }
+                });
+
+                // Handle recognition error event
+                recognition.addEventListener('error', (event) => {
+                    console.error('Speech Recognition Error:', event.error);
+                    // alert("Speech recognition error: " + event.error);
+                    isRecognizing = false;
+                });
+
+                // Start recognition
+                recognition.start();
+            } else {
+
+                // Manually stop recognition if it's already active
+                isManuallyStopping = true;
+                recognition.stop();
+
+            }
+
+        });
+
+    } else {
+
+        // Speech Recognition API not supported in this browser
+
+        // Disable the speech recognition button
+        $('#chatbot-chatgpt-speech-recognition-btn').prop('disabled', true);
+
+        // Change the hover text to indicate that the feature is not supported
+        $('#chatbot-chatgpt-speech-recognition-btn').attr('title', 'Speech Recognition API not supported in this browser.');
+
+        // alert('Speech Recognition API not supported in this browser.');
+        console.log('Speech Recognition API not supported in this browser.');
+
+    }
+
+    // Separate function to handle recognition results
+    function handleRecognitionResult(event) {
+        const transcript = event.results[0][0].transcript;
+        console.log('Speech recognized:', transcript);
+        $('#chatbot-chatgpt-message').val(transcript);
+        sendToChatbot(transcript);  // Send the recognized speech to the chatbot
+
+        // After sending transcript to chatbot, reset the recognition state and icon
+        console.log('Resetting recognition state and icon...');
+        resetRecognition();
+
+        // Manually stop recognition and restart after a slight delay
+        setTimeout(() => {
+            if (!isManuallyStopping && isRecognizing) {  // Prevent restarts during manual stops
+                recognition.stop();  // Ensure the recognition is stopped
+            }
+        }, 500);
+    }
+
+    // Function to reset recognition state and icon
+    function resetRecognition() {
+        isRecognizing = false;
+        // Switch back to the "microphone on" icon
+        $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
+    }
+
+    // Function to send recognized speech text to chatbot input - V2.1.5.1
+    function sendToChatbot(message) {
+
+        console.log("Sending message to chatbot:", message);
+
+        // Update the input field with the recognized speech
+        $('#chatbot-chatgpt-message').val(message);
+    
+        // Ensure that the value is updated before trying to submit
+        let updatedMessage = $('#chatbot-chatgpt-message').val().trim();
+    
+        // console.log("Updated message in input field:", updatedMessage);
+    
+        if (updatedMessage) {
+
+            // Trigger the submit button's click event programmatically
+            $('#chatbot-chatgpt-submit').trigger('click');
+
+        } else {
+
+            console.error("Message is empty, cannot submit.");
+
+        }
+    }
+
+    //
+    // END - Speech Recognition - Ver 2.1.5.1
+    //
+
     // List of allowed MIME types - Ver 2.0.1
     var allowedFileTypes = [
         'text/csv',
@@ -1021,7 +1189,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                // console.log('Chatbot: NOTICE: Response from server', response);
+                // console.error('Chatbot: NOTICE: Response from server', response);
                 $('#chatbot-chatgpt-upload-file-input').val(''); // Clear the file input after successful upload
                 appendMessage('File(s) successfully uploaded.', 'bot');
             },
@@ -1051,7 +1219,7 @@ jQuery(document).ready(function ($) {
     
         // Check if any files are selected
         if (!fileField.files.length) {
-            // console.log('Chatbot: WARNING: No file selected');
+            // console.warn('Chatbot: WARNING: No file selected');
             return;
         }
     
@@ -1102,7 +1270,7 @@ jQuery(document).ready(function ($) {
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                 } else {
                     // DIAG - Log the error - Ver 1.6.7
-                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
+                    // console.error('Chatbot: ERROR: ' + JSON.stringify(response));
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! Failed to upload file. Please try again.', 'error');
                 }
@@ -1163,7 +1331,7 @@ jQuery(document).ready(function ($) {
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                 } else {
                     // DIAG - Log the error - Ver 1.6.7
-                    // console.log('Chatbot: ERROR: ' + JSON.stringify(response));
+                    // console.error('Chatbot: ERROR: ' + JSON.stringify(response));
                     appendMessage('Error: ' + error, 'error');
                     appendMessage('Oops! Unable to clear conversation. Please try again.', 'error');
                 }
@@ -1392,9 +1560,9 @@ jQuery(document).ready(function ($) {
                 // console.log('Chatbot: NOTICE: loadConversation - storedConversation: ' + storedConversation);
                 storedConversation = storedConversation.replace(/autoplay/g, '');
                 // console.log('Chatbot: NOTICE: loadConversation - storedConversation: ' + storedConversation);
-                // console.log('Conversation found in session storage.');
+                // console.warn('Chatbot: WARNING: Conversation found in session storage.');
             } else {
-                // console.log('No conversation found in session storage.');
+                // console.warn('Chatbot: WARNING: No conversation found in session storage.');
             }
         }
 
@@ -1422,7 +1590,7 @@ jQuery(document).ready(function ($) {
             .then(() => {
                 // console.log("MathJax re-rendering complete for stored conversation");
             })
-            .catch((err) => console.log("MathJax re-rendering failed: ", err));
+            .catch((err) => console.error("Chatbot: ERROR: MathJax re-rendering failed: ", err));
 
         } else {
 

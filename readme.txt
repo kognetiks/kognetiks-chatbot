@@ -3,8 +3,8 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, artificial intelligence, customer support
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.6.1
-Stable tag: 2.1.4
+Tested up to: 6.6.2
+Stable tag: 2.1.5
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -157,6 +157,12 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
+= 2.1.5 - Released 09-14-2024 =
+
+* **Speech Recognition Integration**: Added support for speech recognition to enhance user interaction with the chatbot. Users can now speak to the chatbot, which will transcribe the speech into text for processing.
+* **Knowledge Navigator Update**:  Updated the Knowledge Navigator algorithm to prioritize and return search results that match the highest number of input words first, ordered by relevance and recency, to provide the most relevant and recent links.
+* **Bug Fix**: Removed unnecessary code that was causing a cannot modify header information in the chatbot-shortcode.php file.
+
 = 2.1.4 - Released 09-02-2024 =
 
 * **Improved Table Formatting**: Enhanced the appearance of tables in chatbot responses for better readability.
@@ -183,9 +189,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **Conversation Log CSV Export**: Added a check to determine if $value is not null before calling mb_convert_encoding to prevent PHP warnings.
 
 = 2.0.9 - Released 08-17-2024 =
-* **Adjusted Module Name Conflict**: Renamed one module that was had a name found to be in conflict with another vendor's plugin.
+* **Adjusted Module Name Conflict**: Renamed one module that had a name conflict with another vendor's plugin.
 * **Reworked Conversation Continuity**: Improved the way the chatbot handles conversation continuity for visitors and logged-in users, ensuring a seamless experience across pages.
-* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WOrdPress plugin by Kognetiks' with a text message of your choosing.
+* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WordPress plugin by Kognetiks' with a text message of your choosing.
 * **Refactored Inline Styles**: Moved inline styles to an external CSS file for better maintainability and separation of concerns.
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.

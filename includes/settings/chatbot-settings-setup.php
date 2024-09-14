@@ -188,6 +188,17 @@ function chatbot_chatgpt_input_rows_callback($args) {
     <?php
 }
 
+// Speech Recognition - Ver 2.1.5.1
+function chatbot_chatgpt_speech_recognition_callback($args) {
+    $chatbot_chatgpt_speech_recognition = esc_attr(get_option('chatbot_chatgpt_speech_recognition', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_speech_recognition" name="chatbot_chatgpt_speech_recognition">
+        <option value="Yes" <?php selected( $chatbot_chatgpt_speech_recognition, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $chatbot_chatgpt_speech_recognition, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php    
+}
+
 
 // Register the settings
 function chatbot_chatgpt_settings_setup_init() {
@@ -212,6 +223,7 @@ function chatbot_chatgpt_settings_setup_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_disclaimer_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_input_rows');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_speech_recognition');
 
     // Chatbot Settings - Chatbot Name, Start Status, Start Status New Visitor
     add_settings_section(
@@ -283,6 +295,15 @@ function chatbot_chatgpt_settings_setup_init() {
         'Additional Settings',
         'chatbot_chatgpt_additional_setup_section_callback',
         'chatbot_chatgpt_additional_setup_settings'
+    );
+
+    // Speech Recognition - Ver 2.1.5.1
+    add_settings_field(
+        'chatbot_chatgpt_speech_recognition',
+        'Allow Speech Recognition',
+        'chatbot_chatgpt_speech_recognition_callback',
+        'chatbot_chatgpt_additional_setup_settings',
+        'chatbot_chatgpt_additional_setup_section'
     );
 
     // Option to allow downloading transcripts - Ver 2.0.3

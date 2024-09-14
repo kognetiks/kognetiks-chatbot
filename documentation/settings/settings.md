@@ -40,32 +40,38 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ![Additional Settings](additional-settings.png)
 
-1. **Allow Downloading Transcripts**:
+1. **Allow Speech Recognition**:
+   - **Description**: This toggle allows you to allow chatbot users to speak to the chatbot if support by their browser.
+   - **Options**: `Yes` or `No`.
+   - **Selection**: Choose `Yes` if you want to allow a users to speak to the chatbot.
+   - **Note**: Speech recognition is only supported in modern browsers such as Google Chrome, Microsoft Edge, and Safari. It may not function correctly in other browsers, including older versions of Internet Explorer or Firefox.
+
+2. **Allow Downloading Transcripts**:
    - **Description**: This toggle allows you to allow chatbot users to download transcripts.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` if you want to allow a transcript download.
 
-2. **Include "As an AI language model" disclaimer**:
+3. **Include "As an AI language model" disclaimer**:
    - **Description**: This toggle allows you to include a disclaimer about the AI nature of the chatbot.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` if you want to display this disclaimer, which can help manage user expectations.
 
-3. **Force Page Reload on Conversation Clear**:
+4. **Force Page Reload on Conversation Clear**:
    - **Description**: This toggle allows you to force the webpage to reload when the chatbot conversation is cleared.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` if you want to force a page reload.
 
-4. **Conversation Continuation**:
+5. **Conversation Continuation**:
    - **Description**: This toggle allows you to enable conversation continuation when returning to a page with a earlier chat.
    - **Options**: `On` or `Off`.
    - **Selection**: Choose `On` if you want to enable conversation continuation.   
 
-5. **Audience for Chatbot**:
+6. **Audience for Chatbot**:
    - **Description**: This setting allows you to specify the intended audience for the chatbot.
    - **Options**: `All`, `Visitors`, `Logged-in` etc.
    - **Selection**: Choose the appropriate audience based on the content and purpose of your chatbot.
 
-6. **Input Rows**:
+7. **Input Rows**:
    - **Description**: This setting determines the number of rows in the chatbot input field.
    - **Options**: Set a numeric value.
    - **Selection**: Choose a value like `5` to allow more space for user input, or adjust based on your layout preferences.

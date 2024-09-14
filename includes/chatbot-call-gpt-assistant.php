@@ -175,8 +175,8 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // Check for cURL errors
     if (curl_errno($ch)) {
-        // DIAG - Diagnostics
-        // back_trace( 'ERROR', 'Curl error: ' . curl_error($ch));
+        // DIAG - Diagnostics - Ver 2.1.5
+        prod_trace( 'ERROR', 'Curl error: ' . curl_error($ch));
         curl_close($ch);
         return null;
     }
@@ -280,15 +280,36 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
     // Check HTTP response code
     if (http_response_code() != 200) {
-        // DIAG - Diagnostics
-        // back_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code(), true));
+        // DIAG - Diagnostics - Ver 2.1.
+        prod_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code(), true));
         // return "Error: HTTP response code " . http_response_code();
     }
 
+    // Check for an error response without decoding
+    if (strpos($response, '"error"') !== false && strpos($response, '"message"') !== false) {
+
+        // prod_trace('ERROR', print_r($response, true));
+
+        // Extract the error message and type using regular expressions
+        preg_match('/"message"\s*:\s*"([^"]+)"/', $response, $messageMatch);
+        preg_match('/"type"\s*:\s*"([^"]+)"/', $response, $typeMatch);
+    
+        $errorMessage = $messageMatch[1] ?? 'Unknown error';
+        $errorType = $typeMatch[1] ?? 'Unknown type';
+    
+        // Handle the error
+        prod_trace('ERROR', $errorMessage);
+        prod_trace('ERROR', $errorType);
+    } else {
+        // No error found, proceed with normal logic
+        // prod_trace('INFO', 'No errors found. Proceeding with the operation.');
+    }
+    
     // DIAG - Diagnostics  Ver 2.0.1
     // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
-
+    
     return json_decode($response, true);
+
 }
 
 // Step 5: Get the Run's Status
@@ -331,23 +352,23 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
         $responseArray = json_decode($response, true);
 
         // DIAG - Diagnostics - Ver 2.0.9
-        // back_trace ( 'NOTICE', '$responseArray: ' . print_r($responseArray, true));
+        // back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray, true));
 
         if (array_key_exists("status", $responseArray)) {
             $status = $responseArray["status"];
             if ($status == "failed") {
-                // DIAG - Diagnostics
-                // back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . $status);
-                // back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
+                // DIAG - Diagnostics - Ver 2.1.5
+                prod_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . $status);
+                prod_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
                 // exit;
                 break;
             }
             if ($status == "incomplete") {
                 if (array_key_exists("incomplete_details", $responseArray)) {
                     $incomplete_details = $responseArray["incomplete_details"];
-                    // DIAG - Diagnostics
-                    // back_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . print_r($incomplete_details, true));
-                    // back_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
+                    // DIAG - Diagnostics - Ver 2.1.5
+                    prod_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . print_r($incomplete_details, true));
+                    prod_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
                     // exit;
                     break;
                 }
@@ -451,8 +472,9 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
         } else {
             // DIAG - Handle error here
             $status = "failed";
-            // DIAG - Diagnostics
-            // back_trace( 'ERROR', "Error - GPT Assistant - Step 7.");
+            // DIAG - Diagnostics - Ver 2.1.5
+            prod_trace( 'ERROR', "Error - GPT Assistant - Step 7");
+            prod_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
             exit;
         }
 
@@ -787,6 +809,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'ERROR', 'Invalid response format or error occurred');
         return "Error: Invalid response format or error occurred.";
     }
+
     // Check if the 'id' key exists in the response
     if (isset($assistants_response["id"])) {
         $runId = $assistants_response["id"];
@@ -794,6 +817,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'ERROR', 'runId key not found in response');
         return "Error: 'id' key not found in response.";
     }
+
     // DIAG - Print the response
     // back_trace( 'NOTICE', $assistants_response);
 

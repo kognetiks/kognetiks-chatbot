@@ -8,6 +8,12 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
 
+## What's new in Version 2.1.5
+
+* **Speech Recognition Integration**: Added support for speech recognition to enhance user interaction with the chatbot. Users can now speak to the chatbot, which will transcribe the speech into text for processing.
+* **Knowledge Navigator Update**:  Updated the Knowledge Navigator algorithm to prioritize and return search results that match the highest number of input words first, ordered by relevance and recency, to provide the most relevant and recent links.
+* **Bug Fix**: Removed unnecessary code that was causing a cannot modify header information in the chatbot-shortcode.php file.
+
 ## What's new in Version 2.1.4
 
 * **Improved Table Formatting**: Enhanced the appearance of tables in chatbot responses for better readability.
@@ -37,9 +43,9 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## What's New in Version 2.0.9
 
-* **Adjusted Module Name Conflict**: Renamed one module that was had a name found to be in conflict with another vendor's plugin.
+* **Adjusted Module Name Conflict**: Renamed one module that had a name conflict with another vendor's plugin.
 * **Reworked Conversation Continuity**: Improved the way the chatbot handles conversation continuity for visitors and logged-in users, ensuring a seamless experience across pages.
-* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WOrdPress plugin by Kognetiks' with a text message of your choosing.
+* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WordPress plugin by Kognetiks' with a text message of your choosing.
 * **Refactored Inline Styles**: Moved inline styles to an external CSS file for better maintainability and separation of concerns.
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.

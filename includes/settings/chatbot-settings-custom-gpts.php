@@ -379,8 +379,8 @@ function chatbot_chatgpt_max_completion_tokens_callback($args) {
 // Remote Widget Settings section callback - Ver 2.1.3
 function chatbot_chatgpt_remote_widget_settings_section_callback($args) {
     ?>
-    <p>Configure the Remote Widget settings to allow access from specific domains.</p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Remote Widget Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=remote-widget.md">here</a>.</b></p>
+    <p>Configure the Remote Widget settings to allow access from specific domains to specific assistants. Please each pair, seperated with a comma, on their own line.</p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Remote Widget Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=remote-widget-settings.md">here</a>.</b></p>
     <?php
 }
 

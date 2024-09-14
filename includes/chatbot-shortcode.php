@@ -45,8 +45,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     global $kflow_data;
 
-    header("Cache-Control: no-cache, must-revalidate, max-age=0");
-    header("Pragma: no-cache");
+    // header("Cache-Control: no-cache, must-revalidate, max-age=0");
+    // header("Pragma: no-cache");
 
     // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
     $user_id = get_current_user_id();
@@ -732,8 +732,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             $chatbot_chatgpt_hot_bot_prompt = '';
 
             // BELT & SUSPENDERS - Ver 1.9.5
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-            $kchat_settings['model'] = $model;
+            // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+            // $kchat_settings['model'] = $model;
 
         }
 
@@ -896,6 +896,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Generate a unique cache-busting parameter
     $cache_buster = '?cb=' . time();
 
+    // Speech Recognition - Ver 2.1.5.1
+    $chatbot_chatgpt_speech_recognition = esc_attr(get_option('chatbot_chatgpt_speech_recognition', 'No'));
+
     // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
     // Depending on the style, adjust the output - Ver 1.7.1
@@ -1030,6 +1033,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
                 </button>
             <?php endif; ?>
+            <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
+                <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
+                    <img src="<?php echo plugins_url('../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
+                </button>
+            <?php endif; ?>
             <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
                 <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
                     <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
@@ -1159,6 +1167,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
                     </button>
                 <?php endif; ?>
+                <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
+                    <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
+                        <img src="<?php echo plugins_url('../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
+                    </button>
+                <?php endif; ?>
                 <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
                     <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
                         <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
@@ -1277,7 +1290,7 @@ function chatbot_chatgpt_custom_buttons_display() {
 // Attribution - Ver 2.0.5
 function chatbot_chatgpt_attribution () {
 
-    $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'Off'));
+    $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'On'));
     $chatbot_chatgpt_custom_attribution = esc_attr(get_option('chatbot_chatgpt_custom_attribution', 'Your custom attribution message goes here.'));
     // DIAG - Diagnostics - Ver 1.6.5
     // back_trace( 'NOTICE', 'chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);

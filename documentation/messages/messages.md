@@ -42,9 +42,9 @@ The Messages and Diagnostics Settings help you monitor the health and performanc
    - **Description**: This setting allows administrators to define a custom error message that will be displayed to users when the chatbot encounters an issue. This ensures a more consistent and branded user experience, even in cases of unexpected errors.
    - **Options**: Any text string that you want to use as the error message.
    - **Selection**: Enter your preferred error message in the provided text field on the "Messages" tab. An example of a custom error message could be:
-     ```
+     `
      Sorry, it appears our chat isn't working right now. If you're looking for support, click <a href="https://www.kognetiks.com/">here</a>.
-     ```
+     `
    - **Additional Requirements**:
      - **Chatbot Diagnostics**: Ensure that the Chatbot Diagnostics setting is turned from `Off` to `Error` to enable the display of custom error messages.
      - **WordPress Error Logging**: You may also need to turn on WordPress error logging to fully utilize this feature.
@@ -55,7 +55,7 @@ The Messages and Diagnostics Settings help you monitor the health and performanc
    - **Selection**: Choose `On` to suppress notices and warnings if you prefer a less verbose experience, otherwise set to `Off` to see all administrative messages associated with the chatbot.
 
 4. **Suppress Attribution**:
-   - **Description**: Allows you to suppress the attribution message ("Chatbot WordPress plugin by Kognetiks") displayed only in the `floating` style of the chatbot.
+   - **Description**: Allows you to suppress the attribution message ("Chatbot WordPress plugin by Kognetiks") displayed in both the `floating` and `embedded` style of the chatbot.
    - **Options**: `On` or `Off`.
    - **Selection**: Choose `On` to suppress the attribution message. Set to `Off` to display the message.
 
@@ -114,20 +114,20 @@ Here are the basic steps to enable error logging:
 3. **Enable Debugging**:
    - Locate the following line in the file (if it exists):
 
-     ```define('WP_DEBUG', false);```
+     `define('WP_DEBUG', false);`
 
    - Change `false` to `true` to enable debugging:
 
-     ```define('WP_DEBUG', true);```
+     `define('WP_DEBUG', true);`
 
 4. **Enable Debug Log**:
    - Add or modify the following lines to enable the debug log:
 
-     ```define('WP_DEBUG_LOG', true);```
+     `define('WP_DEBUG_LOG', true);`
 
-     ```define('WP_DEBUG_DISPLAY', false);```
+     `define('WP_DEBUG_DISPLAY', false);`
      
-     ```@ini_set('display_errors', 0);```
+     `@ini_set('display_errors', 0);`
 
    - This will log errors to a file named `debug.log` located in the `wp-content` directory, but it will not display errors on the screen.
 
@@ -138,9 +138,9 @@ Here are the basic steps to enable error logging:
 
 If you want more detailed logging, you can also add the following lines to `wp-config.php`:
 
-```define('SCRIPT_DEBUG', true);```
+`define('SCRIPT_DEBUG', true);`
 
-```define('SAVEQUERIES', true);```
+`define('SAVEQUERIES', true);`
 
 - `SCRIPT_DEBUG`: Forces WordPress to use the "dev" versions of core CSS and JavaScript files rather than the minified versions.
 
