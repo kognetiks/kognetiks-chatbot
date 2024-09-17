@@ -99,6 +99,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; //
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // GPT Assistants - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-omni.php'; // ChatGPT API - Ver 2.0.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; // Image API - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-mc-api.php'; // Markov Chain API - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-stt-api.php'; // STT API - Ver 2.0.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
@@ -157,6 +158,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain.php'; // Functions - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php'; // Functions - Ver 2.0.5
@@ -830,6 +832,10 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['model'] = $model;
             // Send message to STT API - Speech-to-text - Ver 1.9.6
             $response = chatbot_chatgpt_call_stt_api($api_key, $message);
+        } elseif ($model !== null && str_starts_with($model,'markov')) {
+            $kchat_settings['model'] = $model;
+            // Send message to Markov API - Ver 1.9.7
+            $response = chatbot_chatgpt_call_markov_chain_api($message);    
         } else {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;

@@ -154,6 +154,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
             <option value="<?php echo esc_attr( 'gpt-4-1106-preview' ); ?>" <?php selected( $model_choice, 'gpt-4-1106-preview' ); ?>><?php echo esc_html( 'gpt-4-1106-preview' ); ?></option>
             <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
             <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
+            <option value="<?php echo esc_attr( 'markov-chain-2023-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2023-09-17' ); ?>><?php echo esc_html( 'markov-chain-2023-09-17' ); ?></option>
         </select>
         <?php
     } else {
@@ -163,6 +164,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
             <?php foreach ($models as $model): ?>
                 <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_model_choice'), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
             <?php endforeach; ?>
+            <option value="<?php echo esc_attr( 'markov-chain-2023-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2023-09-17' ); ?>><?php echo esc_html( 'markov-chain-2023-09-17' ); ?></option>
         </select>
         <?php
     }
