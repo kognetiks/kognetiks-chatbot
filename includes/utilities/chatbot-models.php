@@ -113,10 +113,15 @@ function chatbot_chatgpt_get_openai_models() {
     // Extract the models from the response
     $models = $data['data'];
 
-    // Sort the models by name
-    usort($models, function($a, $b) {
-        return $a['id'] <=> $b['id'];
-    });
+    // Ensure $models is an array
+    if (!is_array($models)) {
+        return $default_model_list;
+    } else {
+        // Sort the models by name
+        usort($models, function($a, $b) {
+            return $a['id'] <=> $b['id'];
+        });
+    }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
     // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
