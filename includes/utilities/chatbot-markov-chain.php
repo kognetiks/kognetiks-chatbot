@@ -17,13 +17,13 @@ if ( ! defined( 'WPINC' ) ) {
 function getAllPublishedContent() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'getAllPublishedContent - Start');
+    // back_trace( 'NOTICE', 'getAllPublishedContent - Start');
 
     $last_updated = getMarkovChainLastUpdated();
 
     // Get the last updated date
-    $last_updated = '2000-01-01 00:00:00'; // FIXME - Remove this line
-    // $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00'));
+    // $last_updated = '2000-01-01 00:00:00'; // FIXME - Remove this line
+    $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00'));
 
     // Query for posts and pages after the last updated date
     $args = array(
@@ -53,7 +53,7 @@ function getAllPublishedContent() {
             $content .= ' ' . get_the_title() . ' ' . $clean_content;
         }
     } else {
-        back_trace( 'NOTICE', 'getAllPublishedContent - No posts found after: ' . $last_updated);
+        // back_trace( 'NOTICE', 'getAllPublishedContent - No posts found after: ' . $last_updated);
     }
 
     // Reset post data
@@ -81,7 +81,7 @@ function getAllPublishedContent() {
     updateMarkovChainTimestamp();
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'getAllPublishedContent - End');
+    // back_trace( 'NOTICE', 'getAllPublishedContent - End');
 
     return $content;
 
@@ -91,26 +91,27 @@ function getAllPublishedContent() {
 function buildMarkovChain($content) {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace('NOTICE', 'buildMarkovChainAndSaveInChunks - Start with content: ' . substr($content, 0, 500)); // Log the first 500 characters of content
+    // back_trace( 'NOTICE', 'buildMarkovChainAndSaveInChunks - Start with content: ' . substr($content, 0, 500)); // Log the first 500 characters of content
 
+    // Clear existing chunks
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
-
-    // Ensure the table is cleared before starting
     $wpdb->query("DELETE FROM $table_name");
-
-    // DIAG - Clear any previous chain data
-    back_trace('NOTICE', 'Previous Markov Chain data cleared.');
 
     $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Default chain length is 3
     $words = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $content)); // Split content into words and remove punctuation
 
     $markovChain = [];
-    $chunkSizeLimit = 5000;  // Set a limit for when to save a chunk
+    $chunkSizeLimit = 10000;  // Set a limit for when to save a chunk
     $chunkData = [];  // This will store the temporary chunk data
     $currentChunk = '';
 
     for ($i = 0; $i < count($words) - $chainLength; $i++) {
+
+        // Avoid out-of-bounds error
+        if (!isset($words[$i + $chainLength])) {
+            continue; // Skip iteration if the next word doesn't exist
+        }
 
         $key = implode(' ', array_slice($words, $i, $chainLength)); // Build key based on chain length
         $nextWord = $words[$i + $chainLength];
@@ -132,12 +133,12 @@ function buildMarkovChain($content) {
     
             // Clear only the temporary chunk data, keep $markovChain intact
             $chunkData = [];
+            // back_trace( 'NOTICE', 'Chunk data cleared at iteration ' . $i);
         }
-
     }
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace('NOTICE', 'buildMarkovChainAndSaveInChunks - End');
+    // back_trace( 'NOTICE', 'buildMarkovChainAndSaveInChunks - End');
 
 }
 
@@ -147,22 +148,29 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
 
-    back_trace('NOTICE', 'Chunk content being saved (truncated): ' . substr($chunk, 0, 100));  // Log first 100 chars of chunk
-    // back_trace('NOTICE', 'Full Chunk content being saved: ' . substr($chunk, 0, 500));
+    // back_trace( 'NOTICE', 'Chunk content being saved (truncated): ' . substr($chunk, 0, 100));  // Log first 100 chars of chunk
+    // back_trace( 'NOTICE', 'Full Chunk content being saved: ' . substr($chunk, 0, 500));
+
+    back_trace( 'NOTICE', '$chunkIndex: ' . $chunkIndex);
+    back_trace( 'NOTICE', '$chuck: ' . strlen($chunk));
+    $update_date = date('Y-m-d H:i:s');
+    back_trace('NOTICE', 'date/time: ' . $update_date);
 
     // Insert the chunk into the database
     $wpdb->query(
         $wpdb->prepare(
-            "INSERT INTO $table_name (chunk_index, chain_chunk, last_updated) VALUES (%d, %s, NOW())",
-            $chunkIndex, $chunk
+            "INSERT INTO $table_name (chunk_index, chain_chunk, last_updated) VALUES (%d, %s, %s)",
+            $chunkIndex, $chunk, $update_date
         )
     );
 
     // Handle errors
     if ($wpdb->last_error) {
         back_trace( 'NOTICE', 'Error saving chunk ' . $chunkIndex . ': ' . $wpdb->last_error);
+        // back_trace( 'NOTICE', 'Query: ' . $wpdb->last_query);
     } else {
-        back_trace('NOTICE', 'Chunk ' . $chunkIndex . ' saved successfully.');
+        back_trace( 'NOTICE', 'Chunk ' . $chunkIndex . ' saved successfully.');
+        // back_trace( 'NOTICE', 'Query: ' . $wpdb->last_query);
     }
 
 }
@@ -171,16 +179,16 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
 function generateMarkovText($markovChain, $length = 100, $startWords = []) {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'generateMarkovText - Start');
-    back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
-    back_trace( 'NOTICE', 'Requested Length: ' . $length);
-    back_trace( 'NOTICE', 'Start Words: ' . implode(' ', $startWords));
+    // back_trace( 'NOTICE', 'generateMarkovText - Start');
+    // back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
+    // back_trace( 'NOTICE', 'Requested Length: ' . $length);
+    // back_trace( 'NOTICE', 'Start Words: ' . implode(' ', $startWords));
 
     // Check if the Markov Chain is empty or not
     if (empty($markovChain) || !is_array($markovChain)) {
         return 'No Markov Chain found.';
     } else {
-        back_trace( 'NOTICE', 'Markov Chain found.');
+        // back_trace( 'NOTICE', 'Markov Chain found.');
     }
 
     // Check if the length is valid
@@ -204,15 +212,15 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
         $key = implode(' ', array_slice($cleanStartWords, $chatbot_chatgpt_markov_chain_length)); // Get the last three words for better matching
 
         // DIAG - Diagnostics - Ver 2.1.6
-        back_trace( 'NOTICE', 'Start words after cleanup - $key: ' . $key);
+        // back_trace( 'NOTICE', 'Start words after cleanup - $key: ' . $key);
         
         // Check if the key exists in the Markov chain
         if (!isset($lowerKeys[$key])) {
-            back_trace( 'NOTICE', 'Start words not found in Markov Chain, falling back to random key.');
+            // back_trace( 'NOTICE', 'Start words not found in Markov Chain, falling back to random key.');
             // Fallback to a random key if start words are not found
             $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
         } else {
-            back_trace( 'NOTICE', 'Start words found in Markov Chain.');
+            // back_trace( 'NOTICE', 'Start words found in Markov Chain.');
         }
 
     } else {
@@ -235,7 +243,7 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
             }
 
             $nextWord = $nextWords[array_rand($nextWords)];
-            back_trace( 'NOTICE', 'Next word selected: ' . $nextWord);
+            // back_trace( 'NOTICE', 'Next word selected: ' . $nextWord);
 
             // Check if the next word is a duplicate of the previous word
             if (end($words) === $nextWord) {
@@ -250,7 +258,7 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
 
         } else {
             // Fallback: If no matching key is found, pick a new random key
-            back_trace( 'NOTICE', 'Key not found, falling back to random key.');
+            // back_trace( 'NOTICE', 'Key not found, falling back to random key.');
             $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
         }
     }
@@ -278,19 +286,19 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
 
     // Apply grammar cleanup and nonsense filtering
     $response = clean_up_markov_chain_response($response); // Clean up response
-    back_trace( 'NOTICE', 'Response after cleanup: ' . $response);
+    // back_trace( 'NOTICE', 'Response after cleanup: ' . $response);
 
     $response = fix_common_grammar_issues($response); // Fix common grammar issues
-    back_trace( 'NOTICE', 'Response after grammar fix: ' . $response);
+    // back_trace( 'NOTICE', 'Response after grammar fix: ' . $response);
 
     $response = remove_nonsense_phrases($response); // Remove nonsense phrases
-    back_trace( 'NOTICE', 'Response after nonsense removal: ' . $response);
+    // back_trace( 'NOTICE', 'Response after nonsense removal: ' . $response);
 
     $response = filter_out_non_standard_words($response); // Filter out non-standard words
-    back_trace( 'NOTICE', 'Response after word filtering: ' . $response);
+    // back_trace( 'NOTICE', 'Response after word filtering: ' . $response);
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'generateMarkovText - End');
+    // back_trace( 'NOTICE', 'generateMarkovText - End');
 
     return $response; // Return the generated and cleaned-up response
 
@@ -300,7 +308,7 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
 function runMarkovChatbot() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'runMarkovChatbot - Start' );
+    // back_trace( 'NOTICE', 'runMarkovChatbot - Start' );
 
     // Step 1: Get all the published content
     $content = getAllPublishedContent();
@@ -312,48 +320,23 @@ function runMarkovChatbot() {
     $response = generateMarkovText($markovChain, 50);
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'runMarkovChatbot - End' );
+    // back_trace( 'NOTICE', 'runMarkovChatbot - End' );
 
     return $response;
 
 }
 
-// Store the Markov Chain in the database
-// function saveMarkovChainToDatabase($markovChain) {
-
-//     // DIAG - Diagnostics - Ver 2.1.6
-//     back_trace( 'NOTICE', 'saveMarkovChainToDatabase - Start' );
-
-//     global $wpdb;
-//     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
-    
-//     // Serialize the array
-//     $serializedChain = serialize($markovChain);
-    
-//     // Insert or update the chain in the database
-//     $wpdb->query(
-//         $wpdb->prepare(
-//             "INSERT INTO $table_name (chain, last_updated) VALUES (%s, NOW()) ON DUPLICATE KEY UPDATE chain = %s, last_updated = NOW()",
-//             $serializedChain, $serializedChain
-//         )
-//     );
-
-//     // DIAG - Diagnostics - Ver 2.1.6
-//     back_trace( 'NOTICE', 'saveMarkovChainToDatabase - End' );
-
-// }
-
 // Save the Markov Chain in the database using chunks
 function saveMarkovChainToDatabase($markovChain) {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'saveMarkovChainToDatabase - Start');
+    // back_trace( 'NOTICE', 'saveMarkovChainToDatabase - Start');
 
     // Save the Markov Chain in chunks using the function saveMarkovChainInChunks
     saveMarkovChainInChunks($markovChain);
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'saveMarkovChainToDatabase - End');
+    // back_trace( 'NOTICE', 'saveMarkovChainToDatabase - End');
 
 }
 
@@ -361,20 +344,20 @@ function saveMarkovChainToDatabase($markovChain) {
 function getMarkovChainFromDatabase() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Start');
+    // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Start');
 
     // Retrieve the Markov Chain from chunks
     $markovChain = getMarkovChainFromChunks();
 
     if ($markovChain) {
 
-        back_trace( 'NOTICE', 'getMarkovChainFromDatabase - End');
+        // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - End');
         return $markovChain;
 
     } else {
 
         // If no Markov Chain found, rebuild it
-        back_trace( 'NOTICE', 'getMarkovChainFromDatabase - No Markov Chain found, rebuilding.');
+        // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - No Markov Chain found, rebuilding.');
 
         runMarkovChatbotAndSaveChain();
 
@@ -382,10 +365,10 @@ function getMarkovChainFromDatabase() {
         $markovChain = getMarkovChainFromChunks();
 
         if ($markovChain) {
-            back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Markov Chain rebuilt and saved.');
+            // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Markov Chain rebuilt and saved.');
             return $markovChain;
         } else {
-            back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Failed to rebuild the Markov Chain.');
+            // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Failed to rebuild the Markov Chain.');
             return null; // Return null to indicate the failure
         }
 
@@ -397,7 +380,7 @@ function getMarkovChainFromDatabase() {
 function createMarkovChainTable() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'createMarkovChainTable - Start' );
+    // back_trace( 'NOTICE', 'createMarkovChainTable - Start' );
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
@@ -414,9 +397,18 @@ function createMarkovChainTable() {
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
+    if (!empty($wpdb->last_error)) {
+
+        prod_trace( 'ERROR', 'Database error during table creation: ' . $wpdb->last_error);
+
+    } else {
+
+        prod_trace( 'NOTICE', 'Markov Chain table created/updated successfully.');
+
+    }
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'createMarkovChainTable - End' );
+    // back_trace( 'NOTICE', 'createMarkovChainTable - End' );
 
 }
 register_activation_hook(__FILE__, 'createMarkovChainTable');
@@ -434,7 +426,7 @@ function getMarkovChainLastUpdated() {
 function runMarkovChatbotAndSaveChain() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - Start');
+    // back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - Start');
 
     // Step 0: Check if the Markov Chain table exists
     createMarkovChainTable();
@@ -457,17 +449,17 @@ function runMarkovChatbotAndSaveChain() {
         update_option('chatbot_chatgpt_markov_last_updated', current_time('mysql'));
         
         // DIAG - Diagnostics - Ver 2.1.6
-        back_trace( 'NOTICE', 'Markov Chain updated and saved to the database.');
+        // back_trace( 'NOTICE', 'Markov Chain updated and saved to the database.');
 
     } else {
 
         // DIAG - Diagnostics - Ver 2.1.6
-        back_trace( 'NOTICE', 'No new content since last update. Markov Chain not rebuilt.');
+        // back_trace( 'NOTICE', 'No new content since last update. Markov Chain not rebuilt.');
 
     }
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
+    // back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
 
 }
 // Hook the function to run after WordPress is fully loaded
@@ -481,36 +473,36 @@ function clean_up_markov_chain_response($response) {
         return strtoupper($matches[1]);
     }, trim($response));
 
-    back_trace( 'NOTICE', 'After capitalization: ' . $response);
+    // back_trace( 'NOTICE', 'After capitalization: ' . $response);
 
     // Step 2: Add punctuation at the end if missing
     if (!preg_match('/[.!?]$/', $response)) {
         $response .= '.'; // Add a period if no punctuation at the end
     }
     
-    back_trace( 'NOTICE', 'After punctuation check: ' . $response);
+    // back_trace( 'NOTICE', 'After punctuation check: ' . $response);
 
     // Step 3: Remove extra spaces
     $response = preg_replace('/\s+/', ' ', $response); // Replace multiple spaces with a single space
 
-    back_trace( 'NOTICE', 'After space cleanup: ' . $response);
+    // back_trace( 'NOTICE', 'After space cleanup: ' . $response);
 
     // Step 4: Basic punctuation cleanup
     // Remove spaces before punctuation, ensure space after punctuation
     $response = preg_replace('/\s+([?.!,])/', '$1', $response); // Remove space before punctuation
     $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response); // Ensure space after punctuation
 
-    back_trace( 'NOTICE', 'After punctuation spacing cleanup: ' . $response);
+    // back_trace( 'NOTICE', 'After punctuation spacing cleanup: ' . $response);
 
     // Step 5: Fix common grammar errors
     $response = fix_common_grammar_issues($response);
 
-    back_trace( 'NOTICE', 'After grammar fixes: ' . $response);
+    // back_trace( 'NOTICE', 'After grammar fixes: ' . $response);
 
     // Step 6: Remove or replace nonsense words/phrases
     $response = remove_nonsense_phrases($response);
 
-    back_trace( 'NOTICE', 'After nonsense filtering: ' . $response);
+    // back_trace( 'NOTICE', 'After nonsense filtering: ' . $response);
 
     return $response;
 }
@@ -602,31 +594,31 @@ function filter_out_non_standard_words($response) {
 function saveMarkovChainInChunks($markovChain) {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'saveMarkovChainInChunks - Start');
+    // back_trace( 'NOTICE', 'saveMarkovChainInChunks - Start');
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
 
     // Serialize the Markov Chain
     $serializedChain = serialize($markovChain);
-    $chunkSize = 5000; // 500-byte Chunk size limit
+    $chunkSize = 10000; // 10000-byte Chunk size limit
 
     if ($serializedChain === false) {
-        back_trace('ERROR', 'Serialization failed for Markov Chain data.');
+        // back_trace( 'ERROR', 'Serialization failed for Markov Chain data.');
         return; // Exit the function if serialization fails
     } else {
-        back_trace('NOTICE', 'Serialization successful.');
+        // back_trace( 'NOTICE', 'Serialization successful.');
     }
 
     // Split the chain into chunks
     $chunks = str_split($serializedChain, $chunkSize);
 
     // Clear existing chunks
-    $wpdb->query("DELETE FROM $table_name");
+    // $wpdb->query("DELETE FROM $table_name");
 
     // Handle errors when clearing the table
     if ($wpdb->last_error) {
-        back_trace('ERROR', 'saveMarkovChainInChunks - Error clearing existing chunks: ' . $wpdb->last_error);
+        // back_trace( 'ERROR', 'saveMarkovChainInChunks - Error clearing existing chunks: ' . $wpdb->last_error);
         return; // Exit function on failure
     }
 
@@ -634,7 +626,7 @@ function saveMarkovChainInChunks($markovChain) {
     foreach ($chunks as $index => $chunk) {
 
         // Log the length of each serialized chunk
-        back_trace( 'NOTICE', 'Chunk ' . $index . ' length: ' . strlen($chunk));
+        // back_trace( 'NOTICE', 'Chunk ' . $index . ' length: ' . strlen($chunk));
 
         $wpdb->query(
             $wpdb->prepare(
@@ -643,20 +635,25 @@ function saveMarkovChainInChunks($markovChain) {
             )
         );
 
+        $saved_chunk = $wpdb->get_var($wpdb->prepare("SELECT chain_chunk FROM $table_name WHERE chunk_index = %d", $index));
+        if ($saved_chunk !== $chunk) {
+            // back_trace( 'ERROR', 'Data integrity issue: Saved chunk does not match the original.');
+        }
+
         // Log error if insertion fails
         if ($wpdb->last_error) {
 
-            back_trace( 'ERROR', 'Error saving chunk ' . $index . ': ' . $wpdb->last_error . ' | Query: ' . $wpdb->last_query);
+            // back_trace( 'ERROR', 'Error saving chunk ' . $index . ': ' . $wpdb->last_error . ' | Query: ' . $wpdb->last_query);
 
         } else {
 
-            back_trace( 'NOTICE', 'Chunk ' . $index . ' saved successfully.');
+            // back_trace( 'NOTICE', 'Chunk ' . $index . ' saved successfully.');
         }
 
     }
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace('NOTICE', 'saveMarkovChainInChunks - End');
+    // back_trace( 'NOTICE', 'saveMarkovChainInChunks - End');
 
 }
 
@@ -668,14 +665,14 @@ function getMarkovChainFromChunks() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
 
     // DIAG - Diagnostics - Start of retrieval process
-    back_trace( 'NOTICE', 'getMarkovChainFromChunks - Start');
+    // back_trace( 'NOTICE', 'getMarkovChainFromChunks - Start');
 
     // Fetch all chunks in order
     $results = $wpdb->get_results("SELECT chain_chunk FROM $table_name ORDER BY chunk_index ASC");
 
     // Log the results of fetched chunks
     if (empty($results)) {
-        back_trace( 'NOTICE', 'No chunks found in the database.');
+        // back_trace( 'NOTICE', 'No chunks found in the database.');
         return null;
     }
 
@@ -686,7 +683,7 @@ function getMarkovChainFromChunks() {
     }
 
     // Log the reassembled chain before unserializing
-    back_trace( 'NOTICE', 'Reassembled serialized chain: ' . $serializedChain);
+    // back_trace( 'NOTICE', 'Reassembled serialized chain: ' . $serializedChain);
 
     // Check if the reassembled chain is valid before unserializing
     if (!empty($serializedChain)) {
@@ -694,17 +691,17 @@ function getMarkovChainFromChunks() {
         $unserializedChain = unserialize($serializedChain);
 
         if ($unserializedChain === false) {
-            back_trace( 'NOTICE', 'Unserialization failed. Check if the concatenated string is valid serialized data.');
+            // back_trace( 'NOTICE', 'Unserialization failed. Check if the concatenated string is valid serialized data.');
             return null;
         }
 
         // Log success
-        back_trace( 'NOTICE', 'Markov Chain unserialized successfully.');
+        // back_trace( 'NOTICE', 'Markov Chain unserialized successfully.');
         return $unserializedChain;
 
     } else {
 
-        back_trace( 'NOTICE', 'Serialized chain is empty or invalid.');
+        // back_trace( 'NOTICE', 'Serialized chain is empty or invalid.');
         return null;
 
     }
