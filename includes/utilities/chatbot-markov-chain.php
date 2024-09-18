@@ -86,12 +86,14 @@ function getAllPublishedContent() {
 
 }
 
-
+// FIXME - $chainLength will need to be an options setting (this is the n-gram size)
 // Build the Markov Chain
-function buildMarkovChain($content, $chainLength = 3) {
+function buildMarkovChain($content) {
 
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace( 'NOTICE', 'buildMarkovChain - Start' );
+
+    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Default chain length is 3
 
     $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', $chainLength)); // Get the chain length
 
@@ -118,6 +120,7 @@ function buildMarkovChain($content, $chainLength = 3) {
 
 // Generate a sentence using the Markov Chain
 function generateMarkovText($markovChain, $length = 100, $startWords = []) {
+
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace('NOTICE', 'generateMarkovText - Start');
     back_trace('NOTICE', 'Markov Chain Length: ' . count($markovChain));
@@ -148,8 +151,11 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
             back_trace('NOTICE', 'Start words not found in Markov Chain, falling back to random key.');
             $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
         }
+
     } else {
+
         $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))]; // Start with a random key
+        
     }
 
     // Split the key into words to start building the response
@@ -195,11 +201,19 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
         $response = substr($response, 0, 497) . '...';
     }
 
+    // Apply grammar cleanup and nonsense filtering
+    $response = clean_up_markov_chain_response($response); // Clean up response
+    $response = fix_common_grammar_issues($response); // Fix common grammar issues
+    $response = remove_nonsense_phrases($response); // Remove nonsense phrases
+    $response = filter_out_non_standard_words($response); // Filter out non-standard words
+
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace('NOTICE', 'generateMarkovText - End');
 
-    return $response; // Return the generated response
+    return $response; // Return the generated and cleaned-up response
+
 }
+
 
 // Run the Markov Chain algorithm
 function runMarkovChatbot() {
@@ -256,34 +270,58 @@ function getMarkovChainFromDatabase() {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
-
-    $result = $wpdb->get_var("SELECT chain FROM $table_name");
     
-    // Unserialize and return the chain
+    $result = $wpdb->get_var("SELECT chain FROM $table_name");
+
+    // Check for database errors
+    if ($wpdb->last_error) {
+
+        // Log the error message
+        prod_trace( 'ERROR', 'Database error: ' . $wpdb->last_error);
+    
+        // Handle the error, for example, by returning null or an error message
+        return null;
+
+    }
+    
+    // Unserialize and return the chain if it exists
     if ($result) {
 
         // DIAG - Diagnostics - Ver 2.1.6
-        back_trace( 'NOTICE', 'getMarkovChainFromDatabase - End' );
+        back_trace('NOTICE', 'getMarkovChainFromDatabase - End');
 
         return unserialize($result);
 
     } else {
 
         // DIAG - Diagnostics - Ver 2.1.6
-        back_trace( 'NOTICE', 'getMarkovChainFromDatabase - No Markov Chain found in the database.' );
-
+        back_trace('NOTICE', 'getMarkovChainFromDatabase - No Markov Chain found in the database.');
+    
         // If no Markov Chain found, run the Markov Chain algorithm and save the chain
         runMarkovChatbotAndSaveChain();
-
+    
+        // Retrieve the newly saved chain from the database
+        $result = $wpdb->get_var("SELECT chain FROM $table_name");
+    
         // DIAG - Diagnostics - Ver 2.1.6
-        back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Markov Chain rebuilt and saved to the database.' );
+        back_trace('NOTICE', 'getMarkovChainFromDatabase - Markov Chain rebuilt and saved to the database.');
+    
+        // Return the newly saved chain
+        if ($result) {
+
+            return unserialize($result);
+
+        } else {
+
+            // Handle the case where the chain could not be rebuilt
+            back_trace('ERROR', 'getMarkovChainFromDatabase - Failed to rebuild the Markov Chain.');
+
+            // FIXME - RETURN ERROR SO THAT THERE IS AN OOPS MESSAGE
+            return null;
+
+        }
 
     }
-    
-    // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'getMarkovChainFromDatabase - End' );
-
-    return false;
 
 }
 
@@ -365,4 +403,88 @@ function runMarkovChatbotAndSaveChain() {
 // Hook the function to run after WordPress is fully loaded
 add_action('wp_loaded', 'runMarkovChatbotAndSaveChain');
 
+function clean_up_markov_chain_response($response) {
 
+    // Step 1: Sentence capitalization
+    $response = ucfirst(trim($response)); // Capitalize first letter of the response
+    
+    // Step 2: Add punctuation at the end if missing
+    if (!preg_match('/[.!?]$/', $response)) {
+        $response .= '.'; // Add a period if no punctuation at the end
+    }
+    
+    // Step 3: Remove extra spaces
+    $response = preg_replace('/\s+/', ' ', $response); // Replace multiple spaces with a single space
+    
+    // Step 4: Basic punctuation cleanup
+    $response = preg_replace('/\s([?.!,])/','\\1',$response); // Fix spacing around punctuation
+    
+    // Step 5: Fix common grammar errors
+    $response = fix_common_grammar_issues($response);
+    
+    // Step 6: Remove or replace nonsense words/phrases
+    $response = remove_nonsense_phrases($response);
+    
+    return $response;
+
+}
+
+function fix_common_grammar_issues($response) {
+
+    // Example: Fix "is are" to just "is" or "are"
+    $response = preg_replace('/\bis are\b/', 'are', $response);
+    $response = preg_replace('/\bhas have\b/', 'has', $response);
+    
+    // Example: Add any other common grammar corrections here
+    return $response;
+
+}
+
+function remove_nonsense_phrases($response) {
+
+    // Define some nonsense words or phrases to be removed
+    $nonsense_phrases = [
+        'Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'eiusmod',  'tempor', 
+        'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua', 'Ut', 'enim', 'minim',  'veniam', 'quis', 
+        'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo',  'consequat', 'duis', 
+        'aute', 'irure', 'in', 'reprehenderit', 'voluptate', 'velit', 'esse', 'cillum', 'eu', 'fugiat', 'nulla', 'pariatur', 
+        'excepteur', 'sint', 'occaecat', 'cupidatat', 'non', 'proident', 'sunt', 'culpa',  'qui', 'officia', 'deserunt', 
+        'mollit', 'anim', 'id', 'est', 'laborum', 'dolorem', 'fugit', 'consequatur', 'unde',  'omnis', 'iste', 'natus', 'similique'
+    ];
+
+    // Lowercase the nonsense phrases for case-insensitive matching
+    $nonsense_phrases = array_map('strtolower', $nonsense_phrases);
+    
+    foreach ($nonsense_phrases as $phrase) {
+        // Remove the phrase or replace it with something more neutral
+        $response = str_ireplace($phrase, '', $response);
+    }
+    
+    // After removing, ensure there are no awkward double spaces
+    $response = preg_replace('/\s+/', ' ', $response);
+    
+    return trim($response);
+
+}
+
+// Filter out stopwords and keep meaningful words in the response
+function filter_out_non_standard_words($response) {
+
+    // List of stopwords that should be removed from the response
+    global $stopWords;
+
+    // Break the response into words
+    $words = explode(' ', $response);
+
+    // Filter out stopwords
+    $filtered_words = array_filter($words, function($word) use ($stopWords) {
+        // Clean up the word and check against our stopwords list
+        $clean_word = strtolower(trim($word, ",.!?"));
+        return !in_array($clean_word, $stopWords); // Keep the word if it's not in stopWords
+    });
+
+    // Join the filtered words back into a response
+    return implode(' ', $filtered_words);
+
+}
+    

@@ -26,6 +26,8 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     global $additional_instructions;
     global $model;
     global $voice;
+
+    global $stopWords;
     
     global $errorResponses;
 
@@ -137,6 +139,9 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     // Convert $message to an array (this will be used as a starting point)
     $mc_message = explode(' ', $message);
 
+    // Remove the stop words from the message
+    $mc_message = array_diff($mc_message, $stopWords);
+
     // FIXME - CONSIDER MOVING THIS INTO FUNCTION generateMarkovText() - Ver 2.1.6
     // FIXME - THEN IF THE CHAIN IS EMPTY, CALL THE FUNCTION TO REBUILD THE CHAIN - Ver 2.1.6
     // FIXME - OR RETURN AN ERRRO
@@ -187,21 +192,47 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
 
     // Get the user ID and page ID
     if (empty($user_id)) {
+
         $user_id = get_current_user_id(); // Get current user ID
+
     }
+
     if (empty($page_id)) {
+
         $page_id = get_the_id(); // Get current page ID
         if (empty($page_id)) {
             $page_id = get_the_ID(); // Get the ID of the queried object if $page_id is not set
         }
+
     }
 
+    // Before returning count the input words and the generated words
+    $word_count = str_word_count($message);
+    $response_body["usage"]["prompt_tokens"] = $word_count;
+    $word_count = str_word_count($response_body['choices'][0]['message']['content']);
+    $response_body["usage"]["completion_tokens"] = $word_count;
+    $response_body["usage"]["total_tokens"] = $response_body["usage"]["prompt_tokens"] + $response_body["usage"]["completion_tokens"];
+
+    // DIAG - Diagnostics - Ver 2.1.6
+    back_trace('NOTICE', '$response_body["usage"]["prompt_tokens"]: ' . $response_body["usage"]["prompt_tokens"]);
+    back_trace('NOTICE', '$response_body["usage"]["completion_tokens"]: ' . $response_body["usage"]["completion_tokens"]);
+    
+    // Add the usage to the conversation tracker
+    if ($response_body['response']['code'] == 200) {
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
+    }
+    
     // Handle the response and return it
     if (!empty($response_body['choices'])) {
+
         // Handle the response from the chat engine
         addEntry('chatbot_chatgpt_context_history', $response_body['choices'][0]['message']['content']);
         return $response_body['choices'][0]['message']['content'];
+
     } else {
+
         // Decide what to return in case of an error
         if (get_locale() !== "en_US") {
             $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
@@ -210,6 +241,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
         }
         // Return a random error message
         return $localized_errorResponses[array_rand($localized_errorResponses)];
+
     }
     
 }
