@@ -792,9 +792,9 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$model: ' . $model);
         // back_trace( 'NOTICE', '$kchat_settings[model]: ' . $kchat_settings['model']);
         // if (str_starts_with($model,'dall')) {
-        //     back_trace ( 'NOTICE', 'Using Image API');
+        //     // back_trace ( 'NOTICE', 'Using Image API');
         // } else {
-        //     back_trace ( 'NOTICE', 'Using ChatGPT API');
+        //     // back_trace ( 'NOTICE', 'Using ChatGPT API');
         // }
 
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);

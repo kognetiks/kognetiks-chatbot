@@ -639,7 +639,7 @@ function saveMarkovChainInChunks($markovChain) {
 
         // Skip empty or invalid chunks
         if (empty($chunk) || $chunk === 'N;') {
-            back_trace('NOTICE', 'Skipping empty or null chunk at index ' . $index);
+            // back_trace('NOTICE', 'Skipping empty or null chunk at index ' . $index);
             continue; // Skip to the next chunk
         }
 

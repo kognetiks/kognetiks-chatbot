@@ -78,7 +78,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
     // back_trace( 'NOTICE', '========================================');
     // foreach ($atts as $key => $value) {
-    //   back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    //   // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     // }
    
     // BELT & SUSPENDERS - Ver 1.9.4
