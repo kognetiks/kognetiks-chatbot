@@ -258,7 +258,7 @@ function prod_trace($message_type = "NOTICE", $message = "No message") {
 }
 
 // Back Trace Function - Revised in Ver 2.0.7
-function // back_trace($message_type = "NOTICE", $message = "No message") {
+function back_trace($message_type = "NOTICE", $message = "No message") {
 
     // Usage Instructions
     // 
