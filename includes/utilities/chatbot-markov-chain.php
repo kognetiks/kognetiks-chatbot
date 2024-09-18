@@ -22,8 +22,8 @@ function getAllPublishedContent() {
     $last_updated = getMarkovChainLastUpdated();
 
     // Get the last updated date
-    // $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00'));
     $last_updated = '2000-01-01 00:00:00'; // FIXME - Remove this line
+    // $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00'));
 
     // Query for posts and pages after the last updated date
     $args = array(
@@ -91,38 +91,79 @@ function getAllPublishedContent() {
 function buildMarkovChain($content) {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'buildMarkovChain - Start');
+    back_trace('NOTICE', 'buildMarkovChainAndSaveInChunks - Start with content: ' . substr($content, 0, 500)); // Log the first 500 characters of content
 
-    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Get the chain length, default to 3
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
 
-    // Step 1: Replace hyphenated words with their separate components (if any)
-    // Split hyphenated words like "thought-provoking" or compound words like "thoughtprovoking"
-    $content = preg_replace('/([a-z])([A-Z])/', '$1 $2', $content);  // Split camelCase words like "thoughtprovoking"
-    $content = preg_replace('/[-]/', ' ', $content);  // Split words with hyphens
+    // Ensure the table is cleared before starting
+    $wpdb->query("DELETE FROM $table_name");
 
-    // Step 2: Split content into words and remove punctuation
-    $words = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $content));
+    // DIAG - Clear any previous chain data
+    back_trace('NOTICE', 'Previous Markov Chain data cleared.');
+
+    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Default chain length is 3
+    $words = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $content)); // Split content into words and remove punctuation
+
     $markovChain = [];
+    $chunkSizeLimit = 5000;  // Set a limit for when to save a chunk
+    $chunkData = [];  // This will store the temporary chunk data
+    $currentChunk = '';
 
     for ($i = 0; $i < count($words) - $chainLength; $i++) {
+
         $key = implode(' ', array_slice($words, $i, $chainLength)); // Build key based on chain length
         $nextWord = $words[$i + $chainLength];
-
+    
         if (!isset($markovChain[$key])) {
             $markovChain[$key] = [];
         }
+    
+        // Add to both $markovChain and the temporary $chunkData
+        $markovChain[$key][] = $nextWord;
+        $chunkData[$key][] = $nextWord;
+    
+        // Serialize the temporary chunk data after it reaches the chunkSizeLimit
+        $currentChunk = serialize($chunkData);
+    
+        if (strlen($currentChunk) >= $chunkSizeLimit || $i == count($words) - $chainLength - 1) {
+            // Save this chunk
+            saveMarkovChainChunk($currentChunk, floor($i / $chainLength));
+    
+            // Clear only the temporary chunk data, keep $markovChain intact
+            $chunkData = [];
+        }
 
-        $markovChain[$key][] = $nextWord; // Add next word to chain
     }
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'Markov Chain Length: ' . count( $markovChain ) );
+    back_trace('NOTICE', 'buildMarkovChainAndSaveInChunks - End');
 
-    // Save the Markov Chain in chunks
-    saveMarkovChainInChunks($markovChain);
+}
 
-    // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'buildMarkovChain - End');
+// Save a single chunk of the Markov Chain to the database
+function saveMarkovChainChunk($chunk, $chunkIndex) {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+
+    back_trace('NOTICE', 'Chunk content being saved (truncated): ' . substr($chunk, 0, 100));  // Log first 100 chars of chunk
+    // back_trace('NOTICE', 'Full Chunk content being saved: ' . substr($chunk, 0, 500));
+
+    // Insert the chunk into the database
+    $wpdb->query(
+        $wpdb->prepare(
+            "INSERT INTO $table_name (chunk_index, chain_chunk, last_updated) VALUES (%d, %s, NOW())",
+            $chunkIndex, $chunk
+        )
+    );
+
+    // Handle errors
+    if ($wpdb->last_error) {
+        back_trace( 'NOTICE', 'Error saving chunk ' . $chunkIndex . ': ' . $wpdb->last_error);
+    } else {
+        back_trace('NOTICE', 'Chunk ' . $chunkIndex . ' saved successfully.');
+    }
 
 }
 
@@ -344,7 +385,7 @@ function getMarkovChainFromDatabase() {
             back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Markov Chain rebuilt and saved.');
             return $markovChain;
         } else {
-            back_trace('ERROR', 'getMarkovChainFromDatabase - Failed to rebuild the Markov Chain.');
+            back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Failed to rebuild the Markov Chain.');
             return null; // Return null to indicate the failure
         }
 
@@ -568,7 +609,14 @@ function saveMarkovChainInChunks($markovChain) {
 
     // Serialize the Markov Chain
     $serializedChain = serialize($markovChain);
-    $chunkSize = 10000; // 1MB chunks
+    $chunkSize = 5000; // 500-byte Chunk size limit
+
+    if ($serializedChain === false) {
+        back_trace('ERROR', 'Serialization failed for Markov Chain data.');
+        return; // Exit the function if serialization fails
+    } else {
+        back_trace('NOTICE', 'Serialization successful.');
+    }
 
     // Split the chain into chunks
     $chunks = str_split($serializedChain, $chunkSize);
@@ -576,25 +624,42 @@ function saveMarkovChainInChunks($markovChain) {
     // Clear existing chunks
     $wpdb->query("DELETE FROM $table_name");
 
-    // Handle errors
+    // Handle errors when clearing the table
     if ($wpdb->last_error) {
         back_trace('ERROR', 'saveMarkovChainInChunks - Error clearing existing chunks: ' . $wpdb->last_error);
+        return; // Exit function on failure
     }
 
     // Insert each chunk
     foreach ($chunks as $index => $chunk) {
+
+        // Log the length of each serialized chunk
+        back_trace( 'NOTICE', 'Chunk ' . $index . ' length: ' . strlen($chunk));
+
         $wpdb->query(
             $wpdb->prepare(
                 "INSERT INTO $table_name (chunk_index, chain_chunk, last_updated) VALUES (%d, %s, NOW())",
                 $index, $chunk
             )
         );
+
+        // Log error if insertion fails
+        if ($wpdb->last_error) {
+
+            back_trace( 'ERROR', 'Error saving chunk ' . $index . ': ' . $wpdb->last_error . ' | Query: ' . $wpdb->last_query);
+
+        } else {
+
+            back_trace( 'NOTICE', 'Chunk ' . $index . ' saved successfully.');
+        }
+
     }
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'saveMarkovChainInChunks - End');
+    back_trace('NOTICE', 'saveMarkovChainInChunks - End');
 
 }
+
 
 // Retrieve the Markov Chain from chunks and reassemble it
 function getMarkovChainFromChunks() {
@@ -610,7 +675,7 @@ function getMarkovChainFromChunks() {
 
     // Log the results of fetched chunks
     if (empty($results)) {
-        back_trace('ERROR', 'No chunks found in the database.');
+        back_trace( 'NOTICE', 'No chunks found in the database.');
         return null;
     }
 
@@ -629,7 +694,7 @@ function getMarkovChainFromChunks() {
         $unserializedChain = unserialize($serializedChain);
 
         if ($unserializedChain === false) {
-            back_trace('ERROR', 'Unserialization failed. Check if the concatenated string is valid serialized data.');
+            back_trace( 'NOTICE', 'Unserialization failed. Check if the concatenated string is valid serialized data.');
             return null;
         }
 
@@ -639,7 +704,7 @@ function getMarkovChainFromChunks() {
 
     } else {
 
-        back_trace('ERROR', 'Serialized chain is empty or invalid.');
+        back_trace( 'NOTICE', 'Serialized chain is empty or invalid.');
         return null;
 
     }
