@@ -188,7 +188,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    back_trace('NOTICE', '$response_body: ' . print_r($response_body, true));
+    back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -214,8 +214,8 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     $response_body["usage"]["total_tokens"] = $response_body["usage"]["prompt_tokens"] + $response_body["usage"]["completion_tokens"];
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace('NOTICE', '$response_body["usage"]["prompt_tokens"]: ' . $response_body["usage"]["prompt_tokens"]);
-    back_trace('NOTICE', '$response_body["usage"]["completion_tokens"]: ' . $response_body["usage"]["completion_tokens"]);
+    back_trace( 'NOTICE', '$response_body["usage"]["prompt_tokens"]: ' . $response_body["usage"]["prompt_tokens"]);
+    back_trace( 'NOTICE', '$response_body["usage"]["completion_tokens"]: ' . $response_body["usage"]["completion_tokens"]);
     
     // Add the usage to the conversation tracker
     if ($response_body['response']['code'] == 200) {
