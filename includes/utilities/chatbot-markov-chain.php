@@ -22,7 +22,8 @@ function getAllPublishedContent() {
     $last_updated = getMarkovChainLastUpdated();
 
     // Get the last updated date
-    $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00'));
+    // $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00'));
+    $last_updated = '2000-01-01 00:00:00'; // FIXME - Remove this line
 
     // Query for posts and pages after the last updated date
     $args = array(
@@ -86,18 +87,15 @@ function getAllPublishedContent() {
 
 }
 
-// FIXME - $chainLength will need to be an options setting (this is the n-gram size)
-// Build the Markov Chain
+// Build the Markov Chain and save it in chunks
 function buildMarkovChain($content) {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'buildMarkovChain - Start' );
+    back_trace('NOTICE', 'buildMarkovChain - Start');
 
-    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Default chain length is 3
+    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Get the chain length, default to 3
 
-    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', $chainLength)); // Get the chain length
-
-    // Split content into words, but also remove any punctuation
+    // Split content into words and remove punctuation
     $words = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $content)); 
     $markovChain = [];
 
@@ -112,11 +110,11 @@ function buildMarkovChain($content) {
         $markovChain[$key][] = $nextWord; // Add next word to chain
     }
 
+    // Save the Markov Chain in chunks
+    saveMarkovChainInChunks($markovChain);
+
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'buildMarkovChain - End' );
-
-    return $markovChain;
-
+    back_trace('NOTICE', 'buildMarkovChain - End');
 }
 
 // Generate a sentence using the Markov Chain
@@ -143,23 +141,33 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
     // Normalize the keys in the Markov Chain to increase the likelihood of a match
     $lowerKeys = array_change_key_case($markovChain, CASE_LOWER);
 
-    // If user provided some starting words, use them
+    // Normalize and handle start words
     if (!empty($startWords)) {
-
+        // Lowercase and trim the start words to ensure matching
         $cleanStartWords = array_map('strtolower', array_map('trim', $startWords));
-        $key = implode(' ', array_slice($cleanStartWords, -3)); // Get the last three words for better matching
 
+        // Get the Markov Chain length from the options table
+        $chatbot_chatgpt_markov_chain_length = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3));
+        // Turn the length into an negative integer
+        $chatbot_chatgpt_markov_chain_length = -absint($chatbot_chatgpt_markov_chain_length);
+
+        $key = implode(' ', array_slice($cleanStartWords, $chatbot_chatgpt_markov_chain_length)); // Get the last three words for better matching
+
+        // DIAG - Diagnostics - Ver 2.1.6
+        back_trace('NOTICE', 'Start words after cleanup - $key: ' . $key);
+        
+        // Check if the key exists in the Markov chain
         if (!isset($lowerKeys[$key])) {
-
             back_trace('NOTICE', 'Start words not found in Markov Chain, falling back to random key.');
+            // Fallback to a random key if start words are not found
             $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
-
+        } else {
+            back_trace('NOTICE', 'Start words found in Markov Chain.');
         }
 
     } else {
-
-        $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))]; // Start with a random key
-
+        // Start with a random key if no start words provided
+        $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
     }
 
     // Split the key into words to start building the response
@@ -173,9 +181,7 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
             $nextWords = $lowerKeys[$key];
 
             if (empty($nextWords)) {
-
                 break; // Break the loop if no next words are found
-
             }
 
             $nextWord = $nextWords[array_rand($nextWords)];
@@ -188,10 +194,9 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
             $key = implode(' ', $keyWords);
 
         } else {
-
             // Fallback: If no matching key is found, pick a new random key
+            back_trace('NOTICE', 'Key not found, falling back to random key.');
             $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
-
         }
     }
 
@@ -203,23 +208,17 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
 
     // Ensure the message ends with a period, unless it ends with other punctuation
     if (!preg_match('/[.!?]$/', $response)) {
-
         $response .= '.';
-
     }
 
     // Capitalize the first letter if needed
     if (!ctype_upper($response[0])) {
-
         $response = ucfirst($response);
-
     }
 
     // Limit the response to 500 characters for brevity (adjust as needed)
     if (strlen($response) > 500) {
-
         $response = substr($response, 0, 497) . '...';
-
     }
 
     // Apply grammar cleanup and nonsense filtering
@@ -241,7 +240,6 @@ function generateMarkovText($markovChain, $length = 100, $startWords = []) {
     return $response; // Return the generated and cleaned-up response
 
 }
-
 
 // Run the Markov Chain algorithm
 function runMarkovChatbot() {
@@ -294,64 +292,55 @@ function saveMarkovChainToDatabase($markovChain) {
 function getMarkovChainFromDatabase() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Start' );
+    back_trace('NOTICE', 'getMarkovChainFromDatabase - Start');
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
     
+    // Query to retrieve the chain from the database
     $result = $wpdb->get_var("SELECT chain FROM $table_name");
 
     // Check for database errors
     if ($wpdb->last_error) {
 
         // Log the error message
-        prod_trace( 'ERROR', 'Database error: ' . $wpdb->last_error);
-    
-        // Handle the error, for example, by returning null or an error message
-        return null;
+        prod_trace('ERROR', 'Database error: ' . $wpdb->last_error);
+        return null;  // Return null if there's a database error
 
     }
-    
+
     // Unserialize and return the chain if it exists
     if ($result) {
 
-        // DIAG - Diagnostics - Ver 2.1.6
         back_trace('NOTICE', 'getMarkovChainFromDatabase - End');
-
         return unserialize($result);
 
     } else {
 
-        // DIAG - Diagnostics - Ver 2.1.6
-        back_trace('NOTICE', 'getMarkovChainFromDatabase - No Markov Chain found in the database.');
-    
-        // If no Markov Chain found, run the Markov Chain algorithm and save the chain
+        // If no Markov Chain found, rebuild and save it
+        back_trace('NOTICE', 'getMarkovChainFromDatabase - No Markov Chain found, rebuilding.');
+        
+        // Run the Markov Chain algorithm and save the chain
         runMarkovChatbotAndSaveChain();
-    
-        // Retrieve the newly saved chain from the database
+
+        // Introduce a small delay to ensure saving completes
+        sleep(1);  // Wait 1 second before re-querying
+
+        // Re-query the database for the newly saved chain
         $result = $wpdb->get_var("SELECT chain FROM $table_name");
-    
-        // DIAG - Diagnostics - Ver 2.1.6
-        back_trace('NOTICE', 'getMarkovChainFromDatabase - Markov Chain rebuilt and saved to the database.');
-    
-        // Return the newly saved chain
+
         if ($result) {
-
-            return unserialize($result);
-
+            back_trace('NOTICE', 'getMarkovChainFromDatabase - Markov Chain rebuilt and saved.');
+            return unserialize($result);  // Return the newly saved chain
         } else {
-
             // Handle the case where the chain could not be rebuilt
             back_trace('ERROR', 'getMarkovChainFromDatabase - Failed to rebuild the Markov Chain.');
-
-            // FIXME - RETURN ERROR SO THAT THERE IS AN OOPS MESSAGE
-            return null;
-
+            return null;  // Return null to indicate the failure
         }
 
     }
-
 }
+
 
 // Check if the Markov Chain exists in the database
 function createMarkovChainTable() {
@@ -555,4 +544,46 @@ function filter_out_non_standard_words($response) {
     return implode(' ', $filtered_words);
 
 }
-    
+
+// Save the Markov Chain in chunks to avoid exceeding database limits
+function saveMarkovChainInChunks($markovChain) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+
+    // Serialize the Markov Chain
+    $serializedChain = serialize($markovChain);
+    $chunkSize = 1000000; // 1MB chunks
+
+    // Split the chain into chunks
+    $chunks = str_split($serializedChain, $chunkSize);
+
+    // Clear existing chunks
+    $wpdb->query("DELETE FROM $table_name");
+
+    // Insert each chunk
+    foreach ($chunks as $index => $chunk) {
+        $wpdb->query(
+            $wpdb->prepare(
+                "INSERT INTO $table_name (chunk_index, chain_chunk, last_updated) VALUES (%d, %s, NOW())",
+                $index, $chunk
+            )
+        );
+    }
+}
+
+// Retrieve the Markov Chain from chunks and reassemble it
+function getMarkovChainFromChunks() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+
+    // Fetch all chunks in order
+    $results = $wpdb->get_results("SELECT chain_chunk FROM $table_name ORDER BY chunk_index ASC");
+
+    // Reassemble the chain
+    $serializedChain = '';
+    foreach ($results as $row) {
+        $serializedChain .= $row->chain_chunk;
+    }
+
+    return unserialize($serializedChain);
+}

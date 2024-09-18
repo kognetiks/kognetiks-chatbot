@@ -140,7 +140,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     $mc_message = explode(' ', $message);
 
     // Remove the stop words from the message
-    $mc_message = array_diff($mc_message, $stopWords);
+    // $mc_message = array_diff($mc_message, $stopWords);
 
     // FIXME - CONSIDER MOVING THIS INTO FUNCTION generateMarkovText() - Ver 2.1.6
     // FIXME - THEN IF THE CHAIN IS EMPTY, CALL THE FUNCTION TO REBUILD THE CHAIN - Ver 2.1.6
