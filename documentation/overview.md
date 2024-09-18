@@ -10,7 +10,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## What's new in Version 2.1.6
 
-* **TBD**: TBD
+* **Suppress Footer Chatbots**: Suppress chatbot in the footer when the chatbot is embedded on the page.
 
 ## What's new in Version 2.1.5
 
