@@ -637,6 +637,12 @@ function saveMarkovChainInChunks($markovChain) {
         // Log the length of each serialized chunk
         // back_trace( 'NOTICE', 'Chunk ' . $index . ' length: ' . strlen($chunk));
 
+        // Skip empty or invalid chunks
+        if (empty($chunk) || $chunk === 'N;') {
+            back_trace('NOTICE', 'Skipping empty or null chunk at index ' . $index);
+            continue; // Skip to the next chunk
+        }
+
         $wpdb->query(
             $wpdb->prepare(
                 "INSERT INTO $table_name (chunk_index, chain_chunk, last_updated) VALUES (%d, %s, NOW())",
