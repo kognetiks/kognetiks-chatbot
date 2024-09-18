@@ -142,13 +142,6 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     // Remove the stop words from the message
     // $mc_message = array_diff($mc_message, $stopWords);
 
-    // FIXME - CONSIDER MOVING THIS INTO FUNCTION generateMarkovText() - Ver 2.1.6
-    // FIXME - THEN IF THE CHAIN IS EMPTY, CALL THE FUNCTION TO REBUILD THE CHAIN - Ver 2.1.6
-    // FIXME - OR RETURN AN ERRRO
-    
-    // Retrieve the Markov Chain from the database
-    $markovChain = getMarkovChainFromDatabase();
-
     // Initialize the $response_body array to hold the API response
     $response_body = [
         'choices' => [
@@ -167,13 +160,30 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
 
     // Check if the Markov Chain exists
-    if (empty($markovChain)) {
-        // If no Markov Chain found, return an error code and message
-        $response_body['choices'][0]['message']['content'] = 'No Markov Chain found.';
-        $response_body['response']['code'] = 500; // Internal server error
-    } else {
-        // Call the Markov Chain generator using the retrieved Markov Chain and user input
-        $response = generateMarkovText($markovChain, $max_tokens, $mc_message);
+    // if (empty($markovChain)) {
+    //     // If no Markov Chain found, return an error code and message
+    //     $response_body['choices'][0]['message']['content'] = 'No Markov Chain found.';
+    //     $response_body['response']['code'] = 500; // Internal server error
+    // } else {
+    //     // Call the Markov Chain generator using the retrieved Markov Chain and user input
+    //     $response = generateMarkovText($mc_message, $max_tokens);
+
+    //     // Prepare the response body
+    //     $response_body['choices'][0]['message']['content'] = trim($response);
+
+    //     // Ensure the message ends with a period
+    //     if (!str_ends_with($response_body['choices'][0]['message']['content'], '.')) {
+    //         $response_body['choices'][0]['message']['content'] .= '.';
+    //     }
+
+    //     // Set the success response code
+    //     $response_body['response']['code'] = 200; // Success code
+    // }
+
+    // Call the Markov Chain generator using the retrieved Markov Chain and user input
+    $response = generateMarkovText($mc_message, $max_tokens);
+
+    if (!empty($response)) {
 
         // Prepare the response body
         $response_body['choices'][0]['message']['content'] = trim($response);
@@ -185,6 +195,12 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
 
         // Set the success response code
         $response_body['response']['code'] = 200; // Success code
+
+    } else {
+
+        // Set the error response code
+        $response_body['response']['code'] = 500; // Internal server error
+
     }
 
     // DIAG - Diagnostics - Ver 1.8.1

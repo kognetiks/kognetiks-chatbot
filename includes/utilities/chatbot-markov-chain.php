@@ -151,10 +151,10 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
     // back_trace( 'NOTICE', 'Chunk content being saved (truncated): ' . substr($chunk, 0, 100));  // Log first 100 chars of chunk
     // back_trace( 'NOTICE', 'Full Chunk content being saved: ' . substr($chunk, 0, 500));
 
-    back_trace( 'NOTICE', '$chunkIndex: ' . $chunkIndex);
-    back_trace( 'NOTICE', '$chuck: ' . strlen($chunk));
+    // back_trace( 'NOTICE', '$chunkIndex: ' . $chunkIndex);
+    // back_trace( 'NOTICE', '$chuck: ' . strlen($chunk));
     $update_date = date('Y-m-d H:i:s');
-    back_trace('NOTICE', 'date/time: ' . $update_date);
+    // back_trace('NOTICE', 'date/time: ' . $update_date);
 
     // Insert the chunk into the database
     $wpdb->query(
@@ -166,23 +166,32 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
 
     // Handle errors
     if ($wpdb->last_error) {
-        back_trace( 'NOTICE', 'Error saving chunk ' . $chunkIndex . ': ' . $wpdb->last_error);
+        // back_trace( 'NOTICE', 'Error saving chunk ' . $chunkIndex . ': ' . $wpdb->last_error);
         // back_trace( 'NOTICE', 'Query: ' . $wpdb->last_query);
     } else {
-        back_trace( 'NOTICE', 'Chunk ' . $chunkIndex . ' saved successfully.');
+        // back_trace( 'NOTICE', 'Chunk ' . $chunkIndex . ' saved successfully.');
         // back_trace( 'NOTICE', 'Query: ' . $wpdb->last_query);
     }
 
 }
 
 // Generate a sentence using the Markov Chain
-function generateMarkovText($markovChain, $length = 100, $startWords = []) {
+function generateMarkovText($startWords = [], $length = 100) {
 
     // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'generateMarkovText - Start');
     // back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
     // back_trace( 'NOTICE', 'Requested Length: ' . $length);
     // back_trace( 'NOTICE', 'Start Words: ' . implode(' ', $startWords));
+
+    // FIXME - CONSIDER MOVING THIS INTO FUNCTION generateMarkovText() - Ver 2.1.6
+    // FIXME - THEN IF THE CHAIN IS EMPTY, CALL THE FUNCTION TO REBUILD THE CHAIN - Ver 2.1.6
+    // FIXME - OR RETURN AN ERROR
+    
+    // Retrieve the Markov Chain from the database
+    // back_trace( 'NOTICE', 'Retrieving Markov Chain from the database.');
+    $markovChain = getMarkovChainFromDatabase();
+    // back_trace( 'NOTICE', 'Markov Chain retrieved from the database.');
 
     // Check if the Markov Chain is empty or not
     if (empty($markovChain) || !is_array($markovChain)) {
@@ -637,7 +646,7 @@ function saveMarkovChainInChunks($markovChain) {
 
         $saved_chunk = $wpdb->get_var($wpdb->prepare("SELECT chain_chunk FROM $table_name WHERE chunk_index = %d", $index));
         if ($saved_chunk !== $chunk) {
-            // back_trace( 'ERROR', 'Data integrity issue: Saved chunk does not match the original.');
+            prod_trace( 'ERROR', 'Data integrity issue: Saved chunk does not match the original.');
         }
 
         // Log error if insertion fails
@@ -669,6 +678,12 @@ function getMarkovChainFromChunks() {
 
     // Fetch all chunks in order
     $results = $wpdb->get_results("SELECT chain_chunk FROM $table_name ORDER BY chunk_index ASC");
+
+    // Error handling
+    if ($wpdb->last_error) {
+        // back_trace( 'ERROR', 'Error fetching chunks: ' . $wpdb->last_error);
+        return null;
+    }
 
     // Log the results of fetched chunks
     if (empty($results)) {
