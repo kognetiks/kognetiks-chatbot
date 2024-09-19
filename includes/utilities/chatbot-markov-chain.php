@@ -202,19 +202,31 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
 function generateMarkovText($startWords = [], $length = 100) {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'generateMarkovText - Start');
-    // back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
-    // back_trace( 'NOTICE', 'Requested Length: ' . $length);
-    // back_trace( 'NOTICE', 'Start Words: ' . implode(' ', $startWords));
+    back_trace( 'NOTICE', 'generateMarkovText - Start');
+    back_trace( 'NOTICE', 'Requested Length: ' . $length);
+    back_trace( 'NOTICE', 'Start Words: ' . implode(' ', $startWords));
 
-    // FIXME - CONSIDER MOVING THIS INTO FUNCTION generateMarkovText() - Ver 2.1.6
-    // FIXME - THEN IF THE CHAIN IS EMPTY, CALL THE FUNCTION TO REBUILD THE CHAIN - Ver 2.1.6
-    // FIXME - OR RETURN AN ERROR
-    
+    // Retrieve the chain length from the options table
+    $chatbot_chatgpt_markov_chain_length = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3));
+
+    // Trim any leading or trailing whitespace from the start words
+    $startWords = array_map('trim', $startWords);
+    // Trim any punctuation from the start words
+    $startWords = array_map(function($word) {
+        return preg_replace('/[^\w\s]/', '', $word);
+    }, $startWords);
+
+    // Trim the start words to the chain length
+    $startWords = array_slice($startWords, -$chatbot_chatgpt_markov_chain_length);
+
+    // DIAG - Diagnostics - Ver 2.1.6
+    back_trace( 'NOTICE', 'Adjusted Start Words: ' . implode(' ', $startWords));
+
     // Retrieve the Markov Chain from the database
     // back_trace( 'NOTICE', 'Retrieving Markov Chain from the database.');
     $markovChain = getMarkovChainFromDatabase();
     // back_trace( 'NOTICE', 'Markov Chain retrieved from the database.');
+    back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
 
     // Check if the Markov Chain is empty or not
     if (empty($markovChain) || !is_array($markovChain)) {
@@ -233,11 +245,13 @@ function generateMarkovText($startWords = [], $length = 100) {
 
     // Normalize and handle start words
     if (!empty($startWords)) {
+
         // Lowercase and trim the start words to ensure matching
         $cleanStartWords = array_map('strtolower', array_map('trim', $startWords));
 
         // Get the Markov Chain length from the options table
         $chatbot_chatgpt_markov_chain_length = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3));
+
         // Turn the length into an negative integer
         $chatbot_chatgpt_markov_chain_length = -absint($chatbot_chatgpt_markov_chain_length);
 
@@ -248,16 +262,22 @@ function generateMarkovText($startWords = [], $length = 100) {
         
         // Check if the key exists in the Markov chain
         if (!isset($lowerKeys[$key])) {
-            // back_trace( 'NOTICE', 'Start words not found in Markov Chain, falling back to random key.');
+
+            back_trace( 'NOTICE', 'Start words not found in Markov Chain, falling back to random key.');
             // Fallback to a random key if start words are not found
             $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
+
         } else {
-            // back_trace( 'NOTICE', 'Start words found in Markov Chain.');
+
+            back_trace( 'NOTICE', 'Start words found in Markov Chain.');
+
         }
 
     } else {
+
         // Start with a random key if no start words provided
         $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
+
     }
 
     // Split the key into words to start building the response
@@ -313,9 +333,9 @@ function generateMarkovText($startWords = [], $length = 100) {
     }
 
     // Limit the response to max_tokens characters for brevity (adjust as needed)
-    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens', 500));
+    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 500));
     if (strlen($response) > $max_tokens) {
-        $response = substr($response, 0, 497) . '...';
+        $response = substr($response, 0, ($max_tokens - 3)) . '...';
         back_trace( 'NOTICE', 'Response truncated: ' . $response);
     }
 
@@ -600,12 +620,6 @@ function remove_nonsense_phrases($response) {
 // Fix common grammar issues in the response
 function fix_common_grammar_issues($response) {
 
-    // Example: Fix "is are" to just "is" or "are"
-    $response = preg_replace('/\bis are\b/', 'are', $response);
-    
-    // Example: Replace "has have" with just "has"
-    $response = preg_replace('/\bhas have\b/', 'has', $response);
-    
     // Example: Replace "a an" with "an"
     $response = preg_replace('/\ba an\b/', 'an', $response);
     
@@ -623,7 +637,39 @@ function fix_common_grammar_issues($response) {
     
     // Example: Replace "doesn't has" with "doesn't have"
     $response = preg_replace('/\bdoesn\'t has\b/', 'doesn\'t have', $response);
+    
+    // Remove repetitive articles
+    $response = preg_replace('/\b(a|an|and|for|the|to) \1\b/i', '$1', $response);
+    
+    // Remove invalid word pairs like "the it"
+    $response = preg_replace('/\b(the|a|an|and|for|to|in|on|with|by|from|at|of) (it|he|she|they|we|you|I)\b/i', '$2', $response);
+    
+    // Remove invalid word pairs like "too and to in"
+    $response = preg_replace('/\b(too|and|to|in) (and|to|in|too)\b/i', '$2', $response);
+    
+    // Remove invalid sequences like "a and an"
+    $response = preg_replace('/\b(a|an|and|for|the|to) (and|an|a|for|the|to)\b/i', '$2', $response);
+    
+    // Don't end a sentence with a preposition or conjunction followed by a period
+    $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\.\b/i', '.', $response);
+    
+    // Ensure proper punctuation before uppercase letters
+    $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
+    
+    // Remove standalone prepositions or conjunctions at the end of sentences
+    $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\b\./i', '.', $response);
+    
+    // Remove standalone prepositions or conjunctions at the end of sentences without a period
+    $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\b$/i', '', $response);
+    
+    // Capitalize the first letter of each sentence
+    $response = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function ($matches) {
+        return strtoupper($matches[0]);
+    }, $response);
 
+    // Remove any spaces before periods
+    $response = preg_replace('/\s+\./', '.', $response);
+    
     return $response;
 
 }
