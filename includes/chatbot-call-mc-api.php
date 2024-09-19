@@ -181,9 +181,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     // }
 
     // Call the Markov Chain generator using the retrieved Markov Chain and user input
-    back_trace( 'NOTICE', 'before generateMarkovText()');
     $response = generateMarkovText($mc_message, $max_tokens);
-    back_trace( 'NOTICE', 'after generateMarkovText()');
 
     if (!empty($response)) {
 
