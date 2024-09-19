@@ -209,7 +209,7 @@ function generateMarkovText($startWords = [], $length = 100) {
     }, $startWords);
 
     // Trim the start words to the chain length
-    $startWords = array_slice($startWords, -$chatbot_chatgpt_markov_chain_length);
+    // $startWords = array_slice($startWords, -$chatbot_chatgpt_markov_chain_length);
 
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace( 'NOTICE', 'Adjusted Start Words: ' . implode(' ', $startWords));
@@ -244,34 +244,41 @@ function generateMarkovText($startWords = [], $length = 100) {
         // Get the Markov Chain length from the options table
         $chatbot_chatgpt_markov_chain_length = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3));
 
-        // Turn the length into an negative integer
-        $chatbot_chatgpt_markov_chain_length = -absint($chatbot_chatgpt_markov_chain_length);
+        $foundKey = false; // Flag to check if a match was found
 
-        $key = implode(' ', array_slice($cleanStartWords, $chatbot_chatgpt_markov_chain_length)); // Get the last n words for better matching
+        // Ensure we always try shifting until fewer than the chain length words remain
+        while (count($cleanStartWords) >= $chatbot_chatgpt_markov_chain_length) {
 
-        // DIAG - Diagnostics - Ver 2.1.6
-        // back_trace( 'NOTICE', 'Start words after cleanup - $key: ' . $key);
-        
-        // Check if the key exists in the Markov chain
-        if (!isset($lowerKeys[$key])) {
+            // Take the first set of words that match the chain length from the current position
+            $key = implode(' ', array_slice($cleanStartWords, 0, $chatbot_chatgpt_markov_chain_length));
 
-            back_trace( 'NOTICE', 'Start words not found in Markov Chain, falling back to random key.');
-            // Fallback to a random key if start words are not found
-            $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
+            // DIAG - Diagnostics - Ver 2.1.6
+            back_trace('NOTICE', 'Start words in while loop - $key: ' . $key);
 
-        } else {
-
-            back_trace( 'NOTICE', 'Start words found in Markov Chain.');
+            // Check if the key exists in the Markov chain
+            if (isset($lowerKeys[$key])) {
+                back_trace('NOTICE', 'Start words found in Markov Chain: ' . $key);
+                $foundKey = true;
+                break; // Exit the loop if found
+            } else {
+                back_trace('NOTICE', 'Start words not found, shifting left and trying again.');
+                array_shift($cleanStartWords); // Shift left by removing the first word
+                // array_pop($cleanStartWords); // Shift right by removing the last word
+            }
 
         }
 
-    } else {
+        // Fallback to random key if no match is found
+        if (!$foundKey) {
+            back_trace('NOTICE', 'No matching start words found in Markov Chain, falling back to random key.');
+            $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
+        }
 
+    } else {
         // Start with a random key if no start words provided
         $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
-
     }
-
+        
     // Split the key into words to start building the response
     $words = explode(' ', $key);
 
@@ -321,23 +328,23 @@ function generateMarkovText($startWords = [], $length = 100) {
     // Capitalize the first letter if needed
     if (!ctype_upper($response[0])) {
         $response = ucfirst($response);
-        back_trace( 'NOTICE', 'Response capitalized: ' . $response);
+        // back_trace( 'NOTICE', 'Response capitalized: ' . $response);
     }
 
     // Limit the response to max_tokens characters for brevity (adjust as needed)
     $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 500));
     if (strlen($response) > $max_tokens) {
         $response = substr($response, 0, ($max_tokens - 3)) . '...';
-        back_trace( 'NOTICE', 'Response truncated: ' . $response);
+        // back_trace( 'NOTICE', 'Response truncated: ' . $response);
     }
 
     // Apply grammar cleanup and nonsense filtering
     $response = clean_up_markov_chain_response($response);
-    back_trace( 'NOTICE', 'Response after cleanup: ' . $response);
+    // back_trace( 'NOTICE', 'Response after cleanup: ' . $response);
 
     // Fix common grammar issues
     $response = fix_common_grammar_issues($response);
-    back_trace( 'NOTICE', 'Response after grammar fix: ' . $response);
+    // back_trace( 'NOTICE', 'Response after grammar fix: ' . $response);
 
     // Remove nonsense phrases
     // $response = remove_nonsense_phrases($response);
@@ -345,7 +352,7 @@ function generateMarkovText($startWords = [], $length = 100) {
 
     // Add punctuation before uppercase words
     $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
-    back_trace( 'NOTICE', 'Response after punctuation fix: ' . $response);
+    // back_trace( 'NOTICE', 'Response after punctuation fix: ' . $response);
 
     // FIXME - TEMP IGNORE - Ver 2.1.6 - 2024-09-19
     // Filter out non-standard words
