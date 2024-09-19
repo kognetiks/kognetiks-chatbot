@@ -411,7 +411,7 @@ function getMarkovChainFromDatabase() {
 
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
     back_trace( 'NOTICE', 'Forcing Markov Chain rebuild.');
-    update_option('chatbot_chatgpt_markov_chain_length', 3);
+    update_option('chatbot_chatgpt_markov_chain_length', 2);
     update_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
     $markovChain = null;
 
@@ -835,12 +835,12 @@ function getMarkovChainFromChunks() {
 
     // Error handling
     if ($wpdb->last_error) {
-        back_trace('ERROR', 'Error fetching chunks: ' . $wpdb->last_error);
+        prod_trace('ERROR', 'Error fetching chunks: ' . $wpdb->last_error);
         return null;
     }
 
     if (empty($results)) {
-        back_trace('NOTICE', 'No chunks found in the database.');
+        prod_trace('NOTICE', 'No chunks found in the database.');
         return null;
     }
 
@@ -849,31 +849,43 @@ function getMarkovChainFromChunks() {
 
     // Process each chunk
     foreach ($results as $row) {
-        back_trace('NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
+
+        // DIAG - Diagnostics - Ver 2.1.6
+        // back_trace('NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
 
         // Unserialize each chunk
         $unserializedChunk = @unserialize($row->chain_chunk);
 
         if ($unserializedChunk === false) {
+
             back_trace('NOTICE', 'Unserialization failed for chunk ' . $row->chunk_index);
+
         } else {
+
             // Log successful unserialization
-            back_trace('NOTICE', 'Chunk ' . $row->chunk_index . ' unserialized successfully.');
+            // back_trace('NOTICE', 'Chunk ' . $row->chunk_index . ' unserialized successfully.');
 
             // Merge unserialized data into the final array
             $finalArray = array_merge($finalArray, $unserializedChunk);
 
-            back_trace('NOTICE', 'Final array size after chunk ' . $row->chunk_index . ': ' . count($finalArray));
+            // back_trace('NOTICE', 'Final array size after chunk ' . $row->chunk_index . ': ' . count($finalArray));
+
         }
     }
 
     // Return the final reassembled Markov Chain array
     if (!empty($finalArray)) {
-        back_trace('NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
+
+        // DIAG - Diagnostics - Ver 2.1.6
+        // back_trace('NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
         return $finalArray;
+
     } else {
+
+        // DIAG - Diagnostics - Ver 2.1.6
         back_trace('NOTICE', 'No valid data reassembled from chunks.');
         return null;
-    }
-}
 
+    }
+    
+}
