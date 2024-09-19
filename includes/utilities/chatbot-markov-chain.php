@@ -43,17 +43,30 @@ function getAllPublishedContent() {
 
     // Loop through each post or page
     if ($query->have_posts()) {
+
         while ($query->have_posts()) {
             $query->the_post();
             $post_content = get_the_content();
+
+            // Swap <br> and <p> tags with spaces
+            $clean_content = preg_replace('/<br\s*\/?>/', ' ', $post_content);
+            $clean_content = preg_replace('/<p\s*\/?>/', ' ', $clean_content);
             // Strip HTML tags, shortcodes, and comments, and clean up excessive whitespace
-            $clean_content = wp_strip_all_tags(strip_shortcodes($post_content));
-            $clean_content = preg_replace('/<!--.*?-->/', '', $clean_content); // Remove HTML comments
-            $clean_content = preg_replace('/\s+/', ' ', $clean_content); // Collapse multiple spaces
+            $clean_content = wp_strip_all_tags(strip_shortcodes($clean_content));
+            // Remove HTML comments
+            $clean_content = preg_replace('/<!--.*?-->/', '', $clean_content);
+            // Collapse multiple spaces
+            $clean_content = preg_replace('/\s+/', ' ', $clean_content);
+
+            // Add cleaned post content to the overall content
             $content .= ' ' . get_the_title() . ' ' . $clean_content;
+
         }
+
     } else {
+
         // back_trace( 'NOTICE', 'getAllPublishedContent - No posts found after: ' . $last_updated);
+
     }
 
     // Reset post data
@@ -72,9 +85,18 @@ function getAllPublishedContent() {
 
     // Add cleaned comment content
     foreach ($comments as $comment) {
-        $clean_comment = wp_strip_all_tags($comment->comment_content);
-        $clean_comment = preg_replace('/\s+/', ' ', $clean_comment); // Collapse multiple spaces
+
+        // Swap <br> and <p> tags with spaces
+        $clean_comment = preg_replace('/<br\s*\/?>/', ' ', $comment->comment_content);
+        $clean_comment = preg_replace('/<p\s*\/?>/', ' ', $clean_comment);
+        // Strip HTML tags and clean up excessive whitespace
+        $clean_comment = wp_strip_all_tags($clean_comment);
+        // Collapse multiple spaces
+        $clean_comment = preg_replace('/\s+/', ' ', $clean_comment);
+
+        // Add cleaned comment content to the overall content
         $content .= ' ' . $clean_comment;
+
     }
 
     // Update the last updated timestamp
@@ -99,7 +121,8 @@ function buildMarkovChain($content) {
     $wpdb->query("DELETE FROM $table_name");
 
     $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Default chain length is 3
-    $words = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $content)); // Split content into words and remove punctuation
+    // $words = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $content)); // Split content into words and remove punctuation
+    $words = preg_split('/\s+/', preg_replace("/[^\w\s']/u", '', $content)); // Keeps apostrophes
 
     $markovChain = [];
     $chunkSizeLimit = 10000;  // Set a limit for when to save a chunk
@@ -286,24 +309,35 @@ function generateMarkovText($startWords = [], $length = 100) {
     // Capitalize the first letter if needed
     if (!ctype_upper($response[0])) {
         $response = ucfirst($response);
+        back_trace( 'NOTICE', 'Response capitalized: ' . $response);
     }
 
-    // Limit the response to 500 characters for brevity (adjust as needed)
-    if (strlen($response) > 500) {
+    // Limit the response to max_tokens characters for brevity (adjust as needed)
+    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens', 500));
+    if (strlen($response) > $max_tokens) {
         $response = substr($response, 0, 497) . '...';
+        back_trace( 'NOTICE', 'Response truncated: ' . $response);
     }
 
     // Apply grammar cleanup and nonsense filtering
-    $response = clean_up_markov_chain_response($response); // Clean up response
-    // back_trace( 'NOTICE', 'Response after cleanup: ' . $response);
+    $response = clean_up_markov_chain_response($response);
+    back_trace( 'NOTICE', 'Response after cleanup: ' . $response);
 
-    $response = fix_common_grammar_issues($response); // Fix common grammar issues
-    // back_trace( 'NOTICE', 'Response after grammar fix: ' . $response);
+    // Fix common grammar issues
+    $response = fix_common_grammar_issues($response);
+    back_trace( 'NOTICE', 'Response after grammar fix: ' . $response);
 
-    $response = remove_nonsense_phrases($response); // Remove nonsense phrases
+    // Remove nonsense phrases
+    // $response = remove_nonsense_phrases($response);
     // back_trace( 'NOTICE', 'Response after nonsense removal: ' . $response);
 
-    $response = filter_out_non_standard_words($response); // Filter out non-standard words
+    // Add punctuation before uppercase words
+    $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
+    back_trace( 'NOTICE', 'Response after punctuation fix: ' . $response);
+
+    // FIXME - TEMP IGNORE - Ver 2.1.6 - 2024-09-19
+    // Filter out non-standard words
+    // $response = filter_out_non_standard_words($response);
     // back_trace( 'NOTICE', 'Response after word filtering: ' . $response);
 
     // DIAG - Diagnostics - Ver 2.1.6
@@ -357,6 +391,12 @@ function getMarkovChainFromDatabase() {
 
     // Retrieve the Markov Chain from chunks
     $markovChain = getMarkovChainFromChunks();
+
+    // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
+    back_trace( 'NOTICE', 'Forcing Markov Chain rebuild.');
+    update_option('chatbot_chatgpt_markov_chain_length', 2);
+    update_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
+    $markovChain = null;
 
     if ($markovChain) {
 
@@ -477,6 +517,9 @@ add_action('wp_loaded', 'runMarkovChatbotAndSaveChain');
 // Clean up the Markov Chain response for better readability
 function clean_up_markov_chain_response($response) {
 
+    // Upper case the first letter of the response
+    $response = ucfirst($response);
+
     // Step 1: Capitalize the first letter of each sentence
     $response = preg_replace_callback('/(?:^|\.\s+)(\w)/', function($matches) {
         return strtoupper($matches[1]);
@@ -509,16 +552,21 @@ function clean_up_markov_chain_response($response) {
     // back_trace( 'NOTICE', 'After grammar fixes: ' . $response);
 
     // Step 6: Remove or replace nonsense words/phrases
-    $response = remove_nonsense_phrases($response);
+    // $response = remove_nonsense_phrases($response);
+
+    // Upper case the first letter of the response
+    $response = ucfirst($response);
 
     // back_trace( 'NOTICE', 'After nonsense filtering: ' . $response);
 
     return $response;
+
 }
 
 // Remove nonsense words or phrases from the response
 function remove_nonsense_phrases($response) {
 
+    // FIXME - TEMP IGNORE - Ver 2.1.6 - 2024-09-19
     // Define some nonsense words or phrases to be removed
     $nonsense_phrases = [
         'Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'eiusmod',  'tempor', 
@@ -551,6 +599,7 @@ function remove_nonsense_phrases($response) {
 
 // Fix common grammar issues in the response
 function fix_common_grammar_issues($response) {
+
     // Example: Fix "is are" to just "is" or "are"
     $response = preg_replace('/\bis are\b/', 'are', $response);
     
@@ -576,6 +625,7 @@ function fix_common_grammar_issues($response) {
     $response = preg_replace('/\bdoesn\'t has\b/', 'doesn\'t have', $response);
 
     return $response;
+
 }
 
 // Filter out stopwords and keep meaningful words in the response

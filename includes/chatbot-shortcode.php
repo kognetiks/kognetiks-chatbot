@@ -275,17 +275,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // See if there is a style transient already stored
-    $temp_chatbot_chatgpt_display_style = get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id, null);
+    // $temp_chatbot_chatgpt_display_style = get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id, null);
 
     // One bot per page, embedded over floating - Ver 2.1.6
-    if ($kchat_settings['chatbot_chatgpt_display_style'] == 'floating' && $temp_chatbot_chatgpt_display_style == 'embedded') {
-        back_trace('NOTICE', 'Embedded style selected over floating style');
-        // End the shortcode processing
-        // return;
-        // $atts['style'] = 'embedded';
-        $chatbot_chatgpt_display_style = 'embedded';
-        $kchat_settings['chatbot_chatgpt_display_style'] = 'embedded';
-    }
+    // if ($kchat_settings['chatbot_chatgpt_display_style'] == 'floating' && $temp_chatbot_chatgpt_display_style == 'embedded') {
+    //     back_trace('NOTICE', 'Embedded style selected over floating style');
+    //     // End the shortcode processing
+    //     // return;
+    //     // $atts['style'] = 'embedded';
+    //     $chatbot_chatgpt_display_style = 'embedded';
+    //     $kchat_settings['chatbot_chatgpt_display_style'] = 'embedded';
+    // }
 
     // Set the sanitized display style in $atts and $kchat_settings
     $atts['chatbot_chatgpt_display_style'] = $chatbot_chatgpt_display_style;
