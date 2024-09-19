@@ -406,8 +406,8 @@ function saveMarkovChainToDatabase($markovChain) {
 // Retrieve the Markov Chain from the database
 function getMarkovChainFromDatabase() {
 
-    // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Start');
+    // DIAG - Diagnostics - Start
+    back_trace('NOTICE', 'getMarkovChainFromDatabase - Start');
 
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
     back_trace( 'NOTICE', 'Forcing Markov Chain rebuild.');
@@ -418,42 +418,30 @@ function getMarkovChainFromDatabase() {
     // Retrieve the Markov Chain from chunks
     $markovChain = getMarkovChainFromChunks();
 
-    if ($markovChain) {
-
-        // Length of the Markov Chain
-        back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
-
-        $serializedChain = serialize($markovChain);
-        back_trace( 'NOTICE', 'Markov Chain Length: ' . strlen($serializedChain));
-      
-        // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - End');
-        return $markovChain;
-
-    } else {
-
-        // If no Markov Chain found, rebuild it
-        // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - No Markov Chain found, rebuilding.');
-
-        runMarkovChatbotAndSaveChain();
-
-        // After rebuilding, attempt to fetch it again
-        $markovChain = getMarkovChainFromChunks();
-        
-            // Length of the Markov Chain
-            back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
-
-        $serializedChain = serialize($markovChain);
-        back_trace( 'NOTICE', 'Markov Chain Length: ' . strlen($serializedChain));
-
-        if ($markovChain) {
-            // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Markov Chain rebuilt and saved.');
-            return $markovChain;
-        } else {
-            // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Failed to rebuild the Markov Chain.');
-            return null; // Return null to indicate the failure
-        }
-
+    // Check if we successfully retrieved the Markov Chain
+    if (!empty($markovChain)) {
+        back_trace('NOTICE', 'Markov Chain Length: ' . count($markovChain));
+        return $markovChain;  // Return the valid Markov Chain
     }
+
+    // If no Markov Chain found, rebuild it
+    back_trace('NOTICE', 'No Markov Chain found. Rebuilding.');
+
+    // Run the Markov Chain building and saving process
+    runMarkovChatbotAndSaveChain();
+
+    // After rebuilding, attempt to fetch it again
+    $markovChain = getMarkovChainFromChunks();
+
+    // Check if rebuilding was successful
+    if (!empty($markovChain)) {
+        back_trace('NOTICE', 'Markov Chain Length after rebuild: ' . count($markovChain));
+        return $markovChain;  // Return the rebuilt Markov Chain
+    }
+
+    // If rebuild fails, log the issue and return null
+    back_trace('NOTICE', 'Failed to rebuild the Markov Chain.');
+    return null;  // Return null to indicate failure
 
 }
 
@@ -838,7 +826,7 @@ function saveMarkovChainInChunks($markovChain) {
 
 // Retrieve the Markov Chain from chunks and reassemble it
 function getMarkovChainFromChunks() {
-    
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
 
