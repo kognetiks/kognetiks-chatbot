@@ -48,16 +48,13 @@ function getAllPublishedContent() {
             $query->the_post();
             $post_content = get_the_content();
 
-            // Swap <br> and <p> tags with spaces
-            $clean_content = preg_replace('/<br\s*\/?>/', ' ', $post_content);
-            $clean_content = preg_replace('/<p\s*\/?>/', ' ', $clean_content);
-            // Strip HTML tags, shortcodes, and comments, and clean up excessive whitespace
-            $clean_content = wp_strip_all_tags(strip_shortcodes($clean_content));
-            // Remove HTML comments
-            $clean_content = preg_replace('/<!--.*?-->/', '', $clean_content);
-            // Collapse multiple spaces
-            $clean_content = preg_replace('/\s+/', ' ', $clean_content);
+            // Ensure $post_content is a string
+            if (is_object($post_content)) {
+                $post_content = wp_kses_post($post_content);
+            }
 
+            // Clean up the post content for better Markov Chain processing
+            $clean_content = clean_up_training_data($post_content);
             // Add cleaned post content to the overall content
             $content .= ' ' . get_the_title() . ' ' . $clean_content;
 
@@ -86,13 +83,8 @@ function getAllPublishedContent() {
     // Add cleaned comment content
     foreach ($comments as $comment) {
 
-        // Swap <br> and <p> tags with spaces
-        $clean_comment = preg_replace('/<br\s*\/?>/', ' ', $comment->comment_content);
-        $clean_comment = preg_replace('/<p\s*\/?>/', ' ', $clean_comment);
-        // Strip HTML tags and clean up excessive whitespace
-        $clean_comment = wp_strip_all_tags($clean_comment);
-        // Collapse multiple spaces
-        $clean_comment = preg_replace('/\s+/', ' ', $clean_comment);
+        // Clean up the post content for better Markov Chain processing
+        $clean_comment = clean_up_training_data($comment->comment_content);
 
         // Add cleaned comment content to the overall content
         $content .= ' ' . $clean_comment;
@@ -255,7 +247,7 @@ function generateMarkovText($startWords = [], $length = 100) {
         // Turn the length into an negative integer
         $chatbot_chatgpt_markov_chain_length = -absint($chatbot_chatgpt_markov_chain_length);
 
-        $key = implode(' ', array_slice($cleanStartWords, $chatbot_chatgpt_markov_chain_length)); // Get the last three words for better matching
+        $key = implode(' ', array_slice($cleanStartWords, $chatbot_chatgpt_markov_chain_length)); // Get the last n words for better matching
 
         // DIAG - Diagnostics - Ver 2.1.6
         // back_trace( 'NOTICE', 'Start words after cleanup - $key: ' . $key);
@@ -414,7 +406,7 @@ function getMarkovChainFromDatabase() {
 
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
     back_trace( 'NOTICE', 'Forcing Markov Chain rebuild.');
-    update_option('chatbot_chatgpt_markov_chain_length', 2);
+    update_option('chatbot_chatgpt_markov_chain_length', 3);
     update_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
     $markovChain = null;
 
@@ -534,6 +526,45 @@ function runMarkovChatbotAndSaveChain() {
 // Hook the function to run after WordPress is fully loaded
 add_action('wp_loaded', 'runMarkovChatbotAndSaveChain');
 
+// Clean up inbound text for better Markov Chain processing
+function clean_up_training_data($content) {
+
+    $clean_content = $content;
+
+    do {
+
+        $previous_clean_content = $clean_content;
+
+        // Replace &nbsp; with a regular space
+        if (is_string($clean_content)) {
+            // Replace &nbsp; with a regular space
+            $clean_content = str_replace('&nbsp;', ' ', $clean_content);
+        } else {
+            // Handle the case where $clean_content is not a string
+            back_trace( 'ERROR', 'Expected $clean_content to be a string, but got ' . gettype($clean_content));
+        }
+
+        // Swap <br> tags with spaces
+        $clean_content = preg_replace('/<br\s*\/?>/', ' ', $clean_content);
+
+        // Swap <p> tags with spaces
+        $clean_content = preg_replace('/<p\s*\/?>/', ' ', $clean_content);
+
+        // Strip HTML tags, shortcodes, and comments, and clean up excessive whitespace
+        $clean_content = wp_strip_all_tags(strip_shortcodes($clean_content));
+
+        // Remove HTML comments
+        $clean_content = preg_replace('/<!--.*?-->/', '', $clean_content);
+
+        // Collapse multiple spaces
+        $clean_content = preg_replace('/\s+/', ' ', $clean_content);
+
+    } while ($clean_content !== $previous_clean_content); // Loop until no more changes are made
+
+    return trim($clean_content); // Return with any leading/trailing whitespace removed
+
+}
+
 // Clean up the Markov Chain response for better readability
 function clean_up_markov_chain_response($response) {
 
@@ -620,55 +651,72 @@ function remove_nonsense_phrases($response) {
 // Fix common grammar issues in the response
 function fix_common_grammar_issues($response) {
 
-    // Example: Replace "a an" with "an"
-    $response = preg_replace('/\ba an\b/', 'an', $response);
+    do {
+        $previous_response = $response;
     
-    // Example: Correct common phrase issues like "more better" -> "better"
-    $response = preg_replace('/\bmore better\b/', 'better', $response);
+        // Example: Replace "a an" with "an"
+        $response = preg_replace('/\ba an\b/', 'an', $response);
     
-    // Example: Correct "a apple" -> "an apple"
-    $response = preg_replace('/\ba ([aeiouAEIOU])\b/', 'an $1', $response);
+        // Example: Correct common phrase issues like "more better" -> "better"
+        $response = preg_replace('/\bmore better\b/', 'better', $response);
     
-    // Example: Correct "an [consonant sound]" -> "a [consonant sound]"
-    $response = preg_replace('/\ban ([bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ])\b/', 'a $1', $response);
+        // Example: Correct "a apple" -> "an apple"
+        $response = preg_replace('/\ba ([aeiouAEIOU])\b/', 'an $1', $response);
     
-    // Example: Replace "you is" with "you are"
-    $response = preg_replace('/\byou is\b/', 'you are', $response);
+        // Example: Correct "an [consonant sound]" -> "a [consonant sound]"
+        $response = preg_replace('/\ban ([bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ])\b/', 'a $1', $response);
     
-    // Example: Replace "doesn't has" with "doesn't have"
-    $response = preg_replace('/\bdoesn\'t has\b/', 'doesn\'t have', $response);
+        // Example: Replace "you is" with "you are"
+        $response = preg_replace('/\byou is\b/', 'you are', $response);
     
-    // Remove repetitive articles
-    $response = preg_replace('/\b(a|an|and|for|the|to) \1\b/i', '$1', $response);
+        // Example: Replace "doesn't has" with "doesn't have"
+        $response = preg_replace('/\bdoesn\'t has\b/', 'doesn\'t have', $response);
     
-    // Remove invalid word pairs like "the it"
-    $response = preg_replace('/\b(the|a|an|and|for|to|in|on|with|by|from|at|of) (it|he|she|they|we|you|I)\b/i', '$2', $response);
+        // Remove repetitive articles
+        $response = preg_replace('/\b(a|an|and|for|the|to) \1\b/i', '$1', $response);
     
-    // Remove invalid word pairs like "too and to in"
-    $response = preg_replace('/\b(too|and|to|in) (and|to|in|too)\b/i', '$2', $response);
+        // Remove invalid word pairs like "the it"
+        $response = preg_replace('/\b(the|a|an|and|for|to|in|on|with|by|from|at|of) (it|he|she|they|we|you|I)\b/i', '$2', $response);
     
-    // Remove invalid sequences like "a and an"
-    $response = preg_replace('/\b(a|an|and|for|the|to) (and|an|a|for|the|to)\b/i', '$2', $response);
+        // Remove invalid word pairs like "too and to in"
+        $response = preg_replace('/\b(too|and|to|in) (and|to|in|too)\b/i', '$2', $response);
     
-    // Don't end a sentence with a preposition or conjunction followed by a period
-    $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\.\b/i', '.', $response);
+        // Remove invalid sequences like "a and an"
+        $response = preg_replace('/\b(a|an|and|for|the|to) (and|an|a|for|the|to)\b/i', '$2', $response);
     
-    // Ensure proper punctuation before uppercase letters
-    $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
+        // Handle specific invalid word pairs like "of the", "with to", "as and"
+        $response = preg_replace('/\b(of|with|as|by|to|for|from|in|on) (and|of|to|the)\b/i', '$1', $response);
     
-    // Remove standalone prepositions or conjunctions at the end of sentences
-    $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\b\./i', '.', $response);
+        // Don't end a sentence with a preposition or conjunction followed by a period
+        $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\.\b/i', '.', $response);
     
-    // Remove standalone prepositions or conjunctions at the end of sentences without a period
-    $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\b$/i', '', $response);
+        // Remove prepositions or articles at the end of a sentence before a period
+        $response = preg_replace('/\b(a|an|the|and|or|in|on|with|at|for|by|to|of)\b\.$/', '.', $response);
     
-    // Capitalize the first letter of each sentence
-    $response = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function ($matches) {
-        return strtoupper($matches[0]);
-    }, $response);
-
-    // Remove any spaces before periods
-    $response = preg_replace('/\s+\./', '.', $response);
+        // Ensure proper punctuation before uppercase letters
+        $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
+    
+        // Remove standalone prepositions or conjunctions at the end of sentences
+        $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\b\./i', '.', $response);
+    
+        // Remove standalone prepositions or conjunctions at the end of sentences without a period
+        $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\b$/i', '', $response);
+    
+        // Capitalize the first letter of each sentence
+        $response = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function ($matches) {
+            return strtoupper($matches[0]);
+        }, $response);
+    
+        // Remove any spaces before periods
+        $response = preg_replace('/\s+\./', '.', $response);
+    
+        // Replace double periods with a single period
+        $response = preg_replace('/\.\.+/', '.', $response);
+    
+        // Correct leftover conjunctions or prepositions at sentence boundaries
+        $response = preg_replace('/(\b[a-z]+\b)\s+\1\b/i', '$1', $response);
+    
+    } while ($previous_response !== $response); // Loop until no more changes are made
     
     return $response;
 
