@@ -217,6 +217,7 @@ function generateMarkovText($startWords = [], $length = 100) {
     // Retrieve the Markov Chain from the database
     // back_trace( 'NOTICE', 'Retrieving Markov Chain from the database.');
     $markovChain = getMarkovChainFromDatabase();
+
     // back_trace( 'NOTICE', 'Markov Chain retrieved from the database.');
     back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
 
@@ -408,17 +409,23 @@ function getMarkovChainFromDatabase() {
     // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Start');
 
-    // Retrieve the Markov Chain from chunks
-    $markovChain = getMarkovChainFromChunks();
-
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
     back_trace( 'NOTICE', 'Forcing Markov Chain rebuild.');
     update_option('chatbot_chatgpt_markov_chain_length', 3);
     update_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
     $markovChain = null;
 
+    // Retrieve the Markov Chain from chunks
+    $markovChain = getMarkovChainFromChunks();
+
     if ($markovChain) {
 
+        // Length of the Markov Chain
+        back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
+
+        $serializedChain = serialize($markovChain);
+        back_trace( 'NOTICE', 'Markov Chain Length: ' . strlen($serializedChain));
+      
         // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - End');
         return $markovChain;
 
@@ -431,6 +438,12 @@ function getMarkovChainFromDatabase() {
 
         // After rebuilding, attempt to fetch it again
         $markovChain = getMarkovChainFromChunks();
+        
+            // Length of the Markov Chain
+            back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
+
+        $serializedChain = serialize($markovChain);
+        back_trace( 'NOTICE', 'Markov Chain Length: ' . strlen($serializedChain));
 
         if ($markovChain) {
             // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Markov Chain rebuilt and saved.');
@@ -823,59 +836,56 @@ function saveMarkovChainInChunks($markovChain) {
 
 }
 
-
 // Retrieve the Markov Chain from chunks and reassemble it
 function getMarkovChainFromChunks() {
-
+    
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
 
-    // DIAG - Diagnostics - Start of retrieval process
-    // back_trace( 'NOTICE', 'getMarkovChainFromChunks - Start');
-
-    // Fetch all chunks in order
-    $results = $wpdb->get_results("SELECT chain_chunk FROM $table_name ORDER BY chunk_index ASC");
+    // Fetch all chunks in order by chunk_index
+    $results = $wpdb->get_results("SELECT chain_chunk, chunk_index FROM $table_name ORDER BY chunk_index ASC");
 
     // Error handling
     if ($wpdb->last_error) {
-        // back_trace( 'ERROR', 'Error fetching chunks: ' . $wpdb->last_error);
+        back_trace('ERROR', 'Error fetching chunks: ' . $wpdb->last_error);
         return null;
     }
 
-    // Log the results of fetched chunks
     if (empty($results)) {
-        // back_trace( 'NOTICE', 'No chunks found in the database.');
+        back_trace('NOTICE', 'No chunks found in the database.');
         return null;
     }
 
-    // Reassemble the chain
-    $serializedChain = '';
+    // Initialize the final array for holding unserialized data
+    $finalArray = [];
+
+    // Process each chunk
     foreach ($results as $row) {
-        $serializedChain .= $row->chain_chunk; // Concatenate all chunks together
-    }
+        back_trace('NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
 
-    // Log the reassembled chain before unserializing
-    // back_trace( 'NOTICE', 'Reassembled serialized chain: ' . $serializedChain);
+        // Unserialize each chunk
+        $unserializedChunk = @unserialize($row->chain_chunk);
 
-    // Check if the reassembled chain is valid before unserializing
-    if (!empty($serializedChain)) {
+        if ($unserializedChunk === false) {
+            back_trace('NOTICE', 'Unserialization failed for chunk ' . $row->chunk_index);
+        } else {
+            // Log successful unserialization
+            back_trace('NOTICE', 'Chunk ' . $row->chunk_index . ' unserialized successfully.');
 
-        $unserializedChain = unserialize($serializedChain);
+            // Merge unserialized data into the final array
+            $finalArray = array_merge($finalArray, $unserializedChunk);
 
-        if ($unserializedChain === false) {
-            // back_trace( 'NOTICE', 'Unserialization failed. Check if the concatenated string is valid serialized data.');
-            return null;
+            back_trace('NOTICE', 'Final array size after chunk ' . $row->chunk_index . ': ' . count($finalArray));
         }
-
-        // Log success
-        // back_trace( 'NOTICE', 'Markov Chain unserialized successfully.');
-        return $unserializedChain;
-
-    } else {
-
-        // back_trace( 'NOTICE', 'Serialized chain is empty or invalid.');
-        return null;
-
     }
 
+    // Return the final reassembled Markov Chain array
+    if (!empty($finalArray)) {
+        back_trace('NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
+        return $finalArray;
+    } else {
+        back_trace('NOTICE', 'No valid data reassembled from chunks.');
+        return null;
+    }
 }
+
