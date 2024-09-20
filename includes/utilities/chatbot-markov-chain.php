@@ -109,20 +109,31 @@ function buildMarkovChain($content) {
 
     // Clear existing chunks
     global $wpdb;
+ 
+    // Reset the Markov Chain table
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
     $wpdb->query("DELETE FROM $table_name");
 
-    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Default chain length is 3
+    // Reset the Markov Chain
+    $markovChain = [];
+
+    // Get the content and split it into words
     // $words = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $content)); // Split content into words and remove punctuation
     $words = preg_split('/\s+/', preg_replace("/[^\w\s']/u", '', $content)); // Keeps apostrophes
 
-    $markovChain = [];
-    $chunkSizeLimit = 10000;  // Set a limit for when to save a chunk
+    // Get the Markov Chain options from the database
+    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Default chain length is 3
+    $nextPhraseLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_next_phrase_length', 2));
+    $chunkSizeLimit = esc_attr(get_option('chatbot_chatgpt_markov_chain_chunk_size_limit', 10000));
+
+    // DIAG - Diagnostics - Ver 2.1.6
+    back_trace( 'NOTICE', 'Chain Length: ' . $chainLength);
+    back_trace( 'NOTICE', 'Next Phrase Length: ' . $nextPhraseLength);
+    back_trace( 'NOTICE', 'Chunk Size Limit: ' . $chunkSizeLimit);
+
+    // Serialize the temporary chunk data after it reaches the chunkSizeLimit
     $chunkData = [];  // This will store the temporary chunk data
     $currentChunk = '';
-
-    // Define how many words the "next phrase" should have - default is 2
-    $nextPhraseLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_next_phrase_length', 2));
 
     for ($i = 0; $i < count($words) - $chainLength - $nextPhraseLength + 1; $i++) {
 
