@@ -10,6 +10,7 @@ jQuery(document).ready(function ($) {
             'chatbot_chatgpt_last_reset',
             'chatbot_chatgpt_message_count',
             'chatbot_chatgpt_message_limit_setting',
+            'chatbot_chatgpt_message_limit_period_setting',
             'chatbot_chatgpt_start_status',
             'chatbot_chatgpt_start_status_new_visitor',
             'chatbot_chatgpt_opened',

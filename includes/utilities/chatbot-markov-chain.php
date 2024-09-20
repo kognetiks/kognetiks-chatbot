@@ -121,34 +121,39 @@ function buildMarkovChain($content) {
     $chunkData = [];  // This will store the temporary chunk data
     $currentChunk = '';
 
-    for ($i = 0; $i < count($words) - $chainLength; $i++) {
+    // Define how many words the "next phrase" should have - default is 2
+    $nextPhraseLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_next_phrase_length', 2));
+
+    for ($i = 0; $i < count($words) - $chainLength - $nextPhraseLength + 1; $i++) {
 
         // Avoid out-of-bounds error
-        if (!isset($words[$i + $chainLength])) {
-            continue; // Skip iteration if the next word doesn't exist
+        if (!isset($words[$i + $chainLength + $nextPhraseLength - 1])) {
+            continue; // Skip iteration if the next phrase doesn't exist
         }
 
-        $key = implode(' ', array_slice($words, $i, $chainLength)); // Build key based on chain length
-        $nextWord = $words[$i + $chainLength];
-    
+        // Build the key based on the chain length
+        $key = implode(' ', array_slice($words, $i, $chainLength));
+        
+        // Build the next phrase by taking multiple words
+        $nextPhrase = implode(' ', array_slice($words, $i + $chainLength, $nextPhraseLength));
+        
         if (!isset($markovChain[$key])) {
             $markovChain[$key] = [];
         }
-    
+
         // Add to both $markovChain and the temporary $chunkData
-        $markovChain[$key][] = $nextWord;
-        $chunkData[$key][] = $nextWord;
-    
+        $markovChain[$key][] = $nextPhrase;
+        $chunkData[$key][] = $nextPhrase;
+
         // Serialize the temporary chunk data after it reaches the chunkSizeLimit
         $currentChunk = serialize($chunkData);
-    
-        if (strlen($currentChunk) >= $chunkSizeLimit || $i == count($words) - $chainLength - 1) {
+
+        if (strlen($currentChunk) >= $chunkSizeLimit || $i == count($words) - $chainLength - $nextPhraseLength) {
             // Save this chunk
             saveMarkovChainChunk($currentChunk, floor($i / $chainLength));
-    
+
             // Clear only the temporary chunk data, keep $markovChain intact
             $chunkData = [];
-            // back_trace( 'NOTICE', 'Chunk data cleared at iteration ' . $i);
         }
     }
 
@@ -193,6 +198,8 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
 // Generate a sentence using the Markov Chain
 function generateMarkovText($startWords = [], $length = 100) {
 
+    global $stopWords;
+
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace( 'NOTICE', 'generateMarkovText - Start');
     back_trace( 'NOTICE', 'Requested Length: ' . $length);
@@ -208,6 +215,12 @@ function generateMarkovText($startWords = [], $length = 100) {
         return preg_replace('/[^\w\s]/', '', $word);
     }, $startWords);
 
+    // Remove stopwords from the start words
+    // $startWords = array_filter($startWords, function($word) {
+    //     global $stopWords;
+    //     return !in_array(strtolower($word), $stopWords);
+    // });
+
     // Trim the start words to the chain length
     // $startWords = array_slice($startWords, -$chatbot_chatgpt_markov_chain_length);
 
@@ -222,7 +235,7 @@ function generateMarkovText($startWords = [], $length = 100) {
     back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
     // How much memory is being used by the Markov Chain
     back_trace( 'NOTICE', 'Memory usage: ' . memory_get_usage());
-    back_trace( 'NOTICE', 'Memory usage in megabytes: ' . round(memory_get_usage() / 1024 / 1024, 2));
+    back_trace( 'NOTICE', 'Memory usage in megabytes: ' . round(memory_get_usage() / 1024 / 1024, 2) . 'M');
 
     // Check if the Markov Chain is empty or not
     if (empty($markovChain) || !is_array($markovChain)) {

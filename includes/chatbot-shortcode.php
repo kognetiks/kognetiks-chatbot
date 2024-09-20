@@ -562,6 +562,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'chatbot_chatgpt_force_page_reload' => esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No')),
         'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
         'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
+        'chatbot_chatgpt_message_limit_period_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime')),
     ));
 
     // back_trace( 'NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));
@@ -877,6 +878,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     'chatbot_chatgpt_last_reset',
                     'chatbot_chatgpt_message_count',
                     'chatbot_chatgpt_message_limit_setting',
+                    'chatbot_chatgpt_message_limit_period_setting',
                     'chatbot_chatgpt_start_status',
                     'chatbot_chatgpt_start_status_new_visitor',
                     'chatbot_chatgpt_opened',
@@ -1381,6 +1383,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
                         'chatbot_chatgpt_last_reset',
                         'chatbot_chatgpt_message_count',
                         'chatbot_chatgpt_message_limit_setting',
+                        'chatbot_chatgpt_message_limit_period_setting',
                         'chatbot_chatgpt_start_status',
                         'chatbot_chatgpt_start_status_new_visitor',
                         'chatbot_chatgpt_opened',

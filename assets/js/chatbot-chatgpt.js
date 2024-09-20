@@ -609,6 +609,17 @@ jQuery(document).ready(function ($) {
         return `<div>${markdown.trim()}</div>`;
     }
 
+    // Helper functions
+    function getWeekNumber(d) {
+        let oneJan = new Date(d.getFullYear(), 0, 1);
+        return Math.ceil((((d - oneJan) / 86400000) + oneJan.getDay() + 1) / 7);
+    }
+
+    function resetMessageCount(today) {
+        localStorage.setItem('chatbot_chatgpt_message_count', 0); // Reset the counter
+        localStorage.setItem('chatbot_chatgpt_last_reset', today); // Update last reset date
+    }
+
     // Submit the message when the submit button is clicked
     submitButton.on('click', function () {
 
@@ -620,14 +631,56 @@ jQuery(document).ready(function ($) {
             return;
         }
 
-        // Reset message count daily
-        let lastReset = localStorage.getItem('chatbot_chatgpt_last_reset');
-        let today = new Date().toDateString();
+        // Get current date and time
+        let now = new Date();
+        let today = now.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        let lastReset = localStorage.getItem('chatbot_chatgpt_last_reset') || today;
 
-        if (lastReset !== today) {
-            localStorage.setItem('chatbot_chatgpt_message_count', 0); // Reset the counter
-            localStorage.setItem('chatbot_chatgpt_last_reset', today); // Update last reset date
+        // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
+        let messageLimitPeriod = localStorage.getItem('chatbot_chatgpt_message_limit_period_setting') || 'Daily';
+
+        if (messageLimitPeriod === 'Hourly') {
+            let lastResetHour = localStorage.getItem('chatbot_chatgpt_last_reset_hour') || '';
+            let currentHour = now.getHours();
+            if (lastResetHour !== currentHour.toString()) {
+                resetMessageCount(currentHour);
+                localStorage.setItem('chatbot_chatgpt_last_reset_hour', currentHour.toString());
+            }
+        } else if (messageLimitPeriod === 'Daily') {
+            if (lastReset !== today) {
+                resetMessageCount(today);
+            }
+        } else if (messageLimitPeriod === 'Weekly') {
+            let lastResetWeek = new Date(lastReset).getFullYear() + '-W' + getWeekNumber(new Date(lastReset));
+            let currentWeek = now.getFullYear() + '-W' + getWeekNumber(now);
+            if (lastResetWeek !== currentWeek) {
+                resetMessageCount(today);
+            }
+        } else if (messageLimitPeriod === 'Monthly') {
+            let lastResetMonth = new Date(lastReset).getFullYear() + '-' + (new Date(lastReset).getMonth() + 1);
+            let currentMonth = now.getFullYear() + '-' + (now.getMonth() + 1);
+            if (lastResetMonth !== currentMonth) {
+                resetMessageCount(today);
+            }
+        } else if (messageLimitPeriod === 'Quarterly') {
+            let lastResetQuarter = Math.floor((new Date(lastReset).getMonth() + 3) / 3);
+            let currentQuarter = Math.floor((now.getMonth() + 3) / 3);
+            if (lastResetQuarter !== currentQuarter || new Date(lastReset).getFullYear() !== now.getFullYear()) {
+                resetMessageCount(today);
+            }
+        } else if (messageLimitPeriod === 'Yearly') {
+            let lastResetYear = new Date(lastReset).getFullYear();
+            let currentYear = now.getFullYear();
+            if (lastResetYear !== currentYear) {
+                resetMessageCount(today);
+            }
+        } else if (messageLimitPeriod === 'Lifetime') {
+            // Do nothing
         }
+
+        console.log("Today:", today);
+        console.log("Last Reset:", lastReset);
+        console.log("Message Limit Period:", messageLimitPeriod);
 
         // Add +1 to the message count - Ver 1.9.6
         let messageCount = localStorage.getItem('chatbot_chatgpt_message_count') || 0;

@@ -330,9 +330,11 @@ function chatbot_chatgpt_enqueue_scripts() {
     if (is_user_logged_in()) {
         // back_trace( 'NOTICE', 'User is logged in');
         $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
+        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime'));
     } else {
         // back_trace( 'NOTICE', 'User is NOT logged in');
         $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime'));
     }
 
     // Localize the data for the chatbot - Ver 2.1.1.1
@@ -355,7 +357,6 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_chatgpt_avatar_greeting_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_greeting_setting', 'Howdy!!! Great to see you today! How can I help you?')),
         'chatbot_chatgpt_force_page_reload' => esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No')),
         'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
-        'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
     ));
     
     $kchat_settings_json = wp_json_encode($kchat_settings);

@@ -28,6 +28,7 @@ function chatbot_chatgpt_api_settings_init() {
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key', 'sanitize_api_key');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_message_limit_setting');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_visitor_message_limit_setting');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_message_limit_period_setting');
 
     add_settings_section(
         'chatbot_chatgpt_api_model_general_section',
@@ -56,6 +57,14 @@ function chatbot_chatgpt_api_settings_init() {
         'chatbot_chatgpt_visitor_message_limit_setting',
         'Visitor Daily Message Limit',
         'chatbot_chatgpt_visitor_message_limit_setting_callback',
+        'chatbot_chatgpt_api_model_general',
+        'chatbot_chatgpt_api_model_general_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_message_limit_period_setting',
+        'Message Limit Period',
+        'chatbot_chatgpt_message_limit_period_setting_callback',
         'chatbot_chatgpt_api_model_general',
         'chatbot_chatgpt_api_model_general_section'
     );

@@ -125,6 +125,23 @@ function chatbot_chatgpt_visitor_message_limit_setting_callback($args) {
     <?php
 }
 
+// Limit Period Setting - Ver 2.1.6
+function chatbot_chatgpt_message_limit_period_setting_callback($args) {
+    // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
+    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime'));
+    ?>
+    <select id="chatbot_chatgpt_message_limit_period_setting" name="chatbot_chatgpt_message_limit_period_setting">
+        <option value="Hourly" <?php selected($message_limit_period, 'Hourly'); ?>>Hourly</option>
+        <option value="Daily" <?php selected($message_limit_period, 'Daily'); ?>>Daily</option>
+        <option value="Weekly" <?php selected($message_limit_period, 'Weekly'); ?>>Weekly</option>
+        <option value="Monthly" <?php selected($message_limit_period, 'Monthly'); ?>>Monthly</option>
+        <option value="Quarterly" <?php selected($message_limit_period, 'Quarterly'); ?>>Quarterly</option>
+        <option value="Yearly" <?php selected($message_limit_period, 'Yearly'); ?>>Yearly</option>
+        <option value="Lifetime" <?php selected($message_limit_period, 'Lifetime'); ?>>Lifetime</option>
+    </select>
+    <?php
+}
+
 // OpenAI Models
 // https://platform.openai.com/docs/models
 // EXPAND THE LIST OF MODELS STARTING WITH V1.9.4 - 2024 03 24

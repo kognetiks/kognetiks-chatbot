@@ -19,6 +19,22 @@ The **Kognetiks Chatbot for WordPress** plugin requires proper configuration to 
    - **Default Value**: The default limit is set to 999 messages per day.
    - **Customization**: You can adjust this number based on your needs. Enter the desired limit in the provided field.
 
+4. **Message Limit Period**:
+   - **Description**:This setting defines the time period during which non-logged-in users (visitors) and logged-in users can send messages to the chatbot. It allows you to manage how often users can interact with the chatbot and helps regulate API usage and associated costs.
+   - **Default Value**: By default, users are allowed to send up to 999 messages per day.
+   - **Customization**: You can customize the number of allowed messages and the reset period based on your specific needs. Enter the desired message limit in the provided field. The following time periods are available for customization:
+   
+      - **Hourly**: Resets the message count every hour, providing a more granular control over usage within a single day. This is useful if you want to limit message bursts within short time frames.
+      - **Daily**: Resets the message count once per day. This is the most common setting, providing users with a fixed number of messages each day.
+      - **Weekly**: Resets the message count once every week. This can help spread out usage over a longer period, ideal for scenarios where more extended engagement is anticipated.
+      - **Monthly**: Resets the message count at the start of each month. Useful for managing API usage on a month-to-month basis, ensuring that your usage aligns with monthly API cost limits.
+      - **Quarterly**: Resets the message count every three months. This option is useful for managing seasonal fluctuations in chatbot usage.
+      - **Yearly**: Resets the message count once per year. This is ideal for long-term planning and budgeting for API usage.
+   - **NOTE**: Lifetime: No reset occurs. This option allows unlimited messages over a user's lifetime, which can be useful for creating limited-time access.
+
+
+
+
 ## Steps to Configure
 
 1. Navigate to the API Settings section of the Kognetiks Chatbot plugin in your WordPress dashboard.
