@@ -93,13 +93,13 @@ function chatbot_chatgpt_api_key_callback($args) {
     <?php
 }
 
-// Message Limit - Ver 1.9.6
-function chatbot_chatgpt_message_limit_setting_callback($args) {
-    // Get the saved chatbot_chatgpt_message_limit_setting value or default to 999
-    $message_limit = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
+// Logged-in User Message Limit - Ver 1.9.6
+function chatbot_chatgpt_user_message_limit_setting_callback($args) {
+    // Get the saved chatbot_chatgpt_user_message_limit_setting value or default to 999
+    $message_limit = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
     // Allow for a range of message limits between 1 and 999 in 1-step increments - Ver 1.9.6
     ?>
-    <select id="chatbot_chatgpt_message_limit_setting" name="chatbot_chatgpt_message_limit_setting">
+    <select id="chatbot_chatgpt_user_message_limit_setting" name="chatbot_chatgpt_user_message_limit_setting">
         <?php
         for ($i=1; $i<=999; $i++) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($message_limit, (string)$i, false) . '>' . esc_html($i) . '</option>';
@@ -108,6 +108,24 @@ function chatbot_chatgpt_message_limit_setting_callback($args) {
     </select>
     <?php
 }
+
+// Limit Period Setting - Ver 2.1.6
+function chatbot_chatgpt_user_message_limit_period_setting_callback($args) {
+    // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
+    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
+    ?>
+    <select id="chatbot_chatgpt_user_message_limit_period_setting" name="chatbot_chatgpt_user_message_limit_period_setting">
+        <option value="Hourly" <?php selected($message_limit_period, 'Hourly'); ?>>Hourly</option>
+        <option value="Daily" <?php selected($message_limit_period, 'Daily'); ?>>Daily</option>
+        <option value="Weekly" <?php selected($message_limit_period, 'Weekly'); ?>>Weekly</option>
+        <option value="Monthly" <?php selected($message_limit_period, 'Monthly'); ?>>Monthly</option>
+        <option value="Quarterly" <?php selected($message_limit_period, 'Quarterly'); ?>>Quarterly</option>
+        <option value="Yearly" <?php selected($message_limit_period, 'Yearly'); ?>>Yearly</option>
+        <option value="Lifetime" <?php selected($message_limit_period, 'Lifetime'); ?>>Lifetime</option>
+    </select>
+    <?php
+}
+
 
 // Visitor Message Limit - Ver 2.0.1
 function chatbot_chatgpt_visitor_message_limit_setting_callback($args) {
@@ -126,11 +144,11 @@ function chatbot_chatgpt_visitor_message_limit_setting_callback($args) {
 }
 
 // Limit Period Setting - Ver 2.1.6
-function chatbot_chatgpt_message_limit_period_setting_callback($args) {
+function chatbot_chatgpt_visitor_message_limit_period_setting_callback($args) {
     // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
-    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime'));
+    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
     ?>
-    <select id="chatbot_chatgpt_message_limit_period_setting" name="chatbot_chatgpt_message_limit_period_setting">
+    <select id="chatbot_chatgpt_visitor_message_limit_period_setting" name="chatbot_chatgpt_visitor_message_limit_period_setting">
         <option value="Hourly" <?php selected($message_limit_period, 'Hourly'); ?>>Hourly</option>
         <option value="Daily" <?php selected($message_limit_period, 'Daily'); ?>>Daily</option>
         <option value="Weekly" <?php selected($message_limit_period, 'Weekly'); ?>>Weekly</option>

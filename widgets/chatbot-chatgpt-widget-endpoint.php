@@ -124,13 +124,13 @@ $chatbot_html = do_shortcode('[' . esc_html($shortcode_param) . ']');
 // Set the initial chatbot settings
 if (is_user_logged_in()) {
 
-    $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999'));
-    $kchat_settings['chatbot_chatgpt_message_limit_setting_period'] = esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime'));
+    $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
+    $kchat_settings['chatbot_chatgpt_message_limit_setting_period'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
 
 } else {
 
     $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
-    $kchat_settings['chatbot_chatgpt_message_limit_setting_period'] = esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime'));
+    $kchat_settings['chatbot_chatgpt_message_limit_setting_period'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
     
 }
 
