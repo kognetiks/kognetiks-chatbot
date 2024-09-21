@@ -181,75 +181,79 @@ function getAllPublishedContent() {
 
 }
 
-// Step 4: Build the Markov Chain and save it in chunks
+// Step 4: Build the Markov Chain with probabilities
 function buildMarkovChain($content) {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'buildMarkovChainAndSaveInChunks - Start with content: ' . substr($content, 0, 500)); // Log the first 500 characters of content
+    back_trace( 'NOTICE', 'buildMarkovChain - Start');
 
-    // Clear existing chunks
     global $wpdb;
- 
+
     // Reset the Markov Chain table
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
     $wpdb->query("DELETE FROM $table_name");
+
+    // Handle errors when clearing the table
+    if ($wpdb->last_error) {
+        prod_trace( 'ERROR', 'Error clearing Markov Chain table: ' . $wpdb->last_error);
+        return; // Exit function on failure
+    }
 
     // Reset the Markov Chain
     $markovChain = [];
 
     // Get the content and split it into words
-    // $words = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $content)); // Split content into words and remove punctuation
     $words = preg_split('/\s+/', preg_replace("/[^\w\s']/u", '', $content)); // Keeps apostrophes
 
     // Get the Markov Chain options from the database
-    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Default chain length is 3
-    $nextPhraseLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_next_phrase_length', 2));
+    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 1)); // Single word as default
+
+    // Initialize chunk size limit for database storage
     $chunkSizeLimit = esc_attr(get_option('chatbot_chatgpt_markov_chain_chunk_size_limit', 10000));
-
-    // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'Chain Length: ' . $chainLength);
-    back_trace( 'NOTICE', 'Next Phrase Length: ' . $nextPhraseLength);
-    back_trace( 'NOTICE', 'Chunk Size Limit: ' . $chunkSizeLimit);
-
-    // Serialize the temporary chunk data after it reaches the chunkSizeLimit
-    $chunkData = [];  // This will store the temporary chunk data
+    $chunkData = [];
     $currentChunk = '';
 
-    for ($i = 0; $i < count($words) - $chainLength - $nextPhraseLength + 1; $i++) {
+    // Loop through each word in the content
+    for ($i = 0; $i < count($words) - $chainLength; $i++) {
+        $key = implode(' ', array_slice($words, $i, $chainLength)); // Current word or phrase (depends on chain length)
+        $nextWord = $words[$i + $chainLength]; // The word that follows the key
 
-        // Avoid out-of-bounds error
-        if (!isset($words[$i + $chainLength + $nextPhraseLength - 1])) {
-            continue; // Skip iteration if the next phrase doesn't exist
-        }
-
-        // Build the key based on the chain length
-        $key = implode(' ', array_slice($words, $i, $chainLength));
-        
-        // Build the next phrase by taking multiple words
-        $nextPhrase = implode(' ', array_slice($words, $i + $chainLength, $nextPhraseLength));
-        
+        // If the key doesn't exist, initialize it
         if (!isset($markovChain[$key])) {
             $markovChain[$key] = [];
         }
 
-        // Add to both $markovChain and the temporary $chunkData
-        $markovChain[$key][] = $nextPhrase;
-        $chunkData[$key][] = $nextPhrase;
+        // If the next word exists in the chain, increase its frequency
+        if (!isset($markovChain[$key][$nextWord])) {
+            $markovChain[$key][$nextWord] = 1;
+        } else {
+            $markovChain[$key][$nextWord]++;
+        }
 
-        // Serialize the temporary chunk data after it reaches the chunkSizeLimit
+        // Add to chunk data for later database storage
+        $chunkData[$key][$nextWord] = $markovChain[$key][$nextWord];
+
+        // Serialize and save the chunk once it reaches the chunkSizeLimit
         $currentChunk = serialize($chunkData);
-
-        if (strlen($currentChunk) >= $chunkSizeLimit || $i == count($words) - $chainLength - $nextPhraseLength) {
-            // Save this chunk
+        if (strlen($currentChunk) >= $chunkSizeLimit || $i == count($words) - $chainLength - 1) {
             saveMarkovChainChunk($currentChunk, floor($i / $chainLength));
-
-            // Clear only the temporary chunk data, keep $markovChain intact
-            $chunkData = [];
+            $chunkData = []; // Clear temporary chunk data
         }
     }
 
+    // Now calculate probabilities for each key
+    foreach ($markovChain as $key => &$nextWords) {
+        $totalCount = array_sum($nextWords);
+        foreach ($nextWords as $word => &$count) {
+            $count = $count / $totalCount; // Convert count to probability
+        }
+    }
+
+    // Save the chain to the database
+    saveMarkovChainToDatabase($markovChain);
+
     // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'buildMarkovChainAndSaveInChunks - End');
+    
 
 }
 

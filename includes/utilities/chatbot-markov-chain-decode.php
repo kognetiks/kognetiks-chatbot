@@ -13,47 +13,33 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Generate a sentence using the Markov Chain
+// Generate a sentence using the Markov Chain with probabilities
 function generateMarkovText($startWords = [], $length = 100) {
 
     global $stopWords;
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'generateMarkovText - Start');
-    back_trace( 'NOTICE', 'Requested Length: ' . $length);
-    back_trace( 'NOTICE', 'Start Words: ' . implode(' ', $startWords));
+    back_trace('NOTICE', 'generateMarkovText - Start');
+    back_trace('NOTICE', 'Requested Length: ' . $length);
+    back_trace('NOTICE', 'Start Words: ' . implode(' ', $startWords));
 
     // Retrieve the chain length from the options table
     $chatbot_chatgpt_markov_chain_length = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3));
 
-    // Trim any leading or trailing whitespace from the start words
+    // Trim and clean up start words
     $startWords = array_map('trim', $startWords);
-    // Trim any punctuation from the start words
     $startWords = array_map(function($word) {
         return preg_replace('/[^\w\s]/', '', $word);
     }, $startWords);
 
-    // Remove stopwords from the start words
+    // Remove stopwords from the start words (optional)
     // $startWords = array_filter($startWords, function($word) {
     //     global $stopWords;
     //     return !in_array(strtolower($word), $stopWords);
     // });
 
-    // Trim the start words to the chain length
-    // $startWords = array_slice($startWords, -$chatbot_chatgpt_markov_chain_length);
-
-    // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'Adjusted Start Words: ' . implode(' ', $startWords));
-
     // Retrieve the Markov Chain from the database
-    // back_trace( 'NOTICE', 'Retrieving Markov Chain from the database.');
     $markovChain = getMarkovChainFromDatabase();
-
-    // back_trace( 'NOTICE', 'Markov Chain retrieved from the database.');
-    back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
-    // How much memory is being used by the Markov Chain
-    back_trace( 'NOTICE', 'Memory usage: ' . memory_get_usage());
-    back_trace( 'NOTICE', 'Memory usage in megabytes: ' . round(memory_get_usage() / 1024 / 1024, 2) . 'M');
 
     // Check if the Markov Chain is empty or not
     if (empty($markovChain) || !is_array($markovChain)) {
@@ -72,65 +58,47 @@ function generateMarkovText($startWords = [], $length = 100) {
 
     // Normalize and handle start words
     if (!empty($startWords)) {
-
-        // Lowercase and trim the start words to ensure matching
+        // Clean up the start words
         $cleanStartWords = array_map('strtolower', array_map('trim', $startWords));
-
-        // Get the Markov Chain length from the options table
-        $chatbot_chatgpt_markov_chain_length = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3));
-
         $foundKey = false; // Flag to check if a match was found
 
-        // Ensure we always try shifting until fewer than the chain length words remain
+        // Try to match start words in the Markov Chain
         while (count($cleanStartWords) >= $chatbot_chatgpt_markov_chain_length) {
-
-            // Take the last set of words that match the chain length from the current position
             $key = implode(' ', array_slice($cleanStartWords, -$chatbot_chatgpt_markov_chain_length));
 
-            // DIAG - Diagnostics - Ver 2.1.6
-            back_trace('NOTICE', 'Start words in while loop - $key: ' . $key);
-
-            // Check if the key exists in the Markov chain
             if (isset($lowerKeys[$key])) {
-                back_trace('NOTICE', 'Start words found in Markov Chain: ' . $key);
                 $foundKey = true;
-                break; // Exit the loop if found
+                break; // Match found
             } else {
-                back_trace('NOTICE', 'Start words not found, shifting right and trying again.');
                 array_pop($cleanStartWords); // Shift right by removing the last word
             }
         }
 
         // Fallback to random key if no match is found
         if (!$foundKey) {
-            back_trace('NOTICE', 'No matching start words found in Markov Chain, falling back to random key.');
             $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
         }
 
     } else {
-        // Start with a random key if no start words provided
+        // Start with a random key if no start words are provided
         $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
     }
-        
+
     // Split the key into words to start building the response
     $words = explode(' ', $key);
 
-    // Get the chain length from the options table
-    $chainLength = intval(esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)));
-
-    // Generate the response text
+    // Generate the response text based on probabilities
     for ($i = 0; $i < $length; $i++) {
-
         if (isset($lowerKeys[$key]) && is_array($lowerKeys[$key])) {
 
             $nextWords = $lowerKeys[$key];
 
             if (empty($nextWords)) {
-                break; // Break the loop if no next words are found
+                break; // End the sentence if no next words are found
             }
 
-            $nextWord = $nextWords[array_rand($nextWords)];
-            // back_trace( 'NOTICE', 'Next word selected: ' . $nextWord);
+            // Select the next word based on its probability
+            $nextWord = selectNextWordBasedOnProbability($nextWords);
 
             // Check if the next word is a duplicate of the previous word
             if (end($words) === $nextWord) {
@@ -139,13 +107,12 @@ function generateMarkovText($startWords = [], $length = 100) {
 
             $words[] = $nextWord;
 
-            // Build the new key using the last three words generated (for better coherence)
-            $keyWords = array_slice($words, count($words) - $chainLength, $chainLength); // Get the last three words
+            // Build the new key using the last words generated (based on chain length)
+            $keyWords = array_slice($words, count($words) - $chatbot_chatgpt_markov_chain_length, $chatbot_chatgpt_markov_chain_length);
             $key = implode(' ', $keyWords);
 
         } else {
             // Fallback: If no matching key is found, pick a new random key
-            // back_trace( 'NOTICE', 'Key not found, falling back to random key.');
             $key = array_keys($lowerKeys)[array_rand(array_keys($lowerKeys))];
         }
     }
@@ -153,53 +120,33 @@ function generateMarkovText($startWords = [], $length = 100) {
     // Final sentence building and punctuation check
     $response = implode(' ', $words);
 
-    // Strip any remaining HTML tags
-    $response = wp_strip_all_tags($response);
+    // Clean up and return the response
+    return clean_up_markov_chain_response($response);
+}
 
-    // Ensure the message ends with a period, unless it ends with other punctuation
-    if (!preg_match('/[.!?]$/', $response)) {
-        $response .= '.';
+// Select the next word based on its probability distribution
+function selectNextWordBasedOnProbability($nextWords) {
+    // Create an array of cumulative probabilities
+    $cumulativeProbabilities = [];
+    $totalProbability = 0;
+
+    foreach ($nextWords as $word => $probability) {
+        $totalProbability += (float)$probability;
+        $cumulativeProbabilities[] = ['word' => $word, 'cumulative' => $totalProbability];
     }
 
-    // Capitalize the first letter if needed
-    if (!ctype_upper($response[0])) {
-        $response = ucfirst($response);
-        // back_trace( 'NOTICE', 'Response capitalized: ' . $response);
+    // Generate a random number between 0 and 1
+    $random = mt_rand() / mt_getrandmax();
+
+    // Find the word that matches the random number
+    foreach ($cumulativeProbabilities as $item) {
+        if ($random <= $item['cumulative']) {
+            return $item['word'];
+        }
     }
 
-    // Limit the response to max_tokens characters for brevity (adjust as needed)
-    $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', 500));
-    if (strlen($response) > $max_tokens) {
-        $response = substr($response, 0, ($max_tokens - 3)) . '...';
-        // back_trace( 'NOTICE', 'Response truncated: ' . $response);
-    }
-
-    // Apply grammar cleanup and nonsense filtering
-    $response = clean_up_markov_chain_response($response);
-    // back_trace( 'NOTICE', 'Response after cleanup: ' . $response);
-
-    // Fix common grammar issues
-    $response = fix_common_grammar_issues($response);
-    // back_trace( 'NOTICE', 'Response after grammar fix: ' . $response);
-
-    // Remove nonsense phrases
-    // $response = remove_nonsense_phrases($response);
-    // back_trace( 'NOTICE', 'Response after nonsense removal: ' . $response);
-
-    // Add punctuation before uppercase words
-    $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
-    // back_trace( 'NOTICE', 'Response after punctuation fix: ' . $response);
-
-    // FIXME - TEMP IGNORE - Ver 2.1.6 - 2024-09-19
-    // Filter out non-standard words
-    // $response = filter_out_non_standard_words($response);
-    // back_trace( 'NOTICE', 'Response after word filtering: ' . $response);
-
-    // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'generateMarkovText - End');
-
-    return $response; // Return the generated and cleaned-up response
-
+    // Fallback to the last word in case no match is found (shouldn't happen)
+    return end($cumulativeProbabilities)['word'];
 }
 
 // Retrieve the Markov Chain from the database
@@ -210,12 +157,18 @@ function getMarkovChainFromDatabase() {
 
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
     $force_markov_chain_rebuild = get_option('chatbot_chatgpt_force_markov_chain_rebuild', 'No');
+
+    // FIXME - TEMP OVERRIDE - Ver 2.1.6 - 2024-09-21
+    $force_markov_chain_rebuild = 'Yes'; 
+
     if ($force_markov_chain_rebuild = 'Yes') {
         back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
         // update_option('chatbot_chatgpt_markov_chain_length', 3);
         update_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
         update_option('chatbot_chatgpt_force_markov_chain_rebuild', 'No');
         $markovChain = null;
+        // Run the Markov Chain building and saving process
+        runMarkovChatbotAndSaveChain();
     }
 
     // Retrieve the Markov Chain from chunks
@@ -455,42 +408,34 @@ function getMarkovChainFromChunks() {
     // Process each chunk
     foreach ($results as $row) {
 
-        // DIAG - Diagnostics - Ver 2.1.6
-        // back_trace('NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
+        // DIAG - Log the chunk being unserialized for debugging
+        back_trace('NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
+        back_trace('NOTICE', 'Serialized chunk content (truncated): ' . substr($row->chain_chunk, 0, 100)); // Log first 100 chars of the chunk
 
         // Unserialize each chunk
         $unserializedChunk = @unserialize($row->chain_chunk);
 
         if ($unserializedChunk === false) {
-
-            back_trace('NOTICE', 'Unserialization failed for chunk ' . $row->chunk_index);
-
+            // Log the failure and check the serialized data format
+            back_trace('ERROR', 'Unserialization failed for chunk ' . $row->chunk_index . '. Check if the data format is correct.');
         } else {
-
-            // Log successful unserialization
-            // back_trace('NOTICE', 'Chunk ' . $row->chunk_index . ' unserialized successfully.');
-
-            // Merge unserialized data into the final array
-            $finalArray = array_merge($finalArray, $unserializedChunk);
-
-            // back_trace('NOTICE', 'Final array size after chunk ' . $row->chunk_index . ': ' . count($finalArray));
-
+            // Check if the unserialized data is an array
+            if (!is_array($unserializedChunk)) {
+                back_trace('ERROR', 'Expected array, but got ' . gettype($unserializedChunk) . ' for chunk ' . $row->chunk_index);
+            } else {
+                // Merge unserialized data into the final array
+                $finalArray = array_merge($finalArray, $unserializedChunk);
+            }
         }
     }
 
     // Return the final reassembled Markov Chain array
     if (!empty($finalArray)) {
-
-        // DIAG - Diagnostics - Ver 2.1.6
-        // back_trace('NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
+        back_trace('NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
         return $finalArray;
-
     } else {
-
-        // DIAG - Diagnostics - Ver 2.1.6
-        back_trace('NOTICE', 'No valid data reassembled from chunks.');
+        back_trace('ERROR', 'No valid data reassembled from chunks.');
         return null;
-
     }
-
+    
 }
