@@ -158,7 +158,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain.php'; // Functions - Ver 2.1.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-decode.php'; // Functions - Ver 2.1.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-encode.php'; // Functions - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php'; // Functions - Ver 2.0.5
