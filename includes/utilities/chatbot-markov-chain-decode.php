@@ -30,23 +30,20 @@ function generateMarkovText($startWords = [], $length = 100) {
         return preg_replace('/[^\w\s]/', '', $word); // Clean up non-alphanumeric characters
     }, $startWords);
 
-    // Start with a random word or use provided start words
+    // Ensure the chain starts from the END of the input prompt
     if (!empty($startWords)) {
+        // Limit the start words to the chain length, but start from the END of the input
+        $key = implode(' ', array_slice($startWords, -$chainLength));
 
-    // Limit the start words to the chain length
-    $key = implode(' ', array_slice($startWords, 0, $chainLength));
-
-    // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
-    back_trace('NOTICE', 'Start Words: ' . $key);
+        // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
+        back_trace('NOTICE', 'Start Words (from the end): ' . $key);
 
     } else {
-
         // If no start words provided, get a random word from the database
         $key = getRandomWordFromDatabase();
 
         // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
-        back_trace('NOTICE', 'Random Phrase: ' . implode(' ', $key));
-
+        back_trace('NOTICE', 'Random Phrase: ' . $key);
     }
 
     // Initialize sentence generation
@@ -65,15 +62,14 @@ function generateMarkovText($startWords = [], $length = 100) {
         if ($nextWord === null) {
             break; // End the sentence if no next word is found
         }
-    
+
         $words[] = $nextWord;
-    
+
         // Update the key to be the last words based on the chain length
         $key = implode(' ', array_slice($words, -$chainLength)); // Take the last 'n' words as the key based on chain length
-        
+
         // DIAG - DIAGNOSTICS - Ver 2.1.6 - 2024-09-21
         back_trace('NOTICE', 'Current Key: ' . $key);
-        
     }
 
     // Final sentence building and punctuation check
@@ -81,9 +77,7 @@ function generateMarkovText($startWords = [], $length = 100) {
 
     // Clean up and return the response
     return clean_up_markov_chain_response($response);
-
 }
-
 
 // Retrieve the next word based on the current word, querying the database dynamically
 function getNextWordFromDatabase($currentWord) {
