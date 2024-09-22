@@ -935,6 +935,28 @@ function chatbot_chatgpt_kn_status_deactivation() {
 }
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
+// Markov Chain builder - Activation Hook - Ver 2.1.6
+function chatbot_chatgpt_markov_chain_status_activation() {
+    // Add the option for build status with a default value of 'Never Run'
+    add_option('chatbot_chatgpt_markov_chain_build_status', 'Never Run');
+
+    // Clear any old scheduled runs, if present
+    if (wp_next_scheduled('chatbot_chatgpt_markov_chain_scan_hook')) {
+        wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook');
+    }
+}
+register_activation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_activation');
+
+// Clean up scheduled events and options - Deactivation Hook
+function chatbot_chatgpt_markov_chain_status_deactivation() {
+    // Delete the build status option on deactivation
+    delete_option('chatbot_chatgpt_markov_chain_build_status');
+
+    // Clear any scheduled events related to the Markov Chain scan
+    wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook');
+}
+register_deactivation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_deactivation');
+
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
 function addEntry($transient_name, $newEntry) {
 

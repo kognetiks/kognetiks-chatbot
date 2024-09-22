@@ -54,46 +54,42 @@ function runMarkovChatbotAndSaveChain() {
 
 }
 // Hook the function to run after WordPress is fully loaded
-add_action('wp_loaded', 'runMarkovChatbotAndSaveChain');
+// add_action('wp_loaded', 'runMarkovChatbotAndSaveChain');
 
-// Step 1: Check if the Markov Chain exists in the database
+// Step 1: Check if the Markov Chain table exists and create/update it if necessary
 function createMarkovChainTable() {
-
-    // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'createMarkovChainTable - Start' );
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
     $charset_collate = $wpdb->get_charset_collate();
-
-    $sql = "CREATE TABLE $table_name (
-        id mediumint(9) NOT NULL AUTO_INCREMENT,
-        word varchar(255) NOT NULL,
-        next_word varchar(255) NOT NULL,
-        frequency int NOT NULL,
-        last_updated datetime NOT NULL,
-        PRIMARY KEY  (id),
-        UNIQUE KEY word_next_word (word, next_word),
-        INDEX idx_word (word) -- This index is optimized for queries on just the 'word' column
-    ) $charset_collate;";
-
+    
+    // SQL to create or update the table
+    $create_table_sql = "
+        CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            word varchar(255) NOT NULL,
+            next_word varchar(255) NOT NULL,
+            frequency int NOT NULL,
+            last_updated datetime NOT NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY word_next_word (word(191), next_word(191)),
+            INDEX idx_word (word(191))
+        ) $charset_collate;";
+    
+    // Execute the SQL to create the table
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
+    dbDelta($create_table_sql);
 
+    // Check for any database errors
     if (!empty($wpdb->last_error)) {
-
-        prod_trace( 'ERROR', 'Database error during table creation: ' . $wpdb->last_error);
-
+        prod_trace('WARNING', 'createMarkovChainTable - Creating table: ' . $create_table_sql);
+        prod_trace('ERROR', 'Database error during table creation: ' . $wpdb->last_error);
     } else {
-
-        prod_trace( 'NOTICE', 'Markov Chain table created/updated successfully.');
-
+        prod_trace('NOTICE', 'Markov Chain table created/updated successfully.');
     }
-
-    // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'createMarkovChainTable - End' );
-
 }
+
+// Register the table creation function to run on plugin activation
 register_activation_hook(__FILE__, 'createMarkovChainTable');
 
 // Step 3: Extract the published content

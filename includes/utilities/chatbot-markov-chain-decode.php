@@ -13,52 +13,10 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Check if the Markov Chain needs to be built or updated
-function checkMarkovChainUpdate() {
-
-    // DIAG - Diagnostics - Start
-    // back_trace('NOTICE', 'checkMarkovChainUpdate - Start');
-
-    // Get the last updated timestamp for the Markov Chain
-    $lastUpdated = get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
-
-    // check if the Markov Chain is forced to rebuild
-    $force_markov_chain_rebuild = get_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
-
-    if ($force_markov_chain_rebuild == 'Yes') {
-
-        // back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
-        update_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
-        update_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
-        $markovChain = null;
-
-        // Run the Markov Chain building and saving process
-        runMarkovChatbotAndSaveChain();
-
-    }
-
-    // Get the update interval from the options
-    $updateInterval = esc_attr(get_option('chatbot_chatgpt_markov_chain_update_interval', 24)); // Default to 24 hours if not set
-
-    // Calculate the next update time based on the interval
-    $nextUpdate = strtotime($lastUpdated) + $updateInterval * 3600;
-
-    // Check if the Markov Chain needs to be updated
-    if (time() >= $nextUpdate) {
-
-        // Run the Markov Chain building and saving process
-        runMarkovChatbotAndSaveChain();
-
-    }
-
-    return;
-
-}
-
 // Generate a sentence using the Markov Chain with probabilities, fetching next words dynamically
 function generateMarkovText($startWords = [], $length = 100) {
 
-    checkMarkovChainUpdate(); // Check if the Markov Chain needs to be updated
+    // checkMarkovChainUpdate(); // Check if the Markov Chain needs to be updated
 
     // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
     // back_trace('NOTICE', 'generateMarkovText - Start');
@@ -242,13 +200,13 @@ function getMarkovChainFromDatabase() {
     // back_trace('NOTICE', 'getMarkovChainFromDatabase - Start');
 
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
-    $force_markov_chain_rebuild = get_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
+    $markov_chain_build_schedule = get_option('chatbot_chatgpt_markov_chain_build_status', 'No');
 
-    if ($force_markov_chain_rebuild == 'Yes') {
+    if ($markov_chain_build_schedule == 'Yes') {
 
         // back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
         update_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
-        update_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
+        update_option('chatbot_chatgpt_markov_chain_build_status', 'No');
         $markovChain = null;
 
         // Run the Markov Chain building and saving process

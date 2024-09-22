@@ -167,7 +167,7 @@ function chatbot_chatgpt_api_settings_init() {
 
     // Markov Chain Options - Ver 2.1.6
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_enabled'); // Ver 2.1.6
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_force_rebuild'); // Ver 2.1.6
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_build_status'); // Ver 2.1.6
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_length'); // Ver 2.1.6
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_next_phrase_length'); // Ver 2.1.6
 
@@ -203,9 +203,9 @@ function chatbot_chatgpt_api_settings_init() {
     );
 
     add_settings_field(
-        'chatbot_chatgpt_markov_chain_force_rebuild',
-        'Markov Chain Force Rebuild',
-        'chatbot_chatgpt_markov_chain_force_rebuild_callback',
+        'chatbot_chatgpt_markov_chain_build_schedule',
+        'Markov Chain Build Schedule',
+        'chatbot_chatgpt_markov_chain_build_schedule_callback',
         'chatbot_chatgpt_api_model_markov_chain',
         'chatbot_chatgpt_api_model_markov_chain_section'
     );

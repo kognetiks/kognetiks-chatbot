@@ -693,14 +693,20 @@ function chatbot_chatgpt_markov_chain_next_phrase_length_callback($args) {
     <?php
 }
 
-// Markov Chain Next Force Rebuild Settings Callback - Ver 2.1.6
-function chatbot_chatgpt_markov_chain_force_rebuild_callback($args) {
-    // Get the saved chatbot_chatgpt_markov_chain_next_force_rebuild_setting value or default to "no"
-    $markov_chain_next_force_rebuild = esc_attr(get_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No'));
+// Markov Chain Build Schedule Callback - Ver 2.1.6
+function chatbot_chatgpt_markov_chain_build_schedule_callback($args) {
+    // Get the saved chatbot_chatgpt_markov_chain_build_status value or default to "Disable"
+    $chatbot_chatgpt_markov_chain_build_schedule = esc_attr(get_option('chatbot_chatgpt_markov_chain_build_schedule', 'Disable'));
     ?>
-    <select id="chatbot_chatgpt_markov_chain_force_rebuild" name="chatbot_chatgpt_markov_chain_force_rebuild">
-        <option value="Yes" <?php selected($markov_chain_next_force_rebuild, 'Yes'); ?>>Yes</option>
-        <option value="No" <?php selected($markov_chain_next_force_rebuild, 'No'); ?>>No</option>
+    <select id="chatbot_chatgpt_markov_chain_build_schedule" name="chatbot_chatgpt_markov_chain_build_schedule">
+        <option value="No" <?php selected($chatbot_chatgpt_markov_chain_build_schedule, 'No'); ?>><?php echo esc_html('No'); ?></option>
+        <option value="Now" <?php selected($chatbot_chatgpt_markov_chain_build_schedule, 'Now'); ?>><?php echo esc_html('Now'); ?></option>
+        <option value="Hourly" <?php selected($chatbot_chatgpt_markov_chain_build_schedule, 'Hourly'); ?>><?php echo esc_html('Hourly'); ?></option>
+        <option value="Twice Daily" <?php selected($chatbot_chatgpt_markov_chain_build_schedule, 'Twice Daily'); ?>><?php echo esc_html('Twice Daily'); ?></option>
+        <option value="Daily" <?php selected($chatbot_chatgpt_markov_chain_build_schedule, 'Daily'); ?>><?php echo esc_html('Daily'); ?></option>
+        <option value="Weekly" <?php selected($chatbot_chatgpt_markov_chain_build_schedule, 'Weekly'); ?>><?php echo esc_html('Weekly'); ?></option>
+        <option value="Disable" <?php selected($chatbot_chatgpt_markov_chain_build_schedule, 'Disable'); ?>><?php echo esc_html('Disable'); ?></option>
+        <option value="Cancel" <?php selected($chatbot_chatgpt_markov_chain_build_schedule, 'Cancel'); ?>><?php echo esc_html('Cancel'); ?></option>
     </select>
     <?php
 }
