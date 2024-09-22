@@ -161,7 +161,7 @@ function getMarkovChainFromDatabase() {
     back_trace('NOTICE', 'getMarkovChainFromDatabase - Start');
 
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
-    $force_markov_chain_rebuild = get_option('chatbot_chatgpt_force_markov_chain_rebuild', 'No');
+    $force_markov_chain_rebuild = get_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
 
     // FIXME - TEMP OVERRIDE - Ver 2.1.6 - 2024-09-21
     $force_markov_chain_rebuild = 'Yes'; 
@@ -170,7 +170,7 @@ function getMarkovChainFromDatabase() {
         back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
         // update_option('chatbot_chatgpt_markov_chain_length', 3);
         update_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
-        update_option('chatbot_chatgpt_force_markov_chain_rebuild', 'No');
+        update_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
         $markovChain = null;
         // Run the Markov Chain building and saving process
         runMarkovChatbotAndSaveChain();
