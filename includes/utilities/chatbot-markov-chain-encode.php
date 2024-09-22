@@ -23,7 +23,7 @@ function runMarkovChatbotAndSaveChain() {
     createMarkovChainTable();
 
     // Step 2: Get the last updated timestamp for the Markov Chain
-    $last_updated = get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
+    $last_updated = get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
 
     // Step 3: Get all published content (posts, pages, and comments) that have been updated after the last Markov Chain update
     $content = getAllPublishedContent($last_updated);
@@ -37,7 +37,7 @@ function runMarkovChatbotAndSaveChain() {
         saveMarkovChainToDatabase($markovChain);
 
         // Step 6: Update the last updated timestamp
-        update_option('chatbot_chatgpt_markov_last_updated', current_time('mysql'));
+        update_option('chatbot_chatgpt_markov_chain_last_updated', current_time('mysql'));
         
         // DIAG - Diagnostics - Ver 2.1.6
         back_trace( 'NOTICE', 'Markov Chain updated and saved to the database.');
@@ -105,7 +105,7 @@ function getAllPublishedContent() {
 
     // Get the last updated date
     // $last_updated = '2000-01-01 00:00:00'; // FIXME - Remove this line
-    $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00'));
+    $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00'));
 
     // Query for posts and pages after the last updated date
     $args = array(
@@ -127,6 +127,7 @@ function getAllPublishedContent() {
     if ($query->have_posts()) {
 
         while ($query->have_posts()) {
+
             $query->the_post();
             $post_content = get_the_content();
 
@@ -139,6 +140,16 @@ function getAllPublishedContent() {
             $clean_content = clean_up_training_data($post_content);
             // Add cleaned post content to the overall content
             $content .= ' ' . get_the_title() . ' ' . $clean_content;
+
+            // FIXME - THIS COULD BE A PROBLEM
+            // FIXME - Probably need to take each post and page one at a time and add it to the DB
+            // FIXME - If the word phrase is found in the DB, increment the frequency
+            // FIXME - If the word phrase is not found in the DB, add it to the DB
+
+            buildMarkovChain($content);
+
+            // Reset the content
+            // $content = '';
 
         }
 
@@ -171,6 +182,16 @@ function getAllPublishedContent() {
         // Add cleaned comment content to the overall content
         $content .= ' ' . $clean_comment;
 
+        // FIXME - THIS COULD BE A PROBLEM
+        // FIXME - Probably need to take each post and page one at a time and add it to the DB
+        // FIXME - If the word phrase is found in the DB, increment the frequency
+        // FIXME - If the word phrase is not found in the DB, add it to the DB
+
+        buildMarkovChain($content);
+
+        // Reset the content
+        // $content = '';
+
     }
 
     // Update the last updated timestamp
@@ -195,30 +216,35 @@ function buildMarkovChain($content) {
     // Split the content into words
     $words = preg_split('/\s+/', preg_replace("/[^\w\s']/u", '', $content));
     
-    // Correctly retrieve the chain length from the database
-    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 2));  // Default to 2 if not set
+    // Correctly retrieve the chain length (key size) from the database
+    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 2));  // Default to 2 (for two-word key) if not set
+
+    // Set the phrase size for the next part of the Markov Chain
+    $phraseSize = esc_attr(get_option('chatbot_chatgpt_markov_chain_next_phrase_length', 4));  // Default to 4 (for four-word phrase) if not set
 
     // Build and save the Markov Chain
-    for ($i = 0; $i < count($words) - $chainLength; $i++) {
-        // Generate the key by taking 'chainLength' number of words
+    for ($i = 0; $i < count($words) - ($chainLength + $phraseSize - 1); $i++) {
+        // Generate the key by taking 'chainLength' number of words (e.g., 2 words)
         $key = implode(' ', array_slice($words, $i, $chainLength));
-        $nextWord = $words[$i + $chainLength];
+        
+        // Generate the next phrase by taking 'phraseSize' number of words after the key (e.g., 4 words)
+        $nextPhrase = implode(' ', array_slice($words, $i + $chainLength, $phraseSize));
 
-        // Check if this word and next word combination already exists in the database
+        // Check if this word and next phrase combination already exists in the database
         $existing = $wpdb->get_var(
             $wpdb->prepare(
                 "SELECT frequency FROM $table_name WHERE word = %s AND next_word = %s",
-                $key, $nextWord
+                $key, $nextPhrase
             )
         );
 
         if ($existing === null) {
-            // If it doesn't exist, insert the word pair
+            // If it doesn't exist, insert the word pair (key and next phrase)
             $wpdb->insert(
                 $table_name,
                 array(
                     'word' => $key,
-                    'next_word' => $nextWord,
+                    'next_word' => $nextPhrase,
                     'frequency' => 1,
                     'last_updated' => current_time('mysql')
                 ),
@@ -229,12 +255,13 @@ function buildMarkovChain($content) {
             $wpdb->query(
                 $wpdb->prepare(
                     "UPDATE $table_name SET frequency = frequency + 1, last_updated = %s WHERE word = %s AND next_word = %s",
-                    current_time('mysql'), $key, $nextWord
+                    current_time('mysql'), $key, $nextPhrase
                 )
             );
         }
     }
 }
+
 // Step 5 - Save the Markov Chain in the database using chunks
 function saveMarkovChainToDatabase($markovChain) {
 
@@ -251,12 +278,12 @@ function saveMarkovChainToDatabase($markovChain) {
 
 // Update the last updated timestamp for the Markov Chain
 function updateMarkovChainTimestamp() {
-    update_option('chatbot_chatgpt_markov_last_updated', current_time('mysql'));
+    update_option('chatbot_chatgpt_markov_chain_last_updated', current_time('mysql'));
 }
 
 // Get the last updated timestamp for the Markov Chain
 function getMarkovChainLastUpdated() {
-    return get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
+    return get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
 }
 
 // Clean up inbound text for better Markov Chain processing

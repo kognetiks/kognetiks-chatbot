@@ -13,8 +13,52 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+// Check if the Markov Chain needs to be built or updated
+function checkMarkovChainUpdate() {
+
+    // DIAG - Diagnostics - Start
+    back_trace('NOTICE', 'checkMarkovChainUpdate - Start');
+
+    // Get the last updated timestamp for the Markov Chain
+    $lastUpdated = get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
+
+    // check if the Markov Chain is forced to rebuild
+    $force_markov_chain_rebuild = get_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
+
+    if ($force_markov_chain_rebuild == 'Yes') {
+
+        back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
+        update_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
+        update_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
+        $markovChain = null;
+
+        // Run the Markov Chain building and saving process
+        runMarkovChatbotAndSaveChain();
+
+    }
+
+    // Get the update interval from the options
+    $updateInterval = esc_attr(get_option('chatbot_chatgpt_markov_chain_update_interval', 24)); // Default to 24 hours if not set
+
+    // Calculate the next update time based on the interval
+    $nextUpdate = strtotime($lastUpdated) + $updateInterval * 3600;
+
+    // Check if the Markov Chain needs to be updated
+    if (time() >= $nextUpdate) {
+
+        // Run the Markov Chain building and saving process
+        runMarkovChatbotAndSaveChain();
+
+    }
+
+    return;
+
+}
+
 // Generate a sentence using the Markov Chain with probabilities, fetching next words dynamically
 function generateMarkovText($startWords = [], $length = 100) {
+
+    checkMarkovChainUpdate(); // Check if the Markov Chain needs to be updated
 
     // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
     back_trace('NOTICE', 'generateMarkovText - Start');
@@ -30,46 +74,63 @@ function generateMarkovText($startWords = [], $length = 100) {
         return preg_replace('/[^\w\s]/', '', $word); // Clean up non-alphanumeric characters
     }, $startWords);
 
-    // Ensure the chain starts from the END of the input prompt
-    if (!empty($startWords)) {
-        // Limit the start words to the chain length, but start from the END of the input
-        $key = implode(' ', array_slice($startWords, -$chainLength));
+    // Phase 1: Try to find a valid starting point by backstepping from the end of the input
+    $key = null;
 
-        // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
-        back_trace('NOTICE', 'Start Words (from the end): ' . $key);
+    if (!empty($startWords)) {
+        // Start by checking the rightmost part of the phrase and then backstep left
+        for ($i = count($startWords) - $chainLength; $i >= 0; $i--) {
+            $attemptedKey = implode(' ', array_slice($startWords, $i, $chainLength));
+
+            back_trace('NOTICE', 'Attempting Key: ' . $attemptedKey);
+
+            $keyExists = checkKeyInDatabase($attemptedKey);
+
+            if ($keyExists) {
+                $key = $attemptedKey;
+                back_trace('NOTICE', 'Using Key: ' . $key);
+                break;
+            }
+        }
+
+        // If no key is found, use a random word as fallback
+        if (!$key) {
+            $key = getRandomWordFromDatabase();
+            back_trace('NOTICE', 'No valid key found, using random word: ' . $key);
+        }
 
     } else {
         // If no start words provided, get a random word from the database
         $key = getRandomWordFromDatabase();
-
-        // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
         back_trace('NOTICE', 'Random Phrase: ' . $key);
     }
 
-    // Initialize sentence generation
-    $words = explode(' ', $key);
+    // Phase 2: Generate words going forward from the starting point
+    $words = explode(' ', $key); // Initialize sentence generation with the found key
 
-    // Generate the response text based on probabilities
     for ($i = 0; $i < $length; $i++) {
 
+        // DIAG - Check current key before fetching next word
+        back_trace('NOTICE', 'Fetching next word for Key: ' . $key);
+
         $nextWord = getNextWordFromDatabase($key);
-        
-        // If next word is part of the input prompt, skip it
-        if (in_array($nextWord, $startWords)) {
-            continue; // Skip the word if it matches the start words
-        }
+
+        // DIAG - Log the retrieved next word
+        back_trace('NOTICE', 'Next Word Retrieved: ' . ($nextWord ?? 'NULL'));
 
         if ($nextWord === null) {
+            back_trace('NOTICE', 'No Next Word Found, Ending Sentence Generation');
             break; // End the sentence if no next word is found
         }
 
+        // Add the next word to the sentence
         $words[] = $nextWord;
 
-        // Update the key to be the last words based on the chain length
-        $key = implode(' ', array_slice($words, -$chainLength)); // Take the last 'n' words as the key based on chain length
+        // Update the key to be the last words based on the chain length (Phase 2 continues here)
+        $key = implode(' ', array_slice($words, -$chainLength));
 
-        // DIAG - DIAGNOSTICS - Ver 2.1.6 - 2024-09-21
-        back_trace('NOTICE', 'Current Key: ' . $key);
+        // DIAG - Log the updated key after adding the next word
+        back_trace('NOTICE', 'Updated Key after Addition: ' . $key);
     }
 
     // Final sentence building and punctuation check
@@ -79,8 +140,21 @@ function generateMarkovText($startWords = [], $length = 100) {
     return clean_up_markov_chain_response($response);
 }
 
+// Check if the key exists
+function checkKeyInDatabase($key) {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+
+    $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word = %s", $key));
+    
+    return $result;
+
+}
+
 // Retrieve the next word based on the current word, querying the database dynamically
 function getNextWordFromDatabase($currentWord) {
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
 
@@ -120,6 +194,7 @@ function getNextWordFromDatabase($currentWord) {
 
 // Get a random word from the database to start the chain
 function getRandomWordFromDatabase() {
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
 
@@ -127,10 +202,12 @@ function getRandomWordFromDatabase() {
     $randomWord = $wpdb->get_var("SELECT word FROM $table_name ORDER BY RAND() LIMIT 1");
 
     return $randomWord;
+
 }
 
 // Select the next word based on its probability distribution
 function selectNextWordBasedOnProbability($nextWords) {
+
     // Create an array of cumulative probabilities
     $cumulativeProbabilities = [];
     $totalProbability = 0;
@@ -152,9 +229,10 @@ function selectNextWordBasedOnProbability($nextWords) {
 
     // Fallback to the last word in case no match is found (shouldn't happen)
     return end($cumulativeProbabilities)['word'];
+
 }
 
-// Retrieve the Markov Chain from the database
+// Retrieve the Markov Chain from the database // NO LONGER USED - Ver 2.1.6 - 2024-09-22
 function getMarkovChainFromDatabase() {
 
     // DIAG - Diagnostics - Start
@@ -163,17 +241,16 @@ function getMarkovChainFromDatabase() {
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
     $force_markov_chain_rebuild = get_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
 
-    // FIXME - TEMP OVERRIDE - Ver 2.1.6 - 2024-09-21
-    $force_markov_chain_rebuild = 'Yes'; 
-
     if ($force_markov_chain_rebuild == 'Yes') {
+
         back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
-        // update_option('chatbot_chatgpt_markov_chain_length', 3);
-        update_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
+        update_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
         update_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
         $markovChain = null;
+
         // Run the Markov Chain building and saving process
         runMarkovChatbotAndSaveChain();
+
     }
 
     // Retrieve the Markov Chain from chunks
@@ -199,8 +276,10 @@ function getMarkovChainFromDatabase() {
 
     // Check if rebuilding was successful
     if (!empty($markovChain)) {
+
         back_trace('NOTICE', 'Markov Chain Length after rebuild: ' . count($markovChain));
         return $markovChain;  // Return the rebuilt Markov Chain
+
     }
 
     // If rebuild fails, log the issue and return null
