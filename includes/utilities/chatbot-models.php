@@ -111,7 +111,13 @@ function chatbot_chatgpt_get_openai_models() {
     }
 
     // Extract the models from the response
-    $models = $data['data'];
+    if (isset($data['data']) && !is_null($data['data'])) {
+        $models = $data['data'];
+    } else {
+        // Handle the case where 'data' is not set or is null
+        $models = []; // Empty array
+        prod_trace( 'WARNING', 'Data key is not set or is null in the \$data array.');
+    }
 
     // Ensure $models is an array
     if (!is_array($models)) {

@@ -73,7 +73,8 @@ function createMarkovChainTable() {
         frequency int NOT NULL,
         last_updated datetime NOT NULL,
         PRIMARY KEY  (id),
-        UNIQUE KEY word_next_word (word, next_word)
+        UNIQUE KEY word_next_word (word, next_word),
+        INDEX idx_word (word) -- This index is optimized for queries on just the 'word' column
     ) $charset_collate;";
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -197,6 +198,10 @@ function getAllPublishedContent() {
     // Update the last updated timestamp
     updateMarkovChainTimestamp();
 
+    $stats = getDatabaseStats('chatbot_chatgpt_markov_chain');
+    prod_trace('NOTICE', 'Number of Rows: ' . $stats['row_count']);
+    prod_trace('NOTICE', 'Database Size: ' . $stats['db_size_mb'] . ' MB');
+
     // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'getAllPublishedContent - End');
 
@@ -220,14 +225,15 @@ function buildMarkovChain($content) {
     $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 2));  // Default to 2 (for two-word key) if not set
 
     // Set the phrase size for the next part of the Markov Chain
-    $phraseSize = esc_attr(get_option('chatbot_chatgpt_markov_chain_next_phrase_length', 4));  // Default to 4 (for four-word phrase) if not set
+    $phraseSize = esc_attr(get_option('chatbot_chatgpt_markov_chain_next_phrase_length', 2));  // Default to 2 (for four-word phrase) if not set
 
     // Build and save the Markov Chain
     for ($i = 0; $i < count($words) - ($chainLength + $phraseSize - 1); $i++) {
+
         // Generate the key by taking 'chainLength' number of words (e.g., 2 words)
         $key = implode(' ', array_slice($words, $i, $chainLength));
         
-        // Generate the next phrase by taking 'phraseSize' number of words after the key (e.g., 4 words)
+        // Generate the next phrase by taking 'phraseSize' number of words after the key (e.g., 2 words)
         $nextPhrase = implode(' ', array_slice($words, $i + $chainLength, $phraseSize));
 
         // Check if this word and next phrase combination already exists in the database
@@ -239,6 +245,7 @@ function buildMarkovChain($content) {
         );
 
         if ($existing === null) {
+
             // If it doesn't exist, insert the word pair (key and next phrase)
             $wpdb->insert(
                 $table_name,
@@ -250,14 +257,28 @@ function buildMarkovChain($content) {
                 ),
                 array('%s', '%s', '%d', '%s')
             );
+
+            // Handle errors
+            if ($wpdb->last_error) {
+                prod_trace('ERROR', 'Error inserting word pair: ' . $wpdb->last_error);
+            }
+
         } else {
+
             // If it exists, increment the frequency
+
             $wpdb->query(
                 $wpdb->prepare(
                     "UPDATE $table_name SET frequency = frequency + 1, last_updated = %s WHERE word = %s AND next_word = %s",
                     current_time('mysql'), $key, $nextPhrase
                 )
             );
+
+            // Handle errors
+            if ($wpdb->last_error) {
+                prod_trace('ERROR', 'Error updating frequency: ' . $wpdb->last_error);
+            }
+
         }
     }
 }
@@ -433,3 +454,26 @@ function saveMarkovChainInChunks($markovChain) {
     // back_trace( 'NOTICE', 'saveMarkovChainInChunks - End');
 
 }
+
+// Get the any table in the database
+function getDatabaseStats($table_name) {
+    global $wpdb;
+    $db_name = $wpdb->dbname;
+
+    // Get the number of rows in the specified table
+    $row_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name"));
+
+    // Get the total size of the database (all tables)
+    $db_size = $wpdb->get_var($wpdb->prepare(
+        "SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 
+        FROM information_schema.tables 
+        WHERE table_schema = %s", 
+        $db_name
+    ));
+
+    return [
+        'row_count' => $row_count,
+        'db_size_mb' => $db_size
+    ];
+}
+
