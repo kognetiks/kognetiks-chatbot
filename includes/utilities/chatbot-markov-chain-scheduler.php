@@ -59,6 +59,10 @@ function chatbot_chatgpt_markov_chain_scan() {
     // Update the status to 'In Process' and log the current time
     update_option('chatbot_chatgpt_markov_chain_build_status', 'In Process');
 
+    if (!isset($run_scanner)) {
+        $run_scanner = 'No';
+    }
+
     // Reset the results message
     update_option('chatbot_chatgpt_markov_chain_build_results', '');
 
@@ -68,7 +72,6 @@ function chatbot_chatgpt_markov_chain_scan() {
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace('NOTICE', 'chatbot_chatgpt_markov_chain_scan - End');
 
-    return;
 }
 add_action('chatbot_chatgpt_markov_chain_scan_hook', 'chatbot_chatgpt_markov_chain_scan');
 

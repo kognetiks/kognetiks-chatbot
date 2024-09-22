@@ -167,7 +167,7 @@ function chatbot_chatgpt_api_settings_init() {
 
     // Markov Chain Options - Ver 2.1.6
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_enabled'); // Ver 2.1.6
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_build_status'); // Ver 2.1.6
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_build_schedule'); // Ver 2.1.6
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_length'); // Ver 2.1.6
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_next_phrase_length'); // Ver 2.1.6
 

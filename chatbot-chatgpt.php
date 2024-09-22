@@ -942,7 +942,8 @@ function chatbot_chatgpt_markov_chain_status_activation() {
 
     // Clear any old scheduled runs, if present
     if (wp_next_scheduled('chatbot_chatgpt_markov_chain_scan_hook')) {
-        wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook');
+        // BREAK/FIX - Do not unset the hook - Ver 2.1.6
+        // wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook'); // Clear scheduled runs
     }
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_activation');
