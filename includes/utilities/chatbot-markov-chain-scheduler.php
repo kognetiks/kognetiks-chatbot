@@ -31,7 +31,7 @@ function chatbot_chatgpt_markov_chain_scheduler() {
 
     // Update the status as 'In Process'
     update_option('chatbot_chatgpt_markov_chain_build_status', 'In Process');
-    prod_trace('NOTICE', 'chatbot_chatgpt_markov_chain_status: ' . $chatbot_chatgpt_markov_chain_build_schedule);
+    prod_trace('NOTICE', 'chatbot_chatgpt_markov_chain_build_status: ' . $chatbot_chatgpt_markov_chain_build_status);
 
     // Reset the results message
     update_option('chatbot_chatgpt_markov_chain_build_results', '');
@@ -106,7 +106,7 @@ function chatbot_chatgpt_markov_chain_build_results_callback($run_scanner) {
 
         } else {
 
-            if (!wp_next_schedule('chatbot_chatgpt_markov_chain_scan_hook')) {
+            if (!wp_next_scheduled('chatbot_chatgpt_markov_chain_scan_hook')) {
                 // Log the schedule
                 update_option('chatbot_chatgpt_markov_chain_build_status', 'In Process');
 

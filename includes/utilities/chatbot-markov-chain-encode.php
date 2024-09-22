@@ -17,13 +17,17 @@ if ( ! defined( 'WPINC' ) ) {
 function runMarkovChatbotAndSaveChain() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - Start');
+    back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - Start');
 
     // Step 1: Check if the Markov Chain table exists
     createMarkovChainTable();
 
     // Step 2: Get the last updated timestamp for the Markov Chain
+    // $last_updated = getMarkovChainLastUpdated();
     $last_updated = get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
+
+    // FIXME - This is a temporary fix to force the Markov Chain to update every time
+    $last_updated = '2000-01-01 00:00:00';
 
     // Step 3: Get all published content (posts, pages, and comments) that have been updated after the last Markov Chain update
     $content = getAllPublishedContent($last_updated);
@@ -40,17 +44,17 @@ function runMarkovChatbotAndSaveChain() {
         update_option('chatbot_chatgpt_markov_chain_last_updated', current_time('mysql'));
         
         // DIAG - Diagnostics - Ver 2.1.6
-        // back_trace( 'NOTICE', 'Markov Chain updated and saved to the database.');
+        back_trace( 'NOTICE', 'Markov Chain updated and saved to the database.');
 
     } else {
 
         // DIAG - Diagnostics - Ver 2.1.6
-        // back_trace( 'NOTICE', 'No new content since last update. Markov Chain not rebuilt.');
+        back_trace( 'NOTICE', 'No new content since last update. Markov Chain not rebuilt.');
 
     }
 
     // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
+    back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
 
 }
 // Hook the function to run after WordPress is fully loaded
@@ -93,16 +97,10 @@ function createMarkovChainTable() {
 register_activation_hook(__FILE__, 'createMarkovChainTable');
 
 // Step 3: Extract the published content
-function getAllPublishedContent() {
+function getAllPublishedContent($last_updated) {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'getAllPublishedContent - Start');
-
-    $last_updated = getMarkovChainLastUpdated();
-
-    // Get the last updated date
-    // $last_updated = '2000-01-01 00:00:00'; // FIXME - Remove this line
-    $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00'));
+    back_trace( 'NOTICE', 'getAllPublishedContent - Start');
 
     // Query for posts and pages after the last updated date
     $args = array(
@@ -194,12 +192,13 @@ function getAllPublishedContent() {
     // Update the last updated timestamp
     updateMarkovChainTimestamp();
 
-    $stats = getDatabaseStats('chatbot_chatgpt_markov_chain');
-    prod_trace('NOTICE', 'Number of Rows: ' . $stats['row_count']);
-    prod_trace('NOTICE', 'Database Size: ' . $stats['db_size_mb'] . ' MB');
+    // FIXME - This function is not working as expected
+    // $stats = getDatabaseStats('chatbot_chatgpt_markov_chain');
+    // prod_trace('NOTICE', 'Number of Rows: ' . $stats['row_count']);
+    // prod_trace('NOTICE', 'Database Size: ' . $stats['db_size_mb'] . ' MB');
 
     // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'getAllPublishedContent - End');
+    back_trace( 'NOTICE', 'getAllPublishedContent - End');
 
     return $content;
 
@@ -453,6 +452,7 @@ function saveMarkovChainInChunks($markovChain) {
 
 // Get the any table in the database
 function getDatabaseStats($table_name) {
+
     global $wpdb;
     $db_name = $wpdb->dbname;
 
@@ -471,5 +471,6 @@ function getDatabaseStats($table_name) {
         'row_count' => $row_count,
         'db_size_mb' => $db_size
     ];
+
 }
 

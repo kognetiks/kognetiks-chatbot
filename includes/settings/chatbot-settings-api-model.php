@@ -630,6 +630,10 @@ function chatbot_chatgpt_whisper_response_format_callback($args) {
 
 // Markov Chain Options Callback - Ver 2.1.6
 function chatbot_chatgpt_markov_chain_section_callback($args) {
+
+    // See if the scanner needs to run
+    $results = chatbot_chatgpt_markov_chain_build_results_callback(esc_attr(get_option('chatbot_chatgpt_markov_chain_build_schedule')));
+
     ?>
     <p>Configure the settings for the plugin when using Markov Chain models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -718,6 +722,7 @@ function chatbot_chatgpt_markov_chain_build_schedule_callback($args) {
         <?php endforeach; ?>
     </select>
     <?php
+    
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace( 'NOTICE', 'chatbot_chatgpt_markov_chain_build_schedule: ' . $chatbot_chatgpt_markov_chain_build_schedule );
     

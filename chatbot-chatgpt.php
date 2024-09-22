@@ -160,6 +160,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-decode.php'; // Functions - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-encode.php'; // Functions - Ver 2.1.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-scheduler.php'; // Functions - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php'; // Functions - Ver 2.0.5
@@ -915,28 +916,38 @@ function chatbot_chatgpt_append_extra_message($response, $extra_message) {
 
 // Crawler aka Knowledge Navigator - Ver 1.6.1
 function chatbot_chatgpt_kn_status_activation() {
+
     add_option('chatbot_chatgpt_kn_status', 'Never Run');
     // clear any old scheduled runs
+
     if (wp_next_scheduled('crawl_scheduled_event_hook')) {
         wp_clear_scheduled_hook('crawl_scheduled_event_hook');
     }
+
     // clear the 'knowledge_navigator_scan_hook' hook on plugin activation - Ver 1.6.3
     if (wp_next_scheduled('knowledge_navigator_scan_hook')) {
         // BREAK/FIX - Do not unset the hook - Ver 1.8.5
         // wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear scheduled runs
     }
+
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_kn_status_activation');
 
 // Clean Up in Aisle 4
 function chatbot_chatgpt_kn_status_deactivation() {
+
     delete_option('chatbot_chatgpt_kn_status');
     wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); 
+
 }
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
 // Markov Chain builder - Activation Hook - Ver 2.1.6
 function chatbot_chatgpt_markov_chain_status_activation() {
+
+    // DIAG - Diagnostics - Ver 2.1.6
+    back_trace( 'NOTICE', 'Markov Chain Status Activation');
+
     // Add the option for build status with a default value of 'Never Run'
     add_option('chatbot_chatgpt_markov_chain_build_status', 'Never Run');
 
@@ -945,16 +956,22 @@ function chatbot_chatgpt_markov_chain_status_activation() {
         // BREAK/FIX - Do not unset the hook - Ver 2.1.6
         // wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook'); // Clear scheduled runs
     }
+
 }
 register_activation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_activation');
 
 // Clean up scheduled events and options - Deactivation Hook
 function chatbot_chatgpt_markov_chain_status_deactivation() {
+
+    // DIAG - Diagnostics - Ver 2.1.6
+    back_trace( 'NOTICE', 'Markov Chain Status Deactivation');
+
     // Delete the build status option on deactivation
     delete_option('chatbot_chatgpt_markov_chain_build_status');
 
     // Clear any scheduled events related to the Markov Chain scan
     wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook');
+
 }
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_deactivation');
 
