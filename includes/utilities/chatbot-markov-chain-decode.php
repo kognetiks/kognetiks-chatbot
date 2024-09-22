@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function checkMarkovChainUpdate() {
 
     // DIAG - Diagnostics - Start
-    back_trace('NOTICE', 'checkMarkovChainUpdate - Start');
+    // back_trace('NOTICE', 'checkMarkovChainUpdate - Start');
 
     // Get the last updated timestamp for the Markov Chain
     $lastUpdated = get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
@@ -27,7 +27,7 @@ function checkMarkovChainUpdate() {
 
     if ($force_markov_chain_rebuild == 'Yes') {
 
-        back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
+        // back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
         update_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
         update_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
         $markovChain = null;
@@ -61,9 +61,9 @@ function generateMarkovText($startWords = [], $length = 100) {
     checkMarkovChainUpdate(); // Check if the Markov Chain needs to be updated
 
     // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
-    back_trace('NOTICE', 'generateMarkovText - Start');
-    back_trace('NOTICE', 'Requested Length: ' . $length);
-    back_trace('NOTICE', 'Start Words: ' . implode(' ', $startWords));
+    // back_trace('NOTICE', 'generateMarkovText - Start');
+    // back_trace('NOTICE', 'Requested Length: ' . $length);
+    // back_trace('NOTICE', 'Start Words: ' . implode(' ', $startWords));
 
     // Get the Markov Chain length from the options
     $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 2)); // Default to 2 if not set
@@ -82,13 +82,13 @@ function generateMarkovText($startWords = [], $length = 100) {
         for ($i = count($startWords) - $chainLength; $i >= 0; $i--) {
             $attemptedKey = implode(' ', array_slice($startWords, $i, $chainLength));
 
-            back_trace('NOTICE', 'Attempting Key: ' . $attemptedKey);
+            // back_trace('NOTICE', 'Attempting Key: ' . $attemptedKey);
 
             $keyExists = checkKeyInDatabase($attemptedKey);
 
             if ($keyExists) {
                 $key = $attemptedKey;
-                back_trace('NOTICE', 'Using Key: ' . $key);
+                // back_trace('NOTICE', 'Using Key: ' . $key);
                 break;
             }
         }
@@ -96,13 +96,13 @@ function generateMarkovText($startWords = [], $length = 100) {
         // If no key is found, use a random word as fallback
         if (!$key) {
             $key = getRandomWordFromDatabase();
-            back_trace('NOTICE', 'No valid key found, using random word: ' . $key);
+            // back_trace('NOTICE', 'No valid key found, using random word: ' . $key);
         }
 
     } else {
         // If no start words provided, get a random word from the database
         $key = getRandomWordFromDatabase();
-        back_trace('NOTICE', 'Random Phrase: ' . $key);
+        // back_trace('NOTICE', 'Random Phrase: ' . $key);
     }
 
     // Phase 2: Generate words going forward from the starting point
@@ -111,26 +111,29 @@ function generateMarkovText($startWords = [], $length = 100) {
     for ($i = 0; $i < $length; $i++) {
 
         // DIAG - Check current key before fetching next word
-        back_trace('NOTICE', 'Fetching next word for Key: ' . $key);
+        // back_trace('NOTICE', 'Fetching next word for Key: ' . $key);
 
         $nextWord = getNextWordFromDatabase($key);
 
         // DIAG - Log the retrieved next word
-        back_trace('NOTICE', 'Next Word Retrieved: ' . ($nextWord ?? 'NULL'));
+        // back_trace('NOTICE', 'Next Word Retrieved: ' . ($nextWord ?? 'NULL'));
 
         if ($nextWord === null) {
-            back_trace('NOTICE', 'No Next Word Found, Ending Sentence Generation');
+            // back_trace('NOTICE', 'No Next Word Found, Ending Sentence Generation');
             break; // End the sentence if no next word is found
         }
 
-        // Add the next word to the sentence
-        $words[] = $nextWord;
+        // Explode $nextWord in case it contains multiple words
+        $nextWordsArray = explode(' ', $nextWord);
 
-        // Update the key to be the last 'chainLength' words from the generated sentence
+        // Add the next words to the sentence
+        $words = array_merge($words, $nextWordsArray);
+
+        // Ensure the key strictly shifts forward to the last 'chainLength' words in the sentence
         $key = implode(' ', array_slice($words, -$chainLength));
 
-        // DIAG - Log the updated key after adding the next word
-        back_trace('NOTICE', 'Updated Key after Addition: ' . $key);
+        // DIAG - Log the updated key after adding the next word(s)
+        // back_trace('NOTICE', 'Updated Key after Addition: ' . $key);
     }
 
     // Final sentence building and punctuation check
@@ -138,7 +141,6 @@ function generateMarkovText($startWords = [], $length = 100) {
 
     // Clean up and return the response
     return clean_up_markov_chain_response($response);
-
 }
 
 // Check if the key exists
@@ -237,14 +239,14 @@ function selectNextWordBasedOnProbability($nextWords) {
 function getMarkovChainFromDatabase() {
 
     // DIAG - Diagnostics - Start
-    back_trace('NOTICE', 'getMarkovChainFromDatabase - Start');
+    // back_trace('NOTICE', 'getMarkovChainFromDatabase - Start');
 
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
     $force_markov_chain_rebuild = get_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
 
     if ($force_markov_chain_rebuild == 'Yes') {
 
-        back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
+        // back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
         update_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
         update_option('chatbot_chatgpt_markov_chain_force_rebuild', 'No');
         $markovChain = null;
@@ -259,15 +261,15 @@ function getMarkovChainFromDatabase() {
 
     // Check if we successfully retrieved the Markov Chain
     if (!empty($markovChain)) {
-        back_trace('NOTICE', 'Markov Chain Length: ' . count($markovChain));
+        // back_trace('NOTICE', 'Markov Chain Length: ' . count($markovChain));
         // How much memory is being used by the Markov Chain
-        back_trace( 'NOTICE', 'Memory usage: ' . memory_get_usage());
-        back_trace( 'NOTICE', 'Memory usage in megabytes: ' . round(memory_get_usage() / 1024 / 1024, 2));
+        // back_trace( 'NOTICE', 'Memory usage: ' . memory_get_usage());
+        // back_trace( 'NOTICE', 'Memory usage in megabytes: ' . round(memory_get_usage() / 1024 / 1024, 2));
         return $markovChain;  // Return the valid Markov Chain
     }
 
     // If no Markov Chain found, rebuild it
-    back_trace('NOTICE', 'No Markov Chain found. Rebuilding.');
+    // back_trace('NOTICE', 'No Markov Chain found. Rebuilding.');
 
     // Run the Markov Chain building and saving process
     runMarkovChatbotAndSaveChain();
@@ -278,13 +280,13 @@ function getMarkovChainFromDatabase() {
     // Check if rebuilding was successful
     if (!empty($markovChain)) {
 
-        back_trace('NOTICE', 'Markov Chain Length after rebuild: ' . count($markovChain));
+        // back_trace('NOTICE', 'Markov Chain Length after rebuild: ' . count($markovChain));
         return $markovChain;  // Return the rebuilt Markov Chain
 
     }
 
     // If rebuild fails, log the issue and return null
-    back_trace('NOTICE', 'Failed to rebuild the Markov Chain.');
+    // back_trace('NOTICE', 'Failed to rebuild the Markov Chain.');
     return null;  // Return null to indicate failure
 
 }
@@ -494,19 +496,19 @@ function getMarkovChainFromChunks() {
     foreach ($results as $row) {
 
         // DIAG - Log the chunk being unserialized for debugging
-        back_trace('NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
-        back_trace('NOTICE', 'Serialized chunk content (truncated): ' . substr($row->chain_chunk, 0, 100)); // Log first 100 chars of the chunk
+        // back_trace('NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
+        // back_trace('NOTICE', 'Serialized chunk content (truncated): ' . substr($row->chain_chunk, 0, 100)); // Log first 100 chars of the chunk
 
         // Unserialize each chunk
         $unserializedChunk = @unserialize($row->chain_chunk);
 
         if ($unserializedChunk === false) {
             // Log the failure and check the serialized data format
-            back_trace('ERROR', 'Unserialization failed for chunk ' . $row->chunk_index . '. Check if the data format is correct.');
+            // back_trace('ERROR', 'Unserialization failed for chunk ' . $row->chunk_index . '. Check if the data format is correct.');
         } else {
             // Check if the unserialized data is an array
             if (!is_array($unserializedChunk)) {
-                back_trace('ERROR', 'Expected array, but got ' . gettype($unserializedChunk) . ' for chunk ' . $row->chunk_index);
+                // back_trace('ERROR', 'Expected array, but got ' . gettype($unserializedChunk) . ' for chunk ' . $row->chunk_index);
             } else {
                 // Merge unserialized data into the final array
                 $finalArray = array_merge($finalArray, $unserializedChunk);
@@ -516,10 +518,10 @@ function getMarkovChainFromChunks() {
 
     // Return the final reassembled Markov Chain array
     if (!empty($finalArray)) {
-        back_trace('NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
+        // back_trace('NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
         return $finalArray;
     } else {
-        back_trace('ERROR', 'No valid data reassembled from chunks.');
+        // back_trace('ERROR', 'No valid data reassembled from chunks.');
         return null;
     }
 

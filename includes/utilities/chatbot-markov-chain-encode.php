@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function runMarkovChatbotAndSaveChain() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - Start');
+    // back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - Start');
 
     // Step 1: Check if the Markov Chain table exists
     createMarkovChainTable();
@@ -40,17 +40,17 @@ function runMarkovChatbotAndSaveChain() {
         update_option('chatbot_chatgpt_markov_chain_last_updated', current_time('mysql'));
         
         // DIAG - Diagnostics - Ver 2.1.6
-        back_trace( 'NOTICE', 'Markov Chain updated and saved to the database.');
+        // back_trace( 'NOTICE', 'Markov Chain updated and saved to the database.');
 
     } else {
 
         // DIAG - Diagnostics - Ver 2.1.6
-        back_trace( 'NOTICE', 'No new content since last update. Markov Chain not rebuilt.');
+        // back_trace( 'NOTICE', 'No new content since last update. Markov Chain not rebuilt.');
 
     }
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
+    // back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
 
 }
 // Hook the function to run after WordPress is fully loaded
@@ -60,7 +60,7 @@ add_action('wp_loaded', 'runMarkovChatbotAndSaveChain');
 function createMarkovChainTable() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'createMarkovChainTable - Start' );
+    // back_trace( 'NOTICE', 'createMarkovChainTable - Start' );
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
@@ -90,7 +90,7 @@ function createMarkovChainTable() {
     }
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'createMarkovChainTable - End' );
+    // back_trace( 'NOTICE', 'createMarkovChainTable - End' );
 
 }
 register_activation_hook(__FILE__, 'createMarkovChainTable');
@@ -301,7 +301,7 @@ function clean_up_training_data($content) {
             $clean_content = str_replace('&nbsp;', ' ', $clean_content);
         } else {
             // Handle the case where $clean_content is not a string
-            back_trace( 'ERROR', 'Expected $clean_content to be a string, but got ' . gettype($clean_content));
+            // back_trace( 'ERROR', 'Expected $clean_content to be a string, but got ' . gettype($clean_content));
         }
 
         // Swap <br> tags with spaces
@@ -334,8 +334,8 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
     // Validate that the chunk is a serialized string
     if (is_string($chunk) && @unserialize($chunk) !== false || $chunk === 'b:0;') {
         // Log chunk size and content (truncated)
-        back_trace('NOTICE', 'Chunk content being saved (truncated): ' . substr($chunk, 0, 100)); // First 100 characters
-        back_trace('NOTICE', 'Full Chunk length: ' . strlen($chunk));  // Log the full length of the chunk
+        // back_trace('NOTICE', 'Chunk content being saved (truncated): ' . substr($chunk, 0, 100)); // First 100 characters
+        // back_trace('NOTICE', 'Full Chunk length: ' . strlen($chunk));  // Log the full length of the chunk
 
         $update_date = date('Y-m-d H:i:s');
 
@@ -349,15 +349,15 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
 
         // Handle errors
         if ($wpdb->last_error) {
-            back_trace('ERROR', 'Error saving chunk ' . $chunkIndex . ': ' . $wpdb->last_error);
-            back_trace('ERROR', 'Query: ' . $wpdb->last_query);
+            // back_trace('ERROR', 'Error saving chunk ' . $chunkIndex . ': ' . $wpdb->last_error);
+            // back_trace('ERROR', 'Query: ' . $wpdb->last_query);
         } else {
-            back_trace('NOTICE', 'Chunk ' . $chunkIndex . ' saved successfully.');
+            // back_trace('NOTICE', 'Chunk ' . $chunkIndex . ' saved successfully.');
         }
 
     } else {
         // Log the issue if the chunk is not a valid serialized string
-        back_trace('ERROR', 'Invalid serialized chunk data for chunk index: ' . $chunkIndex);
+        // back_trace('ERROR', 'Invalid serialized chunk data for chunk index: ' . $chunkIndex);
     }
 }
 
