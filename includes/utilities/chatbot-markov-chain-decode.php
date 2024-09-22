@@ -126,7 +126,7 @@ function generateMarkovText($startWords = [], $length = 100) {
         // Add the next word to the sentence
         $words[] = $nextWord;
 
-        // Update the key to be the last words based on the chain length (Phase 2 continues here)
+        // Update the key to be the last 'chainLength' words from the generated sentence
         $key = implode(' ', array_slice($words, -$chainLength));
 
         // DIAG - Log the updated key after adding the next word
@@ -138,6 +138,7 @@ function generateMarkovText($startWords = [], $length = 100) {
 
     // Clean up and return the response
     return clean_up_markov_chain_response($response);
+
 }
 
 // Check if the key exists
