@@ -29,8 +29,30 @@ function runMarkovChatbotAndSaveChain() {
     // FIXME - This is a temporary fix to force the Markov Chain to update every time
     $last_updated = '2000-01-01 00:00:00';
 
+    // Get the starting batch, if no transient exists, set it to 1
+    $batch_starting_point = get_transient('chatbot_chatgpt_markov_chain_batch_starting_point');
+    If (empty($batch_starting_point)) {
+        $batch_starting_point = 1;
+    }
+
+    // Get the batch size from the settings
+    // Number of posts/pages to process in each batch
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_markov_chain_batch_size', 100));
+    back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
+
+    // Get the total number of posts/pages
+    $total_posts = wp_count_posts('post')->publish;
+    back_trace( 'NOTICE', 'Total Posts: ' . $total_posts);
+
+    // Calculate the number of batches
+    $total_batches = ceil($total_posts / $batch_size);
+    back_trace( 'NOTICE', 'Total Batches: ' . $total_batches);
+
+    // Start with posts and pages
+    $processing_type = 'posts';
+
     // Step 3: Get all published content (posts, pages, and comments) that have been updated after the last Markov Chain update
-    $content = getAllPublishedContent($last_updated);
+    $content = getAllPublishedContent($last_updated, $batch_starting_point, $batch_size, $processing_type);
 
     if (!empty($content)) {
 
@@ -57,8 +79,6 @@ function runMarkovChatbotAndSaveChain() {
     back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
 
 }
-// Hook the function to run after WordPress is fully loaded
-// add_action('wp_loaded', 'runMarkovChatbotAndSaveChain');
 
 // Step 1: Check if the Markov Chain table exists and create/update it if necessary
 function createMarkovChainTable() {
@@ -96,111 +116,145 @@ function createMarkovChainTable() {
 // Register the table creation function to run on plugin activation
 register_activation_hook(__FILE__, 'createMarkovChainTable');
 
-// Step 3: Extract the published content
-function getAllPublishedContent($last_updated) {
+// Step 3: Extract the published content and comments in batches
+function getAllPublishedContent($last_updated, $batch_starting_point, $batch_size, $processing_type = 'posts') {
+    global $wpdb;
 
-    // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'getAllPublishedContent - Start');
+    if (empty($batch_starting_point)) {
+        $batch_starting_point = 1;
+    }
 
-    // Query for posts and pages after the last updated date
-    $args = array(
-        'post_type' => array('post', 'page'),
-        'post_status' => 'publish',
-        'date_query' => array(
-            array(
-                'after' => $last_updated, // Only get content after the last update
+    if (empty($batch_size)) {
+        $batch_size = 100;
+    }
+
+    if ($batch_starting_point == 1 && $processing_type == 'posts') {
+        // Reset the Markov Chain table if it's the first post batch
+        $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+        $wpdb->query("DELETE FROM $table_name");
+    }
+
+    // DIAG - Diagnostics
+    back_trace('NOTICE', 'getAllPublishedContent - Start');
+
+    // Process posts first
+    if ($processing_type == 'posts') {
+
+        // DIAG - Diagnostics - Ver 2.1.6.1
+        back_trace('NOTICE', 'Processing posts and pages');
+
+        // Calculate the offset for the current post batch
+        $offset = ($batch_starting_point - 1) * $batch_size;
+
+        // DIAG - Diagnostics - Ver 2.1.6.1
+        back_trace('NOTICE', 'Offset: ' . $offset);
+        back_trace('NOTICE', 'Batch Size: ' . $batch_size);
+
+        // Query for posts and pages after the last updated date
+        $args = array(
+            'post_type' => array('post', 'page'),
+            'post_status' => 'publish',
+            'date_query' => array(
+                array(
+                    'after' => $last_updated, // Only get content after the last update
+                ),
             ),
-        ),
-        'posts_per_page' => -1 // Get all posts and pages
-    );
+            'posts_per_page' => $batch_size, // Limit the number of posts per batch
+            'offset' => $offset // Offset to fetch the correct batch
+        );
 
-    // Get published posts/pages
-    $query = new WP_Query($args);
-    $content = '';
+        // Get published posts/pages
+        $query = new WP_Query($args);
+        $content = '';
 
-    // Loop through each post or page
-    if ($query->have_posts()) {
+        if ($query->have_posts()) {
+            while ($query->have_posts()) {
+                $query->the_post();
+                $post_content = get_the_content();
 
-        while ($query->have_posts()) {
-
-            $query->the_post();
-            $post_content = get_the_content();
-
-            // Ensure $post_content is a string
-            if (is_object($post_content)) {
-                $post_content = wp_kses_post($post_content);
+                // Clean up the post content for better Markov Chain processing
+                $clean_content = clean_up_training_data($post_content);
+                $content .= ' ' . get_the_title() . ' ' . $clean_content;
             }
 
-            // Clean up the post content for better Markov Chain processing
-            $clean_content = clean_up_training_data($post_content);
-            // Add cleaned post content to the overall content
-            $content .= ' ' . get_the_title() . ' ' . $clean_content;
-
-            // FIXME - THIS COULD BE A PROBLEM
-            // FIXME - Probably need to take each post and page one at a time and add it to the DB
-            // FIXME - If the word phrase is found in the DB, increment the frequency
-            // FIXME - If the word phrase is not found in the DB, add it to the DB
-
+            // Build the Markov Chain with the current batch content
             buildMarkovChain($content);
 
-            // Reset the content
-            // $content = '';
-
+            // If more posts are available, schedule the next post batch
+            if ($query->found_posts > $batch_starting_point * $batch_size) {
+                $next_batch_starting_point = $batch_starting_point + 1;
+                wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array($last_updated, $next_batch_starting_point, $batch_size, 'posts'));
+                back_trace('NOTICE', 'getAllPublishedContent - Scheduled next post batch #' . $next_batch_starting_point);
+            } else {
+                // No more posts, move to processing comments
+                wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array($last_updated, 1, $batch_size, 'comments'));
+                back_trace('NOTICE', 'getAllPublishedContent - Posts done, moving to comments');
+            }
         }
 
-    } else {
-
-        // back_trace( 'NOTICE', 'getAllPublishedContent - No posts found after: ' . $last_updated);
+        // Reset post data
+        wp_reset_postdata();
 
     }
 
-    // Reset post data
-    wp_reset_postdata();
+    // Process comments after posts
+    if ($processing_type == 'comments') {
 
-    // Fetch all comments after the last updated date
-    $comments = get_comments(array(
-        'status' => 'approve',
-        'date_query' => array(
-            array(
-                'after' => $last_updated,
-                'inclusive' => true, // Include comments from the exact last_updated date
+        // DIAG - Diagnostics - Ver 2.1.6.1
+        back_trace('NOTICE', 'Processing comments');
+
+        // Calculate the offset for the current comment batch
+        $offset = ($batch_starting_point - 1) * $batch_size;
+
+        // DIAG - Diagnostics - Ver 2.1.6.1
+        back_trace('NOTICE', 'Offset: ' . $offset);
+        back_trace('NOTICE', 'Batch Size: ' . $batch_size);
+
+        // Fetch all comments after the last updated date
+        $comments = get_comments(array(
+            'status' => 'approve',
+            'date_query' => array(
+                array(
+                    'after' => $last_updated,
+                    'inclusive' => true,
+                ),
             ),
-        ),
-    ));
+            'number' => $batch_size,
+            'offset' => $offset,
+        ));
 
-    // Add cleaned comment content
-    foreach ($comments as $comment) {
+        $content = '';
+        foreach ($comments as $comment) {
+            // Clean up the comment content for better Markov Chain processing
+            $clean_comment = clean_up_training_data($comment->comment_content);
+            $content .= ' ' . $clean_comment;
+        }
 
-        // Clean up the post content for better Markov Chain processing
-        $clean_comment = clean_up_training_data($comment->comment_content);
-
-        // Add cleaned comment content to the overall content
-        $content .= ' ' . $clean_comment;
-
-        // FIXME - THIS COULD BE A PROBLEM
-        // FIXME - Probably need to take each post and page one at a time and add it to the DB
-        // FIXME - If the word phrase is found in the DB, increment the frequency
-        // FIXME - If the word phrase is not found in the DB, add it to the DB
-
+        // Build the Markov Chain with the current batch content
         buildMarkovChain($content);
 
-        // Reset the content
-        // $content = '';
-
+        // If more comments are available, schedule the next comment batch
+        if (count($comments) === $batch_size) {
+            $next_batch_starting_point = $batch_starting_point + 1;
+            wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array($last_updated, $next_batch_starting_point, $batch_size, 'comments'));
+            back_trace('NOTICE', 'getAllPublishedContent - Scheduled next comment batch #' . $next_batch_starting_point);
+        } else {
+            back_trace('NOTICE', 'getAllPublishedContent - Comments done');
+        }
     }
 
     // Update the last updated timestamp
     updateMarkovChainTimestamp();
 
     // FIXME - This function is not working as expected
-    // $stats = getDatabaseStats('chatbot_chatgpt_markov_chain');
-    // prod_trace('NOTICE', 'Number of Rows: ' . $stats['row_count']);
-    // prod_trace('NOTICE', 'Database Size: ' . $stats['db_size_mb'] . ' MB');
+    $stats = getDatabaseStats('chatbot_chatgpt_markov_chain');
+    if (!empty($stats)) {
+        prod_trace('NOTICE', 'Number of Rows: ' . $stats['row_count']);
+        prod_trace('NOTICE', 'Database Size: ' . $stats['db_size_mb'] . ' MB');
+    }
 
-    // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'getAllPublishedContent - End');
-
-    return $content;
+    // DIAG - Diagnostics
+    back_trace('NOTICE', 'getAllPublishedContent - End');
 
 }
 
@@ -450,26 +504,30 @@ function saveMarkovChainInChunks($markovChain) {
 
 }
 
-// Get the any table in the database
+// Get stats for a specific table in the database
 function getDatabaseStats($table_name) {
-
+    
     global $wpdb;
-    $db_name = $wpdb->dbname;
+
+    // Ensure the table name is properly prefixed
+    $table_name = $wpdb->prefix . $table_name;
 
     // Get the number of rows in the specified table
-    $row_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name"));
+    $row_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
 
-    // Get the total size of the database (all tables)
-    $db_size = $wpdb->get_var($wpdb->prepare(
-        "SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 
-        FROM information_schema.tables 
-        WHERE table_schema = %s", 
-        $db_name
-    ));
+    // Get the total size of the specific table
+    $table_size = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT ROUND((data_length + index_length) / 1024 / 1024, 2) AS size_mb 
+             FROM information_schema.tables 
+             WHERE table_schema = %s AND table_name = %s", 
+            DB_NAME, $table_name
+        )
+    );
 
     return [
         'row_count' => $row_count,
-        'db_size_mb' => $db_size
+        'table_size_mb' => $table_size
     ];
 
 }
