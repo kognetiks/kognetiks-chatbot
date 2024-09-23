@@ -16,6 +16,11 @@ if ( ! defined( 'WPINC' ) ) {
 // Generate a sentence using the Markov Chain with probabilities, fetching next words dynamically
 function generateMarkovText($startWords = [], $length = 100) {
 
+    global $chatbot_chatgpt_markov_chain_fallback_response;
+
+    // FIXME - Override length of response - Ver 2.1.6 - 2024-09-23
+    $length = 100;
+
     // checkMarkovChainUpdate(); // Check if the Markov Chain needs to be updated
 
     // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
@@ -52,15 +57,29 @@ function generateMarkovText($startWords = [], $length = 100) {
         }
 
         // If no key is found, use a random word as fallback
+        // if (!$key) {
+        //     $key = getRandomWordFromDatabase();
+        //     // back_trace('NOTICE', 'No valid key found, using random word: ' . $key);
+        // }
+
+        // Modify the code to use a random fallback response if no key is found
         if (!$key) {
-            $key = getRandomWordFromDatabase();
-            // back_trace('NOTICE', 'No valid key found, using random word: ' . $key);
+            // Select a random response from the global array
+            return $chatbot_chatgpt_markov_chain_fallback_response[array_rand($chatbot_chatgpt_markov_chain_fallback_response)];
         }
 
     } else {
+
         // If no start words provided, get a random word from the database
-        $key = getRandomWordFromDatabase();
+        // $key = getRandomWordFromDatabase();
         // back_trace('NOTICE', 'Random Phrase: ' . $key);
+
+        // Modify the code to use a random fallback response if no key is found
+        if (!$key) {
+            // Select a random response from the global array
+            return $chatbot_chatgpt_markov_chain_fallback_response[array_rand($chatbot_chatgpt_markov_chain_fallback_response)];
+        }
+
     }
 
     // Phase 2: Generate words going forward from the starting point
@@ -70,6 +89,9 @@ function generateMarkovText($startWords = [], $length = 100) {
 
         // DIAG - Check current key before fetching next word
         // back_trace('NOTICE', 'Fetching next word for Key: ' . $key);
+
+        // Make sure the key has no leading or trailing spaces or special characters
+        $key = preg_replace('/[^\w\s]/', '', $key);
 
         $nextWord = getNextWordFromDatabase($key);
 
@@ -99,6 +121,7 @@ function generateMarkovText($startWords = [], $length = 100) {
 
     // Clean up and return the response
     return clean_up_markov_chain_response($response);
+
 }
 
 // Check if the key exists
@@ -113,8 +136,9 @@ function checkKeyInDatabase($key) {
 
 }
 
+// FIXME - REPLACED - Ver 2.1.6 - 2024-09-23
 // Retrieve the next word based on the current word, querying the database dynamically
-function getNextWordFromDatabase($currentWord) {
+function getNextWordFromDatabase_OLD($currentWord) {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
@@ -150,6 +174,49 @@ function getNextWordFromDatabase($currentWord) {
 
     // Fallback to the last word in case no match is found (shouldn't happen)
     return end($cumulativeProbabilities)['word'];
+
+}
+
+// Tune the Markov Chain response for better readability
+function getNextWordFromDatabase($currentWord) {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+
+    // Query to get possible next words and their frequencies
+    $results = $wpdb->get_results(
+        $wpdb->prepare("SELECT next_word, frequency FROM $table_name WHERE word = %s", $currentWord),
+        ARRAY_A
+    );
+
+    if (empty($results)) {
+        return null; // Return null if no next word is found
+    }
+
+    // Sort results by frequency to get the most common word
+    usort($results, function($a, $b) {
+        return $b['frequency'] - $a['frequency'];
+    });
+
+    // 80% chance to select the most frequent word
+    if (mt_rand(1, 100) <= 80) {
+        return $results[0]['next_word']; // Return the most frequent word
+    }
+
+    // Otherwise, use the probabilistic approach
+    $totalProbability = array_sum(array_column($results, 'frequency'));
+    $random = mt_rand(1, $totalProbability);
+
+    $cumulative = 0;
+    foreach ($results as $row) {
+        $cumulative += $row['frequency'];
+        if ($random <= $cumulative) {
+            return $row['next_word'];
+        }
+    }
+
+    // Fallback to the most frequent word (shouldn't happen)
+    return $results[0]['next_word'];
 
 }
 
@@ -249,8 +316,9 @@ function getMarkovChainFromDatabase() {
 
 }
 
+// FIXME - REPLACED - Ver 2.1.6 - 2024-09-23
 // Clean up the Markov Chain response for better readability
-function clean_up_markov_chain_response($response) {
+function clean_up_markov_chain_response_OLD($response) {
 
     // Upper case the first letter of the response
     $response = ucfirst($response);
@@ -289,13 +357,83 @@ function clean_up_markov_chain_response($response) {
     // Step 6: Remove or replace nonsense words/phrases
     // $response = remove_nonsense_phrases($response);
 
-    // Upper case the first letter of the response
+    // Step 7: Make sure the first character of the response is not puctuation, spaces, or other non-alphanumeric characters
+    $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
+
+    // Step 8: Remove any double spaces caused by previous cleanup
+    $response = preg_replace('/\s+/', ' ', $response);
+
+    // Step 9: If there is a lower case leter followed by a space followed by an upper case letter, add a period
+    $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
+
+    // Step 10: If there is a special character followed by a space followed by a specai character, remove the space
+    $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1$2', $response);
+
+    // Step 11: if there is are severl lower case letters followed by a single upper case letter followed by several lower case letters, add a period and space
+    $response = preg_replace('/([a-z]+) ([A-Z]) ([a-z]+)/', '$1. $2 $3', $response);
+
+    // Step 12: For example ,"it's justsales.". Change to "It's just sales."
+    $response = preg_replace('/([.!?])"([a-z])/', '$1" $2', $response);
+
+    // Step 13: For example "As you can obtain an. API key" Change to "As you can obtain an API key"
+    $response = preg_replace('/([a-z])\. ([A-Z])/', '$1. $2', $response);
+
+    // Step 14: Upper case the first letter of the response
     $response = ucfirst($response);
 
     // back_trace( 'NOTICE', 'After nonsense filtering: ' . $response);
 
     return $response;
 
+}
+
+// Clean up the Markov Chain response for better readability
+function clean_up_markov_chain_response($response) {
+
+    // Trim whitespace and ensure first letter is capitalized
+    $response = ucfirst(trim($response));
+
+    // Step 1: Capitalize the first letter of each sentence
+    // This uses a regex to match sentence boundaries and capitalize appropriately
+    $response = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function($matches) {
+        return strtoupper($matches[1]);
+    }, $response);
+
+    // Step 2: Add punctuation at the end if missing
+    if (!preg_match('/[.!?]$/', $response)) {
+        $response .= '.';
+    }
+
+    // Step 3: Replace multiple spaces with a single space
+    $response = preg_replace('/\s+/', ' ', $response);
+
+    // Step 4: Basic punctuation cleanup
+    // Ensure no space before punctuation and space after punctuation
+    $response = preg_replace('/\s+([?.!,])/', '$1', $response);  // No space before punctuation
+    $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response);  // Space after punctuation
+
+    // Step 5: Fix grammar issues (custom function for specific cases)
+    $response = fix_common_grammar_issues($response);
+
+    // Step 6: Ensure the response starts with an alphanumeric character
+    $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
+
+    // Step 7: Additional punctuation and case fixes
+    // Insert a period between lowercase followed by an uppercase letter
+    $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
+    // Remove spaces between special characters
+    $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1$2', $response);
+    // Handle cases with lowercase words followed by uppercase
+    $response = preg_replace('/([a-z]+) ([A-Z]) ([a-z]+)/', '$1. $2 $3', $response);
+
+    // Step 8: Handle edge cases like misplaced punctuation and capitalization
+    $response = preg_replace('/([.!?])"([a-z])/', '$1" $2', $response);  // Fix misplaced punctuation within quotes
+    $response = preg_replace('/([a-z])\. ([A-Z])/', '$1. $2', $response);  // Fix misplaced periods
+
+    // Final Step: Upper case the first letter again in case any fixes affected it
+    $response = ucfirst($response);
+
+    return $response;
 }
 
 // Remove nonsense words or phrases from the response

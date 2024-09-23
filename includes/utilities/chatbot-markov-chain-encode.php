@@ -75,6 +75,14 @@ function runMarkovChatbotAndSaveChain() {
 
     }
 
+    
+    // FIXME - This function is not working as expected
+    $stats = getDatabaseStats('chatbot_chatgpt_markov_chain');
+    if (!empty($stats)) {
+        prod_trace('NOTICE', 'Number of Rows: ' . $stats['row_count']);
+        prod_trace('NOTICE', 'Database Size: ' . $stats['table_size_mb'] . ' MB');
+    }
+
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
 
@@ -118,6 +126,7 @@ register_activation_hook(__FILE__, 'createMarkovChainTable');
 
 // Step 3: Extract the published content and comments in batches
 function getAllPublishedContent($last_updated, $batch_starting_point, $batch_size, $processing_type = 'posts') {
+
     global $wpdb;
 
     if (empty($batch_starting_point)) {
@@ -129,9 +138,16 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     }
 
     if ($batch_starting_point == 1 && $processing_type == 'posts') {
+
         // Reset the Markov Chain table if it's the first post batch
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    
+        // Delete all data from the table
         $wpdb->query("DELETE FROM $table_name");
+    
+        // Reset the auto-increment value back to 1
+        $wpdb->query("ALTER TABLE $table_name AUTO_INCREMENT = 1");
+
     }
 
     // DIAG - Diagnostics
@@ -241,17 +257,11 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
         } else {
             back_trace('NOTICE', 'getAllPublishedContent - Comments done');
         }
+
     }
 
     // Update the last updated timestamp
     updateMarkovChainTimestamp();
-
-    // FIXME - This function is not working as expected
-    $stats = getDatabaseStats('chatbot_chatgpt_markov_chain');
-    if (!empty($stats)) {
-        prod_trace('NOTICE', 'Number of Rows: ' . $stats['row_count']);
-        prod_trace('NOTICE', 'Database Size: ' . $stats['db_size_mb'] . ' MB');
-    }
 
     // DIAG - Diagnostics
     back_trace('NOTICE', 'getAllPublishedContent - End');
@@ -268,7 +278,9 @@ function buildMarkovChain($content) {
     $wpdb->query("DELETE FROM $table_name");
 
     // Split the content into words
-    $words = preg_split('/\s+/', preg_replace("/[^\w\s']/u", '', $content));
+    // FIXME - TRY LEAVING PUNCTUATION IN FOR BETTER MARKOV CHAIN GENERATION - Ver 2.1.6
+    // $words = preg_split('/\s+/', preg_replace("/[^\w\s']/u", '', $content));
+    $words = preg_split('/\s+/', $content);
     
     // Correctly retrieve the chain length (key size) from the database
     $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 2));  // Default to 2 (for two-word key) if not set
@@ -281,6 +293,8 @@ function buildMarkovChain($content) {
 
         // Generate the key by taking 'chainLength' number of words (e.g., 2 words)
         $key = implode(' ', array_slice($words, $i, $chainLength));
+        // Remove non-alphanumeric characters from the key
+        $key = preg_replace("/[^a-zA-Z0-9\s]/", '', $key);
         
         // Generate the next phrase by taking 'phraseSize' number of words after the key (e.g., 2 words)
         $nextPhrase = implode(' ', array_slice($words, $i + $chainLength, $phraseSize));
@@ -506,7 +520,7 @@ function saveMarkovChainInChunks($markovChain) {
 
 // Get stats for a specific table in the database
 function getDatabaseStats($table_name) {
-    
+
     global $wpdb;
 
     // Ensure the table name is properly prefixed
@@ -524,6 +538,9 @@ function getDatabaseStats($table_name) {
             DB_NAME, $table_name
         )
     );
+
+    back_trace('NOTICE', 'Row Count: ' . $row_count);
+    back_trace('NOTICE', 'Table Size: ' . $table_size . ' MB');
 
     return [
         'row_count' => $row_count,
