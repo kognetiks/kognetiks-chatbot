@@ -188,7 +188,13 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
         // Prepare the response body
         $response_body['choices'][0]['message']['content'] = trim($response);
 
-        // Ensure the message ends with a period if it doesn't already end with a period, exclamation point, or question mark
+        // If the message ends with a comma followed by a period, remove the comma and keep the period.
+        $response_body['choices'][0]['message']['content'] = preg_replace('/,$/', '', $response_body['choices'][0]['message']['content']);
+
+        // If the message ends with a comma or space, remove and replace with a period
+        $response_body['choices'][0]['message']['content'] = preg_replace('/[,\s]+$/', '.', $response_body['choices'][0]['message']['content']);
+
+        // Ensure the message ends with a period if it doesn't already end with a period, exclamation point, or question mark.
         if (!preg_match('/[.!?]$/', $response_body['choices'][0]['message']['content'])) {
             $response_body['choices'][0]['message']['content'] .= '.';
         }

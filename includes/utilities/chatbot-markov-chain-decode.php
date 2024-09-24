@@ -13,107 +13,71 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Generate a sentence using the Markov Chain with probabilities, fetching next words dynamically
-function generateMarkovText($startWords = [], $length = 100) {
+// Generate a sentence using the Markov Chain with context reinforcement
+function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '') {
 
     global $chatbot_chatgpt_markov_chain_fallback_response;
 
-    // FIXME - Override length of response - Ver 2.1.6 - 2024-09-23
-    $length = 100;
-
-    // checkMarkovChainUpdate(); // Check if the Markov Chain needs to be updated
-
-    // DIAG - Diagnostics - Ver 2.1.6 - 2024-09-21
-    // back_trace('NOTICE', 'generateMarkovText - Start');
-    // back_trace('NOTICE', 'Requested Length: ' . $length);
-    // back_trace('NOTICE', 'Start Words: ' . implode(' ', $startWords));
+    $length = 100; // Set default length
 
     // Get the Markov Chain length from the options
     $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 2)); // Default to 2 if not set
 
-    // Trim and clean up start words
+    // Clean up start words
     $startWords = array_map('trim', $startWords);
     $startWords = array_map(function($word) {
         return preg_replace('/[^\w\s]/', '', $word); // Clean up non-alphanumeric characters
     }, $startWords);
 
-    // Phase 1: Try to find a valid starting point by backstepping from the end of the input
-    $key = null;
+    // Initialize with the primary key (if available)
+    $key = $primaryKeyword ? $primaryKeyword : null;
 
+    // Phase 1: Attempt to find a starting point
     if (!empty($startWords)) {
-        // Start by checking the rightmost part of the phrase and then backstep left
         for ($i = count($startWords) - $chainLength; $i >= 0; $i--) {
             $attemptedKey = implode(' ', array_slice($startWords, $i, $chainLength));
-
-            // back_trace('NOTICE', 'Attempting Key: ' . $attemptedKey);
-
             $keyExists = checkKeyInDatabase($attemptedKey);
 
             if ($keyExists) {
                 $key = $attemptedKey;
-                // back_trace('NOTICE', 'Using Key: ' . $key);
+                $primaryKeyword = $key; // Set primary keyword for context reinforcement
+                back_trace('NOTICE', 'Found starting key: ' . $key);
+                back_trace('NOTICE', 'Primary keyword: ' . $primaryKeyword);
                 break;
             }
         }
 
-        // If no key is found, use a random word as fallback
-        // if (!$key) {
-        //     $key = getRandomWordFromDatabase();
-        //     // back_trace('NOTICE', 'No valid key found, using random word: ' . $key);
-        // }
-
-        // Modify the code to use a random fallback response if no key is found
         if (!$key) {
-            // Select a random response from the global array
             return $chatbot_chatgpt_markov_chain_fallback_response[array_rand($chatbot_chatgpt_markov_chain_fallback_response)];
         }
-
-    } else {
-
-        // If no start words provided, get a random word from the database
-        // $key = getRandomWordFromDatabase();
-        // back_trace('NOTICE', 'Random Phrase: ' . $key);
-
-        // Modify the code to use a random fallback response if no key is found
-        if (!$key) {
-            // Select a random response from the global array
-            return $chatbot_chatgpt_markov_chain_fallback_response[array_rand($chatbot_chatgpt_markov_chain_fallback_response)];
-        }
-
     }
 
-    // Phase 2: Generate words going forward from the starting point
-    $words = explode(' ', $key); // Initialize sentence generation with the found key
+    // Phase 2: Generate words going forward, reinforcing context periodically
+    $words = explode(' ', $key); 
+    $iterationsSinceContextCheck = 0;
 
     for ($i = 0; $i < $length; $i++) {
 
-        // DIAG - Check current key before fetching next word
-        // back_trace('NOTICE', 'Fetching next word for Key: ' . $key);
-
-        // Make sure the key has no leading or trailing spaces or special characters
-        $key = preg_replace('/[^\w\s]/', '', $key);
-
+        // Fetch the next word
         $nextWord = getNextWordFromDatabase($key);
 
-        // DIAG - Log the retrieved next word
-        // back_trace('NOTICE', 'Next Word Retrieved: ' . ($nextWord ?? 'NULL'));
-
         if ($nextWord === null) {
-            // back_trace('NOTICE', 'No Next Word Found, Ending Sentence Generation');
             break; // End the sentence if no next word is found
         }
 
         // Explode $nextWord in case it contains multiple words
         $nextWordsArray = explode(' ', $nextWord);
-
-        // Add the next words to the sentence
         $words = array_merge($words, $nextWordsArray);
 
-        // Ensure the key strictly shifts forward to the last 'chainLength' words in the sentence
+        // Update the key with the last 'chainLength' words
         $key = implode(' ', array_slice($words, -$chainLength));
 
-        // DIAG - Log the updated key after adding the next word(s)
-        // back_trace('NOTICE', 'Updated Key after Addition: ' . $key);
+        // Periodically reintroduce primary keyword context to keep output on track
+        $iterationsSinceContextCheck++;
+        if ($iterationsSinceContextCheck >= 10 && $primaryKeyword) {
+            $key = $primaryKeyword; // Reinforce context every 10 iterations
+            $iterationsSinceContextCheck = 0;
+        }
     }
 
     // Final sentence building and punctuation check
