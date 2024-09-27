@@ -517,11 +517,14 @@ function chatbot_chatgpt_send_message() {
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
-    // Check for missing API key or Message
-    if (!$api_key || !$message) {
-        // DIAG - Diagnostics
-        // back_trace( 'ERROR', 'Invalid API Key or Message.');
-        wp_send_json_error('Error: Invalid API key or Message. Please check the plugin settings.');
+    // If Markov Chain is enabled, then process the message
+    if (esc_attr(get_option('chatbot_chatgpt_markov_chain_setting', 'No')) == 'Yes') {
+        // Check for missing API key or Message
+        if (!$api_key || !$message) {
+            // DIAG - Diagnostics
+            // back_trace( 'ERROR', 'Invalid API Key or Message.');
+            wp_send_json_error('Error: Invalid API key or Message. Please check the plugin settings.');
+        }
     }
 
     // Removed in Ver 1.8.6 - 2024 02 15

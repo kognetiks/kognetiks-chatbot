@@ -40,6 +40,8 @@ function runMarkovChatbotAndSaveChain() {
     $batch_size = esc_attr(get_option('chatbot_chatgpt_markov_chain_batch_size', 100));
     back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
 
+    ini_set('max_execution_time', 300); // Sets the max execution time to 300 seconds
+
     // Get the total number of posts/pages
     $total_posts = wp_count_posts('post')->publish;
     back_trace( 'NOTICE', 'Total Posts: ' . $total_posts);
@@ -75,7 +77,6 @@ function runMarkovChatbotAndSaveChain() {
 
     }
 
-    
     // FIXME - This function is not working as expected
     $stats = getDatabaseStats('chatbot_chatgpt_markov_chain');
     if (!empty($stats)) {

@@ -184,31 +184,28 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     $response = generateMarkovText($mc_message, $max_tokens);
 
     if (!empty($response)) {
-
         // Prepare the response body
         $response_body['choices'][0]['message']['content'] = trim($response);
-
-        // If the message ends with a comma followed by a period, remove the comma and keep the period.
-        $response_body['choices'][0]['message']['content'] = preg_replace('/,$/', '', $response_body['choices'][0]['message']['content']);
-
-        // If the message ends with a comma or space, remove and replace with a period
-        $response_body['choices'][0]['message']['content'] = preg_replace('/[,\s]+$/', '.', $response_body['choices'][0]['message']['content']);
-
-        // Ensure the message ends with a period if it doesn't already end with a period, exclamation point, or question mark.
+        back_trace('NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
+    
+        // Remove any trailing comma, colon, semicolon, or spaces and replace them with a period
+        $response_body['choices'][0]['message']['content'] = preg_replace('/[,;:\s]+$/', '.', $response_body['choices'][0]['message']['content']);
+        back_trace('NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
+    
+        // Ensure the message ends with a period, exclamation point, or question mark
         if (!preg_match('/[.!?]$/', $response_body['choices'][0]['message']['content'])) {
             $response_body['choices'][0]['message']['content'] .= '.';
         }
-
+        back_trace('NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
+    
         // Set the success response code
         $response_body['response']['code'] = 200; // Success code
-
+    
     } else {
-
         // Set the error response code
         $response_body['response']['code'] = 500; // Internal server error
-
     }
-
+        
     // DIAG - Diagnostics - Ver 1.8.1
     // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 

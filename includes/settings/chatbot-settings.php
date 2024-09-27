@@ -77,7 +77,8 @@ function chatbot_chatgpt_settings_page_html() {
 
     ?>
     <div class="wrap">
-        <h1><span class="dashicons dashicons-format-chat"></span> <?php echo esc_html(get_admin_page_title()); ?></h1>
+        <!-- <h1><span class="dashicons dashicons-format-chat"></span> <?php echo esc_html(get_admin_page_title()); ?></h1> -->
+        <h1><span class="dashicons dashicons-format-chat"></span> Chatbot Settings</h1>
 
        <script>
             jQuery(document).ready(function($) {
