@@ -25,13 +25,13 @@ function chatbot_chatgpt_markov_chain_scheduler() {
     if (!isset($chatbot_chatgpt_markov_chain_build_schedule)) {
         $chatbot_chatgpt_markov_chain_build_schedule = 'Disable';
         update_option('chatbot_chatgpt_markov_chain_build_schedule', $chatbot_chatgpt_markov_chain_build_schedule);
-        prod_trace('NOTICE', 'chatbot_chatgpt_markov_chain_scheduler: ' . $chatbot_chatgpt_markov_chain_build_schedule);
+        prod_trace( 'NOTICE', 'chatbot_chatgpt_markov_chain_scheduler: ' . $chatbot_chatgpt_markov_chain_build_schedule);
         return;
     }
 
     // Update the status as 'In Process'
     update_option('chatbot_chatgpt_markov_chain_build_status', 'In Process');
-    prod_trace('NOTICE', 'chatbot_chatgpt_markov_chain_build_status: ' . $chatbot_chatgpt_markov_chain_build_status);
+    prod_trace( 'NOTICE', 'chatbot_chatgpt_markov_chain_build_status: ' . $chatbot_chatgpt_markov_chain_build_status);
 
     // Reset the results message
     update_option('chatbot_chatgpt_markov_chain_build_results', '');

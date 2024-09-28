@@ -290,7 +290,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     // Check for an error response without decoding
     if (strpos($response, '"error"') !== false && strpos($response, '"message"') !== false) {
 
-        // prod_trace('ERROR', print_r($response, true));
+        // prod_trace( 'ERROR', print_r($response, true));
 
         // Extract the error message and type using regular expressions
         preg_match('/"message"\s*:\s*"([^"]+)"/', $response, $messageMatch);
@@ -300,11 +300,11 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
         $errorType = $typeMatch[1] ?? 'Unknown type';
     
         // Handle the error
-        prod_trace('ERROR', $errorMessage);
-        prod_trace('ERROR', $errorType);
+        prod_trace( 'ERROR', $errorMessage);
+        prod_trace( 'ERROR', $errorType);
     } else {
         // No error found, proceed with normal logic
-        // prod_trace('INFO', 'No errors found. Proceeding with the operation.');
+        // prod_trace( 'INFO', 'No errors found. Proceeding with the operation.');
     }
     
     // DIAG - Diagnostics  Ver 2.0.1
