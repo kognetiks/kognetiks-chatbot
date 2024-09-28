@@ -41,8 +41,8 @@ function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '
             if ($keyExists) {
                 $key = $attemptedKey;
                 $primaryKeyword = $key; // Set primary keyword for context reinforcement
-                back_trace('NOTICE', 'Found starting key: ' . $key);
-                back_trace('NOTICE', 'Primary keyword: ' . $primaryKeyword);
+                back_trace( 'NOTICE', 'Found starting key: ' . $key);
+                back_trace( 'NOTICE', 'Primary keyword: ' . $primaryKeyword);
                 break;
             }
         }
@@ -228,14 +228,14 @@ function selectNextWordBasedOnProbability($nextWords) {
 function getMarkovChainFromDatabase() {
 
     // DIAG - Diagnostics - Start
-    // back_trace('NOTICE', 'getMarkovChainFromDatabase - Start');
+    // back_trace( 'NOTICE', 'getMarkovChainFromDatabase - Start');
 
     // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
     $chabot_chatgpt_markov_chain_build_schedule = get_option('chatbot_chatgpt_markov_chain_build_status', 'No');
 
     if ($chatbot_chatgpt_markov_chain_build_schedule == 'Yes') {
 
-        // back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
+        // back_trace( 'NOTICE', 'Forcing Markov Chain rebuild.');
         update_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
         update_option('chatbot_chatgpt_markov_chain_build_status', 'No');
         $markovChain = null;
@@ -250,7 +250,7 @@ function getMarkovChainFromDatabase() {
 
     // Check if we successfully retrieved the Markov Chain
     if (!empty($markovChain)) {
-        // back_trace('NOTICE', 'Markov Chain Length: ' . count($markovChain));
+        // back_trace( 'NOTICE', 'Markov Chain Length: ' . count($markovChain));
         // How much memory is being used by the Markov Chain
         // back_trace( 'NOTICE', 'Memory usage: ' . memory_get_usage());
         // back_trace( 'NOTICE', 'Memory usage in megabytes: ' . round(memory_get_usage() / 1024 / 1024, 2));
@@ -258,7 +258,7 @@ function getMarkovChainFromDatabase() {
     }
 
     // If no Markov Chain found, rebuild it
-    // back_trace('NOTICE', 'No Markov Chain found. Rebuilding.');
+    // back_trace( 'NOTICE', 'No Markov Chain found. Rebuilding.');
 
     // Run the Markov Chain building and saving process
     runMarkovChatbotAndSaveChain();
@@ -269,13 +269,13 @@ function getMarkovChainFromDatabase() {
     // Check if rebuilding was successful
     if (!empty($markovChain)) {
 
-        // back_trace('NOTICE', 'Markov Chain Length after rebuild: ' . count($markovChain));
+        // back_trace( 'NOTICE', 'Markov Chain Length after rebuild: ' . count($markovChain));
         return $markovChain;  // Return the rebuilt Markov Chain
 
     }
 
     // If rebuild fails, log the issue and return null
-    // back_trace('NOTICE', 'Failed to rebuild the Markov Chain.');
+    // back_trace( 'NOTICE', 'Failed to rebuild the Markov Chain.');
     return null;  // Return null to indicate failure
 
 }
@@ -556,19 +556,19 @@ function getMarkovChainFromChunks() {
     foreach ($results as $row) {
 
         // DIAG - Log the chunk being unserialized for debugging
-        // back_trace('NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
-        // back_trace('NOTICE', 'Serialized chunk content (truncated): ' . substr($row->chain_chunk, 0, 100)); // Log first 100 chars of the chunk
+        // back_trace( 'NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
+        // back_trace( 'NOTICE', 'Serialized chunk content (truncated): ' . substr($row->chain_chunk, 0, 100)); // Log first 100 chars of the chunk
 
         // Unserialize each chunk
         $unserializedChunk = @unserialize($row->chain_chunk);
 
         if ($unserializedChunk === false) {
             // Log the failure and check the serialized data format
-            // back_trace('ERROR', 'Unserialization failed for chunk ' . $row->chunk_index . '. Check if the data format is correct.');
+            // back_trace( 'ERROR', 'Unserialization failed for chunk ' . $row->chunk_index . '. Check if the data format is correct.');
         } else {
             // Check if the unserialized data is an array
             if (!is_array($unserializedChunk)) {
-                // back_trace('ERROR', 'Expected array, but got ' . gettype($unserializedChunk) . ' for chunk ' . $row->chunk_index);
+                // back_trace( 'ERROR', 'Expected array, but got ' . gettype($unserializedChunk) . ' for chunk ' . $row->chunk_index);
             } else {
                 // Merge unserialized data into the final array
                 $finalArray = array_merge($finalArray, $unserializedChunk);
@@ -578,10 +578,10 @@ function getMarkovChainFromChunks() {
 
     // Return the final reassembled Markov Chain array
     if (!empty($finalArray)) {
-        // back_trace('NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
+        // back_trace( 'NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
         return $finalArray;
     } else {
-        // back_trace('ERROR', 'No valid data reassembled from chunks.');
+        // back_trace( 'ERROR', 'No valid data reassembled from chunks.');
         return null;
     }
 

@@ -138,8 +138,6 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
         $batch_size = 100;
     }
 
-    $batch_size = 50; // Limit the batch size to 50 for now
-
     if ($batch_starting_point == 1 && $processing_type == 'posts') {
 
         // Reset the Markov Chain table if it's the first post batch
@@ -151,23 +149,30 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
         // Reset the auto-increment value back to 1
         $wpdb->query("ALTER TABLE $table_name AUTO_INCREMENT = 1");
 
+        // DIAG - Diagnostics - Ver 2.1.6.1
+        back_trace( 'NOTICE', 'Markov Chain table reset');
+
     }
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'getAllPublishedContent - Start');
+    back_trace( 'NOTICE', 'getAllPublishedContent - Start');
+
+    // DIAG - Diagnostics - Ver 2.1.6.1
+    back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
+    back_trace( 'NOTICE', 'Last Updated: ' . $last_updated);
+    back_trace( 'NOTICE', 'Processing Type: ' . $processing_type);
+    error_log( 'Batch Size: ' . $batch_size);
+    error_log( 'Last Updated: ' . $last_updated);
+    error_log( 'Processing Type: ' . $processing_type);
 
     // Process posts first
     if ($processing_type == 'posts') {
 
         // DIAG - Diagnostics - Ver 2.1.6.1
-        back_trace('NOTICE', 'Processing posts and pages');
+        back_trace( 'NOTICE', 'Processing posts and pages');
 
         // Calculate the offset for the current post batch
         $offset = ($batch_starting_point - 1) * $batch_size;
-
-        // DIAG - Diagnostics - Ver 2.1.6.1
-        back_trace('NOTICE', 'Offset: ' . $offset);
-        back_trace('NOTICE', 'Batch Size: ' . $batch_size);
 
         // Query for posts and pages after the last updated date
         $args = array(
@@ -200,14 +205,15 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
             buildMarkovChain($content);
 
             // If more posts are available, schedule the next post batch
-            if ($query->found_posts > $batch_starting_point * $batch_size) {
+            // if ($query->found_posts > $batch_starting_point * $batch_size) {
+            if ($query->found_posts > ($offset + $batch_size)) {
                 $next_batch_starting_point = $batch_starting_point + 1;
                 wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array($last_updated, $next_batch_starting_point, $batch_size, 'posts'));
-                back_trace('NOTICE', 'getAllPublishedContent - Scheduled next post batch #' . $next_batch_starting_point);
+                back_trace( 'NOTICE', 'getAllPublishedContent - Scheduled next post batch #' . $next_batch_starting_point);
             } else {
                 // No more posts, move to processing comments
                 wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array($last_updated, 1, $batch_size, 'comments'));
-                back_trace('NOTICE', 'getAllPublishedContent - Posts done, moving to comments');
+                back_trace( 'NOTICE', 'getAllPublishedContent - Posts done, moving to comments');
             }
         }
 
@@ -220,14 +226,14 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     if ($processing_type == 'comments') {
 
         // DIAG - Diagnostics - Ver 2.1.6.1
-        back_trace('NOTICE', 'Processing comments');
+        back_trace( 'NOTICE', 'Processing comments');
 
         // Calculate the offset for the current comment batch
         $offset = ($batch_starting_point - 1) * $batch_size;
 
         // DIAG - Diagnostics - Ver 2.1.6.1
-        back_trace('NOTICE', 'Offset: ' . $offset);
-        back_trace('NOTICE', 'Batch Size: ' . $batch_size);
+        back_trace( 'NOTICE', 'Offset: ' . $offset);
+        back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
 
         // Fetch all comments after the last updated date
         $comments = get_comments(array(
@@ -255,10 +261,10 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
         // If more comments are available, schedule the next comment batch
         if (count($comments) === $batch_size) {
             $next_batch_starting_point = $batch_starting_point + 1;
-            wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array($last_updated, $next_batch_starting_point, $batch_size, 'comments'));
-            back_trace('NOTICE', 'getAllPublishedContent - Scheduled next comment batch #' . $next_batch_starting_point);
+            wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array(serialize(array($last_updated, $next_batch_starting_point, $batch_size, 'posts'))));
+            back_trace( 'NOTICE', 'getAllPublishedContent - Scheduled next comment batch #' . $next_batch_starting_point);
         } else {
-            back_trace('NOTICE', 'getAllPublishedContent - Comments done');
+            back_trace( 'NOTICE', 'getAllPublishedContent - Comments done');
         }
 
     }
@@ -267,9 +273,11 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     updateMarkovChainTimestamp();
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'getAllPublishedContent - End');
+    back_trace( 'NOTICE', 'getAllPublishedContent - End');
 
 }
+add_action('getAllPublishedContent', 'getAllPublishedContent', 10, 4);
+
 
 // Step 4: Build the Markov Chain by saving each word and its next word directly into the database
 function buildMarkovChain($content) {
@@ -429,8 +437,8 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
     // Validate that the chunk is a serialized string
     if (is_string($chunk) && @unserialize($chunk) !== false || $chunk === 'b:0;') {
         // Log chunk size and content (truncated)
-        // back_trace('NOTICE', 'Chunk content being saved (truncated): ' . substr($chunk, 0, 100)); // First 100 characters
-        // back_trace('NOTICE', 'Full Chunk length: ' . strlen($chunk));  // Log the full length of the chunk
+        // back_trace( 'NOTICE', 'Chunk content being saved (truncated): ' . substr($chunk, 0, 100)); // First 100 characters
+        // back_trace( 'NOTICE', 'Full Chunk length: ' . strlen($chunk));  // Log the full length of the chunk
 
         $update_date = date('Y-m-d H:i:s');
 
@@ -444,15 +452,15 @@ function saveMarkovChainChunk($chunk, $chunkIndex) {
 
         // Handle errors
         if ($wpdb->last_error) {
-            // back_trace('ERROR', 'Error saving chunk ' . $chunkIndex . ': ' . $wpdb->last_error);
-            // back_trace('ERROR', 'Query: ' . $wpdb->last_query);
+            // back_trace( 'ERROR', 'Error saving chunk ' . $chunkIndex . ': ' . $wpdb->last_error);
+            // back_trace( 'ERROR', 'Query: ' . $wpdb->last_query);
         } else {
-            // back_trace('NOTICE', 'Chunk ' . $chunkIndex . ' saved successfully.');
+            // back_trace( 'NOTICE', 'Chunk ' . $chunkIndex . ' saved successfully.');
         }
 
     } else {
         // Log the issue if the chunk is not a valid serialized string
-        // back_trace('ERROR', 'Invalid serialized chunk data for chunk index: ' . $chunkIndex);
+        // back_trace( 'ERROR', 'Invalid serialized chunk data for chunk index: ' . $chunkIndex);
     }
 }
 
@@ -496,7 +504,7 @@ function saveMarkovChainInChunks($markovChain) {
 
         // Skip empty or invalid chunks
         if (empty($chunk) || $chunk === 'N;') {
-            // back_trace('NOTICE', 'Skipping empty or null chunk at index ' . $index);
+            // back_trace( 'NOTICE', 'Skipping empty or null chunk at index ' . $index);
             continue; // Skip to the next chunk
         }
 
@@ -550,8 +558,8 @@ function getDatabaseStats($table_name) {
         )
     );
 
-    back_trace('NOTICE', 'Row Count: ' . $row_count);
-    back_trace('NOTICE', 'Table Size: ' . $table_size . ' MB');
+    back_trace( 'NOTICE', 'Row Count: ' . $row_count);
+    back_trace( 'NOTICE', 'Table Size: ' . $table_size . ' MB');
 
     return [
         'row_count' => $row_count,

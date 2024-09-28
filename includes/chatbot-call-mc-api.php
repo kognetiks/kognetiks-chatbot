@@ -186,17 +186,17 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     if (!empty($response)) {
         // Prepare the response body
         $response_body['choices'][0]['message']['content'] = trim($response);
-        back_trace('NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
+        back_trace( 'NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
     
         // Remove any trailing comma, colon, semicolon, or spaces and replace them with a period
         $response_body['choices'][0]['message']['content'] = preg_replace('/[,;:\s]+$/', '.', $response_body['choices'][0]['message']['content']);
-        back_trace('NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
+        back_trace( 'NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
     
         // Ensure the message ends with a period, exclamation point, or question mark
         if (!preg_match('/[.!?]$/', $response_body['choices'][0]['message']['content'])) {
             $response_body['choices'][0]['message']['content'] .= '.';
         }
-        back_trace('NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
+        back_trace( 'NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
     
         // Set the success response code
         $response_body['response']['code'] = 200; // Success code
