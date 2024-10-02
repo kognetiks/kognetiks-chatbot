@@ -135,6 +135,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-dia
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-links.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-localization.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-localize.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-markov-chain.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-notices.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-premium.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-api.php';
@@ -194,6 +195,10 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
+
+// FIXME - Disable Markov Chain - Ver 2.1.6.1
+global $chatbot_chatgpt_markov_chain_setting;
+$chatbot_chatgpt_markov_chain_setting = 'No';
 
 // Model choice - Ver 1.9.4
 global $model;
@@ -519,6 +524,13 @@ function chatbot_chatgpt_send_message() {
 
     // If Markov Chain is enabled, then process the message
     if (esc_attr(get_option('chatbot_chatgpt_markov_chain_setting', 'No')) == 'Yes') {
+        // Check for missing Message
+        if (!$message) {
+            // DIAG - Diagnostics
+            // back_trace( 'ERROR', 'Invalid API Key or Message.');
+            wp_send_json_error('Error: Invalid API key or Message. Please check the plugin settings.');
+        }
+    } else {
         // Check for missing API key or Message
         if (!$api_key || !$message) {
             // DIAG - Diagnostics
