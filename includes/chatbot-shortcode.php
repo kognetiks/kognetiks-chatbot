@@ -279,7 +279,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // One bot per page, embedded over floating - Ver 2.1.6
     // if ($kchat_settings['chatbot_chatgpt_display_style'] == 'floating' && $temp_chatbot_chatgpt_display_style == 'embedded') {
-    //     back_trace('NOTICE', 'Embedded style selected over floating style');
+    //     back_trace( 'NOTICE', 'Embedded style selected over floating style');
     //     // End the shortcode processing
     //     // return;
     //     // $atts['style'] = 'embedded';

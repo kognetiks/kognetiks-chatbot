@@ -159,6 +159,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 2.1.6 - Released TBD =
 
+* **Charset Fallback Adjustment**: Added fallback to ```utf8``` character set when ```utf8mb4``` is not supported, ensuring compatibility across different database configurations.
 * **Suppress Footer Chatbots**: Suppress chatbot in the footer when the chatbot is embedded on the page.
 
 = 2.1.5 - Released 09-14-2024 =

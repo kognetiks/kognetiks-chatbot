@@ -22,6 +22,14 @@ function dbKNStore() {
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
 
+    // Fallback cascade for invalid or unsupported character sets
+    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+        if (strpos($charset_collate, 'utf8') === false) {
+            // Fallback to utf8 if utf8mb4 is not supported
+            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+        }
+    }
+
     // Drop table if it exists
     $wpdb->query("DROP TABLE IF EXISTS $table_name");
 
@@ -61,6 +69,14 @@ function dbKNStoreTFIDF() {
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
+    // Fallback cascade for invalid or unsupported character sets
+    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+        if (strpos($charset_collate, 'utf8') === false) {
+            // Fallback to utf8 if utf8mb4 is not supported
+            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+        }
+    }
+
     // Drop table if it exists
     $wpdb->query("DROP TABLE IF EXISTS $table_name");
 
@@ -94,21 +110,29 @@ function dbKNStoreWordCount() {
 
     global $wpdb;
     
-        $charset_collate = $wpdb->get_charset_collate();
-        $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_word_count';
-    
-        // Drop table if it exists
-        $wpdb->query("DROP TABLE IF EXISTS $table_name");
-    
-        // SQL to create a new table
-        $sql = "CREATE TABLE $table_name (
-            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            word VARCHAR(255) NOT NULL UNIQUE,
-            word_count INT NOT NULL,
-            document_count INT NOT NULL
-        ) $charset_collate;";
-    
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_word_count';
+
+    $charset_collate = $wpdb->get_charset_collate();
+    // Fallback cascade for invalid or unsupported character sets
+    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+        if (strpos($charset_collate, 'utf8') === false) {
+            // Fallback to utf8 if utf8mb4 is not supported
+            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+        }
+    }
+
+    // Drop table if it exists
+    $wpdb->query("DROP TABLE IF EXISTS $table_name");
+
+    // SQL to create a new table
+    $sql = "CREATE TABLE $table_name (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        word VARCHAR(255) NOT NULL UNIQUE,
+        word_count INT NOT NULL,
+        document_count INT NOT NULL
+    ) $charset_collate;";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     
     // Execute SQL query and create the table
     if(dbDelta($sql)) {
