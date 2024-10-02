@@ -28,6 +28,14 @@ function create_chatbot_chatgpt_assistants_table() {
     
     $charset_collate = $wpdb->get_charset_collate();
 
+    // Fallback cascade for invalid or unsupported character sets
+    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+        if (strpos($charset_collate, 'utf8') === false) {
+            // Fallback to utf8 if utf8mb4 is not supported
+            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+        }
+    }
+
     $sql = "CREATE TABLE $table_name (
         id BIGINT(20) UNSIGNED AUTO_INCREMENT,
         assistant_id VARCHAR(255) NOT NULL,
@@ -45,6 +53,7 @@ function create_chatbot_chatgpt_assistants_table() {
         PRIMARY KEY (id)
     ) $charset_collate;";
 
+
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
     // Execute SQL query and create the table
@@ -52,12 +61,12 @@ function create_chatbot_chatgpt_assistants_table() {
 
     // Check for errors after dbDelta
     if ($wpdb->last_error) {
-        logErrorToServer('Failed to create table: ' . $table_name);
-        logErrorToServer('SQL: ' . $sql);
-        logErrorToServer('Error details: ' . $wpdb->last_error);
-        // error_log('Failed to create table: ' . $table_name);
-        // error_log('SQL: ' . $sql);
-        // error_log('Error details: ' . $wpdb->last_error);
+        // logErrorToServer('Failed to create table: ' . $table_name);
+        // logErrorToServer('SQL: ' . $sql);
+        // logErrorToServer('Error details: ' . $wpdb->last_error);
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        error_log('Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
     }
 

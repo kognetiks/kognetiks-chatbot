@@ -76,7 +76,16 @@ function createMarkovChainTable() {
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+
     $charset_collate = $wpdb->get_charset_collate();
+
+    // Fallback cascade for invalid or unsupported character sets
+    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+        if (strpos($charset_collate, 'utf8') === false) {
+            // Fallback to utf8 if utf8mb4 is not supported
+            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+        }
+    }
     
     // SQL to create or update the table
     $create_table_sql = "
@@ -95,17 +104,15 @@ function createMarkovChainTable() {
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($create_table_sql);
 
-    // Check for any database errors
-    if (!empty($wpdb->last_error)) {
-
-        prod_trace( 'WARNING', 'createMarkovChainTable - Creating table: ' . $create_table_sql);
-        prod_trace( 'ERROR', 'Database error during table creation: ' . $wpdb->last_error);
-
-    } else {
-
-        prod_trace( 'NOTICE', 'Markov Chain table created/updated successfully.');
-
+    // Check for errors after dbDelta
+    if ($wpdb->last_error) {
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        error_log('Error details: ' . $wpdb->last_error);
+        return false;  // Table creation failed
     }
+
+    prod_trace( 'NOTICE', 'Markov Chain table created/updated successfully.');
 
 }
 // Register the table creation function to run on plugin activation

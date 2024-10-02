@@ -19,7 +19,16 @@ function create_chatbot_chatgpt_interactions_table() {
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
+    
     $charset_collate = $wpdb->get_charset_collate();
+
+    // Fallback cascade for invalid or unsupported character sets
+    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+        if (strpos($charset_collate, 'utf8') === false) {
+            // Fallback to utf8 if utf8mb4 is not supported
+            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+        }
+    }
 
     $sql = "CREATE TABLE IF NOT EXISTS $table_name (
         date DATE PRIMARY KEY,
@@ -29,11 +38,15 @@ function create_chatbot_chatgpt_interactions_table() {
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 
-    // Log errors or notify admin if there was an error
-    if (!empty($wpdb->last_error)) {
-        // DIAG - Diagnostics
-        // back_trace( 'ERROR', 'Error creating chatbot_chatgpt_interactions table ' . $wpdb->last_error);
-        return;
+    // Check for errors after dbDelta
+    if ($wpdb->last_error) {
+        // logErrorToServer('Failed to create table: ' . $table_name);
+        // logErrorToServer('SQL: ' . $sql);
+        // logErrorToServer('Error details: ' . $wpdb->last_error);
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        error_log('Error details: ' . $wpdb->last_error);
+        return false;  // Table creation failed
     }
 
     // DIAG - Diagnostics
@@ -172,6 +185,17 @@ function create_conversation_logging_table() {
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'Table does not exist: ' . $table_name);
         // SQL to create the conversation logging table
+
+        $charset_collate = $wpdb->get_charset_collate();
+
+        // Fallback cascade for invalid or unsupported character sets
+        if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+            if (strpos($charset_collate, 'utf8') === false) {
+                // Fallback to utf8 if utf8mb4 is not supported
+                $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+            }
+        }
+
         $sql = "CREATE TABLE $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             session_id VARCHAR(255) NOT NULL,
@@ -185,16 +209,18 @@ function create_conversation_logging_table() {
             PRIMARY KEY  (id),
             INDEX session_id_index (session_id),
             INDEX user_id_index (user_id)
-        );";
+        ) $charset_collate;";
     }
     
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 
-    // Log errors or notify admin if there was an error
-    if (!empty($wpdb->last_error)) {
-        // back_trace( 'ERROR', 'Error creating/modifying chatbot_chatgpt_conversation_log table' . $wpdb->last_error);
-        return;
+    // Check for errors after dbDelta
+    if ($wpdb->last_error) {
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        error_log('Error details: ' . $wpdb->last_error);
+        return false;  // Table creation failed
     }
 
     // back_trace( 'SUCCESS', 'Successfully created/updated chatbot_chatgpt_conversation_log table');
