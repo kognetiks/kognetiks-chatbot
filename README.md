@@ -6,6 +6,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's new in Versino 2.1.6
 
+* **Messege Limit Periods**: Added options to set message limits periods for visitors and logged-in users, from ```Hourly```, ```Daily```, ```Weekly```, up to ```Lifetime```.
 * **Charset Fallback Adjustment**: Added fallback to ```utf8``` character set when ```utf8mb4``` is not supported, ensuring compatibility across different database configurations.
 * **Suppress Footer Chatbots**: Suppress chatbot in the footer when the chatbot is embedded on the page.
 
