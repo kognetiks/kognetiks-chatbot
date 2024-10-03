@@ -78,7 +78,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
     // back_trace( 'NOTICE', '========================================');
     // foreach ($atts as $key => $value) {
-    //   back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    //   // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     // }
    
     // BELT & SUSPENDERS - Ver 1.9.4
@@ -254,7 +254,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Validate and sanitize the style parameter - Ver 1.9.9
     $valid_styles = ['floating', 'embedded'];
     $chatbot_chatgpt_display_style = 'floating'; // default value
-    
+
     // Check if 'style' exists in $atts and is not null
     if (array_key_exists('style', $atts) && !is_null($atts['style'])) {
         // Check if the provided style is valid
@@ -273,6 +273,20 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // Remove the 'style' key from the $atts array
         unset($atts['style']);
     }
+
+    // See if there is a style transient already stored
+    // $temp_chatbot_chatgpt_display_style = get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id, null);
+
+    // One bot per page, embedded over floating - Ver 2.1.6
+    // if ($kchat_settings['chatbot_chatgpt_display_style'] == 'floating' && $temp_chatbot_chatgpt_display_style == 'embedded') {
+    //     back_trace('NOTICE', 'Embedded style selected over floating style');
+    //     // End the shortcode processing
+    //     // return;
+    //     // $atts['style'] = 'embedded';
+    //     $chatbot_chatgpt_display_style = 'embedded';
+    //     $kchat_settings['chatbot_chatgpt_display_style'] = 'embedded';
+    // }
+
     // Set the sanitized display style in $atts and $kchat_settings
     $atts['chatbot_chatgpt_display_style'] = $chatbot_chatgpt_display_style;
     $kchat_settings['chatbot_chatgpt_display_style'] = $chatbot_chatgpt_display_style;
@@ -548,9 +562,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'chatbot_chatgpt_force_page_reload' => esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No')),
         'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
         'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
+        'chatbot_chatgpt_message_limit_period_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime')),
     ));
 
-    // back_trace('NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));
+    // back_trace( 'NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
@@ -863,6 +878,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     'chatbot_chatgpt_last_reset',
                     'chatbot_chatgpt_message_count',
                     'chatbot_chatgpt_message_limit_setting',
+                    'chatbot_chatgpt_message_limit_period_setting',
                     'chatbot_chatgpt_start_status',
                     'chatbot_chatgpt_start_status_new_visitor',
                     'chatbot_chatgpt_opened',
@@ -1367,6 +1383,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
                         'chatbot_chatgpt_last_reset',
                         'chatbot_chatgpt_message_count',
                         'chatbot_chatgpt_message_limit_setting',
+                        'chatbot_chatgpt_message_limit_period_setting',
                         'chatbot_chatgpt_start_status',
                         'chatbot_chatgpt_start_status_new_visitor',
                         'chatbot_chatgpt_opened',

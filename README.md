@@ -4,6 +4,10 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## Documentation
 
+## What's new in Versino 2.1.6
+
+* **Suppress Footer Chatbots**: Suppress chatbot in the footer when the chatbot is embedded on the page.
+
 ## What's new in Version 2.1.5
 
 * **Speech Recognition Integration**: Added support for speech recognition to enhance user interaction with the chatbot. Users can now speak to the chatbot, which will transcribe the speech into text for processing.

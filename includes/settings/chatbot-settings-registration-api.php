@@ -26,8 +26,10 @@ function chatbot_chatgpt_api_settings_init() {
 
     // API/Model settings tab - Ver 1.3.0
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_api_key', 'sanitize_api_key');
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_message_limit_setting');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_user_message_limit_setting');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_user_message_limit_period_setting');
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_visitor_message_limit_setting');
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_visitor_message_limit_period_setting');
 
     add_settings_section(
         'chatbot_chatgpt_api_model_general_section',
@@ -45,9 +47,17 @@ function chatbot_chatgpt_api_settings_init() {
     );
 
     add_settings_field(
-        'chatbot_chatgpt_message_limit_setting',
+        'chatbot_chatgpt_user_message_limit_setting',
         'Chatbot Daily Message Limit',
-        'chatbot_chatgpt_message_limit_setting_callback',
+        'chatbot_chatgpt_user_message_limit_setting_callback',
+        'chatbot_chatgpt_api_model_general',
+        'chatbot_chatgpt_api_model_general_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_user_message_limit_period_setting',
+        'Message Limit Period',
+        'chatbot_chatgpt_user_message_limit_period_setting_callback',
         'chatbot_chatgpt_api_model_general',
         'chatbot_chatgpt_api_model_general_section'
     );
@@ -56,6 +66,14 @@ function chatbot_chatgpt_api_settings_init() {
         'chatbot_chatgpt_visitor_message_limit_setting',
         'Visitor Daily Message Limit',
         'chatbot_chatgpt_visitor_message_limit_setting_callback',
+        'chatbot_chatgpt_api_model_general',
+        'chatbot_chatgpt_api_model_general_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_visitor_message_limit_period_setting',
+        'Visitor Message Limit Period',
+        'chatbot_chatgpt_visitor_message_limit_period_setting_callback',
         'chatbot_chatgpt_api_model_general',
         'chatbot_chatgpt_api_model_general_section'
     );
@@ -145,6 +163,51 @@ function chatbot_chatgpt_api_settings_init() {
         'chatbot_chatgpt_top_p_callback',
         'chatbot_chatgpt_api_model_chat',
         'chatbot_chatgpt_api_model_chat_section'
+    );
+
+    // Markov Chain Options - Ver 2.1.6
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_enabled'); // Ver 2.1.6
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_build_schedule'); // Ver 2.1.6
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_length'); // Ver 2.1.6
+    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_next_phrase_length'); // Ver 2.1.6
+
+    add_settings_section(
+        'chatbot_chatgpt_api_model_markov_chain_section',
+        'Markov Chain Settings',
+        'chatbot_chatgpt_markov_chain_section_callback',
+        'chatbot_chatgpt_api_model_markov_chain'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_markov_chain_enabled',
+        'Markov Chain Enabled',
+        'chatbot_chatgpt_markov_chain_enabled_callback',
+        'chatbot_chatgpt_api_model_markov_chain',
+        'chatbot_chatgpt_api_model_markov_chain_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_markov_chain_length',
+        'Markov Chain Length',
+        'chatbot_chatgpt_markov_chain_length_callback',
+        'chatbot_chatgpt_api_model_markov_chain',
+        'chatbot_chatgpt_api_model_markov_chain_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_markov_chain_next_phrase_length',
+        'Markov Chain Length Next Phase Length',
+        'chatbot_chatgpt_markov_chain_next_phrase_length_callback',
+        'chatbot_chatgpt_api_model_markov_chain',
+        'chatbot_chatgpt_api_model_markov_chain_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_markov_chain_build_schedule',
+        'Markov Chain Build Schedule',
+        'chatbot_chatgpt_markov_chain_build_schedule_callback',
+        'chatbot_chatgpt_api_model_markov_chain',
+        'chatbot_chatgpt_api_model_markov_chain_section'
     );
 
     // Voice Options - Ver 1.9.5

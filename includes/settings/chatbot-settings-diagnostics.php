@@ -140,6 +140,7 @@ function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
 
     echo '<p>Chatbot Version: <b>' . kchat_get_plugin_version() . '</b><br>';
     echo 'PHP Version: <b>' . $php_version . '</b><br>';
+    echo 'PHP Memory Limit: <b>' . ini_get('memory_limit') . '</b><br>';
     echo 'WordPress Version: <b>' . $wp_version . '</b><br>';
     echo 'WordPress Language Code: <b>' . get_locale() . '</b></p>';
 
@@ -253,7 +254,7 @@ function chatbot_chatgpt_delete_data_callback($args) {
 function prod_trace($message_type = "NOTICE", $message = "No message") {
 
     // Trace production messages to the error log
-    back_trace($message_type, $message);
+    // back_trace($message_type, $message);
 
 }
 
