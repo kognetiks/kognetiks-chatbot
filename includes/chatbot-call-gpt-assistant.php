@@ -271,7 +271,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
     $response = fetchDataUsingCurl($url, $context);
 
-    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Check for false response
     if ($response === FALSE) {
