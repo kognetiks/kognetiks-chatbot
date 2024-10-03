@@ -214,6 +214,7 @@ jQuery(document).ready(function ($) {
 
     customAvatar = DOMPurify.sanitize(customAvatar); // Sanitize the custom avatar URL
     // customAvatar = document.createTextNode(customAvatar); // Create a text node from the custom avatar URL
+    console.log ('Chatbot: NOTICE: customAvatar: ' + customAvatar);
 
     // Overrides for mobile devices - Ver 1.8.1
     // if (isMobile()) {
