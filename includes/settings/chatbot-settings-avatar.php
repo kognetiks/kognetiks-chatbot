@@ -147,7 +147,6 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
                 }
             ?>
         </table>
-        <input type="hidden" id="chatbot_chatgpt_avatar_icon_setting" name="chatbot_chatgpt_avatar_icon_setting" value="<?php echo esc_attr( $selectedIcon ); ?>">
     <?php
 
 }
