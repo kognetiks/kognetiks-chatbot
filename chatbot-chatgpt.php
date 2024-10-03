@@ -961,7 +961,7 @@ register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 function chatbot_chatgpt_markov_chain_status_activation() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'Markov Chain Status Activation');
+    // back_trace( 'NOTICE', 'Markov Chain Status Activation');
 
     // Add the option for build status with a default value of 'Never Run'
     add_option('chatbot_chatgpt_markov_chain_build_status', 'Never Run');
@@ -979,7 +979,7 @@ register_activation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_activati
 function chatbot_chatgpt_markov_chain_status_deactivation() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'Markov Chain Status Deactivation');
+    // back_trace( 'NOTICE', 'Markov Chain Status Deactivation');
 
     // Delete the build status option on deactivation
     delete_option('chatbot_chatgpt_markov_chain_build_status');
