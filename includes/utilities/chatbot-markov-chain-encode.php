@@ -131,6 +131,8 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
         $batch_size = 100;
     }
 
+    $batch_size = 50; // Limit the batch size to 50 for now
+
     if ($batch_starting_point == 1 && $processing_type == 'posts') {
 
         // Reset the Markov Chain table if it's the first post batch
