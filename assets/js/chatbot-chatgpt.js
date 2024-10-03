@@ -1,10 +1,12 @@
 jQuery(document).ready(function ($) {
 
+    console.log('Chatbot: NOTICE: chatbot-chatgpt.js loaded.');
+
     if (typeof kchat_settings === 'undefined') {
-        // console.error('Chatbot: NOTICE: kchat_settings is not defined.');
+        console.error('Chatbot: NOTICE: kchat_settings is not defined.');
         return;
     } else {
-        // console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
+        console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
     }
 
     // Only call the function if the chatbot shortcode is present
@@ -206,7 +208,9 @@ jQuery(document).ready(function ($) {
 
     // Avatar and Custom Message - Ver 1.5.0 - Upgraded - Ver 2.0.3 - 2024 05 28
     let selectedAvatar = kchat_settings.chatbot_chatgpt_avatar_icon_setting || '';
+    console.log ('Chatbot: NOTICE: selectedAvatar: ' + selectedAvatar);
     let customAvatar = kchat_settings.chatbot_chatgpt_custom_avatar_icon_setting || '';
+    console.log ('Chatbot: NOTICE: customAvatar: ' + customAvatar);
 
     customAvatar = DOMPurify.sanitize(customAvatar); // Sanitize the custom avatar URL
     // customAvatar = document.createTextNode(customAvatar); // Create a text node from the custom avatar URL
