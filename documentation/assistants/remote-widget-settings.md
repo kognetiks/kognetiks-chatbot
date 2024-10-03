@@ -7,14 +7,14 @@ The **Kognetiks Chatbot for WordPress** now includes the advanced feature to all
 ### Field Descriptions
 
 1. **Enable Remote Widget**:
-   - **Description**: This settings enables and disables remote access on a global basis.  By default it is set to ```No```.  To allow access by a remote server to a chatbot, you will need to change this setting to ```Yes```.
+   - **Description**: This setting enables and disables remote access on a global basis.  By default, it is set to ```No```.  To allow access by a remote server to a chatbot, you will need to change this setting to ```Yes```.
    - **Input**: Choose ```Yes``` or ```No```.
 
 2. **Allowed Domains**:
     - **Description**: Enter the domain and assistant identified to allow remote access to a chatbot.  For example if the domain is ```kognetiks.com``` and you the chatbot is ```chatbot-4```, then enter ```kognetiks.com,chatbot-4```.  The pairs will be checked at when the remote server calls the chatbot widget endpoint.  If the pair is domain and chatbot are not paired correctly, no chatbot will be present.
     - **Input**: ```domain.com,chatbot-n```
-    - **Tip**: Be sure to put each pair on it's own line, seperated the domain name and the chatbot shortcode identifier with a coma.
-    - **Caution**: Your server and OpenAI resources are valuable.  Be sure to secure those resouces by carefully maintaining the allowed pairs of domains and chatbots that you have white listed in this section.
+    - **Tip**: Be sure to put each pair on its own line, seperated the domain name and the chatbot shortcode identifier with a coma.
+    - **Caution**: Your server and OpenAI resources are valuable.  Be sure to secure those resources by carefully maintaining the allowed pairs of domains and chatbots that you have white listed in this section.
 
 3. **Widget Logging**:
     - **Description**: Widget logging records valid and invalid access to your chatbot(s) from remote servers.  This is especially helpful to ensure that your resources are used only by those that you have allowed.  On the ```Tools``` tab you will find a section titled **Manage Widget Access Logs** where you can download and delete remote widget access.
@@ -24,7 +24,7 @@ The **Kognetiks Chatbot for WordPress** now includes the advanced feature to all
 ### Configuring Remote Server Access
 
 1. **Remote Server Script**:
-    - **Description**: The code block below illustrates how to configure the remote server call to your chatbot.  It consists of a ```<script></script>``` and ```<iframe></iframe >```.  In the iframe is the call to your endpoint and a sepecific assistant.  In this example, the endpoitn is located on the kognetiks.com domain, nestled deep within the subdirectories where the Kogentiks Chatbot resides.  To get stareted, you can copy this code and substitute ```kognetiks.com``` and ```chatbot-4``` for your domain and one of your assistants.
+    - **Description**: The code block below illustrates how to configure the remote server call to your chatbot.  It consists of a ```<script></script>``` and ```<iframe></iframe >```.  In the iframe is the call to your endpoint and a specific assistant.  In this example, the endpoint is located on the kognetiks.com domain, nestled deep within the subdirectories where the Kogentiks Chatbot resides.  To get started, you can copy this code and substitute ```kognetiks.com``` and ```chatbot-4``` for your domain and one of your assistants.
 
     ```
     <script>

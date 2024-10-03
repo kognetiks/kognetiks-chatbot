@@ -156,7 +156,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
         ]
     ];
 
-    // Retireve max tokens from the settings
+    // Retrieve max tokens from the settings
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
 
     // Check if the Markov Chain exists

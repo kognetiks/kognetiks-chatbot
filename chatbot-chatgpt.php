@@ -635,7 +635,7 @@ function chatbot_chatgpt_send_message() {
         $use_assistant_id = 'Yes';
 
         // DIAG - Diagnostics - Ver 2.0.5
-        // back_trace( 'NOTICE' , 'Using Altrnate Assistant - $assistant_id: ' .  $assistant_id);
+        // back_trace( 'NOTICE' , 'Using Alternate Assistant - $assistant_id: ' .  $assistant_id);
 
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
         if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {

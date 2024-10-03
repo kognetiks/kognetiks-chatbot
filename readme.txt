@@ -39,16 +39,13 @@ The **Kognetiks Chatbot for WordPress** is a feature-rich AI plugin that leverag
 
 * **API Key Management & Security**: Securely manage your OpenAI API key directly within the plugin. Includes features for monitoring usage, setting limits, and regularly rotating keys for added security.
 
-* **Persistent Memory & Interaction Continuity**: The chatbot remembers previous
-fering a seamless and continuous experience across different pages.
+* **Persistent Memory & Interaction Continuity**: The chatbot remembers previous confering a seamless and continuous experience across different pages.
 
-* **Multi-Language Support**: Engage a global audience with multilingual support
-justing to the site’s language settings.
+* **Multi-Language Support**: Engage a global audience with multilingual support adjusting to the site’s language settings.
 
 🌟 **Why Choose the Kognetiks Chatbot?**
 
-* **Easy Integration**: Quickly set up the plugin and integrate with OpenAI’s AP
-ing intelligent conversations.
+* **Easy Integration**: Quickly set up the plugin and integrate with OpenAI’s API offering intelligent conversations.
 
 * **Versatile Applications**: Perfect for customer support, lead generation, educational purposes, and more.
 
@@ -213,7 +210,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **Model Support**: The latest models available from OpenAI are dynamically added to model picklists.  Available models now include gpt-4o and gpt-4o-mini.  See Chatbot Settings > API/Model > Chat Settings.
 * **Manage Chatbot Error Logs**: Added the ability to manage chatbot error logs, including the ability to download and delete logs. See Chatbot Settings > Tools. TIP: You must enable Diagnostics access the Tools tab. See Chatbot Settings > Messages > Messages and Diagnostics.
 * **Revised Reporting Settings Layout**: Revised and refreshed the Reporting Settings page layout for better visualization. See Chatbot Settings > Reporting.
-* **Conversation Continuation**: Added an additional setting added to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
+* **Conversation Continuation**: Added an additional setting to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
 
 = 2.0.6 - Released 07-11-2024 =
 * **Dynamic Shortcode**: Added support for dynamic shortcodes to allow for more flexible Assistant selection. Add all parameters to the shortcode, including the Assistant ID on the GTP Assistant tab. For example, `[chatbot-1]`.

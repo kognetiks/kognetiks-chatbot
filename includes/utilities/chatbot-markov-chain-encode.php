@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Markove Chain Encode - Ver 2.1.6
+ * Kognetiks Chatbot for WordPress - Markov Chain Encode - Ver 2.1.6
  *
  * This file contains the code for implementing the Markov Chain algorithm
  *
@@ -434,4 +434,3 @@ function getDatabaseStats($table_name) {
     ];
 
 }
-

@@ -62,7 +62,7 @@ The General Settings allow you to customize the basic behavior and appearance of
    - **Selection**: Choose `Yes` if you want to force a page reload.
 
 5. **Conversation Continuation**:
-   - **Description**: This toggle allows you to enable conversation continuation when returning to a page with a earlier chat.
+   - **Description**: This toggle allows you to enable conversation continuation when returning to a page with an earlier chat.
    - **Options**: `On` or `Off`.
    - **Selection**: Choose `On` if you want to enable conversation continuation.   
 

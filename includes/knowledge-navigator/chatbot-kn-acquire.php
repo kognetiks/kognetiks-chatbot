@@ -150,6 +150,7 @@ function chatbot_chatgpt_kn_acquire() {
             $postContentUtf8 = mb_convert_encoding($postContent, 'UTF-8', mb_detect_encoding($postContent));
 
             // Now call kn_acquire_just_the_words with the UTF-8 encoded post content and return $words
+            back_trace( 'WARNING', 'Calling kn_acquire_just_the_words');
             $words = kn_acquire_just_the_words($postContentUtf8);
 
             // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs
@@ -234,6 +235,7 @@ function chatbot_chatgpt_kn_acquire() {
             $postContentUtf8 = mb_convert_encoding($postContent, 'UTF-8', mb_detect_encoding($postContent));
 
             // Now call kn_acquire_just_the_words with the UTF-8 encoded post content and return $words
+            back_trace( 'WARNING', 'Calling kn_acquire_just_the_words');
             $words = kn_acquire_just_the_words($postContentUtf8);
 
             // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs
@@ -325,6 +327,7 @@ function chatbot_chatgpt_kn_acquire() {
             $postContentUtf8 = mb_convert_encoding($postContent, 'UTF-8', mb_detect_encoding($postContent));
 
             // Now call kn_acquire_just_the_words with the UTF-8 encoded post content and return $words
+            back_trace( 'WARNING', 'Calling kn_acquire_just_the_words');
             $words = kn_acquire_just_the_words($postContentUtf8);
 
             // Now call kn_acquire_word_pairs with the UTF-8 encoded post content and return $word_pairs

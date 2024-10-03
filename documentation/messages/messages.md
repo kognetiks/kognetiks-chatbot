@@ -36,7 +36,7 @@ The Messages and Diagnostics Settings help you monitor the health and performanc
      - `Error`: Error messages.
    - **Selection**: Choose the appropriate level based on your need for diagnostics information. `Off` is the default and recommended setting for general use. Use `Error` for in-depth troubleshooting. `Error` logs all levels.
 
-   **NOTE:** You can enable error and console logging at anytime, however in the production releases of the chatbot all error logging has been commented.
+   **NOTE:** You can enable error and console logging at any time, however in the production releases of the chatbot all error logging has been commented.
 
 2. **Custom Error Message**:
    - **Description**: This setting allows administrators to define a custom error message that will be displayed to users when the chatbot encounters an issue. This ensures a more consistent and branded user experience, even in cases of unexpected errors.
