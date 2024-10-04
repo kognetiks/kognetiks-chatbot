@@ -28,6 +28,14 @@ function create_chatbot_chatgpt_assistants_table() {
     
     $charset_collate = $wpdb->get_charset_collate();
 
+    // Fallback cascade for invalid or unsupported character sets
+    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+        if (strpos($charset_collate, 'utf8') === false) {
+            // Fallback to utf8 if utf8mb4 is not supported
+            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+        }
+    }
+
     $sql = "CREATE TABLE $table_name (
         id BIGINT(20) UNSIGNED AUTO_INCREMENT,
         assistant_id VARCHAR(255) NOT NULL,
@@ -45,6 +53,7 @@ function create_chatbot_chatgpt_assistants_table() {
         PRIMARY KEY (id)
     ) $charset_collate;";
 
+
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
     // Execute SQL query and create the table
@@ -52,12 +61,12 @@ function create_chatbot_chatgpt_assistants_table() {
 
     // Check for errors after dbDelta
     if ($wpdb->last_error) {
-        logErrorToServer('Failed to create table: ' . $table_name);
-        logErrorToServer('SQL: ' . $sql);
-        logErrorToServer('Error details: ' . $wpdb->last_error);
-        // error_log('Failed to create table: ' . $table_name);
-        // error_log('SQL: ' . $sql);
-        // error_log('Error details: ' . $wpdb->last_error);
+        // logErrorToServer('Failed to create table: ' . $table_name);
+        // logErrorToServer('SQL: ' . $sql);
+        // logErrorToServer('Error details: ' . $wpdb->last_error);
+        error_log('Failed to create table: ' . $table_name);
+        error_log('SQL: ' . $sql);
+        error_log('Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
     }
 
@@ -193,6 +202,16 @@ function add_chatbot_chatgpt_assistant($assistant_id, $common_name, $style, $aud
             'additional_instructions' => $additional_instructions ?? ''
         )
     );
+
+    // Check for errors after insert
+    if ($wpdb->last_error) {
+        error_log('Failed to insert row into table: ' . $table_name);
+        error_log('Error details: ' . $wpdb->last_error);
+        return false;  // Row insertion failed
+    }
+
+    return true;  // Row insertion succeeded
+
 }
 
 // Update a row in the chatbot assistants table
@@ -224,6 +243,16 @@ function update_chatbot_chatgpt_assistant($id, $assistant_id, $common_name, $sty
         ),
         array('id' => $id)
     );
+
+    // Check for errors after update
+    if ($wpdb->last_error) {
+        error_log('Failed to update row in table: ' . $table_name);
+        error_log('Error details: ' . $wpdb->last_error);
+        return false;  // Row update failed
+    }
+
+    return true;  // Row update succeeded
+
 }
 
 // Delete a row from the chatbot assistants table
@@ -237,6 +266,16 @@ function delete_chatbot_chatgpt_assistant($id) {
         $table_name,
         array('id' => $id)
     );
+
+    // Check for errors after delete
+    if ($wpdb->last_error) {
+        error_log('Failed to delete row from table: ' . $table_name);
+        error_log('Error details: ' . $wpdb->last_error);
+        return false;  // Row deletion failed
+    }
+
+    return true;  // Row deletion succeeded
+
 }
 
 // Display the chatbot assistants table
@@ -405,7 +444,6 @@ function display_chatbot_chatgpt_assistants_table() {
     
 }
 
-
 // Scripts for the chatbot assistants table
 function chatbot_chatgpt_assistants_scripts() {
 
@@ -522,7 +560,15 @@ function update_assistant() {
         array('id' => $id)
     );
 
+    // Check for errors after update
+    if ($wpdb->last_error) {
+        error_log('Failed to update row in table: ' . $table_name);
+        error_log('Error details: ' . $wpdb->last_error);
+        return false;  // Row update failed
+    }
+
     wp_die();
+
 }
 add_action('wp_ajax_update_assistant', 'update_assistant');
 
@@ -535,7 +581,15 @@ function delete_assistant() {
     $id = intval($_POST['id']);
     $wpdb->delete($table_name, array('id' => $id));
 
+    // Check for errors after delete
+    if ($wpdb->last_error) {
+        error_log('Failed to delete row from table: ' . $table_name);
+        error_log('Error details: ' . $wpdb->last_error);
+        return false;  // Row deletion failed
+    }
+
     wp_die();
+
 }
 add_action('wp_ajax_delete_assistant', 'delete_assistant');
 
@@ -576,12 +630,21 @@ function add_new_assistant() {
         )
     );
 
+    // Check for errors after insert
+    if ($wpdb->last_error) {
+        error_log('Failed to insert row into table: ' . $table_name);
+        error_log('Error details: ' . $wpdb->last_error);
+        return false;  // Row insertion failed
+    }
+
     wp_die();
+
 }
 add_action('wp_ajax_add_new_assistant', 'add_new_assistant');
 
 // Upgrade the old primary and alternate assistant settings to the new chatbot assistants table
 function upgrade_chatbot_chatgpt_assistants_table() {
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -611,6 +674,14 @@ function upgrade_chatbot_chatgpt_assistants_table() {
                 'additional_instructions' => $assistant_instructions
             )
         );
+
+        // Check for errors after insert
+        if ($wpdb->last_error) {
+            error_log('Failed to insert row into table: ' . $table_name);
+            error_log('Error details: ' . $wpdb->last_error);
+            return false;  // Row insertion failed
+        }
+
     }
 
     if ($assistant_id_alternate) {
@@ -631,6 +702,14 @@ function upgrade_chatbot_chatgpt_assistants_table() {
                 'additional_instructions' => $assistant_instructions_alternate
             )
         );
+
+        // Check for errors after insert
+        if ($wpdb->last_error) {
+            error_log('Failed to insert row into table: ' . $table_name);
+            error_log('Error details: ' . $wpdb->last_error);
+            return false;  // Row insertion failed
+        }
+        
     }
 
     // Delete options from wp_options table

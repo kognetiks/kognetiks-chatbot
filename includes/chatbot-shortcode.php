@@ -279,7 +279,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // One bot per page, embedded over floating - Ver 2.1.6
     // if ($kchat_settings['chatbot_chatgpt_display_style'] == 'floating' && $temp_chatbot_chatgpt_display_style == 'embedded') {
-    //     back_trace('NOTICE', 'Embedded style selected over floating style');
+    //     back_trace( 'NOTICE', 'Embedded style selected over floating style');
     //     // End the shortcode processing
     //     // return;
     //     // $atts['style'] = 'embedded';
@@ -868,6 +868,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
 
+    $kchat_settings['chatbot_chatgpt_avatar_icon_setting'] = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', ''));
+    $kchat_settings['chatbot_chatgpt_custom_avatar_icon_setting'] = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
+
     ?>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
@@ -1358,7 +1361,9 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
 
     // Preload avatar - Ver 2.0.3
     $avatar_icon_setting = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', ''));
+    $kchat_settings['chatbot_chatgpt_avatar_icon_setting'] = $avatar_icon_setting;
     $custom_avatar_icon_setting = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
+    $kchat_settings['chatbot_chatgpt_custom_avatar_icon_setting'] = $custom_avatar_icon_setting;
 
     // DIAG - Diagnostics - Ver 1.9.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_shortcode_enqueue_script - at the beginning of the function');

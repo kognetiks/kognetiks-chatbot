@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Markove Chain Decode - Ver 2.1.6
+ * Kognetiks Chatbot for WordPress - Markov Chain Decode - Ver 2.1.6
  *
  * This file contains the code for implementing the Markov Chain algorithm
  *
@@ -41,8 +41,8 @@ function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '
             if ($keyExists) {
                 $key = $attemptedKey;
                 $primaryKeyword = $key; // Set primary keyword for context reinforcement
-                back_trace('NOTICE', 'Found starting key: ' . $key);
-                back_trace('NOTICE', 'Primary keyword: ' . $primaryKeyword);
+                back_trace( 'NOTICE', 'Found starting key: ' . $key);
+                back_trace( 'NOTICE', 'Primary keyword: ' . $primaryKeyword);
                 break;
             }
         }
@@ -97,47 +97,6 @@ function checkKeyInDatabase($key) {
     $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word = %s", $key));
     
     return $result;
-
-}
-
-// FIXME - REPLACED - Ver 2.1.6 - 2024-09-23
-// Retrieve the next word based on the current word, querying the database dynamically
-function getNextWordFromDatabase_OLD($currentWord) {
-
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
-
-    // Query to get possible next words and their frequencies
-    $results = $wpdb->get_results(
-        $wpdb->prepare("SELECT next_word, frequency FROM $table_name WHERE word = %s", $currentWord),
-        ARRAY_A
-    );
-
-    if (empty($results)) {
-        return null; // Return null if no next word is found
-    }
-
-    // Create a cumulative probability distribution based on word frequency
-    $cumulativeProbabilities = [];
-    $totalProbability = 0;
-
-    foreach ($results as $row) {
-        $totalProbability += $row['frequency'];
-        $cumulativeProbabilities[] = ['word' => $row['next_word'], 'cumulative' => $totalProbability];
-    }
-
-    // Generate a random number between 0 and the total frequency
-    $random = mt_rand(1, $totalProbability);
-
-    // Find the word that matches the random number
-    foreach ($cumulativeProbabilities as $item) {
-        if ($random <= $item['cumulative']) {
-            return $item['word'];
-        }
-    }
-
-    // Fallback to the last word in case no match is found (shouldn't happen)
-    return end($cumulativeProbabilities)['word'];
 
 }
 
@@ -224,133 +183,6 @@ function selectNextWordBasedOnProbability($nextWords) {
 
 }
 
-// Retrieve the Markov Chain from the database // NO LONGER USED - Ver 2.1.6 - 2024-09-22
-function getMarkovChainFromDatabase() {
-
-    // DIAG - Diagnostics - Start
-    // back_trace('NOTICE', 'getMarkovChainFromDatabase - Start');
-
-    // FIXME - FORCE REBUILD - Ver 2.1.6 - 2024-09-19
-    $chabot_chatgpt_markov_chain_build_schedule = get_option('chatbot_chatgpt_markov_chain_build_status', 'No');
-
-    if ($chatbot_chatgpt_markov_chain_build_schedule == 'Yes') {
-
-        // back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
-        update_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
-        update_option('chatbot_chatgpt_markov_chain_build_status', 'No');
-        $markovChain = null;
-
-        // Run the Markov Chain building and saving process
-        runMarkovChatbotAndSaveChain();
-
-    }
-
-    // Retrieve the Markov Chain from chunks
-    $markovChain = getMarkovChainFromChunks();
-
-    // Check if we successfully retrieved the Markov Chain
-    if (!empty($markovChain)) {
-        // back_trace('NOTICE', 'Markov Chain Length: ' . count($markovChain));
-        // How much memory is being used by the Markov Chain
-        // back_trace( 'NOTICE', 'Memory usage: ' . memory_get_usage());
-        // back_trace( 'NOTICE', 'Memory usage in megabytes: ' . round(memory_get_usage() / 1024 / 1024, 2));
-        return $markovChain;  // Return the valid Markov Chain
-    }
-
-    // If no Markov Chain found, rebuild it
-    // back_trace('NOTICE', 'No Markov Chain found. Rebuilding.');
-
-    // Run the Markov Chain building and saving process
-    runMarkovChatbotAndSaveChain();
-
-    // After rebuilding, attempt to fetch it again
-    $markovChain = getMarkovChainFromChunks();
-
-    // Check if rebuilding was successful
-    if (!empty($markovChain)) {
-
-        // back_trace('NOTICE', 'Markov Chain Length after rebuild: ' . count($markovChain));
-        return $markovChain;  // Return the rebuilt Markov Chain
-
-    }
-
-    // If rebuild fails, log the issue and return null
-    // back_trace('NOTICE', 'Failed to rebuild the Markov Chain.');
-    return null;  // Return null to indicate failure
-
-}
-
-// FIXME - REPLACED - Ver 2.1.6 - 2024-09-23
-// Clean up the Markov Chain response for better readability
-function clean_up_markov_chain_response_OLD($response) {
-
-    // Upper case the first letter of the response
-    $response = ucfirst($response);
-
-    // Step 1: Capitalize the first letter of each sentence
-    $response = preg_replace_callback('/(?:^|\.\s+)(\w)/', function($matches) {
-        return strtoupper($matches[1]);
-    }, trim($response));
-
-    // back_trace( 'NOTICE', 'After capitalization: ' . $response);
-
-    // Step 2: Add punctuation at the end if missing
-    if (!preg_match('/[.!?]$/', $response)) {
-        $response .= '.'; // Add a period if no punctuation at the end
-    }
-    
-    // back_trace( 'NOTICE', 'After punctuation check: ' . $response);
-
-    // Step 3: Remove extra spaces
-    $response = preg_replace('/\s+/', ' ', $response); // Replace multiple spaces with a single space
-
-    // back_trace( 'NOTICE', 'After space cleanup: ' . $response);
-
-    // Step 4: Basic punctuation cleanup
-    // Remove spaces before punctuation, ensure space after punctuation
-    $response = preg_replace('/\s+([?.!,])/', '$1', $response); // Remove space before punctuation
-    $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response); // Ensure space after punctuation
-
-    // back_trace( 'NOTICE', 'After punctuation spacing cleanup: ' . $response);
-
-    // Step 5: Fix common grammar errors
-    $response = fix_common_grammar_issues($response);
-
-    // back_trace( 'NOTICE', 'After grammar fixes: ' . $response);
-
-    // Step 6: Remove or replace nonsense words/phrases
-    // $response = remove_nonsense_phrases($response);
-
-    // Step 7: Make sure the first character of the response is not puctuation, spaces, or other non-alphanumeric characters
-    $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
-
-    // Step 8: Remove any double spaces caused by previous cleanup
-    $response = preg_replace('/\s+/', ' ', $response);
-
-    // Step 9: If there is a lower case leter followed by a space followed by an upper case letter, add a period
-    $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
-
-    // Step 10: If there is a special character followed by a space followed by a specai character, remove the space
-    $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1$2', $response);
-
-    // Step 11: if there is are severl lower case letters followed by a single upper case letter followed by several lower case letters, add a period and space
-    $response = preg_replace('/([a-z]+) ([A-Z]) ([a-z]+)/', '$1. $2 $3', $response);
-
-    // Step 12: For example ,"it's justsales.". Change to "It's just sales."
-    $response = preg_replace('/([.!?])"([a-z])/', '$1" $2', $response);
-
-    // Step 13: For example "As you can obtain an. API key" Change to "As you can obtain an API key"
-    $response = preg_replace('/([a-z])\. ([A-Z])/', '$1. $2', $response);
-
-    // Step 14: Upper case the first letter of the response
-    $response = ucfirst($response);
-
-    // back_trace( 'NOTICE', 'After nonsense filtering: ' . $response);
-
-    return $response;
-
-}
-
 // Clean up the Markov Chain response for better readability
 function clean_up_markov_chain_response($response) {
 
@@ -398,40 +230,6 @@ function clean_up_markov_chain_response($response) {
     $response = ucfirst($response);
 
     return $response;
-}
-
-// Remove nonsense words or phrases from the response
-function remove_nonsense_phrases($response) {
-
-    // FIXME - TEMP IGNORE - Ver 2.1.6 - 2024-09-19
-    // Define some nonsense words or phrases to be removed
-    $nonsense_phrases = [
-        'Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'eiusmod',  'tempor', 
-        'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua', 'Ut', 'enim', 'minim',  'veniam', 'quis', 
-        'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo',  'consequat', 'duis', 
-        'aute', 'irure', 'in', 'reprehenderit', 'voluptate', 'velit', 'esse', 'cillum', 'eu', 'fugiat', 'nulla', 'pariatur', 
-        'excepteur', 'sint', 'occaecat', 'cupidatat', 'non', 'proident', 'sunt', 'culpa',  'qui', 'officia', 'deserunt', 
-        'mollit', 'anim', 'id', 'est', 'laborum', 'dolorem', 'fugit', 'consequatur', 'unde',  'omnis', 'iste', 'natus', 'similique'
-    ];
-
-    // Lowercase the nonsense phrases for case-insensitive matching
-    $nonsense_phrases = array_map('strtolower', $nonsense_phrases);
-    
-    // Convert response to lowercase for case-insensitive matching
-    $lowercase_response = strtolower($response);
-
-    foreach ($nonsense_phrases as $phrase) {
-        // Use a regex to remove whole word matches only (case-insensitive)
-        $pattern = '/\b' . preg_quote($phrase, '/') . '\b/i';
-        $lowercase_response = preg_replace($pattern, '', $lowercase_response);
-    }
-    
-    // Replace double spaces caused by removals
-    $lowercase_response = preg_replace('/\s+/', ' ', $lowercase_response);
-    
-    // Return trimmed response with original case
-    return trim($lowercase_response);
-
 }
 
 // Fix common grammar issues in the response
@@ -505,84 +303,5 @@ function fix_common_grammar_issues($response) {
     } while ($previous_response !== $response); // Loop until no more changes are made
     
     return $response;
-
-}
-
-// Filter out stopwords and keep meaningful words in the response
-function filter_out_non_standard_words($response) {
-
-    // List of stopwords that should be removed from the response
-    global $stopWords;
-
-    // Break the response into words
-    $words = explode(' ', $response);
-
-    // Filter out stopwords
-    $filtered_words = array_filter($words, function($word) use ($stopWords) {
-        // Clean up the word and check against our stopwords list
-        $clean_word = strtolower(trim($word, ",.!?"));
-        return !in_array($clean_word, $stopWords); // Keep the word if it's not in stopWords
-    });
-
-    // Join the filtered words back into a response
-    return implode(' ', $filtered_words);
-
-}
-
-// Retrieve the Markov Chain from chunks and reassemble it
-function getMarkovChainFromChunks() {
-
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
-
-    // Fetch all chunks in order by chunk_index
-    $results = $wpdb->get_results("SELECT chain_chunk, chunk_index FROM $table_name ORDER BY chunk_index ASC");
-
-    // Error handling
-    if ($wpdb->last_error) {
-        prod_trace('ERROR', 'Error fetching chunks: ' . $wpdb->last_error);
-        return null;
-    }
-
-    if (empty($results)) {
-        prod_trace('NOTICE', 'No chunks found in the database.');
-        return null;
-    }
-
-    // Initialize the final array for holding unserialized data
-    $finalArray = [];
-
-    // Process each chunk
-    foreach ($results as $row) {
-
-        // DIAG - Log the chunk being unserialized for debugging
-        // back_trace('NOTICE', 'Processing chunk ' . $row->chunk_index . ' with length: ' . strlen($row->chain_chunk));
-        // back_trace('NOTICE', 'Serialized chunk content (truncated): ' . substr($row->chain_chunk, 0, 100)); // Log first 100 chars of the chunk
-
-        // Unserialize each chunk
-        $unserializedChunk = @unserialize($row->chain_chunk);
-
-        if ($unserializedChunk === false) {
-            // Log the failure and check the serialized data format
-            // back_trace('ERROR', 'Unserialization failed for chunk ' . $row->chunk_index . '. Check if the data format is correct.');
-        } else {
-            // Check if the unserialized data is an array
-            if (!is_array($unserializedChunk)) {
-                // back_trace('ERROR', 'Expected array, but got ' . gettype($unserializedChunk) . ' for chunk ' . $row->chunk_index);
-            } else {
-                // Merge unserialized data into the final array
-                $finalArray = array_merge($finalArray, $unserializedChunk);
-            }
-        }
-    }
-
-    // Return the final reassembled Markov Chain array
-    if (!empty($finalArray)) {
-        // back_trace('NOTICE', 'Markov Chain fully reassembled. Length: ' . count($finalArray));
-        return $finalArray;
-    } else {
-        // back_trace('ERROR', 'No valid data reassembled from chunks.');
-        return null;
-    }
 
 }

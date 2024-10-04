@@ -67,7 +67,7 @@ The Manage Widget Access Logs section provides direct access to the chatbot's wi
     - Choose ```Download``` to retrieve and save locally the selected widget access log.
 
 2. **Delete**
-    - Choose ```Delete``` to delete the selected ewidget accessrror log.
+    - Choose ```Delete``` to delete the selected widget access error log.
 
 3. **Delete All**
     - Chose ```Delete All``` to delete ALL widget access logs listed.

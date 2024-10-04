@@ -156,7 +156,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
         ]
     ];
 
-    // Retireve max tokens from the settings
+    // Retrieve max tokens from the settings
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
 
     // Check if the Markov Chain exists
@@ -186,17 +186,17 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     if (!empty($response)) {
         // Prepare the response body
         $response_body['choices'][0]['message']['content'] = trim($response);
-        back_trace('NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
+        // back_trace( 'NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
     
         // Remove any trailing comma, colon, semicolon, or spaces and replace them with a period
         $response_body['choices'][0]['message']['content'] = preg_replace('/[,;:\s]+$/', '.', $response_body['choices'][0]['message']['content']);
-        back_trace('NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
+        // back_trace( 'NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
     
         // Ensure the message ends with a period, exclamation point, or question mark
         if (!preg_match('/[.!?]$/', $response_body['choices'][0]['message']['content'])) {
             $response_body['choices'][0]['message']['content'] .= '.';
         }
-        back_trace('NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
+        // back_trace( 'NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
     
         // Set the success response code
         $response_body['response']['code'] = 200; // Success code
