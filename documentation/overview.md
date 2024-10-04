@@ -8,6 +8,10 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 **Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
 
+## What's new in Version 2.1.7
+
+* **TBD**: TBD
+
 ## What's new in Version 2.1.6
 
 * **Message Limit Periods**: Added options to set message limits periods for visitors and logged-in users, from ```Hourly```, ```Daily```, ```Weekly```, up to ```Lifetime```.
