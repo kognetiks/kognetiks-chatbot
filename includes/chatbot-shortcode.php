@@ -872,34 +872,36 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $kchat_settings['chatbot_chatgpt_custom_avatar_icon_setting'] = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
 
     ?>
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function() {
-            let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
-            if (kchat_settings && typeof kchat_settings === "object") {
-                // Resolve LocalStorage - Ver 2.1.1.1
-                const includeKeys = [
-                    'chatbot_chatgpt_last_reset',
-                    'chatbot_chatgpt_message_count',
-                    'chatbot_chatgpt_message_limit_setting',
-                    'chatbot_chatgpt_message_limit_period_setting',
-                    'chatbot_chatgpt_start_status',
-                    'chatbot_chatgpt_start_status_new_visitor',
-                    'chatbot_chatgpt_opened',
-                    'chatbot_chatgpt_last_reset'
-                ];
-                
-                Object.keys(kchat_settings).forEach(function(key) {
-                    if (includeKeys.includes(key)) {
-                        localStorage.setItem(key, kchat_settings[key]);
-                        // DiAG - Ver 2.1.1.1
-                        // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
-                    }
-                });
-                // Dispatch custom event after setting localStorage keys
-                document.dispatchEvent(new Event('kchat_settingsSet'));
-            }
-        });
-    </script>
+        <script type="text/javascript">
+            document.addEventListener("DOMContentLoaded", function() {
+                // Outputting kchat_settings from PHP safely
+                let kchat_settings = JSON.parse('<?php echo wp_json_encode($kchat_settings ?? []); ?>');
+                // Ensure kchat_settings is an object
+                if (kchat_settings && typeof kchat_settings === "object") {
+                    // Resolve LocalStorage - Ver 2.1.1.1.R1
+                    const includeKeys = [
+                        'chatbot_chatgpt_last_reset',
+                        'chatbot_chatgpt_message_count',
+                        'chatbot_chatgpt_message_limit_setting',
+                        'chatbot_chatgpt_message_limit_period_setting',
+                        'chatbot_chatgpt_start_status',
+                        'chatbot_chatgpt_start_status_new_visitor',
+                        'chatbot_chatgpt_opened',
+                        'chatbot_chatgpt_last_reset'
+                    ];
+                    // Iterate over kchat_settings and add to localStorage if key is included
+                    Object.keys(kchat_settings).forEach(function(key) {
+                        if (includeKeys.includes(key)) {
+                            localStorage.setItem(key, kchat_settings[key]);
+                            // Optional: Diagnostic output
+                            // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
+                        }
+                    });
+                    // Dispatch custom event after setting localStorage keys
+                    document.dispatchEvent(new Event('kchat_settingsSet'));
+                }
+            });
+        </script>
     <?php
 
     // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
@@ -935,7 +937,18 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo time(); ?>">
         <script>
             jQuery(document).ready(function($) {
+                // Update chatbot styles
+                console.log('Updating chatbot styles...');
                 $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
+                // Hide the footer chatbot if the embedded one is present
+                var embeddedChatbot = $('#chatbot-chatgpt-header-embedded');
+                var footerChatbot = $('#chatbot-chatgpt-header');
+                console.log('Embedded chatbot:', embeddedChatbot);
+                console.log('Footer chatbot:', footerChatbot);
+                if (embeddedChatbot.length && footerChatbot.length) {
+                    console.log('Hiding footer chatbot...');
+                    footerChatbot.hide();
+                }
             });
         </script>
         <!-- REMOVED FOR EMBEDDED -->
@@ -1027,9 +1040,23 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <button id="chatbot-chatgpt-upload-file" title="Upload Files">
                     <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                 </button>
-                <script type="text/javascript">
-                    document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        // Handle file upload click
+                        var uploadButton = document.getElementById('chatbot-chatgpt-upload-file');
+                        var fileInput = document.getElementById('chatbot-chatgpt-upload-file-input');
+                        if (uploadButton && fileInput) {
+                            uploadButton.addEventListener('click', function() {
+                                fileInput.click();
+                            });
+                        }
+                        // Hide the footer chatbot if the embedded one is present
+                        var embeddedChatbot = document.getElementById("chatbot-chatgpt-header-embedded");
+                        var footerChatbot = document.getElementById("chatbot-chatgpt-header");
+                        console.log('Updating chatbot styles...suppressing footer chatbot');
+                        if (embeddedChatbot && footerChatbot) {
+                            footerChatbot.style.display = "none";
+                        }
                     });
                 </script>
             <?php endif; ?>
@@ -1381,9 +1408,11 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     ?>
         <script type="text/javascript">
             document.addEventListener("DOMContentLoaded", function() {
-                let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
+                // Outputting kchat_settings from PHP safely
+                let kchat_settings = JSON.parse('<?php echo wp_json_encode($kchat_settings ?? []); ?>');
+                // Ensure kchat_settings is an object
                 if (kchat_settings && typeof kchat_settings === "object") {
-                    // Resolve LocalStorage - Ver 2.1.1.1
+                    // Resolve LocalStorage - Ver 2.1.1.1.R2
                     const includeKeys = [
                         'chatbot_chatgpt_last_reset',
                         'chatbot_chatgpt_message_count',
@@ -1394,11 +1423,11 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
                         'chatbot_chatgpt_opened',
                         'chatbot_chatgpt_last_reset'
                     ];
-                    
+                    // Iterate over kchat_settings and add to localStorage if key is included
                     Object.keys(kchat_settings).forEach(function(key) {
                         if (includeKeys.includes(key)) {
                             localStorage.setItem(key, kchat_settings[key]);
-                            // DiAG - Ver 2.1.1.1
+                            // Optional: Diagnostic output
                             // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
                         }
                     });

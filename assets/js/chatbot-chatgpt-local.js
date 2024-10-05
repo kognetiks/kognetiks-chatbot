@@ -5,7 +5,7 @@ jQuery(document).ready(function ($) {
         // DIAG - Diagnostics - Ver 2.1.1.1
         // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - Before localStorage.set Item loop');
 
-        // Resolve LocalStorage - Ver 2.1.1.1
+        // Resolve LocalStorage - Ver 2.1.1.1.R3
         const includeKeys = [
             'chatbot_chatgpt_last_reset',
             'chatbot_chatgpt_message_count',
@@ -17,13 +17,15 @@ jQuery(document).ready(function ($) {
             'chatbot_chatgpt_last_reset'
         ];
         
-        Object.keys(kchat_settings).forEach(function(key) {
-            if (includeKeys.includes(key)) {
-                localStorage.setItem(key, kchat_settings[key]);
-                // DIAG - Diagnostics - Ver 2.1.1.1
-                // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
-            }
-        });
+        if (typeof kchat_settings === "object") {
+            Object.keys(kchat_settings).forEach(function(key) {
+                if (includeKeys.includes(key)) {
+                    localStorage.setItem(key, kchat_settings[key]);
+                    // DIAG - Diagnostics - Ver 2.1.1.1
+                    // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
+                }
+            });
+        }
 
         // DIAG - Diagnostics - Ver 2.1.1.1
         // console.log('Chatbot: NOTICE: chatbot-chatgpt-local.js - After localStorage.set Item loop');
