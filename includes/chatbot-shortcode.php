@@ -531,6 +531,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $page_id = 999999;
     }
 
+    // Check for the presence of an embedded chatbot
+    back_trace( 'NOTICE', 'get_chatbot_chatgpt_transients: ' . get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id));
+    if (get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id) == 'embedded') {
+        back_trace( 'NOTICE', 'Embedded chatbot detected');
+        $chatbot_chatgpt_display_style = 'embedded';
+        // return;
+    }
+
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
     
@@ -872,36 +880,33 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $kchat_settings['chatbot_chatgpt_custom_avatar_icon_setting'] = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting', ''));
 
     ?>
-        <script type="text/javascript">
-            document.addEventListener("DOMContentLoaded", function() {
-                // Outputting kchat_settings from PHP safely
-                let kchat_settings = JSON.parse('<?php echo wp_json_encode($kchat_settings ?? []); ?>');
-                // Ensure kchat_settings is an object
-                if (kchat_settings && typeof kchat_settings === "object") {
-                    // Resolve LocalStorage - Ver 2.1.1.1.R1
-                    const includeKeys = [
-                        'chatbot_chatgpt_last_reset',
-                        'chatbot_chatgpt_message_count',
-                        'chatbot_chatgpt_message_limit_setting',
-                        'chatbot_chatgpt_message_limit_period_setting',
-                        'chatbot_chatgpt_start_status',
-                        'chatbot_chatgpt_start_status_new_visitor',
-                        'chatbot_chatgpt_opened',
-                        'chatbot_chatgpt_last_reset'
-                    ];
-                    // Iterate over kchat_settings and add to localStorage if key is included
-                    Object.keys(kchat_settings).forEach(function(key) {
-                        if (includeKeys.includes(key)) {
-                            localStorage.setItem(key, kchat_settings[key]);
-                            // Optional: Diagnostic output
-                            // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
-                        }
-                    });
-                    // Dispatch custom event after setting localStorage keys
-                    document.dispatchEvent(new Event('kchat_settingsSet'));
-                }
-            });
-        </script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
+            if (kchat_settings && typeof kchat_settings === "object") {
+                // Resolve LocalStorage - Ver 2.1.1.1.R2
+                const includeKeys = [
+                    'chatbot_chatgpt_last_reset',
+                    'chatbot_chatgpt_message_count',
+                    'chatbot_chatgpt_message_limit_setting',
+                    'chatbot_chatgpt_message_limit_period_setting',
+                    'chatbot_chatgpt_start_status',
+                    'chatbot_chatgpt_start_status_new_visitor',
+                    'chatbot_chatgpt_opened',
+                    'chatbot_chatgpt_last_reset'
+                ];
+                Object.keys(kchat_settings).forEach(function(key) {
+                    if (includeKeys.includes(key)) {
+                        localStorage.setItem(key, kchat_settings[key]);
+                        // DiAG - Ver 2.1.1.1
+                        // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
+                    }
+                });
+                // Dispatch custom event after setting localStorage keys
+                document.dispatchEvent(new Event('kchat_settingsSet'));
+            }
+        });
+    </script>
     <?php
 
     // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
@@ -937,18 +942,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo time(); ?>">
         <script>
             jQuery(document).ready(function($) {
-                // Update chatbot styles
-                console.log('Updating chatbot styles...');
                 $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
-                // Hide the footer chatbot if the embedded one is present
-                var embeddedChatbot = $('#chatbot-chatgpt-header-embedded');
-                var footerChatbot = $('#chatbot-chatgpt-header');
-                console.log('Embedded chatbot:', embeddedChatbot);
-                console.log('Footer chatbot:', footerChatbot);
-                if (embeddedChatbot.length && footerChatbot.length) {
-                    console.log('Hiding footer chatbot...');
-                    footerChatbot.hide();
-                }
             });
         </script>
         <!-- REMOVED FOR EMBEDDED -->
@@ -1040,23 +1034,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <button id="chatbot-chatgpt-upload-file" title="Upload Files">
                     <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
                 </button>
-                <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        // Handle file upload click
-                        var uploadButton = document.getElementById('chatbot-chatgpt-upload-file');
-                        var fileInput = document.getElementById('chatbot-chatgpt-upload-file-input');
-                        if (uploadButton && fileInput) {
-                            uploadButton.addEventListener('click', function() {
-                                fileInput.click();
-                            });
-                        }
-                        // Hide the footer chatbot if the embedded one is present
-                        var embeddedChatbot = document.getElementById("chatbot-chatgpt-header-embedded");
-                        var footerChatbot = document.getElementById("chatbot-chatgpt-header");
-                        console.log('Updating chatbot styles...suppressing footer chatbot');
-                        if (embeddedChatbot && footerChatbot) {
-                            footerChatbot.style.display = "none";
-                        }
+                <script type="text/javascript">
+                    document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
+                        document.getElementById('chatbot-chatgpt-upload-file-input').click();
                     });
                 </script>
             <?php endif; ?>
@@ -1334,12 +1314,13 @@ function chatbot_chatgpt_custom_buttons_display() {
 }
 
 // Attribution - Ver 2.0.5
-function chatbot_chatgpt_attribution () {
+function chatbot_chatgpt_attribution() {
 
     $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'On'));
     $chatbot_chatgpt_custom_attribution = esc_attr(get_option('chatbot_chatgpt_custom_attribution', 'Your custom attribution message goes here.'));
     // DIAG - Diagnostics - Ver 1.6.5
     // back_trace( 'NOTICE', 'chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);
+    
     if ($chatbot_chatgpt_suppress_attribution == 'Off') {
         if ($chatbot_chatgpt_custom_attribution == 'Your custom attribution message goes here.' || empty($chatbot_chatgpt_custom_attribution)) { 
             ?>
@@ -1355,7 +1336,6 @@ function chatbot_chatgpt_attribution () {
             <?php
         }
     }
-
 }
 
 
@@ -1408,11 +1388,9 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
     ?>
         <script type="text/javascript">
             document.addEventListener("DOMContentLoaded", function() {
-                // Outputting kchat_settings from PHP safely
-                let kchat_settings = JSON.parse('<?php echo wp_json_encode($kchat_settings ?? []); ?>');
-                // Ensure kchat_settings is an object
+                let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
                 if (kchat_settings && typeof kchat_settings === "object") {
-                    // Resolve LocalStorage - Ver 2.1.1.1.R2
+                    // Resolve LocalStorage - Ver 2.1.1.1.R1
                     const includeKeys = [
                         'chatbot_chatgpt_last_reset',
                         'chatbot_chatgpt_message_count',
@@ -1423,11 +1401,14 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
                         'chatbot_chatgpt_opened',
                         'chatbot_chatgpt_last_reset'
                     ];
+                    ];
+                    // Iterate over kchat_settings and add to localStorage if key is included
+                    ];     
                     // Iterate over kchat_settings and add to localStorage if key is included
                     Object.keys(kchat_settings).forEach(function(key) {
                         if (includeKeys.includes(key)) {
                             localStorage.setItem(key, kchat_settings[key]);
-                            // Optional: Diagnostic output
+                            // DiAG - Ver 2.1.1.1
                             // console.log("Chatbot: NOTICE: chatbot-shortcode.php - Key: " + key + " Value: " + kchat_settings[key]);
                         }
                     });

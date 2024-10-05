@@ -246,6 +246,7 @@ function chatbot_chatgpt_enqueue_admin_scripts() {
 
     wp_enqueue_script('jquery'); // Ensure jQuery is enqueued
     wp_enqueue_script('chatbot_chatgpt_admin', plugins_url('assets/js/chatbot-chatgpt-admin.js', __FILE__), array('jquery'), $chatbot_chatgpt_plugin_version, true);
+
 }
 add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
 
