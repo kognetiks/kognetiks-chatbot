@@ -531,13 +531,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $page_id = 999999;
     }
 
-    // Check for the presence of an embedded chatbot
-    back_trace( 'NOTICE', 'get_chatbot_chatgpt_transients: ' . get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id));
-    if (get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id) == 'embedded') {
-        back_trace( 'NOTICE', 'Embedded chatbot detected');
-        $chatbot_chatgpt_display_style = 'embedded';
-        // return;
-    }
+    // FIXME - Check for the presence of an embedded chatbot - Ver 2.1.7
+    // back_trace( 'NOTICE', 'get_chatbot_chatgpt_transients: ' . get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id));
+    // if (get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id) == 'embedded') {
+    //     back_trace( 'NOTICE', 'Embedded chatbot detected');
+    //     $chatbot_chatgpt_display_style = 'embedded';
+    //     return;
+    // }
 
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
