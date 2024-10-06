@@ -4,6 +4,10 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## Documentation
 
+## What's new in Version 2.1.7
+
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.1.6.
+
 ## What's new in Version 2.1.6
 
 * **Message Limit Periods**: Added options to set message limits periods for visitors and logged-in users, from ```Hourly```, ```Daily```, ```Weekly```, up to ```Lifetime```.

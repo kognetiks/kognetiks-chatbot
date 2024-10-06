@@ -531,6 +531,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $page_id = 999999;
     }
 
+    // FIXME - Check for the presence of an embedded chatbot - Ver 2.1.7
+    // back_trace( 'NOTICE', 'get_chatbot_chatgpt_transients: ' . get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id));
+    // if (get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id) == 'embedded') {
+    //     back_trace( 'NOTICE', 'Embedded chatbot detected');
+    //     $chatbot_chatgpt_display_style = 'embedded';
+    //     return;
+    // }
+
     set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
     set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
     
@@ -540,6 +548,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null);
 
     // back_trace( 'NOTICE', 'LINE 528 - $chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+
+    // Set visitor and logged in user limits - Ver 2.0.1
+    if (is_user_logged_in()) {
+        // back_trace( 'NOTICE', 'User is logged in');
+        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
+        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
+    } else {
+        // back_trace( 'NOTICE', 'User is NOT logged in');
+        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
+    }
 
     // Localize the data for the chatbot - Ver 2.1.1.1 - 2024 08 28 - THIS IS THE SPOT
     $kchat_settings = array_merge($kchat_settings, array(
@@ -561,8 +580,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'chatbot_chatgpt_avatar_greeting_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_greeting_setting', 'Howdy!!! Great to see you today! How can I help you?')),
         'chatbot_chatgpt_force_page_reload' => esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No')),
         'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
-        'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
-        'chatbot_chatgpt_message_limit_period_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime')),
+        // 'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
+        // 'chatbot_chatgpt_message_limit_period_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime')),
     ));
 
     // back_trace( 'NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));
@@ -876,7 +895,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         document.addEventListener("DOMContentLoaded", function() {
             let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
             if (kchat_settings && typeof kchat_settings === "object") {
-                // Resolve LocalStorage - Ver 2.1.1.1
+                // Resolve LocalStorage - Ver 2.1.1.1.R2
                 const includeKeys = [
                     'chatbot_chatgpt_last_reset',
                     'chatbot_chatgpt_message_count',
@@ -887,7 +906,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     'chatbot_chatgpt_opened',
                     'chatbot_chatgpt_last_reset'
                 ];
-                
                 Object.keys(kchat_settings).forEach(function(key) {
                     if (includeKeys.includes(key)) {
                         localStorage.setItem(key, kchat_settings[key]);
@@ -1307,12 +1325,13 @@ function chatbot_chatgpt_custom_buttons_display() {
 }
 
 // Attribution - Ver 2.0.5
-function chatbot_chatgpt_attribution () {
+function chatbot_chatgpt_attribution() {
 
     $chatbot_chatgpt_suppress_attribution = esc_attr(get_option('chatbot_chatgpt_suppress_attribution', 'On'));
     $chatbot_chatgpt_custom_attribution = esc_attr(get_option('chatbot_chatgpt_custom_attribution', 'Your custom attribution message goes here.'));
     // DIAG - Diagnostics - Ver 1.6.5
     // back_trace( 'NOTICE', 'chatbot_chatgpt_suppress_attribution: ' . $chatbot_chatgpt_suppress_attribution);
+    
     if ($chatbot_chatgpt_suppress_attribution == 'Off') {
         if ($chatbot_chatgpt_custom_attribution == 'Your custom attribution message goes here.' || empty($chatbot_chatgpt_custom_attribution)) { 
             ?>
@@ -1328,7 +1347,6 @@ function chatbot_chatgpt_attribution () {
             <?php
         }
     }
-
 }
 
 
@@ -1383,7 +1401,7 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
             document.addEventListener("DOMContentLoaded", function() {
                 let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
                 if (kchat_settings && typeof kchat_settings === "object") {
-                    // Resolve LocalStorage - Ver 2.1.1.1
+                    // Resolve LocalStorage - Ver 2.1.1.1.R1
                     const includeKeys = [
                         'chatbot_chatgpt_last_reset',
                         'chatbot_chatgpt_message_count',
@@ -1394,7 +1412,10 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
                         'chatbot_chatgpt_opened',
                         'chatbot_chatgpt_last_reset'
                     ];
-                    
+                    ];
+                    // Iterate over kchat_settings and add to localStorage if key is included
+                    ];     
+                    // Iterate over kchat_settings and add to localStorage if key is included
                     Object.keys(kchat_settings).forEach(function(key) {
                         if (includeKeys.includes(key)) {
                             localStorage.setItem(key, kchat_settings[key]);
