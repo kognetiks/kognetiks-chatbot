@@ -549,6 +549,17 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // back_trace( 'NOTICE', 'LINE 528 - $chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
+    // Set visitor and logged in user limits - Ver 2.0.1
+    if (is_user_logged_in()) {
+        // back_trace( 'NOTICE', 'User is logged in');
+        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
+        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
+    } else {
+        // back_trace( 'NOTICE', 'User is NOT logged in');
+        $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+        $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
+    }
+
     // Localize the data for the chatbot - Ver 2.1.1.1 - 2024 08 28 - THIS IS THE SPOT
     $kchat_settings = array_merge($kchat_settings, array(
         'chatbot_chatgpt_display_style' => $chatbot_chatgpt_display_style,
@@ -569,8 +580,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'chatbot_chatgpt_avatar_greeting_setting' => esc_attr(get_option('chatbot_chatgpt_avatar_greeting_setting', 'Howdy!!! Great to see you today! How can I help you?')),
         'chatbot_chatgpt_force_page_reload' => esc_attr(get_option('chatbot_chatgpt_force_page_reload', 'No')),
         'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
-        'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
-        'chatbot_chatgpt_message_limit_period_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime')),
+        // 'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
+        // 'chatbot_chatgpt_message_limit_period_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime')),
     ));
 
     // back_trace( 'NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));
