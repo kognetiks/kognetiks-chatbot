@@ -167,7 +167,7 @@ function chatbot_chatgpt_visitor_message_limit_period_setting_callback($args) {
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
 
-    global $chatbot_chatgpt_markov_chain_enabled;
+    global $chatbot_markov_chain_enabled;
     
     // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
@@ -193,7 +193,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
             <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
             <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
             <?php
-            if ( $chatbot_chatgpt_markov_chain_enabled == 'Yes' ) {
+            if ( $chatbot_markov_chain_enabled == 'Yes' ) {
                 ?>
                 <option value="<?php echo esc_attr( 'markov-chain-2023-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2023-09-17' ); ?>><?php echo esc_html( 'markov-chain-2023-09-17' ); ?></option>
                 <?php
@@ -210,7 +210,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
                 <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_model_choice'), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
             <?php endforeach; ?>
             <?php
-            if ( $chatbot_chatgpt_markov_chain_enabled == 'Yes' ) {
+            if ( $chatbot_markov_chain_enabled == 'Yes' ) {
                 ?>
                 <option value="<?php echo esc_attr( 'markov-chain-2023-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2023-09-17' ); ?>><?php echo esc_html( 'markov-chain-2023-09-17' ); ?></option>
                 <?php

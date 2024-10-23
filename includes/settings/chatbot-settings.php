@@ -38,7 +38,7 @@ function chatbot_chatgpt_settings_page_html() {
 
     global $chatbot_chatgpt_plugin_version;
 
-    global $chatbot_chatgpt_markov_chain_setting;
+    global $chatbot_markov_chain_setting;
 
     global $kchat_settings;
 
@@ -121,6 +121,8 @@ function chatbot_chatgpt_settings_page_html() {
        <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=bot_settings" class="nav-tab <?php echo $active_tab == 'bot_settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
             <a href="?page=chatbot-chatgpt&tab=api_model" class="nav-tab <?php echo $active_tab == 'api_model' ? 'nav-tab-active' : ''; ?>">API/Model</a>
+            <a href="?page=chatbot-chatgpt&tab=api_nvidia" class="nav-tab <?php echo $active_tab == 'api_nvidia' ? 'nav-tab-active' : ''; ?>">API/NVIDIA</a>
+            <a href="?page=chatbot-chatgpt&tab=api_markov" class="nav-tab <?php echo $active_tab == 'api_markov' ? 'nav-tab-active' : ''; ?>">API/Markov</a>
             <a href="?page=chatbot-chatgpt&tab=gpt_assistants" class="nav-tab <?php echo $active_tab == 'gpt_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>
             <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatars</a>
             <a href="?page=chatbot-chatgpt&tab=appearance" class="nav-tab <?php echo $active_tab == 'appearance' ? 'nav-tab-active' : ''; ?>">Appearance</a>
@@ -194,12 +196,38 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_api_model_advanced');
                 echo '</div>';
 
-                if ( $chatbot_chatgpt_markov_chain_setting == 'Yes') {
-                    // Markov Chain Settings - Ver 2.1.6
-                    echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                    do_settings_sections('chatbot_chatgpt_api_model_markov_chain');
-                    echo '</div>';
-                }
+            } elseif ($active_tab == 'api_nvidia') {
+
+                settings_fields('chatbot_nvidia_api_model');
+
+                // NVIDIA API Settings - Ver 2.1.8
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_nvidia_model_settings_general');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_nvidia_api_model_general');
+                echo '</div>';
+
+                // Advanced Settings
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_nvidia_api_model_advanced');
+                echo '</div>';
+
+            } elseif ($active_tab == 'api_markov') {
+
+                settings_fields('chatbot_markov_chain_api_model');
+
+                // Markov Chain Settings - Ver 2.1.6
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_markov_chain_model_settings_general');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_markov_chain_api_model_general');
+                echo '</div>';
 
             } elseif ($active_tab == 'gpt_assistants') {
 

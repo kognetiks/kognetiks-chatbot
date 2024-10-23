@@ -24,20 +24,20 @@ function runMarkovChatbotAndSaveChain() {
 
     // Step 2: Get the last updated timestamp for the Markov Chain
     // $last_updated = getMarkovChainLastUpdated();
-    $last_updated = get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
+    $last_updated = get_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00');
 
     // FIXME - This is a temporary fix to force the Markov Chain to update every time
     $last_updated = '2000-01-01 00:00:00';
 
     // Step 3: Get the starting batch, if no transient exists, set it to 1
-    $batch_starting_point = get_transient('chatbot_chatgpt_markov_chain_batch_starting_point');
+    $batch_starting_point = get_transient('chatbot_markov_chain_batch_starting_point');
     If (empty($batch_starting_point)) {
         $batch_starting_point = 1;
     }
 
     // Step 4: Get the batch size from the settings
     // Number of posts/pages to process in each batch
-    $batch_size = esc_attr(get_option('chatbot_chatgpt_markov_chain_batch_size', 100));
+    $batch_size = esc_attr(get_option('chatbot_markov_chain_batch_size', 100));
     back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
 
     // Step 5: Set the maximum execution time to 300 seconds (5 minutes)
@@ -59,7 +59,7 @@ function runMarkovChatbotAndSaveChain() {
 
     // FIXME - This function needs to be scheduled to run after the chain is built
     // Step 9: Report the results of the Markov Chain build
-    $stats = getDatabaseStats('chatbot_chatgpt_markov_chain');
+    $stats = getDatabaseStats('chatbot_markov_chain');
     if (!empty($stats)) {
         prod_trace( 'NOTICE', 'Number of Rows: ' . $stats['row_count']);
         prod_trace( 'NOTICE', 'Database Size: ' . $stats['table_size_mb'] . ' MB');
@@ -75,7 +75,7 @@ function createMarkovChainTable() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
     $charset_collate = $wpdb->get_charset_collate();
 
@@ -136,7 +136,7 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     if ($batch_starting_point == 1 && $processing_type == 'posts') {
 
         // Reset the Markov Chain table if it's the first post batch
-        $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+        $table_name = $wpdb->prefix . 'chatbot_markov_chain';
     
         // Delete all data from the table
         $wpdb->query("DELETE FROM $table_name");
@@ -278,7 +278,7 @@ add_action('getAllPublishedContent', 'getAllPublishedContent', 10, 4);
 function buildMarkovChain($content) {
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
     // Split the content into words
     // FIXME - TRY LEAVING PUNCTUATION IN FOR BETTER MARKOV CHAIN GENERATION - Ver 2.1.6
@@ -286,10 +286,10 @@ function buildMarkovChain($content) {
     $words = preg_split('/\s+/', $content);
     
     // Correctly retrieve the chain length (key size) from the database
-    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 2));  // Default to 2 (for two-word key) if not set
+    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 2));  // Default to 2 (for two-word key) if not set
 
     // Set the phrase size for the next part of the Markov Chain
-    $phraseSize = esc_attr(get_option('chatbot_chatgpt_markov_chain_next_phrase_length', 2));  // Default to 2 (for four-word phrase) if not set
+    $phraseSize = esc_attr(get_option('chatbot_markov_chain_next_phrase_length', 2));  // Default to 2 (for four-word phrase) if not set
 
     // Build and save the Markov Chain
     for ($i = 0; $i < count($words) - ($chainLength + $phraseSize - 1); $i++) {
@@ -359,12 +359,12 @@ function buildMarkovChain($content) {
 
 // Update the last updated timestamp for the Markov Chain
 function updateMarkovChainTimestamp() {
-    update_option('chatbot_chatgpt_markov_chain_last_updated', current_time('mysql'));
+    update_option('chatbot_markov_chain_last_updated', current_time('mysql'));
 }
 
 // Get the last updated timestamp for the Markov Chain
 function getMarkovChainLastUpdated() {
-    return get_option('chatbot_chatgpt_markov_chain_last_updated', '2000-01-01 00:00:00');
+    return get_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00');
 }
 
 // Clean up inbound text for better Markov Chain processing

@@ -23,7 +23,7 @@ function getAllPublishedContent() {
 
     // Get the last updated date
     // $last_updated = '2000-01-01 00:00:00'; // FIXME - Remove this line
-    $last_updated = esc_attr(get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00'));
+    $last_updated = esc_attr(get_option('chatbot_markov_last_updated', '2000-01-01 00:00:00'));
 
     // Query for posts and pages after the last updated date
     $args = array(
@@ -111,7 +111,7 @@ function buildMarkovChain($content) {
     global $wpdb;
  
     // Reset the Markov Chain table
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
     $wpdb->query("DELETE FROM $table_name");
 
     // Reset the Markov Chain
@@ -122,9 +122,9 @@ function buildMarkovChain($content) {
     $words = preg_split('/\s+/', preg_replace("/[^\w\s']/u", '', $content)); // Keeps apostrophes
 
     // Get the Markov Chain options from the database
-    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)); // Default chain length is 3
-    $nextPhraseLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_next_phrase_length', 2));
-    $chunkSizeLimit = esc_attr(get_option('chatbot_chatgpt_markov_chain_chunk_size_limit', 10000));
+    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3)); // Default chain length is 3
+    $nextPhraseLength = esc_attr(get_option('chatbot_markov_chain_next_phrase_length', 2));
+    $chunkSizeLimit = esc_attr(get_option('chatbot_markov_chain_chunk_size_limit', 10000));
 
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace( 'NOTICE', 'Chain Length: ' . $chainLength);
@@ -177,7 +177,7 @@ function buildMarkovChain($content) {
 function saveMarkovChainChunk($chunk, $chunkIndex) {
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
     // back_trace( 'NOTICE', 'Chunk content being saved (truncated): ' . substr($chunk, 0, 100));  // Log first 100 chars of chunk
     // back_trace( 'NOTICE', 'Full Chunk content being saved: ' . substr($chunk, 0, 500));
@@ -217,7 +217,7 @@ function generateMarkovText($startWords = [], $length = 100) {
     back_trace( 'NOTICE', 'Start Words: ' . implode(' ', $startWords));
 
     // Retrieve the chain length from the options table
-    $chatbot_chatgpt_markov_chain_length = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3));
+    $chatbot_markov_chain_length = esc_attr(get_option('chatbot_markov_chain_length', 3));
 
     // Trim any leading or trailing whitespace from the start words
     $startWords = array_map('trim', $startWords);
@@ -233,7 +233,7 @@ function generateMarkovText($startWords = [], $length = 100) {
     // });
 
     // Trim the start words to the chain length
-    // $startWords = array_slice($startWords, -$chatbot_chatgpt_markov_chain_length);
+    // $startWords = array_slice($startWords, -$chatbot_markov_chain_length);
 
     // DIAG - Diagnostics - Ver 2.1.6
     back_trace( 'NOTICE', 'Adjusted Start Words: ' . implode(' ', $startWords));
@@ -270,15 +270,15 @@ function generateMarkovText($startWords = [], $length = 100) {
         $cleanStartWords = array_map('strtolower', array_map('trim', $startWords));
 
         // Get the Markov Chain length from the options table
-        $chatbot_chatgpt_markov_chain_length = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3));
+        $chatbot_markov_chain_length = esc_attr(get_option('chatbot_markov_chain_length', 3));
 
         $foundKey = false; // Flag to check if a match was found
 
         // Ensure we always try shifting until fewer than the chain length words remain
-        while (count($cleanStartWords) >= $chatbot_chatgpt_markov_chain_length) {
+        while (count($cleanStartWords) >= $chatbot_markov_chain_length) {
 
             // Take the last set of words that match the chain length from the current position
-            $key = implode(' ', array_slice($cleanStartWords, -$chatbot_chatgpt_markov_chain_length));
+            $key = implode(' ', array_slice($cleanStartWords, -$chatbot_markov_chain_length));
 
             // DIAG - Diagnostics - Ver 2.1.6
             back_trace('NOTICE', 'Start words in while loop - $key: ' . $key);
@@ -309,7 +309,7 @@ function generateMarkovText($startWords = [], $length = 100) {
     $words = explode(' ', $key);
 
     // Get the chain length from the options table
-    $chainLength = intval(esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 3)));
+    $chainLength = intval(esc_attr(get_option('chatbot_markov_chain_length', 3)));
 
     // Generate the response text
     for ($i = 0; $i < $length; $i++) {
@@ -441,8 +441,8 @@ function getMarkovChainFromDatabase() {
     $force_markov_chain_rebuild = get_option('chatbot_chatgpt_force_markov_chain_rebuild', 'No');
     if ($force_markov_chain_rebuild = 'Yes') {
         back_trace('NOTICE', 'Forcing Markov Chain rebuild.');
-        // update_option('chatbot_chatgpt_markov_chain_length', 3);
-        update_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
+        // update_option('chatbot_markov_chain_length', 3);
+        update_option('chatbot_markov_last_updated', '2000-01-01 00:00:00');
         update_option('chatbot_chatgpt_force_markov_chain_rebuild', 'No');
         $markovChain = null;
     }
@@ -487,7 +487,7 @@ function createMarkovChainTable() {
     // back_trace( 'NOTICE', 'createMarkovChainTable - Start' );
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
     $charset_collate = $wpdb->get_charset_collate();
 
     $sql = "CREATE TABLE $table_name (
@@ -518,11 +518,11 @@ function createMarkovChainTable() {
 register_activation_hook(__FILE__, 'createMarkovChainTable');
 
 function updateMarkovChainTimestamp() {
-    update_option('chatbot_chatgpt_markov_last_updated', current_time('mysql'));
+    update_option('chatbot_markov_last_updated', current_time('mysql'));
 }
 
 function getMarkovChainLastUpdated() {
-    return get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
+    return get_option('chatbot_markov_last_updated', '2000-01-01 00:00:00');
 }
 
 
@@ -536,7 +536,7 @@ function runMarkovChatbotAndSaveChain() {
     createMarkovChainTable();
 
     // Step 1: Get the last updated timestamp for the Markov Chain
-    $last_updated = get_option('chatbot_chatgpt_markov_last_updated', '2000-01-01 00:00:00');
+    $last_updated = get_option('chatbot_markov_last_updated', '2000-01-01 00:00:00');
 
     // Step 2: Get all published content (posts, pages, and comments) that have been updated after the last Markov Chain update
     $content = getAllPublishedContent($last_updated);
@@ -550,7 +550,7 @@ function runMarkovChatbotAndSaveChain() {
         saveMarkovChainToDatabase($markovChain);
 
         // Step 5: Update the last updated timestamp
-        update_option('chatbot_chatgpt_markov_last_updated', current_time('mysql'));
+        update_option('chatbot_markov_last_updated', current_time('mysql'));
         
         // DIAG - Diagnostics - Ver 2.1.6
         // back_trace( 'NOTICE', 'Markov Chain updated and saved to the database.');
@@ -793,7 +793,7 @@ function saveMarkovChainInChunks($markovChain) {
     // back_trace( 'NOTICE', 'saveMarkovChainInChunks - Start');
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
     // Serialize the Markov Chain
     $serializedChain = serialize($markovChain);
@@ -863,7 +863,7 @@ function saveMarkovChainInChunks($markovChain) {
 function getMarkovChainFromChunks() {
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
     // Fetch all chunks in order by chunk_index
     $results = $wpdb->get_results("SELECT chain_chunk, chunk_index FROM $table_name ORDER BY chunk_index ASC");

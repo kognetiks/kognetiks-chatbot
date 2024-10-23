@@ -20,15 +20,13 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Kognetiks Chatbot for WordPress. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
- * 
-*/
+ */
 
 // If this file is called directly, die.
 defined( 'WPINC' ) || die();
 
-if ( ! defined( 'ABSPATH' ) ) {
-	die();
-}
+// Start output buffering earlier to prevent "headers already sent" issues - Ver 2.1.8
+ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
@@ -49,29 +47,19 @@ global $wpdb;
 global $session_id;
 global $user_id;
 
-// Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
-ob_start();
-
 // Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
 function kognetiks_assign_unique_id() {
     if (!isset($_COOKIE['kognetiks_unique_id'])) {
         $unique_id = uniqid('kognetiks_', true);
         
-        // Use the build-in setcookie function
-        // setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/"); // Cookie expires in 30 days
-
-        // Use the build-in setcookie function - Sets HttpOnly and Secure flags
-        // setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
-        
-        // Set SameSite attribute manually
-        // Sets HttpOnly, Secure, and SameSite = Strict, Lax or None
-        header('Set-Cookie: kognetiks_unique_id=' . $unique_id . '; expires=' . gmdate('D, d M Y H:i:s T', time() + (86400 * 30)) . '; path=/; HttpOnly; Secure; SameSite=Lax');
+        // Set a cookie using the built-in setcookie function
+        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
         
         // Ensure the cookie is set for the current request
         $_COOKIE['kognetiks_unique_id'] = $unique_id;
     }
 }
-add_action('init', 'kognetiks_assign_unique_id');
+add_action('init', 'kognetiks_assign_unique_id', 1); // Set higher priority
 
 // Get the unique ID of the visitor or logged-in user - Ver 2.0.4
 function kognetiks_get_unique_id() {
@@ -125,6 +113,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 
 // Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-model.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-avatar.php';
@@ -196,8 +185,8 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
 // FIXME - Disable Markov Chain - Ver 2.1.6.1
-global $chatbot_chatgpt_markov_chain_setting;
-$chatbot_chatgpt_markov_chain_setting = 'No';
+global $chatbot_markov_chain_setting;
+$chatbot_markov_chain_setting = 'No';
 
 // Model choice - Ver 1.9.4
 global $model;
@@ -523,7 +512,7 @@ function chatbot_chatgpt_send_message() {
     $message = sanitize_text_field($_POST['message']);
 
     // If Markov Chain is enabled, then process the message
-    if (esc_attr(get_option('chatbot_chatgpt_markov_chain_setting', 'No')) == 'Yes') {
+    if (esc_attr(get_option('chatbot_markov_chain_setting', 'No')) == 'Yes') {
         // Check for missing Message
         if (!$message) {
             // DIAG - Diagnostics
@@ -958,37 +947,37 @@ function chatbot_chatgpt_kn_status_deactivation() {
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
 // Markov Chain builder - Activation Hook - Ver 2.1.6
-function chatbot_chatgpt_markov_chain_status_activation() {
+function chatbot_markov_chain_status_activation() {
 
     // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'Markov Chain Status Activation');
 
     // Add the option for build status with a default value of 'Never Run'
-    add_option('chatbot_chatgpt_markov_chain_build_status', 'Never Run');
+    add_option('chatbot_markov_chain_build_status', 'Never Run');
 
     // Clear any old scheduled runs, if present
-    if (wp_next_scheduled('chatbot_chatgpt_markov_chain_scan_hook')) {
+    if (wp_next_scheduled('chatbot_markov_chain_scan_hook')) {
         // BREAK/FIX - Do not unset the hook - Ver 2.1.6
-        // wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook'); // Clear scheduled runs
+        // wp_clear_scheduled_hook('chatbot_markov_chain_scan_hook'); // Clear scheduled runs
     }
 
 }
-register_activation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_activation');
+register_activation_hook(__FILE__, 'chatbot_markov_chain_status_activation');
 
 // Clean up scheduled events and options - Deactivation Hook
-function chatbot_chatgpt_markov_chain_status_deactivation() {
+function chatbot_markov_chain_status_deactivation() {
 
     // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'Markov Chain Status Deactivation');
 
     // Delete the build status option on deactivation
-    delete_option('chatbot_chatgpt_markov_chain_build_status');
+    delete_option('chatbot_markov_chain_build_status');
 
     // Clear any scheduled events related to the Markov Chain scan
-    wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook');
+    wp_clear_scheduled_hook('chatbot_markov_chain_scan_hook');
 
 }
-register_deactivation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_deactivation');
+register_deactivation_hook(__FILE__, 'chatbot_markov_chain_status_deactivation');
 
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
 function addEntry($transient_name, $newEntry) {
@@ -1153,9 +1142,12 @@ function kchat_get_plugin_version() {
         require_once(ABSPATH . 'wp-admin/includes/plugin.php');
     }
 
-    // $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
+    $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
+    // DIAG - Print the plugin data
+    // back_trace( 'NOTICE', 'Plugin data: ' . print_r($plugin_data, true));
     // $plugin_version = $plugin_data['chatbot_chatgpt_version'];
-    $plugin_version = $chatbot_chatgpt_plugin_version;
+    $plugin_version = $plugin_data['Version'];
+    // $plugin_version = $chatbot_chatgpt_plugin_version;
     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
     // DIAG - Log the plugin version
     // back_trace( 'NOTICE', 'Plugin version ' . $plugin_version);

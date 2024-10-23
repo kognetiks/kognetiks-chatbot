@@ -165,51 +165,6 @@ function chatbot_chatgpt_api_settings_init() {
         'chatbot_chatgpt_api_model_chat_section'
     );
 
-    // Markov Chain Options - Ver 2.1.6
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_enabled'); // Ver 2.1.6
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_build_schedule'); // Ver 2.1.6
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_length'); // Ver 2.1.6
-    register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_markov_chain_next_phrase_length'); // Ver 2.1.6
-
-    add_settings_section(
-        'chatbot_chatgpt_api_model_markov_chain_section',
-        'Markov Chain Settings',
-        'chatbot_chatgpt_markov_chain_section_callback',
-        'chatbot_chatgpt_api_model_markov_chain'
-    );
-
-    add_settings_field(
-        'chatbot_chatgpt_markov_chain_enabled',
-        'Markov Chain Enabled',
-        'chatbot_chatgpt_markov_chain_enabled_callback',
-        'chatbot_chatgpt_api_model_markov_chain',
-        'chatbot_chatgpt_api_model_markov_chain_section'
-    );
-
-    add_settings_field(
-        'chatbot_chatgpt_markov_chain_length',
-        'Markov Chain Length',
-        'chatbot_chatgpt_markov_chain_length_callback',
-        'chatbot_chatgpt_api_model_markov_chain',
-        'chatbot_chatgpt_api_model_markov_chain_section'
-    );
-
-    add_settings_field(
-        'chatbot_chatgpt_markov_chain_next_phrase_length',
-        'Markov Chain Length Next Phase Length',
-        'chatbot_chatgpt_markov_chain_next_phrase_length_callback',
-        'chatbot_chatgpt_api_model_markov_chain',
-        'chatbot_chatgpt_api_model_markov_chain_section'
-    );
-
-    add_settings_field(
-        'chatbot_chatgpt_markov_chain_build_schedule',
-        'Markov Chain Build Schedule',
-        'chatbot_chatgpt_markov_chain_build_schedule_callback',
-        'chatbot_chatgpt_api_model_markov_chain',
-        'chatbot_chatgpt_api_model_markov_chain_section'
-    );
-
     // Voice Options - Ver 1.9.5
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_voice_model_option'); // Ver 1.9.5
     register_setting('chatbot_chatgpt_api_model', 'chatbot_chatgpt_voice_option'); // Ver 1.9.5

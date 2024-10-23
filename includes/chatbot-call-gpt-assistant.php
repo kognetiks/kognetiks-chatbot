@@ -241,12 +241,44 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     // back_trace( 'NOTICE', '$top_p: ' . $top_p);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
 
+    // $headers = array(
+    //     "Content-Type: application/json",
+    //     "OpenAI-Beta: " . $beta_version,
+    //     "Authorization: Bearer " . $api_key
+    // );
+
+    // $data = array(
+    //     "assistant_id" => $assistant_id,
+    //     "max_prompt_tokens" => $max_prompt_tokens,
+    //     "max_completion_tokens" => $max_completion_tokens,
+    //     "temperature" => $temperature,
+    //     "top_p" => $top_p,
+    //     "truncation_strategy" => array(
+    //         "type" => "auto",
+    //         "last_messages" => null,
+    //     ),
+    //     "additional_instructions" => $additional_instructions,
+    // );
+
+    // $context = stream_context_create(array(
+    //     'http' => array(
+    //         'method' => 'POST',
+    //         'header' => $headers,
+    //         'content' => json_encode($data),
+    //         'ignore_errors' => true // This allows the function to proceed even if there's an HTTP error
+    //     )
+    // ));
+
+    // $response = fetchDataUsingCurl($url, $context);
+
+    back_trace( 'NOTICE', 'runTheAssistant() - $url: ' . $url);
+
     $headers = array(
         "Content-Type: application/json",
         "OpenAI-Beta: " . $beta_version,
         "Authorization: Bearer " . $api_key
     );
-
+    
     $data = array(
         "assistant_id" => $assistant_id,
         "max_prompt_tokens" => $max_prompt_tokens,
@@ -257,19 +289,72 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
             "type" => "auto",
             "last_messages" => null,
         ),
+        "stream" => true,
         "additional_instructions" => $additional_instructions,
     );
+    
+    // Convert the data array to JSON format
+    $json_data = json_encode($data);
+    
+    // Set up cURL options
+    $curl = curl_init($url);
+    
+    // Set cURL options
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, false);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $json_data);
+    curl_setopt($curl, CURLOPT_WRITEFUNCTION, function ($curl, $data) {
 
-    $context = stream_context_create(array(
-        'http' => array(
-            'method' => 'POST',
-            'header' => $headers,
-            'content' => json_encode($data),
-            'ignore_errors' => true // This allows the function to proceed even if there's an HTTP error
-        )
-    ));
+        // Log the chunk received for debugging
+        back_trace( 'NOTICE', 'Received chunk of data: ' . print_r($data, true));
+    
+        // Check if the chunk contains JSON data starting with 'data:'
+        if (strpos($data, 'data: ') === 0) {
+            // Extract the JSON string
+            $json_string = trim(substr($data, strlen('data: ')));
+    
+            // Decode the JSON string
+            $decoded_data = json_decode($json_string, true);
 
-    $response = fetchDataUsingCurl($url, $context);
+            // back_trace( 'NOTICE', 'Received decoded data: ' . print_r($decoded_data, true));
+    
+            // Check if decoding was successful
+            if (json_last_error() === JSON_ERROR_NONE && isset($decoded_data['object']['delta']['content'])) {
+                // Loop through content to get the value(s)
+                foreach ($decoded_data['delta']['content'] as $content) {
+                    // Check if decoding was successful
+                    if (json_last_error() === JSON_ERROR_NONE && isset($decoded_data['object']['delta']['content'][0])) {
+                        $content = $decoded_data['object']['delta']['content'][0];
+                        if (isset($content['text']['value'])) {
+                            $value = $content['text']['value'];
+
+                            back_trace('NOTICE', 'Received value: ' . $value);
+                            // Output only the value
+                            echo $value;
+                            flush(); // Ensure the value is sent in real time
+                        }
+                    } else {
+                        back_trace('ERROR', 'Failed to decode JSON or missing keys: ' . json_last_error_msg());
+                    }
+                }
+            }
+        }
+    
+        return strlen($data);
+
+    });
+    
+    // Execute cURL session
+    curl_exec($curl);
+    
+    // Check for errors
+    if (curl_errno($curl)) {
+        back_trace('ERROR', 'cURL error: ' . curl_error($curl));
+    }
+    
+    // Close cURL session
+    curl_close($curl);    
 
     // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
@@ -522,7 +607,8 @@ function getTheMessage($thread_id, $api_key) {
             'method' => 'GET',
             'header' => $headers
     )));
-    $response = fetchDataUsingCurl($url, $context);
+    // $response = fetchDataUsingCurl($url, $context);
+    $response = fetchDeltaDataUsingCurl($url, $context);
     $response_data = json_decode($response, true);
 
     // DIAG - Diagnostics - Ver 2.0.3
@@ -872,6 +958,74 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 }
 
 // Fetch data with cURL - Ver 1.7.6
+function fetchDeltaDataUsingCurl($url, $context) {
+
+    // Extract headers and other context options
+    $context_options = stream_context_get_options($context);
+
+    // Initialize a cURL session
+    $curl = curl_init($url);
+
+    // Set cURL options for POST
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, false);
+
+    // Initialize a variable to store response
+    $response_data = '';
+
+    // Set callback to handle streaming chunks
+    curl_setopt($curl, CURLOPT_WRITEFUNCTION, function ($curl, $data) use (&$response_data) {
+        // Append data as it arrives
+        $response_data .= $data;
+        back_trace('NOTICE', 'Received chunk of data: ' . $data);
+        flush(); // Ensure the data is sent in real time
+        return strlen($data);
+    });
+
+    // Set headers and other options
+    if (isset($context_options['http'])) {
+        $http_options = $context_options['http'];
+
+        if (isset($http_options['method'])) {
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $http_options['method']);
+        }
+        if (isset($http_options['header'])) {
+            if (is_array($http_options['header'])) {
+                curl_setopt($curl, CURLOPT_HTTPHEADER, $http_options['header']);
+            } else {
+                curl_setopt($curl, CURLOPT_HTTPHEADER, explode("\r\n", $http_options['header']));
+            }
+        }
+        if (isset($http_options['content'])) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $http_options['content']);
+        }
+    }
+
+    // Execute cURL session
+    curl_exec($curl);
+
+    // Log if the cURL execution failed
+    if (curl_errno($curl)) {
+        $curl_error = curl_error($curl);
+        back_trace('ERROR', 'cURL error: ' . $curl_error);
+    }
+
+    // Close cURL session
+    curl_close($curl);
+
+    // Decode the response if it is not empty
+    if (!empty($response_data)) {
+        $decoded_response = json_decode($response_data, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            back_trace('ERROR', 'Failed to decode JSON: ' . json_last_error_msg());
+        }
+        return $decoded_response;
+    } else {
+        back_trace('ERROR', 'No data received from API');
+        return null;
+    }
+
+}
+
 function fetchDataUsingCurl($url, $context) {
 
     // Initialize a cURL session
@@ -897,6 +1051,9 @@ function fetchDataUsingCurl($url, $context) {
     // Execute cURL session and close it
     $response = curl_exec($curl);
     curl_close($curl);
+
+    // Diagnostic - Ver 2.1.7
+    //back_trace( 'NOTICE', 'fetchDataUsingCurl(): ' . print_r($response, true));
 
     return $response;
 
