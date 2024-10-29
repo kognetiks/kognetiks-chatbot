@@ -605,8 +605,11 @@ jQuery(document).ready(function ($) {
             // Only convert newlines to <br> outside of code blocks and blockquotes
             return index % 2 === 0 ? chunk.replace(/\n/g, '<br>') : chunk;
         }).join('');
+
+        // Step 13: Convert double line breaks to single line breaks
+        markdown = markdown.replace(/(<br>\s*){2,}/g, '<br>');
     
-        // Step 13: Reinsert predefined HTML tags
+        // Step 14: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
             return predefinedHtml[parseInt(index)];
         });

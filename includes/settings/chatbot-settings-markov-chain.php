@@ -38,22 +38,22 @@ function chatbot_markov_chain_api_model_general_section_callback($args){
 }
 
 // Markov Chain Enable Settings Callback - Ver 2.1.6
-function chatbot_markov_chain_enabled_callback($args) {
-    // Get the saved chatbot_markov_chain_enabled value or default to "No"
+function chatbot_markov_chain_api_enabled_callback($args) {
+    // Get the saved chatbot_markov_chain_api_enabled value or default to "No"
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    $markov_chain_enabled = esc_attr(get_option('chatbot_markov_chain_enabled', 'No'));
-    if ($model_choice == 'markov-chain-2023-09-17' || $markov_chain_enabled == 'Yes') {
-        $markov_chain_enabled = 'Yes';
-        update_option('chatbot_markov_chain_enabled', 'Yes');
+    $markov_chain_api_enabled = esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No'));
+    if ($model_choice == 'markov-chain-2023-09-17' || $markov_chain_api_enabled == 'Yes') {
+        $markov_chain_api_enabled = 'Yes';
+        update_option('chatbot_markov_chain_api_enabled', 'Yes');
         update_option('chatbot_chatgpt_model_choice', 'markov-chain-2023-09-17');
     } else {
-        $markov_chain_enabled = 'No';
-        update_option('chatbot_markov_chain_enabled', 'No');
+        $markov_chain_api_enabled = 'No';
+        update_option('chatbot_markov_chain_api_enabled', 'No');
     }
     ?>
-    <select id="chatbot_markov_chain_enabled" name="chatbot_markov_chain_enabled">
-        <option value="Yes" <?php selected($markov_chain_enabled, 'Yes'); ?>>Yes</option>
-        <option value="No" <?php selected($markov_chain_enabled, 'No'); ?>>No</option>
+    <select id="chatbot_markov_chain_api_enabled" name="chatbot_markov_chain_api_enabled">
+        <option value="Yes" <?php selected($markov_chain_api_enabled, 'Yes'); ?>>Yes</option>
+        <option value="No" <?php selected($markov_chain_api_enabled, 'No'); ?>>No</option>
     </select>
     <?php
 }
@@ -121,6 +121,22 @@ function chatbot_markov_chain_build_schedule_callback($args) {
     
 }
 
+// Markov Chain Model Choice Callback - Ver 2.1.8
+function chatbot_markov_chain_model_choice_callback($args) {
+
+    global $chatbot_markov_chain_api_enabled;
+    
+    // Get the saved chatbot_markov_chain_model_choice value or default to "markov-chain-2023-09-17"
+    $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2023-09-17'));
+
+    ?>
+    <select id="chatbot_markov_chain_model_choice" name="chatbot_markov_chain_model_choice">
+        <option value="<?php echo esc_attr( 'markov-chain-2023-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2023-09-17' ); ?>><?php echo esc_html( 'markov-chain-2023-09-17' ); ?></option>
+    </select>
+    <?php
+
+}
+
 // Register API settings - Moved for Ver 2.1.8
 function chatbot_markov_chain_api_settings_init() {
 
@@ -132,7 +148,8 @@ function chatbot_markov_chain_api_settings_init() {
     );
 
     // Markov Chain Options - Ver 2.1.6
-    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_enabled'); // Ver 2.1.6
+    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_api_enabled'); // Ver 2.1.6
+    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_model_choice'); // Ver 2.1.8
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_build_schedule'); // Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_length'); // Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_next_phrase_length'); // Ver 2.1.6
@@ -145,9 +162,17 @@ function chatbot_markov_chain_api_settings_init() {
     );
 
     add_settings_field(
-        'chatbot_markov_chain_enabled',
+        'chatbot_markov_chain_api_enabled',
         'Markov Chain Enabled',
-        'chatbot_markov_chain_enabled_callback',
+        'chatbot_markov_chain_api_enabled_callback',
+        'chatbot_markov_chain_api_model_general',
+        'chatbot_markov_chain_api_model_general_section'
+    );
+
+    add_settings_field(
+        'chatbot_markov_chain_model_choice',
+        'Markov Chain Model Choice',
+        'chatbot_markov_chain_model_choice_callback',
         'chatbot_markov_chain_api_model_general',
         'chatbot_markov_chain_api_model_general_section'
     );

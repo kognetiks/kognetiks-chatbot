@@ -78,12 +78,30 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
     // back_trace( 'NOTICE', '========================================');
     // foreach ($atts as $key => $value) {
-    //   // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    //     back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     // }
+    // back_trace( 'NOTICE', '========================================');
    
-    // BELT & SUSPENDERS - Ver 1.9.4
-    $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    $voice_choice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
+    // BELT & SUSPENDERS - Ver 1.9.4 - Updated Ver 2.1.8 - 2024 10 26
+    if (esc_attr(get_option('chatbot_nvidia_api_enabled', 'No')) == 'Yes') {
+        // DIAG - Diagnostics - Ver 2.1.8
+        back_trace( 'NOTICE', 'NVIDIA chatbot is enabled');
+        $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
+        $voice_choice = esc_attr(get_option('chatbot_nvidia_voice_option', 'none'));
+    } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
+        // DIAG - Diagnostics - Ver 2.1.8
+        back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
+        $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2023-09-17'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
+        $voice_choice = esc_attr(get_option('chatbot_markov_chain_voice_option', 'none'));
+    } else {
+        // DIAG - Diagnostics - Ver 2.1.8
+        back_trace( 'NOTICE', 'OpenAI chatbot is enabled');
+        $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
+        $voice_choice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));    
+    }
 
     // DIAG - Diagnostics - Ver 2.0.6
     // back_trace( 'NOTICE', '========================================');
@@ -94,6 +112,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', 'Shortcode Attributes: ' . print_r($atts, true));
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
+    // back_trace( 'NOTICE', '========================================');
+    // foreach ($kchat_settings as $key => $value) {
+    //     back_trace( 'NOTICE', '$kchat_settings - Key: ' . $key . ' Value: ' . $value);
+    // }
+    // back_trace( 'NOTICE', '========================================');
 
     // EXAMPLE - Shortcode Attributes
     // [chatbot] - Default values, floating style, uses OpenAI's ChatGPT

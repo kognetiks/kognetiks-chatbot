@@ -167,7 +167,7 @@ function chatbot_chatgpt_visitor_message_limit_period_setting_callback($args) {
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
 
-    global $chatbot_markov_chain_enabled;
+    global $chatbot_markov_chain_api_enabled;
     
     // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
@@ -192,14 +192,6 @@ function chatbot_chatgpt_model_choice_callback($args) {
             <option value="<?php echo esc_attr( 'gpt-4-1106-preview' ); ?>" <?php selected( $model_choice, 'gpt-4-1106-preview' ); ?>><?php echo esc_html( 'gpt-4-1106-preview' ); ?></option>
             <option value="<?php echo esc_attr( 'gpt-4' ); ?>" <?php selected( $model_choice, 'gpt-4' ); ?>><?php echo esc_html( 'gpt-4' ); ?></option>
             <option value="<?php echo esc_attr( 'gpt-3.5-turbo' ); ?>" <?php selected( $model_choice, 'gpt-3.5-turbo' ); ?>><?php echo esc_html( 'gpt-3.5-turbo' ); ?></option>
-            <?php
-            if ( $chatbot_markov_chain_enabled == 'Yes' ) {
-                ?>
-                <option value="<?php echo esc_attr( 'markov-chain-2023-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2023-09-17' ); ?>><?php echo esc_html( 'markov-chain-2023-09-17' ); ?></option>
-                <?php
-            }
-            ?>
-            <option value="<?php echo esc_attr( 'markov-chain-2023-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2023-09-17' ); ?>><?php echo esc_html( 'markov-chain-2023-09-17' ); ?></option>
         </select>
         <?php
     } else {
@@ -209,12 +201,6 @@ function chatbot_chatgpt_model_choice_callback($args) {
             <?php foreach ($models as $model): ?>
                 <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_model_choice'), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
             <?php endforeach; ?>
-            <?php
-            if ( $chatbot_markov_chain_enabled == 'Yes' ) {
-                ?>
-                <option value="<?php echo esc_attr( 'markov-chain-2023-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2023-09-17' ); ?>><?php echo esc_html( 'markov-chain-2023-09-17' ); ?></option>
-                <?php
-            }
             ?>
         </select>
         <?php
@@ -299,6 +285,11 @@ function get_openai_api_base_url() {
     return esc_attr(get_option('chatbot_chatgpt_base_url', 'https://api.openai.com/v1'));
 }
 
+// Base URL for the NVIDIA - Ver 2.1.8
+function get_nvidia_api_base_url() {
+    return esc_attr(get_option('chatbot_nvidia_api_base_url', 'https://integrate.api.nvidia.com/v1'));
+}
+
 function get_threads_api_url() {
     return get_openai_api_base_url() . "/threads";
 }
@@ -308,13 +299,26 @@ function get_files_api_url() {
 }
 
 function get_chat_completions_api_url() {
-    return get_openai_api_base_url() . "/chat/completions";
+
+    // Enable for either ChatGPT or NVIDIA - Ver 2.1.8
+    if (get_option('chatbot_nvidia_api_enabled', 'No') == 'Yes') {
+        // DIAG - Diagnostics - Ver 2.1.8
+        back_trace( 'NOTICE', 'get_chat_completions_api_url: NVIDIA API' );
+        return get_nvidia_api_base_url() . "/chat/completions";
+    } else {
+        // DIAG - Diagnostics - Ver 2.1.8
+        back_trace( 'NOTICE', 'get_chat_completions_api_url: OpenAI API' );
+        return get_openai_api_base_url() . "/chat/completions";
+    }
+
 }
 
 // Timeout Settings Callback - Ver 1.8.8
 function chatbot_chatgpt_timeout_setting_callback($args) {
+
     // Get the saved chatbot_chatgpt_timeout value or default to 240
     $timeout = esc_attr(get_option('chatbot_chatgpt_timeout_setting', 240));
+
     // Allow for a range of tokens between 5 and 500 in 5-step increments - Ver 1.8.8
     ?>
     <select id="chatbot_chatgpt_timeout_setting" name="chatbot_chatgpt_timeout_setting">
@@ -325,6 +329,7 @@ function chatbot_chatgpt_timeout_setting_callback($args) {
         ?>
     </select>
     <?php
+    
 }
 
 // Voice Model Options Callback - Ver 1.9.5

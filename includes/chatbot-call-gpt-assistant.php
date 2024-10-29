@@ -271,6 +271,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
     // $response = fetchDataUsingCurl($url, $context);
 
+    // DIAG - Diagnostics
     back_trace( 'NOTICE', 'runTheAssistant() - $url: ' . $url);
 
     $headers = array(

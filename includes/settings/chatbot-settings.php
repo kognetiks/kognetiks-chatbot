@@ -210,6 +210,10 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_nvidia_api_model_general');
                 echo '</div>';
 
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_nvidia_api_model_chat_settings');
+                echo '</div>';
+
                 // Advanced Settings
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_nvidia_api_model_advanced');

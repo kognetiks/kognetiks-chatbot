@@ -1,8 +1,8 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - ChatGPT API - Ver 1.6.9
+ * Kognetiks Chatbot for WordPress - NVIDIA API - Ver 1.6.9
  *
- * This file contains the code for accessing the ChatGPT API.
+ * This file contains the code for accessing the NVIDIA API.
  * 
  *
  * @package chatbot-chatgpt
@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the ChatGPT API
-function chatbot_chatgpt_call_api($api_key, $message) {
+function chatbot_nvidia_call_api($api_key, $message) {
 
     global $session_id;
     global $user_id;
@@ -30,16 +30,19 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_api()');
+    // back_trace( 'NOTICE', 'chatbot_nvidia_call_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
-    // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
-    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    // The current NVIDIA API URL endpoint for chat completions
+    // $api_url = 'https://integrate.api.nvidia.com/v1';
     $api_url = get_chat_completions_api_url();
+
+    // DIAG - Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -47,14 +50,14 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     );
 
     // Select the OpenAI Model
-    // Get the saved model from the settings or default to "gpt-3.5-turbo"
-    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+    // Get the saved model from the settings or default to "nvidia/llama-3.1-nemotron-70b-instruct"
+    $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
  
     // Max tokens - Ver 1.4.2
-    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '500')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_nvidia_max_tokens_setting', '500')));
 
     // Conversation Context - Ver 1.6.1
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+    $context = esc_attr(get_option('chatbot_nvidia_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
  
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
@@ -94,7 +97,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     //
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
     //
-    $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context'), '');
+    $useEnhancedContext = esc_attr(get_option('chatbot_nvidia_use_enhanced_context'), '');
 
     // DIAG Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$useEnhancedContext: ' . $useEnhancedContext);
@@ -159,17 +162,29 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // back_trace( 'NOTICE', '$context: ' . $context);
     // back_trace( 'NOTICE', '$message: ' . $message);  
 
+    $chatbot_nvidia_timeout = esc_attr(get_option('chatbot_nvidia_timeout_setting', '50'));
+    $chatbot_nvidia_timeout = 90;
+
     $args = array(
         'headers' => $headers,
         'body' => json_encode($body),
         'method' => 'POST',
         'data_format' => 'body',
-        'timeout' => 50, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
-    );
+        'timeout' => $chatbot_nvidia_timeout, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
+        );
 
+    // DIAG - Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', '========================================');
+    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
+    // back_trace( 'NOTICE', '$args: ' . print_r($args, true));
+    // back_trace( 'NOTICE', '========================================');
+    
     $response = wp_remote_post($api_url, $args);
-    // DIAG - Diagnostics - Ver 1.6.7
+
+    // DIAG - Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', '========================================');
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -181,10 +196,21 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
-    if (isset($response_body['message'])) {
-        $response_body['message'] = trim($response_body['message']);
-        if (!str_ends_with($response_body['message'], '.')) {
-            $response_body['message'] .= '.';
+
+    // if (isset($response_body['message'])) {
+    //     $response_body['message'] = trim($response_body['message']);
+    //     if (!str_ends_with($response_body['message'], '.')) {
+    //         $response_body['message'] .= '.';
+    //     }
+    // }
+
+    if (isset($response_body['choices'][0]['message']['content'])) {
+        // Extract the assistant's message content
+        $message_content = trim($response_body['choices'][0]['message']['content']);
+        
+        // Ensure the response ends with a period
+        if (!str_ends_with($message_content, '.')) {
+            $message_content .= '.';
         }
     }
 
@@ -229,6 +255,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         // Context History - Ver 1.6.1
         addEntry('chatbot_chatgpt_context_history', $response_body['choices'][0]['message']['content']);
         return $response_body['choices'][0]['message']['content'];
+    
     } else {
         // FIXME - Decide what to return here - it's an error
         if (get_locale() !== "en_US") {
