@@ -81,7 +81,7 @@ function chatbot_nvidia_chat_model_choice_callback($args) {
     $nvidia_api_enabled = esc_attr(get_option('chatbot_nvidia_api_enabled', 'No'));
 
     // Fetch models from the API
-    $models = chatbot_nvidia_get_openai_models();
+    $models = chatbot_nvidia_get_models();
 
     // Remove the models not owned by NVIDIA
     $models = array_filter($models, function($model) {

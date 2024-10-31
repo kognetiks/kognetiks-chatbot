@@ -149,7 +149,6 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
 // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
 function update_chatbot_chatgpt_number_of_shortcodes() {
 
-
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -180,6 +179,11 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
 
 // Add a row to the chatbot assistants table
 function add_chatbot_chatgpt_assistant($assistant_id, $common_name, $style, $audience, $voice, $allow_file_uploads, $allow_transcript_downloads, $show_assistant_name, $initial_greeting, $subsequent_greeting, $placeholder_prompt, $additional_instructions) {
+
+    if ( ! current_user_can('manage_options') ) {
+        wp_send_json_error( 'Unauthorized user', 403 );
+        exit;
+    }
 
     global $wpdb;
 
@@ -216,6 +220,11 @@ function add_chatbot_chatgpt_assistant($assistant_id, $common_name, $style, $aud
 
 // Update a row in the chatbot assistants table
 function update_chatbot_chatgpt_assistant($id, $assistant_id, $common_name, $style, $audience, $voice, $allow_file_uploads, $allow_transcript_downloads, $show_assistant_name, $initial_greeting, $subsequent_greeting, $placeholder_prompt, $additional_instructions) {
+
+    if ( ! current_user_can('manage_options') ) {
+        wp_send_json_error( 'Unauthorized user', 403 );
+        exit;
+    }
 
     global $wpdb;
 
@@ -257,6 +266,11 @@ function update_chatbot_chatgpt_assistant($id, $assistant_id, $common_name, $sty
 
 // Delete a row from the chatbot assistants table
 function delete_chatbot_chatgpt_assistant($id) {
+
+    if ( ! current_user_can('manage_options') ) {
+        wp_send_json_error( 'Unauthorized user', 403 );
+        exit;
+    }
 
     global $wpdb;
 

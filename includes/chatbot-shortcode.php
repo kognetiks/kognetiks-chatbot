@@ -1039,7 +1039,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             setTimeout(function() {
                                 var submitButton = document.getElementById('chatbot-chatgpt-submit');
                                 if (submitButton) {
-                                    submitButton.trigger('click');
+                                    submitButton.click(); // Use plain JS click
                                 }
                             }, 500); // Delay of 1 second
                         });
@@ -1177,7 +1177,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                                 setTimeout(function() {
                                     var submitButton = document.getElementById('chatbot-chatgpt-submit');
                                     if (submitButton) {
-                                        submitButton.trigger('click');
+                                        submitButton.click(); // Use plain JS click
                                     }
                                 }, 500); // Delay of 1 second
                             });
@@ -1435,9 +1435,6 @@ function chatbot_chatgpt_shortcode_enqueue_script() {
                         'chatbot_chatgpt_opened',
                         'chatbot_chatgpt_last_reset'
                     ];
-                    ];
-                    // Iterate over kchat_settings and add to localStorage if key is included
-                    ];     
                     // Iterate over kchat_settings and add to localStorage if key is included
                     Object.keys(kchat_settings).forEach(function(key) {
                         if (includeKeys.includes(key)) {

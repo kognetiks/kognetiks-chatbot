@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Function to get the Model names from OpenAI API
-function chatbot_chatgpt_get_openai_models() {
+function chatbot_openai_get_models() {
 
     global $session_id;
     global $user_id;
@@ -142,7 +142,7 @@ function chatbot_chatgpt_get_openai_models() {
 }
 
 // Function to get the Model names from NVIDIA API
-function chatbot_nvidia_get_openai_models() {
+function chatbot_nvidia_get_models() {
 
     global $session_id;
     global $user_id;

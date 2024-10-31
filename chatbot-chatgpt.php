@@ -504,53 +504,28 @@ function chatbot_chatgpt_send_message() {
     if (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
         $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
         $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model;
+        $kchat_settings['model'] = $model;
+        // DIAG - Diagnostics - Ver 2.1.8
+        back_trace( 'NOTICE', 'LINE 510 - $model: ' . $model);
     } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
         $api_key = esc_attr(get_option('chatbot_markov_chain_api_key'));
         $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2023-09-17'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model;
+        $kchat_settings['model'] = $model;
+        // DIAG - Diagnostics - Ver 2.1.8
+        back_trace( 'NOTICE', 'LINE 517 - $model: ' . $model);
     } else {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-    }
-
-    // FIXME - STILL NEEDED - Ver 2.0.7 - 2024 07 25
-    // Retrieve the GPT Model
-    if (!empty($model)) {
-        // Set the model to the default
-        if (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
-            $kchat_settings['chatbot_chatgpt_model'] = $model;
-        } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2023-09-17'));
-            $kchat_settings['chatbot_chatgpt_model'] = $model;
-        } else {
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-            $kchat_settings['chatbot_chatgpt_model'] = $model;
-        }
-        // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'LINE 530 - Model from options: ' . $model);
-    } else {
-        // SEE IF $kchat_settings HAS THE MODEL
-        if ( isset($kchat_settings['model'])) {
-            $model = $kchat_settings['model'];
-            // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'LINE 536 - Model set in global: ' . $model);
-        } else {
-            // Set the model to the default
-            if (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
-                $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
-            } else {
-                $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-                // DIAG - Diagnostics
-                back_trace( 'NOTICE', 'LINE 536 - Model set by default: ' . $model);
-            }
-            // DIAG - Diagnostics
-            // back_trace( 'ERROR', 'Invalid Model.');
-            // wp_send_json_error('Error: Invalid Model. Please check the plugin settings.');
-        }
+        $kchat_settings['chatbot_chatgpt_model'] = $model;
+        $kchat_settings['model'] = $model;
+        // DIAG - Diagnostics - Ver 2.1.8
+        back_trace( 'NOTICE', 'LINE 524 - $model: ' . $model);
     }
 
     // DIAG - Diagnostics - Ver 2.1.8
-    back_trace( 'NOTICE', 'LINE 553 - $model: ' . $model);
+    back_trace( 'NOTICE', 'LINE 528 - $model: ' . $model);
 
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);

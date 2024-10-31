@@ -1250,7 +1250,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                // console.error('Chatbot: NOTICE: Response from server', response);
+                console.error('Chatbot: NOTICE: Response from server', response);
                 $('#chatbot-chatgpt-upload-file-input').val(''); // Clear the file input after successful upload
                 appendMessage('File(s) successfully uploaded.', 'bot');
             },
@@ -1265,8 +1265,21 @@ jQuery(document).ready(function ($) {
                     appendMessage('Oops! Failed to upload file. Please try again.', 'error');
                 }
             },
-            complete: function () {
+            complete: function (response) {
                 removeTypingIndicator();
+                console.log('Chatbot: NOTICE: Response from server', response);
+                if (response) {
+                    // appendMessage(response, 'bot');
+                    // Append custom JS to the bot's response - Ver 2.0.9
+                    if (typeof appendCustomJsToFileUploadResponse === 'function') {
+                        let customMessage = '';
+                        customMessage = appendCustomJsToFileUploadResponse('File(s) successfully uploaded.');
+                        // Check if customMessage is not null, undefined, or an empty string
+                        if (customMessage) {
+                            appendMessage(customMessage, 'bot');
+                        }
+                    };
+                }
                 submitButton.prop('disabled', false);
             },
         });
