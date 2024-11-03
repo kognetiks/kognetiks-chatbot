@@ -4,7 +4,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ## General Settings
 
-![General Settings](general-settings.png)
+![Chatbot Settings](general-settings.png)
 
 1. **Chatbot Name**:
    - **Description**: This field allows you to set the name of your chatbot.
@@ -19,6 +19,46 @@ The General Settings allow you to customize the basic behavior and appearance of
    - **Description**: This setting determines the initial status of the chatbot for new visitors.
    - **Options**: `Closed` or `Open`.
    - **Selection**: Similar to the Start Status, choose `Closed` or `Open` based on your preference for new visitors.
+
+## Message Limit Settings
+
+![Message Limit Settings](message-limit-settings.png)
+
+1. **User Message Limit per Period**:
+   - **Description**: This setting limits the number of messages logged-in users can send to the chatbot per day. It helps manage API usage and costs.
+   - **Default Value**: The default limit is set to 999 messages per day.
+   - **Customization**: You can adjust this number based on your needs. Enter the desired limit in the provided field.
+
+2. **User Message Limit Period**:
+   - **Description**:This setting defines the time period during which non-logged-in users (visitors) and logged-in users can send messages to the chatbot. It allows you to manage how often users can interact with the chatbot and helps regulate API usage and associated costs.
+   - **Default Value**: By default, users are allowed to send up to 999 messages per day.
+   - **Customization**: You can customize the number of allowed messages and the reset period based on your specific needs. Enter the desired message limit in the provided field. The following time periods are available for customization:
+   
+      - **Hourly**: Resets the message count every hour, providing a more granular control over usage within a single day. This is useful if you want to limit message bursts within short time frames.
+      - **Daily**: Resets the message count once per day. This is the most common setting, providing users with a fixed number of messages each day.
+      - **Weekly**: Resets the message count once every week. This can help spread out usage over a longer period, ideal for scenarios where more extended engagement is anticipated.
+      - **Monthly**: Resets the message count at the start of each month. Useful for managing API usage on a month-to-month basis, ensuring that your usage aligns with monthly API cost limits.
+      - **Quarterly**: Resets the message count every three months. This option is useful for managing seasonal fluctuations in chatbot usage.
+      - **Yearly**: Resets the message count once per year. This is ideal for long-term planning and budgeting for API usage.
+   - **NOTE**: Lifetime: No reset occurs. This option allows unlimited messages over a user's lifetime, which can be useful for creating limited-time access.
+   
+3. **Visitor Message Limit**:
+   - **Description**: This setting limits the number of messages non-logged-in users (visitors) can send to the chatbot per day. It also helps manage API usage and costs.
+   - **Default Value**: The default limit is set to 999 messages per day.
+   - **Customization**: You can adjust this number based on your needs. Enter the desired limit in the provided field.
+
+4. **Visitor Message Limit per Period**:
+   - **Description**:This setting defines the time period during which non-logged-in users (visitors) and logged-in users can send messages to the chatbot. It allows you to manage how often users can interact with the chatbot and helps regulate API usage and associated costs.
+   - **Default Value**: By default, users are allowed to send up to 999 messages per day.
+   - **Customization**: You can customize the number of allowed messages and the reset period based on your specific needs. Enter the desired message limit in the provided field. The following time periods are available for customization:
+   
+      - **Hourly**: Resets the message count every hour, providing a more granular control over usage within a single day. This is useful if you want to limit message bursts within short time frames.
+      - **Daily**: Resets the message count once per day. This is the most common setting, providing users with a fixed number of messages each day.
+      - **Weekly**: Resets the message count once every week. This can help spread out usage over a longer period, ideal for scenarios where more extended engagement is anticipated.
+      - **Monthly**: Resets the message count at the start of each month. Useful for managing API usage on a month-to-month basis, ensuring that your usage aligns with monthly API cost limits.
+      - **Quarterly**: Resets the message count every three months. This option is useful for managing seasonal fluctuations in chatbot usage.
+      - **Yearly**: Resets the message count once per year. This is ideal for long-term planning and budgeting for API usage.
+   - **NOTE**: Lifetime: No reset occurs. This option allows unlimited messages over a user's lifetime, which can be useful for creating limited-time access.
 
 ## Prompts and Greetings
 
@@ -84,21 +124,35 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 3. Set the `Start Status` and `Start Status New Visitor` according to your preference.
 
-4. Customize the `Chatbot Prompt` with a message that fits your use case.
+4. Select a `User Message Limit per Perod` or use the default.
 
-5. Write a personalized `Initial Greeting` to welcome new users.
+5. Select a `User Message Limit Period` or use the default.
 
-6. Create a `Subsequent Greeting` for returning users.
+6. Select a `Visitor Message Limit per Perod` or use the default.
 
-7. Decide whether to include the "As an AI language model" disclaimer by toggling the option to `Yes` or `No`.
+7. Select a `Visitor Message Limit Period` or use the default.
 
-8. Select the appropriate `Audience for Chatbot` based on your content.
+8. Customize the `Chatbot Prompt` with a message that fits your use case.
 
-9. Set the `Input Rows` to the desired number.
+9. Write a personalized `Initial Greeting` to welcome new users.
 
-10. Save the settings.
+10. Create a `Subsequent Greeting` for returning users.
+
+11. Decide whether to include the "As an AI language model" disclaimer by toggling the option to `Yes` or `No`.
+
+12. Select the appropriate `Audience for Chatbot` based on your content.
+
+13. Set the `Input Rows` to the desired number.
+
+14. Save the settings.
 
 ## Tips
+
+By configuring these settings, you ensure that your Kognetiks Chatbot plugin operates smoothly and efficiently, providing a seamless experience for both logged-in users and visitors.
+
+- **Monitoring Usage**: Regularly monitor your API usage in the OpenAI dashboard to ensure that your limits are appropriate and adjust them as necessary.
+
+- **Cost Management**: Setting appropriate message limits helps control costs associated with API usage.
 
 - **Personalization**: Use placeholders like `[first_name]` to make interactions more personalized and engaging.
 

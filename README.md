@@ -198,7 +198,7 @@ The latest update for the Kognetiks Chatbot for WordPress plugin, Version 1.9.5,
 
 * **Repositioned Chatbot Controls:** For an improved user interface, we have moved essential chatbot controls — such as submit, file upload, erase, and text-to-speech buttons — below the input box. This rearrangement enhances accessibility and makes the chat interface cleaner and more intuitive.
 
-* **Redesigned API/Model Settings Page:** The settings page for chat, image, and speech generation parameters has been redesigned for better usability. You can now more easily adjust and tune your settings, ensuring the chatbot performs optimally across all integrated models.
+* **Redesigned API/ChatGPT Settings Page:** The settings page for chat, image, and speech generation parameters has been redesigned for better usability. You can now more easily adjust and tune your settings, ensuring the chatbot performs optimally across all integrated models.
 
 These updates aim to enhance the versatility and visitor experience of the Kognetiks Chatbot for WordPress, continuing our commitment to deliver cutting-edge, customizable, and accessible technology solutions.
 

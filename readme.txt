@@ -141,7 +141,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 12. Mobile Chatbot - Tablet Open example
 13. Mobile Chatbot - Tablet Landscape example
 14. Chatbot Setting - Main settings
-15. Chatbot Setting - API/Model settings
+15. Chatbot Setting - API/ChatGPT Settings
 16. Chatbot Setting - GPT Assistant settings
 17. Chatbot Setting - Avatar settings
 18. Chatbot Setting - Appearance settings

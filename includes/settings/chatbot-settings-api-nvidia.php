@@ -27,7 +27,6 @@ function chatbot_nvidia_model_settings_section_callback($args) {
 function chatbot_nvidia_api_model_general_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from NVIDIA to function. You can obtain an API key by signing up at <a href="https://build.nvidia.com/nim?signin=true" target="_blank">https://build.nvidia.com/nim?signin=true</a>.</p>
-    <p>The Chatbot Daily Message Limit applies to logged-in users. The Visitor Message Limit applies to non-logged-in users. The default is 999.</p>
     <?php
 }
 
@@ -35,12 +34,12 @@ function chatbot_nvidia_api_model_general_section_callback($args) {
 function chatbot_nvidia_api_enabled_callback($args) {
 
     // Get the saved chatbot_nvidia_api_enabled value or default to "No"
-    $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
+    $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
     $nvidia_api_enabled = esc_attr(get_option('chatbot_nvidia_api_enabled', 'No'));
     
     if ($nvidia_api_enabled == 'Yes') {
         update_option('chatbot_nvidia_api_enabled', 'Yes');
-        // update_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct');
+        // update_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct');
     } else {
         $nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
@@ -68,8 +67,8 @@ function chatbot_nvidia_api_model_chat_settings_section_callback($args) {
     <p>Configure the settings for the plugin when using chat models. Depending on the NVIDIA model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://docs.api.nvidia.com/nim/reference/models-1" target="_blank">https://docs.api.nvidia.com/nim/reference/models-1</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
-        <li><code>&#91;chatbot style="floating" model="nvidia/llama-3.1-nemotron-70b-instruct"&#93;</code> - Style is floating, specific model</li>
-        <li><code>&#91;chatbot style="embedded" model="nvidia/llama-3.1-nemotron-70b-instruct"&#93;</code> - Style is embedded, default chat model</li>
+        <li><code>&#91;chatbot style="floating" model="nvidia/llama-3.1-nemotron-51b-instruct"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="nvidia/llama-3.1-nemotron-51b-instruct"&#93;</code> - Style is embedded, default chat model</li>
     </ul>
     <?php
 }
@@ -77,7 +76,7 @@ function chatbot_nvidia_api_model_chat_settings_section_callback($args) {
 // NVIDIA Model Settings Callback - Ver 2.1.8
 function chatbot_nvidia_chat_model_choice_callback($args) {
 
-    $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
+    $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
     $nvidia_api_enabled = esc_attr(get_option('chatbot_nvidia_api_enabled', 'No'));
 
     // Fetch models from the API
@@ -91,10 +90,10 @@ function chatbot_nvidia_chat_model_choice_callback($args) {
     // Check for errors
     if (is_string($models) && strpos($models, 'Error:') === 0) {
         // If there's an error, display the hardcoded list
-        $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
+        $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
         ?>
         <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
-            <option value="<?php echo esc_attr( 'nvidia/llama-3.1-nemotron-70b-instruct' ); ?>" <?php selected( $model_choice, 'nvidia/llama-3.1-nemotron-70b-instruct' ); ?>><?php echo esc_html( 'nvidia/llama-3.1-nemotron-70b-instruct' ); ?></option>
+            <option value="<?php echo esc_attr( 'nvidia/llama-3.1-nemotron-51b-instruct' ); ?>" <?php selected( $model_choice, 'nvidia/llama-3.1-nemotron-51b-instruct' ); ?>><?php echo esc_html( 'nvidia/llama-3.1-nemotron-51b-instruct' ); ?></option>
         </select>
         <?php
     } else {
@@ -171,13 +170,13 @@ function chatbot_nvidia_api_settings_init() {
         'chatbot_nvidia_model_settings_general'
     );
 
-    // API/Model settings tab - Ver 1.3.0
+    // API/NVIDIA settings tab - Ver 1.3.0
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_enabled');
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_key');
 
     add_settings_section(
         'chatbot_nvidia_api_model_general_section',
-        'API Settings',
+        'NVIDIA API Settings',
         'chatbot_nvidia_api_model_general_section_callback',
         'chatbot_nvidia_api_model_general'
     );

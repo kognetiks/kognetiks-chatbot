@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - API/Model Page
+ * Kognetiks Chatbot for WordPress - Settings - API/ChatGPT Page
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the API key and other parameters
@@ -14,24 +14,23 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// API/Model settings section callback - Ver 1.3.0 - Updated Ver 2.0.2.1
+// API/ChatGPT Settings section callback - Ver 1.3.0 - Updated Ver 2.0.2.1
 function chatbot_chatgpt_model_settings_section_callback($args) {
     ?>
     <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Model settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-model-settings&file=api-model-settings.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/ChatGPT Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-model-settings&file=api-model-settings.md">here</a>.</b></p>
     <?php
 }
 
-function chatbot_chatgpt_api_model_general_section_callback($args) {
+function chatbot_chatgpt_api_chatgpt_general_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p>
-    <p>The Chatbot Daily Message Limit applies to logged-in users. The Visitor Message Limit applies to non-logged-in users. The default is 999.</p>
     <?php
 }
 
-function chatbot_chatgpt_api_model_chat_section_callback($args) {
+function chatbot_chatgpt_api_chatgpt_chat_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using chat models. Depending on the OpenAI model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank">https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -43,7 +42,7 @@ function chatbot_chatgpt_api_model_chat_section_callback($args) {
     <?php
 }
 
-function chatbot_chatgpt_api_model_image_section_callback($args) {
+function chatbot_chatgpt_api_chatgpt_image_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using image models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -54,7 +53,7 @@ function chatbot_chatgpt_api_model_image_section_callback($args) {
     <?php
 }
 
-function chatbot_chatgpt_api_model_voice_section_callback($args) {
+function chatbot_chatgpt_api_chatgpt_voice_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using audio models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -68,7 +67,7 @@ function chatbot_chatgpt_api_model_voice_section_callback($args) {
 }
 
 // Whisper Section Callback - Ver 2.0.1
-function chatbot_chatgpt_api_model_whisper_section_callback($args) {
+function chatbot_chatgpt_api_chatgpt_whisper_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using whisper models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -79,7 +78,7 @@ function chatbot_chatgpt_api_model_whisper_section_callback($args) {
     <?php
 }
 
-function chatbot_chatgpt_api_model_advanced_section_callback($args) {
+function chatbot_chatgpt_api_chatgpt_advanced_section_callback($args) {
     ?>
     <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
     <?php
@@ -90,73 +89,6 @@ function chatbot_chatgpt_api_key_callback($args) {
     $api_key = get_option('chatbot_chatgpt_api_key');
     ?>
     <input type="password" id="chatbot_chatgpt_api_key" name="chatbot_chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text">
-    <?php
-}
-
-// Logged-in User Message Limit - Ver 1.9.6
-function chatbot_chatgpt_user_message_limit_setting_callback($args) {
-    // Get the saved chatbot_chatgpt_user_message_limit_setting value or default to 999
-    $message_limit = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
-    // Allow for a range of message limits between 1 and 999 in 1-step increments - Ver 1.9.6
-    ?>
-    <select id="chatbot_chatgpt_user_message_limit_setting" name="chatbot_chatgpt_user_message_limit_setting">
-        <?php
-        for ($i=1; $i<=999; $i++) {
-            echo '<option value="' . esc_attr($i) . '" ' . selected($message_limit, (string)$i, false) . '>' . esc_html($i) . '</option>';
-        }
-        ?>
-    </select>
-    <?php
-}
-
-// Limit Period Setting - Ver 2.1.6
-function chatbot_chatgpt_user_message_limit_period_setting_callback($args) {
-    // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
-    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
-    ?>
-    <select id="chatbot_chatgpt_user_message_limit_period_setting" name="chatbot_chatgpt_user_message_limit_period_setting">
-        <option value="Hourly" <?php selected($message_limit_period, 'Hourly'); ?>>Hourly</option>
-        <option value="Daily" <?php selected($message_limit_period, 'Daily'); ?>>Daily</option>
-        <option value="Weekly" <?php selected($message_limit_period, 'Weekly'); ?>>Weekly</option>
-        <option value="Monthly" <?php selected($message_limit_period, 'Monthly'); ?>>Monthly</option>
-        <option value="Quarterly" <?php selected($message_limit_period, 'Quarterly'); ?>>Quarterly</option>
-        <option value="Yearly" <?php selected($message_limit_period, 'Yearly'); ?>>Yearly</option>
-        <option value="Lifetime" <?php selected($message_limit_period, 'Lifetime'); ?>>Lifetime</option>
-    </select>
-    <?php
-}
-
-
-// Visitor Message Limit - Ver 2.0.1
-function chatbot_chatgpt_visitor_message_limit_setting_callback($args) {
-    // Get the saved chatbot_chatgpt_visitor_message_limit_setting value or default to 999
-    $visitor_message_limit = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
-    // Allow for a range of visitor message limits between 1 and 999 in 1-step increments - Ver 2.0.1
-    ?>
-    <select id="chatbot_chatgpt_visitor_message_limit_setting" name="chatbot_chatgpt_visitor_message_limit_setting">
-        <?php
-        for ($i=1; $i<=999; $i++) {
-            echo '<option value="' . esc_attr($i) . '" ' . selected($visitor_message_limit, (string)$i, false) . '>' . esc_html($i) . '</option>';
-        }
-        ?>
-    </select>
-    <?php
-}
-
-// Limit Period Setting - Ver 2.1.6
-function chatbot_chatgpt_visitor_message_limit_period_setting_callback($args) {
-    // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
-    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
-    ?>
-    <select id="chatbot_chatgpt_visitor_message_limit_period_setting" name="chatbot_chatgpt_visitor_message_limit_period_setting">
-        <option value="Hourly" <?php selected($message_limit_period, 'Hourly'); ?>>Hourly</option>
-        <option value="Daily" <?php selected($message_limit_period, 'Daily'); ?>>Daily</option>
-        <option value="Weekly" <?php selected($message_limit_period, 'Weekly'); ?>>Weekly</option>
-        <option value="Monthly" <?php selected($message_limit_period, 'Monthly'); ?>>Monthly</option>
-        <option value="Quarterly" <?php selected($message_limit_period, 'Quarterly'); ?>>Quarterly</option>
-        <option value="Yearly" <?php selected($message_limit_period, 'Yearly'); ?>>Yearly</option>
-        <option value="Lifetime" <?php selected($message_limit_period, 'Lifetime'); ?>>Lifetime</option>
-    </select>
     <?php
 }
 

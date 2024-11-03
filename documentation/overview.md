@@ -117,9 +117,11 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## Sections
 
-- [Settings](settings/settings.md)
+- [General](settings/settings.md)
 
-- [API/Model Settings](api-model-settings/api-model-settings.md)
+- [API/ChatGPT Settings](api-chatgpt-settings/api-chatgpt-model-settings.md)
+
+- [API/NVIDIA Settings](api-nvidia-settings/api-nvidia-model-settings.md)
 
 - [Assistants](assistants/manage-assistants.md)
 

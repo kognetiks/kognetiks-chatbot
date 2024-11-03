@@ -33,7 +33,6 @@ function chatbot_markov_chain_model_settings_section_callback($args) {
 function chatbot_markov_chain_api_model_general_section_callback($args){
     ?>
     <p>Configure the settings for the plugin when using Markov Chain models.</p>
-    <p>The Chatbot Daily Message Limit applies to logged-in users. The Visitor Message Limit applies to non-logged-in users. The default is 999.</p>
     <?php
 }
 
@@ -141,7 +140,7 @@ function chatbot_markov_chain_model_choice_callback($args) {
 function chatbot_markov_chain_api_settings_init() {
 
     add_settings_section(
-        'chatbot_markov_chain_settings_section',
+        'chatbot_markov_chain_api_enableds_section',
         'API/Markov Chain Settings',
         'chatbot_markov_chain_model_settings_section_callback',
         'chatbot_markov_chain_model_settings_general'

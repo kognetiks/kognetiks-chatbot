@@ -113,7 +113,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
 
 // Include necessary files - Settings
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-model.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
@@ -185,23 +185,26 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
+// FIXME - SEE AI Engine Selection setting - Ver 2.1.8
 $chatbot_chatgpt_api_enabled = 'Yes';
 // API Enabled - Ver 2.1.8
 if (esc_attr(get_option('chatbot_chatgpt_api_enabled', 'Yes')) == 'Yes') {
     $chatbot_chatgpt_api_enabled = 'Yes';
     $chatbot_nvidia_api_enabled = 'No';
-    $chatbot_markov_chain_setting = 'No';
+    $chatbot_markov_chain_api_enabled = 'No';
 } elseif (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
     $chatbot_nvidia_api_enabled = 'Yes';
     $chatbot_chatgpt_api_enabled = 'No';
-    $chatbot_markov_chain_setting = 'No';
+    $chatbot_markov_chain_api_enabled = 'No';
 } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
-    $chatbot_markov_chain_setting = 'Yes';
+    $chatbot_markov_chain_api_enabled = 'Yes';
+    $chatbot_nvidia_api_enabled = 'No';
+    $chatbot_chatgpt_api_enabled = 'No';
 } else {
     prod_trace('NOTICE', 'No API enabled');
     $chatbot_chatgpt_api_enabled = 'No';
     $chatbot_nvidia_api_enabled = 'No';
-    $chatbot_markov_chain_setting = 'No';
+    $chatbot_markov_chain_api_enabled = 'No';
 }
 
 // Model choice - Ver 1.9.4
@@ -503,7 +506,7 @@ function chatbot_chatgpt_send_message() {
     // Retrieve the API key
     if (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
         $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
-        $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
+        $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
         $kchat_settings['chatbot_chatgpt_model'] = $model;
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8
@@ -531,7 +534,7 @@ function chatbot_chatgpt_send_message() {
     $message = sanitize_text_field($_POST['message']);
 
     // If Markov Chain is enabled, then process the message
-    if (esc_attr(get_option('chatbot_markov_chain_setting', 'No')) == 'Yes') {
+    if (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
         // Check for missing Message
         if (!$message) {
             // DIAG - Diagnostics
@@ -847,11 +850,6 @@ function chatbot_chatgpt_send_message() {
 
         // FIXME - TESTING - Ver 2.1.8
         back_trace( 'NOTICE', 'LINE 873 - $model: ' . $model);
-
-        // FIXME - FORCE NVIDIA API FOR TESTING - Ver 2.1.8
-        // if (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
-        //     $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
-        // }
 
         if (str_starts_with($model !== null && $model, 'gpt-4o') !== false) {
             // The string 'gpt-4o' is found in $model

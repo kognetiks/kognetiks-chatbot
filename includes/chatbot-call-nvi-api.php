@@ -50,8 +50,8 @@ function chatbot_nvidia_call_api($api_key, $message) {
     );
 
     // Select the OpenAI Model
-    // Get the saved model from the settings or default to "nvidia/llama-3.1-nemotron-70b-instruct"
-    $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-70b-instruct'));
+    // Get the saved model from the settings or default to "nvidia/llama-3.1-nemotron-51b-instruct"
+    $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
  
     // Max tokens - Ver 1.4.2
     $max_tokens = intval(esc_attr(get_option('chatbot_nvidia_max_tokens_setting', '500')));

@@ -166,7 +166,7 @@ function chatbot_nvidia_get_models() {
     $default_model_list = '';
     $default_model_list = array(
         array(
-            'id' => 'nvidia/llama-3.1-nemotron-70b-instruct',
+            'id' => 'nvidia/llama-3.1-nemotron-51b-instruct',
             'object' => 'model',
             'created' => 735790403,
             'owned_by' => 'nvidia'

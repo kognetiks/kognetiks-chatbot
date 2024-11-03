@@ -607,7 +607,7 @@ jQuery(document).ready(function ($) {
         }).join('');
 
         // Step 13: Convert double line breaks to single line breaks
-        markdown = markdown.replace(/(<br>\s*){2,}/g, '<br>');
+        // markdown = markdown.replace(/(<br>\s*){2,}/g, '<br>');
     
         // Step 14: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
