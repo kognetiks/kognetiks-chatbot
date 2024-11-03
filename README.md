@@ -7,7 +7,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 ## What's new in Version 2.1.8
 
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with assistant management.
-* **Additional Security**: Enhanced security to reduce vulnerabilities associates with accessing chatbot support.
+* **Additional Security**: Enhanced security to reduce vulnerabilities associated with accessing chatbot support pages.
 
 ## What's new in Version 2.1.7
 

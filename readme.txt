@@ -157,7 +157,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 = 2.1.8 - Release TBD =
 
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with assistant management.
-* **Additional Security**: Enhanced security to reduce vulnerabilities associates with accessing chatbot support.
+* **Additional Security**: Enhanced security to reduce vulnerabilities associated with accessing chatbot support pages.
+
 
 = 2.1.7 - Release 10-06-2024 =
 
