@@ -181,13 +181,13 @@ function chatbot_nvidia_api_settings_init() {
         'chatbot_nvidia_api_model_general'
     );
 
-    add_settings_field(
-        'chatbot_nvidia_api_enabled',
-        'NVIDIA API Enabled',
-        'chatbot_nvidia_api_enabled_callback',
-        'chatbot_nvidia_api_model_general',
-        'chatbot_nvidia_api_model_general_section'
-    );
+    // add_settings_field(
+    //     'chatbot_nvidia_api_enabled',
+    //     'NVIDIA API Enabled',
+    //     'chatbot_nvidia_api_enabled_callback',
+    //     'chatbot_nvidia_api_model_general',
+    //     'chatbot_nvidia_api_model_general_section'
+    // );
 
     add_settings_field(
         'chatbot_nvidia_api_key',
