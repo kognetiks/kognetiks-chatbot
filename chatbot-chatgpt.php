@@ -570,6 +570,7 @@ function chatbot_chatgpt_send_message() {
     $kchat_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id, $session_id);
     $kchat_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id, $session_id);
     $kchat_settings['chatbot_chatgpt_model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
+    $kchat_settings['model'] = $kchat_settings['chatbot_chatgpt_model'];
     $kchat_settings['chatbot_chatgpt_voice_option'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
     $kchat_settings['additional_instructions'] = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
     $voice = $kchat_settings['chatbot_chatgpt_voice_option'];
@@ -771,7 +772,7 @@ function chatbot_chatgpt_send_message() {
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
         if ( $chatbot_chatgpt_suppress_learnings != 'None') {
-            $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+            $response = $response . '<br><br>' . chatbot_chatgpt_enhance_with_tfidf($message);
         }
 
         // DIAG - Diagnostics
@@ -902,7 +903,7 @@ function chatbot_chatgpt_send_message() {
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
         if ( $chatbot_chatgpt_suppress_learnings != 'None') {
-            $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+            $response = $response . '<br><br>' . chatbot_chatgpt_enhance_with_tfidf($message);
         }
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);

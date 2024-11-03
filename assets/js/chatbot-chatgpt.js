@@ -1267,7 +1267,7 @@ jQuery(document).ready(function ($) {
             },
             complete: function (response) {
                 removeTypingIndicator();
-                console.log('Chatbot: NOTICE: Response from server', response);
+                // console.log('Chatbot: NOTICE: Response from server', response);
                 if (response) {
                     // appendMessage(response, 'bot');
                     // Append custom JS to the bot's response - Ver 2.0.9

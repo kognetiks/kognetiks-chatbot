@@ -16,7 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 // Create the table for the chatbot assistants
 function create_chatbot_chatgpt_assistants_table() {
 
-
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -295,6 +294,11 @@ function delete_chatbot_chatgpt_assistant($id) {
 // Display the chatbot assistants table
 function display_chatbot_chatgpt_assistants_table() {
 
+    if ( ! current_user_can('manage_options') ) {
+        wp_send_json_error( 'Unauthorized user', 403 );
+        exit;
+    }
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -534,8 +538,13 @@ function chatbot_chatgpt_assistants_scripts() {
 }
 add_action('admin_footer', 'chatbot_chatgpt_assistants_scripts');
 
-
+// Update Assistant AJAX action
 function update_assistant() {
+
+    if ( ! current_user_can('manage_options') ) {
+        wp_send_json_error( 'Unauthorized user', 403 );
+        exit;
+    }
 
     global $wpdb;
 
@@ -586,7 +595,13 @@ function update_assistant() {
 }
 add_action('wp_ajax_update_assistant', 'update_assistant');
 
+// Delete Assistant AJAX action
 function delete_assistant() {
+
+    if ( ! current_user_can('manage_options') ) {
+        wp_send_json_error( 'Unauthorized user', 403 );
+        exit;
+    }
 
     global $wpdb;
 
@@ -608,6 +623,11 @@ function delete_assistant() {
 add_action('wp_ajax_delete_assistant', 'delete_assistant');
 
 function add_new_assistant() {
+
+    if ( ! current_user_can('manage_options') ) {
+        wp_send_json_error( 'Unauthorized user', 403 );
+        exit;
+    }
 
     global $wpdb;
 
