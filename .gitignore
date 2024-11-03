@@ -16,11 +16,11 @@ package.json
 # Ignore all files in the results folder
 results/*
 uploads/*
-audio/
-transcripts/
-downloads/
-chatbot-logs/
-widget-logs/
+audio/*
+transcripts/*
+downloads/*
+chatbot-logs/*
+widget-logs/*
 
 # Allow tracking of only the index.php file in the results folder
 !results/index.php
