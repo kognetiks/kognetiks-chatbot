@@ -186,23 +186,23 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
 // FIXME - SEE AI Engine Selection setting - Ver 2.1.8
-$chatbot_chatgpt_api_enabled = 'Yes';
+$chatbot_ai_engine_choice = esc_attr(get_option('chatbot_ai_engine_choice', 'OpenAI'));
 // API Enabled - Ver 2.1.8
-if (esc_attr(get_option('chatbot_chatgpt_api_enabled', 'Yes')) == 'Yes') {
+if ($chatbot_ai_engine_choice == 'OpenAI') {
     $chatbot_chatgpt_api_enabled = 'Yes';
     $chatbot_nvidia_api_enabled = 'No';
     $chatbot_markov_chain_api_enabled = 'No';
-} elseif (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
+} elseif ($chatbot_ai_engine_choice) {
     $chatbot_nvidia_api_enabled = 'Yes';
     $chatbot_chatgpt_api_enabled = 'No';
     $chatbot_markov_chain_api_enabled = 'No';
-} elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
+} elseif ($chatbot_ai_engine_choice) {
     $chatbot_markov_chain_api_enabled = 'Yes';
     $chatbot_nvidia_api_enabled = 'No';
     $chatbot_chatgpt_api_enabled = 'No';
 } else {
-    prod_trace('NOTICE', 'No API enabled');
-    $chatbot_chatgpt_api_enabled = 'No';
+    prod_trace('NOTICE', 'No API enabled - defaulting to OpenAI');
+    $chatbot_chatgpt_api_enabled = 'Yes';
     $chatbot_nvidia_api_enabled = 'No';
     $chatbot_markov_chain_api_enabled = 'No';
 }

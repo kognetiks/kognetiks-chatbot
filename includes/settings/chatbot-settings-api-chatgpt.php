@@ -219,7 +219,7 @@ function get_openai_api_base_url() {
 
 // Base URL for the NVIDIA - Ver 2.1.8
 function get_nvidia_api_base_url() {
-    return esc_attr(get_option('chatbot_nvidia_api_base_url', 'https://integrate.api.nvidia.com/v1'));
+    return esc_attr(get_option('chatbot_nvidia_base_url', 'https://integrate.api.nvidia.com/v1'));
 }
 
 function get_threads_api_url() {

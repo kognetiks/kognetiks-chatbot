@@ -53,12 +53,18 @@ function chatbot_nvidia_call_api($api_key, $message) {
     // Get the saved model from the settings or default to "nvidia/llama-3.1-nemotron-51b-instruct"
     $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
  
-    // Max tokens - Ver 1.4.2
+    // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_nvidia_max_tokens_setting', '500')));
 
-    // Conversation Context - Ver 1.6.1
+    // Conversation Context
     $context = esc_attr(get_option('chatbot_nvidia_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
- 
+
+    // Temperature - Ver 2.1.8
+    $temperature = floatval(esc_attr(get_option('chatbot_nvidia_temperature', '0.5')));
+
+    // Top P - Ver 2.1.8
+    $top_p = floatval(esc_attr(get_option('chatbot_nvidia_top_p', '1.0')));
+
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
     // DIAG Diagnostics - Ver 1.6.1
@@ -110,23 +116,7 @@ function chatbot_nvidia_call_api($api_key, $message) {
         // Focus the content based on the message from the user
         $enhancedContext = kn_enhance_context($message);
 
-        // Original Context Instructions
-        // $context = $sys_message . ' Here is some information that might be helpful in responding: ' . $enhancedContext . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Second attempt at Context Instructions
-        // $contextInstructions = ' Here is some information that might be helpful in your response: ';
-        // $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $sys_message. ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Third attempt at Context Instructions
-        // $contextInstructions = ' Try to only use this information in responding to input. ';
-        // $contextInstructions = ' Incorporate this information into your response. ';
-        // $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $sys_message. ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Fourth attempt at Context Instructions
-        // $contextInstructions = ' Use this information to help guide your response. ';
-        // $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Fifth attempt at Context Instructions
+        // Context Instructions
         $contextInstructions = ' Use this information to help guide your response. ';
         $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
@@ -144,12 +134,16 @@ function chatbot_nvidia_call_api($api_key, $message) {
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
-        'temperature' => 0.5,
+        'temperature' => $temperature,
+        'top_p' => $top_p,
         'messages' => array(
             array('role' => 'system', 'content' => $context),
             array('role' => 'user', 'content' => $message)
             ),
     );
+
+    // DIAG - Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', 'chatbot_nvidia_call_api() - $body: ' . print_r($body, true));
 
     // FIXME - Allow for file uploads here
     // $file = 'path/to/file';
@@ -163,7 +157,6 @@ function chatbot_nvidia_call_api($api_key, $message) {
     // back_trace( 'NOTICE', '$message: ' . $message);  
 
     $chatbot_nvidia_timeout = esc_attr(get_option('chatbot_nvidia_timeout_setting', '50'));
-    $chatbot_nvidia_timeout = 90;
 
     $args = array(
         'headers' => $headers,

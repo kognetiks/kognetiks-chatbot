@@ -55,6 +55,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Conversation Context - Ver 1.6.1
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+
+    // Temperature - Ver 2.1.8
+    $temperature = floatval(esc_attr(get_option('chatbot_chatgpt_temperature', '0.5')));
+
+    // Top P - Ver 2.1.8
+    $top_p = floatval(esc_attr(get_option('chatbot_chatgpt_top_p', '1.0')));
  
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
@@ -141,7 +147,8 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
-        'temperature' => 0.5,
+        'temperature' => $temperature,
+        'top_p' => $top_p,
         'messages' => array(
             array('role' => 'system', 'content' => $context),
             array('role' => 'user', 'content' => $message)
