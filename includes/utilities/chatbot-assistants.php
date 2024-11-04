@@ -181,7 +181,7 @@ function add_chatbot_chatgpt_assistant($assistant_id, $common_name, $style, $aud
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
-        exit;
+        wp_die();
     }
 
     global $wpdb;
@@ -191,20 +191,20 @@ function add_chatbot_chatgpt_assistant($assistant_id, $common_name, $style, $aud
     $wpdb->insert(
         $table_name,
         array(
-            'assistant_id' => $assistant_id ?? 'Please provide the GPT Assistant Id.',
-            'common_name' => $common_name ?? 'Kognetiks Chatbot Assistant',
-            'style' => $style ?? 'embedded',
-            'audience' => $audience ?? 'All',
-            'voice' => $voice ?? 'alloy',
-            'allow_file_uploads' => $allow_file_uploads ?? 'Yes',
-            'allow_transcript_downloads' => $allow_transcript_downloads ?? 'Yes',
-            'show_assistant_name' => $show_assistant_name ?? 'Yes',
-            'initial_greeting' => $initial_greeting ?? 'Hello! How can I help you today?',
-            'subsequent_greeting' => $subsequent_greeting ?? 'Hello again! How can I help you?',
-            'placeholder_prompt' => $placeholder_prompt ?? 'Enter your question ...',
-            'additional_instructions' => $additional_instructions ?? ''
+            'assistant_id' => sanitize_text_field($assistant_id ?? 'Please provide the GPT Assistant Id.'),
+            'common_name' => sanitize_text_field($common_name ?? 'Kognetiks Chatbot Assistant'),
+            'style' => sanitize_text_field($style ?? 'embedded'),
+            'audience' => sanitize_text_field($audience ?? 'All'),
+            'voice' => sanitize_text_field($voice ?? 'alloy'),
+            'allow_file_uploads' => sanitize_text_field($allow_file_uploads ?? 'Yes'),
+            'allow_transcript_downloads' => sanitize_text_field($allow_transcript_downloads ?? 'Yes'),
+            'show_assistant_name' => sanitize_text_field($show_assistant_name ?? 'Yes'),
+            'initial_greeting' => sanitize_textarea_field($initial_greeting ?? 'Hello! How can I help you today?'),
+            'subsequent_greeting' => sanitize_textarea_field($subsequent_greeting ?? 'Hello again! How can I help you?'),
+            'placeholder_prompt' => sanitize_textarea_field($placeholder_prompt ?? 'Enter your question ...'),
+            'additional_instructions' => sanitize_textarea_field($additional_instructions ?? '')
         )
-    );
+    ); 
 
     // Check for errors after insert
     if ($wpdb->last_error) {
@@ -222,7 +222,7 @@ function update_chatbot_chatgpt_assistant($id, $assistant_id, $common_name, $sty
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
-        exit;
+        wp_die();
     }
 
     global $wpdb;
@@ -236,20 +236,20 @@ function update_chatbot_chatgpt_assistant($id, $assistant_id, $common_name, $sty
     $wpdb->update(
         $table_name,
         array(
-            'assistant_id' => $assistant_id ?? 'Please provide the GPT Assistant Id.',
-            'common_name' => $common_name ?? 'Kognetiks Chatbot Assistant',
-            'style' => $style ?? 'embedded',
-            'audience' => $audience ?? 'All',
-            'voice' => $voice ?? 'alloy',
-            'allow_file_uploads' => $allow_file_uploads ?? 'Yes',
-            'allow_transcript_downloads' => $allow_transcript_downloads ?? 'Yes',
-            'show_assistant_name' => $show_assistant_name ?? 'Yes',
-            'initial_greeting' => $initial_greeting ?? 'Hello! How can I help you today?',
-            'subsequent_greeting' => $subsequent_greeting ?? 'Hello again! How can I help you?',
-            'placeholder_prompt' => $placeholder_prompt ?? 'Enter your question ...',
-            'additional_instructions' => $additional_instructions ?? ''
+            'assistant_id' => sanitize_text_field($assistant_id ?? 'Please provide the GPT Assistant Id.'),
+            'common_name' => sanitize_text_field($common_name ?? 'Kognetiks Chatbot Assistant'),
+            'style' => sanitize_text_field($style ?? 'embedded'),
+            'audience' => sanitize_text_field($audience ?? 'All'),
+            'voice' => sanitize_text_field($voice ?? 'alloy'),
+            'allow_file_uploads' => sanitize_text_field($allow_file_uploads ?? 'Yes'),
+            'allow_transcript_downloads' => sanitize_text_field($allow_transcript_downloads ?? 'Yes'),
+            'show_assistant_name' => sanitize_text_field($show_assistant_name ?? 'Yes'),
+            'initial_greeting' => sanitize_textarea_field($initial_greeting ?? 'Hello! How can I help you today?'),
+            'subsequent_greeting' => sanitize_textarea_field($subsequent_greeting ?? 'Hello again! How can I help you?'),
+            'placeholder_prompt' => sanitize_textarea_field($placeholder_prompt ?? 'Enter your question ...'),
+            'additional_instructions' => sanitize_textarea_field($additional_instructions ?? '')
         ),
-        array('id' => $id)
+        array('id' => intval($id)) // Ensure $id is an integer for safety
     );
 
     // Check for errors after update
@@ -268,7 +268,7 @@ function delete_chatbot_chatgpt_assistant($id) {
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
-        exit;
+        wp_die();
     }
 
     global $wpdb;
@@ -296,7 +296,7 @@ function display_chatbot_chatgpt_assistants_table() {
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
-        exit;
+        wp_die();
     }
 
     global $wpdb;
@@ -465,76 +465,81 @@ function display_chatbot_chatgpt_assistants_table() {
 // Scripts for the chatbot assistants table
 function chatbot_chatgpt_assistants_scripts() {
 
-    ?>
-    <script type="text/javascript">
+    if ( current_user_can('manage_options') ) {
 
-        // Function to update an assistant's details
-        function updateAssistant(id) {
-            var data = {
-                action: 'update_assistant',
-                id: id,
-                assistant_id: document.getElementsByName('assistant_id_' + id)[0].value,
-                common_name: document.getElementsByName('common_name_' + id)[0].value,
-                style: document.getElementsByName('style_' + id)[0].value,
-                audience: document.getElementsByName('audience_' + id)[0].value,
-                voice: document.getElementsByName('voice_' + id)[0].value,
-                allow_file_uploads: document.getElementsByName('allow_file_uploads_' + id)[0].value,
-                allow_transcript_downloads: document.getElementsByName('allow_transcript_downloads_' + id)[0].value,
-                show_assistant_name: document.getElementsByName('show_assistant_name_' + id)[0].value,
-                initial_greeting: document.getElementsByName('initial_greeting_' + id)[0].value,
-                subsequent_greeting: document.getElementsByName('subsequent_greeting_' + id)[0].value,
-                placeholder_prompt: document.getElementsByName('placeholder_prompt_' + id)[0].value,
-                additional_instructions: document.getElementsByName('additional_instructions_' + id)[0].value
-            };
+        ?>
+        <script type="text/javascript">
 
-            // Send the update request via AJAX
-            jQuery.post(ajaxurl, data, function(response) {
-                alert('Assistant updated successfully!');
-                location.reload();  // Reload the page to reflect the deletion
-            });
-        }
+            // Function to update an assistant's details
+            function updateAssistant(id) {
+                var data = {
+                    action: 'update_assistant',
+                    id: id,
+                    assistant_id: document.getElementsByName('assistant_id_' + id)[0].value,
+                    common_name: document.getElementsByName('common_name_' + id)[0].value,
+                    style: document.getElementsByName('style_' + id)[0].value,
+                    audience: document.getElementsByName('audience_' + id)[0].value,
+                    voice: document.getElementsByName('voice_' + id)[0].value,
+                    allow_file_uploads: document.getElementsByName('allow_file_uploads_' + id)[0].value,
+                    allow_transcript_downloads: document.getElementsByName('allow_transcript_downloads_' + id)[0].value,
+                    show_assistant_name: document.getElementsByName('show_assistant_name_' + id)[0].value,
+                    initial_greeting: document.getElementsByName('initial_greeting_' + id)[0].value,
+                    subsequent_greeting: document.getElementsByName('subsequent_greeting_' + id)[0].value,
+                    placeholder_prompt: document.getElementsByName('placeholder_prompt_' + id)[0].value,
+                    additional_instructions: document.getElementsByName('additional_instructions_' + id)[0].value
+                };
 
-        // Function to delete an assistant
-        function deleteAssistant(id) {
-            var data = {
-                action: 'delete_assistant',
-                id: id
-            };
+                // Send the update request via AJAX
+                jQuery.post(ajaxurl, data, function(response) {
+                    alert('Assistant updated successfully!');
+                    location.reload();  // Reload the page to reflect the deletion
+                });
+            }
 
-            // Send the delete request via AJAX
-            jQuery.post(ajaxurl, data, function(response) {
-                alert('Assistant deleted successfully!');
-                location.reload();  // Reload the page to reflect the deletion
-            });
-        }
+            // Function to delete an assistant
+            function deleteAssistant(id) {
+                var data = {
+                    action: 'delete_assistant',
+                    id: id
+                };
 
-        // Function to add a new assistant
-        function addNewAssistant() {
-            var data = {
-                action: 'add_new_assistant',
-                assistant_id: document.getElementsByName('new_assistant_id')[0].value,
-                common_name: document.getElementsByName('new_common_name')[0].value,
-                style: document.getElementsByName('new_style')[0].value,
-                audience: document.getElementsByName('new_audience')[0].value,
-                voice: document.getElementsByName('new_voice')[0].value,
-                allow_file_uploads: document.getElementsByName('new_allow_file_uploads')[0].value,
-                allow_transcript_downloads: document.getElementsByName('new_allow_transcript_downloads')[0].value,
-                show_assistant_name: document.getElementsByName('new_show_assistant_name')[0].value,
-                initial_greeting: document.getElementsByName('new_initial_greeting')[0].value,
-                subsequent_greeting: document.getElementsByName('new_subsequent_greeting')[0].value,
-                placeholder_prompt: document.getElementsByName('new_placeholder_prompt')[0].value,
-                additional_instructions: document.getElementsByName('new_additional_instructions')[0].value
-            };
+                // Send the delete request via AJAX
+                jQuery.post(ajaxurl, data, function(response) {
+                    alert('Assistant deleted successfully!');
+                    location.reload();  // Reload the page to reflect the deletion
+                });
+            }
 
-            // Send the add request via AJAX
-            jQuery.post(ajaxurl, data, function(response) {
-                alert('New assistant added successfully!');
-                location.reload();  // Reload the page to reflect the addition
-            });
-        }
+            // Function to add a new assistant
+            function addNewAssistant() {
+                var data = {
+                    action: 'add_new_assistant',
+                    assistant_id: document.getElementsByName('new_assistant_id')[0].value,
+                    common_name: document.getElementsByName('new_common_name')[0].value,
+                    style: document.getElementsByName('new_style')[0].value,
+                    audience: document.getElementsByName('new_audience')[0].value,
+                    voice: document.getElementsByName('new_voice')[0].value,
+                    allow_file_uploads: document.getElementsByName('new_allow_file_uploads')[0].value,
+                    allow_transcript_downloads: document.getElementsByName('new_allow_transcript_downloads')[0].value,
+                    show_assistant_name: document.getElementsByName('new_show_assistant_name')[0].value,
+                    initial_greeting: document.getElementsByName('new_initial_greeting')[0].value,
+                    subsequent_greeting: document.getElementsByName('new_subsequent_greeting')[0].value,
+                    placeholder_prompt: document.getElementsByName('new_placeholder_prompt')[0].value,
+                    additional_instructions: document.getElementsByName('new_additional_instructions')[0].value
+                };
 
-    </script>
-    <?php
+                // Send the add request via AJAX
+                jQuery.post(ajaxurl, data, function(response) {
+                    alert('New assistant added successfully!');
+                    location.reload();  // Reload the page to reflect the addition
+                });
+            }
+
+        </script>
+        <?php
+
+    }
+
 }
 add_action('admin_footer', 'chatbot_chatgpt_assistants_scripts');
 
@@ -543,7 +548,7 @@ function update_assistant() {
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
-        exit;
+        wp_die();
     }
 
     global $wpdb;
@@ -600,7 +605,7 @@ function delete_assistant() {
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
-        exit;
+        wp_die();
     }
 
     global $wpdb;
@@ -626,7 +631,7 @@ function add_new_assistant() {
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
-        exit;
+        wp_die();
     }
 
     global $wpdb;
