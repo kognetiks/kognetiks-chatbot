@@ -72,6 +72,7 @@ function chatbot_chatgpt_api_settings_init() {
     );
 
     // Chat Options - Ver 1.9.5
+    register_setting('chatbot_chatgpt_api_chatgpt', 'chatbot_chatgpt_api_enabled');
     register_setting('chatbot_chatgpt_api_chatgpt', 'chatbot_chatgpt_model_choice');
     register_setting('chatbot_chatgpt_api_chatgpt', 'chatbot_chatgpt_max_tokens_setting'); // Max Tokens setting options - Ver 1.4.2
     register_setting('chatbot_chatgpt_api_chatgpt', 'chatbot_chatgpt_conversation_context'); // Conversation Context - Ver 1.6.1

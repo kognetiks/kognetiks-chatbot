@@ -30,30 +30,6 @@ function chatbot_nvidia_api_model_general_section_callback($args) {
     <?php
 }
 
-// NVIDIA Enable Settings Callback - Ver 2.1.6
-function chatbot_nvidia_api_enabled_callback($args) {
-
-    // Get the saved chatbot_nvidia_api_enabled value or default to "No"
-    $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
-    $nvidia_api_enabled = esc_attr(get_option('chatbot_nvidia_api_enabled', 'No'));
-    
-    if ($nvidia_api_enabled == 'Yes') {
-        update_option('chatbot_nvidia_api_enabled', 'Yes');
-        // update_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct');
-    } else {
-        $nvidia_api_enabled = 'No';
-        update_option('chatbot_nvidia_api_enabled', 'No');
-    }
-    
-    ?>
-    <select id="chatbot_nvidia_api_enabled" name="chatbot_nvidia_api_enabled">
-        <option value="Yes" <?php selected($nvidia_api_enabled, 'Yes'); ?>>Yes</option>
-        <option value="No" <?php selected($nvidia_api_enabled, 'No'); ?>>No</option>
-    </select>
-    <?php
-
-}
-
 // API key field callback
 function chatbot_nvidia_api_key_callback($args) {
     $api_key = get_option('chatbot_nvidia_api_key');
@@ -126,6 +102,52 @@ function chatgpt_nvidia_max_tokens_setting_callback($args) {
     <?php
 }
 
+// Conversation Context
+function chatbot_nvidia_conversation_context_callback($args) {
+    // Get the value of the setting we've registered with register_setting()
+    $chatbot_nvidia_conversation_context = esc_attr(get_option('chatbot_nvidia_conversation_context'));
+
+    // Check if the option has been set, if not, use a default value
+    if (empty($chatbot_nvidia_conversation_context)) {
+        $chatbot_nvidia_conversation_context = "You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.";
+        // Save the default value into the option
+        update_option('chatbot_nvidia_conversation_context', $chatbot_nvidia_conversation_context);
+    }
+
+    ?>
+    <!-- Define the textarea field. -->
+    <textarea id='chatbot_nvidia_conversation_context' name='chatbot_nvidia_conversation_context' rows='5' cols='50' maxlength='12500'><?php echo esc_html(stripslashes($chatbot_nvidia_conversation_context)); ?></textarea>
+    <?php
+}
+
+// Set chatbot_nvidia_temperature
+function chatbot_nvidia_temperature_callback($args) {
+    $temperature = esc_attr(get_option('chatbot_nvidia_temperature', 0.50));
+    ?>
+    <select id="chatbot_nvidia_temperature" name="chatbot_nvidia_temperature">
+        <?php
+        for ($i = 0.01; $i <= 2.01; $i += 0.01) {
+            echo '<option value="' . $i . '" ' . selected($temperature, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
+// Set chatbot_nvidia_top_p
+function chatbot_nvidia_top_p_callback($args) {
+    $top_p = esc_attr(get_option('chatbot_nvidia_top_p', 1.00));
+    ?>
+    <select id="chatbot_nvidia_top_p" name="chatbot_nvidia_top_p">
+        <?php
+        for ($i = 0.01; $i <= 1.01; $i += 0.01) {
+            echo '<option value="' . $i . '" ' . selected($top_p, (string)$i) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
 // API Advanced settings section callback
 function chatbot_nvidia_api_model_advanced_section_callback($args) {
     ?>
@@ -170,9 +192,13 @@ function chatbot_nvidia_api_settings_init() {
         'chatbot_nvidia_model_settings_general'
     );
 
-    // API/NVIDIA settings tab - Ver 1.3.0
+    // API/NVIDIA settings tab - Ver 2.1.8
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_enabled');
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_key');
+    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_max_tokens_setting'); // Max Tokens setting options
+    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_conversation_context'); // Conversation Context
+    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_temperature'); // Temperature
+    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_top_p'); // Top P
 
     add_settings_section(
         'chatbot_nvidia_api_model_general_section',
@@ -180,14 +206,6 @@ function chatbot_nvidia_api_settings_init() {
         'chatbot_nvidia_api_model_general_section_callback',
         'chatbot_nvidia_api_model_general'
     );
-
-    // add_settings_field(
-    //     'chatbot_nvidia_api_enabled',
-    //     'NVIDIA API Enabled',
-    //     'chatbot_nvidia_api_enabled_callback',
-    //     'chatbot_nvidia_api_model_general',
-    //     'chatbot_nvidia_api_model_general_section'
-    // );
 
     add_settings_field(
         'chatbot_nvidia_api_key',
@@ -220,6 +238,33 @@ function chatbot_nvidia_api_settings_init() {
         'chatbot_nvidia_max_tokens_setting',
         'Maximum Tokens Setting',
         'chatgpt_nvidia_max_tokens_setting_callback',
+        'chatbot_nvidia_api_model_chat_settings',
+        'chatbot_nvidia_api_model_chat_settings_section'
+    );
+
+    // Setting to adjust the conversation context
+    add_settings_field(
+        'chatbot_nvidia_conversation_context',
+        'Conversation Context',
+        'chatbot_nvidia_conversation_context_callback',
+        'chatbot_nvidia_api_model_chat_settings',
+        'chatbot_nvidia_api_model_chat_settings_section'
+    );
+
+    // Temperature
+    add_settings_field(
+        'chatbot_nvidia_temperature',
+        'Temperature',
+        'chatbot_nvidia_temperature_callback',
+        'chatbot_nvidia_api_model_chat_settings',
+        'chatbot_nvidia_api_model_chat_settings_section'
+    );
+
+    // Top P
+    add_settings_field(
+        'chatbot_nvidia_top_p',
+        'Top P',
+        'chatbot_nvidia_top_p_callback',
         'chatbot_nvidia_api_model_chat_settings',
         'chatbot_nvidia_api_model_chat_settings_section'
     );

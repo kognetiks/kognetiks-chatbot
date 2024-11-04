@@ -513,7 +513,7 @@ function chatbot_chatgpt_send_message() {
         back_trace( 'NOTICE', 'LINE 510 - $model: ' . $model);
     } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
         $api_key = esc_attr(get_option('chatbot_markov_chain_api_key'));
-        $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2023-09-17'));
+        $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
         $kchat_settings['chatbot_chatgpt_model'] = $model;
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8

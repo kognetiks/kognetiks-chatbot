@@ -92,7 +92,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
         back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
-        $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2023-09-17'));
+        $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_markov_chain_voice_option', 'none'));
     } else {
@@ -370,7 +370,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         if (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
             $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
         } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2023-09-17'));
+            $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
         } else {
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         }
