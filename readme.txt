@@ -156,6 +156,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 2.1.8 - Release TBD =
 
+* **Assistant Management**: Resolved the issue with adding, updating and deleting Assistants when using Firefox browser.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with assistant management.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with accessing chatbot support pages.
 

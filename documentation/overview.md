@@ -10,6 +10,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## What's new in Version 2.1.8
 
+* **Assistant Management**: Resolved the issue with adding, updating and deleting Assistants when using Firefox browser.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with assistant management.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with accessing chatbot support pages.
 
