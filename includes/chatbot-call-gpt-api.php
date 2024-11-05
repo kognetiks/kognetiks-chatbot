@@ -164,14 +164,16 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // DIAG Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
     // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', '$message: ' . $message);  
+    // back_trace( 'NOTICE', '$message: ' . $message);
+
+    $chatbot_chatgpt_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '50')));
 
     $args = array(
         'headers' => $headers,
         'body' => json_encode($body),
         'method' => 'POST',
         'data_format' => 'body',
-        'timeout' => 50, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
+        'timeout' => $chatbot_chatgpt_timeout, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
     $response = wp_remote_post($api_url, $args);

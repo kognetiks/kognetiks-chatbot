@@ -508,7 +508,7 @@ jQuery(document).ready(function ($) {
     function markdownToHtml(markdown) {
         // Step 1: Process links before any other inline elements
         markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-        
+    
         // Step 2: Extract predefined HTML tags
         const predefinedHtmlRegex = /<.*?>/g;
         let predefinedHtml = [];
@@ -516,93 +516,56 @@ jQuery(document).ready(function ($) {
             predefinedHtml.push(match);
             return `{{HTML_TAG_${predefinedHtml.length - 1}}}`;
         });
-
+    
         // Step 3: Escape HTML outside of code blocks
         markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
             return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
         }).join('');
-
+    
         // Step 4: Process images
         markdown = markdown.replace(/\!\[(.*?)\]\((.*?)\)/g, `<img alt="$1" src="$2">`);
-
+    
         // Step 5: Headers
         markdown = markdown.replace(/^#### (.*)$/gim, '<h4>$1</h4>')
                         .replace(/^### (.*)$/gim, '<h3>$1</h3>')
                         .replace(/^## (.*)$/gim, '<h2>$1</h2>')
                         .replace(/^# (.*)$/gim, '<h1>$1</h1>');
-
-        // Step 6: Process tables as a block and wrap the entire table in <pre>
-        markdown = markdown.replace(/(\|.+?\|)\n(\|[-:|]+\|)\n([\s\S]+?)\n(?=\n|$)/gm, (match, header, separator, body) => {
-            const headersArray = header.split('|').map(h => h.trim()).filter(h => h !== '');
-            const rowsArray = body.trim().split('\n').map(row => row.split('|').map(cell => cell.trim()).filter(cell => cell !== ''));
-
-            rowsArray.forEach(row => {
-                while (row.length < headersArray.length) {
-                    row.push(''); // Add empty cells to match header length
-                }
-                if (row.length > headersArray.length) {
-                    row.splice(headersArray.length); // Remove any extra cells
-                }
-            });
-
-            const colWidths = headersArray.map((header, i) => {
-                return Math.max(header.length, ...rowsArray.map(row => (row[i] || '').length));
-            });
-
-            const headerRow = '| ' + headersArray.map((header, i) => header.padEnd(colWidths[i])).join(' | ') + ' |';
-            const separatorRow = '|-' + colWidths.map(width => '-'.repeat(width)).join('-|-') + '-|';
-            const rows = rowsArray.map(row => {
-                return '| ' + row.map((cell, i) => (cell || '').padEnd(colWidths[i])).join(' | ') + ' |';
-            }).join('\n');
-
-            return `<pre style="font-family: monospace;">${headerRow}\n${separatorRow}\n${rows}</pre>`;
-        });
-
-        // Step 7: Bold, Italic, Strikethrough
+    
+        // Step 6: Bold, Italic, Strikethrough
         markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\*(.*?)\*/g, '<em>$1</em>')
                         .replace(/\~\~(.*?)\~\~/g, '<del>$1</del>');
-
-        // Step 8: Multi-line code blocks
+    
+        // Step 7: Multi-line code blocks
         markdown = markdown.replace(/```([\s\S]*?)```/gm, '<pre><code>$1</code></pre>');
-
-        // Step 9: Inline code - after handling multi-line to prevent conflicts
+    
+        // Step 8: Inline code - after handling multi-line to prevent conflicts
         markdown = markdown.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-        // Step 10: Lists - Needs refining for nested lists
+    
+        // Step 9: Lists - Improved handling for nested lists and spacing
         markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
-                        .replace(/<\/li><li>/g, '</li>\n<li>')
-                        .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>')
-                        .replace(/<ul>\s*<li>/g, '<ul>\n<li>')
-                        .replace(/<\/li>\s*<\/ul>/g, '</li>\n</ul>');
-
-        // Step 11: Improved blockquote handling
+                        .replace(/<\/li>\s*<li>/g, '</li>\n<li>')
+                        .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>');
+    
+        // Step 10: Improved blockquote handling
         markdown = markdown.replace(/^(>+\s?)(.*)$/gm, (match, p1, p2) => {
             return `<blockquote>${p2}</blockquote>`;
         });
-
-        // Step 12: Consolidate line breaks, then convert single line breaks to <br> outside of code blocks and blockquotes
-        markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>)/g).map((chunk, index) => {
-            if (index % 2 === 0) {
-                // Consolidate multiple line breaks and replace single line breaks with <br>
-                return chunk.replace(/\n{2,}/g, '\n').replace(/\n/g, '<br>');
-            } else {
-                return chunk;
-            }
+    
+        // Step 11: Consolidate line breaks and remove extra spaces
+        markdown = markdown.replace(/\n{2,}/g, '\n').split(/\n/g).map((line, index) => {
+            return line.match(/^<h|<p|<ul|<pre|<blockquote/) ? line : line.trim() ? `${line}<br>` : '';
         }).join('');
-
-        // Step 13: Reinsert predefined HTML tags
+    
+        // Step 12: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
             return predefinedHtml[parseInt(index)];
         });
-
-        // Step 14: Remove the very last <br> tag, if any
-        markdown = markdown.replace(/<br\s*\/?>\s*$/, '');
-
+    
         // Return final output wrapped in a div
         return `<div>${markdown.trim()}</div>`;
     }
-
+    
     // Helper functions
     function getWeekNumber(d) {
         let oneJan = new Date(d.getFullYear(), 0, 1);

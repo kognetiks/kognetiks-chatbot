@@ -156,7 +156,7 @@ function chatbot_nvidia_call_api($api_key, $message) {
     // back_trace( 'NOTICE', '$context: ' . $context);
     // back_trace( 'NOTICE', '$message: ' . $message);  
 
-    $chatbot_nvidia_timeout = esc_attr(get_option('chatbot_nvidia_timeout_setting', '50'));
+    $chatbot_nvidia_timeout = intval(esc_attr(get_option('chatbot_nvidia_timeout_setting', '50')));
 
     $args = array(
         'headers' => $headers,

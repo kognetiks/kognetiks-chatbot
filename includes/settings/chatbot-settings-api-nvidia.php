@@ -34,7 +34,7 @@ function chatbot_nvidia_api_model_general_section_callback($args) {
 function chatbot_nvidia_api_key_callback($args) {
     $api_key = get_option('chatbot_nvidia_api_key');
     ?>
-    <input type="password" id="chatbot_nvidia_api_key" name="chatbot_nvidia_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text">
+    <input type="password" id="chatbot_nvidia_api_key" name="chatbot_nvidia_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
 }
 
