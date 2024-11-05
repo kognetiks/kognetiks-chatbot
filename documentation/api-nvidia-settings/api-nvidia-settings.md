@@ -6,7 +6,7 @@ The **Kognetiks Chatbot for WordPress** plugin requires proper configuration to 
 
 1. **NVIDIA API Key**:
 
-   - **Description**: This field is for your OpenAI API key, which is necessary for the plugin to access the NVIDIA functionality.
+   - **Description**: This field is for your NVIDIA API key, which is necessary for the plugin to access the NVIDIA functionality.
    - **How to obtain**: You can get your API key by signing up at [NVIDIA](https://build.nvidia.com/explore/discover?signin=true).
    - **Input**: Paste your API key in the provided field.
 

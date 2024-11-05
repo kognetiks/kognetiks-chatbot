@@ -25,44 +25,44 @@ function chatbot_chatgpt_bot_settings_section_callback($args) {
 
 }
 
-// AI Engine Selection section callback - Ver 2.1.8
+// AI Platform Selection section callback - Ver 2.1.8
 function chatbot_ai_engine_section_callback($args) {
 
     // DIAG - Diagnostics - Ver 2.1.8
     // back_trace( 'NOTICE', 'chatbot_ai_engine_section_callback');
 
-    $chatbot_ai_engine_choice = esc_attr(get_option('chatbot_ai_engine_choice', 'OpenAI'));
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
     ?>
-    <p>Configure the AI Engine for the Chatbot plugin. The default will be one of <?php echo $chatbot_ai_engine_choice ?>'s AI models; assumes you have or will provide a valid API key.</p>
+    <p>Configure the AI Platform for the Chatbot plugin. The default will be one of <?php echo $chatbot_ai_platform_choice ?>'s AI models; assumes you have or will provide a valid API key.</p>
     <?php
 
 }
 
-// AI Engine Choice - Ver 2.1.8
-function chatbot_ai_engine_choice_callback($args) {
+// AI Platform Choice - Ver 2.1.8
+function chatbot_ai_platform_choice_callback($args) {
 
-    $chatbot_ai_engine_choice = esc_attr(get_option('chatbot_ai_engine_choice', 'OpenAI'));
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
-    if (empty($chatbot_ai_engine_choice) || $chatbot_ai_engine_choice == 'OpenAI') {
-        $chatbot_ai_engine_choice = 'OpenAI';
-        update_option('chatbot_ai_engine_choice', 'OpenAI');
+    if (empty($chatbot_ai_platform_choice) || $chatbot_ai_platform_choice == 'OpenAI') {
+        $chatbot_ai_platform_choice = 'OpenAI';
+        update_option('chatbot_ai_platform_choice', 'OpenAI');
         update_option('chatbot_chatgpt_api_enabled', 'Yes');
         update_option('chatbot_nvidia_api_enabled', 'No');
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_chatgpt_api_enabled = 'Yes';
         $chatbot_nvidia_api_enabled = 'No';
         $chatbot_markov_chain_api_enabled = 'No';
-    } else if ($chatbot_ai_engine_choice == 'NVIDIA') {
-        update_option('chatbot_ai_engine_choice', 'NVIDIA');
+    } else if ($chatbot_ai_platform_choice == 'NVIDIA') {
+        update_option('chatbot_ai_platform_choice', 'NVIDIA');
         update_option('chatbot_chatgpt_api_enabled', 'No');
         update_option('chatbot_nvidia_api_enabled', 'Yes');
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_nvidia_api_enabled = 'Yes';
         $chatbot_chatgpt_api_enabled = 'No';
         $chatbot_markov_chain_api_enabled = 'No';
-    } else if ($chatbot_ai_engine_choice == 'Markov Chain') {
-        update_option('chatbot_ai_engine_choice', 'Markov Chain');
+    } else if ($chatbot_ai_platform_choice == 'Markov Chain') {
+        update_option('chatbot_ai_platform_choice', 'Markov Chain');
         update_option('chatbot_chatgpt_api_enabled', 'No');
         update_option('chatbot_nvidia_api_enabled', 'No');
         update_option('chatbot_markov_chain_api_enabled', 'Yes');
@@ -70,7 +70,7 @@ function chatbot_ai_engine_choice_callback($args) {
         $chatbot_nvidia_api_enabled = 'No';
         $chatbot_chatgpt_api_enabled = 'No';
     } else {
-        update_option('chatbot_ai_engine_choice', 'OpenAI');
+        update_option('chatbot_ai_platform_choice', 'OpenAI');
         update_option('chatbot_chatgpt_api_enabled', 'Yes');
         update_option('chatbot_nvidia_api_enabled', 'No');
         update_option('chatbot_markov_chain_api_enabled', 'No');
@@ -80,19 +80,19 @@ function chatbot_ai_engine_choice_callback($args) {
     }
 
     ?>
-    <select id="chatbot_ai_engine_choice" name="chatbot_ai_engine_choice">
-        <option value="OpenAI" <?php selected( $chatbot_ai_engine_choice, 'OpenAI' ); ?>><?php echo esc_html( 'OpenAI' ); ?></option>
-        <option value="NVIDIA" <?php selected( $chatbot_ai_engine_choice, 'NVIDIA' ); ?>><?php echo esc_html( 'NVIDIA' ); ?></option>
-        <option value="Markov Chain" <?php selected( $chatbot_ai_engine_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option>
+    <select id="chatbot_ai_platform_choice" name="chatbot_ai_platform_choice">
+        <option value="OpenAI" <?php selected( $chatbot_ai_platform_choice, 'OpenAI' ); ?>><?php echo esc_html( 'OpenAI' ); ?></option>
+        <option value="NVIDIA" <?php selected( $chatbot_ai_platform_choice, 'NVIDIA' ); ?>><?php echo esc_html( 'NVIDIA' ); ?></option>
+        <option value="Markov Chain" <?php selected( $chatbot_ai_platform_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option>
     </select>
     <?php
 
-    // if ($chatbot_ai_engine_choice == 'OpenAI') {
-    //     echo '<p><b>OpenAI ChatGPT is the default AI Engine for the Chatbot plugin.</b></p>';
-    // } elseif ($chatbot_ai_engine_choice == 'NVIDIA') {
-    //     echo '<p><b>NVIDIA ChatGPT is the NVIDIA AI Engine for the Chatbot plugin.</b></p>';
-    // } elseif ($chatbot_ai_engine_choice == 'Markov Chain') {
-    //     echo '<p><b>Markov Chain is the Markov Chain AI Engine for the Chatbot plugin.</b></p>';
+    // if ($chatbot_ai_platform_choice == 'OpenAI') {
+    //     echo '<p><b>OpenAI ChatGPT is the default AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
+    //     echo '<p><b>NVIDIA ChatGPT is the NVIDIA AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
+    //     echo '<p><b>Markov Chain is the Markov Chain AI Platform for the Chatbot plugin.</b></p>';
     // }
 
 }
@@ -112,7 +112,7 @@ function chatbot_chatgpt_name_section_callback($args) {
 function chatbot_chatgpt_message_limits_section_callback($args) {
     ?>
     <p>Configure message limits for (logged-in/registered) Users and (guest/unregistered) Visitors access.</p>
-    <p>The User Message Limit Settings applies to authenticed, registered and/or logged-in users. The Visitor Message Limit applies to unauthenteicated, general, non-logged-in visitors or guests. The default is 999.</p>
+    <p>The User Message Limit Settings applies to authenticated, registered and/or logged-in users. The Visitor Message Limit applies to unauthenticated, general, non-logged-in visitors or guests. The default is 999.</p>
     <?php
 }
 
@@ -375,20 +375,20 @@ function chatbot_chatgpt_settings_setup_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_visitor_message_limit_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_visitor_message_limit_period_setting');
 
-    register_setting('chatbot_chatgpt_settings', 'chatbot_ai_engine_choice');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_ai_platform_choice');
 
-    // Chatbot Settings - AI Engine Selection
+    // Chatbot Settings - AI Platform Selection
     add_settings_section(
         'chatbot_ai_engine_section',
-        'AI Engine Selection',
+        'AI Platform Selection',
         'chatbot_ai_engine_section_callback',
         'chatbot_ai_engine_settings'
     );
 
     add_settings_field(
-        'chatbot_ai_engine_choice',
-        'AI Engine Choice',
-        'chatbot_ai_engine_choice_callback',
+        'chatbot_ai_platform_choice',
+        'AI Platform Choice',
+        'chatbot_ai_platform_choice_callback',
         'chatbot_ai_engine_settings',
         'chatbot_ai_engine_section'
     );

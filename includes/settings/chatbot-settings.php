@@ -120,10 +120,10 @@ function chatbot_chatgpt_settings_page_html() {
 
        <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=general" class="nav-tab <?php echo $active_tab == 'general' ? 'nav-tab-active' : ''; ?>">General</a>
-            <?php if (esc_attr(get_option('chatbot_ai_engine_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=api_chatgpt" class="nav-tab <?php echo $active_tab == 'api_chatgpt' ? 'nav-tab-active' : ''; ?>">API/ChatGPT</a> <?php } ?>
-            <?php if (esc_attr(get_option('chatbot_ai_engine_choice')) == 'NVIDIA') { ?><a href="?page=chatbot-chatgpt&tab=api_nvidia" class="nav-tab <?php echo $active_tab == 'api_nvidia' ? 'nav-tab-active' : ''; ?>">API/NVIDIA</a> <?php } ?>
-            <?php if (esc_attr(get_option('chatbot_ai_engine_choice')) == 'Markov Chain') { ?><a href="?page=chatbot-chatgpt&tab=api_markov" class="nav-tab <?php echo $active_tab == 'api_markov' ? 'nav-tab-active' : ''; ?>">API/Markov</a> <?php } ?>
-            <?php if (esc_attr(get_option('chatbot_ai_engine_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=gpt_assistants" class="nav-tab <?php echo $active_tab == 'gpt_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>  <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=api_chatgpt" class="nav-tab <?php echo $active_tab == 'api_chatgpt' ? 'nav-tab-active' : ''; ?>">API/ChatGPT</a> <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice')) == 'NVIDIA') { ?><a href="?page=chatbot-chatgpt&tab=api_nvidia" class="nav-tab <?php echo $active_tab == 'api_nvidia' ? 'nav-tab-active' : ''; ?>">API/NVIDIA</a> <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice')) == 'Markov Chain') { ?><a href="?page=chatbot-chatgpt&tab=api_markov" class="nav-tab <?php echo $active_tab == 'api_markov' ? 'nav-tab-active' : ''; ?>">API/Markov</a> <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=gpt_assistants" class="nav-tab <?php echo $active_tab == 'gpt_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>  <?php } ?>
             <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatars</a>
             <a href="?page=chatbot-chatgpt&tab=appearance" class="nav-tab <?php echo $active_tab == 'appearance' ? 'nav-tab-active' : ''; ?>">Appearance</a>
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
@@ -137,7 +137,7 @@ function chatbot_chatgpt_settings_page_html() {
        <form id="chatgpt-settings-form" action="options.php" method="post">
             <?php
 
-            $chatbot_ai_engine_choice = esc_attr(get_option('chatbot_ai_engine_choice', 'ChatGPT'));
+            $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'ChatGPT'));
 
             if ($active_tab == 'general') {
 
@@ -169,7 +169,7 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_additional_setup_settings');
                 echo '</div>';
 
-            } elseif ($active_tab == 'api_chatgpt' && $chatbot_ai_engine_choice == 'OpenAI') {
+            } elseif ($active_tab == 'api_chatgpt' && $chatbot_ai_platform_choice == 'OpenAI') {
 
                 settings_fields('chatbot_chatgpt_api_chatgpt');
 
@@ -207,7 +207,7 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_api_chatgpt_advanced');
                 echo '</div>';
 
-            } elseif ($active_tab == 'api_nvidia' && $chatbot_ai_engine_choice == 'NVIDIA') {
+            } elseif ($active_tab == 'api_nvidia' && $chatbot_ai_platform_choice == 'NVIDIA') {
 
                 settings_fields('chatbot_nvidia_api_model');
 
@@ -230,7 +230,7 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_nvidia_api_model_advanced');
                 echo '</div>';
 
-            } elseif ($active_tab == 'api_markov' && $chatbot_ai_engine_choice == 'Markov Chain') {
+            } elseif ($active_tab == 'api_markov' && $chatbot_ai_platform_choice == 'Markov Chain') {
 
                 settings_fields('chatbot_markov_chain_api_model');
 
@@ -244,7 +244,7 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_markov_chain_api_model_general');
                 echo '</div>';
 
-            } elseif ($active_tab == 'gpt_assistants' && $chatbot_ai_engine_choice == 'OpenAI') {
+            } elseif ($active_tab == 'gpt_assistants' && $chatbot_ai_platform_choice == 'OpenAI') {
 
                 settings_fields('chatbot_chatgpt_custom_gpts');
 

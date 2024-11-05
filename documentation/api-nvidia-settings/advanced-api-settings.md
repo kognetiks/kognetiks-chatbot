@@ -7,7 +7,7 @@ The Advanced API Settings allow you to configure critical parameters for the API
 1. **Base URL for API**:
    - **Description**: This field specifies the base URL for the NVIDIA API. The plugin uses this URL to connect to the NVIDIA servers.
    - **Default Value**: The default URL is `https://integrate.api.nvidia.com/v1`.
-   - **Customization**: Typically, you should not need to change this value unless directed by OpenAI support or if there are specific requirements for your integration.
+   - **Customization**: Typically, you should not need to change this value unless directed by NVIDIA support or if there are specific requirements for your integration.
 
 2. **Timeout Setting (in seconds)**:
    - **Description**: This setting determines how long the plugin will wait for a response from the API before timing out.
@@ -23,11 +23,11 @@ The Advanced API Settings allow you to configure critical parameters for the API
 
 ## Tips
 
-- **Avoid Unnecessary Changes**: Unless you have a specific reason, it’s best to leave the Base URL as the default provided by OpenAI.
+- **Avoid Unnecessary Changes**: Unless you have a specific reason, it’s best to leave the Base URL as the default provided by NVIDIA.
 - **Monitor Performance**: If you experience issues with response times or API connectivity, consider adjusting the timeout setting and monitor the performance impact.
 - **Consult Documentation**: For more information on API parameters and troubleshooting, refer to the [NVIDIA API Documentation](https://docs.api.nvidia.com/).
 
-By configuring these settings, you ensure that your Kognetiks Chatbot maintains a stable and efficient connection to the OpenAI API, providing reliable performance for your users.
+By configuring these settings, you ensure that your Kognetiks Chatbot maintains a stable and efficient connection to the NVIDIA API, providing reliable performance for your users.
 
 ---
 

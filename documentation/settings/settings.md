@@ -2,6 +2,17 @@
 
 The General Settings allow you to customize the basic behavior and appearance of your Kognetiks Chatbot. Follow these steps to set up these options:
 
+## AI Platform Selection
+
+![AI Platform Selection](ai-platform-selection.png)
+
+1. **AI Platform Choice**:
+
+   - **Description**: This setting determines which AI model provider will be used for conversational AI capabilities.
+   - **Options**: `OpenAI`, `NVIDIA`, and others to be announced.
+   - **Default Value**: By default this value will be set to `OpenAI` as the model provider of choice.
+   - **Note**: An valid API key obtained from the respective model vendor is required for the chatbot to operate correctly.
+
 ## General Settings
 
 ![Chatbot Settings](general-settings.png)
@@ -150,7 +161,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 By configuring these settings, you ensure that your Kognetiks Chatbot plugin operates smoothly and efficiently, providing a seamless experience for both logged-in users and visitors.
 
-- **Monitoring Usage**: Regularly monitor your API usage in the OpenAI dashboard to ensure that your limits are appropriate and adjust them as necessary.
+- **Monitoring Usage**: Regularly monitor API usage in the AI Platform vendor's dashboard to ensure that your limits are appropriate and adjust them as necessary.
 
 - **Cost Management**: Setting appropriate message limits helps control costs associated with API usage.
 

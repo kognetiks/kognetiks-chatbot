@@ -49,7 +49,7 @@ function chatbot_nvidia_call_api($api_key, $message) {
         'Content-Type' => 'application/json',
     );
 
-    // Select the OpenAI Model
+    // Select the NVIDIA Model
     // Get the saved model from the settings or default to "nvidia/llama-3.1-nemotron-51b-instruct"
     $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
  
@@ -181,7 +181,7 @@ function chatbot_nvidia_call_api($api_key, $message) {
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
-        return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
+        return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your NVIDIA account for additional information.';
     }
 
     // DIAG - Diagnostics - Ver 1.8.6

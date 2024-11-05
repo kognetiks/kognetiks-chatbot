@@ -1,12 +1,12 @@
 # **Kognetiks Chatbot for WordPress** Plugin Documentation
 
-**Kognetiks Chatbot for WordPress** is a plugin that allows you to effortlessly integrate OpenAI’s ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
+**Kognetiks Chatbot for WordPress** is a plugin that allows you to effortlessly integrate OpenAI’s ChatGPT API or NVIDIA's NIM API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
 
-Conversational AI platforms - like those from OpenAI - use natural language processing and machine learning algorithms to interact with users in a human-like manner. They are designed to answer questions, provide suggestions, and engage in conversations with users. This is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, these platforms can be used in various fields such as healthcare, education, finance, and many more.
+Conversational AI platforms - like those from OpenAI, NVIDIA, and others - use natural language processing and machine learning algorithms to interact with users in a human-like manner. They are designed to answer questions, provide suggestions, and engage in conversations with users. This is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, these platforms can be used in various fields such as healthcare, education, finance, and many more.
 
-The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and Models to bring artificial intelligence to life within your WordPress website.
+The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA or others, via their APIs and Models to bring artificial intelligence to life within your WordPress website.
 
-**Important Note:** This plugin requires an API key from OpenAI to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys.
+**Important Note:** This plugin requires an API key from OpenAI, NVIDIA or other AI platform vendors, to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys or https://build.nvidia.com/nim.
 
 ## What's new in Version 2.1.8
 
@@ -66,8 +66,8 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.
 * **chatgptTitle CSS ID Rename**: Renamed the chatgptTitle CSS ID renamed to chatbot-chatgpt-title to avoid conflicts with other plugins or themes.
-* **chatbot-user-text CSS Class Rename**: Renamed the user-text CSSclass to chatbot-user-text to avoid conflicts with other plugins or themes.
-* **bot-text CSS Class Rename**: Renamed the bot-text CSSclass to chatbot-bot-text to avoid conflicts with other plugins or themes.
+* **chatbot-user-text CSS Class Rename**: Renamed the user-text CSS class to chatbot-user-text to avoid conflicts with other plugins or themes.
+* **bot-text CSS Class Rename**: Renamed the bot-text CSS class to chatbot-bot-text to avoid conflicts with other plugins or themes.
 
 ## What's New in Version 2.0.8
 
@@ -76,10 +76,10 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, via it's API and M
 
 ## What's New in Version 2.0.7
 
-* **Model Support**: The latest models available from OpenAI are dynamically added to model picklists.  Available models now include gpt-4o and gpt-4o-mini.  See Chatbot Settings > API/Model > Chat Settings.
+* **Model Support**: The latest models available from the AI platform you choose and are dynamically added to model picklists.
 * **Manage Chatbot Error Logs**: Added the ability to manage chatbot error logs, including the ability to download and delete logs. See Chatbot Settings > Tools. TIP: You must enable Diagnostics access the Tools tab. See Chatbot Settings > Messages > Messages and Diagnostics.
 * **Revised Reporting Settings Layout**: Revised and refreshed the Reporting Settings page layout for better visualization. See Chatbot Settings > Reporting.
-* **Conversation Continuation**: Added an additional setting to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
+* **Conversation Continuation**: Added a setting to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
 
 ## What's New in Version 2.0.6
 
@@ -164,7 +164,7 @@ While AI-powered applications strive for accuracy, they can sometimes make mista
 
 ## Disclaimer
 
-OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetiks is not a partner of, endorsed by, or sponsored by OpenAI.
+OpenAI, ChatGPT, and their respective trademarks are registered trademarks of OpenAI. NVIDIA, NIM, and their respective trademarks are registered trademarks of NVIDIA. Anthropic, Claude, and their respective trademarks are registered trademarks of Anthropic. Kognetiks is an independent entity and is neither affiliated with, endorsed by, nor sponsored by OpenAI, NVIDIA, or Anthropic.
 
 ---
 

@@ -151,7 +151,7 @@ function chatbot_nvidia_top_p_callback($args) {
 // API Advanced settings section callback
 function chatbot_nvidia_api_model_advanced_section_callback($args) {
     ?>
-    <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
+    <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the NVIDIA API.  The default is <code>https://integrate.api.nvidia.com/v1</code>.</p>
     <?php
 }
 

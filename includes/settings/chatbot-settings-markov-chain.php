@@ -123,7 +123,7 @@ function chatbot_markov_chain_model_choice_callback($args) {
 function chatbot_markov_chain_api_settings_init() {
 
     add_settings_section(
-        'chatbot_markov_chain_api_enableds_section',
+        'chatbot_markov_chain_api_enabled_section',
         'API/Markov Chain Settings',
         'chatbot_markov_chain_model_settings_section_callback',
         'chatbot_markov_chain_model_settings_general'

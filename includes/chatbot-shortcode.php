@@ -976,7 +976,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, $session_id, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, $session_id, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, $session_id, null);
-        // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
+        // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
         <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo time(); ?>">
@@ -1132,7 +1132,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, $session_id, null);
         set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, $session_id, null);
         set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, $session_id, null);
-        // OUTSIDE OF THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
+        // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
         ?>
         <div id="chatbot-chatgpt">

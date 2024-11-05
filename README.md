@@ -1,6 +1,6 @@
 # Kognetiks Chatbot for WordPress
 
-The **Kognetiks Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
+The **Kognetiks Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI, NVIDIA, and Anthropic (release date TBD). The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
 ## Documentation
 
@@ -62,8 +62,8 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.
 * **chatgptTitle CSS ID Rename**: Renamed the chatgptTitle CSS ID renamed to chatbot-chatgpt-title to avoid conflicts with other plugins or themes.
-* **chatbot-user-text CSS Class Rename**: Renamed the user-text CSSclass to chatbot-user-text to avoid conflicts with other plugins or themes.
-* **bot-text CSS Class Rename**: Renamed the bot-text CSSclass to chatbot-bot-text to avoid conflicts with other plugins or themes.
+* **chatbot-user-text CSS Class Rename**: Renamed the user-text CSS class to chatbot-user-text to avoid conflicts with other plugins or themes.
+* **bot-text CSS Class Rename**: Renamed the bot-text CSS class to chatbot-bot-text to avoid conflicts with other plugins or themes.
 
 ## What's New in Version 2.0.8
 
@@ -75,7 +75,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 * **Model Support**: The latest models available from OpenAI are dynamically added to model picklists.  Available models now include gpt-4o and gpt-4o-mini.  See Chatbot Settings > API/Model > Chat Settings.
 * **Manage Chatbot Error Logs**: Added the ability to manage chatbot error logs, including the ability to download and delete logs. See Chatbot Settings > Tools. TIP: You must enable Diagnostics access the Tools tab. See Chatbot Settings > Messages > Messages and Diagnostics.
 * **Revised Reporting Settings Layout**: Revised and refreshed the Reporting Settings page layout for better visualization. See Chatbot Settings > Reporting.
-* **Conversation Continuation**: Added an additional setting to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
+* **Conversation Continuation**: Added a setting to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
 
 ## What's New in Version 2.0.6
 
@@ -393,7 +393,7 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 
 ## Disclaimer
 
-OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetiks is not a partner of, endorsed by, or sponsored by OpenAI.
+OpenAI, ChatGPT, and their respective trademarks are registered trademarks of OpenAI. NVIDIA, NIM, and their respective trademarks are registered trademarks of NVIDIA. Anthropic, Claude, and their respective trademarks are registered trademarks of Anthropic. Kognetiks is an independent entity and is neither affiliated with, endorsed by, nor sponsored by OpenAI, NVIDIA, or Anthropic.
 
 ## Thank you for using Kognetiks Chatbot for WordPress
 

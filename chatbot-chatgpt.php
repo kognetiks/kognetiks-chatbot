@@ -185,45 +185,69 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
-// FIXME - SEE AI Engine Selection setting - Ver 2.1.8
-$chatbot_ai_engine_choice = esc_attr(get_option('chatbot_ai_engine_choice', 'OpenAI'));
-// API Enabled - Ver 2.1.8
-if ($chatbot_ai_engine_choice == 'OpenAI') {
+global $chatbot_ai_platform_choice;
+global $model;
+global $voice;
+
+// FIXME - SEE AI Platform Selection setting - Ver 2.1.8
+$chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+
+// OpenAI ChatGPT API Enabled - Ver 2.1.8
+if ($chatbot_ai_platform_choice == 'OpenAI') {
+
     $chatbot_chatgpt_api_enabled = 'Yes';
     $chatbot_nvidia_api_enabled = 'No';
     $chatbot_markov_chain_api_enabled = 'No';
-} elseif ($chatbot_ai_engine_choice) {
+    update_option('chatbot_ai_platform_choice', 'OpenAI');
+
+    // Model choice - Ver 1.9.4
+    if (get_option('chatbot_chatgpt_model_choice') === null) {
+        $model = 'gpt-4-1106-preview';
+        update_option('chatbot_chatgpt_model_choice', $model);
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    }
+
+    // Voice choice - Ver 1.9.5
+    if (get_option('chatbot_chatgpt_voice_option') === null) {
+        $voice = 'alloy';
+        update_option('chatbot_chatgpt_voice_option', $voice);
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
+    }
+
+// NVIDIA NIM API Enabled - Ver 2.1.8
+} elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
+
     $chatbot_nvidia_api_enabled = 'Yes';
     $chatbot_chatgpt_api_enabled = 'No';
     $chatbot_markov_chain_api_enabled = 'No';
-} elseif ($chatbot_ai_engine_choice) {
+    update_option('chatbot_ai_platform_choice', 'NVIDIA');
+
+    // Model choice - Ver 2.1.8
+    if (get_option('chatbot_nvidia_model_choice') === null) {
+        $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
+        update_option('chatbot_nvidia_model_choice', $model);
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    }
+
+// Markov Chain API Enabled - Ver 2.1.8
+} elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
+
     $chatbot_markov_chain_api_enabled = 'Yes';
     $chatbot_nvidia_api_enabled = 'No';
     $chatbot_chatgpt_api_enabled = 'No';
-} else {
-    prod_trace('NOTICE', 'No API enabled - defaulting to OpenAI');
-    $chatbot_chatgpt_api_enabled = 'Yes';
-    $chatbot_nvidia_api_enabled = 'No';
-    $chatbot_markov_chain_api_enabled = 'No';
-}
+    update_option('chatbot_ai_platform_choice', 'Markov Chain');
 
-// Model choice - Ver 1.9.4
-global $model;
-// Starting with V1.9.4 the model choice "gpt-4-turbo" is replaced with "gpt-4-1106-preview"
-if (get_option('chatbot_chatgpt_model_choice') == 'gpt-4-turbo') {
-    $model = 'gpt-4-1106-preview';
-    update_option('chatbot_chatgpt_model_choice', $model);
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
-}
-
-// Voice choice - Ver 1.9.5
-global $voice;
-if (get_option('chatbot_chatgpt_voice_option') == 'alloy') {
-    $voice = 'alloy';
-    update_option('chatbot_chatgpt_voice_option', $voice);
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
+    // Model choice - Ver 2.1.8
+    if (get_option('chatbot_markov_chain_model_choice') === null) {
+        $model = 'markov-chain-2024-09-17';
+        update_option('chatbot_markov_chain_model_choice', $model);
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    }
+    
 }
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5

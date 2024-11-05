@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Markove Chain - Ver 2.1.6
+ * Kognetiks Chatbot for WordPress - Markov Chain - Ver 2.1.6
  *
  * This file contains the code for implementing the Markov Chain algorithm
  *

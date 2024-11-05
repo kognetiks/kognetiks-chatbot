@@ -156,9 +156,7 @@ function chatbot_chatgpt_diagnostics_section_callback($args) {
 // API Status and Results section callback - Ver 2.0.7
 function chatbot_chatgpt_diagnostics_api_status_section_callback($args) {
 
-        $api_key = get_option('chatbot_chatgpt_api_key');
-        test_chatgpt_api($api_key);
-        $updated_status = esc_attr(get_option('chatbot_chatgpt_api_status', 'NOT SET'));
+        $updated_status = test_api_status();
     ?>
         <p>API STATUS: <b><?php echo esc_html( $updated_status ); ?></b></p>
     <?php
@@ -168,9 +166,7 @@ function chatbot_chatgpt_diagnostics_api_status_section_callback($args) {
 // Call the api-test.php file to test the API
 function chatbot_chatgpt_api_test_callback($args) {
 
-    $api_key = get_option('chatbot_chatgpt_api_key');
-    test_chatgpt_api($api_key);
-    $updated_status = esc_attr(get_option('chatbot_chatgpt_api_status', 'NOT SET'));
+    $updated_status = test_api_status();
     ?>
     <p>API STATUS: <b><?php echo esc_html( $updated_status ); ?></b></p>
     <?php
