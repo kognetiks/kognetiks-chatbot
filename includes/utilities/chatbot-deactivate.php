@@ -52,9 +52,13 @@ function chatbot_chatgpt_uninstall(){
 
     // Check for a setting that specifies whether to delete data
     if (get_option('chatbot_chatgpt_delete_data') == 'yes') {
+
+        // Delete on-off options
+        // back_trace( 'NOTICE', 'Deleting one-off options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_ai_platform_choice'");
     
         // Delete ChatGPT options
-        // back_trace( 'NOTICE', 'Deleting options');
+        // back_trace( 'NOTICE', 'Deleting ChatGPT options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_chatgpt%'");
 
         // Delete NVIDIA options

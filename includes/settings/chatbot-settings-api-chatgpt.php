@@ -233,7 +233,7 @@ function get_files_api_url() {
 function get_chat_completions_api_url() {
 
     // Enable for either ChatGPT or NVIDIA - Ver 2.1.8
-    if (get_option('chatbot_nvidia_api_enabled', 'No') == 'Yes') {
+    if (get_option('chatbot_nvidia_api_enabled') == 'Yes' || get_option('chatbot_ai_platform_choice') == 'NVIDIA') {
         // DIAG - Diagnostics - Ver 2.1.8
         // back_trace( 'NOTICE', 'get_chat_completions_api_url: NVIDIA API' );
         return get_nvidia_api_base_url() . "/chat/completions";

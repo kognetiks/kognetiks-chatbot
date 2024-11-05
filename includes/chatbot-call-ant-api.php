@@ -43,7 +43,7 @@ function chatbot_call_ant_api($api_key, $message) {
     // The current Anthropic API URL endpoint for claude-3-5-sonnet-20240620
     // $api_url = get_chat_completions_api_url();
     // FIXME - TEMP OVERRIDE
-    $api_url = 'https://api.anthoric.com/v1/messages';
+    $api_url = 'https://api.anthropic.com/v1/messages';
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,

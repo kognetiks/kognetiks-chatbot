@@ -53,7 +53,7 @@ function chatbot_nvidia_api_model_chat_settings_section_callback($args) {
 function chatbot_nvidia_chat_model_choice_callback($args) {
 
     $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
-    $nvidia_api_enabled = esc_attr(get_option('chatbot_nvidia_api_enabled', 'No'));
+    $nvidia_api_enabled = esc_attr(get_option('chatbot_nvidia_api_enabled', 'Yes'));
 
     // Fetch models from the API
     $models = chatbot_nvidia_get_models();

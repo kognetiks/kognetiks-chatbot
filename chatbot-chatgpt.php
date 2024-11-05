@@ -196,9 +196,14 @@ $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 
 if ($chatbot_ai_platform_choice == 'OpenAI') {
 
     $chatbot_chatgpt_api_enabled = 'Yes';
-    $chatbot_nvidia_api_enabled = 'No';
-    $chatbot_markov_chain_api_enabled = 'No';
+    update_option('chabot_chatgpt_api_enabled', 'Yes');
     update_option('chatbot_ai_platform_choice', 'OpenAI');
+
+    $chatbot_nvidia_api_enabled = 'No';
+    update_option('chatbot_nvidia_api_enabled', 'No');
+
+    $chatbot_markov_chain_api_enabled = 'No';
+    update_option('chatbot_markov_chain_api_enabled', 'No');
 
     // Model choice - Ver 1.9.4
     if (get_option('chatbot_chatgpt_model_choice') === null) {
@@ -220,9 +225,14 @@ if ($chatbot_ai_platform_choice == 'OpenAI') {
 } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
 
     $chatbot_nvidia_api_enabled = 'Yes';
-    $chatbot_chatgpt_api_enabled = 'No';
-    $chatbot_markov_chain_api_enabled = 'No';
+    update_option('chatbot_nvidia_api_enabled', 'Yes');
     update_option('chatbot_ai_platform_choice', 'NVIDIA');
+
+    $chatbot_chatgpt_api_enabled = 'No';
+    update_option('chatbot_chatgpt_api_enabled', 'No');
+
+    $chatbot_markov_chain_api_enabled = 'No';
+    update_option('chatbot_markov_chain_api_enabled', 'No');
 
     // Model choice - Ver 2.1.8
     if (get_option('chatbot_nvidia_model_choice') === null) {
@@ -236,9 +246,14 @@ if ($chatbot_ai_platform_choice == 'OpenAI') {
 } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
 
     $chatbot_markov_chain_api_enabled = 'Yes';
-    $chatbot_nvidia_api_enabled = 'No';
-    $chatbot_chatgpt_api_enabled = 'No';
+    update_option('chatbot_markov_chain_api_enabled', 'Yes');
     update_option('chatbot_ai_platform_choice', 'Markov Chain');
+
+    $chatbot_nvidia_api_enabled = 'No';
+    update_option('chatbot_nvidia_api_enabled', 'No');
+
+    $chatbot_chatgpt_api_enabled = 'No';
+    update_option('chatbot_chatgpt_api_enabled', 'No');
 
     // Model choice - Ver 2.1.8
     if (get_option('chatbot_markov_chain_model_choice') === null) {
