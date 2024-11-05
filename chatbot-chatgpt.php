@@ -190,13 +190,20 @@ global $model;
 global $voice;
 
 // FIXME - SEE AI Platform Selection setting - Ver 2.1.8
+if (esc_attr(get_option('chatbot_ai_platform_choice')) === null) {
+    update_option('chatbot_ai_platform_choice', 'OpenAI');
+    update_option('chatbot_chatgpt_api_enabled', 'Yes');
+    update_option('chatbot_nvidia_api_enabled', 'No');
+    update_option('chatbot_markov_chain_api_enabled', 'No');
+}
+
 $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
 // OpenAI ChatGPT API Enabled - Ver 2.1.8
 if ($chatbot_ai_platform_choice == 'OpenAI') {
 
     $chatbot_chatgpt_api_enabled = 'Yes';
-    update_option('chabot_chatgpt_api_enabled', 'Yes');
+    update_option('chatbot_chatgpt_api_enabled', 'Yes');
     update_option('chatbot_ai_platform_choice', 'OpenAI');
 
     $chatbot_nvidia_api_enabled = 'No';
