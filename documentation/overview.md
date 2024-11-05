@@ -10,6 +10,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA or others, 
 
 ## What's new in Version 2.1.8
 
+* **NVIDIA NIM API Integration**: Added support for NVIDIA's NIM API to provide advanced conversational capabilities for the chatbot.
 * **Assistant Management**: Resolved the issue with adding, updating and deleting Assistants when using Firefox browser.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with assistant management.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with accessing chatbot support pages.

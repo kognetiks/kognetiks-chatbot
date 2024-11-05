@@ -25,8 +25,6 @@ The **Kognetiks Chatbot for WordPress** is a feature-rich AI plugin that leverag
 
 * **NVIDIA's NIM API**: Unlock advanced conversational abilities for a highly interactive chatbot.
 
-* **Anthropic's Claude API**: Coming soon! Additional conversational capabilities on the way with Claude API support.
-
 🌟 **Key Features**:
 
 * **Advanced AI-Powered Conversations**: Utilize the latest AI Platform and Large Language Models (LLMs) to generate natural, human-like responses that engage and assist your visitors.
@@ -164,8 +162,9 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
-= 2.1.8 - Release TBD =
+= 2.1.8 - Release 11-05-2024 =
 
+* **NVIDIA NIM API Integration**: Added support for NVIDIA's NIM API to provide advanced conversational capabilities for the chatbot.
 * **Assistant Management**: Resolved the issue with adding, updating and deleting Assistants when using Firefox browser.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with assistant management.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with accessing chatbot support pages.
