@@ -534,25 +534,25 @@ function chatbot_chatgpt_send_message() {
         $kchat_settings['chatbot_chatgpt_model'] = $model;
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8
-        back_trace( 'NOTICE', 'LINE 510 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 537 - $model: ' . $model);
     } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
         $api_key = esc_attr(get_option('chatbot_markov_chain_api_key'));
         $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
         $kchat_settings['chatbot_chatgpt_model'] = $model;
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8
-        back_trace( 'NOTICE', 'LINE 517 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 544 - $model: ' . $model);
     } else {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         $kchat_settings['chatbot_chatgpt_model'] = $model;
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8
-        back_trace( 'NOTICE', 'LINE 524 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 551 - $model: ' . $model);
     }
 
     // DIAG - Diagnostics - Ver 2.1.8
-    back_trace( 'NOTICE', 'LINE 528 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 555 - $model: ' . $model);
 
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
@@ -604,7 +604,7 @@ function chatbot_chatgpt_send_message() {
     $model = $kchat_settings['chatbot_chatgpt_model'];
 
     // FIXME - TESTING - Ver 2.1.8
-    back_trace( 'NOTICE', 'LINE 604 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 607 - $model: ' . $model);
     
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
@@ -619,7 +619,7 @@ function chatbot_chatgpt_send_message() {
     $model = isset($kchat_settings['chatbot_chatgpt_model']) ? $kchat_settings['chatbot_chatgpt_model'] : '';
 
     // FIXME - TESTING - Ver 2.1.8
-    back_trace( 'NOTICE', 'LINE 611 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 622 - $model: ' . $model);
 
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
@@ -853,8 +853,8 @@ function chatbot_chatgpt_send_message() {
         };
 
         // FIXME - TESTING - Ver 2.1.8
-        back_trace( 'NOTICE', 'LINE 845 - $model: ' . $model);
-        back_trace( 'NOTICE', 'LINE 847 - $kchat_settings[model]: ' . $kchat_settings['model']);
+        // back_trace( 'NOTICE', 'LINE 856 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 857 - $kchat_settings[model]: ' . $kchat_settings['model']);
 
         // if (str_starts_with($model,'dall')) {
         //     // back_trace ( 'NOTICE', 'Using Image API');
@@ -873,7 +873,7 @@ function chatbot_chatgpt_send_message() {
         $voice = isset($kchat_settings['voice']) ? $kchat_settings['voice'] : null;
 
         // FIXME - TESTING - Ver 2.1.8
-        back_trace( 'NOTICE', 'LINE 873 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 876 - $model: ' . $model);
 
         if (str_starts_with($model !== null && $model, 'gpt-4o') !== false) {
             // The string 'gpt-4o' is found in $model
@@ -904,10 +904,10 @@ function chatbot_chatgpt_send_message() {
         } elseif ($model !==null && str_starts_with($model,'nvidia')) {
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            back_trace( 'NOTICE', 'LINE 909 - Calling NVIDIA API');
+            // back_trace( 'NOTICE', 'LINE 907 - Calling NVIDIA API');
             // Send message to NVIDIA API - Ver 2.1.8
             $response = chatbot_nvidia_call_api($api_key, $message);
-            back_trace( 'NOTICE', 'LINE 912 - NVIDIA API Response: ' . $response);
+            // back_trace( 'NOTICE', 'LINE 910 - NVIDIA API Response: ' . $response);
         } elseif ($model !== null && str_starts_with($model,'markov')) {
             $kchat_settings['model'] = $model;
             // Send message to Markov API - Ver 1.9.7
@@ -941,7 +941,7 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE', 'LINE 946 - Response: ' . $response);
+        // back_trace( 'NOTICE', 'LINE 944 - Response: ' . $response);
 
         // FIXME - Append extra message - Ver 2.1.1.1.1
         // Danger Will Robinson! Danger!
@@ -949,7 +949,7 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
         // DIAG - Diagnostics - Ver 2.1.8
-        back_trace( 'NOTICE', 'LINE 954 - $response: ' . $response);
+        // back_trace( 'NOTICE', 'LINE 952 - $response: ' . $response);
 
         // Return response
         wp_send_json_success($response);
