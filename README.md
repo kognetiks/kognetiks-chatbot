@@ -8,6 +8,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 * **NVIDIA NIM API Integration**: Added support for NVIDIA's NIM API to provide advanced conversational capabilities for the chatbot.
 * **Assistant Management**: Resolved the issue with adding, updating and deleting Assistants when using Firefox browser.
+* **Conversation Continuation**: Improved conversation continuity for visitors and logged-in users to ensure a seamless experience across sessions.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with assistant management.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with accessing chatbot support pages.
 
