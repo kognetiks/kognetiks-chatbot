@@ -504,11 +504,11 @@ jQuery(document).ready(function ($) {
         $('.chatbot-typing-indicator').remove();
     }
 
-    // markdownToHtml - Ver 1.9.2 - Updated in Ver 2.1.4
+    // markdownToHtml - Ver 2.1.5
     function markdownToHtml(markdown) {
         // Step 1: Process links before any other inline elements
         markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-        
+    
         // Step 2: Extract predefined HTML tags
         const predefinedHtmlRegex = /<.*?>/g;
         let predefinedHtml = [];
@@ -527,93 +527,45 @@ jQuery(document).ready(function ($) {
     
         // Step 5: Headers
         markdown = markdown.replace(/^#### (.*)$/gim, '<h4>$1</h4>')
-                           .replace(/^### (.*)$/gim, '<h3>$1</h3>')
-                           .replace(/^## (.*)$/gim, '<h2>$1</h2>')
-                           .replace(/^# (.*)$/gim, '<h1>$1</h1>');
+                        .replace(/^### (.*)$/gim, '<h3>$1</h3>')
+                        .replace(/^## (.*)$/gim, '<h2>$1</h2>')
+                        .replace(/^# (.*)$/gim, '<h1>$1</h1>');
     
-        // Step 6: Process tables as a block and wrap the entire table in <pre>
-        markdown = markdown.replace(/(\|.+?\|)\n(\|[-:|]+\|)\n([\s\S]+?)\n(?=\n|$)/gm, (match, header, separator, body) => {
-            const headersArray = header.split('|').map(h => h.trim()).filter(h => h !== '');
-            const rowsArray = body.trim().split('\n').map(row => row.split('|').map(cell => cell.trim()).filter(cell => cell !== ''));
-    
-            // Ensure all rows have the correct number of columns
-            rowsArray.forEach(row => {
-                while (row.length < headersArray.length) {
-                    row.push(''); // Add empty cells to match header length
-                }
-                if (row.length > headersArray.length) {
-                    row.splice(headersArray.length); // Remove any extra cells
-                }
-            });
-    
-            // Calculate column widths
-            const colWidths = headersArray.map((header, i) => {
-                return Math.max(
-                    header.length,
-                    ...rowsArray.map(row => (row[i] || '').length)
-                );
-            });
-    
-            // Build the table with consistent column widths
-            const headerRow = '| ' + headersArray.map((header, i) => header.padEnd(colWidths[i])).join(' | ') + ' |';
-            const separatorRow = '|-' + colWidths.map(width => '-'.repeat(width)).join('-|-') + '-|';
-            const rows = rowsArray.map(row => {
-                return '| ' + row.map((cell, i) => (cell || '').padEnd(colWidths[i])).join(' | ') + ' |';
-            }).join('\n');
-    
-            // Wrap the entire table in <pre> and return it
-            return `<pre style="font-family: monospace;">${headerRow}\n${separatorRow}\n${rows}</pre>`;
-        });
-    
-        // Step 7: Bold, Italic, Strikethrough
+        // Step 6: Bold, Italic, Strikethrough
         markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                           .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                           .replace(/\~\~(.*?)\~\~/g, '<del>$1</del>');
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/\~\~(.*?)\~\~/g, '<del>$1</del>');
     
-        // Step 8: Multi-line code blocks
+        // Step 7: Multi-line code blocks
         markdown = markdown.replace(/```([\s\S]*?)```/gm, '<pre><code>$1</code></pre>');
     
-        // Step 9: Inline code - after handling multi-line to prevent conflicts
+        // Step 8: Inline code - after handling multi-line to prevent conflicts
         markdown = markdown.replace(/`([^`]+)`/g, '<code>$1</code>');
     
-        // Step 10: Lists - Needs refining for nested lists
+        // Step 9: Lists - Improved handling for nested lists and spacing
         markdown = markdown.replace(/^\*\s(.+)$/gim, '<li>$1</li>')
-                           .replace(/<\/li><li>/g, '</li>\n<li>')
-                           .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>')
-                           .replace(/<ul>\s*<li>/g, '<ul>\n<li>')
-                           .replace(/<\/li>\s*<\/ul>/g, '</li>\n</ul>');
+                        .replace(/<\/li>\s*<li>/g, '</li>\n<li>')
+                        .replace(/<li>(.*?)<\/li>/gs, '<ul>$&</ul>');
     
-        // Step 11: Improved blockquote handling
+        // Step 10: Improved blockquote handling
         markdown = markdown.replace(/^(>+\s?)(.*)$/gm, (match, p1, p2) => {
             return `<blockquote>${p2}</blockquote>`;
         });
     
-        // Step 12: Convert line breaks to <br>, except for code blocks and blockquotes
-        // markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>|<\/?h[1-6]>)/g).map((chunk, index) => {
-        //     // Only convert newlines to <br> outside of code blocks, blockquotes, and handle header tags
-        //     if (index % 2 === 0) {
-        //         // Convert \n to <br>, then remove any double <br> tags
-        //         return chunk.replace(/\n/g, '<br>').replace(/(<br>\s*){2,}/g, '<br>');
-        //     } else {
-        //         return chunk;
-        //     }
-        // }).join('');
-    
-        // REVERTED TO VER 2.1.3 - 2024 09 02
-        // FIXME - LOOK AT USING <p> TAGS INSTEAD OF <BR> TAGS
-        markdown = markdown.split(/(<pre><code>[\s\S]*?<\/code><\/pre>|<blockquote>[\s\S]*?<\/blockquote>)/g).map((chunk, index) => {
-            // Only convert newlines to <br> outside of code blocks and blockquotes
-            return index % 2 === 0 ? chunk.replace(/\n/g, '<br>') : chunk;
+        // Step 11: Consolidate line breaks and remove extra spaces
+        markdown = markdown.replace(/\n{2,}/g, '\n').split(/\n/g).map((line, index) => {
+            return line.match(/^<h|<p|<ul|<pre|<blockquote/) ? line : line.trim() ? `${line}<br>` : '';
         }).join('');
     
-        // Step 13: Reinsert predefined HTML tags
+        // Step 12: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
             return predefinedHtml[parseInt(index)];
         });
     
+        // Return final output wrapped in a div
         return `<div>${markdown.trim()}</div>`;
     }
-
+    
     // Helper functions
     function getWeekNumber(d) {
         let oneJan = new Date(d.getFullYear(), 0, 1);
@@ -1247,7 +1199,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                // console.error('Chatbot: NOTICE: Response from server', response);
+                console.error('Chatbot: NOTICE: Response from server', response);
                 $('#chatbot-chatgpt-upload-file-input').val(''); // Clear the file input after successful upload
                 appendMessage('File(s) successfully uploaded.', 'bot');
             },
@@ -1262,8 +1214,21 @@ jQuery(document).ready(function ($) {
                     appendMessage('Oops! Failed to upload file. Please try again.', 'error');
                 }
             },
-            complete: function () {
+            complete: function (response) {
                 removeTypingIndicator();
+                // console.log('Chatbot: NOTICE: Response from server', response);
+                if (response) {
+                    // appendMessage(response, 'bot');
+                    // Append custom JS to the bot's response - Ver 2.0.9
+                    if (typeof appendCustomJsToFileUploadResponse === 'function') {
+                        let customMessage = '';
+                        customMessage = appendCustomJsToFileUploadResponse('File(s) successfully uploaded.');
+                        // Check if customMessage is not null, undefined, or an empty string
+                        if (customMessage) {
+                            appendMessage(customMessage, 'bot');
+                        }
+                    };
+                }
                 submitButton.prop('disabled', false);
             },
         });

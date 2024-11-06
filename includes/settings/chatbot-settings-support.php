@@ -47,6 +47,7 @@ function listDocumentationContents() {
 
 // Traverse the directory structure to get the list of directories and files
 function traverseDirectory($path) {
+
     $contents = scandir($path);
     $result = [
         'directories' => [],
@@ -62,7 +63,7 @@ function traverseDirectory($path) {
 
         if (is_dir($fullPath)) {
             $result['directories'][$item] = traverseDirectory($fullPath);
-        } elseif (is_file($fullPath)) {
+        } elseif (is_file($fullPath) && pathinfo($item, PATHINFO_EXTENSION) === 'md') {
             $result['files'][] = $item;
         }
     }
@@ -73,6 +74,12 @@ function traverseDirectory($path) {
 
 // Validate the requested directory and file
 function validateDocumentation($dir, $file) {
+
+    $allowed_file_extension = 'md'; // Set the allowed file extension to 'md'
+
+    if (!preg_match('/^[a-zA-Z0-9_\-\/]+$/', $dir) || pathinfo($file, PATHINFO_EXTENSION) !== $allowed_file_extension) {
+        return false;
+    }
 
     $data = []; // Initialize $data as an empty array
     $sub_directory = ""; // Initialize $sub_directory as an empty string
@@ -129,16 +136,19 @@ function chatbot_chatgpt_support_section_callback() {
 
     // Get the 'documentation' parameter from the URL
     $docLocation = '';
+
     if (isset($_GET['dir'])) {
-        $dir = basename(sanitize_text_field($_GET['dir']));
+        $dir = sanitize_file_name(basename(sanitize_text_field($_GET['dir'])));
     } else {
         $dir = '';
     }
+
     if (isset($_GET['file'])) {
-        $file = basename(sanitize_text_field($_GET['file']));
+        $file = sanitize_file_name(basename(sanitize_text_field($_GET['file'])));
     } else {
         $file = '';
     }
+
     if (!empty($dir) && !empty($file)) {
         $docLocation = $dir . '/' . $file;
     } else if (empty($dir) && empty($file)) {
@@ -191,20 +201,24 @@ function chatbot_chatgpt_support_section_callback() {
     //     // back_trace( 'NOTICE', "File written successfully to: " . $absolutePath );
     // }
 
-    echo $adjustedHtmlContent;
+    echo wp_kses_post($adjustedHtmlContent);
 
 }
 
 function file_exists_in_doc_location($docLocation) {
+
     return file_exists($docLocation);
+
 }
 
 function adjustPaths($html, $basePath) {
+
     // Adjust image paths
     $html = preg_replace_callback(
         '/<img\s+src="([^"]+)"/i',
         function ($matches) use ($basePath) {
-            return '<img src="' . adjustImagePath($matches[1], $basePath) . '" style="max-width: 80%; width: auto; height: auto; border: 1px solid black; box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.3);"';
+            $adjustedImagePath = adjustImagePath($matches[1], $basePath);
+            return '<img src="' . esc_url($adjustedImagePath) . '" style="max-width: 80%; width: auto; height: auto; border: 1px solid black; box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.3);"';
         },
         $html
     );
@@ -213,18 +227,23 @@ function adjustPaths($html, $basePath) {
     $html = preg_replace_callback(
         '/<a\s+href="([^"]+)"/i',
         function ($matches) use ($basePath) {
-            return '<a href="' . adjustPath($matches[1], $basePath) . '"';
+            $adjustedHref = adjustPath($matches[1], $basePath);
+            return '<a href="' . esc_url($adjustedHref) . '"';
         },
         $html
     );
 
     return $html;
+    
 }
 
 function adjustPath($url, $basePath) {
+
     if (strpos($url, 'http') !== 0 && strpos($url, '#') !== 0) {
+
         // Split the URL by '/' to get the dir and file
         $parts = explode('/', $url);
+
         if (count($parts) >= 2) {
             $dir = $parts[0];
             $file = $parts[1];
@@ -235,25 +254,34 @@ function adjustPath($url, $basePath) {
             // If the URL is a relative path, append it to the base path of the current document
             $basePathParts = explode('&file=', $basePath);
             $url = rtrim($basePathParts[0], '/') . "&file=" . $url;
+
         }
+
     }
+
     return $url;
+
 }
 
 function adjustImagePath($url, $basePath) {
+
     if (strpos($url, 'http') !== 0) {
+
         // If the URL is a relative path, construct the direct path to the image
         $basePathParts = explode('&dir=', $basePath);
+
         if (count($basePathParts) > 1) {
             $dirParts = explode('&file=', $basePathParts[1]);
             $dir = rtrim($dirParts[0], '/');
-            // FIXME - Check if the URL is a relative path - Ver 2.0.2.1
+            // Check if the URL is a relative path and sanitize it
             $url = site_url() . '/wp-content/plugins/chatbot-chatgpt/documentation/' . $dir . '/' . $url;
         } else {
-            // FIXME - Check if the URL is a relative path - Ver 2.0.2.1
+            // Check if the URL is a relative path and sanitize it
             $url = site_url() . '/wp-content/plugins/chatbot-chatgpt/documentation/' . $url;
         }
-    }
-    return $url;
-}
 
+    }
+
+    return esc_url($url);
+
+}

@@ -39,7 +39,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
-    $model = 'markov-chain-2023-09-17';
+    $model = 'markov-chain-2024-09-17';
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
@@ -126,6 +126,19 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
         // Original Context Instructions - No Enhanced Context
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
+    }
+
+    
+    // Conversation Continuity - Ver 2.1.8
+    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
+
+    // DIAG Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
+
+    if ($chatbot_chatgpt_conversation_continuation == 'On') {
+        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
+        $context = $conversation_history . ' ' . $context;
     }
 
     // Context History - Ver 1.6.1

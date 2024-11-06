@@ -1,15 +1,15 @@
 === Kognetiks Chatbot for WordPress ===
 Contributors: Kognetiks
-Tags: chatbot, chatgpt, openai, artificial intelligence, customer support
+Tags: chatbot, chatgpt, openai, nvidia, artificial intelligence
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
 Tested up to: 6.6.2
-Stable tag: 2.1.7
+Stable tag: 2.1.8
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Easily integrate OpenAI's ChatGPT API into your WordPress website with this powerful AI-driven chatbot plugin for support and engagement.
+Effortlessly add conversational AI to your WordPress site! Integrate OpenAI ChatGPT or NVIDIA NIM for powerful, responsive support and engagement.
 
 == Description ==
 
@@ -17,9 +17,17 @@ Easily integrate OpenAI's ChatGPT API into your WordPress website with this powe
 
 The **Kognetiks Chatbot for WordPress** is a feature-rich AI plugin that leverages OpenAI’s ChatGPT to deliver an intelligent, conversational experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
 
+🌟 **AI Platform Options**:
+
+* With **Version 2.1.8**, the **Kognetiks Chatbot for WordPress** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
+
+* **OpenAI's ChatGPT API**: Engage visitors with natural, human-like responses for rich conversational experiences.
+
+* **NVIDIA's NIM API**: Unlock advanced conversational abilities for a highly interactive chatbot.
+
 🌟 **Key Features**:
 
-* **Advanced AI-Powered Conversations**: Utilize OpenAI’s GPT models to generate natural, human-like responses that engage and assist your visitors.
+* **Advanced AI-Powered Conversations**: Utilize the latest AI Platform and Large Language Models (LLMs) to generate natural, human-like responses that engage and assist your visitors.
 
 * **Customizable Assistants**: Deploy virtually unlimited Assistants tailored to specific roles. Whether it's handling FAQs, managing bookings, or offering personalized recommendations, you can create and manage Assistants directly within the plugin.
 
@@ -39,13 +47,13 @@ The **Kognetiks Chatbot for WordPress** is a feature-rich AI plugin that leverag
 
 * **API Key Management & Security**: Securely manage your OpenAI API key directly within the plugin. Includes features for monitoring usage, setting limits, and regularly rotating keys for added security.
 
-* **Persistent Memory & Interaction Continuity**: The chatbot remembers previous confering a seamless and continuous experience across different pages.
+* **Persistent Memory & Interaction Continuity**: The chatbot remembers previous conferring a seamless and continuous experience across different pages.
 
 * **Multi-Language Support**: Engage a global audience with multilingual support adjusting to the site’s language settings.
 
 🌟 **Why Choose the Kognetiks Chatbot?**
 
-* **Easy Integration**: Quickly set up the plugin and integrate with OpenAI’s API offering intelligent conversations.
+* **Easy Integration**: Quickly set up the plugin and integrate with the AI Platform of API offering intelligent conversations.
 
 * **Versatile Applications**: Perfect for customer support, lead generation, educational purposes, and more.
 
@@ -141,7 +149,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 12. Mobile Chatbot - Tablet Open example
 13. Mobile Chatbot - Tablet Landscape example
 14. Chatbot Setting - Main settings
-15. Chatbot Setting - API/Model settings
+15. Chatbot Setting - API/ChatGPT Settings
 16. Chatbot Setting - GPT Assistant settings
 17. Chatbot Setting - Avatar settings
 18. Chatbot Setting - Appearance settings
@@ -154,13 +162,21 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
+= 2.1.8 - Release 11-05-2024 =
+
+* **NVIDIA NIM API Integration**: Added support for NVIDIA's NIM API to provide advanced conversational capabilities for the chatbot.
+* **Assistant Management**: Resolved the issue with adding, updating and deleting Assistants when using Firefox browser.
+* **Conversation Continuation**: Improved conversation continuity for visitors and logged-in users to ensure a seamless experience across sessions.
+* **Additional Security**: Enhanced security to reduce vulnerabilities associated with assistant management.
+* **Additional Security**: Enhanced security to reduce vulnerabilities associated with accessing chatbot support pages.
+
 = 2.1.7 - Release 10-06-2024 =
 
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.1.6.
 
 = 2.1.6 - Released 10-02-2024 =
 
-* **Messege Limit Periods**: Added options to set message limits periods for visitors and logged-in users, from ```Hourly```, ```Daily```, ```Weekly```, up to ```Lifetime```.
+* **Message Limit Periods**: Added options to set message limits periods for visitors and logged-in users, from ```Hourly```, ```Daily```, ```Weekly```, up to ```Lifetime```.
 * **Charset Fallback Adjustment**: Added fallback to ```utf8``` character set when ```utf8mb4``` is not supported, ensuring compatibility across different database configurations.
 * **Suppress Footer Chatbots**: Suppress chatbot in the footer when the chatbot is embedded on the page.
 
@@ -203,8 +219,8 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.
 * **chatgptTitle CSS ID Rename**: Renamed the chatgptTitle CSS ID renamed to chatbot-chatgpt-title to avoid conflicts with other plugins or themes.
-* **chatbot-user-text CSS Class Rename**: Renamed the user-text CSSclass to chatbot-user-text to avoid conflicts with other plugins or themes.
-* **bot-text CSS Class Rename**: Renamed the bot-text CSSclass to chatbot-bot-text to avoid conflicts with other plugins or themes.
+* **chatbot-user-text CSS Class Rename**: Renamed the user-text CSS class to chatbot-user-text to avoid conflicts with other plugins or themes.
+* **bot-text CSS Class Rename**: Renamed the bot-text CSS class to chatbot-bot-text to avoid conflicts with other plugins or themes.
 
 = 2.0.8 - Released 08-01-2024 =
 * **Logic Error Updated**: Corrected a logic error that was causing some visitors and logged-in users to lose their session continuity with the Assistants. This ensures a smoother and more consistent experience for all users.
@@ -214,7 +230,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * **Model Support**: The latest models available from OpenAI are dynamically added to model picklists.  Available models now include gpt-4o and gpt-4o-mini.  See Chatbot Settings > API/Model > Chat Settings.
 * **Manage Chatbot Error Logs**: Added the ability to manage chatbot error logs, including the ability to download and delete logs. See Chatbot Settings > Tools. TIP: You must enable Diagnostics access the Tools tab. See Chatbot Settings > Messages > Messages and Diagnostics.
 * **Revised Reporting Settings Layout**: Revised and refreshed the Reporting Settings page layout for better visualization. See Chatbot Settings > Reporting.
-* **Conversation Continuation**: Added an additional setting to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
+* **Conversation Continuation**: Added a setting to enable conversation continuation after returning to a page previously visited. See Chatbot Settings > Settings > Additional Settings.
 
 = 2.0.6 - Released 07-11-2024 =
 * **Dynamic Shortcode**: Added support for dynamic shortcodes to allow for more flexible Assistant selection. Add all parameters to the shortcode, including the Assistant ID on the GTP Assistant tab. For example, `[chatbot-1]`.

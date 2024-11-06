@@ -16,12 +16,12 @@ if ( ! defined( 'WPINC' ) ) {
 // Generate a sentence using the Markov Chain with context reinforcement
 function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '') {
 
-    global $chatbot_chatgpt_markov_chain_fallback_response;
+    global $chatbot_markov_chain_fallback_response;
 
     $length = 100; // Set default length
 
     // Get the Markov Chain length from the options
-    $chainLength = esc_attr(get_option('chatbot_chatgpt_markov_chain_length', 2)); // Default to 2 if not set
+    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 2)); // Default to 2 if not set
 
     // Clean up start words
     $startWords = array_map('trim', $startWords);
@@ -48,7 +48,7 @@ function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '
         }
 
         if (!$key) {
-            return $chatbot_chatgpt_markov_chain_fallback_response[array_rand($chatbot_chatgpt_markov_chain_fallback_response)];
+            return $chatbot_markov_chain_fallback_response[array_rand($chatbot_markov_chain_fallback_response)];
         }
     }
 
@@ -92,7 +92,7 @@ function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '
 function checkKeyInDatabase($key) {
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
     $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word = %s", $key));
     
@@ -104,7 +104,7 @@ function checkKeyInDatabase($key) {
 function getNextWordFromDatabase($currentWord) {
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
     // Query to get possible next words and their frequencies
     $results = $wpdb->get_results(
@@ -147,7 +147,7 @@ function getNextWordFromDatabase($currentWord) {
 function getRandomWordFromDatabase() {
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_markov_chain';
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
     // Query to get a random word from the database
     $randomWord = $wpdb->get_var("SELECT word FROM $table_name ORDER BY RAND() LIMIT 1");

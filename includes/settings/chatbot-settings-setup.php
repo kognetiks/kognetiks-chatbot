@@ -25,6 +25,78 @@ function chatbot_chatgpt_bot_settings_section_callback($args) {
 
 }
 
+// AI Platform Selection section callback - Ver 2.1.8
+function chatbot_ai_engine_section_callback($args) {
+
+    // DIAG - Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', 'chatbot_ai_engine_section_callback');
+
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+
+    ?>
+    <p>Configure the AI Platform for the Chatbot plugin. The default will be one of <?php echo $chatbot_ai_platform_choice ?>'s AI models; assumes you have or will provide a valid API key.</p>
+    <?php
+
+}
+
+// AI Platform Choice - Ver 2.1.8
+function chatbot_ai_platform_choice_callback($args) {
+
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+
+    if (empty($chatbot_ai_platform_choice) || $chatbot_ai_platform_choice == 'OpenAI') {
+        $chatbot_ai_platform_choice = 'OpenAI';
+        update_option('chatbot_ai_platform_choice', 'OpenAI');
+        update_option('chatbot_chatgpt_api_enabled', 'Yes');
+        update_option('chatbot_nvidia_api_enabled', 'No');
+        update_option('chatbot_markov_chain_api_enabled', 'No');
+        $chatbot_chatgpt_api_enabled = 'Yes';
+        $chatbot_nvidia_api_enabled = 'No';
+        $chatbot_markov_chain_api_enabled = 'No';
+    } else if ($chatbot_ai_platform_choice == 'NVIDIA') {
+        update_option('chatbot_ai_platform_choice', 'NVIDIA');
+        update_option('chatbot_chatgpt_api_enabled', 'No');
+        update_option('chatbot_nvidia_api_enabled', 'Yes');
+        update_option('chatbot_markov_chain_api_enabled', 'No');
+        $chatbot_nvidia_api_enabled = 'Yes';
+        $chatbot_chatgpt_api_enabled = 'No';
+        $chatbot_markov_chain_api_enabled = 'No';
+    } else if ($chatbot_ai_platform_choice == 'Markov Chain') {
+        update_option('chatbot_ai_platform_choice', 'Markov Chain');
+        update_option('chatbot_chatgpt_api_enabled', 'No');
+        update_option('chatbot_nvidia_api_enabled', 'No');
+        update_option('chatbot_markov_chain_api_enabled', 'Yes');
+        $chatbot_markov_chain_api_enabled = 'Yes';
+        $chatbot_nvidia_api_enabled = 'No';
+        $chatbot_chatgpt_api_enabled = 'No';
+    } else {
+        update_option('chatbot_ai_platform_choice', 'OpenAI');
+        update_option('chatbot_chatgpt_api_enabled', 'Yes');
+        update_option('chatbot_nvidia_api_enabled', 'No');
+        update_option('chatbot_markov_chain_api_enabled', 'No');
+        $chatbot_chatgpt_api_enabled = 'Yes';
+        $chatbot_nvidia_api_enabled = 'No';
+        $chatbot_markov_chain_api_enabled = 'No';
+    }
+
+    ?>
+    <select id="chatbot_ai_platform_choice" name="chatbot_ai_platform_choice">
+        <option value="OpenAI" <?php selected( $chatbot_ai_platform_choice, 'OpenAI' ); ?>><?php echo esc_html( 'OpenAI' ); ?></option>
+        <option value="NVIDIA" <?php selected( $chatbot_ai_platform_choice, 'NVIDIA' ); ?>><?php echo esc_html( 'NVIDIA' ); ?></option>
+        <!-- <option value="Markov Chain" <?php selected( $chatbot_ai_platform_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option> -->
+    </select>
+    <?php
+
+    // if ($chatbot_ai_platform_choice == 'OpenAI') {
+    //     echo '<p><b>OpenAI ChatGPT is the default AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
+    //     echo '<p><b>NVIDIA ChatGPT is the NVIDIA AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
+    //     echo '<p><b>Markov Chain is the Markov Chain AI Platform for the Chatbot plugin.</b></p>';
+    // }
+
+}
+
 // Configure the chatbot's name and start status
 function chatbot_chatgpt_name_section_callback($args) {
 
@@ -37,6 +109,13 @@ function chatbot_chatgpt_name_section_callback($args) {
 
 }
 
+function chatbot_chatgpt_message_limits_section_callback($args) {
+    ?>
+    <p>Configure message limits for (logged-in/registered) Users and (guest/unregistered) Visitors access.</p>
+    <p>The User Message Limit Settings applies to authenticated, registered and/or logged-in users. The Visitor Message Limit applies to unauthenticated, general, non-logged-in visitors or guests. The default is 999.</p>
+    <?php
+}
+
 // Greeting settings section callback - Ver 1.3.0
 function chatbot_chatgpt_greetings_section_callback($args) {
 
@@ -47,6 +126,73 @@ function chatbot_chatgpt_greetings_section_callback($args) {
     <p>Configure the prompt and greetings for the Chatbot.</p>
     <?php
 
+}
+
+// Logged-in User Message Limit - Ver 1.9.6
+function chatbot_chatgpt_user_message_limit_setting_callback($args) {
+    // Get the saved chatbot_chatgpt_user_message_limit_setting value or default to 999
+    $message_limit = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
+    // Allow for a range of message limits between 1 and 999 in 1-step increments - Ver 1.9.6
+    ?>
+    <select id="chatbot_chatgpt_user_message_limit_setting" name="chatbot_chatgpt_user_message_limit_setting">
+        <?php
+        for ($i=1; $i<=999; $i++) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($message_limit, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
+// Limit Period Setting - Ver 2.1.6
+function chatbot_chatgpt_user_message_limit_period_setting_callback($args) {
+    // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
+    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
+    ?>
+    <select id="chatbot_chatgpt_user_message_limit_period_setting" name="chatbot_chatgpt_user_message_limit_period_setting">
+        <option value="Hourly" <?php selected($message_limit_period, 'Hourly'); ?>>Hourly</option>
+        <option value="Daily" <?php selected($message_limit_period, 'Daily'); ?>>Daily</option>
+        <option value="Weekly" <?php selected($message_limit_period, 'Weekly'); ?>>Weekly</option>
+        <option value="Monthly" <?php selected($message_limit_period, 'Monthly'); ?>>Monthly</option>
+        <option value="Quarterly" <?php selected($message_limit_period, 'Quarterly'); ?>>Quarterly</option>
+        <option value="Yearly" <?php selected($message_limit_period, 'Yearly'); ?>>Yearly</option>
+        <option value="Lifetime" <?php selected($message_limit_period, 'Lifetime'); ?>>Lifetime</option>
+    </select>
+    <?php
+}
+
+
+// Visitor Message Limit - Ver 2.0.1
+function chatbot_chatgpt_visitor_message_limit_setting_callback($args) {
+    // Get the saved chatbot_chatgpt_visitor_message_limit_setting value or default to 999
+    $visitor_message_limit = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
+    // Allow for a range of visitor message limits between 1 and 999 in 1-step increments - Ver 2.0.1
+    ?>
+    <select id="chatbot_chatgpt_visitor_message_limit_setting" name="chatbot_chatgpt_visitor_message_limit_setting">
+        <?php
+        for ($i=1; $i<=999; $i++) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($visitor_message_limit, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
+// Limit Period Setting - Ver 2.1.6
+function chatbot_chatgpt_visitor_message_limit_period_setting_callback($args) {
+    // Options: Hourly, Daily, Weekly, Monthly, Quarterly, Yearly, Lifetime
+    $message_limit_period = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
+    ?>
+    <select id="chatbot_chatgpt_visitor_message_limit_period_setting" name="chatbot_chatgpt_visitor_message_limit_period_setting">
+        <option value="Hourly" <?php selected($message_limit_period, 'Hourly'); ?>>Hourly</option>
+        <option value="Daily" <?php selected($message_limit_period, 'Daily'); ?>>Daily</option>
+        <option value="Weekly" <?php selected($message_limit_period, 'Weekly'); ?>>Weekly</option>
+        <option value="Monthly" <?php selected($message_limit_period, 'Monthly'); ?>>Monthly</option>
+        <option value="Quarterly" <?php selected($message_limit_period, 'Quarterly'); ?>>Quarterly</option>
+        <option value="Yearly" <?php selected($message_limit_period, 'Yearly'); ?>>Yearly</option>
+        <option value="Lifetime" <?php selected($message_limit_period, 'Lifetime'); ?>>Lifetime</option>
+    </select>
+    <?php
 }
 
 // Additional settings section callback - Ver 1.3.0
@@ -224,6 +370,28 @@ function chatbot_chatgpt_settings_setup_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_input_rows');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_speech_recognition');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_user_message_limit_setting');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_user_message_limit_period_setting');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_visitor_message_limit_setting');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_visitor_message_limit_period_setting');
+
+    register_setting('chatbot_chatgpt_settings', 'chatbot_ai_platform_choice');
+
+    // Chatbot Settings - AI Platform Selection
+    add_settings_section(
+        'chatbot_ai_engine_section',
+        'AI Platform Selection',
+        'chatbot_ai_engine_section_callback',
+        'chatbot_ai_engine_settings'
+    );
+
+    add_settings_field(
+        'chatbot_ai_platform_choice',
+        'AI Platform Choice',
+        'chatbot_ai_platform_choice_callback',
+        'chatbot_ai_engine_settings',
+        'chatbot_ai_engine_section'
+    );
 
     // Chatbot Settings - Chatbot Name, Start Status, Start Status New Visitor
     add_settings_section(
@@ -255,6 +423,45 @@ function chatbot_chatgpt_settings_setup_init() {
         'chatbot_chatgpt_start_status_new_visitor_callback',
         'chatbot_chatgpt_name_settings',
         'chatbot_chatgpt_name_section'
+    );
+
+    add_settings_section(
+        'chatbot_chatgpt_message_limits_section',
+        'Message Limit Settings',
+        'chatbot_chatgpt_message_limits_section_callback',
+        'chatbot_chatgpt_message_limits_settings'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_user_message_limit_setting',
+        'User Message Limit per Period',
+        'chatbot_chatgpt_user_message_limit_setting_callback',
+        'chatbot_chatgpt_message_limits_settings',
+        'chatbot_chatgpt_message_limits_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_user_message_limit_period_setting',
+        'User Message Limit Period',
+        'chatbot_chatgpt_user_message_limit_period_setting_callback',
+        'chatbot_chatgpt_message_limits_settings',
+        'chatbot_chatgpt_message_limits_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_visitor_message_limit_setting',
+        'Visitor Message Limit per Period',
+        'chatbot_chatgpt_visitor_message_limit_setting_callback',
+        'chatbot_chatgpt_message_limits_settings',
+        'chatbot_chatgpt_message_limits_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_visitor_message_limit_period_setting',
+        'Visitor Message Limit Period',
+        'chatbot_chatgpt_visitor_message_limit_period_setting_callback',
+        'chatbot_chatgpt_message_limits_settings',
+        'chatbot_chatgpt_message_limits_section'
     );
 
     // Chatbot Prompts and Greetings: Chatbot Prompt, Initial Greeting, Subsequent Greeting

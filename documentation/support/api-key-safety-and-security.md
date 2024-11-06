@@ -21,7 +21,7 @@ The API Key Safety and Security settings are crucial for ensuring that your Open
 
 2. **Monitor and Review Usage**
    - **Purpose**: Regularly monitor the usage of your API keys to detect any unusual or unauthorized activity.
-   - **Best Practices**: Frequently check usage statistics provided by OpenAI and review records to identify any anomalies.
+   - **Best Practices**: Frequently check usage statistics provided by AI Platform vendor and review records to identify any anomalies.
 
 3. **Establish Usage Limits**
    - **Purpose**: Implement hard and soft usage limits to control how much your API can be used within a given period.
@@ -35,7 +35,7 @@ The API Key Safety and Security settings are crucial for ensuring that your Open
 
 - **Proactive Monitoring**: Stay vigilant by continuously monitoring API key usage and promptly addressing any signs of unusual activity.
 - **Limit Access**: Restrict access to your API keys to essential personnel only and use secure methods to share or store these keys.
-- **Use Analytics**: Leverage OpenAI’s usage data and records to gain insights into how your API keys are being used and identify patterns that could indicate potential security threats.
+- **Use Analytics**: Leverage OpenAI’s, NVIDIA's, and others' usage data and records to gain insights into how your API keys are being used and identify patterns that could indicate potential security threats.
 - **Be Prepared**: Have a plan in place to quickly revoke and replace API keys if necessary. This helps mitigate risks in the event of a security breach.
 
 By following these practices, you can ensure that your API keys are well-protected, minimizing the risk of unauthorized access and misuse.

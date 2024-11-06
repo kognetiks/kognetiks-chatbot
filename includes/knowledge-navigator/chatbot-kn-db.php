@@ -126,7 +126,7 @@ function dbKNStoreWordCount() {
     // SQL to create a new table
     $sql = "CREATE TABLE $table_name (
         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        word VARCHAR(255) NOT NULL UNIQUE,
+        word VARCHAR(191) NOT NULL UNIQUE,
         word_count INT NOT NULL,
         document_count INT NOT NULL
     ) $charset_collate;";

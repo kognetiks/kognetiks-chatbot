@@ -52,12 +52,24 @@ function chatbot_chatgpt_uninstall(){
 
     // Check for a setting that specifies whether to delete data
     if (get_option('chatbot_chatgpt_delete_data') == 'yes') {
+
+        // Delete on-off options
+        // back_trace( 'NOTICE', 'Deleting one-off options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_ai_platform_choice'");
     
-        // Delete options
-        // back_trace( 'NOTICE', 'Deleting options');
+        // Delete ChatGPT options
+        // back_trace( 'NOTICE', 'Deleting ChatGPT options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_chatgpt%'");
 
-        // Delete tables
+        // Delete NVIDIA options
+        // back_trace( 'NOTICE', 'Deleting NVIDIA options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_nvidia%'");
+
+        // Delete Markov Chain options
+        // back_trace( 'NOTICE', 'Deleting Markov Chain options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_markov%'");
+
+        // Delete ChatGPT tables
         // back_trace( 'NOTICE', 'Deleting tables');
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_assistants");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_conversation_log");
@@ -65,11 +77,26 @@ function chatbot_chatgpt_uninstall(){
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_knowledge_base");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_knowledge_base_tfidf");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_knowledge_base_word_count");
-        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_markov_chain");
 
-        // Delete transients
+        // Delete NVIDIA tables
+        // back_trace( 'NOTICE', 'Deleting NVIDIA tables');
+        // NONE CURRENTLY - Ver 2.1.8
+
+        // Delete Markov Chain tables
+        // back_trace( 'NOTICE', 'Deleting Markov Chain tables');
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_markov_chain");
+
+        // Delete ChatGPT transients
         // back_trace( 'NOTICE', 'Deleting transients');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_chatgpt%' OR option_name LIKE '_transient_timeout_chatbot_chatgpt%'");
+
+        // Delete NVIDIA transients
+        // back_trace( 'NOTICE', 'Deleting NVIDIA transients');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_nvidia%' OR option_name LIKE '_transient_timeout_chatbot_nvidia%'");
+
+        // Delete Markov Chain transients
+        // back_trace( 'NOTICE', 'Deleting Markov Chain transients');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_markov%' OR option_name LIKE '_transient_timeout_chatbot_markov%'");
 
         // Delete any scheduled cron events
         // back_trace( 'NOTICE', 'Deleting cron events');
