@@ -85,3 +85,60 @@ function interactive_chat_history() {
 add_shortcode('chatbot_chatgpt_history', 'interactive_chat_history');
 add_shortcode('chatbot_conversation', 'interactive_chat_history');
 add_shortcode('chat_history', 'interactive_chat_history');
+
+// Function to get the conversation history for a given session ID
+function chatbot_chatgpt_get_converation_history($session_id) {
+
+    global $wpdb;
+
+    // If $session_id is null return an empty string
+    if (empty($session_id)) {
+        return '';
+    }
+
+    // If $session_id doesn't start with "kogentiks_" return an empty string
+    if (strpos($session_id, 'kognetiks_') !== 0) {
+        return '';
+    }
+
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+
+    // Query to get message_text ordered by timestamp
+    $results = $wpdb->get_results($wpdb->prepare("
+        SELECT message_text, user_type
+        FROM $table_name 
+        WHERE session_id = %s AND user_type IN ('Chatbot', 'Visitor')
+        ORDER BY interaction_time ASC", $session_id));
+
+    // DIAG - Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', 'Query Results: ' . print_r($results, true));
+
+    // Filter results to stay within the 2.5 MB limit
+    $limited_results = [];
+    $max_size = 2.5 * 1024 * 1024; // 2.5 MB in bytes
+    $total_size = 0;
+
+    foreach ($results as $result) {
+        $message_size = strlen($result->message_text);
+        if (($total_size + $message_size) > $max_size) break;
+        
+        $limited_results[] = $result;
+        $total_size += $message_size;
+        // back_trace( 'NOTICE', 'Total Size: ' . $total_size);
+    }
+
+    $conversation_history = '';
+    foreach ($results as $result) {
+        $conversation_history .= esc_html($result->message_text);        
+    }
+
+    // Remove extra spaces from $conversation_history
+    $conversation_history = preg_replace('/\s+/', ' ', $conversation_history);
+
+    // DIAG - Diagnostics - Ver 2.1.8
+    back_trace( 'NOTICE', '$conversation_history: ' . $conversation_history);
+
+    // Return the HTML output as a JSON response
+    return($conversation_history);
+
+}

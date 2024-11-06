@@ -143,6 +143,21 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     }
 
+    // Conversation Continuity - Ver 2.1.8
+    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
+
+    // DIAG Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
+
+    if ($chatbot_chatgpt_conversation_continuation == 'On') {
+        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
+        $context = $conversation_history . ' ' . $context;
+    }
+
+    // DIAG Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', '$context: ' . $context);
+
     // Added Role, System, Content Static Variable - Ver 1.6.0
     $body = array(
         'model' => $model,

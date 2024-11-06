@@ -901,37 +901,49 @@ function chatbot_chatgpt_send_message() {
             // The string 'gpt-4o' is found in $model
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling ChatGPT Omni API');
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_omni($api_key, $message);
         } elseif ($model !== null && str_starts_with($model, 'gpt')) {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling ChatGPT API');
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_api($api_key, $message);
         } elseif ($model !== null && str_starts_with($model, 'dall')) {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling Dall E Image API');
             // Send message to Image API - Ver 1.9.4
             $response = chatbot_chatgpt_call_image_api($api_key, $message);
         } elseif ($model !== null && str_starts_with($model, 'tts')) {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
             $kchat_settings['voice'] = $voice;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling TTS API');
             // Send message to TTS API - Text-to-speech - Ver 1.9.5
             $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
         } elseif ($model !== null && str_starts_with($model,'whisper')) {
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling STT API');
             // Send message to STT API - Speech-to-text - Ver 1.9.6
             $response = chatbot_chatgpt_call_stt_api($api_key, $message);
         } elseif ($model !==null && str_starts_with($model,'nvidia')) {
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 907 - Calling NVIDIA API');
+            // back_trace( 'NOTICE', 'Calling NVIDIA API');
             // Send message to NVIDIA API - Ver 2.1.8
             $response = chatbot_nvidia_call_api($api_key, $message);
             // back_trace( 'NOTICE', 'LINE 910 - NVIDIA API Response: ' . $response);
         } elseif ($model !== null && str_starts_with($model,'markov')) {
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling Markov Chain API');
             // Send message to Markov API - Ver 1.9.7
             $response = chatbot_chatgpt_call_markov_chain_api($message);    
         } else {
