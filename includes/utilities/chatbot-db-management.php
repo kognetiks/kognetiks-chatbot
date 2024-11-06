@@ -1,11 +1,13 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Database Management for Reporting - Ver 1.6.3
+ * Modified Kognetiks Chatbot for WordPress - Database Management for Reporting
  *
  * This file contains the code for table actions for reporting
  * to display the Chatbot on the website.
  *
- * @package chatbot-chatgpt
+ * @package modified-chatbot-chatgpt
+ * @author Francisco Abenza (@franciscoabenza)
+ * @fork-of chatbot-chatgpt
  */
 
 // If this file is called directly, abort.
@@ -55,7 +57,7 @@ function create_chatbot_chatgpt_interactions_table() {
 
 }
 // Hook to run the function when the plugin is activated
-// register_activation_hook(__FILE__, 'create_chatbot_chatgpt_interactions_table');
+register_activation_hook(__FILE__, 'create_chatbot_chatgpt_interactions_table');
 
 // Update Interaction Tracking - Ver 1.6.3
 function update_interaction_tracking() {
