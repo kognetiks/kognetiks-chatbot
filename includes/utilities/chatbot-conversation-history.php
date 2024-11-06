@@ -129,14 +129,14 @@ function chatbot_chatgpt_get_converation_history($session_id) {
 
     $conversation_history = '';
     foreach ($results as $result) {
-        $conversation_history .= esc_html($result->message_text);        
+        $conversation_history .= esc_html($result->message_text) . ' ';        
     }
 
     // Remove extra spaces from $conversation_history
     $conversation_history = preg_replace('/\s+/', ' ', $conversation_history);
 
     // DIAG - Diagnostics - Ver 2.1.8
-    back_trace( 'NOTICE', '$conversation_history: ' . $conversation_history);
+    // back_trace( 'NOTICE', '$conversation_history: ' . $conversation_history);
 
     // Return the HTML output as a JSON response
     return($conversation_history);
