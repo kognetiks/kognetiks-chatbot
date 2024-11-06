@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.1.7
+ * Version:     2.1.8
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -20,19 +20,17 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Kognetiks Chatbot for WordPress. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
- * 
-*/
+ */
 
 // If this file is called directly, die.
 defined( 'WPINC' ) || die();
 
-if ( ! defined( 'ABSPATH' ) ) {
-	die();
-}
+// Start output buffering earlier to prevent "headers already sent" issues - Ver 2.1.8
+ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.1.7';
+$chatbot_chatgpt_plugin_version = '2.1.8';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -49,29 +47,19 @@ global $wpdb;
 global $session_id;
 global $user_id;
 
-// Start output buffering to prevent "headers already sent" issues - Ver 1.8.5
-ob_start();
-
 // Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
 function kognetiks_assign_unique_id() {
     if (!isset($_COOKIE['kognetiks_unique_id'])) {
         $unique_id = uniqid('kognetiks_', true);
         
-        // Use the build-in setcookie function
-        // setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/"); // Cookie expires in 30 days
-
-        // Use the build-in setcookie function - Sets HttpOnly and Secure flags
-        // setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
-        
-        // Set SameSite attribute manually
-        // Sets HttpOnly, Secure, and SameSite = Strict, Lax or None
-        header('Set-Cookie: kognetiks_unique_id=' . $unique_id . '; expires=' . gmdate('D, d M Y H:i:s T', time() + (86400 * 30)) . '; path=/; HttpOnly; Secure; SameSite=Lax');
+        // Set a cookie using the built-in setcookie function
+        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
         
         // Ensure the cookie is set for the current request
         $_COOKIE['kognetiks_unique_id'] = $unique_id;
     }
 }
-add_action('init', 'kognetiks_assign_unique_id');
+add_action('init', 'kognetiks_assign_unique_id', 1); // Set higher priority
 
 // Get the unique ID of the visitor or logged-in user - Ver 2.0.4
 function kognetiks_get_unique_id() {
@@ -100,6 +88,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.ph
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-omni.php'; // ChatGPT API - Ver 2.0.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; // Image API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-mc-api.php'; // Markov Chain API - Ver 2.1.6
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-nvi-api.php'; // NVIDIA API - Ver 2.1.8
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-stt-api.php'; // STT API - Ver 2.0.1
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
@@ -124,7 +113,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
 
 // Include necessary files - Settings
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-model.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-avatar.php';
@@ -195,27 +185,91 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
-// FIXME - Disable Markov Chain - Ver 2.1.6.1
-global $chatbot_chatgpt_markov_chain_setting;
-$chatbot_chatgpt_markov_chain_setting = 'No';
-
-// Model choice - Ver 1.9.4
+global $chatbot_ai_platform_choice;
 global $model;
-// Starting with V1.9.4 the model choice "gpt-4-turbo" is replaced with "gpt-4-1106-preview"
-if (get_option('chatbot_chatgpt_model_choice') == 'gpt-4-turbo') {
-    $model = 'gpt-4-1106-preview';
-    update_option('chatbot_chatgpt_model_choice', $model);
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+global $voice;
+
+// FIXME - SEE AI Platform Selection setting - Ver 2.1.8
+if (esc_attr(get_option('chatbot_ai_platform_choice')) === null) {
+    update_option('chatbot_ai_platform_choice', 'OpenAI');
+    update_option('chatbot_chatgpt_api_enabled', 'Yes');
+    update_option('chatbot_nvidia_api_enabled', 'No');
+    update_option('chatbot_markov_chain_api_enabled', 'No');
 }
 
-// Voice choice - Ver 1.9.5
-global $voice;
-if (get_option('chatbot_chatgpt_voice_option') == 'alloy') {
-    $voice = 'alloy';
-    update_option('chatbot_chatgpt_voice_option', $voice);
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
+$chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+
+// OpenAI ChatGPT API Enabled - Ver 2.1.8
+if ($chatbot_ai_platform_choice == 'OpenAI') {
+
+    $chatbot_chatgpt_api_enabled = 'Yes';
+    update_option('chatbot_chatgpt_api_enabled', 'Yes');
+    update_option('chatbot_ai_platform_choice', 'OpenAI');
+
+    $chatbot_nvidia_api_enabled = 'No';
+    update_option('chatbot_nvidia_api_enabled', 'No');
+
+    $chatbot_markov_chain_api_enabled = 'No';
+    update_option('chatbot_markov_chain_api_enabled', 'No');
+
+    // Model choice - Ver 1.9.4
+    if (get_option('chatbot_chatgpt_model_choice') === null) {
+        $model = 'gpt-4-1106-preview';
+        update_option('chatbot_chatgpt_model_choice', $model);
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    }
+
+    // Voice choice - Ver 1.9.5
+    if (get_option('chatbot_chatgpt_voice_option') === null) {
+        $voice = 'alloy';
+        update_option('chatbot_chatgpt_voice_option', $voice);
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
+    }
+
+// NVIDIA NIM API Enabled - Ver 2.1.8
+} elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
+
+    $chatbot_nvidia_api_enabled = 'Yes';
+    update_option('chatbot_nvidia_api_enabled', 'Yes');
+    update_option('chatbot_ai_platform_choice', 'NVIDIA');
+
+    $chatbot_chatgpt_api_enabled = 'No';
+    update_option('chatbot_chatgpt_api_enabled', 'No');
+
+    $chatbot_markov_chain_api_enabled = 'No';
+    update_option('chatbot_markov_chain_api_enabled', 'No');
+
+    // Model choice - Ver 2.1.8
+    if (get_option('chatbot_nvidia_model_choice') === null) {
+        $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
+        update_option('chatbot_nvidia_model_choice', $model);
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    }
+
+// Markov Chain API Enabled - Ver 2.1.8
+} elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
+
+    $chatbot_markov_chain_api_enabled = 'Yes';
+    update_option('chatbot_markov_chain_api_enabled', 'Yes');
+    update_option('chatbot_ai_platform_choice', 'Markov Chain');
+
+    $chatbot_nvidia_api_enabled = 'No';
+    update_option('chatbot_nvidia_api_enabled', 'No');
+
+    $chatbot_chatgpt_api_enabled = 'No';
+    update_option('chatbot_chatgpt_api_enabled', 'No');
+
+    // Model choice - Ver 2.1.8
+    if (get_option('chatbot_markov_chain_model_choice') === null) {
+        $model = 'markov-chain-2024-09-17';
+        update_option('chatbot_markov_chain_model_choice', $model);
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    }
+    
 }
 
 // Custom buttons on/off setting can be found on the Settings tab - Ver 1.6.5
@@ -496,34 +550,37 @@ function chatbot_chatgpt_send_message() {
     $api_key = '';
 
     // Retrieve the API key
-    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
-
-    // FIXME - STILL NEEDED - Ver 2.0.7 - 2024 07 25
-    // Retrieve the GPT Model
-    if (!empty($model)) {
-        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-        // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'Model from options: ' . $model);
+    if (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
+        $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
+        $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model;
+        $kchat_settings['model'] = $model;
+        // DIAG - Diagnostics - Ver 2.1.8
+        // back_trace( 'NOTICE', 'LINE 537 - $model: ' . $model);
+    } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
+        $api_key = esc_attr(get_option('chatbot_markov_chain_api_key'));
+        $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model;
+        $kchat_settings['model'] = $model;
+        // DIAG - Diagnostics - Ver 2.1.8
+        // back_trace( 'NOTICE', 'LINE 544 - $model: ' . $model);
     } else {
-        // SEE IF $kchat_settings HAS THE MODEL
-        if ( isset($kchat_settings['model'])) {
-            $model = $kchat_settings['model'];
-            // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Model set in global: ' . $model);
-        } else {
-            // Set the model to the default
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-            // DIAG - Diagnostics
-            // back_trace( 'ERROR', 'Invalid Model.');
-            // wp_send_json_error('Error: Invalid Model. Please check the plugin settings.');
-        }
+        $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+        $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model;
+        $kchat_settings['model'] = $model;
+        // DIAG - Diagnostics - Ver 2.1.8
+        // back_trace( 'NOTICE', 'LINE 551 - $model: ' . $model);
     }
+
+    // DIAG - Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', 'LINE 555 - $model: ' . $model);
 
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
     // If Markov Chain is enabled, then process the message
-    if (esc_attr(get_option('chatbot_chatgpt_markov_chain_setting', 'No')) == 'Yes') {
+    if (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
         // Check for missing Message
         if (!$message) {
             // DIAG - Diagnostics
@@ -562,10 +619,15 @@ function chatbot_chatgpt_send_message() {
     $kchat_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id, $session_id);
     $kchat_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id, $session_id);
     $kchat_settings['chatbot_chatgpt_model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
+    $kchat_settings['model'] = $kchat_settings['chatbot_chatgpt_model'];
     $kchat_settings['chatbot_chatgpt_voice_option'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
     $kchat_settings['additional_instructions'] = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
     $voice = $kchat_settings['chatbot_chatgpt_voice_option'];
     $model = $kchat_settings['chatbot_chatgpt_model'];
+
+    // FIXME - TESTING - Ver 2.1.8
+    // back_trace( 'NOTICE', 'LINE 607 - $model: ' . $model);
+    
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
 
@@ -577,6 +639,10 @@ function chatbot_chatgpt_send_message() {
     $assistant_id = isset($kchat_settings['assistant_id']) ? $kchat_settings['assistant_id'] : '';
     $thread_Id = isset($kchat_settings['thread_id']) ? $kchat_settings['thread_id'] : '';
     $model = isset($kchat_settings['chatbot_chatgpt_model']) ? $kchat_settings['chatbot_chatgpt_model'] : '';
+
+    // FIXME - TESTING - Ver 2.1.8
+    // back_trace( 'NOTICE', 'LINE 622 - $model: ' . $model);
+
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -587,12 +653,12 @@ function chatbot_chatgpt_send_message() {
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
-    // back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '3 - $model: ' . $model);
     // back_trace( 'NOTICE', '$voice: ' . $voice);
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', '========================================');
     // foreach ($kchat_settings as $key => $value) {
-         // back_trace( 'NOTICE', '$kchat_settings[' . $key . ']: ' . $value);
+    //      back_trace( 'NOTICE', '$kchat_settings[' . $key . ']: ' . $value);
     // }
 
     // Assistants
@@ -755,7 +821,7 @@ function chatbot_chatgpt_send_message() {
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
         if ( $chatbot_chatgpt_suppress_learnings != 'None') {
-            $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+            $response = $response . '<br><br>' . chatbot_chatgpt_enhance_with_tfidf($message);
         }
 
         // DIAG - Diagnostics
@@ -807,8 +873,11 @@ function chatbot_chatgpt_send_message() {
         if (!isset($kchat_settings['model'])) {
             $kchat_settings['model'] = $model;
         };
-        // back_trace( 'NOTICE', '$model: ' . $model);
-        // back_trace( 'NOTICE', '$kchat_settings[model]: ' . $kchat_settings['model']);
+
+        // FIXME - TESTING - Ver 2.1.8
+        // back_trace( 'NOTICE', 'LINE 856 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 857 - $kchat_settings[model]: ' . $kchat_settings['model']);
+
         // if (str_starts_with($model,'dall')) {
         //     // back_trace ( 'NOTICE', 'Using Image API');
         // } else {
@@ -824,34 +893,57 @@ function chatbot_chatgpt_send_message() {
         // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         $model = isset($kchat_settings['model']) ? $kchat_settings['model'] : null;
         $voice = isset($kchat_settings['voice']) ? $kchat_settings['voice'] : null;
+
+        // FIXME - TESTING - Ver 2.1.8
+        // back_trace( 'NOTICE', 'LINE 876 - $model: ' . $model);
+
         if (str_starts_with($model !== null && $model, 'gpt-4o') !== false) {
             // The string 'gpt-4o' is found in $model
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling ChatGPT Omni API');
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_omni($api_key, $message);
         } elseif ($model !== null && str_starts_with($model, 'gpt')) {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling ChatGPT API');
             // Send message to ChatGPT API - Ver 1.6.7
             $response = chatbot_chatgpt_call_api($api_key, $message);
         } elseif ($model !== null && str_starts_with($model, 'dall')) {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling Dall E Image API');
             // Send message to Image API - Ver 1.9.4
             $response = chatbot_chatgpt_call_image_api($api_key, $message);
         } elseif ($model !== null && str_starts_with($model, 'tts')) {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;
             $kchat_settings['voice'] = $voice;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling TTS API');
             // Send message to TTS API - Text-to-speech - Ver 1.9.5
             $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
         } elseif ($model !== null && str_starts_with($model,'whisper')) {
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling STT API');
             // Send message to STT API - Speech-to-text - Ver 1.9.6
             $response = chatbot_chatgpt_call_stt_api($api_key, $message);
+        } elseif ($model !==null && str_starts_with($model,'nvidia')) {
+            $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling NVIDIA API');
+            // Send message to NVIDIA API - Ver 2.1.8
+            $response = chatbot_nvidia_call_api($api_key, $message);
+            // back_trace( 'NOTICE', 'LINE 910 - NVIDIA API Response: ' . $response);
         } elseif ($model !== null && str_starts_with($model,'markov')) {
             $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'Calling Markov Chain API');
             // Send message to Markov API - Ver 1.9.7
             $response = chatbot_chatgpt_call_markov_chain_api($message);    
         } else {
@@ -867,7 +959,7 @@ function chatbot_chatgpt_send_message() {
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
         if ( $chatbot_chatgpt_suppress_learnings != 'None') {
-            $response = $response . chatbot_chatgpt_enhance_with_tfidf($message);
+            $response = $response . '<br><br>' . chatbot_chatgpt_enhance_with_tfidf($message);
         }
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', ['message' => 'AFTER CALL TO ENHANCE TFIDF', 'response' => $response]);
@@ -883,12 +975,15 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
         // DIAG - Diagnostics - Ver 2.0.5
-        // back_trace( 'NOTICE', 'Response: ' . $response);
+        // back_trace( 'NOTICE', 'LINE 944 - Response: ' . $response);
 
         // FIXME - Append extra message - Ver 2.1.1.1.1
         // Danger Will Robinson! Danger!
         $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
         $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
+
+        // DIAG - Diagnostics - Ver 2.1.8
+        // back_trace( 'NOTICE', 'LINE 952 - $response: ' . $response);
 
         // Return response
         wp_send_json_success($response);
@@ -958,37 +1053,37 @@ function chatbot_chatgpt_kn_status_deactivation() {
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_kn_status_deactivation');
 
 // Markov Chain builder - Activation Hook - Ver 2.1.6
-function chatbot_chatgpt_markov_chain_status_activation() {
+function chatbot_markov_chain_status_activation() {
 
     // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'Markov Chain Status Activation');
 
     // Add the option for build status with a default value of 'Never Run'
-    add_option('chatbot_chatgpt_markov_chain_build_status', 'Never Run');
+    add_option('chatbot_markov_chain_build_status', 'Never Run');
 
     // Clear any old scheduled runs, if present
-    if (wp_next_scheduled('chatbot_chatgpt_markov_chain_scan_hook')) {
+    if (wp_next_scheduled('chatbot_markov_chain_scan_hook')) {
         // BREAK/FIX - Do not unset the hook - Ver 2.1.6
-        // wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook'); // Clear scheduled runs
+        // wp_clear_scheduled_hook('chatbot_markov_chain_scan_hook'); // Clear scheduled runs
     }
 
 }
-register_activation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_activation');
+register_activation_hook(__FILE__, 'chatbot_markov_chain_status_activation');
 
 // Clean up scheduled events and options - Deactivation Hook
-function chatbot_chatgpt_markov_chain_status_deactivation() {
+function chatbot_markov_chain_status_deactivation() {
 
     // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'Markov Chain Status Deactivation');
 
     // Delete the build status option on deactivation
-    delete_option('chatbot_chatgpt_markov_chain_build_status');
+    delete_option('chatbot_markov_chain_build_status');
 
     // Clear any scheduled events related to the Markov Chain scan
-    wp_clear_scheduled_hook('chatbot_chatgpt_markov_chain_scan_hook');
+    wp_clear_scheduled_hook('chatbot_markov_chain_scan_hook');
 
 }
-register_deactivation_hook(__FILE__, 'chatbot_chatgpt_markov_chain_status_deactivation');
+register_deactivation_hook(__FILE__, 'chatbot_markov_chain_status_deactivation');
 
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
 function addEntry($transient_name, $newEntry) {
@@ -1153,9 +1248,12 @@ function kchat_get_plugin_version() {
         require_once(ABSPATH . 'wp-admin/includes/plugin.php');
     }
 
-    // $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
+    $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
+    // DIAG - Print the plugin data
+    // back_trace( 'NOTICE', 'Plugin data: ' . print_r($plugin_data, true));
     // $plugin_version = $plugin_data['chatbot_chatgpt_version'];
-    $plugin_version = $chatbot_chatgpt_plugin_version;
+    $plugin_version = $plugin_data['Version'];
+    // $plugin_version = $chatbot_chatgpt_plugin_version;
     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
     // DIAG - Log the plugin version
     // back_trace( 'NOTICE', 'Plugin version ' . $plugin_version);

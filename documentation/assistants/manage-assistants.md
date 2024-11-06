@@ -26,7 +26,7 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
 
 2. **Shortcode**:
    - **Description**: The unique identifier for each assistant, such as ```[chatbot-1]``` or ```[chatbot-2]```.
-   - **Usage**: ```[chatbot-n]``` where n=1, 2, etc. You'll use this name to call the assistant from your the shortcode.
+   - **Usage**: ```[chatbot-n]``` where n=1, 2, etc. You'll use this name to call the assistant in the shortcode.
    - **Input**: Automatically generated.
 
 3. **Assistant ID**:

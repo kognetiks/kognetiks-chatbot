@@ -43,7 +43,7 @@ function chatbot_call_ant_api($api_key, $message) {
     // The current Anthropic API URL endpoint for claude-3-5-sonnet-20240620
     // $api_url = get_chat_completions_api_url();
     // FIXME - TEMP OVERRIDE
-    $api_url = 'https://api.anthoric.com/v1/messages';
+    $api_url = 'https://api.anthropic.com/v1/messages';
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
@@ -149,6 +149,18 @@ function chatbot_call_ant_api($api_key, $message) {
         // Original Context Instructions - No Enhanced Context
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
+    }
+
+    // Conversation Continuity - Ver 2.1.8
+    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
+
+    // DIAG Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
+
+    if ($chatbot_chatgpt_conversation_continuation == 'On') {
+        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
+        $context = $conversation_history . ' ' . $context;
     }
 
     // Build the Anthropic API request body

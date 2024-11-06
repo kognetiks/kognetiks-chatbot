@@ -1,18 +1,32 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+
 # Editor-based HTTP Client requests
+
 /httpRequests/
+
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
 .idea/
-results/
-uploads/
 debug/
-audio/
-transcripts/
-downloads/
-chatbot-logs/
 package.json
-widget-logs/
+
+# Ignore all files in the results folder
+results/*
+uploads/*
+audio/*
+transcripts/*
+downloads/*
+chatbot-logs/*
+widget-logs/*
+
+# Allow tracking of only the index.php file in the results folder
+!results/index.php
+!uploads/index.php
+!audio/index.php
+!transcripts/index.php
+!downloads/index.php
+!chatbot-logs/index.php
+!widget-logs/index.php

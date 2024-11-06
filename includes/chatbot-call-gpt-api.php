@@ -55,6 +55,12 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     // Conversation Context - Ver 1.6.1
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+
+    // Temperature - Ver 2.1.8
+    $temperature = floatval(esc_attr(get_option('chatbot_chatgpt_temperature', '0.5')));
+
+    // Top P - Ver 2.1.8
+    $top_p = floatval(esc_attr(get_option('chatbot_chatgpt_top_p', '1.0')));
  
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
@@ -137,11 +143,27 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     }
 
+    // Conversation Continuity - Ver 2.1.8
+    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
+
+    // DIAG Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
+
+    if ($chatbot_chatgpt_conversation_continuation == 'On') {
+        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
+        $context = $conversation_history . ' ' . $context;
+    }
+
+    // DIAG Diagnostics - Ver 2.1.8
+    // back_trace( 'NOTICE', '$context: ' . $context);
+
     // Added Role, System, Content Static Variable - Ver 1.6.0
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
-        'temperature' => 0.5,
+        'temperature' => $temperature,
+        'top_p' => $top_p,
         'messages' => array(
             array('role' => 'system', 'content' => $context),
             array('role' => 'user', 'content' => $message)
@@ -157,19 +179,21 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     // DIAG Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
     // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', '$message: ' . $message);  
+    // back_trace( 'NOTICE', '$message: ' . $message);
+
+    $chatbot_chatgpt_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '50')));
 
     $args = array(
         'headers' => $headers,
         'body' => json_encode($body),
         'method' => 'POST',
         'data_format' => 'body',
-        'timeout' => 50, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
+        'timeout' => $chatbot_chatgpt_timeout, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
     $response = wp_remote_post($api_url, $args);
     // DIAG - Diagnostics - Ver 1.6.7
-    // back_trace( 'NOTICE', '$response: ' . $response);
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -189,7 +213,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body))
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
 
     // Get the user ID and page ID
     if (empty($user_id)) {

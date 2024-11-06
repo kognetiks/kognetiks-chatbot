@@ -24,7 +24,7 @@ The **Kognetiks Chatbot for WordPress** now includes the advanced feature to all
 ### Configuring Remote Server Access
 
 1. **Remote Server Script**:
-    - **Description**: The code block below illustrates how to configure the remote server call to your chatbot.  It consists of a ```<script></script>``` and ```<iframe></iframe >```.  In the iframe is the call to your endpoint and a specific assistant.  In this example, the endpoint is located on the kognetiks.com domain, nestled deep within the subdirectories where the Kogentiks Chatbot resides.  To get started, you can copy this code and substitute ```kognetiks.com``` and ```chatbot-4``` for your domain and one of your assistants.
+    - **Description**: The code block below illustrates how to configure the remote server call to your chatbot.  It consists of a ```<script></script>``` and ```<iframe></iframe >```.  In the iframe is the call to your endpoint and a specific assistant.  In this example, the endpoint is located on the kognetiks.com domain, nestled deep within the subdirectories where the Kognetiks Chatbot resides.  To get started, you can copy this code and substitute ```kognetiks.com``` and ```chatbot-4``` for your domain and one of your assistants.
 
     ```
     <script>

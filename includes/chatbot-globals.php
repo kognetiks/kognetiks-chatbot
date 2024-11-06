@@ -87,9 +87,9 @@ $chatbot_chatgpt_bot_prompt = [
     "What would you like to talk about ..."
 ];
 
-// Declare the $chatbot_chatgpt_markov_chain_fallback_response as global - Ver 2.1.6.1
-global $chatbot_chatgpt_markov_chain_fallback_response;
-$chatbot_chatgpt_markov_chain_fallback_response = [
+// Declare the $chatbot_markov_chain_fallback_response as global - Ver 2.1.6.1
+global $chatbot_markov_chain_fallback_response;
+$chatbot_markov_chain_fallback_response = [
     "Sorry, I couldn't find any relevant information to respond to your query. Can you try rephrasing or asking something else?",
     "I’m not sure I have the right information for that. Could you clarify or ask differently?",
     "It seems I don’t have the exact details you're looking for. Could you rephrase the question?",
