@@ -223,7 +223,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
     $max_prompt_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_prompt_tokens', 20000));
     $max_completion_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_completion_tokens', 20000));
-    $temperature = (float) esc_attr(get_option('chatbot_chatgpt_temperature', 1.0));
+    $temperature = (float) esc_attr(get_option('chatbot_chatgpt_temperature', 0.5));
     $top_p = (float) esc_attr(get_option('chatbot_chatgpt_top_p', 1.0));
 
     // Additional instructions - Ver 2.0.9

@@ -122,7 +122,7 @@ function chatbot_nvidia_conversation_context_callback($args) {
 
 // Set chatbot_nvidia_temperature
 function chatbot_nvidia_temperature_callback($args) {
-    $temperature = esc_attr(get_option('chatbot_nvidia_temperature', 0.50));
+    $temperature = esc_attr(get_option('chatbot_nvidia_temperature', 0.5));
     ?>
     <select id="chatbot_nvidia_temperature" name="chatbot_nvidia_temperature">
         <?php
