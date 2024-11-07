@@ -112,6 +112,11 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
 
+// Include necessary files - Markov Chain - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-decode.php'; // Functions - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-encode.php'; // Functions - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-scheduler.php'; // Functions - Ver 2.1.9
+
 // Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
@@ -148,9 +153,6 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-decode.php'; // Functions - Ver 2.1.6
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-encode.php'; // Functions - Ver 2.1.6
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-scheduler.php'; // Functions - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php'; // Functions - Ver 2.0.5
