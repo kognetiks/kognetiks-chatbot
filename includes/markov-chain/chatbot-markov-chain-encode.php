@@ -476,13 +476,14 @@ function chatbot_markov_chain_synthetic_data_generation() {
 
     if ($syntheticData === false) {
 
-        back_trace('ERROR', 'Failed to read synthetic data file');
+        prod_trace('ERROR', 'Failed to read synthetic data file');
         return '';
 
     } else {
 
         // DIAG - Diagnostics - Ver 2.1.9
-        back_trace( 'NOTICE', 'Synthetic Data: ' . $syntheticData);
+        // back_trace( 'NOTICE', 'Synthetic Data: ' . $syntheticData);
+        prod_trace( 'NOTICE', 'Synthetic Data read successfully');
 
     }
 

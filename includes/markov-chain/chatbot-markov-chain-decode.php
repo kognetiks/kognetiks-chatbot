@@ -14,11 +14,9 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Generate a sentence using the Markov Chain with context reinforcement
-function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '') {
+function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword = '') {
 
     global $chatbot_markov_chain_fallback_response;
-
-    $length = 100; // Set default length
 
     // Get the Markov Chain length from the options
     $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3)); // Default to 3 if not set
@@ -56,10 +54,10 @@ function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '
     $words = explode(' ', $key); 
     $iterationsSinceContextCheck = 0;
 
-    for ($i = 0; $i < $length; $i++) {
+    for ($i = 0; $i < $max_tokens; $i++) {
 
         // Fetch the next word
-        $nextWord = getNextWordFromDatabase($key);
+        $nextWord = getNextWordFromDatabase($key, 1);
 
         if ($nextWord === null) {
             break; // End the sentence if no next word is found
@@ -67,17 +65,22 @@ function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '
 
         // Explode $nextWord in case it contains multiple words
         $nextWordsArray = explode(' ', $nextWord);
+        back_trace('NOTICE', 'Next word: ' . $nextWord);
         $words = array_merge($words, $nextWordsArray);
+        back_trace('NOTICE', 'Words: ' . implode(' ', $words));
 
         // Update the key with the last 'chainLength' words
         $key = implode(' ', array_slice($words, -$chainLength));
+        back_trace('NOTICE', 'Key: ' . $key);
 
         // Periodically reintroduce primary keyword context to keep output on track
         $iterationsSinceContextCheck++;
         if ($iterationsSinceContextCheck >= 10 && $primaryKeyword) {
             $key = $primaryKeyword; // Reinforce context every 10 iterations
             $iterationsSinceContextCheck = 0;
+            back_trace('NOTICE', 'Reinforcing context with primary keyword: ' . $key);
         }
+
     }
 
     // Final sentence building and punctuation check
@@ -89,22 +92,53 @@ function generateMarkovText($startWords = [], $length = 100, $primaryKeyword = '
 }
 
 // Check if the key exists
-function checkKeyInDatabase($key) {
+function checkKeyInDatabase($key, $attempts = 1) {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
+    // Limit attempts before proceeding
+    if ($attempts > esc_attr(get_option('chatbot_markov_chain_length', 3))) {
+        return null; // Stop further recursion if max attempts are reached
+    }
+
     $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word = %s", $key));
-    
+
+    // DIAG - Diagnostics - V 2.1.9
+    back_trace('NOTICE', 'Checking key: ' . $key . ' - Result: ' . $result);
+    back_trace('NOTICE', 'Attempts: ' . $attempts);
+
+    if ($result === null) {
+        
+        // Randomize order of $key words and try again
+        $keyWords = explode(' ', $key);
+        shuffle($keyWords);
+        $shuffledKey = implode(' ', $keyWords);
+
+        // Recursive call with incremented attempts
+        return checkKeyInDatabase($shuffledKey, $attempts + 1);
+    }
+
     return $result;
 
 }
 
 // Tune the Markov Chain response for better readability
-function getNextWordFromDatabase($currentWord) {
+// Get the next word from the database based on the current word
+function getNextWordFromDatabase($currentWord, $attempts = 1) {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_markov_chain';
+
+    // Limit attempts before proceeding
+    $maxAttempts = esc_attr(get_option('chatbot_markov_chain_length', 3));
+    if ($attempts > $maxAttempts) {
+        return null; // Stop further recursion if max attempts are reached
+    }
+
+    // Diagnostic output
+    back_trace('NOTICE', 'Checking current word: ' . $currentWord);
+    back_trace('NOTICE', 'Attempts: ' . $attempts);
 
     // Query to get possible next words and their frequencies
     $results = $wpdb->get_results(
@@ -112,8 +146,15 @@ function getNextWordFromDatabase($currentWord) {
         ARRAY_A
     );
 
+    // Check if no results are found
     if (empty($results)) {
-        return null; // Return null if no next word is found
+        // Randomize order of current word's parts and try again
+        $wordParts = explode(' ', $currentWord);
+        shuffle($wordParts);
+        $shuffledWord = implode(' ', $wordParts);
+
+        // Recursive call with incremented attempts
+        return getNextWordFromDatabase($shuffledWord, $attempts + 1);
     }
 
     // Sort results by frequency to get the most common word
@@ -140,7 +181,7 @@ function getNextWordFromDatabase($currentWord) {
 
     // Fallback to the most frequent word (shouldn't happen)
     return $results[0]['next_word'];
-
+    
 }
 
 // Get a random word from the database to start the chain

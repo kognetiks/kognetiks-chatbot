@@ -32,8 +32,50 @@ function chatbot_markov_chain_model_settings_section_callback($args) {
 
 function chatbot_markov_chain_api_model_general_section_callback($args){
     ?>
-    <p>Configure the settings for the plugin when using Markov Chain models.</p>
+    <p>Configure the settings for the plugin when using Markov Chain models.  Depending on the Markov Chain model you choose, the maximum tokens may be as high as 4000.  The default is 500.</p>
     <?php
+}
+
+// Markov Chain Advanced Settings Callback - Ver 2.1.9
+function chatbot_markov_chain_advanced_settings_section_callback($args) {
+
+    ?>
+    <p>Configure the advanced settings for the plugin when using Markov Chain models.</p>
+    <p>Schedule the Markov Chain model build process to run at different intervals. The build process trains the model on your site's published content, including pages, posts, and comments. The model is then used to generate text for the chatbot. The build process can be resource-intensive, so it is recommended to run it during off-peak hours or less frequently on high-traffic sites.</p>
+    <p>The Markov Chain model length determines the number of tokens used to generate text. A higher length can produce more coherent text but may also be more prone to overfitting. The next phrase length determines the number of tokens used to generate the next phrase in a conversation. A higher length can produce more contextually relevant responses but may also be more prone to overfitting.</p>
+    <?php
+
+}
+
+// Markov Chain Build Schedule Callback - Ver 2.1.6
+function chatbot_markov_chain_build_schedule_callback($args) {
+
+    // Get the saved chatbot_markov_chain_build_schedule value or default to "No"
+    $chatbot_markov_chain_build_schedule = esc_attr(get_option('chatbot_markov_chain_build_schedule', 'No'));
+    
+    $options = [
+        'No' => 'No',
+        'Now' => 'Now',
+        'Hourly' => 'Hourly',
+        'Twice Daily' => 'Twice Daily',
+        'Daily' => 'Daily',
+        'Weekly' => 'Weekly',
+        'Disable' => 'Disable',
+        'Cancel' => 'Cancel'
+    ];
+    ?>
+    <select id="chatbot_markov_chain_build_schedule" name="chatbot_markov_chain_build_schedule">
+        <?php foreach ($options as $value => $label) : ?>
+            <option value="<?php echo esc_attr($value); ?>" <?php selected($chatbot_markov_chain_build_schedule, $value); ?>>
+                <?php echo esc_html($label); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+    <?php
+    
+    // DIAG - Diagnostics - Ver 2.1.6
+    // back_trace( 'NOTICE', 'chatbot_markov_chain_build_schedule: ' . $chatbot_markov_chain_build_schedule );
+    
 }
 
 // Markov Chain Length Options Callback - Ver 2.1.6
@@ -72,37 +114,6 @@ function chatbot_markov_chain_next_phrase_length_callback($args) {
     
 }
 
-// Markov Chain Build Schedule Callback - Ver 2.1.6
-function chatbot_markov_chain_build_schedule_callback($args) {
-
-    // Get the saved chatbot_markov_chain_build_schedule value or default to "No"
-    $chatbot_markov_chain_build_schedule = esc_attr(get_option('chatbot_markov_chain_build_schedule', 'No'));
-    
-    $options = [
-        'No' => 'No',
-        'Now' => 'Now',
-        'Hourly' => 'Hourly',
-        'Twice Daily' => 'Twice Daily',
-        'Daily' => 'Daily',
-        'Weekly' => 'Weekly',
-        'Disable' => 'Disable',
-        'Cancel' => 'Cancel'
-    ];
-    ?>
-    <select id="chatbot_markov_chain_build_schedule" name="chatbot_markov_chain_build_schedule">
-        <?php foreach ($options as $value => $label) : ?>
-            <option value="<?php echo esc_attr($value); ?>" <?php selected($chatbot_markov_chain_build_schedule, $value); ?>>
-                <?php echo esc_html($label); ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-    <?php
-    
-    // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'chatbot_markov_chain_build_schedule: ' . $chatbot_markov_chain_build_schedule );
-    
-}
-
 // Markov Chain Model Choice Callback - Ver 2.1.8
 function chatbot_markov_chain_model_choice_callback($args) {
 
@@ -119,6 +130,24 @@ function chatbot_markov_chain_model_choice_callback($args) {
 
 }
 
+// Max Tokens choice - Ver 2.1.9
+function chatbot_markov_chain_max_tokens_setting_callback($args) {
+
+    // Get the saved chatbot_markov_chain_max_tokens or default to 500
+    $max_tokens = esc_attr(get_option('chatbot_markov_chain_max_tokens', '500'));
+
+    // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
+    ?>
+    <select id="chatbot_markov_chain_max_tokens" name="chatbot_markov_chain_max_tokens">
+        <?php
+        for ($i=100; $i<=4000; $i+=100) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
 // Register API settings - Moved for Ver 2.1.8
 function chatbot_markov_chain_api_settings_init() {
 
@@ -132,6 +161,7 @@ function chatbot_markov_chain_api_settings_init() {
     // Markov Chain Options - Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_api_enabled'); // Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_model_choice'); // Ver 2.1.8
+    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_max_tokens'); // Ver 2.1.9
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_build_schedule'); // Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_length'); // Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_next_phrase_length'); // Ver 2.1.6
@@ -152,27 +182,42 @@ function chatbot_markov_chain_api_settings_init() {
     );
 
     add_settings_field(
-        'chatbot_markov_chain_length',
-        'Markov Chain Length',
-        'chatbot_markov_chain_length_callback',
+        'chatbot_markov_chain_max_tokens',
+        'Maximum Tokens Setting',
+        'chatbot_markov_chain_max_tokens_setting_callback',
         'chatbot_markov_chain_api_model_general',
         'chatbot_markov_chain_api_model_general_section'
     );
 
-    add_settings_field(
-        'chatbot_markov_chain_next_phrase_length',
-        'Markov Chain Length Next Phase Length',
-        'chatbot_markov_chain_next_phrase_length_callback',
-        'chatbot_markov_chain_api_model_general',
-        'chatbot_markov_chain_api_model_general_section'
+    add_settings_section(
+        'chatbot_markov_chain_advanced_settings_section',
+        'Markov Chain Advanced Settings',
+        'chatbot_markov_chain_advanced_settings_section_callback',
+        'chatbot_markov_chain_advanced_settings'
     );
 
     add_settings_field(
         'chatbot_markov_chain_build_schedule',
         'Markov Chain Build Schedule',
         'chatbot_markov_chain_build_schedule_callback',
-        'chatbot_markov_chain_api_model_general',
-        'chatbot_markov_chain_api_model_general_section'
+        'chatbot_markov_chain_advanced_settings',
+        'chatbot_markov_chain_advanced_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_markov_chain_length',
+        'Markov Chain Length',
+        'chatbot_markov_chain_length_callback',
+        'chatbot_markov_chain_advanced_settings',
+        'chatbot_markov_chain_advanced_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_markov_chain_next_phrase_length',
+        'Markov Chain Length Next Phase Length',
+        'chatbot_markov_chain_next_phrase_length_callback',
+        'chatbot_markov_chain_advanced_settings',
+        'chatbot_markov_chain_advanced_settings_section'
     );
 
 }
