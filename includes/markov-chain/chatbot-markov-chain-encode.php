@@ -466,10 +466,11 @@ function chatbot_markov_chain_synthetic_data_generation() {
     $syntheticData = '';
 
     // Open the file containing the synthetic data
-    $syntheticDataFile = plugin_dir_path(__FILE__) . '/synthetic-data.txt';
+    $syntheticDataModel = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
+    $syntheticDataFile = plugin_dir_path(__FILE__) . $syntheticDataModel . '.txt';
 
     // DIAG - Diagnostics - Ver 2.1.9
-    // back_trace( 'NOTICE', 'Synthetic Data File: ' . $syntheticDataFile);
+    back_trace( 'NOTICE', 'Synthetic Data File: ' . $syntheticDataFile);
 
     // Read the synthetic data from the file
     $syntheticData = file_get_contents($syntheticDataFile);

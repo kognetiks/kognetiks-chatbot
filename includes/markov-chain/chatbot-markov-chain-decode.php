@@ -60,7 +60,13 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
         $nextWord = getNextWordFromDatabase($key, 1);
 
         if ($nextWord === null) {
-            break; // End the sentence if no next word is found
+            // Fallback: Use a random word if no next word is found
+            $nextWord = getRandomWordFromDatabase() ?? $primaryKeyword;
+            
+            // If no fallback word is available, stop the generation
+            if ($nextWord === null) {
+                break; // End the sentence if no next word is found
+            }
         }
 
         // Explode $nextWord in case it contains multiple words
@@ -133,7 +139,8 @@ function getNextWordFromDatabase($currentWord, $attempts = 1) {
     // Limit attempts before proceeding
     $maxAttempts = esc_attr(get_option('chatbot_markov_chain_length', 3));
     if ($attempts > $maxAttempts) {
-        return null; // Stop further recursion if max attempts are reached
+        // return null; // Stop further recursion if max attempts are reached
+        return getRandomWordFromDatabase(); // Return a random fallback word if max attempts are reached
     }
 
     // Diagnostic output
@@ -181,7 +188,7 @@ function getNextWordFromDatabase($currentWord, $attempts = 1) {
 
     // Fallback to the most frequent word (shouldn't happen)
     return $results[0]['next_word'];
-    
+
 }
 
 // Get a random word from the database to start the chain
