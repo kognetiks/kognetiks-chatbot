@@ -13,20 +13,18 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Generate a sentence using the Markov Chain with context reinforcement
-function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword = '') {
+function generateMarkovText($startWords = [], $max_tokens = 700, $primaryKeyword = '', $minLength = 150) {
 
     global $chatbot_markov_chain_fallback_response;
 
-    // Get the Markov Chain length from the options
     $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3));
 
     // Clean up start words
     $startWords = array_map('trim', $startWords);
     $startWords = array_map(function($word) {
-        return preg_replace('/[^\w\s]/', '', $word); // Clean up non-alphanumeric characters
+        return preg_replace('/[^\w\s]/', '', $word);
     }, $startWords);
 
-    // Initialize with the primary key (if available)
     $key = $primaryKeyword ? $primaryKeyword : null;
 
     // Phase 1: Attempt to find a starting point
@@ -47,54 +45,56 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
         }
     }
 
-    // Phase 2: Generate words going forward with context
+    // Phase 2: Generate words going forward with a flexible topic drift and minimum length requirement
     $words = explode(' ', $key);
     $iterationsSinceContextCheck = 0;
-    $offTopicCount = 0; // Track off-topic drift
+    $offTopicCount = 0; 
 
     for ($i = 0; $i < $max_tokens; $i++) {
 
-        // Fetch the next word
         $nextWord = getNextWordFromDatabase($key, 1);
 
         if ($nextWord === null) {
-            break; // End the sentence if no next word is found
+            break; // End if no next word is found
         }
 
-        // Explode $nextWord in case it contains multiple words
         $nextWordsArray = explode(' ', $nextWord);
         $words = array_merge($words, $nextWordsArray);
 
         // Update the key with the last 'chainLength' words
         $key = implode(' ', array_slice($words, -$chainLength));
 
-        // If the next word deviates from the primary topic, increase off-topic count
-        if (strpos($nextWord, $primaryKeyword) === false) {
+        // Allow more topic drift after the minimum length is reached
+        if ($i >= $minLength && strpos($nextWord, $primaryKeyword) === false) {
             $offTopicCount++;
         }
 
-        // Exit if the response is drifting too much from the topic
-        if ($offTopicCount >= 5) {
+        // Exit if off-topic drift is too high after reaching minimum length
+        if ($offTopicCount >= 10 && count($words) > $minLength) {
             break;
         }
 
-        // Periodically reinforce primary keyword context to stay on topic
+        // Check for natural endings if the sentence is long enough
+        if (count($words) >= $minLength && preg_match('/[.!?]$/', implode(' ', $words))) {
+            break;
+        }
+
+        // Reinforce context only if needed to bring focus back
         $iterationsSinceContextCheck++;
-        if ($iterationsSinceContextCheck >= 10 && $primaryKeyword) {
+        if ($iterationsSinceContextCheck >= 15 && $primaryKeyword) {
             $key = $primaryKeyword;
             $iterationsSinceContextCheck = 0;
         }
-
-        // Exit if a natural ending is reached
-        if (preg_match('/[.!?]$/', implode(' ', $words))) {
-            break;
-        }
     }
 
-    // Clean up and return the response
+    // Final cleanup and punctuation check to ensure sentence completion
     $response = implode(' ', $words);
 
-    // Ensure the final response is tidy and punctuated
+    // If it doesn’t end with a period, check for possible endings or add punctuation
+    if (!preg_match('/[.!?]$/', $response)) {
+        $response = rtrim($response, ' ,;') . '.';
+    }
+
     return clean_up_markov_chain_response($response);
     
 }
