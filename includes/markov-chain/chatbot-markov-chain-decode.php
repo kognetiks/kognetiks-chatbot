@@ -18,7 +18,7 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
     global $chatbot_markov_chain_fallback_response;
 
     // Get the Markov Chain length from the options
-    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3)); // Default to 3 if not set
+    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3));
 
     // Clean up start words
     $startWords = array_map('trim', $startWords);
@@ -37,8 +37,7 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
 
             if ($keyExists) {
                 $key = $attemptedKey;
-                $primaryKeyword = $key; // Set primary keyword for context reinforcement
-                back_trace( 'NOTICE', 'Found starting key: ' . $key);
+                $primaryKeyword = $key;
                 break;
             }
         }
@@ -48,9 +47,10 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
         }
     }
 
-    // Phase 2: Generate words going forward, reinforcing context periodically
-    $words = explode(' ', $key); 
+    // Phase 2: Generate words going forward with context
+    $words = explode(' ', $key);
     $iterationsSinceContextCheck = 0;
+    $offTopicCount = 0; // Track off-topic drift
 
     for ($i = 0; $i < $max_tokens; $i++) {
 
@@ -58,40 +58,45 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
         $nextWord = getNextWordFromDatabase($key, 1);
 
         if ($nextWord === null) {
-            // Fallback: Use a random word if no next word is found
-            $nextWord = getRandomWordFromDatabase() ?? $primaryKeyword;
-            
-            // If no fallback word is available, stop the generation
-            if ($nextWord === null) {
-                break; 
-            }
+            break; // End the sentence if no next word is found
         }
 
         // Explode $nextWord in case it contains multiple words
         $nextWordsArray = explode(' ', $nextWord);
-        back_trace('NOTICE', 'Next word: ' . $nextWord);
         $words = array_merge($words, $nextWordsArray);
-        back_trace('NOTICE', 'Words: ' . implode(' ', $words));
 
         // Update the key with the last 'chainLength' words
         $key = implode(' ', array_slice($words, -$chainLength));
-        back_trace('NOTICE', 'Key: ' . $key);
 
-        // Periodically reintroduce primary keyword context to keep output on track
+        // If the next word deviates from the primary topic, increase off-topic count
+        if (strpos($nextWord, $primaryKeyword) === false) {
+            $offTopicCount++;
+        }
+
+        // Exit if the response is drifting too much from the topic
+        if ($offTopicCount >= 5) {
+            break;
+        }
+
+        // Periodically reinforce primary keyword context to stay on topic
         $iterationsSinceContextCheck++;
         if ($iterationsSinceContextCheck >= 10 && $primaryKeyword) {
-            $key = $primaryKeyword; // Reinforce context every 10 iterations
+            $key = $primaryKeyword;
             $iterationsSinceContextCheck = 0;
-            back_trace('NOTICE', 'Reinforcing context with primary keyword: ' . $key);
+        }
+
+        // Exit if a natural ending is reached
+        if (preg_match('/[.!?]$/', implode(' ', $words))) {
+            break;
         }
     }
 
-    // Final sentence building and punctuation check
+    // Clean up and return the response
     $response = implode(' ', $words);
 
-    // Clean up and return the response
+    // Ensure the final response is tidy and punctuated
     return clean_up_markov_chain_response($response);
-
+    
 }
 
 // Check if the key exists
