@@ -1,9 +1,8 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Markov Chain Decode - Ver 2.1.6
+ * Kognetiks Chatbot for WordPress - Markov Chain Decode - Ver 2.1.9
  *
  * This file contains the code for implementing the Markov Chain algorithm
- *
  *
  * @package chatbot-chatgpt
  */
@@ -40,7 +39,6 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
                 $key = $attemptedKey;
                 $primaryKeyword = $key; // Set primary keyword for context reinforcement
                 back_trace( 'NOTICE', 'Found starting key: ' . $key);
-                back_trace( 'NOTICE', 'Primary keyword: ' . $primaryKeyword);
                 break;
             }
         }
@@ -65,7 +63,7 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
             
             // If no fallback word is available, stop the generation
             if ($nextWord === null) {
-                break; // End the sentence if no next word is found
+                break; 
             }
         }
 
@@ -86,7 +84,6 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
             $iterationsSinceContextCheck = 0;
             back_trace('NOTICE', 'Reinforcing context with primary keyword: ' . $key);
         }
-
     }
 
     // Final sentence building and punctuation check
@@ -129,18 +126,36 @@ function checkKeyInDatabase($key, $attempts = 1) {
 
 }
 
-// Tune the Markov Chain response for better readability
 // Get the next word from the database based on the current word
-function getNextWordFromDatabase($currentWord, $attempts = 1) {
+function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempts = 0) {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
-    // Limit attempts before proceeding
+    // Limit for attempts to find a next word using $currentWord
     $maxAttempts = esc_attr(get_option('chatbot_markov_chain_length', 3));
+
+    // Limit for attempts to get a random fallback word
+    $maxRandomWordAttempts = $maxAttempts; // Limit based on chain length
+
+    // Check if we've exceeded attempts for the primary word
     if ($attempts > $maxAttempts) {
-        // return null; // Stop further recursion if max attempts are reached
-        return getRandomWordFromDatabase(); // Return a random fallback word if max attempts are reached
+
+        // If max attempts reached, use a random word as fallback, limited by $maxRandomWordAttempts
+        if ($randomWordAttempts < $maxRandomWordAttempts) {
+            $randomWord = getRandomWordFromDatabase();
+            
+            // Increment and try again if a random word is not found
+            if ($randomWord !== null) {
+                return $randomWord;
+            }
+
+            // Increment random word attempts and retry if necessary
+            return getNextWordFromDatabase($currentWord, $attempts, $randomWordAttempts + 1);
+        }
+
+        // If we've exhausted random word attempts, return null to indicate failure
+        return null;
     }
 
     // Diagnostic output
@@ -161,7 +176,7 @@ function getNextWordFromDatabase($currentWord, $attempts = 1) {
         $shuffledWord = implode(' ', $wordParts);
 
         // Recursive call with incremented attempts
-        return getNextWordFromDatabase($shuffledWord, $attempts + 1);
+        return getNextWordFromDatabase($shuffledWord, $attempts + 1, $randomWordAttempts);
     }
 
     // Sort results by frequency to get the most common word
@@ -188,7 +203,6 @@ function getNextWordFromDatabase($currentWord, $attempts = 1) {
 
     // Fallback to the most frequent word (shouldn't happen)
     return $results[0]['next_word'];
-
 }
 
 // Get a random word from the database to start the chain
@@ -204,33 +218,6 @@ function getRandomWordFromDatabase() {
 
 }
 
-// Select the next word based on its probability distribution
-function selectNextWordBasedOnProbability($nextWords) {
-
-    // Create an array of cumulative probabilities
-    $cumulativeProbabilities = [];
-    $totalProbability = 0;
-
-    foreach ($nextWords as $word => $probability) {
-        $totalProbability += (float)$probability;
-        $cumulativeProbabilities[] = ['word' => $word, 'cumulative' => $totalProbability];
-    }
-
-    // Generate a random number between 0 and 1
-    $random = mt_rand() / mt_getrandmax();
-
-    // Find the word that matches the random number
-    foreach ($cumulativeProbabilities as $item) {
-        if ($random <= $item['cumulative']) {
-            return $item['word'];
-        }
-    }
-
-    // Fallback to the last word in case no match is found (shouldn't happen)
-    return end($cumulativeProbabilities)['word'];
-
-}
-
 // Clean up the Markov Chain response for better readability
 function clean_up_markov_chain_response($response) {
 
@@ -238,7 +225,6 @@ function clean_up_markov_chain_response($response) {
     $response = ucfirst(trim($response));
 
     // Step 1: Capitalize the first letter of each sentence
-    // This uses a regex to match sentence boundaries and capitalize appropriately
     $response = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function($matches) {
         return strtoupper($matches[1]);
     }, $response);
@@ -252,32 +238,21 @@ function clean_up_markov_chain_response($response) {
     $response = preg_replace('/\s+/', ' ', $response);
 
     // Step 4: Basic punctuation cleanup
-    // Ensure no space before punctuation and space after punctuation
     $response = preg_replace('/\s+([?.!,])/', '$1', $response);  // No space before punctuation
     $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response);  // Space after punctuation
 
-    // Step 5: Fix grammar issues (custom function for specific cases)
+    // Step 5: Fix grammar issues
     $response = fix_common_grammar_issues($response);
 
     // Step 6: Ensure the response starts with an alphanumeric character
     $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
 
     // Step 7: Additional punctuation and case fixes
-    // Insert a period between lowercase followed by an uppercase letter
     $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
-    // Remove spaces between special characters
     $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1$2', $response);
-    // Handle cases with lowercase words followed by uppercase
-    $response = preg_replace('/([a-z]+) ([A-Z]) ([a-z]+)/', '$1. $2 $3', $response);
-
-    // Step 8: Handle edge cases like misplaced punctuation and capitalization
-    $response = preg_replace('/([.!?])"([a-z])/', '$1" $2', $response);  // Fix misplaced punctuation within quotes
-    $response = preg_replace('/([a-z])\. ([A-Z])/', '$1. $2', $response);  // Fix misplaced periods
-
-    // Final Step: Upper case the first letter again in case any fixes affected it
-    $response = ucfirst($response);
 
     return $response;
+
 }
 
 // Fix common grammar issues in the response
@@ -286,67 +261,15 @@ function fix_common_grammar_issues($response) {
     do {
         $previous_response = $response;
     
-        // Example: Replace "a an" with "an"
+        // Grammar and formatting fixes
         $response = preg_replace('/\ba an\b/', 'an', $response);
-    
-        // Example: Correct common phrase issues like "more better" -> "better"
         $response = preg_replace('/\bmore better\b/', 'better', $response);
-    
-        // Example: Correct "a apple" -> "an apple"
         $response = preg_replace('/\ba ([aeiouAEIOU])\b/', 'an $1', $response);
-    
-        // Example: Correct "an [consonant sound]" -> "a [consonant sound]"
         $response = preg_replace('/\ban ([bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ])\b/', 'a $1', $response);
-    
-        // Example: Replace "you is" with "you are"
         $response = preg_replace('/\byou is\b/', 'you are', $response);
-    
-        // Example: Replace "doesn't has" with "doesn't have"
         $response = preg_replace('/\bdoesn\'t has\b/', 'doesn\'t have', $response);
-    
-        // Remove repetitive articles
         $response = preg_replace('/\b(a|an|and|for|the|to) \1\b/i', '$1', $response);
-    
-        // Remove invalid word pairs like "the it"
         $response = preg_replace('/\b(the|a|an|and|for|to|in|on|with|by|from|at|of) (it|he|she|they|we|you|I)\b/i', '$2', $response);
-    
-        // Remove invalid word pairs like "too and to in"
-        $response = preg_replace('/\b(too|and|to|in) (and|to|in|too)\b/i', '$2', $response);
-    
-        // Remove invalid sequences like "a and an"
-        $response = preg_replace('/\b(a|an|and|for|the|to) (and|an|a|for|the|to)\b/i', '$2', $response);
-    
-        // Handle specific invalid word pairs like "of the", "with to", "as and"
-        $response = preg_replace('/\b(of|with|as|by|to|for|from|in|on) (and|of|to|the)\b/i', '$1', $response);
-    
-        // Don't end a sentence with a preposition or conjunction followed by a period
-        $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\.\b/i', '.', $response);
-    
-        // Remove prepositions or articles at the end of a sentence before a period
-        $response = preg_replace('/\b(a|an|the|and|or|in|on|with|at|for|by|to|of)\b\.$/', '.', $response);
-    
-        // Ensure proper punctuation before uppercase letters
-        $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
-    
-        // Remove standalone prepositions or conjunctions at the end of sentences
-        $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\b\./i', '.', $response);
-    
-        // Remove standalone prepositions or conjunctions at the end of sentences without a period
-        $response = preg_replace('/\b(a|as|at|by|for|from|in|of|on|or|to|the|with|and|when)\b$/i', '', $response);
-    
-        // Capitalize the first letter of each sentence
-        $response = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function ($matches) {
-            return strtoupper($matches[0]);
-        }, $response);
-    
-        // Remove any spaces before periods
-        $response = preg_replace('/\s+\./', '.', $response);
-    
-        // Replace double periods with a single period
-        $response = preg_replace('/\.\.+/', '.', $response);
-    
-        // Correct leftover conjunctions or prepositions at sentence boundaries
-        $response = preg_replace('/(\b[a-z]+\b)\s+\1\b/i', '$1', $response);
     
     } while ($previous_response !== $response); // Loop until no more changes are made
     
