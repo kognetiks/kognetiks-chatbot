@@ -148,6 +148,37 @@ function chatbot_markov_chain_max_tokens_setting_callback($args) {
     <?php
 }
 
+// Knowledge Navigator Status - Ver 2.0.0.
+function chatbot_markov_chain_status_section_callback($args) {
+
+    // See if the scanner is needs to run
+    $chatbot_markov_chain_current_build_schedule = esc_attr(get_option('chatbot_markov_chain_build_schedule', 'No Schedule'));
+    if ($chatbot_markov_chain_current_build_schedule == 'No') {
+        $chatbot_markov_chain_current_build_schedule  = 'No Schedule';
+    }
+
+    // Force run the scanner
+    // $results = chatbot_chatgpt_kn_acquire();
+
+    // Get DB Stats
+    $chatbot_markov_chain_db_stats = getDatabaseStats("chatbot_markov_chain");
+    // Unpack the returned array
+    $chatbot_markov_chain_row_count = $chatbot_markov_chain_db_stats['row_count'];
+    $chatbot_markov_chain_table_size_mb = $chatbot_markov_chain_db_stats['table_size_mb'];
+    
+    ?>
+        <div class="wrap">
+            <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
+                <p><b>Scheduled to Run: </b><?php echo $chatbot_markov_chain_current_build_schedule; ?></p>
+                <p><b>Status of Last Run: </b><?php echo esc_attr(get_option('chatbot_markov_chain_last_updated', 'Please select a Build Schedule below.')); ?></p>
+                <p><b>Row Count: </b><?php echo $chatbot_markov_chain_row_count; ?></p>
+                <p><b>Table Size: </b><?php echo $chatbot_markov_chain_table_size_mb; ?> MB</p>
+            </div>
+            <p>Refresh this page to determine the progress and status of Knowledge Navigation!</p>
+        </div>
+    <?php
+}
+
 // Register API settings - Moved for Ver 2.1.8
 function chatbot_markov_chain_api_settings_init() {
 
@@ -187,6 +218,13 @@ function chatbot_markov_chain_api_settings_init() {
         'chatbot_markov_chain_max_tokens_setting_callback',
         'chatbot_markov_chain_api_model_general',
         'chatbot_markov_chain_api_model_general_section'
+    );
+
+    add_settings_section(
+        'chatbot_markov_chain_status_section',
+        'Markov Chain Build Status',
+        'chatbot_markov_chain_status_section_callback',
+        'chatbot_markov_chain_status'
     );
 
     add_settings_section(

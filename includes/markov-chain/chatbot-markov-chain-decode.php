@@ -64,6 +64,10 @@ function generateMarkovText($startWords = [], $max_tokens = 700, $primaryKeyword
         // Update the key with the last 'chainLength' words
         $key = implode(' ', array_slice($words, -$chainLength));
 
+        // Try removing special characters and extra spaces from the key - Ver 2.1.9.1
+        $key = preg_replace("/[^\w\s']/u", '', $key);
+        $key = preg_replace('/\s+/', ' ', $key); // Remove extra spaces
+
         // Allow more topic drift after the minimum length is reached
         if ($i >= $minLength && strpos($nextWord, $primaryKeyword) === false) {
             $offTopicCount++;
@@ -253,8 +257,11 @@ function clean_up_markov_chain_response($response) {
     $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
 
     // Step 7: Additional punctuation and case fixes
-    $response = preg_replace('/([a-z]) ([A-Z])/', '$1. $2', $response);
-    $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1$2', $response);
+    // Insert punctuation where a lowercase word is followed by an uppercase word without punctuation
+    $response = preg_replace('/([a-z])([A-Z])/', '$1. $2', $response);
+
+    // Final check to ensure punctuation between phrases and correct spacing
+    $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1 $2', $response);
 
     return $response;
 

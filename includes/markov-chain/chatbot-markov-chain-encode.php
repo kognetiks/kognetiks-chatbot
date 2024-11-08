@@ -158,9 +158,6 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
     back_trace( 'NOTICE', 'Last Updated: ' . $last_updated);
     back_trace( 'NOTICE', 'Processing Type: ' . $processing_type);
-    error_log( 'Batch Size: ' . $batch_size);
-    error_log( 'Last Updated: ' . $last_updated);
-    error_log( 'Processing Type: ' . $processing_type);
 
     // Syntheic Data Generation
     if ($processing_type == 'synthetic') {
@@ -276,7 +273,7 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
         // If more comments are available, schedule the next comment batch
         if (count($comments) === $batch_size) {
             $next_batch_starting_point = $batch_starting_point + 1;
-            wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array(serialize(array($last_updated, $next_batch_starting_point, $batch_size, 'posts'))));
+            wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array(serialize(array($last_updated, $next_batch_starting_point, $batch_size, 'comments'))));
             back_trace( 'NOTICE', 'getAllPublishedContent - Scheduled next comment batch #' . $next_batch_starting_point);
         } else {
             back_trace( 'NOTICE', 'getAllPublishedContent - Comments done');
@@ -286,6 +283,9 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
 
     // Update the last updated timestamp
     updateMarkovChainTimestamp();
+
+    // Set the status as complete - Ver 2.1.9.1
+    update_option('chatbot_markov_chain_build_schedule', 'Completed');
 
     // DIAG - Diagnostics
     back_trace( 'NOTICE', 'getAllPublishedContent - End');
@@ -306,10 +306,10 @@ function buildMarkovChain($content) {
     $words = preg_split('/\s+/', $content);
     
     // Correctly retrieve the chain length (key size) from the database
-    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3));  // Default to 3 (for two-word key) if not set
+    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3));  // Default to 3 (for a three-word key) if not set
 
     // Set the phrase size for the next part of the Markov Chain
-    $phraseSize = esc_attr(get_option('chatbot_markov_chain_next_phrase_length', 1));  // Default to 1 (for four-word phrase) if not set
+    $phraseSize = esc_attr(get_option('chatbot_markov_chain_next_phrase_length', 1));  // Default to 1 (for a four-word phrase) if not set
 
     // Build and save the Markov Chain
     for ($i = 0; $i < count($words) - ($chainLength + $phraseSize - 1); $i++) {
@@ -317,8 +317,12 @@ function buildMarkovChain($content) {
         // Generate the key by taking 'chainLength' number of words (e.g., 3 words)
         $key = implode(' ', array_slice($words, $i, $chainLength));
 
+        // Try remove non-alphanumeric characters from the key - Ver 2.1.9.1
+        $key = preg_replace("/[^\w\s']/u", '', $key);
+        $key = preg_replace('/\s+/', ' ', $key); // Remove extra spaces
+
         // count words in $key
-        $key_word_count = $key !== null ? str_word_count($key) : 0;
+        $key_word_count = is_string($key) ? str_word_count($key) : 0;
         if ($key_word_count < $chainLength) {
             // Skip this iteration if the key does not have enough words
             continue;
@@ -327,7 +331,7 @@ function buildMarkovChain($content) {
         // Remove non-alphanumeric characters from the key - punctuation is important for the Markov Chain
         // $key = preg_replace("/[^a-zA-Z0-9\s]/", '', $key);
         
-        // Generate the next phrase by taking 'phraseSize' number of words after the key (e.g., 3 words)
+        // Generate the next phrase by taking 'phraseSize' number of words after the key (e.g., 3 + 1 words)
         $nextPhrase = implode(' ', array_slice($words, $i + $chainLength, $phraseSize));
 
         // Check if this word and next phrase combination already exists in the database
