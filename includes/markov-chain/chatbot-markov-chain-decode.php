@@ -13,9 +13,12 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Generate a sentence using the Markov Chain with context reinforcement
-function generateMarkovText($startWords = [], $max_tokens = 700, $primaryKeyword = '', $minLength = 150) {
+function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
 
     global $chatbot_markov_chain_fallback_response;
+
+    // Vary the $minLength between the chain length the the maximum tokens - Ver 2.1.9.1
+    $minLength = rand($minLength, $max_tokens);
 
     $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3));
 
@@ -114,26 +117,39 @@ function checkKeyInDatabase($key, $attempts = 1) {
         return null; // Stop further recursion if max attempts are reached
     }
 
+    // Check the database for an exact match
     $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word = %s", $key));
 
     // DIAG - Diagnostics - V 2.1.9
     back_trace('NOTICE', 'Checking key: ' . $key . ' - Result: ' . $result);
     back_trace('NOTICE', 'Attempts: ' . $attempts);
 
+    // If no exact match is found, try using the wildcard approach
     if ($result === null) {
-        
-        // Randomize order of $key words and try again
         $keyWords = explode(' ', $key);
-        shuffle($keyWords);
-        $shuffledKey = implode(' ', $keyWords);
 
-        // Recursive call with incremented attempts
-        return checkKeyInDatabase($shuffledKey, $attempts + 1);
+        // Shuffle the keywords to randomize the order
+        shuffle($keyWords);
+
+        // Drop the last word and append a wildcard symbol
+        $wildcardKey = implode(' ', array_slice($keyWords, 0, -1)) . ' %';
+
+        // Use LIKE for the wildcard search
+        $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word LIKE %s", $wildcardKey));
+
+        // Diagnostic output to log the wildcard key generation and attempt number
+        back_trace('NOTICE', 'Attempt ' . $attempts . ': Wildcard key after shuffle - ' . $wildcardKey);
+        back_trace('NOTICE', 'Wildcard key result: ' . $result);
+
+        // Recursive call with incremented attempts if no result is found
+        if ($result === null) {
+            return checkKeyInDatabase($wildcardKey, $attempts + 1);
+        }
     }
 
     return $result;
-
 }
+
 
 // Get the next word from the database based on the current word
 function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempts = 0) {
@@ -194,7 +210,7 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
     });
 
     // 80% chance to select the most frequent word
-    if (mt_rand(1, 100) <= 80) {
+    if (mt_rand(1, 100) <= 90) {
         return $results[0]['next_word']; // Return the most frequent word
     }
 
@@ -257,8 +273,8 @@ function clean_up_markov_chain_response($response) {
     $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
 
     // Step 7: Additional punctuation and case fixes
-    // Insert punctuation where a lowercase word is followed by an uppercase word without punctuation
-    $response = preg_replace('/([a-z])([A-Z])/', '$1. $2', $response);
+    // Insert punctuation where a lowercase word is followed by a space and a word starting with an uppercase letter but is not in ALL CAPS
+    $response = preg_replace('/([a-z])\s+([A-Z][a-z]+)/', '$1. $2', $response);
 
     // Final check to ensure punctuation between phrases and correct spacing
     $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1 $2', $response);
