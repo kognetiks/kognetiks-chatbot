@@ -10,7 +10,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA or others, 
 
 ## What's new in Version 2.1.9
 
-* **TBD**: TBD
+* **Bug Fix**: Removed extra line brakes after the chatbot's response.
 
 ## What's new in Version 2.1.8
 

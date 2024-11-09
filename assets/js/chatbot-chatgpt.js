@@ -556,12 +556,19 @@ jQuery(document).ready(function ($) {
         markdown = markdown.replace(/\n{2,}/g, '\n').split(/\n/g).map((line, index) => {
             return line.match(/^<h|<p|<ul|<pre|<blockquote/) ? line : line.trim() ? `${line}<br>` : '';
         }).join('');
-    
+   
         // Step 12: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
             return predefinedHtml[parseInt(index)];
         });
-    
+
+        // Penultimate step: Check for extra line breaks at the end
+        markdown = markdown.replace(/<br>\s*$/, '');
+        // Check again for extra line breaks at the end
+        markdown = markdown.replace(/<br>\s*$/, '');
+        // Check again for extra line breaks at the end
+        markdown = markdown.replace(/<br>\s*$/, '');
+
         // Return final output wrapped in a div
         return `<div>${markdown.trim()}</div>`;
     }
