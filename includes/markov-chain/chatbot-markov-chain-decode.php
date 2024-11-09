@@ -18,7 +18,7 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
     global $chatbot_markov_chain_fallback_response;
 
     // Vary the $minLength between the chain length the the maximum tokens - Ver 2.1.9.1
-    $minLength = rand($minLength, $max_tokens);
+    $minLength = rand($minLength, $max_tokens / 2);
 
     $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3));
 

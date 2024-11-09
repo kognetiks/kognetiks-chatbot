@@ -76,6 +76,7 @@ function create_chatbot_chatgpt_assistants_table() {
     update_chatbot_chatgpt_number_of_shortcodes();
 
 }
+register_activation_hook(__FILE__, 'create_chatbot_chatgpt_assistants_table');
 
 // Drop the table for the chatbot assistants
 function drop_chatbot_chatgpt_assistants_table() {
@@ -152,17 +153,15 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
-    // $number_of_shortcodes = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
-
-    // Check if the table exists
-    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name;
+    // Check if the table exists using a prepared statement
+    $table_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) == $table_name;
 
     if ($table_exists) {
-        // The table exists, proceed with the original query
+        // The table exists, proceed with retrieving the maximum ID as the count of shortcodes
         $number_of_shortcodes = $wpdb->get_var("SELECT MAX(id) FROM $table_name");
 
-        // If the query fails for any other reason, set $number_of_shortcodes to 0
-        if ($number_of_shortcodes === NULL || $number_of_shortcodes === FALSE) {
+        // If the query fails for any reason, set $number_of_shortcodes to 0
+        if ($number_of_shortcodes === null || $number_of_shortcodes === false) {
             $number_of_shortcodes = 0;
         }
     } else {
@@ -172,8 +171,8 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
 
     update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 
+    // Optionally log for debugging
     // error_log('chatbot-assistants - Number of Shortcodes: ' . $number_of_shortcodes);
-
 }
 
 // Display the chatbot assistants table
@@ -352,8 +351,12 @@ function chatbot_chatgpt_assistants_scripts() {
 
     if ( current_user_can('manage_options') ) {
 
+        $nonce = wp_create_nonce('chatbot_nonce_action');
+
         ?>
         <script type="text/javascript">
+
+            var chatbot_nonce = "<?php echo esc_js($nonce); ?>";
 
             // Function to update an assistant's details
             function updateAssistant(id) {
@@ -374,6 +377,8 @@ function chatbot_chatgpt_assistants_scripts() {
                     additional_instructions: document.getElementsByName('additional_instructions_' + id)[0].value
                 };
 
+                data._wpnonce = chatbot_nonce;
+
                 // Send the update request via AJAX
                 jQuery.post(ajaxurl, data, function(response) {
                     alert('Assistant updated successfully!');
@@ -387,6 +392,8 @@ function chatbot_chatgpt_assistants_scripts() {
                     action: 'delete_assistant',
                     id: id
                 };
+
+                data._wpnonce = chatbot_nonce;
 
                 // Send the delete request via AJAX
                 jQuery.post(ajaxurl, data, function(response) {
@@ -413,6 +420,8 @@ function chatbot_chatgpt_assistants_scripts() {
                     additional_instructions: document.getElementsByName('new_additional_instructions')[0].value
                 };
 
+                data._wpnonce = chatbot_nonce;
+
                 // Send the add request via AJAX
                 jQuery.post(ajaxurl, data, function(response) {
                     alert('New assistant added successfully!');
@@ -430,6 +439,8 @@ add_action('admin_footer', 'chatbot_chatgpt_assistants_scripts');
 
 // Update Assistant AJAX action
 function update_assistant() {
+
+    check_ajax_referer('chatbot_nonce_action', '_wpnonce');
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
@@ -488,6 +499,8 @@ add_action('wp_ajax_update_assistant', 'update_assistant');
 // Delete Assistant AJAX action
 function delete_assistant() {
 
+    check_ajax_referer('chatbot_nonce_action', '_wpnonce');
+
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
         wp_die();
@@ -513,6 +526,8 @@ function delete_assistant() {
 add_action('wp_ajax_delete_assistant', 'delete_assistant');
 
 function add_new_assistant() {
+
+    check_ajax_referer('chatbot_nonce_action', '_wpnonce');
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
