@@ -25,7 +25,8 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
     // Clean up start words
     $startWords = array_map('trim', $startWords);
     $startWords = array_map(function($word) {
-        return preg_replace('/[^\w\s]/', '', $word);
+        // return preg_replace('/[^\w\s]/', '', $word);
+        return preg_replace('/[^\w\s\-]/', '', $word);
     }, $startWords);
 
     $key = $primaryKeyword ? $primaryKeyword : null;
@@ -68,7 +69,7 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
         $key = implode(' ', array_slice($words, -$chainLength));
 
         // Try removing special characters and extra spaces from the key - Ver 2.1.9.1
-        $key = preg_replace("/[^\w\s']/u", '', $key);
+        // $key = preg_replace("/[^\w\s']/u", '', $key);
         $key = preg_replace('/\s+/', ' ', $key); // Remove extra spaces
 
         // Allow more topic drift after the minimum length is reached
@@ -86,9 +87,9 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
             break;
         }
 
-        // Reinforce context only if needed to bring focus back
+        // Reinforce context only if needed to bring focus back - default was 15 - Tuning in Ver 2.1.9.4
         $iterationsSinceContextCheck++;
-        if ($iterationsSinceContextCheck >= 15 && $primaryKeyword) {
+        if ($iterationsSinceContextCheck >= 7 && $primaryKeyword) {
             $key = $primaryKeyword;
             $iterationsSinceContextCheck = 0;
         }
@@ -121,8 +122,8 @@ function checkKeyInDatabase($key, $attempts = 1) {
     $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word = %s", $key));
 
     // DIAG - Diagnostics - V 2.1.9
-    back_trace('NOTICE', 'Checking key: ' . $key . ' - Result: ' . $result);
-    back_trace('NOTICE', 'Attempts: ' . $attempts);
+    // back_trace('NOTICE', 'Checking key: ' . $key . ' - Result: ' . $result);
+    // back_trace('NOTICE', 'Attempts: ' . $attempts);
 
     // If no exact match is found, try using the wildcard approach
     if ($result === null) {
@@ -138,8 +139,8 @@ function checkKeyInDatabase($key, $attempts = 1) {
         $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word LIKE %s", $wildcardKey));
 
         // Diagnostic output to log the wildcard key generation and attempt number
-        back_trace('NOTICE', 'Attempt ' . $attempts . ': Wildcard key after shuffle - ' . $wildcardKey);
-        back_trace('NOTICE', 'Wildcard key result: ' . $result);
+        // back_trace('NOTICE', 'Attempt ' . $attempts . ': Wildcard key after shuffle - ' . $wildcardKey);
+        // back_trace('NOTICE', 'Wildcard key result: ' . $result);
 
         // Recursive call with incremented attempts if no result is found
         if ($result === null) {
@@ -148,6 +149,7 @@ function checkKeyInDatabase($key, $attempts = 1) {
     }
 
     return $result;
+
 }
 
 
@@ -184,8 +186,8 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
     }
 
     // Diagnostic output
-    back_trace('NOTICE', 'Checking current word: ' . $currentWord);
-    back_trace('NOTICE', 'Attempts: ' . $attempts);
+    // back_trace('NOTICE', 'Checking current word: ' . $currentWord);
+    // back_trace('NOTICE', 'Attempts: ' . $attempts);
 
     // Query to get possible next words and their frequencies
     $results = $wpdb->get_results(
@@ -209,8 +211,12 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
         return $b['frequency'] - $a['frequency'];
     });
 
-    // 80% chance to select the most frequent word
-    if (mt_rand(1, 100) <= 90) {
+    // Define the probability threshold to select the most frequent word
+    // You can adjust this value as needed - Tuning in Ver 2.1.9.4
+    $probabilityThreshold = esc_attr(get_option('chatbot_markov_chain_probability_threshold', 95));
+
+    // Probability or chance to select the most frequent word
+    if (mt_rand(1, 100) <= $probabilityThreshold) {
         return $results[0]['next_word']; // Return the most frequent word
     }
 
@@ -244,6 +250,46 @@ function getRandomWordFromDatabase() {
 }
 
 // Clean up the Markov Chain response for better readability
+// function clean_up_markov_chain_response($response) {
+
+//     // Trim whitespace and ensure first letter is capitalized
+//     $response = ucfirst(trim($response));
+
+//     // Step 1: Capitalize the first letter of each sentence
+//     $response = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function($matches) {
+//         return strtoupper($matches[1]);
+//     }, $response);
+
+//     // Step 2: Add punctuation at the end if missing
+//     if (!preg_match('/[.!?]$/', $response)) {
+//         $response .= '. ';
+//     }
+
+//     // Step 3: Replace multiple spaces with a single space
+//     $response = preg_replace('/\s+/', ' ', $response);
+
+//     // Step 4: Basic punctuation cleanup
+//     $response = preg_replace('/\s+([?.!,])/', '$1', $response);  // No space before punctuation
+//     $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response);  // Space after punctuation
+
+//     // Step 5: Fix grammar issues
+//     $response = fix_common_grammar_issues($response);
+
+//     // Step 6: Ensure the response starts with an alphanumeric character
+//     $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
+
+//     // Step 7: Additional punctuation and case fixes - Removed in Ver 2.1.9.3
+//     // Insert punctuation where a lowercase word is followed by a space and a word starting with an uppercase letter but is not in ALL CAPS
+//     // $response = preg_replace('/([a-z])\s+([A-Z][a-z]+)/', '$1. $2', $response);
+
+//     // Final check to ensure punctuation between phrases and correct spacing
+//     $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1 $2', $response);
+
+//     return $response;
+
+// }
+
+// Clean up the Markov Chain response for better readability
 function clean_up_markov_chain_response($response) {
 
     // Trim whitespace and ensure first letter is capitalized
@@ -256,15 +302,17 @@ function clean_up_markov_chain_response($response) {
 
     // Step 2: Add punctuation at the end if missing
     if (!preg_match('/[.!?]$/', $response)) {
-        $response .= '.';
+        $response .= '. ';
     }
 
     // Step 3: Replace multiple spaces with a single space
     $response = preg_replace('/\s+/', ' ', $response);
 
     // Step 4: Basic punctuation cleanup
+    // Ensure there’s no space before punctuation and that spaces after punctuation are managed correctly
     $response = preg_replace('/\s+([?.!,])/', '$1', $response);  // No space before punctuation
     $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response);  // Space after punctuation
+    $response = preg_replace('/([?.!,])\s+([\'"])/', '$1$2', $response);  // No space between punctuation and quote
 
     // Step 5: Fix grammar issues
     $response = fix_common_grammar_issues($response);
@@ -272,9 +320,12 @@ function clean_up_markov_chain_response($response) {
     // Step 6: Ensure the response starts with an alphanumeric character
     $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
 
-    // Step 7: Additional punctuation and case fixes
+    // Step 7: Handle words run together (e.g., "expertiseAnd")
+    $response = preg_replace('/([a-z])([A-Z])/', '$1 $2', $response);
+
+    // Step 8: Additional punctuation and case fixes - Removed in Ver 2.1.9.3
     // Insert punctuation where a lowercase word is followed by a space and a word starting with an uppercase letter but is not in ALL CAPS
-    $response = preg_replace('/([a-z])\s+([A-Z][a-z]+)/', '$1. $2', $response);
+    // $response = preg_replace('/([a-z])\s+([A-Z][a-z]+)/', '$1. $2', $response);
 
     // Final check to ensure punctuation between phrases and correct spacing
     $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1 $2', $response);
@@ -282,6 +333,7 @@ function clean_up_markov_chain_response($response) {
     return $response;
 
 }
+
 
 // Fix common grammar issues in the response
 function fix_common_grammar_issues($response) {

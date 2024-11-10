@@ -317,8 +317,8 @@ function buildMarkovChain($content) {
         // Generate the key by taking 'chainLength' number of words (e.g., 3 words)
         $key = implode(' ', array_slice($words, $i, $chainLength));
 
-        // Try remove non-alphanumeric characters from the key - Ver 2.1.9.1
-        $key = preg_replace("/[^\w\s']/u", '', $key);
+        // Try removing non-alphanumeric characters from the key - Ver 2.1.9.1
+        // $key = preg_replace("/[^\w\s']/u", '', $key);
         $key = preg_replace('/\s+/', ' ', $key); // Remove extra spaces
 
         // count words in $key

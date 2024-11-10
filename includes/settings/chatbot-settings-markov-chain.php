@@ -125,6 +125,7 @@ function chatbot_markov_chain_model_choice_callback($args) {
     ?>
     <select id="chatbot_markov_chain_model_choice" name="chatbot_markov_chain_model_choice">
         <option value="<?php echo esc_attr( 'markov-chain-2024-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2024-09-17' ); ?>><?php echo esc_html( 'markov-chain-2024-09-17' ); ?></option>
+        <option value="<?php echo esc_attr( 'markov-chain-2024-11-10' ); ?>" <?php selected( $model_choice, 'markov-chain-2024-11-10' ); ?>><?php echo esc_html( 'markov-chain-2024-11-10' ); ?></option>
     </select>
     <?php
 
