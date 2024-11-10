@@ -6,7 +6,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's new in Version 2.1.9
 
-* **Bug Fix**: Removed extra line brakes after the chatbot's response.
+* **Bug Fix**: Removed extra line breaks after the chatbot's response.
 
 ## What's new in Version 2.1.8
 
