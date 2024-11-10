@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.1.8
+ * Version:     2.1.9
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -30,7 +30,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.1.8';
+$chatbot_chatgpt_plugin_version = '2.1.9';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -112,6 +112,11 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
 
+// Include necessary files - Markov Chain - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-decode.php'; // Functions - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-encode.php'; // Functions - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-scheduler.php'; // Functions - Ver 2.1.9
+
 // Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
@@ -148,9 +153,6 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-decode.php'; // Functions - Ver 2.1.6
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-encode.php'; // Functions - Ver 2.1.6
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-markov-chain-scheduler.php'; // Functions - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php'; // Functions - Ver 2.0.5
@@ -191,10 +193,21 @@ global $voice;
 
 // FIXME - SEE AI Platform Selection setting - Ver 2.1.8
 if (esc_attr(get_option('chatbot_ai_platform_choice')) === null) {
+
+    $chatbot_ai_platform_choice = 'OpenAI';
     update_option('chatbot_ai_platform_choice', 'OpenAI');
     update_option('chatbot_chatgpt_api_enabled', 'Yes');
+    $chatbot_chatgpt_api_enabled = 'Yes';
+
     update_option('chatbot_nvidia_api_enabled', 'No');
+    $chatbot_nvidia_api_enabled = 'No';
+
     update_option('chatbot_markov_chain_api_enabled', 'No');
+    $chatbot_nvidia_api_enabled = 'No';
+    
+    update_option('chatbot_anthropic_api_enabled', 'No');
+    $chatbot_anthropic_api_enabled = 'No';
+
 }
 
 $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));

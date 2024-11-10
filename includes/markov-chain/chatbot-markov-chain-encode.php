@@ -57,6 +57,8 @@ function runMarkovChatbotAndSaveChain() {
     // Step 8: Get all published content (posts, pages, and comments) that have been updated after the last Markov Chain update
     $content = getAllPublishedContent($last_updated, $batch_starting_point, $batch_size, $processing_type);
 
+    $content = getAllPublishedContent($last_updated, $batch_starting_point, $batch_size, 'synthetic');
+
     // FIXME - This function needs to be scheduled to run after the chain is built
     // Step 9: Report the results of the Markov Chain build
     $stats = getDatabaseStats('chatbot_markov_chain');
@@ -156,9 +158,24 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
     back_trace( 'NOTICE', 'Last Updated: ' . $last_updated);
     back_trace( 'NOTICE', 'Processing Type: ' . $processing_type);
-    error_log( 'Batch Size: ' . $batch_size);
-    error_log( 'Last Updated: ' . $last_updated);
-    error_log( 'Processing Type: ' . $processing_type);
+
+    // Syntheic Data Generation
+    if ($processing_type == 'synthetic') {
+
+        // DIAG - Diagnostics - Ver 2.1.8
+        back_trace( 'NOTICE', 'Synthetic Data Generation and Processing');
+
+        // Generate synthetic data for the Markov Chain
+        $syntheticData = chatbot_markov_chain_synthetic_data_generation();
+
+        // Clean up the post content for better Markov Chain processing
+        $clean_content = clean_up_training_data($syntheticData);
+        $content = $clean_content;
+
+        // Build the Markov Chain with the current batch content
+        buildMarkovChain($content);
+
+    }
 
     // Process posts first
     if ($processing_type == 'posts') {
@@ -256,7 +273,7 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
         // If more comments are available, schedule the next comment batch
         if (count($comments) === $batch_size) {
             $next_batch_starting_point = $batch_starting_point + 1;
-            wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array(serialize(array($last_updated, $next_batch_starting_point, $batch_size, 'posts'))));
+            wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array(serialize(array($last_updated, $next_batch_starting_point, $batch_size, 'comments'))));
             back_trace( 'NOTICE', 'getAllPublishedContent - Scheduled next comment batch #' . $next_batch_starting_point);
         } else {
             back_trace( 'NOTICE', 'getAllPublishedContent - Comments done');
@@ -266,6 +283,9 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
 
     // Update the last updated timestamp
     updateMarkovChainTimestamp();
+
+    // Set the status as complete - Ver 2.1.9.1
+    update_option('chatbot_markov_chain_build_schedule', 'Completed');
 
     // DIAG - Diagnostics
     back_trace( 'NOTICE', 'getAllPublishedContent - End');
@@ -286,28 +306,32 @@ function buildMarkovChain($content) {
     $words = preg_split('/\s+/', $content);
     
     // Correctly retrieve the chain length (key size) from the database
-    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 2));  // Default to 2 (for two-word key) if not set
+    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3));  // Default to 3 (for a three-word key) if not set
 
     // Set the phrase size for the next part of the Markov Chain
-    $phraseSize = esc_attr(get_option('chatbot_markov_chain_next_phrase_length', 2));  // Default to 2 (for four-word phrase) if not set
+    $phraseSize = esc_attr(get_option('chatbot_markov_chain_next_phrase_length', 1));  // Default to 1 (for a four-word phrase) if not set
 
     // Build and save the Markov Chain
     for ($i = 0; $i < count($words) - ($chainLength + $phraseSize - 1); $i++) {
 
-        // Generate the key by taking 'chainLength' number of words (e.g., 2 words)
+        // Generate the key by taking 'chainLength' number of words (e.g., 3 words)
         $key = implode(' ', array_slice($words, $i, $chainLength));
 
+        // Try removing non-alphanumeric characters from the key - Ver 2.1.9.1
+        // $key = preg_replace("/[^\w\s']/u", '', $key);
+        $key = preg_replace('/\s+/', ' ', $key); // Remove extra spaces
+
         // count words in $key
-        $key_word_count = str_word_count($key);
+        $key_word_count = is_string($key) ? str_word_count($key) : 0;
         if ($key_word_count < $chainLength) {
             // Skip this iteration if the key does not have enough words
             continue;
         }
 
-        // Remove non-alphanumeric characters from the key
-        $key = preg_replace("/[^a-zA-Z0-9\s]/", '', $key);
+        // Remove non-alphanumeric characters from the key - punctuation is important for the Markov Chain
+        // $key = preg_replace("/[^a-zA-Z0-9\s]/", '', $key);
         
-        // Generate the next phrase by taking 'phraseSize' number of words after the key (e.g., 2 words)
+        // Generate the next phrase by taking 'phraseSize' number of words after the key (e.g., 3 + 1 words)
         $nextPhrase = implode(' ', array_slice($words, $i + $chainLength, $phraseSize));
 
         // Check if this word and next phrase combination already exists in the database
@@ -434,5 +458,43 @@ function getDatabaseStats($table_name) {
         'row_count' => $row_count,
         'table_size_mb' => $table_size
     ];
+
+}
+
+// Syntheic Data Generation
+function chatbot_markov_chain_synthetic_data_generation() {
+
+    // DIAG - Diagnostics - Ver 2.1.9
+    back_trace( 'NOTICE', 'chatbot_markov_chain_synthetic_data_generation - Start');
+
+    $syntheticData = '';
+
+    // Open the file containing the synthetic data
+    $syntheticDataModel = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
+    $syntheticDataFile = plugin_dir_path(__FILE__) . $syntheticDataModel . '.txt';
+
+    // DIAG - Diagnostics - Ver 2.1.9
+    back_trace( 'NOTICE', 'Synthetic Data File: ' . $syntheticDataFile);
+
+    // Read the synthetic data from the file
+    $syntheticData = file_get_contents($syntheticDataFile);
+
+    if ($syntheticData === false) {
+
+        prod_trace('ERROR', 'Failed to read synthetic data file');
+        return '';
+
+    } else {
+
+        // DIAG - Diagnostics - Ver 2.1.9
+        // back_trace( 'NOTICE', 'Synthetic Data: ' . $syntheticData);
+        prod_trace( 'NOTICE', 'Synthetic Data read successfully');
+
+    }
+
+    // DIAG - Diagnostics - Ver 2.1.9
+    back_trace( 'NOTICE', 'chatbot_markov_chain_synthetic_data_generation - End');
+
+    return $syntheticData;
 
 }

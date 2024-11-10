@@ -39,7 +39,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
-    $model = 'markov-chain-2024-09-17';
+    $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
@@ -170,7 +170,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     ];
 
     // Retrieve max tokens from the settings
-    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_markov_chain_max_tokens', '500')));
 
     // Check if the Markov Chain exists
     // if (empty($markovChain)) {
