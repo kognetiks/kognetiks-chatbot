@@ -1161,6 +1161,14 @@ jQuery(document).ready(function ($) {
     $('#chatbot-chatgpt-upload-file-input').on('change', function(e) {
 
         // console.log('Chatbot: NOTICE: File selected');
+
+        let user_id = kchat_settings.user_id;
+        let session_id = kchat_settings.session_id;
+        let page_id = kchat_settings.page_id;
+
+        // console.log('Chatbot: NOTICE: user_id: ' + user_id);
+        // console.log('Chatbot: NOTICE: session_id: ' + session_id);
+        // console.log('Chatbot: NOTICE: page_id: ' + page_id);
         
         let fileField = e.target;
     
@@ -1193,6 +1201,9 @@ jQuery(document).ready(function ($) {
         }
         // console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_files');
+        formData.append('user_id', user_id); // Add user_id to FormData
+        formData.append('page_id', page_id); // Add page_id to FormData
+        formData.append('session_id', session_id); // Add session_id to FormData
     
         $.ajax({
             url: kchat_settings.ajax_url,

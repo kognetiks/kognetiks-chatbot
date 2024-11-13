@@ -78,7 +78,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
     // back_trace( 'NOTICE', '========================================');
     // foreach ($atts as $key => $value) {
-    //     back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    //     // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     // }
     // back_trace( 'NOTICE', '========================================');
    
@@ -114,7 +114,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
     // back_trace( 'NOTICE', '========================================');
     // foreach ($kchat_settings as $key => $value) {
-    //     back_trace( 'NOTICE', '$kchat_settings - Key: ' . $key . ' Value: ' . $value);
+    //     // back_trace( 'NOTICE', '$kchat_settings - Key: ' . $key . ' Value: ' . $value);
     // }
     // back_trace( 'NOTICE', '========================================');
 
@@ -302,7 +302,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // One bot per page, embedded over floating - Ver 2.1.6
     // if ($kchat_settings['chatbot_chatgpt_display_style'] == 'floating' && $temp_chatbot_chatgpt_display_style == 'embedded') {
-    //     back_trace( 'NOTICE', 'Embedded style selected over floating style');
+    //     // back_trace( 'NOTICE', 'Embedded style selected over floating style');
     //     // End the shortcode processing
     //     // return;
     //     // $atts['style'] = 'embedded';
@@ -563,7 +563,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // FIXME - Check for the presence of an embedded chatbot - Ver 2.1.7
     // back_trace( 'NOTICE', 'get_chatbot_chatgpt_transients: ' . get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id));
     // if (get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id) == 'embedded') {
-    //     back_trace( 'NOTICE', 'Embedded chatbot detected');
+    //     // back_trace( 'NOTICE', 'Embedded chatbot detected');
     //     $chatbot_chatgpt_display_style = 'embedded';
     //     return;
     // }

@@ -671,7 +671,7 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', '========================================');
     // foreach ($kchat_settings as $key => $value) {
-    //      back_trace( 'NOTICE', '$kchat_settings[' . $key . ']: ' . $value);
+    //      // back_trace( 'NOTICE', '$kchat_settings[' . $key . ']: ' . $value);
     // }
 
     // Assistants

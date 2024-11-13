@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, artificial intelligence
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.6.2
+Tested up to: 6.7
 Stable tag: 2.2.0
 Requires PHP: 7.0
 License: GPLv3 or later

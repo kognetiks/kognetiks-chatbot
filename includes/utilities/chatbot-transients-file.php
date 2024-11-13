@@ -16,12 +16,11 @@ if ( ! defined( 'WPINC' ) ) {
 // Set the transients based on the type - Ver 1.8.1
 function set_chatbot_chatgpt_transients_files( $transient_type, $transient_value, $session_id, $file_no ) {
 
-
-    global $session_id;
-    global $user_id;
-    global $page_id;
-    global $thread_id;
-    global $assistant_id;
+    // global $session_id;
+    // global $user_id;
+    // global $page_id;
+    // global $thread_id;
+    // global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
     // back_trace( 'NOTICE', 'SET $transient_type: ' . $transient_type);
@@ -38,16 +37,16 @@ function set_chatbot_chatgpt_transients_files( $transient_type, $transient_value
 
 // Get the transients based on the type - Ver 1.8.1
 function get_chatbot_chatgpt_transients_files( $transient_type, $session_id, $file_no ): string {
-
     
-    global $session_id;
-    global $user_id;
-    global $page_id;
-    global $thread_id;
-    global $assistant_id;
+    // global $session_id;
+    // global $user_id;
+    // global $page_id;
+    // global $thread_id;
+    // global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
     // back_trace( 'NOTICE', 'GET $transient_type: ' . $transient_type);
+    // back_trace( 'NOTICE', 'GET $session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'GET $file_no: ' . $file_no);
 
     // Construct the transient key based on the transient type
@@ -67,11 +66,11 @@ function delete_chatbot_chatgpt_transients_files( $transient_type, $session_id, 
 
     // FIXME - DECIDE - Should we delete the transients
 
-    global $session_id;
-    global $user_id;
-    global $page_id;
-    global $thread_id;
-    global $assistant_id;
+    // global $session_id;
+    // global $user_id;
+    // global $page_id;
+    // global $thread_id;
+    // global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
     // back_trace( 'NOTICE', 'DEL $transient_type: ' . $transient_type);

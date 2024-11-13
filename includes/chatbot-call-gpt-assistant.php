@@ -63,12 +63,47 @@ function createAnAssistant($api_key) {
 function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+    
+    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    $user_id = get_current_user_id();
+    // Fetch the Kognetiks cookie
+    if (empty($session_id) || $session_id == 0) {
+        $session_id = kognetiks_get_unique_id();
+    }
+    // $session_id = kognetiks_get_unique_id();
+    if (empty($user_id) || $user_id == 0) {
+        $user_id = $session_id;
+    }
 
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', 'Step 3: addAMessage()');
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$prompt: ' . $prompt);
     // back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
+
+    // Belt and suspenders - Ver 2.2.0 - 2024 11 12
+    if (empty($file_id)) {
+        // Try to get the file_id from the transients
+        if ( $page_id == null) {
+            // Try 999999
+            $page_id = 999999;
+        }
+        // back_trace( 'NOTICE', 'BEFORE FETCHING FILE ID');
+        // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+        // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+        $file_id = chatbot_chatgpt_retrieve_file_id( $user_id, $page_id );
+        // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
+        // back_trace( 'NOTICE', 'AFTER FETCHING FILE ID');
+    }
+
     // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     // Set the URL
@@ -107,7 +142,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
         // No files attached, just send the prompt
         $data = [
-            'role' => 'user',
+            // 'role' => 'user',
             'content' => [
                 [
                     'type' => 'text',
@@ -124,13 +159,14 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
         // Decide which helper to use
         // *********************************************************************************
 
-        // FIXME - Retrieve the first item file type - assumes they are all the same, not mixed
-        $file_type = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_type', $session_id, $file_id[0]);
-        $file_type = $file_type ? $file_type : 'unknown';
-    
+        // Retrieve the first item file type - assumes they are all the same, not mixed
+        $file_key = $file_id[0]; // Get the value of the first element
+        $file_type = isset($file_id[$file_key]) ? $file_id[$file_key] : 'assistant'; // Retrieve the value associated with the key
+
+
         // DIAG - Diagnostics - Ver 2.0.3
-        // back_trace( 'NOTICE', '========================================');
-        // back_trace( 'NOTICE', '$file_type: ' . $file_type);
+        // back_trace('NOTICE', '========================================');
+        // back_trace('NOTICE', '$file_type: ' . $file_type);
 
         // *********************************************************************************
         // NON-IMAGE ATTACHMENTS - Ver 2.0.3
@@ -138,6 +174,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
         if ( $file_type == 'assistants' ) {
             $data = chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version);
+            // back_trace( 'NOTICE', 'chatbot_chatgpt_text_attachment()' . print_r($data, true));
         }
 
         // *********************************************************************************
@@ -146,16 +183,14 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
         if ( $file_type == 'vision' ) {
             $data = chatbot_chatgpt_image_attachment($prompt, $file_id, $beta_version);
+            // back_trace( 'NOTICE', 'chatbot_chatgpt_image_attachment()' . print_r($data, true));
         }
 
     }
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', '========================================');
-    // back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
-    // back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
     // back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));
-    // back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
 
     // Initialize cURL session
     $ch = curl_init();
@@ -170,6 +205,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // Execute cURL session
     $response = curl_exec($ch);
 
+    // back_trace( 'NOTICE', 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r($response, true));
 
@@ -911,6 +947,10 @@ function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id ) {
     global $thread_id;
     global $assistant_id;
 
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+
     $counter = 0;
     $file_ids = [];
     $file_types = [];
@@ -919,8 +959,11 @@ function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id ) {
     $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $file_id);
 
     // DIAG - Diagnostics - Ver 2.0.3
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_types, true));
+    // back_trace( 'NOTICE', '$file_id: ' . print_r(get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $user_id, $counter), true));
+    // back_trace( 'NOTICE', '$file_types: ' . print_r(get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $user_id, $file_id), true));
+
+    // back_trace( 'NOTICE', '$file_id(): ' . $file_id);
+    // back_trace( 'NOTICE', '$file_types(): ' . $file_types);
 
     while (!empty($file_id)) {
         // Delete the transient

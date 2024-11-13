@@ -16,9 +16,26 @@ if ( ! defined( 'WPINC' ) ) {
 // Upload Multiple files to the Assistant
 function chatbot_chatgpt_upload_files() {
 
-    global $chatbot_chatgpt_plugin_dir_path;
-
     global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+
+    global $kchat_settings;
+    global $additional_instructions;
+    global $model;
+    global $voice;
+    
+    if (empty($session_id) || $session_id == 0) {
+        $session_id = isset($_POST['session_id']) ? $_POST['session_id'] : null;
+        $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
+    }
+    
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
+
+    global $chatbot_chatgpt_plugin_dir_path;
 
     $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
 
@@ -102,7 +119,11 @@ function chatbot_chatgpt_upload_files() {
             // ***************************************************************************
 
             $file_mime_type = mime_content_type($file_path);
-            $purpose = strpos($file_mime_type, 'image/') === 0 ? 'vision' : 'assistants';
+            if ($file_mime_type === 'image/') {
+                $purpose = 'vision';
+            } else {
+                $purpose = 'assistants';
+            }
 
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, get_files_api_url());
@@ -138,6 +159,12 @@ function chatbot_chatgpt_upload_files() {
                     );
                     // back_trace( 'ERROR', 'API error: ' . $errorMessage);
                 } else {
+
+                    // back_trace( 'NOTICE', 'File ' . $newFileName . ' uploaded successfully. ID: ' . $responseData['id']);
+                    // back_trace( 'NOTICE', 'Purpose: ' . $purpose);
+                    // back_trace( 'NOTICE', 'Session ID: ' . $session_id);
+                    // back_trace( 'NOTICE', 'File No: ' . $i);
+
                     set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $responseData['id'], $session_id, $i);
                     set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $purpose, $session_id,  $responseData['id']);
                     $responses[] = array(
@@ -152,6 +179,7 @@ function chatbot_chatgpt_upload_files() {
 
             unlink($file_path); // Delete the file after successful upload
             curl_close($ch);
+
         }
 
         return $responses;
@@ -163,8 +191,8 @@ function chatbot_chatgpt_upload_files() {
             'message' => 'Oops! Please select a file to upload.'
         );
     }
-}
 
+}
 
 // Handle Large Files - Ver 2.0.3
 function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
@@ -221,20 +249,32 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
 // Upload files - Ver 2.0.1
 function chatbot_chatgpt_upload_mp3() {
 
-    global $chatbot_chatgpt_plugin_dir_path;
-
     global $session_id;
     global $user_id;
     global $page_id;
     global $thread_id;
     global $assistant_id;
+
     global $kchat_settings;
     global $additional_instructions;
     global $model;
     global $voice;
+    
+    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    $user_id = get_current_user_id();
+    // Fetch the Kognetiks cookie
+    if (empty($session_id) || $session_id == 0) {
+        $session_id = kognetiks_get_unique_id();
+    }
+    // $session_id = kognetiks_get_unique_id();
+    if (empty($user_id) || $user_id == 0) {
+        $user_id = $session_id;
+    }
 
     global $chatbot_chatgpt_display_style;
     global $chatbot_chatgpt_assistant_alias;
+
+    global $chatbot_chatgpt_plugin_dir_path;
 
     $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
 
