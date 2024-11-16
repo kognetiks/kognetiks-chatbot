@@ -143,7 +143,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-rep
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-support.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-tools.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-transformer-model.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-transformer.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
 // Include necessary files - Utilities - Ver 1.9.0
