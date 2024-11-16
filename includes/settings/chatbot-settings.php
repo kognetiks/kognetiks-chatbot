@@ -252,6 +252,33 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_markov_chain_advanced_settings');
                 echo '</div>';
 
+            } elseif ($active_tab == 'gpt_assistants' && $chatbot_ai_platform_choice == 'Transformer') {
+
+                settings_fields('chatbot_chatgpt_transformer');
+
+                // Transformer Settings - Ver 2.2.0
+
+                // Transformer Model Settings - Ver 2.2.0
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_transformer_model_settings_general');
+                echo '</div>';
+
+                // Transformer API Settings - Ver 2.2.0
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_transformer_api_model_general');
+                echo '</div>';
+
+                // Transformer Chat Settings - Ver 2.2.0
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_transformer_api_model_chat_settings');
+                echo '</div>';
+
+                // Transformer Advanced Settings - Ver 2.2.0
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_transformer_api_model_advanced');
+                echo '</div>';
+
+
             } elseif ($active_tab == 'gpt_assistants' && $chatbot_ai_platform_choice == 'OpenAI') {
 
                 settings_fields('chatbot_chatgpt_custom_gpts');

@@ -8,25 +8,25 @@
  */
 
 // If this file is called directly, abort.
-// if ( ! defined( 'WPINC' ) ) {
-//     die();
-// }
+if ( ! defined( 'WPINC' ) ) {
+    die();
+}
 
 // Load WordPress Environment
-echo "Loading WordPress Environment...<br>";
-$wp_load_path = "D:/XAMPP/htdocs/wpdev/wp-load.php";
-if (file_exists($wp_load_path)) {
-    require_once($wp_load_path);
-} else {
-    exit('Could not find wp-load.php');
-}
+// echo "Loading WordPress Environment...<br>";
+// $wp_load_path = "D:/XAMPP/htdocs/wpdev/wp-load.php";
+// if (file_exists($wp_load_path)) {
+//     require_once($wp_load_path);
+// } else {
+//     exit('Could not find wp-load.php');
+// }
 
 // Example Usage
 // $inputSentence = "How are you?";
-$inputSentence = "When in Rome, do as the Romans do.";
-$response = transformer_chatbot_response($inputSentence);
-echo "Input: $inputSentence" . "<br>";
-echo "Response: $response" . "<br>";
+// $inputSentence = "When in Rome, do as the Romans do.";
+// $response = transformer_model_response($inputSentence);
+// echo "Input: $inputSentence" . "<br>";
+// echo "Response: $response" . "<br>";
 
 // Transformer function to read WordPress page and post content
 function transformer_fetch_wordpress_content() {
@@ -177,10 +177,10 @@ function transformer_generate_contextual_response($input, $embeddings, $corpus, 
 }
 
 // Transform input sentence into a response
-function transformer_chatbot_response($input) {
+function transformer_model_response( $input, $max_tokens = 50) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    back_trace('NOTICE', 'transformer_chatbot_response');
+    back_trace('NOTICE', 'transformer_model_response');
 
     // Fetch WordPress content
     $corpus = transformer_fetch_wordpress_content();
@@ -192,6 +192,6 @@ function transformer_chatbot_response($input) {
     $response = transformer_generate_contextual_response($input, $embeddings, $corpus);
 
     return $response;
-    
+
 }
 

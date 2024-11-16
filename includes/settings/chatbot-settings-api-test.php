@@ -25,14 +25,33 @@ if ( ! defined( 'WPINC' ) ) {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', 'NOT SET'));
         // Model and message for testing
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+        $updated_status = chatbot_test_api($api_key, $model);
+        update_option('chatbot_chatgpt_api_status', $updated_status);
     } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
         update_option('chatbot_nvidia_api_status', 'API Error Type: Status Unknown');
         $api_key = esc_attr(get_option('chatbot_nvidia_api_key', 'NOT SET'));
         // Model and message for testing
         $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
+        $updated_status = chatbot_test_api($api_key, $model);
+        update_option('chatbot_nvidia_api_status', $updated_status);
     } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
+        $updated_status = 'API Testing Not Required';
         update_option('chatbot_markov_chain_api_status', 'API Error Type: Status Unknown');
+        update_option('chatbot_markov_chain_api_status', $updated_status);
+    } elseif ($chatbot_ai_platform_choice == 'Transformer') {
+        $updated_status = 'API Testing Not Required';
+        update_option('chatbot_transformer_api_status', 'API Error Type: Status Unknown');
+        update_option('chatbot_transformer_api_status', $updated_status);
+    } else {
+        $updated_status = 'API Error Type: Platform Choice Invalid';
     }
+
+    return $updated_status;
+
+}
+
+// FIXME - TEST THE ASSISTANT IF PROVIDED - Ver 1.6.7
+function chatbot_test_api($api_key, $model) {
 
     // The current API URL endpoint
     // $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -102,19 +121,9 @@ if ( ! defined( 'WPINC' ) ) {
         // back_trace( 'ERROR', 'API Status: ' . $updated_status);
     }
 
-    if ($chatbot_ai_platform_choice == 'OpenAI') {
-        update_option('chatbot_chatgpt_api_status', $updated_status);
-    } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
-        update_option('chatbot_nvidia_api_status', $updated_status);
-    } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
-        update_option('chatbot_markov_chain_api_status', $updated_status);
-    }
-
     return $updated_status;
 
 }
-
-// FIXME - TEST THE ASSISTANT IF PROVIDED - Ver 1.6.7
 
 // This function is executed whenever any option is updated
 function chatgpt_option_updated($option_name, $old_value, $new_value) {

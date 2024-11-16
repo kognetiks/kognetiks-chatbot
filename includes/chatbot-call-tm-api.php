@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the Anthropic API
-function chatbot_chatgpt_call_transformer_model_api($message) {
+function chatbot_chatgpt_call_transformer_api($message) {
 
     global $session_id;
     global $user_id;
@@ -31,15 +31,15 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_calll_transformer_model_api()');
+    // DIAG - Diagnostics - Ver 2.2.0
+    back_trace( 'NOTICE', 'chatbot_calll_transformer_model_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
-    $model = esc_attr(get_option('chatbot_transformer_model_model_choice', 'markov-chain-2024-09-17'));
+    $model = esc_attr(get_option('chatbot_transformer_model_choice', 'transformer-model-2024-11-16'));
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
@@ -150,10 +150,12 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     // back_trace( 'NOTICE', '$message: ' . $message);
 
     // Convert $message to an array (this will be used as a starting point)
-    $mc_message = explode(' ', $message);
+    // $transformer_message = explode(' ', $message);
+    $transformer_message = $message;
 
     // Remove the stop words from the message
-    // $mc_message = array_diff($mc_message, $stopWords);
+    // $transformer_message = array_diff($transformer_message, $stopWords);
+
 
     // Initialize the $response_body array to hold the API response
     $response_body = [
@@ -172,29 +174,8 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     // Retrieve max tokens from the settings
     $max_tokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', '500')));
 
-    // Check if the Markov Chain exists
-    // if (empty($markovChain)) {
-    //     // If no Markov Chain found, return an error code and message
-    //     $response_body['choices'][0]['message']['content'] = 'No Markov Chain found.';
-    //     $response_body['response']['code'] = 500; // Internal server error
-    // } else {
-    //     // Call the Markov Chain generator using the retrieved Markov Chain and user input
-    //     $response = generateMarkovText($mc_message, $max_tokens);
-
-    //     // Prepare the response body
-    //     $response_body['choices'][0]['message']['content'] = trim($response);
-
-    //     // Ensure the message ends with a period
-    //     if (!str_ends_with($response_body['choices'][0]['message']['content'], '.')) {
-    //         $response_body['choices'][0]['message']['content'] .= '.';
-    //     }
-
-    //     // Set the success response code
-    //     $response_body['response']['code'] = 200; // Success code
-    // }
-
-    // Call the Markov Chain generator using the retrieved Markov Chain and user input
-    $response = generateMarkovText($mc_message, $max_tokens);
+    // Call the transformer model with the user input
+    $response = transformer_model_response($transformer_message, $max_tokens);
 
     if (!empty($response)) {
         // Prepare the response body
