@@ -73,6 +73,10 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting Anthropic options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_anthropic%'");
 
+        // Delete Transformer options
+        // back_trace( 'NOTICE', 'Deleting Transformer options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_transformer_model%'");
+
         // Delete ChatGPT tables
         // back_trace( 'NOTICE', 'Deleting tables');
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_assistants");
@@ -90,6 +94,14 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting Markov Chain tables');
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_markov_chain");
 
+        // Delete Anthropic tables
+        // back_trace( 'NOTICE', 'Deleting Anthropic tables');
+        // NONE CURRENTLY - Ver 2.2.0
+
+        // Delete Transformer tables
+        // back_trace( 'NOTICE', 'Deleting Transformer tables');
+        // NONE CURRENTLY - Ver 2.2.0
+
         // Delete ChatGPT transients
         // back_trace( 'NOTICE', 'Deleting transients');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_chatgpt%' OR option_name LIKE '_transient_timeout_chatbot_chatgpt%'");
@@ -101,6 +113,14 @@ function chatbot_chatgpt_uninstall(){
         // Delete Markov Chain transients
         // back_trace( 'NOTICE', 'Deleting Markov Chain transients');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_markov%' OR option_name LIKE '_transient_timeout_chatbot_markov%'");
+
+        // Delete Anthropic transients
+        // back_trace( 'NOTICE', 'Deleting Anthropic transients');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_anthropic%' OR option_name LIKE '_transient_timeout_chatbot_anthropic%'");
+
+        // Delete Transformer transients
+        // back_trace( 'NOTICE', 'Deleting Transformer transients');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_transformer_model%' OR option_name LIKE '_transient_timeout_chatbot_transformer_model%'");
 
         // Delete any scheduled cron events
         // back_trace( 'NOTICE', 'Deleting cron events');

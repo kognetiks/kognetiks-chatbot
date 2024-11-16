@@ -12,22 +12,6 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Load WordPress Environment
-// echo "Loading WordPress Environment...<br>";
-// $wp_load_path = "D:/XAMPP/htdocs/wpdev/wp-load.php";
-// if (file_exists($wp_load_path)) {
-//     require_once($wp_load_path);
-// } else {
-//     exit('Could not find wp-load.php');
-// }
-
-// Example Usage
-// $inputSentence = "How are you?";
-// $inputSentence = "When in Rome, do as the Romans do.";
-// $response = transformer_model_response($inputSentence);
-// echo "Input: $inputSentence" . "<br>";
-// echo "Response: $response" . "<br>";
-
 // Transformer function to read WordPress page and post content
 function transformer_fetch_wordpress_content() {
 

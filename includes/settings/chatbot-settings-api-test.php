@@ -40,8 +40,8 @@ if ( ! defined( 'WPINC' ) ) {
         update_option('chatbot_markov_chain_api_status', $updated_status);
     } elseif ($chatbot_ai_platform_choice == 'Transformer') {
         $updated_status = 'API Testing Not Required';
-        update_option('chatbot_transformer_api_status', 'API Error Type: Status Unknown');
-        update_option('chatbot_transformer_api_status', $updated_status);
+        update_option('chatbot_transformer_model_api_status', 'API Error Type: Status Unknown');
+        update_option('chatbot_transformer_model_api_status', $updated_status);
     } else {
         $updated_status = 'API Error Type: Platform Choice Invalid';
     }

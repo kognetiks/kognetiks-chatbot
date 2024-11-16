@@ -143,6 +143,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-rep
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-support.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-tools.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-transformer-model.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
 // Include necessary files - Utilities - Ver 1.9.0
@@ -196,31 +197,10 @@ global $model;
 global $voice;
 
 // FIXME - SEE AI Platform Selection setting - Ver 2.1.8
-if (esc_attr(get_option('chatbot_ai_platform_choice')) === null) {
-
-    $chatbot_ai_platform_choice = 'OpenAI';
-    update_option('chatbot_ai_platform_choice', 'OpenAI');
-    update_option('chatbot_chatgpt_api_enabled', 'Yes');
-    $chatbot_chatgpt_api_enabled = 'Yes';
-
-    update_option('chatbot_nvidia_api_enabled', 'No');
-    $chatbot_nvidia_api_enabled = 'No';
-
-    update_option('chatbot_markov_chain_api_enabled', 'No');
-    $chatbot_nvidia_api_enabled = 'No';
-
-    update_option('chatbot_transformer_model_api_enabled', 'No');
-    $chatbot_transformer_model_api_enabled = 'No';
-    
-    update_option('chatbot_anthropic_api_enabled', 'No');
-    $chatbot_anthropic_api_enabled = 'No';
-
-}
-
 $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
 // OpenAI ChatGPT API Enabled - Ver 2.1.8
-if ($chatbot_ai_platform_choice == 'OpenAI') {
+if ($chatbot_ai_platform_choice == 'OpenAI' || $chatbot_ai_platform_choice === null) {
 
     $chatbot_chatgpt_api_enabled = 'Yes';
     update_option('chatbot_chatgpt_api_enabled', 'Yes');
@@ -244,6 +224,8 @@ if ($chatbot_ai_platform_choice == 'OpenAI') {
         update_option('chatbot_chatgpt_model_choice', $model);
         // DIAG - Diagnostics
         back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    } elseif (empty($model)) {
+        $model = 'gpt-4-1106-preview';
     }
 
     // Voice choice - Ver 1.9.5
@@ -273,6 +255,8 @@ if ($chatbot_ai_platform_choice == 'OpenAI') {
         update_option('chatbot_nvidia_model_choice', $model);
         // DIAG - Diagnostics
         back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    } elseif (empty($model)) {
+        $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
     }
 
 // Markov Chain API Enabled - Ver 2.1.8
@@ -294,6 +278,8 @@ if ($chatbot_ai_platform_choice == 'OpenAI') {
         update_option('chatbot_markov_chain_model_choice', $model);
         // DIAG - Diagnostics
         back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    } elseif (empty($model)) {
+        $model = 'markov-chain-2024-09-17';
     }
     
 } elseif ($chatbot_ai_platform_choice == 'Transformer') {
@@ -313,10 +299,12 @@ if ($chatbot_ai_platform_choice == 'OpenAI') {
 
     // Model choice - Ver 2.2.0
     if (get_option('chatbot_transformer_model_choice') === null) {
-        $model = 'transformer-2024-11-16';
+        $model = 'transformer-model-2024-11-16';
         update_option('chatbot_transformer_model_choice', $model);
         // DIAG - Diagnostics
         back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+    } elseif (empty($model)) {
+        $model = 'transformer-model-2024-11-16';
     }
 
 }
@@ -1139,6 +1127,39 @@ function chatbot_markov_chain_status_deactivation() {
 
 }
 register_deactivation_hook(__FILE__, 'chatbot_markov_chain_status_deactivation');
+
+// Transformer Model builder - Activation Hook - Ver 2.2.0
+function chatbot_transformer_model_status_activation() {
+
+    // DIAG - Diagnostics - Ver 2.2.0
+    // back_trace( 'NOTICE', 'Transformer Model Status Activation');
+
+    // Add the option for build status with a default value of 'Never Run'
+    add_option('chatbot_transformer_model_build_status', 'Never Run');
+
+    // Clear any old scheduled runs, if present
+    if (wp_next_scheduled('chatbot_transformer_model_scan_hook')) {
+        // BREAK/FIX - Do not unset the hook - Ver 2.2.0
+        // wp_clear_scheduled_hook('chatbot_transformer_model_scan_hook'); // Clear scheduled runs
+    }
+
+}
+register_activation_hook(__FILE__, 'chatbot_transformer_model_status_activation');
+
+// Clean up scheduled events and options - Deactivation Hook
+function chatbot_transformer_model_status_deactivation() {
+
+    // DIAG - Diagnostics - Ver 2.2.0
+    // back_trace( 'NOTICE', 'Transformer Model Status Deactivation');
+
+    // Delete the build status option on deactivation
+    delete_option('chatbot_transformer_model_build_status');
+
+    // Clear any scheduled events related to the Transformer Model scan
+    wp_clear_scheduled_hook('chatbot_transformer_model_scan_hook');
+
+}
+register_deactivation_hook(__FILE__, 'chatbot_transformer_model_status_deactivation');
 
 // Function to add a new message and response, keeping only the last five - Ver 1.6.1
 function addEntry($transient_name, $newEntry) {

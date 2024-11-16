@@ -57,8 +57,8 @@ function chatbot_ai_platform_choice_callback($args) {
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_nvidia_api_enabled = 'No';
 
-        update_option('chatbot_transformer_api_enabled', 'No');
-        $chatbot_transformer_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
         
         update_option('chatbot_anthropic_api_enabled', 'No');
         $chatbot_anthropic_api_enabled = 'No';
@@ -76,8 +76,8 @@ function chatbot_ai_platform_choice_callback($args) {
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_markov_chain_api_enabled = 'No';
 
-        update_option('chatbot_transformer_api_enabled', 'No');
-        $chatbot_transformer_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
         
         update_option('chatbot_anthropic_api_enabled', 'No');
         $chatbot_anthropic_api_enabled = 'No';
@@ -95,8 +95,8 @@ function chatbot_ai_platform_choice_callback($args) {
         update_option('chatbot_nvidia_api_enabled', 'No');
         $chatbot_nvidia_api_enabled = 'No';
 
-        update_option('chatbot_transformer_api_enabled', 'No');
-        $chatbot_transformer_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
         
         update_option('chatbot_anthropic_api_enabled', 'No');
         $chatbot_anthropic_api_enabled = 'No';
@@ -105,8 +105,8 @@ function chatbot_ai_platform_choice_callback($args) {
 
         $chatbot_ai_platform_choice = 'Transformer';
         update_option('chatbot_ai_platform_choice', 'Transformer');
-        update_option('chatbot_transformer_api_enabled', 'Yes');
-        $chatbot_transformer_api_enabled = 'Yes';
+        update_option('chatbot_transformer_model_api_enabled', 'Yes');
+        $chatbot_transformer_model_api_enabled = 'Yes';
 
         update_option('chatbot_chatgpt_api_enabled', 'No');
         $chatbot_chatgpt_api_enabled = 'No';
@@ -133,8 +133,8 @@ function chatbot_ai_platform_choice_callback($args) {
         update_option('chatbot_nvidia_api_enabled', 'No');
         $chatbot_nvidia_api_enabled = 'No';
 
-        update_option('chatbot_transformer_api_enabled', 'No');
-        $chatbot_transformer_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
         
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_markov_chain_api_enabled = 'No';
@@ -152,8 +152,8 @@ function chatbot_ai_platform_choice_callback($args) {
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_markov_chain_api_enabled = 'No';
 
-        update_option('chatbot_transformer_api_enabled', 'No');
-        $chatbot_transformer_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
         
         update_option('chatbot_anthropic_api_enabled', 'No');
         $chatbot_anthropic_api_enabled = 'No';
