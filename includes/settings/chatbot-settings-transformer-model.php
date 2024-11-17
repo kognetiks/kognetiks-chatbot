@@ -82,13 +82,13 @@ function chatbot_transformer_model_build_schedule_callback($args) {
 }
 
 // Transformer Length Options Callback - Ver 2.1.6
-function chatbot_transformer_model_window_size_callback($args) {
+function chatbot_transformer_model_word_content_window_size_callback($args) {
 
-    // Get the saved chatbot_transformer_model_window_size_setting value or default to 10
-    $transformer_model_window_length = esc_attr(get_option('chatbot_transformer_model_window_size', '3'));
+    // Get the saved chatbot_transformer_model_word_content_window_size_setting value or default to 10
+    $transformer_model_window_length = esc_attr(get_option('chatbot_transformer_model_word_content_window_size', '3'));
     // Allow for a range of tokens between 1 and 5 in 1-step increments - Ver 2.1.6
     ?>
-    <select id="chatbot_transformer_model_window_size" name="chatbot_transformer_model_window_size">
+    <select id="chatbot_transformer_model_word_content_window_size" name="chatbot_transformer_model_word_content_window_size">
         <?php
         for ($i=1; $i<=5; $i+=1) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($transformer_model_window_length, (string)$i, false) . '>' . esc_html($i) . '</option>';
@@ -100,16 +100,16 @@ function chatbot_transformer_model_window_size_callback($args) {
 }
 
 // Transformer Next Phrase Length Settings Callback - Ver 2.1.6
-function chatbot_transformer_model_next_phrase_length_callback($args) {
+function chatbot_transformer_model_sentence_response_length_callback($args) {
 
-    // Get the saved chatbot_transformer_model_next_phrase_length_setting value or default to 10
-    $transformer_next_phrase_length = esc_attr(get_option('chatbot_transformer_model_next_phrase_length', '1'));
-    // Allow for a range of tokens between 10 and 1000 in 10-step increments - Ver 2.1.6
+    // Get the saved chatbot_transformer_model_sentence_response_length_setting value or default to 10
+    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', '3'));
+    // Allow for a range of sentences between 1 and 10 in 1-step increments - Ver 2.1.6
     ?>
-    <select id="chatbot_transformer_model_next_phrase_length" name="chatbot_transformer_model_next_phrase_length">
+    <select id="chatbot_transformer_model_sentence_response_length" name="chatbot_transformer_model_sentence_response_length">
         <?php
         for ($i=1; $i<=10; $i+=1) {
-            echo '<option value="' . esc_attr($i) . '" ' . selected($transformer_next_phrase_length, (string)$i, false) . '>' . esc_html($i) . '</option>';
+            echo '<option value="' . esc_attr($i) . '" ' . selected($sentence_response_length, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>
     </select>
@@ -195,8 +195,8 @@ function chatbot_transformer_model_api_settings_init() {
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_choice'); // Ver 2.1.8
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_max_tokens'); // Ver 2.1.9
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_build_schedule'); // Ver 2.1.6
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_window_size'); // Ver 2.1.6
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_next_phrase_length'); // Ver 2.1.6
+    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_word_content_window_size'); // Ver 2.1.6
+    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_sentence_response_length'); // Ver 2.1.6
 
     add_settings_section(
         'chatbot_transformer_model_api_model_general_section',
@@ -244,17 +244,17 @@ function chatbot_transformer_model_api_settings_init() {
     );
 
     add_settings_field(
-        'chatbot_transformer_model_window_size',
-        'Window Size (Context Word Count)',
-        'chatbot_transformer_model_window_size_callback',
+        'chatbot_transformer_model_word_content_window_size',
+        'Word Content Window Size',
+        'chatbot_transformer_model_word_content_window_size_callback',
         'chatbot_transformer_model_advanced_settings',
         'chatbot_transformer_model_advanced_settings_section'
     );
 
     add_settings_field(
-        'chatbot_transformer_model_next_phrase_length',
-        'Transformer Length Next Phase Length',
-        'chatbot_transformer_model_next_phrase_length_callback',
+        'chatbot_transformer_model_sentence_response_length',
+        'Sentence Response Count',
+        'chatbot_transformer_model_sentence_response_length_callback',
         'chatbot_transformer_model_advanced_settings',
         'chatbot_transformer_model_advanced_settings_section'
     );

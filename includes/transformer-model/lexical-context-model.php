@@ -13,10 +13,15 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Transform input sentence into a response
-function transformer_model_lexical_context_response( $input, $max_tokens = 50) {
+function transformer_model_lexical_context_response( $input, $max_tokens = null) {
 
     // DIAG - Diagnostic - Ver 2.2.1
     back_trace('NOTICE', 'transformer_model_lexical_context_response');
+
+    // Maximum tokens
+    if (empty($max_tokens)) {
+        $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', 50));
+    }
 
     // Belt & Suspenders - Check for clean input
     $input = sanitize_text_field($input);

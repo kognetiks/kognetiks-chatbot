@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Main function to get the chatbot's response
-function transformer_model_sentential_context_model_response($input, $responseCount = 3) {
+function transformer_model_sentential_context_model_response($input, $responseCount = 500) {
 
     // DIAG - Diagnostic - Ver 2.2.0
     back_trace('NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
@@ -23,7 +23,12 @@ function transformer_model_sentential_context_model_response($input, $responseCo
     $corpus = transformer_model_sentential_context_fetch_wordpress_content();
 
     // Set the window size for co-occurrence matrix
-    $windowSize = esc_attr(get_option('chatbot_transformer_model_window_size', '3'));
+    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
+    // DIAG - Diagnostic - Ver 2.2.0
+    back_trace('NOTICE', 'Window Size: ' . $windowSize);
+
+    // DIAG - Diagnostic - Ver 2.2.0
+    back_trace('NOTICE', 'Response Count: ' . $responseCount);
 
     // MOVED TO transformer-model-scheduler.php
     // Build embeddings (with caching for performance)
@@ -182,11 +187,11 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
 
 }
 
-// Function to generate a contextual response
-function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxResponseLength = 300) {
+function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500) {
 
-    // DIAG - Diagnostic - Ver 2.3.1
+    // DIAG - Diagnostic - Ver 2.3.0
     back_trace('NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
+    back_trace('NOTICE', 'Max Tokens: ' . $maxTokens);
 
     // Tokenize the corpus into sentences
     $sentences = preg_split('/(?<=[.?!])\s+/', $corpus);
@@ -242,7 +247,6 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 
     // Compute similarities
     $similarities = [];
-
     foreach ($sentenceVectors as $index => $vector) {
         $similarity = transformer_model_sentential_context_cosine_similarity($inputVector, $vector);
         $similarities[$index] = $similarity;
@@ -255,28 +259,50 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 
     // Initialize the response
     $response = $bestMatchSentence;
-    $responseLength = strlen($response);
 
-    // Optionally include adjacent sentences for additional context
-    $maxResponseLength = max($maxResponseLength, $responseLength); // Ensure the max length is not less than the response
+    // Retrieve settings
+    $maxSentences = intval(esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 5)));
+    $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
 
-    // Include previous sentence if it exists and doesn't exceed max length
-    if ($bestMatchIndex > 0) {
-        $previousSentence = trim($sentences[$bestMatchIndex - 1]);
-        $candidateResponse = $previousSentence . ' ' . $response;
-        if (strlen($candidateResponse) <= $maxResponseLength) {
-            $response = $candidateResponse;
-            $responseLength = strlen($response);
+    // Ratios for splitting sentences and tokens
+    $sentenceBeforeRatio = 0.25; // 25% of sentences before
+    $tokenBeforeRatio = 0.25;    // 25% of tokens before
+
+    // Distribute sentences and tokens
+    $sentencesBefore = floor($maxSentences * $sentenceBeforeRatio);
+    $sentencesAfter = $maxSentences - $sentencesBefore;
+    $tokensBefore = floor($maxTokens * $tokenBeforeRatio);
+    $tokensAfter = $maxTokens - $tokensBefore;
+
+    $responseWordCount = str_word_count($response);
+
+    // Add sentences before the best match
+    $tokensUsedBefore = 0;
+    $sentencesUsedBefore = 0;
+    for ($i = $bestMatchIndex - 1; $i >= 0 && $sentencesUsedBefore < $sentencesBefore && $tokensUsedBefore < $tokensBefore; $i--) {
+        $previousSentence = trim($sentences[$i]);
+        $sentenceWordCount = str_word_count($previousSentence);
+        if ($tokensUsedBefore + $sentenceWordCount <= $tokensBefore) {
+            $response = $previousSentence . ' ' . $response;
+            $tokensUsedBefore += $sentenceWordCount;
+            $sentencesUsedBefore++;
+        } else {
+            break; // Stop if adding this sentence exceeds the token limit
         }
     }
 
-    // Include next sentence if it exists and doesn't exceed max length
-    if ($bestMatchIndex < count($sentences) - 1) {
-        $nextSentence = trim($sentences[$bestMatchIndex + 1]);
-        $candidateResponse = $response . ' ' . $nextSentence;
-        if (strlen($candidateResponse) <= $maxResponseLength) {
-            $response = $candidateResponse;
-            $responseLength = strlen($response);
+    // Add sentences after the best match
+    $tokensUsedAfter = 0;
+    $sentencesUsedAfter = 0;
+    for ($i = $bestMatchIndex + 1; $i < count($sentences) && $sentencesUsedAfter < $sentencesAfter && $tokensUsedAfter < $tokensAfter; $i++) {
+        $nextSentence = trim($sentences[$i]);
+        $sentenceWordCount = str_word_count($nextSentence);
+        if ($tokensUsedAfter + $sentenceWordCount <= $tokensAfter) {
+            $response .= ' ' . $nextSentence;
+            $tokensUsedAfter += $sentenceWordCount;
+            $sentencesUsedAfter++;
+        } else {
+            break; // Stop if adding this sentence exceeds the token limit
         }
     }
 
