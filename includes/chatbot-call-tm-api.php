@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the Anthropic API
-function chatbot_chatgpt_call_transformer_api($message) {
+function chatbot_chatgpt_call_transformer_model_api($message) {
 
     global $session_id;
     global $user_id;
@@ -150,11 +150,11 @@ function chatbot_chatgpt_call_transformer_api($message) {
     // back_trace( 'NOTICE', '$message: ' . $message);
 
     // Convert $message to an array (this will be used as a starting point)
-    // $transformer_message = explode(' ', $message);
-    $transformer_message = $message;
+    // $transformer_model_message = explode(' ', $message);
+    $transformer_model_message = $message;
 
     // Remove the stop words from the message
-    // $transformer_message = array_diff($transformer_message, $stopWords);
+    // $transformer_model_message = array_diff($transformer_model_message, $stopWords);
 
 
     // Initialize the $response_body array to hold the API response
@@ -175,7 +175,13 @@ function chatbot_chatgpt_call_transformer_api($message) {
     $max_tokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', '500')));
 
     // Call the transformer model with the user input
-    $response = transformer_model_response($transformer_message, $max_tokens);
+    if ($model == 'transformer-model-lexical-context') {
+        // Call the transformer model with the user input - transformer-word-based
+        $response = transformer_model_lexical_context_response($transformer_model_message, $max_tokens);
+    } else {
+        // Call the transformer model with the user input - transformer-sentence-based
+        $response = transformer_model_sentential_context_model_response($transformer_model_message, $max_tokens);
+    }
 
     if (!empty($response)) {
         // Prepare the response body

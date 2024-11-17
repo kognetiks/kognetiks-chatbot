@@ -149,7 +149,7 @@ function chatbot_markov_chain_max_tokens_setting_callback($args) {
     <?php
 }
 
-// Knowledge Navigator Status - Ver 2.0.0.
+// Markov Chain Build Status - Ver 2.0.0.
 function chatbot_markov_chain_status_section_callback($args) {
 
     // See if the scanner is needs to run
@@ -157,9 +157,6 @@ function chatbot_markov_chain_status_section_callback($args) {
     if ($chatbot_markov_chain_current_build_schedule == 'No') {
         $chatbot_markov_chain_current_build_schedule  = 'No Schedule';
     }
-
-    // Force run the scanner
-    // $results = chatbot_chatgpt_kn_acquire();
 
     // Get DB Stats
     $chatbot_markov_chain_db_stats = getDatabaseStats("chatbot_markov_chain");
@@ -175,7 +172,7 @@ function chatbot_markov_chain_status_section_callback($args) {
                 <p><b>Row Count: </b><?php echo $chatbot_markov_chain_row_count; ?></p>
                 <p><b>Table Size: </b><?php echo $chatbot_markov_chain_table_size_mb; ?> MB</p>
             </div>
-            <p>Refresh this page to determine the progress and status of Knowledge Navigation!</p>
+            <p>Refresh this page to determine the progress and status of Markov Chain build process!</p>
         </div>
     <?php
 }

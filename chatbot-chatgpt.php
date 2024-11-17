@@ -119,7 +119,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-c
 require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-scheduler.php'; // Functions - Ver 2.1.9
 
 // Include necessary files - Transformer Model - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/transformer-model/transformer-model.php'; // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformer-model/transformer-model-lexical-context.php'; // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformer-model/transformer-model-sentential-context.php'; // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformer-model/transformer-model-scheduler.php'; // Functions - Ver 2.2.0
 
 // Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
@@ -143,7 +145,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-rep
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-setup.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-support.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-tools.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-transformer.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-transformer-model.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
 // Include necessary files - Utilities - Ver 1.9.0
@@ -647,9 +649,9 @@ function chatbot_chatgpt_send_message() {
     $session_id = $_POST['session_id'];
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     $kchat_settings['chatbot_chatgpt_display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
     $kchat_settings['chatbot_chatgpt_assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
@@ -678,7 +680,7 @@ function chatbot_chatgpt_send_message() {
     $model = isset($kchat_settings['chatbot_chatgpt_model']) ? $kchat_settings['chatbot_chatgpt_model'] : '';
 
     // FIXME - TESTING - Ver 2.1.8
-    // back_trace( 'NOTICE', 'LINE 622 - $model: ' . $model);
+    back_trace( 'NOTICE', 'LINE 681 - $model: ' . $model);
 
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
@@ -988,7 +990,7 @@ function chatbot_chatgpt_send_message() {
             // DIAG - Diagnostics - Ver 2.2.0
             back_trace( 'NOTICE', 'Calling Transformer Model API');
             // Send message to Transformer Model API - Ver 2.2.0
-            $response = chatbot_chatgpt_call_transformer_api($message);
+            $response = chatbot_chatgpt_call_transformer_model_api($message);
         } else {
             // Reload the model - BELT & SUSPENDERS
             $kchat_settings['model'] = $model;

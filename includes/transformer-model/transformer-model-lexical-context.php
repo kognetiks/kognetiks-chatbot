@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress -Transformer Model - Ver 2.2.0
+ * Kognetiks Chatbot for WordPress - Transformer Model - Lexical Context Model (LCM) - Ver 2.2.0
  *
  * This file contains the code for implementing a Transformer algorithm in PHP
  *
@@ -12,13 +12,32 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+// Transform input sentence into a response
+function transformer_model_lexical_context_response( $input, $max_tokens = 50) {
+
+    // DIAG - Diagnostic - Ver 2.2.1
+    back_trace('NOTICE', 'transformer_model_lexical_context_response');
+
+    // Fetch WordPress content
+    $corpus = transformer_model_lexical_context_fetch_wordpress_content();
+
+    // Build embeddings
+    $embeddings = transformer_model_lexical_context_build_cooccurrence_matrix($corpus);
+
+    // Generate contextual response
+    $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus);
+
+    return $response;
+
+}
+
 // Transformer function to read WordPress page and post content
-function transformer_fetch_wordpress_content() {
+function transformer_model_lexical_context_fetch_wordpress_content() {
 
     global $wpdb;
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_fetch_wordpress_content' );
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_fetch_wordpress_content' );
 
     // Query to get post and page content
     $results = $wpdb->get_results(
@@ -38,10 +57,10 @@ function transformer_fetch_wordpress_content() {
 }
 
 // Transformer function to build a co-occurrence matrix for word embeddings
-function transformer_build_cooccurrence_matrix($corpus, $windowSize = 2) {
+function transformer_model_lexical_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_build_cooccurrence_matrix' );
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_build_cooccurrence_matrix' );
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -64,10 +83,10 @@ function transformer_build_cooccurrence_matrix($corpus, $windowSize = 2) {
 }
 
 // Transformer function to calculate cosine similarity between two vectors
-function transformer_cosine_similarity($vectorA, $vectorB) {
+function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace( 'NOTICE', 'transformer_cosine_similarity' );
+    // back_trace( 'NOTICE', 'transformer_model_lexical_context_cosine_similarity' );
 
     $dotProduct = array_sum(array_map(fn($a, $b) => $a * $b, $vectorA, $vectorB));
     $magnitudeA = sqrt(array_sum(array_map(fn($x) => $x * $x, $vectorA)));
@@ -78,10 +97,10 @@ function transformer_cosine_similarity($vectorA, $vectorB) {
 }
 
 // Transformer to generate a response based on the input
-function transformer_generate_response($input, $embeddings) {
+function transformer_model_lexical_context_generate_response($input, $embeddings) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_generate_response' );
+    back_trace( 'NOTICE', 'transformer_model_context_lexical_generate_response' );
 
     $inputWords = preg_split('/\s+/', strtolower($input));
     $inputVector = [];
@@ -99,7 +118,7 @@ function transformer_generate_response($input, $embeddings) {
     $bestMatch = '';
     $bestScore = -1;
     foreach ($embeddings as $word => $vector) {
-        $similarity = transformer_cosine_similarity($inputVector, $vector);
+        $similarity = transformer_model_lexical_context_cosine_similarity($inputVector, $vector);
         if ($similarity > $bestScore) {
             $bestMatch = $word;
             $bestScore = $similarity;
@@ -112,10 +131,10 @@ function transformer_generate_response($input, $embeddings) {
 }
 
 // Transformer function to generate a contextual response
-function transformer_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 10) {
+function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 10) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    back_trace('NOTICE', 'transformer_generate_contextual_response');
+    back_trace('NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
 
     $inputWords = preg_split('/\s+/', strtolower($input));
     $inputVector = [];
@@ -133,7 +152,7 @@ function transformer_generate_contextual_response($input, $embeddings, $corpus, 
     $bestMatch = '';
     $bestScore = -1;
     foreach ($embeddings as $word => $vector) {
-        $similarity = transformer_cosine_similarity($inputVector, $vector);
+        $similarity = transformer_model_lexical_context_cosine_similarity($inputVector, $vector);
         if ($similarity > $bestScore) {
             $bestMatch = $word;
             $bestScore = $similarity;
@@ -159,23 +178,3 @@ function transformer_generate_contextual_response($input, $embeddings, $corpus, 
     return ucfirst(implode(' ', $responseWords)) . '.';
 
 }
-
-// Transform input sentence into a response
-function transformer_model_response( $input, $max_tokens = 50) {
-
-    // DIAG - Diagnostic - Ver 2.2.1
-    back_trace('NOTICE', 'transformer_model_response');
-
-    // Fetch WordPress content
-    $corpus = transformer_fetch_wordpress_content();
-
-    // Build embeddings
-    $embeddings = transformer_build_cooccurrence_matrix($corpus);
-
-    // Generate contextual response
-    $response = transformer_generate_contextual_response($input, $embeddings, $corpus);
-
-    return $response;
-
-}
-

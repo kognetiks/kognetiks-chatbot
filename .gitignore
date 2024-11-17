@@ -30,3 +30,6 @@ widget-logs/*
 !downloads/index.php
 !chatbot-logs/index.php
 !widget-logs/index.php
+
+# Ignore specific files
+includes/transformer-model/embeddings_cache.php
