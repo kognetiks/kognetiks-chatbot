@@ -98,7 +98,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     } elseif (esc_attr(get_option('chatbot_transformer_model_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.2.0
         back_trace( 'NOTICE', 'Transformer chatbot is enabled');
-        $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'transformer-2024-11-16'));
+        $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_transformer_model_voice_option', 'none'));
     } else {
@@ -381,7 +381,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
             $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
         } else if (esc_attr(get_option('chatbot_transformer_model_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_transformer_model_choice', 'transformer-2024-11-16'));
+            $model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
         } else {
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         }

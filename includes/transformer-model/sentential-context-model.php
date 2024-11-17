@@ -43,7 +43,10 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
 
     // Query to get post and page content
     $results = $wpdb->get_results(
-        "SELECT post_content FROM {$wpdb->prefix}posts WHERE post_status = 'publish' AND (post_type = 'post' OR post_type = 'page')",
+        $wpdb->prepare(
+            "SELECT post_content FROM {$wpdb->posts} WHERE post_status = %s AND (post_type = %s OR post_type = %s)",
+            'publish', 'post', 'page'
+        ),
         ARRAY_A
     );
 
@@ -53,9 +56,15 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
         $content .= ' ' . $row['post_content'];
     }
 
+    // DIAG - Diagnostic - Ver 2.2.0
+    back_trace('NOTICE', 'Content in characters: ' . strlen($content));
+
     // Clean up the content
     $content = strip_tags($content); // Remove HTML tags
     $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5); // Decode HTML entities
+
+    // DIAG - Diagnostic - Ver 2.2.0
+    back_trace('NOTICE', 'Content in characters after cleanup: ' . strlen($content));
 
     return $content;
 
@@ -67,7 +76,7 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
     // DIAG - Diagnostic - Ver 2.2.0
     back_trace('NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
 
-    $cacheFile = __DIR__ . '/embeddings_cache.php';
+    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
 
     // Check if embeddings are cached
     if (file_exists($cacheFile)) {

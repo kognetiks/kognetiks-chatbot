@@ -32,14 +32,14 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 2.2.0
-    back_trace( 'NOTICE', 'chatbot_calll_transformer_model_api()');
+    back_trace( 'NOTICE', 'chatbot_call_transformer_model_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
-    $model = esc_attr(get_option('chatbot_transformer_model_choice', 'transformer-model-2024-11-16'));
+    $model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));

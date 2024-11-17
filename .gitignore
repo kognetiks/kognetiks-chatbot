@@ -32,4 +32,5 @@ widget-logs/*
 !widget-logs/index.php
 
 # Ignore specific files
-includes/transformer-model/embeddings_cache.php
+includes/transformer-model/sentential_embeddings_cache.php
+includes/transformer-model/lexical_embeddings_cache.php

@@ -301,12 +301,12 @@ if ($chatbot_ai_platform_choice == 'OpenAI' || $chatbot_ai_platform_choice === n
 
     // Model choice - Ver 2.2.0
     if (get_option('chatbot_transformer_model_choice') === null) {
-        $model = 'transformer-model-2024-11-16';
+        $model = 'sentential-context-model';
         update_option('chatbot_transformer_model_choice', $model);
         // DIAG - Diagnostics
         back_trace( 'NOTICE', 'Model upgraded: ' . $model);
     } elseif (empty($model)) {
-        $model = 'transformer-model-2024-11-16';
+        $model = 'sentential-context-model';
     }
 
 }
@@ -985,7 +985,7 @@ function chatbot_chatgpt_send_message() {
             // back_trace( 'NOTICE', 'Calling Markov Chain API');
             // Send message to Markov API - Ver 1.9.7
             $response = chatbot_chatgpt_call_markov_chain_api($message);
-        } elseif ($model !== null && str_starts_with($model,'transformer')) {
+        } elseif ($model !== null && str_contains($model,'context-model')) {
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.0
             back_trace( 'NOTICE', 'Calling Transformer Model API');

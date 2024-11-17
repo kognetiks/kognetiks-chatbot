@@ -18,16 +18,45 @@ function transformer_model_lexical_context_response( $input, $max_tokens = 50) {
     // DIAG - Diagnostic - Ver 2.2.1
     back_trace('NOTICE', 'transformer_model_lexical_context_response');
 
+    // Belt & Suspenders - Check for clean input
+    $input = sanitize_text_field($input);
+    if (empty($input)) {
+        return "I didn't understand that, please try again.";
+    }
+
     // Fetch WordPress content
     $corpus = transformer_model_lexical_context_fetch_wordpress_content();
 
     // Build embeddings
-    $embeddings = transformer_model_lexical_context_build_cooccurrence_matrix($corpus);
+    // $embeddings = transformer_model_lexical_context_build_cooccurrence_matrix($corpus);
+    $embeddings = transformer_model_lexical_context_get_cached_embeddings($corpus);
+
+    // Response lenght
+    $responseLength = $max_tokens;
 
     // Generate contextual response
-    $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus);
+    $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 50);
 
     return $response;
+
+}
+
+// Transformer function to get cached embeddings
+function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 2) {
+
+    // DIAG - Diagnostic - Ver 2.2.0
+    back_trace('NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
+
+    $cacheFile = __DIR__ . '/lexical_embeddings_cache.php';
+
+    if (file_exists($cacheFile)) {
+        $embeddings = include $cacheFile;
+    } else {
+        $embeddings = transformer_model_lexical_context_build_cooccurrence_matrix($corpus, $windowSize);
+        file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');
+    }
+
+    return $embeddings;
 
 }
 
@@ -41,7 +70,10 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
 
     // Query to get post and page content
     $results = $wpdb->get_results(
-        "SELECT post_content FROM {$wpdb->prefix}posts WHERE post_status = 'publish' AND (post_type = 'post' OR post_type = 'page')",
+        $wpdb->prepare(
+            "SELECT post_content FROM {$wpdb->posts} WHERE post_status = %s AND (post_type = %s OR post_type = %s)",
+            'publish', 'post', 'page'
+        ),
         ARRAY_A
     );
 
@@ -100,7 +132,7 @@ function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB)
 function transformer_model_lexical_context_generate_response($input, $embeddings) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_context_lexical_generate_response' );
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_generate_response' );
 
     $inputWords = preg_split('/\s+/', strtolower($input));
     $inputVector = [];
@@ -126,7 +158,7 @@ function transformer_model_lexical_context_generate_response($input, $embeddings
     }
 
     // Return the best match or fallback response
-    return $bestMatch ?: "I don't understand that.";
+    return $bestMatch ?: "I didn't understand that, please try again.";
 
 }
 
@@ -136,10 +168,16 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
     // DIAG - Diagnostic - Ver 2.2.1
     back_trace('NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
 
+    global $stopWords;
+
+    // Tokenize the corpus into words and punctuation
+    $words = preg_split('/(\s+|(?=[.,!?;:])|(?<=[.,!?;:]))/', $corpus, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+
+    // Prepare the input words
     $inputWords = preg_split('/\s+/', strtolower($input));
     $inputVector = [];
 
-    // Average embedding vectors for input words
+    // Build the input vector
     foreach ($inputWords as $word) {
         if (isset($embeddings[$word])) {
             foreach ($embeddings[$word] as $contextWord => $value) {
@@ -148,7 +186,7 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
         }
     }
 
-    // Find the most similar word in the embeddings
+    // Find the best matching word
     $bestMatch = '';
     $bestScore = -1;
     foreach ($embeddings as $word => $vector) {
@@ -160,21 +198,80 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
     }
 
     if (!$bestMatch) {
-        return "I don't understand that.";
+        return "I didn't understand that, please try again.";
     }
 
-    // Extract context from the corpus
-    $words = preg_split('/\s+/', strtolower($corpus));
-    $bestMatchIndex = array_search($bestMatch, $words);
-    if ($bestMatchIndex === false) {
-        return "I don't understand that.";
+    // Find all occurrences of the best match
+    $lowerWords = array_map('strtolower', $words);
+    $bestMatchIndices = array_keys($lowerWords, $bestMatch);
+    if (empty($bestMatchIndices)) {
+        return "I didn't understand that, please try again.";
     }
 
-    // Collect surrounding words for response
+    // Use the first occurrence of the best match
+    $bestMatchIndex = $bestMatchIndices[0];
+
+    // Extract surrounding words for the response
     $start = max(0, $bestMatchIndex - floor($responseLength / 2));
     $end = min(count($words) - 1, $bestMatchIndex + floor($responseLength / 2));
     $responseWords = array_slice($words, $start, $end - $start + 1);
 
-    return ucfirst(implode(' ', $responseWords)) . '.';
+    // Reconstruct the response with proper capitalization and spacing
+    $response = '';
+    $capitalizeNext = true;
 
+    foreach ($responseWords as $word) {
+        // Check if the word is punctuation
+        if (preg_match('/[.,!?;:]/', $word)) {
+            $response = rtrim($response); // Remove any trailing space
+            $response .= $word . ' ';
+            if (in_array($word, ['.', '!', '?'])) {
+                $capitalizeNext = true;
+            }
+        } elseif (trim($word) === '') {
+            // Handle spaces
+            $response .= ' ';
+        } else {
+            // Word token
+            if ($capitalizeNext) {
+                $word = ucfirst($word);
+                $capitalizeNext = false;
+            }
+            $response .= $word . ' ';
+        }
+    }
+
+    // Make sure the response does not end with a stop word
+    $response = removeStopWordFromEnd($response, $stopWords);
+
+    // Make sure the response does not start with any punctuation or whitespace
+    $response = ltrim($response, " \t\n\r\0\x0B.,!?;:");
+
+    // Trim any extra whitespace
+    $response = trim($response);
+
+    // Ensure the response ends with appropriate punctuation
+    if (!preg_match('/[.!?]$/', $response)) {
+        $response .= '.';
+    }
+
+    return $response;
+
+}
+
+// Trim off any stop words from the end of the response
+function removeStopWordFromEnd($response, $stopWords) {
+    // Split the response into words
+    $responseWords = preg_split('/\s+/', rtrim($response, " \t\n\r\0\x0B.,!?;:"));
+    $lastWord = strtolower(end($responseWords));
+    back_trace('NOTICE', 'Last Word: ' . $lastWord);
+
+    // Check if the last word is a stop word
+    if (in_array($lastWord, $stopWords)) {
+        array_pop($responseWords); // Remove the last word
+        $response = implode(' ', $responseWords); // Reconstruct the response
+        return removeStopWordFromEnd($response, $stopWords); // Recursive call
+    }
+
+    return $response;
 }
