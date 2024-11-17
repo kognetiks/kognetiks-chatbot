@@ -170,17 +170,17 @@ function chatbot_ai_platform_choice_callback($args) {
     </select>
     <?php
 
-    if ($chatbot_ai_platform_choice == 'OpenAI') {
-        echo '<p><b>OpenAI ChatGPT is the default AI Platform for the Chatbot plugin.</b></p>';
-    } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
-        echo '<p><b>NVIDIA ChatGPT is the NVIDIA AI Platform for the Chatbot plugin.</b></p>';
-    } elseif ($chatbot_ai_platform_choice == 'Anthropic') {
-        echo '<p><b>Anthropic ChatGPT is the Anthropic AI Platform for the Chatbot plugin.</b></p>';
-    } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
-        echo '<p><b>Markov Chain is the Markov Chain AI Platform for the Chatbot plugin.</b></p>';
-    } elseif ($chatbot_ai_platform_choice == 'Transformer') {
-        echo '<p><b>Transformer is the Transformer AI Platform for the Chatbot plugin.</b></p>';
-    }
+    // if ($chatbot_ai_platform_choice == 'OpenAI') {
+    //     echo '<p><b>OpenAI ChatGPT is the default AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
+    //     echo '<p><b>NVIDIA ChatGPT is the NVIDIA AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'Anthropic') {
+    //     echo '<p><b>Anthropic ChatGPT is the Anthropic AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
+    //     echo '<p><b>Markov Chain is the Markov Chain AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'Transformer') {
+    //     echo '<p><b>Transformer is the Transformer AI Platform for the Chatbot plugin.</b></p>';
+    // }
 
 }
 

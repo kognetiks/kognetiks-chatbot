@@ -82,16 +82,16 @@ function chatbot_transformer_model_build_schedule_callback($args) {
 }
 
 // Transformer Length Options Callback - Ver 2.1.6
-function chatbot_transformer_model_length_callback($args) {
+function chatbot_transformer_model_window_size_callback($args) {
 
-    // Get the saved chatbot_transformer_model_length_setting value or default to 10
-    $transformer_length = esc_attr(get_option('chatbot_transformer_model_length', '3'));
-    // Allow for a range of tokens between 1 and 10 in 1-step increments - Ver 2.1.6
+    // Get the saved chatbot_transformer_model_window_size_setting value or default to 10
+    $transformer_model_window_length = esc_attr(get_option('chatbot_transformer_model_window_size', '3'));
+    // Allow for a range of tokens between 1 and 5 in 1-step increments - Ver 2.1.6
     ?>
-    <select id="chatbot_transformer_model_length" name="chatbot_transformer_model_length">
+    <select id="chatbot_transformer_model_window_size" name="chatbot_transformer_model_window_size">
         <?php
-        for ($i=1; $i<=10; $i+=1) {
-            echo '<option value="' . esc_attr($i) . '" ' . selected($transformer_length, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        for ($i=1; $i<=5; $i+=1) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($transformer_model_window_length, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>
     </select>
@@ -195,7 +195,7 @@ function chatbot_transformer_model_api_settings_init() {
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_choice'); // Ver 2.1.8
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_max_tokens'); // Ver 2.1.9
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_build_schedule'); // Ver 2.1.6
-    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_length'); // Ver 2.1.6
+    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_window_size'); // Ver 2.1.6
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_next_phrase_length'); // Ver 2.1.6
 
     add_settings_section(
@@ -244,9 +244,9 @@ function chatbot_transformer_model_api_settings_init() {
     );
 
     add_settings_field(
-        'chatbot_transformer_model_length',
-        'Transformer Length',
-        'chatbot_transformer_model_length_callback',
+        'chatbot_transformer_model_window_size',
+        'Window Size (Context Word Count)',
+        'chatbot_transformer_model_window_size_callback',
         'chatbot_transformer_model_advanced_settings',
         'chatbot_transformer_model_advanced_settings_section'
     );

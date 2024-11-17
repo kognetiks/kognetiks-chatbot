@@ -628,7 +628,18 @@ function chatbot_chatgpt_send_message() {
         }
     } else {
         // Check for missing API key or Message
-        if (!$api_key || !$message) {
+        // Not for Markov Chain or Transformer Model
+        if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI') == 'OpenAI') && !$api_key || !$message) {
+            // DIAG - Diagnostics
+            // back_trace( 'ERROR', 'Invalid API Key or Message.');
+            wp_send_json_error('Error: Invalid API key or Message. Please check the plugin settings.');
+        }
+        if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI') == 'NVIDIA') && !$api_key || !$message) {
+            // DIAG - Diagnostics
+            // back_trace( 'ERROR', 'Invalid API Key or Message.');
+            wp_send_json_error('Error: Invalid API key or Message. Please check the plugin settings.');
+        }
+        if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI') == 'Anthropic') && !$api_key || !$message) {
             // DIAG - Diagnostics
             // back_trace( 'ERROR', 'Invalid API Key or Message.');
             wp_send_json_error('Error: Invalid API key or Message. Please check the plugin settings.');

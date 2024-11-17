@@ -22,9 +22,12 @@ function transformer_model_sentential_context_model_response($input, $responseCo
     // Fetch WordPress content
     $corpus = transformer_model_sentential_context_fetch_wordpress_content();
 
+    // Set the window size for co-occurrence matrix
+    $windowSize = esc_attr(get_option('chatbot_transformer_model_window_size', '3'));
+
     // MOVED TO transformer-model-scheduler.php
     // Build embeddings (with caching for performance)
-    $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus);
+    $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
 
     // Generate contextual response
     $response = transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $responseCount);
@@ -58,6 +61,9 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
 
     // DIAG - Diagnostic - Ver 2.2.0
     back_trace('NOTICE', 'Content in characters: ' . strlen($content));
+    // Calculate the $content size in MB
+    $content_size = strlen($content) / 1024 / 1024;
+    back_trace('NOTICE', 'Content in MB: ' . $content_size . ' MB');
 
     // Clean up the content
     $content = strip_tags($content); // Remove HTML tags
@@ -65,6 +71,9 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
 
     // DIAG - Diagnostic - Ver 2.2.0
     back_trace('NOTICE', 'Content in characters after cleanup: ' . strlen($content));
+    // Calculate the $content size in MB
+    $content_size = strlen($content) / 1024 / 1024;
+    back_trace('NOTICE', 'Content in MB after cleanup: ' . $content_size . ' MB');
 
     return $content;
 
