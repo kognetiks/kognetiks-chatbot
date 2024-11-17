@@ -21,18 +21,20 @@ function chatbot_transformer_model_settings_section_callback($args) {
     $results = chatbot_transformer_model_build_results_callback(esc_attr(get_option('chatbot_transformer_model_build_schedule')));
 
     ?>
-    <p>Configure the settings for the plugin when using Transformer models. Some example shortcodes include:</p>
+    <p>Configure the settings for the plugin when using transformer models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-        <li><code>&#91;chatbot style="floating" model="transformer-model-sentential-context"&#93;</code> - Style is floating, specific model</li>
-        <li><code>&#91;chatbot style="embedded" model="transformer-model-sentential-context"&#93;</code> - Style is embedded, specific model</li>
+        <li><code>&#91;chatbot style="floating" model="lexical-context-model"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="sentential-context-model"&#93;</code> - Style is embedded, specific model</li>
     </ul>
     <p>A Transformer Model generates text using a local algorithm based on the <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)" target="_blank" rel="noopener noreferrer">deep learning architecture</a>, a concept developed by researchers at Google and based on the multi-head attention mechanism proposed in a 2017 paper titled 'Attention Is All You Need'. Transformer models in this plugin are trained on your site's published content, including pages and posts. These models run locally on your server and are not available on the OpenAI platform. While they can produce useful text, they are less advanced than OpenAI models and may sometimes generate nonsensical output. However, they can still be effective when your site has a large amount of content.</p> 
+    <p><strong>The Sentential Context Model (SCM) is a sentence-based model.</strong> The SCM operates at the level of entire sentences, analyzing the structure and meaning of sentences to generate coherent and contextually relevant responses. By comparing input sentences with sentences from your WordPress content, the SCM selects the most appropriate responses based on sentence-level similarity. This approach allows the chatbot to provide more comprehensive and context-aware replies, enhancing user interactions with more natural and meaningful conversations.</p>
+    <p><strong>The Lexical Context Model (LCM) is a word-based model.</strong> The LCM focuses on individual words and their relationships within the text. It utilizes word embeddings derived from co-occurrence matrices to understand the context in which words appear. By analyzing word-level similarities between the user's input and the content from your WordPress site, the LCM generates responses that are relevant based on specific keywords and phrases. This model is effective for generating quick and pertinent answers by leveraging word-level context.</p>
     <?php
 }
 
 function chatbot_transformer_model_api_model_general_section_callback($args){
     ?>
-    <p>Configure the settings for the plugin when using Transformer models.  Depending on the Transformer model you choose, the maximum tokens may be as high as 4000.  The default is 500.</p>
+    <p>Configure the settings for the plugin when using transformer models.  Depending on the transformer model you choose, the maximum tokens may be as high as 4000.  The default is 500.</p>
     <?php
 }
 
@@ -118,13 +120,13 @@ function chatbot_transformer_model_choice_callback($args) {
 
     global $chatbot_transformer_model_api_enabled;
     
-    // Get the saved chatbot_transformer_model_choice value or default to the transformer-model-lexical-context model
-    $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'transformer-model-lexical-context'));
+    // Get the saved chatbot_transformer_model_choice value or default to the lexical-context-model model
+    $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'lexical-context-model'));
 
     ?>
     <select id="chatbot_transformer_model_choice" name="chatbot_transformer_model_choice">
-        <option value="<?php echo esc_attr( 'transformer-model-lexical-context' ); ?>" <?php selected( $model_choice, 'transformer-model-lexical-context' ); ?>><?php echo esc_html( 'transformer-model-lexical-context' ); ?></option>
-        <option value="<?php echo esc_attr( 'transformer-model-sentential-context' ); ?>" <?php selected( $model_choice, 'transformer-model-sentential-context' ); ?>><?php echo esc_html( 'transformer-model-sentential-context' ); ?></option>
+        <option value="<?php echo esc_attr( 'lexical-context-model' ); ?>" <?php selected( $model_choice, 'lexical-context-model' ); ?>><?php echo esc_html( 'lexical-context-model' ); ?></option>
+        <option value="<?php echo esc_attr( 'sentential-context-model' ); ?>" <?php selected( $model_choice, 'sentential-context-model' ); ?>><?php echo esc_html( 'sentential-context-model' ); ?></option>
     </select>
     <?php
 
