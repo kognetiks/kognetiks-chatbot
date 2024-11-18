@@ -85,19 +85,19 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // BELT & SUSPENDERS - Ver 1.9.4 - Updated Ver 2.1.8 - 2024 10 26
     if (esc_attr(get_option('chatbot_nvidia_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
-        back_trace( 'NOTICE', 'NVIDIA chatbot is enabled');
+        // back_trace( 'NOTICE', 'NVIDIA chatbot is enabled');
         $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_nvidia_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
-        back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
+        // back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
         $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_markov_chain_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_transformer_model_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.2.0
-        back_trace( 'NOTICE', 'Transformer chatbot is enabled');
+        // back_trace( 'NOTICE', 'Transformer chatbot is enabled');
         $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_transformer_model_voice_option', 'none'));
@@ -157,7 +157,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $atts[$key] = sanitize_text_field($value);
         $atts[$key] = htmlspecialchars(strip_tags($atts[$key] ?? ''), ENT_QUOTES, 'UTF-8');
         // DIAG - Diagnostics - Ver 2.0.6
-        back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+        // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     }
 
     // If (strpos($atts['assistant'], 'asst_') === false && $atts['assistant'] != 'original' && $atts['assistant'] != 'primary' && $atts['assistant'] != 'alternate') {

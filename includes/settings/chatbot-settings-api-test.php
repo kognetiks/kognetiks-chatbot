@@ -95,9 +95,9 @@ function chatbot_test_api($api_key, $model) {
     // back_trace( 'NOTICE', 'API Response: ' . print_r(json_encode($response),true));
 
     if (is_wp_error($response)) {
+        // DIAG - Log the response body
+        // back_trace( 'ERROR', $response->get_error_message());
         return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your AI Platform vendor account for additional information.';
-            // DIAG - Log the response body
-            // back_trace( 'ERROR', $response->get_error_message());
     }
 
     $response_body = json_decode(wp_remote_retrieve_body($response), true);

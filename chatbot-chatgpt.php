@@ -225,7 +225,7 @@ if ($chatbot_ai_platform_choice == 'OpenAI' || $chatbot_ai_platform_choice === n
         $model = 'gpt-4-1106-preview';
         update_option('chatbot_chatgpt_model_choice', $model);
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
     } elseif (empty($model)) {
         $model = 'gpt-4-1106-preview';
     }
@@ -235,7 +235,7 @@ if ($chatbot_ai_platform_choice == 'OpenAI' || $chatbot_ai_platform_choice === n
         $voice = 'alloy';
         update_option('chatbot_chatgpt_voice_option', $voice);
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
+        // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
     }
 
 // NVIDIA NIM API Enabled - Ver 2.1.8
@@ -256,7 +256,7 @@ if ($chatbot_ai_platform_choice == 'OpenAI' || $chatbot_ai_platform_choice === n
         $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
         update_option('chatbot_nvidia_model_choice', $model);
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
     } elseif (empty($model)) {
         $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
     }
@@ -279,7 +279,7 @@ if ($chatbot_ai_platform_choice == 'OpenAI' || $chatbot_ai_platform_choice === n
         $model = 'markov-chain-2024-09-17';
         update_option('chatbot_markov_chain_model_choice', $model);
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
     } elseif (empty($model)) {
         $model = 'markov-chain-2024-09-17';
     }
@@ -304,7 +304,7 @@ if ($chatbot_ai_platform_choice == 'OpenAI' || $chatbot_ai_platform_choice === n
         $model = 'sentential-context-model';
         update_option('chatbot_transformer_model_choice', $model);
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+        // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
     } elseif (empty($model)) {
         $model = 'sentential-context-model';
     }
@@ -660,9 +660,9 @@ function chatbot_chatgpt_send_message() {
     $session_id = $_POST['session_id'];
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     $kchat_settings['chatbot_chatgpt_display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
     $kchat_settings['chatbot_chatgpt_assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
@@ -691,7 +691,7 @@ function chatbot_chatgpt_send_message() {
     $model = isset($kchat_settings['chatbot_chatgpt_model']) ? $kchat_settings['chatbot_chatgpt_model'] : '';
 
     // FIXME - TESTING - Ver 2.1.8
-    back_trace( 'NOTICE', 'LINE 681 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 681 - $model: ' . $model);
 
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
@@ -999,7 +999,7 @@ function chatbot_chatgpt_send_message() {
         } elseif ($model !== null && str_contains($model,'context-model')) {
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.0
-            back_trace( 'NOTICE', 'Calling Transformer Model API');
+            // back_trace( 'NOTICE', 'Calling Transformer Model API');
             // Send message to Transformer Model API - Ver 2.2.0
             $response = chatbot_chatgpt_call_transformer_model_api($message);
         } else {

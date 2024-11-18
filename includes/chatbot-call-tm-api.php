@@ -32,7 +32,7 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 2.2.0
-    back_trace( 'NOTICE', 'chatbot_call_transformer_model_api()');
+    // back_trace( 'NOTICE', 'chatbot_call_transformer_model_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);

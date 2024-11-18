@@ -68,7 +68,7 @@ function create_directory_and_index_file($dir_path) {
     // Check if the directory exists, if not create it
     if (!file_exists($dir_path) && !wp_mkdir_p($dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace( 'ERROR', 'Failed to create directory.')
+        // back_trace( 'ERROR', 'Failed to create directory.');
         return false;
     }
 

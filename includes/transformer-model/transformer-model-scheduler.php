@@ -51,7 +51,7 @@ add_action('chatbot_transformer_model_scheduler_hook', 'chatbot_transformer_mode
 function chatbot_transformer_model_scan() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'chatbot_transformer_model_scan - Start');
+    // back_trace( 'NOTICE', 'chatbot_transformer_model_scan - Start');
 
     // Get the current schedule setting
     $run_scanner = get_option('chatbot_transformer_model_build_schedule', 'No');
@@ -75,7 +75,7 @@ function chatbot_transformer_model_scan() {
     $embeddings = transformer_get_cached_embeddings($corpus);
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'chatbot_transformer_model_scan - End');
+    // back_trace( 'NOTICE', 'chatbot_transformer_model_scan - End');
 
 }
 add_action('chatbot_transformer_model_scan_hook', 'chatbot_transformer_model_scan');
