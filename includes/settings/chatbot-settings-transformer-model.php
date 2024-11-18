@@ -18,7 +18,8 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_transformer_model_settings_section_callback($args) {
 
     // See if the scanner needs to run
-    $results = chatbot_transformer_model_build_results_callback(esc_attr(get_option('chatbot_transformer_model_build_schedule')));
+    // $results = chatbot_transformer_model_build_results_callback(esc_attr(get_option('chatbot_transformer_model_build_schedule')));
+    $results = chatbot_transformer_model_scheduler();
 
     ?>
     <p>Configure the settings for the plugin when using transformer models. Some example shortcodes include:</p>

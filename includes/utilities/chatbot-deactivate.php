@@ -132,6 +132,11 @@ function chatbot_chatgpt_uninstall(){
                         wp_unschedule_event($timestamp, $hook, $event['args']);
                     }
                 }
+                if (strpos($hook, 'chatbot_transformer') !== false) {
+                    foreach ($events as $event) {
+                        wp_unschedule_event($timestamp, $hook, $event['args']);
+                    }
+                }
             }
         }
 

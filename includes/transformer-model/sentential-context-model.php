@@ -122,7 +122,13 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
 
         for ($j = max(0, $i - $windowSize); $j <= min(count($words) - 1, $i + $windowSize); $j++) {
             if ($i !== $j) {
-                $contextWord = $words[$j];
+                if (isset($words[$j])) {
+                    $contextWord = $words[$j];
+                } else {
+                    // Handle the case where the key does not exist
+                    // back_trace( 'NOTICE', 'Undefined array key ' . $j . ' in words array');
+                    $contextWord = null; // or some default value
+                }
                 $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
             }
         }
@@ -156,7 +162,7 @@ function transformer_model_sentential_context_remove_stop_words($words) {
 function transformer_model_sentential_context_cosine_similarity($vectorA, $vectorB) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
+    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
 
     $commonKeys = array_intersect_key($vectorA, $vectorB);
 
@@ -207,7 +213,13 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         foreach ($sentenceWords as $word) {
             if (isset($embeddings[$word])) {
                 foreach ($embeddings[$word] as $contextWord => $value) {
-                    $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
+                    if (is_numeric($value)) {
+                        $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
+                    } else {
+                        // Handle the case where $value is not numeric
+                        // For example, you could log an error or skip this value
+                        back_trace( 'NOTICE', 'Non-numeric value encountered in embeddings for word: ' . $word);
+                    }
                 }
                 $wordCount++;
             }
