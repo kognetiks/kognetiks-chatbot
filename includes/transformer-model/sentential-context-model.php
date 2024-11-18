@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 function transformer_model_sentential_context_model_response($input, $responseCount = 500) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
+    back_trace('NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
 
     // MOVED TO transformer-model-scheduler.php
     // Fetch WordPress content
@@ -25,10 +25,10 @@ function transformer_model_sentential_context_model_response($input, $responseCo
     // Set the window size for co-occurrence matrix
     $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'Window Size: ' . $windowSize);
+    back_trace('NOTICE', 'Window Size: ' . $windowSize);
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'Response Count: ' . $responseCount);
+    back_trace('NOTICE', 'Response Count: ' . $responseCount);
 
     // MOVED TO transformer-model-scheduler.php
     // Build embeddings (with caching for performance)
@@ -47,7 +47,7 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
     global $wpdb;
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
+    back_trace('NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
 
     // Query to get post and page content
     $results = $wpdb->get_results(
@@ -65,20 +65,20 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
     }
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'Content in characters: ' . strlen($content));
+    back_trace('NOTICE', 'Content in characters: ' . strlen($content));
     // Calculate the $content size in MB
     $content_size = strlen($content) / 1024 / 1024;
-    // back_trace('NOTICE', 'Content in MB: ' . $content_size . ' MB');
+    back_trace('NOTICE', 'Content in MB: ' . $content_size . ' MB');
 
     // Clean up the content
     $content = strip_tags($content); // Remove HTML tags
     $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5); // Decode HTML entities
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'Content in characters after cleanup: ' . strlen($content));
+    back_trace('NOTICE', 'Content in characters after cleanup: ' . strlen($content));
     // Calculate the $content size in MB
     $content_size = strlen($content) / 1024 / 1024;
-    // back_trace('NOTICE', 'Content in MB after cleanup: ' . $content_size . ' MB');
+    back_trace('NOTICE', 'Content in MB after cleanup: ' . $content_size . ' MB');
 
     return $content;
 
@@ -88,7 +88,7 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
 function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
+    back_trace('NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
 
     $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
 
@@ -109,7 +109,7 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
 function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
+    back_trace('NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -156,7 +156,7 @@ function transformer_model_sentential_context_remove_stop_words($words) {
 function transformer_model_sentential_context_cosine_similarity($vectorA, $vectorB) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
 
     $commonKeys = array_intersect_key($vectorA, $vectorB);
 
@@ -190,8 +190,8 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
 function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500) {
 
     // DIAG - Diagnostic - Ver 2.3.0
-    // back_trace('NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
-    // back_trace('NOTICE', 'Max Tokens: ' . $maxTokens);
+    back_trace('NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
+    back_trace('NOTICE', 'Max Tokens: ' . $maxTokens);
 
     // Tokenize the corpus into sentences
     $sentences = preg_split('/(?<=[.?!])\s+/', $corpus);

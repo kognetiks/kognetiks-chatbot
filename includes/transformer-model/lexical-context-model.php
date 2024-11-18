@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 function transformer_model_lexical_context_response( $input, $max_tokens = null) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace('NOTICE', 'transformer_model_lexical_context_response');
+    back_trace('NOTICE', 'transformer_model_lexical_context_response');
 
     // Maximum tokens
     if (empty($max_tokens)) {
@@ -50,7 +50,7 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null)
 function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
+    back_trace('NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
 
     $cacheFile = __DIR__ . '/lexical_embeddings_cache.php';
 
@@ -71,7 +71,7 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
     global $wpdb;
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace( 'NOTICE', 'transformer_model_lexical_context_fetch_wordpress_content' );
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_fetch_wordpress_content' );
 
     // Query to get post and page content
     $results = $wpdb->get_results(
@@ -97,7 +97,7 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
 function transformer_model_lexical_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace( 'NOTICE', 'transformer_model_lexical_context_build_cooccurrence_matrix' );
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_build_cooccurrence_matrix' );
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -137,7 +137,7 @@ function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB)
 function transformer_model_lexical_context_generate_response($input, $embeddings) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace( 'NOTICE', 'transformer_model_lexical_context_generate_response' );
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_generate_response' );
 
     $inputWords = preg_split('/\s+/', strtolower($input));
     $inputVector = [];
@@ -171,7 +171,7 @@ function transformer_model_lexical_context_generate_response($input, $embeddings
 function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 10) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace('NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
+    back_trace('NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
 
     global $stopWords;
 
@@ -269,7 +269,7 @@ function removeStopWordFromEnd($response, $stopWords) {
     // Split the response into words
     $responseWords = preg_split('/\s+/', rtrim($response, " \t\n\r\0\x0B.,!?;:"));
     $lastWord = strtolower(end($responseWords));
-    // back_trace('NOTICE', 'Last Word: ' . $lastWord);
+    back_trace('NOTICE', 'Last Word: ' . $lastWord);
 
     // Check if the last word is a stop word
     if (in_array($lastWord, $stopWords)) {
