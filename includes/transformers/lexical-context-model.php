@@ -266,6 +266,7 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
 
 // Trim off any stop words from the end of the response
 function removeStopWordFromEnd($response, $stopWords) {
+    
     // Split the response into words
     $responseWords = preg_split('/\s+/', rtrim($response, " \t\n\r\0\x0B.,!?;:"));
     $lastWord = strtolower(end($responseWords));
@@ -279,4 +280,5 @@ function removeStopWordFromEnd($response, $stopWords) {
     }
 
     return $response;
+
 }
