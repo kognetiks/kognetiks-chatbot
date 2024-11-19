@@ -12,10 +12,12 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Transform input sentence into a response
-function transformer_model_lexical_context_response( $input, $max_tokens = null) {
+// Main function to generate a response
+function transformer_model_lexical_context_response( $input, $max_tokens = null ) {
 
-    // DIAG - Diagnostic - Ver 2.2.1
+    $max_tokens = 50;
+
+    // DIAG - Diagnostic - Ver 2.3.0
     back_trace('NOTICE', 'transformer_model_lexical_context_response');
 
     // Maximum tokens
@@ -33,23 +35,19 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null)
     $corpus = transformer_model_lexical_context_fetch_wordpress_content();
 
     // Build embeddings
-    // $embeddings = transformer_model_lexical_context_build_cooccurrence_matrix($corpus);
     $embeddings = transformer_model_lexical_context_get_cached_embeddings($corpus);
 
-    // Response lenght
-    $responseLength = $max_tokens;
-
     // Generate contextual response
-    $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 50);
+    $response = transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $max_tokens);
 
     return $response;
 
 }
 
-// Transformer function to get cached embeddings
+// Function to get cached embeddings
 function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 2) {
 
-    // DIAG - Diagnostic - Ver 2.2.0
+    // DIAG - Diagnostic - Ver 2.3.0
     back_trace('NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
 
     $cacheFile = __DIR__ . '/lexical_embeddings_cache.php';
@@ -57,7 +55,7 @@ function transformer_model_lexical_context_get_cached_embeddings($corpus, $windo
     if (file_exists($cacheFile)) {
         $embeddings = include $cacheFile;
     } else {
-        $embeddings = transformer_model_lexical_context_build_cooccurrence_matrix($corpus, $windowSize);
+        $embeddings = transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize);
         file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');
     }
 
@@ -65,12 +63,12 @@ function transformer_model_lexical_context_get_cached_embeddings($corpus, $windo
 
 }
 
-// Transformer function to read WordPress page and post content
+// Function to fetch WordPress content
 function transformer_model_lexical_context_fetch_wordpress_content() {
 
     global $wpdb;
 
-    // DIAG - Diagnostic - Ver 2.2.0
+    // DIAG - Diagnostic - Ver 2.3.0
     back_trace( 'NOTICE', 'transformer_model_lexical_context_fetch_wordpress_content' );
 
     // Query to get post and page content
@@ -93,169 +91,129 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
 
 }
 
-// Transformer function to build a co-occurrence matrix for word embeddings
-function transformer_model_lexical_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
+// Function to build a PMI matrix for word embeddings
+function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize = 2) {
 
-    // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_lexical_context_build_cooccurrence_matrix' );
+    // DIAG - Diagnostic - Ver 2.3.0
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_build_pmi_matrix' );
 
-    $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
+    $vocab = array_unique($words);
+    $wordCounts = array_count_values($words);
+    $totalWords = count($words);
 
-    foreach ($words as $i => $word) {
-        if (!isset($matrix[$word])) {
-            $matrix[$word] = [];
-        }
+    // Initialize co-occurrence counts
+    $coOccurrenceCounts = [];
 
-        for ($j = max(0, $i - $windowSize); $j <= min(count($words) - 1, $i + $windowSize); $j++) {
-            if ($i !== $j) {
+    for ($i = 0; $i < count($words); $i++) {
+        $word = $words[$i];
+        $contextStart = max(0, $i - $windowSize);
+        $contextEnd = min(count($words) - 1, $i + $windowSize);
+        for ($j = $contextStart; $j <= $contextEnd; $j++) {
+            if ($i != $j) {
                 $contextWord = $words[$j];
-                $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
+                if (!isset($coOccurrenceCounts[$word][$contextWord])) {
+                    $coOccurrenceCounts[$word][$contextWord] = 0;
+                }
+                $coOccurrenceCounts[$word][$contextWord] += 1;
             }
         }
     }
 
-    return $matrix;
+    // Compute PMI values
+    $embeddings = [];
+    foreach ($coOccurrenceCounts as $word => $contexts) {
+        foreach ($contexts as $contextWord => $count) {
+            $p_word = $wordCounts[$word] / $totalWords;
+            $p_context = $wordCounts[$contextWord] / $totalWords;
+            $p_word_context = $count / $totalWords;
+            $pmi = log($p_word_context / ($p_word * $p_context));
+            if ($pmi > 0) {
+                $embeddings[$word][$contextWord] = $pmi;
+            }
+        }
+    }
 
+    return $embeddings;
+    
 }
 
-// Transformer function to calculate cosine similarity between two vectors
+// Function to calculate cosine similarity between two vectors
 function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB) {
 
-    // DIAG - Diagnostic - Ver 2.2.0
+    // DIAG - Diagnostic - Ver 2.3.0
     // back_trace( 'NOTICE', 'transformer_model_lexical_context_cosine_similarity' );
 
-    $dotProduct = array_sum(array_map(fn($a, $b) => $a * $b, $vectorA, $vectorB));
-    $magnitudeA = sqrt(array_sum(array_map(fn($x) => $x * $x, $vectorA)));
-    $magnitudeB = sqrt(array_sum(array_map(fn($x) => $x * $x, $vectorB)));
+    $dotProduct = 0;
+    $magnitudeA = 0;
+    $magnitudeB = 0;
 
-    return $magnitudeA && $magnitudeB ? $dotProduct / ($magnitudeA * $magnitudeB) : 0;
+    $allKeys = array_unique(array_merge(array_keys($vectorA), array_keys($vectorB)));
+
+    foreach ($allKeys as $key) {
+        $a = isset($vectorA[$key]) ? $vectorA[$key] : 0;
+        $b = isset($vectorB[$key]) ? $vectorB[$key] : 0;
+
+        $dotProduct += $a * $b;
+        $magnitudeA += $a * $a;
+        $magnitudeB += $b * $b;
+    }
+
+    $magnitudeA = sqrt($magnitudeA);
+    $magnitudeB = sqrt($magnitudeB);
+
+    if ($magnitudeA * $magnitudeB == 0) {
+        return 0;
+    }
+
+    return $dotProduct / ($magnitudeA * $magnitudeB);
 
 }
 
-// Transformer to generate a response based on the input
-function transformer_model_lexical_context_generate_response($input, $embeddings) {
+// Function to generate a contextual response
+function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 50) {
 
-    // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_lexical_context_generate_response' );
-
-    $inputWords = preg_split('/\s+/', strtolower($input));
-    $inputVector = [];
-
-    // Average embedding vectors for input words
-    foreach ($inputWords as $word) {
-        if (isset($embeddings[$word])) {
-            foreach ($embeddings[$word] as $contextWord => $value) {
-                $inputVector[$contextWord] = ($inputVector[$contextWord] ?? 0) + $value;
-            }
-        }
-    }
-
-    // Find the most similar word in the embeddings
-    $bestMatch = '';
-    $bestScore = -1;
-    foreach ($embeddings as $word => $vector) {
-        $similarity = transformer_model_lexical_context_cosine_similarity($inputVector, $vector);
-        if ($similarity > $bestScore) {
-            $bestMatch = $word;
-            $bestScore = $similarity;
-        }
-    }
-
-    // Return the best match or fallback response
-    return $bestMatch ?: "I didn't understand that, please try again.";
-
-}
-
-// Transformer function to generate a contextual response
-function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 10) {
-
-    // DIAG - Diagnostic - Ver 2.2.1
+    // DIAG - Diagnostic - Ver 2.3.0
     back_trace('NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
 
     global $stopWords;
 
-    // Tokenize the corpus into words and punctuation
-    $words = preg_split('/(\s+|(?=[.,!?;:])|(?<=[.,!?;:]))/', $corpus, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-
-    // Prepare the input words
+    // Preprocess input
     $inputWords = preg_split('/\s+/', strtolower($input));
-    $inputVector = [];
 
-    // Build the input vector
+    // Build input embedding
+    $inputEmbedding = [];
     foreach ($inputWords as $word) {
         if (isset($embeddings[$word])) {
             foreach ($embeddings[$word] as $contextWord => $value) {
-                $inputVector[$contextWord] = ($inputVector[$contextWord] ?? 0) + $value;
+                $inputEmbedding[$contextWord] = ($inputEmbedding[$contextWord] ?? 0) + $value;
             }
         }
     }
 
-    // Find the best matching word
-    $bestMatch = '';
-    $bestScore = -1;
+    // Compute similarities with vocabulary words
+    $similarities = [];
     foreach ($embeddings as $word => $vector) {
-        $similarity = transformer_model_lexical_context_cosine_similarity($inputVector, $vector);
-        if ($similarity > $bestScore) {
-            $bestMatch = $word;
-            $bestScore = $similarity;
+        $similarity = transformer_model_lexical_context_cosine_similarity($inputEmbedding, $vector);
+        if ($similarity > 0) {
+            $similarities[$word] = $similarity;
         }
     }
 
-    if (!$bestMatch) {
-        return "I didn't understand that, please try again.";
-    }
+    // Sort words by similarity
+    arsort($similarities);
 
-    // Find all occurrences of the best match
-    $lowerWords = array_map('strtolower', $words);
-    $bestMatchIndices = array_keys($lowerWords, $bestMatch);
-    if (empty($bestMatchIndices)) {
-        return "I didn't understand that, please try again.";
-    }
+    // Generate response by selecting top similar words
+    $responseWords = array_slice(array_keys($similarities), 0, $responseLength);
 
-    // Use the first occurrence of the best match
-    $bestMatchIndex = $bestMatchIndices[0];
-
-    // Extract surrounding words for the response
-    $start = max(0, $bestMatchIndex - floor($responseLength / 2));
-    $end = min(count($words) - 1, $bestMatchIndex + floor($responseLength / 2));
-    $responseWords = array_slice($words, $start, $end - $start + 1);
-
-    // Reconstruct the response with proper capitalization and spacing
-    $response = '';
-    $capitalizeNext = true;
-
-    foreach ($responseWords as $word) {
-        // Check if the word is punctuation
-        if (preg_match('/[.,!?;:]/', $word)) {
-            $response = rtrim($response); // Remove any trailing space
-            $response .= $word . ' ';
-            if (in_array($word, ['.', '!', '?'])) {
-                $capitalizeNext = true;
-            }
-        } elseif (trim($word) === '') {
-            // Handle spaces
-            $response .= ' ';
-        } else {
-            // Word token
-            if ($capitalizeNext) {
-                $word = ucfirst($word);
-                $capitalizeNext = false;
-            }
-            $response .= $word . ' ';
-        }
-    }
+    // Reconstruct the response
+    $response = implode(' ', $responseWords);
 
     // Make sure the response does not end with a stop word
     $response = removeStopWordFromEnd($response, $stopWords);
 
-    // Make sure the response does not start with any punctuation or whitespace
-    $response = ltrim($response, " \t\n\r\0\x0B.,!?;:");
-
-    // Trim any extra whitespace
-    $response = trim($response);
-
     // Ensure the response ends with appropriate punctuation
+    $response = ucfirst($response);
     if (!preg_match('/[.!?]$/', $response)) {
         $response .= '.';
     }
@@ -266,11 +224,11 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
 
 // Trim off any stop words from the end of the response
 function removeStopWordFromEnd($response, $stopWords) {
-    
+
     // Split the response into words
     $responseWords = preg_split('/\s+/', rtrim($response, " \t\n\r\0\x0B.,!?;:"));
     $lastWord = strtolower(end($responseWords));
-    back_trace('NOTICE', 'Last Word: ' . $lastWord);
+    back_trace('NOTICE', 'removeStopWordFromEnd - Last Word: ' . $lastWord);
 
     // Check if the last word is a stop word
     if (in_array($lastWord, $stopWords)) {

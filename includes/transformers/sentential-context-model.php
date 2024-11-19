@@ -102,7 +102,7 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
             foreach ($context as $contextWord => $value) {
                 if (!is_numeric($value)) {
                     unset($embeddings[$word][$contextWord]);
-                    back_trace('NOTICE', 'Invalid value removed from cache for word: ' . $word . ' contextWord: ' . $contextWord);
+                    // back_trace('NOTICE', 'Invalid value removed from cache for word: ' . $word . ' contextWord: ' . $contextWord);
                 }
             }
         }
