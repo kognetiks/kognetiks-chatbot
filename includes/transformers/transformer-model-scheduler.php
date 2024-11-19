@@ -21,7 +21,7 @@ function chatbot_transformer_model_scheduler() {
     $chatbot_transformer_model_build_schedule = esc_attr(get_option('chatbot_transformer_model_build_schedule', 'Disable'));
 
     // Array with the possible values
-    $allowedValues = ['Disable', 'Completed', 'In Progress', 'No'];
+    $allowedValues = ['Disable', 'No'];
     if (!in_array($chatbot_transformer_model_build_schedule, $allowedValues)) {
         return; // Exit if the scheduler is disabled
     }
@@ -61,7 +61,8 @@ function chatbot_transformer_model_scheduler() {
         // All posts/pages are processed, reset offset and stop scheduling
         update_option('chatbot_transformer_model_offset', 0);
         back_trace('NOTICE', 'chatbot_transformer_model_scheduler - All posts processed.');
-        update_option('chatbot_chatgpt_scan_interval', 'Complete');
+        update_option('chatbot_chatgpt_scan_interval', esc_attr(get_option('chatbot_transformer_model_build_schedule', 'Disable')));
+        update_option(chatbot_transformer_model_build_status, 'Complete');
         update_option('chatbot_transformer_model_last_updated', current_time('mysql'));
         update_option('chatbot_transformer_model_build_schedule', 'No');
         return;
