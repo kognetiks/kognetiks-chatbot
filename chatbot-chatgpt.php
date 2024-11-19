@@ -119,9 +119,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-c
 require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-scheduler.php'; // Functions - Ver 2.1.9
 
 // Include necessary files - Transformer Model - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/transformer-model/lexical-context-model.php'; // Functions - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/transformer-model/sentential-context-model.php'; // Functions - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/transformer-model/transformer-model-scheduler.php'; // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformers/lexical-context-model.php'; // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-context-model.php'; // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-model-scheduler.php'; // Functions - Ver 2.2.0
 
 // Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';

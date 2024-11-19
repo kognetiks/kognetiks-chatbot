@@ -94,11 +94,25 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
 
     // Check if embeddings are cached
     if (file_exists($cacheFile)) {
+
         $embeddings = include $cacheFile;
+
+        // Validate cache
+        foreach ($embeddings as $word => $context) {
+            foreach ($context as $contextWord => $value) {
+                if (!is_numeric($value)) {
+                    unset($embeddings[$word][$contextWord]);
+                    back_trace('NOTICE', 'Invalid value removed from cache for word: ' . $word . ' contextWord: ' . $contextWord);
+                }
+            }
+        }
+
     } else {
+
         $embeddings = transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize);
         // Cache the embeddings
         file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');
+
     }
 
     return $embeddings;
@@ -109,7 +123,7 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
 function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
+    // back_trace('NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -119,17 +133,21 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
         if (!isset($matrix[$word])) {
             $matrix[$word] = [];
         }
-
+    
         for ($j = max(0, $i - $windowSize); $j <= min(count($words) - 1, $i + $windowSize); $j++) {
             if ($i !== $j) {
                 if (isset($words[$j])) {
                     $contextWord = $words[$j];
                 } else {
-                    // Handle the case where the key does not exist
-                    // back_trace( 'NOTICE', 'Undefined array key ' . $j . ' in words array');
-                    $contextWord = null; // or some default value
+                    // Handle the case where the index does not exist
+                    $contextWord = null; // or any default value
                 }
-                $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
+                $value = ($matrix[$word][$contextWord] ?? 0) + 1;
+                if (is_numeric($value)) {
+                    $matrix[$word][$contextWord] = $value;
+                } else {
+                    back_trace('NOTICE', "Non-numeric value encountered in co-occurrence matrix for word: $word");
+                }
             }
         }
     }
@@ -205,6 +223,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 
     // Compute embeddings for sentences
     foreach ($sentences as $index => $sentence) {
+
         $sentenceWords = preg_split('/\s+/', strtolower($sentence));
         $sentenceWords = transformer_model_sentential_context_remove_stop_words($sentenceWords); // Remove stop words
         $sentenceVector = [];
@@ -233,6 +252,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         }
 
         $sentenceVectors[$index] = $sentenceVector;
+
     }
 
     // Compute the input vector
