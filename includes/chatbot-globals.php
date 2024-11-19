@@ -40,7 +40,8 @@ $stopWords = [
     "w", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would", "wouldn't",
     "x",
     "y", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves",
-    "z"
+    "z",
+    "will", "just", "now", "needn't", "mightn't", "oughtn't", "ain't"
 ];
 
 
