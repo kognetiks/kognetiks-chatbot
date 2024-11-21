@@ -162,19 +162,17 @@ function chatbot_transformer_model_status_section_callback($args) {
         $chatbot_transformer_model_current_build_schedule  = 'No Schedule';
     }
 
-    // Get DB Stats
-    // $chatbot_transformer_model_db_stats = getDatabaseStats("chatbot_transformer_model");
-    // Unpack the returned array
-    // $chatbot_transformer_model_row_count = $chatbot_transformer_model_db_stats['row_count'];
-    // $chatbot_transformer_model_table_size_mb = $chatbot_transformer_model_db_stats['table_size_mb'];
+    // Get Transformer Model Stats
+    $chatbot_transformer_model_character_count = esc_attr(get_option('chatbot_transformer_model_character_count', 0));
+    $chatbot_transformer_model_content_in_mb = esc_attr(get_option('chatbot_transformer_model_content_in_mb', 0));
     
     ?>
         <div class="wrap">
             <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
                 <p><b>Scheduled to Run: </b><?php echo $chatbot_transformer_model_current_build_schedule; ?></p>
                 <p><b>Status of Last Run: </b><?php echo esc_attr(get_option('chatbot_transformer_model_last_updated', 'Please select a Build Schedule below.')); ?></p>
-                <p><b>Row Count: </b><?php // echo $chatbot_transformer_model_row_count; ?></p>
-                <p><b>Table Size: </b><?php // echo $chatbot_transformer_model_table_size_mb; ?> MB</p>
+                <p><b>Character Count: </b><?php echo $chatbot_transformer_model_row_count; ?></p>
+                <p><b>Table Size: </b><?php echo $chatbot_transformer_model_table_size_mb; ?> MB</p>
             </div>
             <p>Refresh this page to determine the progress and status of Transformer Model build status!</p>
         </div>

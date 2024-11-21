@@ -76,9 +76,11 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
 
     // DIAG - Diagnostic - Ver 2.2.0
     back_trace('NOTICE', 'Content in characters after cleanup: ' . strlen($content));
+    update_option('chatbot_transformer_model_content_size', strlen($content));
     // Calculate the $content size in MB
     $content_size = strlen($content) / 1024 / 1024;
     back_trace('NOTICE', 'Content in MB after cleanup: ' . $content_size . ' MB');
+    update_option('chatbot_transformer_model_content_size_mb', $content_size);
 
     return $content;
 
@@ -109,7 +111,7 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
 function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
+    // back_trace('NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -202,7 +204,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         foreach ($sentenceWords as $word) {
             if (isset($embeddings[$word])) {
                 foreach ($embeddings[$word] as $contextWord => $value) {
-                    $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
+                    $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + (is_array($value) ? 0 : $value);
                 }
                 $wordCount++;
             }
