@@ -260,8 +260,10 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
 
     // Ratios for splitting sentences and tokens
-    $sentenceBeforeRatio = 0.25; // 25% of sentences before
-    $tokenBeforeRatio = 0.25;    // 25% of tokens before
+    // $sentenceBeforeRatio = 0.25; // 0.25 or 25% of sentences before
+    // $tokenBeforeRatio = 0.25;    // 0.25 or 25% of tokens before
+    $sentenceBeforeRatio = 0.0; // 0.25 or 25% of sentences before
+    $tokenBeforeRatio = 0.0;    // 0.25 or 25% of tokens before
 
     // Distribute sentences and tokens
     $sentencesBefore = floor($maxSentences * $sentenceBeforeRatio);

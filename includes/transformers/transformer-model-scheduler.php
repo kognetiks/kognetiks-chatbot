@@ -69,10 +69,10 @@ function chatbot_transformer_model_scan() {
     // Run the Transformer Model building and saving process
 
     // Fetch WordPress content
-    $corpus = transformer_fetch_wordpress_content();
+    $corpus = transformer_model_sentential_context_fetch_wordpress_content();
 
     // Build embeddings (with caching for performance)
-    $embeddings = transformer_get_cached_embeddings($corpus);
+    $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus);
 
     // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'chatbot_transformer_model_scan - End');
