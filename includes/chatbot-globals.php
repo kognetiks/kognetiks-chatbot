@@ -98,3 +98,19 @@ $chatbot_markov_chain_fallback_response = [
     "I'm afraid I don't have enough information on that. Could you provide more details?",
     "It looks like I’m missing the answer for that. Perhaps you could rephrase or ask something else?"
 ];
+
+// Declare the $chatbotFallbackResponses array as global
+$chatbotFallbackResponses = [
+    "I didn't quite catch that. Could you try rephrasing?",
+    "Hmm, I'm not sure I understood. Can you explain differently?",
+    "I'm not following. Could you ask that in another way?",
+    "Sorry, that doesn't make sense to me. Could you clarify?",
+    "I may have missed your point. Could you say it differently?",
+    "I'm having trouble understanding. Could you ask another way?",
+    "That doesn't seem clear to me. Can you rephrase?",
+    "I’m not sure what you mean. Could you try explaining it differently?",
+    "I didn’t get that. Could you ask again in another way?",
+    "I’m a bit confused. Can you provide more details or rephrase?",
+    "I'm sorry, I don't understand. Could you try rewording it?",
+    "That’s unclear to me. Could you ask it in a different way?"
+];

@@ -186,6 +186,8 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
 
 function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500) {
 
+    global $chatbotFallbackResponses;
+
     // DIAG - Diagnostic - Ver 2.3.0
     back_trace('NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
     back_trace('NOTICE', 'Max Tokens: ' . $maxTokens);
@@ -249,6 +251,31 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         $similarities[$index] = $similarity;
     }
 
+    // Calculate key stats
+    $highestSimilarity = max($similarities);
+    $averageSimilarity = array_sum($similarities) / count($similarities);
+    $matchesAboveThreshold = array_filter($similarities, function($similarity) {
+        return $similarity > floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2));
+    });
+    $numMatchesAboveThreshold = count($matchesAboveThreshold);
+    $totalSentencesAnalyzed = count($sentences);
+
+    // Log key stats
+    back_trace('NOTICE', 'Key Stats:');
+    back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+
+    // Add a similarity threshold
+    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2)); // Default to 0.2
+
+    // If the highest similarity is below the threshold, return a fallback message
+    if ($highestSimilarity < $similarityThreshold) {
+        back_trace('NOTICE', 'Low similarity detected: ' . $highestSimilarity);
+        return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
+    }
+
     // Find the index of the most similar sentence
     arsort($similarities);
     $bestMatchIndex = key($similarities);
@@ -262,10 +289,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
 
     // Ratios for splitting sentences and tokens
-    // $sentenceBeforeRatio = 0.25; // 0.25 or 25% of sentences before
-    // $tokenBeforeRatio = 0.25;    // 0.25 or 25% of tokens before
-    $sentenceBeforeRatio = 0.0; // 0.25 or 25% of sentences before
-    $tokenBeforeRatio = 0.0;    // 0.25 or 25% of tokens before
+    $sentenceBeforeRatio = 0.0;
+    $tokenBeforeRatio = 0.0;
 
     // Distribute sentences and tokens
     $sentencesBefore = floor($maxSentences * $sentenceBeforeRatio);
@@ -286,7 +311,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
             $tokensUsedBefore += $sentenceWordCount;
             $sentencesUsedBefore++;
         } else {
-            break; // Stop if adding this sentence exceeds the token limit
+            break;
         }
     }
 
@@ -301,7 +326,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
             $tokensUsedAfter += $sentenceWordCount;
             $sentencesUsedAfter++;
         } else {
-            break; // Stop if adding this sentence exceeds the token limit
+            break;
         }
     }
 
