@@ -20,7 +20,7 @@ function chatbot_nvidia_model_settings_section_callback($args) {
     <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about NVIDIA models and their capability can be found at <a href="https://build.nvidia.com/explore/discover" target="_blank">https://build.nvidia.com/explore/discover</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/NVIDIA settings and additional documentation please click <a href="?page=chatbot-nvidia&tab=support&dir=api-nvidia-settings&file=api-nvidia-settings.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/NVIDIA settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-nvidia-settings&file=api-nvidia-model-settings.md">here</a>.</b></p>                                                                                 
     <?php
 }
 

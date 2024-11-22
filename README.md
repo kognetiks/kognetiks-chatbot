@@ -4,6 +4,10 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## Documentation
 
+## What's new in Version 2.2.1
+
+* **TBD**: TBD
+
 ## What's new in Version 2.2.0
 
 * **Rate Limit Exceeded Errors**: Added improved error handling for rate limit exceeded errors to retry the request after the delay specified by the API.
