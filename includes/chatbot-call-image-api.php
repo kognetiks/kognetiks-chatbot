@@ -30,7 +30,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_api()');
+    // back_trace( 'NOTICE', 'chatbot_calll_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
@@ -96,7 +96,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     $user_tracking = $session_id . '-' . $user_id . '-' . $page_id . '-' . $thread_id . '-' . $assistant_id;
 
     // Diagnostic - Ver 1.9.5
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_image_api()');
+    // back_trace( 'NOTICE', 'chatbot_calll_image_api()');
     // back_trace( 'NOTICE', 'BEGIN $message: ' . $message);
     // back_trace( 'NOTICE', 'BEGIN $model: ' . $model);
     // back_trace( 'NOTICE', 'BEGIN $quantity: ' . $quantity);

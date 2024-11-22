@@ -230,7 +230,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     $additional_instruction = null;
     if (isset($kchat_settings['additional_instructions']) && $kchat_settings['additional_instructions'] !== null) {
         $additional_instructions = $kchat_settings['additional_instructions'];
-        // back_trace ( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+        // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     }
 
     // DIAG - Diagnostics - Ver 2.0.9
@@ -320,76 +320,136 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', 'Step 5: getTheRunsStatus()');
 
+    global $sleepTime;
+
     $status = "";
 
-    while ($status != "completed") {
-    
-        // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/".$runId;
+    // Exponential backoff parameters - Ver 2.2.0
+    $initialSleep = 500000;        // Initial sleep time in microseconds (0.5 seconds)
+    $maxSleep = 20000000;          // Maximum sleep time in microseconds (20 seconds)
+    $sleepTime = $initialSleep;
+    $retryCount = 0;
+    $maxRetriesBeforeReset = 5;    // Number of retries before resetting the sleep time
+    $resetRangeMin = 500000;       // Minimum reset sleep time in microseconds (0.5 seconds)
+    $resetRangeMax = 2000000;      // Maximum reset sleep time in microseconds (2 seconds)
+    $maxTotalRetries = 50;         // Maximum total retries to prevent infinite loops
+    $totalRetryCount = 0;          // Total retry counter
+
+    while ($status != "completed" && $totalRetryCount < $maxTotalRetries) {
+
+        // Build the API URL
         $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId;
-        // DIAG - Diagnostics - Ver 2.0.9
         // back_trace( 'NOTICE', '$url: ' . $url);
 
+        // Determine the beta version
         $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-        if ( $assistant_beta_version == 'v2' ) {
-            $beta_version = "assistants=v2";
-        } else {
-            $beta_version = "assistants=v1";
-        }
-        // DIAG - Diagnostics - Ver 1.9.6
+        $beta_version = ($assistant_beta_version == 'v2') ? 'assistants=v2' : 'assistants=v1';
         // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
-    
+
+        // Prepare headers as an array
         $headers = array(
             "Content-Type: application/json",
             "OpenAI-Beta: " . $beta_version,
             "Authorization: Bearer " . $api_key
         );
 
-        $context = stream_context_create(array(
+        // Prepare the stream context options
+        $contextOptions = array(
             'http' => array(
                 'method' => 'GET',
                 'header' => $headers
-        )));
+            )
+        );
+        $context = stream_context_create($contextOptions);
+
+        // Fetch data using your existing fetchDataUsingCurl function
         $response = fetchDataUsingCurl($url, $context);
 
+        // Decode JSON response with error handling
         $responseArray = json_decode($response, true);
+        if ($responseArray === null && json_last_error() !== JSON_ERROR_NONE) {
+            prod_trace( 'ERROR', 'JSON decode error: ' . json_last_error_msg());
+            break; // Exit the loop or handle the error appropriately
+        }
 
-        // DIAG - Diagnostics - Ver 2.0.9
         // back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray, true));
 
-        if (array_key_exists("status", $responseArray)) {
+        // Check if 'status' exists in the response
+        if (isset($responseArray["status"])) {
             $status = $responseArray["status"];
+
+            // Handle 'failed' status indicating rate limit reached
             if ($status == "failed") {
-                // DIAG - Diagnostics - Ver 2.1.5
+                // back_trace( 'ERROR', "ALERT - FAILED STATUS RETURNED IN STEP 5");
                 prod_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . $status);
                 prod_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
-                // exit;
-                break;
+
+                // Check if last_error exists and code is rate_limit_exceeded
+                if (isset($responseArray['last_error']) && $responseArray['last_error']['code'] === 'rate_limit_exceeded') {
+                    // Extract the message
+                    $message = $responseArray['last_error']['message'] ?? '';
+
+                    // Use regex to find the seconds in the message
+                    if (preg_match('/Please try again in (\d+\.\d+)s/', $message, $matches)) {
+                        // Convert the seconds to microseconds and add 0.5 seconds
+                        $sleepTime = (int) ceil(($matches[1] + 0.5) * 1000000);
+                        prod_trace( 'ERROR', 'ALERT - RATE LIMIT REACHED - Sleeping for ' . $sleepTime . ' microseconds');
+                        break; // Exit after calculating sleep time
+                    } else {
+                        prod_trace( 'ERROR', 'Exiting Step 5 - UNABLE TO PARSE RETRY TIME');
+                        break;
+                    }
+                }
             }
+
+            // Handle 'incomplete' status
             if ($status == "incomplete") {
-                if (array_key_exists("incomplete_details", $responseArray)) {
+                if (isset($responseArray["incomplete_details"])) {
                     $incomplete_details = $responseArray["incomplete_details"];
-                    // DIAG - Diagnostics - Ver 2.1.5
+                    // back_trace( 'ERROR', "ALERT - INCOMPLETE STATUS RETURNED IN STEP 5");
                     prod_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . print_r($incomplete_details, true));
                     prod_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
-                    // exit;
                     break;
                 }
-            }      
+            }
+
+        } else {
+            prod_trace( 'ERROR', 'Error - GPT Assistant - Step 5: Status not found in response.');
+            break;
         }
 
-        // DIAG - Diagnostics - Ver 2.0.9
-        // back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray, true));
-        
+        // Check if the status is not completed
         if ($status != "completed") {
-            // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
-            // sleep(5);
-            usleep(500000);
-        }
 
+            // Exponential backoff
+            usleep($sleepTime);
+
+            // Increment the retry counts
+            $retryCount++;
+            $totalRetryCount++;
+
+            // Check if we need to reset the sleep time
+            if ($retryCount >= $maxRetriesBeforeReset) {
+                // Reset the sleep time to a random value within the specified range
+                $sleepTime = rand($resetRangeMin, $resetRangeMax);
+                $retryCount = 0;
+            } else {
+                // Double the sleep time for the next iteration, up to the maximum
+                $sleepTime = min($sleepTime * 2, $maxSleep);
+            }
+
+            // back_trace( 'NOTICE', 'Sleeping for ' . $sleepTime . ' microseconds');
+
+            // Check if maximum total retries have been reached
+            if ($totalRetryCount >= $maxTotalRetries) {
+                prod_trace( 'ERROR', 'Error - GPT Assistant - Step 5: Maximum retries reached. Exiting loop.');
+                break;
+            }
+        }
     }
 
     return $status;
-    
+
 }
 
 // Step 6: Get the Run's Steps
@@ -489,7 +549,7 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
 
         if (!$status) {
             // DIAG - Diagnostics - Ver 2.0.9
-            // back_trace ( 'NOTICE', '$status: ' . print_r($responseArray, true));
+            // back_trace  ( 'NOTICE', '$status: ' . print_r($responseArray, true));
             // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
             // sleep(5);
             usleep(500000);
@@ -802,33 +862,54 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'NOTICE', $assistants_response);
     }
 
-    // Step 4: Run the Assistant
-    // back_trace( 'NOTICE', 'Step 4: Run the Assistant');
-    $assistants_response = runTheAssistant($thread_id, $assistant_id, $context, $api_key);
+    $retries = 0;
+    $maxRetries = 5;
+    global $sleepTime; 
 
-    // Check if the response is not an array or is a string indicating an error
-    if (!is_array($assistants_response) || is_string($assistants_response)) {
-        // back_trace( 'ERROR', 'Invalid response format or error occurred');
-        return "Error: Invalid response format or error occurred.";
-    }
+    do {
 
-    // Check if the 'id' key exists in the response
-    if (isset($assistants_response["id"])) {
-        $runId = $assistants_response["id"];
-    } else {
-        // back_trace( 'ERROR', 'runId key not found in response');
-        return "Error: 'id' key not found in response.";
-    }
+        $run_status = '';
 
-    // DIAG - Print the response
-    // back_trace( 'NOTICE', $assistants_response);
+        // Step 4: Run the Assistant
+        // back_trace( 'NOTICE', 'Step 4: Run the Assistant');
+        $assistants_response = runTheAssistant($thread_id, $assistant_id, $context, $api_key);
 
-    // Step 5: Get the Run's Status
-    // back_trace( 'NOTICE', 'Step 5: Get the Run\'s Status');
-    $run_status = getTheRunsStatus($thread_id, $runId, $api_key);
+        // Check if the response is not an array or is a string indicating an error
+        if (!is_array($assistants_response) || is_string($assistants_response)) {
+            // back_trace( 'ERROR', 'Invalid response format or error occurred');
+            return "Error: Invalid response format or error occurred.";
+        }
 
+        // Check if the 'id' key exists in the response
+        if (isset($assistants_response["id"])) {
+            $runId = $assistants_response["id"];
+        } else {
+            // back_trace( 'ERROR', 'runId key not found in response');
+            return "Error: 'id' key not found in response.";
+        }
+
+        // DIAG - Print the response
+        // back_trace( 'NOTICE', $assistants_response);
+
+        // Step 5: Get the Run's Status
+        // back_trace( 'NOTICE', 'Step 5: Get the Run\'s Status');
+        $run_status = getTheRunsStatus($thread_id, $runId, $api_key);
+
+        $retries++;
+
+        if ($run_status == "failed" || $run_status == "incomplete") {
+            // back_trace( 'ERROR', 'Error - INSIDE DO WHILE LOOP - GPT Assistant - Step 5: ' . $run_status);
+            // return "Error: GPT Assistant - Step 5: " . $run_status;
+            // back_trace( 'NOTICE', 'ALERT INSIDE DO LOOP - Sleeping for ' . $sleepTime . ' microseconds');
+            // back_trace( 'NOTICE', 'ALERT INSIDE DO LOOP - Retries: ' . $retries);
+            usleep($sleepTime);
+        }
+
+    } while ($run_status != "completed" && $retries < $maxRetries);
+
+    // Failed after multiple retries
     if ($run_status == "failed" || $run_status == "incomplete") {
-        // back_trace( 'ERROR', 'Error - GPT Assistant - Step 5: ' . $run_status);
+        // back_trace( 'ERROR', 'Error - FAILED AFTER MULTIPLE RETRIES - GPT Assistant - Step 5: ' . $run_status);
         return "Error: GPT Assistant - Step 5: " . $run_status;
     }
 

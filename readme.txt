@@ -3,8 +3,8 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, artificial intelligence
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Requires at least: 5.5
-Tested up to: 6.6.2
-Stable tag: 2.1.9
+Tested up to: 6.7.1
+Stable tag: 2.2.0
 Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -162,7 +162,11 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
-= 2.1.9 - Release 11=10-2024 =
+= 2.2.0 - Release 11-22-2024 =
+
+* **Rate Limit Exceeded Errors**: Added improved error handling for rate limit exceeded errors to retry the request after the delay specified by the API.
+
+= 2.1.9 - Release 11-10-2024 =
 
 * **Bug Fixes**: Removed extra line breaks after the chatbot's response, among other minor issues identified after the release of version 2.1.8.
 

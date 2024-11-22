@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_markov_chain_scheduler() {
 
     // DIAG - Diagnostic - Ver 2.1.6
-    back_trace( 'NOTICE', 'chatbot_markov_chain_scheduler - START');
+    // back_trace( 'NOTICE', 'chatbot_markov_chain_scheduler - START');
 
     // Retrieve the schedule setting
     $chatbot_markov_chain_build_schedule = esc_attr(get_option('chatbot_markov_chain_build_schedule', 'Disable'));
@@ -43,7 +43,7 @@ function chatbot_markov_chain_scheduler() {
     update_option('chatbot_markov_chain_build_status', 'Completed');
 
     // DIAG - Diagnostic - Ver 2.1.6
-    back_trace( 'NOTICE', 'chatbot_markov_chain_scheduler - END');
+    // back_trace( 'NOTICE', 'chatbot_markov_chain_scheduler - END');
 }
 add_action('chatbot_markov_chain_scheduler_hook', 'chatbot_markov_chain_scheduler');
 
@@ -51,7 +51,7 @@ add_action('chatbot_markov_chain_scheduler_hook', 'chatbot_markov_chain_schedule
 function chatbot_markov_chain_scan() {
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'chatbot_markov_chain_scan - Start');
+    // back_trace( 'NOTICE', 'chatbot_markov_chain_scan - Start');
 
     // Get the current schedule setting
     $run_scanner = get_option('chatbot_markov_chain_build_schedule', 'No');
@@ -70,7 +70,7 @@ function chatbot_markov_chain_scan() {
     runMarkovChatbotAndSaveChain();
 
     // DIAG - Diagnostics - Ver 2.1.6
-    back_trace( 'NOTICE', 'chatbot_markov_chain_scan - End');
+    // back_trace( 'NOTICE', 'chatbot_markov_chain_scan - End');
 
 }
 add_action('chatbot_markov_chain_scan_hook', 'chatbot_markov_chain_scan');
@@ -79,9 +79,9 @@ add_action('chatbot_markov_chain_scan_hook', 'chatbot_markov_chain_scan');
 function chatbot_markov_chain_build_results_callback($run_scanner) {
 
     // DIAG - Diagnostic - Ver 2.1.6
-    back_trace( 'NOTICE', 'chatbot_markov_chain_build_results_callback');
-    back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner);
-    back_trace( 'NOTICE', 'chatbot_markov_chain_build_schedule: ' . esc_attr(get_option('chatbot_markov_chain_build_schedule')));
+    // back_trace( 'NOTICE', 'chatbot_markov_chain_build_results_callback');
+    // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner);
+    // back_trace( 'NOTICE', 'chatbot_markov_chain_build_schedule: ' . esc_attr(get_option('chatbot_markov_chain_build_schedule')));
 
     update_option('chatbot_markov_chain_last_updated', date('Y-m-d H:i:s'));
 

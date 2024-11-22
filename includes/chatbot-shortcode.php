@@ -78,7 +78,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', 'Browser: ' . $_SERVER['HTTP_USER_AGENT']);
     // back_trace( 'NOTICE', '========================================');
     // foreach ($atts as $key => $value) {
-    //     back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
+    //     // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     // }
     // back_trace( 'NOTICE', '========================================');
    
@@ -95,6 +95,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_markov_chain_voice_option', 'none'));
+    } elseif (esc_attr(get_option('chatbot_transformer_model_api_enabled', 'No')) == 'Yes') {
+        // DIAG - Diagnostics - Ver 2.2.0
+        // back_trace( 'NOTICE', 'Transformer chatbot is enabled');
+        $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
+        $voice_choice = esc_attr(get_option('chatbot_transformer_model_voice_option', 'none'));
     } else {
         // DIAG - Diagnostics - Ver 2.1.8
         // back_trace( 'NOTICE', 'OpenAI chatbot is enabled');
@@ -114,7 +120,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
     // back_trace( 'NOTICE', '========================================');
     // foreach ($kchat_settings as $key => $value) {
-    //     back_trace( 'NOTICE', '$kchat_settings - Key: ' . $key . ' Value: ' . $value);
+    //     // back_trace( 'NOTICE', '$kchat_settings - Key: ' . $key . ' Value: ' . $value);
     // }
     // back_trace( 'NOTICE', '========================================');
 
@@ -302,7 +308,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // One bot per page, embedded over floating - Ver 2.1.6
     // if ($kchat_settings['chatbot_chatgpt_display_style'] == 'floating' && $temp_chatbot_chatgpt_display_style == 'embedded') {
-    //     back_trace( 'NOTICE', 'Embedded style selected over floating style');
+    //     // back_trace( 'NOTICE', 'Embedded style selected over floating style');
     //     // End the shortcode processing
     //     // return;
     //     // $atts['style'] = 'embedded';
@@ -356,7 +362,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_hot_bot_prompt = sanitize_text_field($_GET['chatbot_prompt']);
         // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
     }
-    
+    If (!empty($chatbot_chatgpt_hot_bot_prompt)) {
+        $chatbot_chatgpt_hot_bot_prompt = preg_replace("/^\\\\'|\\\\'$/", '', $chatbot_chatgpt_hot_bot_prompt);
+    }
+
     // Validate and sanitize the additional_instructions parameter - Ver 1.9.9
     $additional_instructions = ''; // default value
     if (array_key_exists('additional_instructions', $atts)) {
@@ -371,6 +380,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
         } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
             $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
+        } else if (esc_attr(get_option('chatbot_transformer_model_api_enabled')) == 'Yes') {
+            $model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
         } else {
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         }
@@ -563,7 +574,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // FIXME - Check for the presence of an embedded chatbot - Ver 2.1.7
     // back_trace( 'NOTICE', 'get_chatbot_chatgpt_transients: ' . get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id));
     // if (get_chatbot_chatgpt_transients('display_style', $user_id, $page_id, $session_id) == 'embedded') {
-    //     back_trace( 'NOTICE', 'Embedded chatbot detected');
+    //     // back_trace( 'NOTICE', 'Embedded chatbot detected');
     //     $chatbot_chatgpt_display_style = 'embedded';
     //     return;
     // }
@@ -656,9 +667,19 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     $chatbot_chatgpt_bot_prompt = esc_attr(get_option('chatbot_chatgpt_bot_prompt', 'Enter your question ...'));
 
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
+
     // Hot Prompt the Chatbot - Ver 1.9.0
     if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
-        wp_add_inline_script('chatbot-chatgpt', 'document.getElementById("chatbot-chatgpt-message").placeholder = "' . $chatbot_chatgpt_hot_bot_prompt . '";');
+        // back_trace( 'NOTICE', 'Hot Prompting the Chatbot');
+            wp_add_inline_script('chatbot-chatgpt-js', '
+            if (typeof kchat_settings === "undefined") { 
+                var kchat_settings = ' . $kchat_settings_json . '; 
+            } else { 
+                kchat_settings = ' . $kchat_settings_json . '; 
+            }
+            document.getElementById("chatbot-chatgpt-message").placeholder = "' . $chatbot_chatgpt_hot_bot_prompt . '";
+        ', 'before');
     }
 
     // Assistant's Table Override - Ver 2.0.4
@@ -1031,7 +1052,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     // Preload with a prompt if it is set - Ver 1.9.5
                     if ($kflow_enabled != true and !empty($chatbot_chatgpt_hot_bot_prompt)) {
                         // DIAG - Diagnostics - Ver 1.9.0
-                        // back_trace( 'NOTICE', 'chatbot_chatgpt_bot_prompt: ' . $chatbot_chatgpt_bot_prompt);
+                        // back_trace( 'NOTICE', 'PRELOAD: $chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                         $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                         $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
                         $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
@@ -1171,6 +1192,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         }
                         // Preload with a prompt if it is set - Ver 1.9.5
                         if ($kflow_enabled != true and !empty($chatbot_chatgpt_hot_bot_prompt)) {
+                            // back_trace( 'NOTICE', 'PRELOAD: $chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                             $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                             $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
                             $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));

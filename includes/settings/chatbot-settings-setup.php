@@ -56,6 +56,9 @@ function chatbot_ai_platform_choice_callback($args) {
 
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_nvidia_api_enabled = 'No';
+
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
         
         update_option('chatbot_anthropic_api_enabled', 'No');
         $chatbot_anthropic_api_enabled = 'No';
@@ -73,6 +76,9 @@ function chatbot_ai_platform_choice_callback($args) {
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_markov_chain_api_enabled = 'No';
 
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
+        
         update_option('chatbot_anthropic_api_enabled', 'No');
         $chatbot_anthropic_api_enabled = 'No';
 
@@ -88,6 +94,28 @@ function chatbot_ai_platform_choice_callback($args) {
 
         update_option('chatbot_nvidia_api_enabled', 'No');
         $chatbot_nvidia_api_enabled = 'No';
+
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
+        
+        update_option('chatbot_anthropic_api_enabled', 'No');
+        $chatbot_anthropic_api_enabled = 'No';
+
+    } else if ($chatbot_ai_platform_choice == 'Transformer') {
+
+        $chatbot_ai_platform_choice = 'Transformer';
+        update_option('chatbot_ai_platform_choice', 'Transformer');
+        update_option('chatbot_transformer_model_api_enabled', 'Yes');
+        $chatbot_transformer_model_api_enabled = 'Yes';
+
+        update_option('chatbot_chatgpt_api_enabled', 'No');
+        $chatbot_chatgpt_api_enabled = 'No';
+
+        update_option('chatbot_nvidia_api_enabled', 'No');
+        $chatbot_nvidia_api_enabled = 'No';
+
+        update_option('chatbot_markov_chain_api_enabled', 'No');
+        $chatbot_markov_chain_api_enabled = 'No';
 
         update_option('chatbot_anthropic_api_enabled', 'No');
         $chatbot_anthropic_api_enabled = 'No';
@@ -105,6 +133,9 @@ function chatbot_ai_platform_choice_callback($args) {
         update_option('chatbot_nvidia_api_enabled', 'No');
         $chatbot_nvidia_api_enabled = 'No';
 
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
+        
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_markov_chain_api_enabled = 'No';
 
@@ -121,6 +152,9 @@ function chatbot_ai_platform_choice_callback($args) {
         update_option('chatbot_markov_chain_api_enabled', 'No');
         $chatbot_markov_chain_api_enabled = 'No';
 
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        $chatbot_transformer_model_api_enabled = 'No';
+        
         update_option('chatbot_anthropic_api_enabled', 'No');
         $chatbot_anthropic_api_enabled = 'No';
 
@@ -130,8 +164,9 @@ function chatbot_ai_platform_choice_callback($args) {
     <select id="chatbot_ai_platform_choice" name="chatbot_ai_platform_choice">
         <option value="OpenAI" <?php selected( $chatbot_ai_platform_choice, 'OpenAI' ); ?>><?php echo esc_html( 'OpenAI' ); ?></option>
         <option value="NVIDIA" <?php selected( $chatbot_ai_platform_choice, 'NVIDIA' ); ?>><?php echo esc_html( 'NVIDIA' ); ?></option>
-        <!-- <option value="Markov Chain" <?php selected( $chatbot_ai_platform_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option> -->
         <!-- <option value="Anthropic" <?php selected( $chatbot_ai_platform_choice, 'Anthropic' ); ?>><?php echo esc_html( 'Anthropic' ); ?></option> -->
+        <!-- <option value="Markov Chain" <?php selected( $chatbot_ai_platform_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option> -->
+        <!-- <option value="Transformer" <?php selected( $chatbot_ai_platform_choice, 'Transformer' ); ?>><?php echo esc_html( 'Transformer' ); ?></option> -->
     </select>
     <?php
 
@@ -139,8 +174,12 @@ function chatbot_ai_platform_choice_callback($args) {
     //     echo '<p><b>OpenAI ChatGPT is the default AI Platform for the Chatbot plugin.</b></p>';
     // } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
     //     echo '<p><b>NVIDIA ChatGPT is the NVIDIA AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'Anthropic') {
+    //     echo '<p><b>Anthropic ChatGPT is the Anthropic AI Platform for the Chatbot plugin.</b></p>';
     // } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
     //     echo '<p><b>Markov Chain is the Markov Chain AI Platform for the Chatbot plugin.</b></p>';
+    // } elseif ($chatbot_ai_platform_choice == 'Transformer') {
+    //     echo '<p><b>Transformer is the Transformer AI Platform for the Chatbot plugin.</b></p>';
     // }
 
 }

@@ -98,9 +98,7 @@ function chatbot_chatgpt_api_key_callback($args) {
 // https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
 // Model choice
 function chatbot_chatgpt_model_choice_callback($args) {
-
-    global $chatbot_markov_chain_api_enabled;
-    
+  
     // Get the saved chatbot_chatgpt_model_choice value or default to "gpt-3.5-turbo"
     $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
 

@@ -35,7 +35,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
+    // back_trace( 'NOTICE', 'chatbot_calll_tts_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
@@ -66,7 +66,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace( 'ERROR', 'Failed to create directory.')
+        // back_trace( 'ERROR', 'Failed to create directory.');
         return;
     }
 
@@ -390,7 +390,7 @@ function deleteAudioFile($file_id) {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace( 'ERROR', 'Failed to create directory.')
+        // back_trace( 'ERROR', 'Failed to create directory.');
         return;
     }
 

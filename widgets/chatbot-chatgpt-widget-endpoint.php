@@ -58,6 +58,10 @@ global $shortcode_tags;
 // Get the shortcode parameter from the URL and sanitize it
 $shortcode_param = isset($_GET['assistant']) ? sanitize_text_field($_GET['assistant']) : '';
 
+$chatbot_prompt = isset($_GET['chatbot_prompt']) ? sanitize_text_field($_GET['chatbot_prompt']) : '';
+$chatbot_prompt = preg_replace("/^\\\\'|\\\\'$/", '', $chatbot_prompt);
+// back_trace( 'NOTICE', 'Widget Endpoint - $chatbot_prompt: ' . $chatbot_prompt);
+
 // Retrieve the allowed domains and assistants from the WordPress options
 $allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
 
@@ -119,7 +123,11 @@ if (!array_key_exists($shortcode_param, $shortcode_tags)) {
 
 // Since we're confident that $shortcode_param is a valid registered shortcode,
 // it's safe to pass it to the do_shortcode function.
-$chatbot_html = do_shortcode('[' . esc_html($shortcode_param) . ']');
+if (!empty($chatbot_prompt)) {
+    $chatbot_html = do_shortcode('[' . esc_html($shortcode_param) . ' chatbot_prompt="' . esc_html($chatbot_prompt) . '"]');
+} else {
+    $chatbot_html = do_shortcode('[' . esc_html($shortcode_param) . ']');
+}
 
 // Set the initial chatbot settings
 if (is_user_logged_in()) {

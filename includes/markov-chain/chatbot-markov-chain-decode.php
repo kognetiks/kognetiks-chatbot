@@ -53,6 +53,7 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
     $words = explode(' ', $key);
     $iterationsSinceContextCheck = 0;
     $offTopicCount = 0; 
+    $offTopicMax = esc_attr(get_option('chatbot_markov_chain_off_topic_max', 5));
 
     for ($i = 0; $i < $max_tokens; $i++) {
 
@@ -78,7 +79,7 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
         }
 
         // Exit if off-topic drift is too high after reaching minimum length
-        if ($offTopicCount >= 10 && count($words) > $minLength) {
+        if ($offTopicCount >= $offTopicMax && count($words) > $minLength) {
             break;
         }
 
@@ -89,7 +90,7 @@ function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword
 
         // Reinforce context only if needed to bring focus back - default was 15 - Tuning in Ver 2.1.9.4
         $iterationsSinceContextCheck++;
-        if ($iterationsSinceContextCheck >= 7 && $primaryKeyword) {
+        if ($iterationsSinceContextCheck >= 15 && $primaryKeyword) {
             $key = $primaryKeyword;
             $iterationsSinceContextCheck = 0;
         }
@@ -204,36 +205,84 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
 
         // Recursive call with incremented attempts
         return getNextWordFromDatabase($shuffledWord, $attempts + 1, $randomWordAttempts);
+
     }
 
-    // Sort results by frequency to get the most common word
-    usort($results, function($a, $b) {
-        return $b['frequency'] - $a['frequency'];
-    });
+    // $approach = "Original"; // Approach used to calculate probabilities
+    $approach = "Laplace Smoothing"; // Approach used to calculate probabilities
 
-    // Define the probability threshold to select the most frequent word
-    // You can adjust this value as needed - Tuning in Ver 2.1.9.4
-    $probabilityThreshold = esc_attr(get_option('chatbot_markov_chain_probability_threshold', 95));
+    if ($approach === "Laplace Smoothing") {
 
-    // Probability or chance to select the most frequent word
-    if (mt_rand(1, 100) <= $probabilityThreshold) {
-        return $results[0]['next_word']; // Return the most frequent word
-    }
+        // Using Laplace smoothing to calculate probabilities and select the next word
+        // back_trace( 'NOTICE', 'Using Laplace Smoothing to calculate probabilities and select the next word' );
 
-    // Otherwise, use the probabilistic approach
-    $totalProbability = array_sum(array_column($results, 'frequency'));
-    $random = mt_rand(1, $totalProbability);
+        // Implement Laplace smoothing to calculate probabilities
+        // Calculate the vocabulary size (number of possible next words)
+        $vocabularySize = count($results);
 
-    $cumulative = 0;
-    foreach ($results as $row) {
-        $cumulative += $row['frequency'];
-        if ($random <= $cumulative) {
-            return $row['next_word'];
+        // Calculate the total frequency with smoothing
+        $totalFrequency = array_sum(array_column($results, 'frequency')) + $vocabularySize;
+
+        // Apply Laplace smoothing to each word's frequency to calculate probabilities
+        foreach ($results as &$row) {
+            $row['probability'] = ($row['frequency'] + 1) / $totalFrequency;
         }
+
+        // Sort results by probability in descending order
+        usort($results, function($a, $b) {
+            return $b['probability'] - $a['probability'];
+        });
+
+        // Use the probabilities to select the next word
+        $random = mt_rand() / mt_getrandmax(); // Generate a random float between 0 and 1
+        $cumulative = 0;
+
+        foreach ($results as $row) {
+            $cumulative += $row['probability'];
+            if ($random <= $cumulative) {
+                return $row['next_word'];
+            }
+        }
+
+        // Fallback to the most probable word (shouldn't happen due to probabilities summing to 1)
+        return $results[0]['next_word'];
+
+    } else {
+
+        // Using original (V2.1.9) approach to calculate probabilities and select the next word
+        // back_trace( 'NOTICE', 'Using Original (V2.1.9) approach to calculate probabilities and select the next word' );
+
+        // Sort results by frequency to get the most common word
+        usort($results, function($a, $b) {
+            return $b['frequency'] - $a['frequency'];
+        });
+
+        // Define the probability threshold to select the most frequent word
+        // You can adjust this value as needed - Tuning in Ver 2.1.9.4
+        $probabilityThreshold = esc_attr(get_option('chatbot_markov_chain_probability_threshold', 95));
+
+        // Probability or chance to select the most frequent word
+        if (mt_rand(1, 100) <= $probabilityThreshold) {
+            return $results[0]['next_word']; // Return the most frequent word
+        }
+
+        // Otherwise, use the probabilistic approach
+        $totalProbability = array_sum(array_column($results, 'frequency'));
+        $random = mt_rand(1, $totalProbability);
+
+        $cumulative = 0;
+        foreach ($results as $row) {
+            $cumulative += $row['frequency'];
+            if ($random <= $cumulative) {
+                return $row['next_word'];
+            }
+        }
+
+        // Fallback to the most frequent word (shouldn't happen)
+        return $results[0]['next_word'];
+
     }
 
-    // Fallback to the most frequent word (shouldn't happen)
-    return $results[0]['next_word'];
 }
 
 // Get a random word from the database to start the chain

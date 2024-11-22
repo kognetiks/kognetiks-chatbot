@@ -56,10 +56,10 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
     // Check for errors during the execution or in the response
     if($response === false) {
-        // back_trace( 'ERROR', 'cURL Error: ' . curl_error($ch);
+        // back_trace( 'ERROR', 'cURL Error: ' . curl_error($ch));
         return false;
     } elseif(isset($response['error'])) {
-        // back_trace( 'ERROR', 'API Error: ' . $response['error']['message'];
+        // back_trace( 'ERROR', 'API Error: ' . $response['error']['message']);
         return false;
     } else {
         // If no errors, print the Assistant's name

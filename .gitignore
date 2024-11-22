@@ -30,3 +30,7 @@ widget-logs/*
 !downloads/index.php
 !chatbot-logs/index.php
 !widget-logs/index.php
+
+# Ignore specific files
+includes/transformers/sentential_embeddings_cache.php
+includes/transformers/lexical_embeddings_cache.php

@@ -26,7 +26,7 @@ function chatbot_markov_chain_model_settings_section_callback($args) {
         <li><code>&#91;chatbot style="floating" model="markov-chain-2024-09-17"&#93;</code> - Style is floating, specific model</li>
         <li><code>&#91;chatbot style="embedded" model="markov-chain-2024-09-17"&#93;</code> - Style is embedded, specific model</li>
     </ul>
-    <p>Markov Chain models generate text using a local algorithm based on the <a href="https://en.wikipedia.org/wiki/Markov_chain" target="_blank" rel="noopener noreferrer">Markov Chain</a> concept. They are trained on your site's published content, including pages, posts, and comments. These models run locally on your server and are not available on the OpenAI platform. While they can produce useful text, they are less advanced than OpenAI models and may sometimes generate nonsensical output. However, they can still be effective when your site has a large amount of content.</p> 
+    <p>Markov Chain models generate text using a local algorithm based on the <a href="https://en.wikipedia.org/wiki/Markov_chain" target="_blank" rel="noopener noreferrer">Markov Chain</a> concept. They are trained on your site's published content, including pages, posts, and comments. These models run locally on your server and are not available on the OpenAI platform. Although these models may not match the sophistication of OpenAI's offerings and might occasionally generate nonsensical output, they can still be effective, especially when your site contains a large amount of content.</p> 
     <?php
 }
 
@@ -149,7 +149,7 @@ function chatbot_markov_chain_max_tokens_setting_callback($args) {
     <?php
 }
 
-// Knowledge Navigator Status - Ver 2.0.0.
+// Markov Chain Build Status - Ver 2.0.0.
 function chatbot_markov_chain_status_section_callback($args) {
 
     // See if the scanner is needs to run
@@ -157,9 +157,6 @@ function chatbot_markov_chain_status_section_callback($args) {
     if ($chatbot_markov_chain_current_build_schedule == 'No') {
         $chatbot_markov_chain_current_build_schedule  = 'No Schedule';
     }
-
-    // Force run the scanner
-    // $results = chatbot_chatgpt_kn_acquire();
 
     // Get DB Stats
     $chatbot_markov_chain_db_stats = getDatabaseStats("chatbot_markov_chain");
@@ -175,7 +172,7 @@ function chatbot_markov_chain_status_section_callback($args) {
                 <p><b>Row Count: </b><?php echo $chatbot_markov_chain_row_count; ?></p>
                 <p><b>Table Size: </b><?php echo $chatbot_markov_chain_table_size_mb; ?> MB</p>
             </div>
-            <p>Refresh this page to determine the progress and status of Knowledge Navigation!</p>
+            <p>Refresh this page to determine the progress and status of Markov Chain build process!</p>
         </div>
     <?php
 }

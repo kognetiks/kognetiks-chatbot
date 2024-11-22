@@ -34,7 +34,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     // Return 'COMING SOON: STT API is not yet implemented.';
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
+    // back_trace( 'NOTICE', 'chatbot_calll_tts_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
