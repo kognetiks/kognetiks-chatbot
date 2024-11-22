@@ -162,11 +162,11 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 == Changelog ==
 
-= 2.2.0 - Release TBD =
+= 2.2.0 - Release 11-22-2024 =
 
 * **Rate Limit Exceeded Errors**: Added improved error handling for rate limit exceeded errors to retry the request after the delay specified by the API.
 
-= 2.1.9 - Release 11=10-2024 =
+= 2.1.9 - Release 11-10-2024 =
 
 * **Bug Fixes**: Removed extra line breaks after the chatbot's response, among other minor issues identified after the release of version 2.1.8.
 
