@@ -109,6 +109,7 @@ function chatbot_test_api($api_key, $model) {
     //
     // https://platform.openai.com/docs/guides/error-codes/api-errors
     //
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
     if (isset($response_body['error'])) {
         $error_type = $response_body['error']['type'] ?? 'Unknown';
         $error_message = $response_body['error']['message'] ?? 'No additional information.';

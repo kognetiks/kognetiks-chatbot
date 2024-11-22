@@ -10,7 +10,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA or others, 
 
 ## What's new in Version 2.2.0
 
-* **TBD**: TBD
+* **Rate Limit Exceeded Errors**: Added improved error handling for rate limit exceeded errors to retry the request after the delay specified by the API.
 
 ## What's new in Version 2.1.9
 
