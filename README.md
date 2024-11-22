@@ -6,7 +6,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's new in Version 2.2.1
 
-* **TBD**: TBD
+* **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
 
 ## What's new in Version 2.2.0
 

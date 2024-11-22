@@ -164,7 +164,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 2.2.1 - Release TBD =
 
-* **TBD**: TBD
+* **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
 
 = 2.2.0 - Release 11-22-2024 =
 
