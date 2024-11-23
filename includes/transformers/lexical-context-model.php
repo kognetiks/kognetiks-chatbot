@@ -52,8 +52,14 @@ function transformer_model_lexical_context_get_cached_embeddings($corpus, $windo
 
     $cacheFile = __DIR__ . '/lexical_embeddings_cache.php';
 
+    back_trace( 'NOTICE', "Memory Limit: " . round( ini_get('memory_limit') / 1024 / 1024, 2 ) . " MB" );
+    back_trace( 'NOTICE', "Memory Usage: " . round( memory_get_usage($real_usage = true) / 1024 / 1024, 2 ) . " MB" );
+    back_trace( 'NOTICE', "Memory allocated: " . round( memory_get_peak_usage() / 1024 / 1024, 2 ) . " MB" );
+    back_trace( 'NOTICE', "Memory Usage (BEFORE): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
+
     if (file_exists($cacheFile)) {
         $embeddings = include $cacheFile;
+        back_trace( 'NOTICE', "Memory Usage (AFTER): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
     } else {
         $embeddings = transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize);
         file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');

@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 function transformer_model_sentential_context_model_response($input, $responseCount = 500) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
 
     // MOVED TO transformer-model-scheduler.php
     // Fetch WordPress content
@@ -25,10 +25,10 @@ function transformer_model_sentential_context_model_response($input, $responseCo
     // Set the window size for co-occurrence matrix
     $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'Window Size: ' . $windowSize);
+    back_trace( 'NOTICE', 'Window Size: ' . $windowSize);
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'Response Count: ' . $responseCount);
+    back_trace( 'NOTICE', 'Response Count: ' . $responseCount);
 
     // MOVED TO transformer-model-scheduler.php
     // Build embeddings (with caching for performance)
@@ -47,7 +47,7 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
     global $wpdb;
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
 
     // Query to get post and page content
     $results = $wpdb->get_results(
@@ -65,21 +65,21 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
     }
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'Content in characters: ' . strlen($content));
+    back_trace( 'NOTICE', 'Content in characters: ' . strlen($content));
     // Calculate the $content size in MB
     $content_size = strlen($content) / 1024 / 1024;
-    back_trace('NOTICE', 'Content in MB: ' . $content_size . ' MB');
+    back_trace( 'NOTICE', 'Content in MB: ' . $content_size . ' MB');
 
     // Clean up the content
     $content = strip_tags($content); // Remove HTML tags
     $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5); // Decode HTML entities
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'Content in characters after cleanup: ' . strlen($content));
+    back_trace( 'NOTICE', 'Content in characters after cleanup: ' . strlen($content));
     update_option('chatbot_transformer_model_content_size', strlen($content));
     // Calculate the $content size in MB
     $content_size = strlen($content) / 1024 / 1024;
-    back_trace('NOTICE', 'Content in MB after cleanup: ' . $content_size . ' MB');
+    back_trace( 'NOTICE', 'Content in MB after cleanup: ' . $content_size . ' MB');
     update_option('chatbot_transformer_model_content_size_mb', $content_size);
 
     return $content;
@@ -90,13 +90,20 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
 function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
+
+    back_trace( 'NOTICE', "Memory Limit: " . round( ini_get('memory_limit') / 1024 / 1024, 2 ) . " MB" );
+    back_trace( 'NOTICE', "Memory Usage: " . round( memory_get_usage($real_usage = true) / 1024 / 1024, 2 ) . " MB" );
+    back_trace( 'NOTICE', "Memory allocated: " . round( memory_get_peak_usage() / 1024 / 1024, 2 ) . " MB" );
+    back_trace( 'NOTICE', "Memory Usage (BEFORE): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
 
     $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
 
     // Check if embeddings are cached
     if (file_exists($cacheFile)) {
         $embeddings = include $cacheFile;
+        back_trace( 'NOTICE', "Memory Usage (AFTER): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
+
     } else {
         $embeddings = transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize);
         // Cache the embeddings
@@ -111,7 +118,7 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
 function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace('NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -153,7 +160,7 @@ function transformer_model_sentential_context_remove_stop_words($words) {
 function transformer_model_sentential_context_cosine_similarity($vectorA, $vectorB) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
 
     $commonKeys = array_intersect_key($vectorA, $vectorB);
 
@@ -189,8 +196,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     global $chatbotFallbackResponses;
 
     // DIAG - Diagnostic - Ver 2.3.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
-    back_trace('NOTICE', 'Max Tokens: ' . $maxTokens);
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
+    back_trace( 'NOTICE', 'Max Tokens: ' . $maxTokens);
 
     // Tokenize the corpus into sentences
     $sentences = preg_split('/(?<=[.?!])\s+/', $corpus);
@@ -261,18 +268,18 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $totalSentencesAnalyzed = count($sentences);
 
     // Log key stats
-    back_trace('NOTICE', 'Key Stats:');
-    back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+    back_trace( 'NOTICE', 'Key Stats:');
+    back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // Add a similarity threshold
     $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2)); // Default to 0.2
 
     // If the highest similarity is below the threshold, return a fallback message
     if ($highestSimilarity < $similarityThreshold) {
-        back_trace('NOTICE', 'Low similarity detected: ' . $highestSimilarity);
+        back_trace( 'NOTICE', 'Low similarity detected: ' . $highestSimilarity);
         return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
     }
 

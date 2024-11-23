@@ -121,25 +121,99 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 }
 
 // Cache embeddings for the fetched content
-function transformer_model_sentential_context_cache_embeddings($corpus) {
+// function transformer_model_sentential_context_cache_embeddings($corpus) {
 
-    back_trace('NOTICE', 'Cache Embeddings Start');
+//     back_trace('NOTICE', 'Cache Embeddings Start');
 
-    $embeddings = [];
-    foreach ($corpus as $row) {
-        $postID = $row['ID'];
-        $postContent = strip_tags(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5));
-        $postEmbeddings = transformer_model_sentential_context_build_cooccurrence_matrix($postContent, 2);
-        $embeddings[$postID] = $postEmbeddings;
+//     $embeddings = [];
+//     foreach ($corpus as $row) {
+//         $postID = $row['ID'];
+//         $postContent = strip_tags(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5));
+//         $postEmbeddings = transformer_model_sentential_context_build_cooccurrence_matrix($postContent, 2);
+//         $embeddings[$postID] = $postEmbeddings;
+//     }
+
+//     // Save embeddings to the cache file
+//     $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
+//     $existingCache = file_exists($cacheFile) ? include $cacheFile : [];
+//     $mergedEmbeddings = array_merge($existingCache, $embeddings);
+//     file_put_contents($cacheFile, '<?php return ' . var_export($mergedEmbeddings, true) . ';');
+
+//     back_trace('NOTICE', 'Cache Embeddings End');
+
+//     return $embeddings;
+
+// }
+
+// TABLE-BASED APPROACH
+// Create the sentential context model table
+function create_sentential_embeddings_table() {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'sentential_embeddings';
+
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        post_id BIGINT UNSIGNED NOT NULL,
+        context TEXT NOT NULL,
+        word TEXT NOT NULL,
+        count INT UNSIGNED NOT NULL,
+        INDEX post_id_idx (post_id),
+        INDEX context_word_idx (context(100), word(100))
+    ) $charset_collate;";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+
+}
+
+// Reinitialize the sentential context model table
+function reinitialize_sentential_embeddings_table() {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'sentential_embeddings';
+
+    $wpdb->query("TRUNCATE TABLE $table_name");
+
+}
+
+// Add embeddings to the sentential context model table
+function add_sentential_embeddings_to_table($post_id, $embeddings) {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'sentential_embeddings';
+
+    $data = [];
+    foreach ($embeddings as $context => $words) {
+        foreach ($words as $word => $count) {
+            $data[] = $wpdb->prepare("(%d, %s, %s, %d)", $post_id, $context, $word, $count);
+        }
     }
 
-    // Save embeddings to the cache file
-    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
-    $existingCache = file_exists($cacheFile) ? include $cacheFile : [];
-    $mergedEmbeddings = array_merge($existingCache, $embeddings);
-    file_put_contents($cacheFile, '<?php return ' . var_export($mergedEmbeddings, true) . ';');
+    if (!empty($data)) {
+        $query = "INSERT INTO $table_name (post_id, context, word, count) VALUES " . implode(", ", $data);
+        $wpdb->query($query);
+    }
 
-    back_trace('NOTICE', 'Cache Embeddings End');
+}
+
+// Retrieve embeddings from the sentential context model table
+function get_sentential_embeddings_from_table($post_id) {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'sentential_embeddings';
+
+    $results = $wpdb->get_results(
+        $wpdb->prepare("SELECT context, word, count FROM $table_name WHERE post_id = %d", $post_id),
+        ARRAY_A
+    );
+
+    $embeddings = [];
+    foreach ($results as $row) {
+        $embeddings[$row['context']][$row['word']] = $row['count'];
+    }
 
     return $embeddings;
 
