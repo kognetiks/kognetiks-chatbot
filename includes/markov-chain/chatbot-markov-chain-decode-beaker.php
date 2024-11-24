@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Generate a sentence using the Markov Chain with context reinforcement
-function generate_markov_text_flask_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
+function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
 
     global $chatbot_markov_chain_fallback_response;
 
@@ -104,7 +104,7 @@ function generate_markov_text_flask_model($startWords = [], $max_tokens = 500, $
         $response = rtrim($response, ' ,;') . '.';
     }
 
-    return clean_up_markov_chain_response($response);
+    return markov_chain_beaker_fix_common_grammar_issues($response);
     
 }
 
@@ -299,7 +299,7 @@ function markov_chain_beaker_get_randon_word_from_database() {
 }
 
 // Clean up the Markov Chain response for better readability
-// function clean_up_markov_chain_response($response) {
+// function markov_chain_beaker_clean_up_markov_chain_response($response) {
 
 //     // Trim whitespace and ensure first letter is capitalized
 //     $response = ucfirst(trim($response));
@@ -322,7 +322,7 @@ function markov_chain_beaker_get_randon_word_from_database() {
 //     $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response);  // Space after punctuation
 
 //     // Step 5: Fix grammar issues
-//     $response = fix_common_grammar_issues($response);
+//     $response = markov_chain_beaker_fix_common_grammar_issues($response);
 
 //     // Step 6: Ensure the response starts with an alphanumeric character
 //     $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
@@ -339,7 +339,7 @@ function markov_chain_beaker_get_randon_word_from_database() {
 // }
 
 // Clean up the Markov Chain response for better readability
-function clean_up_markov_chain_response($response) {
+function markov_chain_beaker_clean_up_markov_chain_response($response) {
 
     // Trim whitespace and ensure first letter is capitalized
     $response = ucfirst(trim($response));
@@ -364,7 +364,7 @@ function clean_up_markov_chain_response($response) {
     $response = preg_replace('/([?.!,])\s+([\'"])/', '$1$2', $response);  // No space between punctuation and quote
 
     // Step 5: Fix grammar issues
-    $response = fix_common_grammar_issues($response);
+    $response = markov_chain_beaker_fix_common_grammar_issues($response);
 
     // Step 6: Ensure the response starts with an alphanumeric character
     $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
@@ -385,7 +385,7 @@ function clean_up_markov_chain_response($response) {
 
 
 // Fix common grammar issues in the response
-function fix_common_grammar_issues($response) {
+function markov_chain_beaker_fix_common_grammar_issues($response) {
 
     do {
         $previous_response = $response;
