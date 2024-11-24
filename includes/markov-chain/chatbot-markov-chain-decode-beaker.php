@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
 
     // Diagnostics
-    back_trace('NOTICE', 'Generating Markov Chain response with improved Beaker model');
+    back_trace( 'NOTICE', 'Generating Markov Chain response with improved Beaker model');
 
     global $chatbot_markov_chain_fallback_response, $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_markov_chain';

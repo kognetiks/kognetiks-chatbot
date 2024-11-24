@@ -44,6 +44,7 @@ function chatbot_markov_chain_scheduler() {
 
     // DIAG - Diagnostic - Ver 2.1.6
     back_trace( 'NOTICE', 'chatbot_markov_chain_scheduler - END');
+    
 }
 add_action('chatbot_markov_chain_scheduler_hook', 'chatbot_markov_chain_scheduler');
 
