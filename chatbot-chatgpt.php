@@ -1042,7 +1042,7 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
         // DIAG - Diagnostics - Ver 2.1.8
-        back_trace( 'NOTICE', 'LINE 1044 - $response: ' . $response);
+        // back_trace( 'NOTICE', 'LINE 1045 - $response: ' . $response);
 
         // Return response
         wp_send_json_success($response);

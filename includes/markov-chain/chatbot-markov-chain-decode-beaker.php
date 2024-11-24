@@ -2,7 +2,7 @@
 /**
  * Kognetiks Chatbot for WordPress - Markov Chain Decode - Beaker - Ver 2.2.0
  *
- * This file contains the code for implementing the Markov Chain algorithm
+ * This file contains the improved code for implementing the Markov Chain algorithm.
  *
  * @package chatbot-chatgpt
  */
@@ -15,393 +15,181 @@ if ( ! defined( 'WPINC' ) ) {
 // Generate a sentence using the Markov Chain with context reinforcement
 function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
 
-    global $chatbot_markov_chain_fallback_response;
+    // Diagnostics
+    back_trace('NOTICE', 'Generating Markov Chain response with improved Beaker model');
 
-    // Vary the $minLength between the chain length the the maximum tokens - Ver 2.1.9.1
-    $minLength = rand($minLength, $max_tokens / 2);
+    global $chatbot_markov_chain_fallback_response, $wpdb;
+    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
-    $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3));
+    $chainLength = intval(get_option('chatbot_markov_chain_length', 3));
 
     // Clean up start words
-    $startWords = array_map('trim', $startWords);
-    $startWords = array_map(function($word) {
-        // return preg_replace('/[^\w\s]/', '', $word);
-        return preg_replace('/[^\w\s\-]/', '', $word);
-    }, $startWords);
+    $startWords = array_filter(array_map(function($word) {
+        return preg_replace('/[^\w\s\-]/u', '', trim($word));
+    }, $startWords));
 
-    $key = $primaryKeyword ? $primaryKeyword : null;
-
-    // Phase 1: Attempt to find a starting point
+    // Attempt to find a starting key
+    $key = $primaryKeyword ?: null;
     if (!empty($startWords)) {
         for ($i = count($startWords) - $chainLength; $i >= 0; $i--) {
             $attemptedKey = implode(' ', array_slice($startWords, $i, $chainLength));
-            $keyExists = markov_chain_beaker_check_key_in_database($attemptedKey);
-
-            if ($keyExists) {
+            if (markov_chain_beaker_key_exists($attemptedKey, $table_name)) {
                 $key = $attemptedKey;
-                $primaryKeyword = $key;
                 break;
             }
         }
+    }
 
+    // Use a random key if no starting key is found
+    if (!$key) {
+        $key = markov_chain_beaker_get_random_key($table_name);
         if (!$key) {
             return $chatbot_markov_chain_fallback_response[array_rand($chatbot_markov_chain_fallback_response)];
         }
     }
 
-    // Phase 2: Generate words going forward with a flexible topic drift and minimum length requirement
+    // Initialize variables for text generation
     $words = explode(' ', $key);
-    $iterationsSinceContextCheck = 0;
-    $offTopicCount = 0; 
-    $offTopicMax = esc_attr(get_option('chatbot_markov_chain_off_topic_max', 5));
+    $offTopicCount = 0;
+    $offTopicMax = intval(get_option('chatbot_markov_chain_off_topic_max', 5));
+    $minLength = rand($minLength, $max_tokens / 2);
 
     for ($i = 0; $i < $max_tokens; $i++) {
 
-        $nextWord = markov_chain_beaker_get_next_word_from_database($key, 1);
-
+        $nextWord = markov_chain_beaker_get_next_word($key, $table_name);
         if ($nextWord === null) {
-            break; // End if no next word is found
+            break;
         }
 
-        $nextWordsArray = explode(' ', $nextWord);
-        $words = array_merge($words, $nextWordsArray);
-
-        // Update the key with the last 'chainLength' words
+        $words[] = $nextWord;
         $key = implode(' ', array_slice($words, -$chainLength));
 
-        // Try removing special characters and extra spaces from the key - Ver 2.1.9.1
-        // $key = preg_replace("/[^\w\s']/u", '', $key);
-        $key = preg_replace('/\s+/', ' ', $key); // Remove extra spaces
-
-        // Allow more topic drift after the minimum length is reached
-        if ($i >= $minLength && strpos($nextWord, $primaryKeyword) === false) {
+        // Allow topic drift after minimum length is reached
+        if ($i >= $minLength && $primaryKeyword && strpos($nextWord, $primaryKeyword) === false) {
             $offTopicCount++;
+            if ($offTopicCount >= $offTopicMax) {
+                break;
+            }
         }
 
-        // Exit if off-topic drift is too high after reaching minimum length
-        if ($offTopicCount >= $offTopicMax && count($words) > $minLength) {
+        // Check for natural sentence endings
+        if (count($words) >= $minLength && preg_match('/[.!?]$/', $nextWord)) {
             break;
-        }
-
-        // Check for natural endings if the sentence is long enough
-        if (count($words) >= $minLength && preg_match('/[.!?]$/', implode(' ', $words))) {
-            break;
-        }
-
-        // Reinforce context only if needed to bring focus back - default was 15 - Tuning in Ver 2.1.9.4
-        $iterationsSinceContextCheck++;
-        if ($iterationsSinceContextCheck >= 15 && $primaryKeyword) {
-            $key = $primaryKeyword;
-            $iterationsSinceContextCheck = 0;
         }
     }
 
-    // Final cleanup and punctuation check to ensure sentence completion
+    // Final cleanup
     $response = implode(' ', $words);
-
-    // If it doesn’t end with a period, check for possible endings or add punctuation
-    if (!preg_match('/[.!?]$/', $response)) {
-        $response = rtrim($response, ' ,;') . '.';
-    }
-
-    return markov_chain_beaker_fix_common_grammar_issues($response);
-    
-}
-
-// Check if the key exists
-function markov_chain_beaker_check_key_in_database($key, $attempts = 1) {
-
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
-
-    // Limit attempts before proceeding
-    if ($attempts > esc_attr(get_option('chatbot_markov_chain_length', 3))) {
-        return null; // Stop further recursion if max attempts are reached
-    }
-
-    // Check the database for an exact match
-    $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word = %s", $key));
-
-    // DIAG - Diagnostics - V 2.1.9
-    // back_trace('NOTICE', 'Checking key: ' . $key . ' - Result: ' . $result);
-    // back_trace('NOTICE', 'Attempts: ' . $attempts);
-
-    // If no exact match is found, try using the wildcard approach
-    if ($result === null) {
-        $keyWords = explode(' ', $key);
-
-        // Shuffle the keywords to randomize the order
-        shuffle($keyWords);
-
-        // Drop the last word and append a wildcard symbol
-        $wildcardKey = implode(' ', array_slice($keyWords, 0, -1)) . ' %';
-
-        // Use LIKE for the wildcard search
-        $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word LIKE %s", $wildcardKey));
-
-        // Diagnostic output to log the wildcard key generation and attempt number
-        // back_trace('NOTICE', 'Attempt ' . $attempts . ': Wildcard key after shuffle - ' . $wildcardKey);
-        // back_trace('NOTICE', 'Wildcard key result: ' . $result);
-
-        // Recursive call with incremented attempts if no result is found
-        if ($result === null) {
-            return markov_chain_beaker_check_key_in_database($wildcardKey, $attempts + 1);
-        }
-    }
-
-    return $result;
-
-}
-
-
-// Get the next word from the database based on the current word
-function markov_chain_beaker_get_next_word_from_database($currentWord, $attempts = 1, $randomWordAttempts = 0) {
-
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
-
-    // Limit for attempts to find a next word using $currentWord
-    $maxAttempts = esc_attr(get_option('chatbot_markov_chain_length', 3));
-
-    // Limit for attempts to get a random fallback word
-    $maxRandomWordAttempts = $maxAttempts; // Limit based on chain length
-
-    // Check if we've exceeded attempts for the primary word
-    if ($attempts > $maxAttempts) {
-
-        // If max attempts reached, use a random word as fallback, limited by $maxRandomWordAttempts
-        if ($randomWordAttempts < $maxRandomWordAttempts) {
-            $randomWord = markov_chain_beaker_get_randon_word_from_database();
-            
-            // Increment and try again if a random word is not found
-            if ($randomWord !== null) {
-                return $randomWord;
-            }
-
-            // Increment random word attempts and retry if necessary
-            return markov_chain_beaker_get_next_word_from_database($currentWord, $attempts, $randomWordAttempts + 1);
-        }
-
-        // If we've exhausted random word attempts, return null to indicate failure
-        return null;
-    }
-
-    // Diagnostic output
-    // back_trace('NOTICE', 'Checking current word: ' . $currentWord);
-    // back_trace('NOTICE', 'Attempts: ' . $attempts);
-
-    // Query to get possible next words and their frequencies
-    $results = $wpdb->get_results(
-        $wpdb->prepare("SELECT next_word, frequency FROM $table_name WHERE word = %s", $currentWord),
-        ARRAY_A
-    );
-
-    // Check if no results are found
-    if (empty($results)) {
-        // Randomize order of current word's parts and try again
-        $wordParts = explode(' ', $currentWord);
-        shuffle($wordParts);
-        $shuffledWord = implode(' ', $wordParts);
-
-        // Recursive call with incremented attempts
-        return markov_chain_beaker_get_next_word_from_database($shuffledWord, $attempts + 1, $randomWordAttempts);
-
-    }
-
-    // $approach = "Original"; // Approach used to calculate probabilities
-    $approach = "Laplace Smoothing"; // Approach used to calculate probabilities
-
-    if ($approach === "Laplace Smoothing") {
-
-        // Using Laplace smoothing to calculate probabilities and select the next word
-        // back_trace( 'NOTICE', 'Using Laplace Smoothing to calculate probabilities and select the next word' );
-
-        // Implement Laplace smoothing to calculate probabilities
-        // Calculate the vocabulary size (number of possible next words)
-        $vocabularySize = count($results);
-
-        // Calculate the total frequency with smoothing
-        $totalFrequency = array_sum(array_column($results, 'frequency')) + $vocabularySize;
-
-        // Apply Laplace smoothing to each word's frequency to calculate probabilities
-        foreach ($results as &$row) {
-            $row['probability'] = ($row['frequency'] + 1) / $totalFrequency;
-        }
-
-        // Sort results by probability in descending order
-        usort($results, function($a, $b) {
-            return $b['probability'] - $a['probability'];
-        });
-
-        // Use the probabilities to select the next word
-        $random = mt_rand() / mt_getrandmax(); // Generate a random float between 0 and 1
-        $cumulative = 0;
-
-        foreach ($results as $row) {
-            $cumulative += $row['probability'];
-            if ($random <= $cumulative) {
-                return $row['next_word'];
-            }
-        }
-
-        // Fallback to the most probable word (shouldn't happen due to probabilities summing to 1)
-        return $results[0]['next_word'];
-
-    } else {
-
-        // Using original (V2.1.9) approach to calculate probabilities and select the next word
-        // back_trace( 'NOTICE', 'Using Original (V2.1.9) approach to calculate probabilities and select the next word' );
-
-        // Sort results by frequency to get the most common word
-        usort($results, function($a, $b) {
-            return $b['frequency'] - $a['frequency'];
-        });
-
-        // Define the probability threshold to select the most frequent word
-        // You can adjust this value as needed - Tuning in Ver 2.1.9.4
-        $probabilityThreshold = esc_attr(get_option('chatbot_markov_chain_probability_threshold', 95));
-
-        // Probability or chance to select the most frequent word
-        if (mt_rand(1, 100) <= $probabilityThreshold) {
-            return $results[0]['next_word']; // Return the most frequent word
-        }
-
-        // Otherwise, use the probabilistic approach
-        $totalProbability = array_sum(array_column($results, 'frequency'));
-        $random = mt_rand(1, $totalProbability);
-
-        $cumulative = 0;
-        foreach ($results as $row) {
-            $cumulative += $row['frequency'];
-            if ($random <= $cumulative) {
-                return $row['next_word'];
-            }
-        }
-
-        // Fallback to the most frequent word (shouldn't happen)
-        return $results[0]['next_word'];
-
-    }
-
-}
-
-// Get a random word from the database to start the chain
-function markov_chain_beaker_get_randon_word_from_database() {
-
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
-
-    // Query to get a random word from the database
-    $randomWord = $wpdb->get_var("SELECT word FROM $table_name ORDER BY RAND() LIMIT 1");
-
-    return $randomWord;
-
-}
-
-// Clean up the Markov Chain response for better readability
-// function markov_chain_beaker_clean_up_markov_chain_response($response) {
-
-//     // Trim whitespace and ensure first letter is capitalized
-//     $response = ucfirst(trim($response));
-
-//     // Step 1: Capitalize the first letter of each sentence
-//     $response = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function($matches) {
-//         return strtoupper($matches[1]);
-//     }, $response);
-
-//     // Step 2: Add punctuation at the end if missing
-//     if (!preg_match('/[.!?]$/', $response)) {
-//         $response .= '. ';
-//     }
-
-//     // Step 3: Replace multiple spaces with a single space
-//     $response = preg_replace('/\s+/', ' ', $response);
-
-//     // Step 4: Basic punctuation cleanup
-//     $response = preg_replace('/\s+([?.!,])/', '$1', $response);  // No space before punctuation
-//     $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response);  // Space after punctuation
-
-//     // Step 5: Fix grammar issues
-//     $response = markov_chain_beaker_fix_common_grammar_issues($response);
-
-//     // Step 6: Ensure the response starts with an alphanumeric character
-//     $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
-
-//     // Step 7: Additional punctuation and case fixes - Removed in Ver 2.1.9.3
-//     // Insert punctuation where a lowercase word is followed by a space and a word starting with an uppercase letter but is not in ALL CAPS
-//     // $response = preg_replace('/([a-z])\s+([A-Z][a-z]+)/', '$1. $2', $response);
-
-//     // Final check to ensure punctuation between phrases and correct spacing
-//     $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1 $2', $response);
-
-//     return $response;
-
-// }
-
-// Clean up the Markov Chain response for better readability
-function markov_chain_beaker_clean_up_markov_chain_response($response) {
-
-    // Trim whitespace and ensure first letter is capitalized
-    $response = ucfirst(trim($response));
-
-    // Step 1: Capitalize the first letter of each sentence
-    $response = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function($matches) {
-        return strtoupper($matches[1]);
-    }, $response);
-
-    // Step 2: Add punctuation at the end if missing
-    if (!preg_match('/[.!?]$/', $response)) {
-        $response .= '. ';
-    }
-
-    // Step 3: Replace multiple spaces with a single space
-    $response = preg_replace('/\s+/', ' ', $response);
-
-    // Step 4: Basic punctuation cleanup
-    // Ensure there’s no space before punctuation and that spaces after punctuation are managed correctly
-    $response = preg_replace('/\s+([?.!,])/', '$1', $response);  // No space before punctuation
-    $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response);  // Space after punctuation
-    $response = preg_replace('/([?.!,])\s+([\'"])/', '$1$2', $response);  // No space between punctuation and quote
-
-    // Step 5: Fix grammar issues
-    $response = markov_chain_beaker_fix_common_grammar_issues($response);
-
-    // Step 6: Ensure the response starts with an alphanumeric character
-    $response = preg_replace('/^[^a-zA-Z0-9]+/', '', $response);
-
-    // Step 7: Handle words run together (e.g., "expertiseAnd")
-    $response = preg_replace('/([a-z])([A-Z])/', '$1 $2', $response);
-
-    // Step 8: Additional punctuation and case fixes - Removed in Ver 2.1.9.3
-    // Insert punctuation where a lowercase word is followed by a space and a word starting with an uppercase letter but is not in ALL CAPS
-    // $response = preg_replace('/([a-z])\s+([A-Z][a-z]+)/', '$1. $2', $response);
-
-    // Final check to ensure punctuation between phrases and correct spacing
-    $response = preg_replace('/([^\w\s])\s+([^\w\s])/', '$1 $2', $response);
+    $response = markov_chain_beaker_clean_up_response($response);
 
     return $response;
 
 }
 
+// Check if the key exists in the database
+function markov_chain_beaker_key_exists($key, $table_name) {
+
+    global $wpdb;
+    $result = $wpdb->get_var($wpdb->prepare("SELECT 1 FROM $table_name WHERE word = %s LIMIT 1", $key));
+    return !is_null($result);
+
+}
+
+// Get the next word from the database
+function markov_chain_beaker_get_next_word($currentKey, $table_name) {
+
+    global $wpdb;
+
+    // Fetch possible next words with their frequencies
+    $results = $wpdb->get_results(
+        $wpdb->prepare("SELECT next_word, frequency FROM $table_name WHERE word = %s", $currentKey),
+        ARRAY_A
+    );
+
+    if (empty($results)) {
+        // Try reducing the chain length if no results are found
+        $keyParts = explode(' ', $currentKey);
+        array_shift($keyParts);
+        if (count($keyParts) > 0) {
+            $newKey = implode(' ', $keyParts);
+            return markov_chain_beaker_get_next_word($newKey, $table_name);
+        } else {
+            return null;
+        }
+    }
+
+    // Calculate total frequency
+    $totalFrequency = array_sum(array_column($results, 'frequency'));
+
+    // Generate a random number between 1 and total frequency
+    $rand = mt_rand(1, $totalFrequency);
+
+    // Select next word based on weighted probability
+    $cumulative = 0;
+    foreach ($results as $row) {
+        $cumulative += $row['frequency'];
+        if ($rand <= $cumulative) {
+            return $row['next_word'];
+        }
+    }
+
+    // Fallback to the most frequent next word
+    return $results[0]['next_word'];
+
+}
+
+// Get a random key from the database
+function markov_chain_beaker_get_random_key($table_name) {
+
+    global $wpdb;
+    return $wpdb->get_var("SELECT word FROM $table_name ORDER BY RAND() LIMIT 1");
+
+}
+
+// Clean up the Markov Chain response
+function markov_chain_beaker_clean_up_response($response) {
+
+    // Trim and capitalize
+    $response = ucfirst(trim($response));
+
+    // Fix spacing and punctuation
+    $response = preg_replace('/\s+/', ' ', $response);
+    $response = preg_replace('/\s+([.,!?])/', '$1', $response);
+    $response = preg_replace('/([.,!?])([^\s])/', '$1 $2', $response);
+
+    // Ensure proper sentence endings
+    if (!preg_match('/[.!?]$/', $response)) {
+        $response .= '.';
+    }
+
+    // Fix common grammar issues
+    $response = markov_chain_beaker_fix_grammar($response);
+
+    return $response;
+
+}
 
 // Fix common grammar issues in the response
-function markov_chain_beaker_fix_common_grammar_issues($response) {
+function markov_chain_beaker_fix_grammar($response) {
 
-    do {
-        $previous_response = $response;
-    
-        // Grammar and formatting fixes
-        $response = preg_replace('/\ba an\b/', 'an', $response);
-        $response = preg_replace('/\bmore better\b/', 'better', $response);
-        $response = preg_replace('/\ba ([aeiouAEIOU])\b/', 'an $1', $response);
-        $response = preg_replace('/\ban ([bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ])\b/', 'a $1', $response);
-        $response = preg_replace('/\byou is\b/', 'you are', $response);
-        $response = preg_replace('/\bdoesn\'t has\b/', 'doesn\'t have', $response);
-        $response = preg_replace('/\b(a|an|and|for|the|to) \1\b/i', '$1', $response);
-        $response = preg_replace('/\b(the|a|an|and|for|to|in|on|with|by|from|at|of) (it|he|she|they|we|you|I)\b/i', '$2', $response);
-    
-    } while ($previous_response !== $response); // Loop until no more changes are made
-    
+    // Correct indefinite articles
+    $response = preg_replace('/\b(a|an) ([aeiouAEIOU])/', 'an $2', $response);
+    $response = preg_replace('/\b(an) ([^aeiouAEIOU\s])/', 'a $2', $response);
+
+    // Correct common mistakes
+    $replacements = [
+        '/\b(you|we|they) is\b/' => '$1 are',
+        '/\bI is\b/' => 'I am',
+        '/\bdoesn\'t has\b/' => 'doesn\'t have',
+        '/\bcan\'t not\b/' => 'cannot',
+        '/\bmore better\b/' => 'better',
+        '/\b(\w+) \1\b/i' => '$1',
+    ];
+
+    foreach ($replacements as $pattern => $replacement) {
+        $response = preg_replace($pattern, $replacement, $response);
+    }
+
     return $response;
 
 }
