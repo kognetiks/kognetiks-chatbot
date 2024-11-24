@@ -276,12 +276,12 @@ if ($chatbot_ai_platform_choice == 'OpenAI' || $chatbot_ai_platform_choice === n
 
     // Model choice - Ver 2.1.8
     if (get_option('chatbot_markov_chain_model_choice') === null) {
-        $model = 'markov-chain-2024-09-17';
+        $model = 'markov-chain-flask';
         update_option('chatbot_markov_chain_model_choice', $model);
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
     } elseif (empty($model)) {
-        $model = 'markov-chain-2024-09-17';
+        $model = 'markov-chain-flask';
     }
     
 } elseif ($chatbot_ai_platform_choice == 'Transformer') {
@@ -598,7 +598,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', 'LINE 537 - $model: ' . $model);
     } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
         $api_key = esc_attr(get_option('chatbot_markov_chain_api_key'));
-        $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
+        $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
         $kchat_settings['chatbot_chatgpt_model'] = $model;
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8

@@ -133,7 +133,7 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
         $batch_size = 100;
     }
 
-    $batch_size = 50; // Limit the batch size to 50 for now
+    // $batch_size = 50; // Limit the batch size to 50 for now
 
     if ($batch_starting_point == 1 && $processing_type == 'posts') {
 
@@ -152,18 +152,18 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'getAllPublishedContent - Start');
+    back_trace( 'NOTICE', 'getAllPublishedContent - Start');
 
     // DIAG - Diagnostics - Ver 2.1.6.1
-    // back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
-    // back_trace( 'NOTICE', 'Last Updated: ' . $last_updated);
-    // back_trace( 'NOTICE', 'Processing Type: ' . $processing_type);
+    back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
+    back_trace( 'NOTICE', 'Last Updated: ' . $last_updated);
+    back_trace( 'NOTICE', 'Processing Type: ' . $processing_type);
 
     // Syntheic Data Generation
     if ($processing_type == 'synthetic') {
 
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'Synthetic Data Generation and Processing');
+        back_trace( 'NOTICE', 'Synthetic Data Generation and Processing');
 
         // Generate synthetic data for the Markov Chain
         $syntheticData = chatbot_markov_chain_synthetic_data_generation();
@@ -181,7 +181,7 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     if ($processing_type == 'posts') {
 
         // DIAG - Diagnostics - Ver 2.1.6.1
-        // back_trace( 'NOTICE', 'Processing posts and pages');
+        back_trace( 'NOTICE', 'Processing posts and pages');
 
         // Calculate the offset for the current post batch
         $offset = ($batch_starting_point - 1) * $batch_size;
@@ -221,11 +221,11 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
             if ($query->found_posts > ($offset + $batch_size)) {
                 $next_batch_starting_point = $batch_starting_point + 1;
                 wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array($last_updated, $next_batch_starting_point, $batch_size, 'posts'));
-                // back_trace( 'NOTICE', 'getAllPublishedContent - Scheduled next post batch #' . $next_batch_starting_point);
+                back_trace( 'NOTICE', 'getAllPublishedContent - Scheduled next post batch #' . $next_batch_starting_point);
             } else {
                 // No more posts, move to processing comments
                 wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array($last_updated, 1, $batch_size, 'comments'));
-                // back_trace( 'NOTICE', 'getAllPublishedContent - Posts done, moving to comments');
+                back_trace( 'NOTICE', 'getAllPublishedContent - Posts done, moving to comments');
             }
         }
 
@@ -238,14 +238,14 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     if ($processing_type == 'comments') {
 
         // DIAG - Diagnostics - Ver 2.1.6.1
-        // back_trace( 'NOTICE', 'Processing comments');
+        back_trace( 'NOTICE', 'Processing comments');
 
         // Calculate the offset for the current comment batch
         $offset = ($batch_starting_point - 1) * $batch_size;
 
         // DIAG - Diagnostics - Ver 2.1.6.1
-        // back_trace( 'NOTICE', 'Offset: ' . $offset);
-        // back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
+        back_trace( 'NOTICE', 'Offset: ' . $offset);
+        back_trace( 'NOTICE', 'Batch Size: ' . $batch_size);
 
         // Fetch all comments after the last updated date
         $comments = get_comments(array(
@@ -274,9 +274,9 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
         if (count($comments) === $batch_size) {
             $next_batch_starting_point = $batch_starting_point + 1;
             wp_schedule_single_event(time() + 120, 'getAllPublishedContent', array(serialize(array($last_updated, $next_batch_starting_point, $batch_size, 'comments'))));
-            // back_trace( 'NOTICE', 'getAllPublishedContent - Scheduled next comment batch #' . $next_batch_starting_point);
+            back_trace( 'NOTICE', 'getAllPublishedContent - Scheduled next comment batch #' . $next_batch_starting_point);
         } else {
-            // back_trace( 'NOTICE', 'getAllPublishedContent - Comments done');
+            back_trace( 'NOTICE', 'getAllPublishedContent - Comments done');
         }
 
     }
@@ -288,7 +288,7 @@ function getAllPublishedContent($last_updated, $batch_starting_point, $batch_siz
     update_option('chatbot_markov_chain_build_schedule', 'Completed');
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'getAllPublishedContent - End');
+    back_trace( 'NOTICE', 'getAllPublishedContent - End');
 
 }
 add_action('getAllPublishedContent', 'getAllPublishedContent', 10, 4);
@@ -470,7 +470,7 @@ function chatbot_markov_chain_synthetic_data_generation() {
     $syntheticData = '';
 
     // Open the file containing the synthetic data
-    $syntheticDataModel = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
+    $syntheticDataModel = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
     $syntheticDataFile = plugin_dir_path(__FILE__) . $syntheticDataModel . '.txt';
 
     // DIAG - Diagnostics - Ver 2.1.9

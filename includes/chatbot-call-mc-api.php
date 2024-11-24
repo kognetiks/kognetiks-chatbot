@@ -39,7 +39,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
-    $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
+    $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
@@ -179,7 +179,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     //     $response_body['response']['code'] = 500; // Internal server error
     // } else {
     //     // Call the Markov Chain generator using the retrieved Markov Chain and user input
-    //     $response = generateMarkovText($mc_message, $max_tokens);
+    //     $response = generate_markov_text_beaker_model($mc_message, $max_tokens);
 
     //     // Prepare the response body
     //     $response_body['choices'][0]['message']['content'] = trim($response);
@@ -193,8 +193,23 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     //     $response_body['response']['code'] = 200; // Success code
     // }
 
+    // Markov Model Names - 2024 11 24
+    // Flask: Precursor stage for foundational elements.
+    // Beaker: Small-scale, foundational stage—perfect for initial lexical analysis or simple models.
+    // Bucket: A step up, handling larger datasets or more complex lexical processes.
+    // Barrel: Substantially greater capacity, signaling robust intermediate processing or models.
+    // Vat: The pinnacle of processing—handling massive, industrial-scale lexical or sentential progression.
+    // Tank: For even larger or more advanced processes.
+    // Reservoir: Denoting a vast storage or synthesis capability.
+
     // Call the Markov Chain generator using the retrieved Markov Chain and user input
-    $response = generateMarkovText($mc_message, $max_tokens);
+    $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
+    if ($model == 'markov-chain-flask') {
+        $response = generate_markov_text_flask_model($mc_message, $max_tokens);
+    } else {
+        // Allways fall through to the latest model
+        $response = generate_markov_text_beaker_model($mc_message, $max_tokens);
+    }
 
     if (!empty($response)) {
         // Prepare the response body

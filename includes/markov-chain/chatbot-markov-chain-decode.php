@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Markov Chain Decode - Ver 2.1.9
+ * Kognetiks Chatbot for WordPress - Markov Chain Decode - Flask - Ver 2.1.9
  *
  * This file contains the code for implementing the Markov Chain algorithm
  *
@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Generate a sentence using the Markov Chain with context reinforcement
-function generateMarkovText($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
+function generate_markov_text_flask_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
 
     global $chatbot_markov_chain_fallback_response;
 

@@ -23,8 +23,8 @@ function chatbot_markov_chain_model_settings_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using Markov Chain models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-        <li><code>&#91;chatbot style="floating" model="markov-chain-2024-09-17"&#93;</code> - Style is floating, specific model</li>
-        <li><code>&#91;chatbot style="embedded" model="markov-chain-2024-09-17"&#93;</code> - Style is embedded, specific model</li>
+        <li><code>&#91;chatbot style="floating" model="markov-chain-flask"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="markov-chain-flask"&#93;</code> - Style is embedded, specific model</li>
     </ul>
     <p>Markov Chain models generate text using a local algorithm based on the <a href="https://en.wikipedia.org/wiki/Markov_chain" target="_blank" rel="noopener noreferrer">Markov Chain</a> concept. They are trained on your site's published content, including pages, posts, and comments. These models run locally on your server and are not available on the OpenAI platform. Although these models may not match the sophistication of OpenAI's offerings and might occasionally generate nonsensical output, they can still be effective, especially when your site contains a large amount of content.</p> 
     <?php
@@ -119,13 +119,13 @@ function chatbot_markov_chain_model_choice_callback($args) {
 
     global $chatbot_markov_chain_api_enabled;
     
-    // Get the saved chatbot_markov_chain_model_choice value or default to "markov-chain-2024-09-17"
-    $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
+    // Get the saved chatbot_markov_chain_model_choice value or default to "markov-chain-flask"
+    $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
 
     ?>
     <select id="chatbot_markov_chain_model_choice" name="chatbot_markov_chain_model_choice">
-        <option value="<?php echo esc_attr( 'markov-chain-2024-09-17' ); ?>" <?php selected( $model_choice, 'markov-chain-2024-09-17' ); ?>><?php echo esc_html( 'markov-chain-2024-09-17' ); ?></option>
-        <option value="<?php echo esc_attr( 'markov-chain-2024-11-10' ); ?>" <?php selected( $model_choice, 'markov-chain-2024-11-10' ); ?>><?php echo esc_html( 'markov-chain-2024-11-10' ); ?></option>
+        <option value="<?php echo esc_attr( 'markov-chain-flask' ); ?>" <?php selected( $model_choice, 'markov-chain-flask' ); ?>><?php echo esc_html( 'markov-chain-flask' ); ?></option>
+        <option value="<?php echo esc_attr( 'markov-chain-beaker' ); ?>" <?php selected( $model_choice, 'markov-chain-beaker' ); ?>><?php echo esc_html( 'markov-chain-beaker' ); ?></option>
     </select>
     <?php
 

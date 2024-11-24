@@ -16,13 +16,23 @@ if ( ! defined( 'WPINC' ) ) {
 function transformer_model_sentential_context_model_response($input, $responseCount = 500) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_model_response');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
 
-    // Fetch embeddings from the database
-    $embeddings = transformer_model_sentential_context_fetch_embeddings_from_db();
-
-    // Retrieve WordPress content for tokenization
+    // MOVED TO transformer-model-scheduler.php
+    // Fetch WordPress content
     $corpus = transformer_model_sentential_context_fetch_wordpress_content();
+
+    // Set the window size for co-occurrence matrix
+    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
+    // DIAG - Diagnostic - Ver 2.2.0
+    back_trace( 'NOTICE', 'Window Size: ' . $windowSize);
+
+    // DIAG - Diagnostic - Ver 2.2.0
+    back_trace( 'NOTICE', 'Response Count: ' . $responseCount);
+
+    // MOVED TO transformer-model-scheduler.php
+    // Build embeddings (with caching for performance)
+    $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
 
     // Generate contextual response
     $response = transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $responseCount);
@@ -54,74 +64,50 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
         $content .= ' ' . $row['post_content'];
     }
 
+    // DIAG - Diagnostic - Ver 2.2.0
+    back_trace( 'NOTICE', 'Content in characters: ' . strlen($content));
+    // Calculate the $content size in MB
+    $content_size = strlen($content) / 1024 / 1024;
+    back_trace( 'NOTICE', 'Content in MB: ' . $content_size . ' MB');
+
     // Clean up the content
     $content = strip_tags($content); // Remove HTML tags
     $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5); // Decode HTML entities
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'Content size in characters after cleanup: ' . strlen($content));
+    back_trace( 'NOTICE', 'Content in characters after cleanup: ' . strlen($content));
+    update_option('chatbot_transformer_model_content_size', strlen($content));
+    // Calculate the $content size in MB
+    $content_size = strlen($content) / 1024 / 1024;
+    back_trace( 'NOTICE', 'Content in MB after cleanup: ' . $content_size . ' MB');
+    update_option('chatbot_transformer_model_content_size_mb', $content_size);
 
     return $content;
 
 }
 
-// Function to fetch embeddings from the database
-function transformer_model_sentential_context_fetch_embeddings_from_db() {
-
-    global $wpdb;
+// Function to build or retrieve cached embeddings
+function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_fetch_embeddings_from_db');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
 
     back_trace( 'NOTICE', "Memory Limit: " . round( ini_get('memory_limit') / 1024 / 1024, 2 ) . " MB" );
     back_trace( 'NOTICE', "Memory Usage: " . round( memory_get_usage($real_usage = true) / 1024 / 1024, 2 ) . " MB" );
     back_trace( 'NOTICE', "Memory allocated: " . round( memory_get_peak_usage() / 1024 / 1024, 2 ) . " MB" );
     back_trace( 'NOTICE', "Memory Usage (BEFORE): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
 
-    // Fetch all embeddings from the database
-    $results = $wpdb->get_results("SELECT post_id, context, word, count FROM {$wpdb->prefix}chatbot_sentential_embeddings", ARRAY_A);
+    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
 
-    $embeddings = [];
-    foreach ($results as $row) {
-        $post_id = $row['post_id'];
-        $context = $row['context'];
-        $word = $row['word'];
-        $count = $row['count'];
+    // Check if embeddings are cached
+    if (file_exists($cacheFile)) {
+        $embeddings = include $cacheFile;
+        back_trace( 'NOTICE', "Memory Usage (AFTER): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
 
-        if (!isset($embeddings[$post_id])) {
-            $embeddings[$post_id] = [];
-        }
-
-        if (!isset($embeddings[$post_id][$context])) {
-            $embeddings[$post_id][$context] = [];
-        }
-
-        $embeddings[$post_id][$context][$word] = $count;
-    }
-
-    back_trace( 'NOTICE', "Memory Limit: " . round( ini_get('memory_limit') / 1024 / 1024, 2 ) . " MB" );
-    back_trace( 'NOTICE', "Memory Usage: " . round( memory_get_usage($real_usage = true) / 1024 / 1024, 2 ) . " MB" );
-    back_trace( 'NOTICE', "Memory allocated: " . round( memory_get_peak_usage() / 1024 / 1024, 2 ) . " MB" );
-    back_trace( 'NOTICE', "Memory Usage (BEFORE): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
-
-    return $embeddings;
-
-}
-
-// Function to build embeddings and save them to the database
-function transformer_model_sentential_context_build_and_store_embeddings($corpus) {
-
-    global $wpdb;
-
-
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_build_and_store_embeddings');
-
-    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
-    $embeddings = transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize);
-
-    // Store embeddings in the database
-    foreach ($embeddings as $post_id => $postEmbeddings) {
-        add_sentential_embeddings_to_table($post_id, $postEmbeddings);
+    } else {
+        $embeddings = transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize);
+        // Cache the embeddings
+        file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');
     }
 
     return $embeddings;
@@ -132,7 +118,7 @@ function transformer_model_sentential_context_build_and_store_embeddings($corpus
 function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -147,8 +133,11 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
             if ($i !== $j) {
                 if (isset($words[$j])) {
                     $contextWord = $words[$j];
-                    $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
+                } else {
+                    // Handle the case where the index does not exist
+                    $contextWord = null; // or any default value
                 }
+                $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
             }
         }
     }
@@ -157,38 +146,58 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
 
 }
 
-// Function to generate a contextual response
+// Function to remove stop words from an array of words
+function transformer_model_sentential_context_remove_stop_words($words) {
+
+    // Use global stop words list
+    global $stopWords;
+
+    return array_diff($words, $stopWords);
+
+}
+
+// Function to calculate cosine similarity between two vectors
+function transformer_model_sentential_context_cosine_similarity($vectorA, $vectorB) {
+
+    // DIAG - Diagnostic - Ver 2.2.0
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
+
+    $commonKeys = array_intersect_key($vectorA, $vectorB);
+
+    if (empty($commonKeys)) {
+        return 0;
+    }
+
+    $dotProduct = 0;
+    $magnitudeA = 0;
+    $magnitudeB = 0;
+
+    foreach ($commonKeys as $key => $value) {
+        $dotProduct += $vectorA[$key] * $vectorB[$key];
+    }
+
+    foreach ($vectorA as $value) {
+        $magnitudeA += $value * $value;
+    }
+
+    foreach ($vectorB as $value) {
+        $magnitudeB += $value * $value;
+    }
+
+    $magnitudeA = sqrt($magnitudeA);
+    $magnitudeB = sqrt($magnitudeB);
+
+    return ($magnitudeA * $magnitudeB) ? $dotProduct / ($magnitudeA * $magnitudeB) : 0;
+
+}
+
 function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500) {
 
     global $chatbotFallbackResponses;
 
     // DIAG - Diagnostic - Ver 2.3.0
     back_trace( 'NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
-    if (!empty($maxTokens)) {
-        back_trace( 'NOTICE', 'Max Tokens: ' . $maxTokens);
-    } else {
-        back_trace( 'NOTICE', 'Max Tokens: (empty)');
-    }
-    if (!empty($input)) {
-        back_trace( 'NOTICE', 'Input: ' . $input);
-    } else {
-        back_trace( 'NOTICE', 'Input: (empty)');
-    }
-    if (!empty($corpus)) {
-        back_trace( 'NOTICE', 'Corpus: ' . substr($corpus, 0, 100) . '...');
-    } else {
-        back_trace( 'NOTICE', 'Corpus: (empty)');
-    }
-    if (!empty($embeddings)) {
-        back_trace( 'NOTICE', 'Embeddings: ' . count($embeddings) . ' posts');
-    } else {
-        back_trace( 'NOTICE', 'Embeddings: (empty)');
-    }
- 
-    back_trace( 'NOTICE', "Memory Limit: " . round( ini_get('memory_limit') / 1024 / 1024, 2 ) . " MB" );
-    back_trace( 'NOTICE', "Memory Usage: " . round( memory_get_usage($real_usage = true) / 1024 / 1024, 2 ) . " MB" );
-    back_trace( 'NOTICE', "Memory allocated: " . round( memory_get_peak_usage() / 1024 / 1024, 2 ) . " MB" );
-    back_trace( 'NOTICE', "Memory Usage (BEFORE): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
+    back_trace( 'NOTICE', 'Max Tokens: ' . $maxTokens);
 
     // Tokenize the corpus into sentences
     $sentences = preg_split('/(?<=[.?!])\s+/', $corpus);
@@ -330,14 +339,5 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 
     // Return the response
     return $response;
-
-}
-
-// Function to remove stop words from an array of words
-function transformer_model_sentential_context_remove_stop_words($words) {
-
-    global $stopWords;
-
-    return array_diff($words, $stopWords);
 
 }
