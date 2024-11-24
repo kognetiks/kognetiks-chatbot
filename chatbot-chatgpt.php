@@ -115,6 +115,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-k
 
 // Include necessary files - Markov Chain - Ver 2.1.9
 require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-decode.php'; // Functions - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-decode-beaker.php'; // Functions - Ver 2.2.0
 require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-encode.php'; // Functions - Ver 2.1.9
 require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-scheduler.php'; // Functions - Ver 2.1.9
 
