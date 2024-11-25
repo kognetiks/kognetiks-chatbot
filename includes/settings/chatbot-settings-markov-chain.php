@@ -219,6 +219,25 @@ function chatbot_markov_chain_off_topic_max_callback($args) {
 
 }
 
+// Max Sentences Callback - Ver 2.2.0
+function chatbot_markov_chain_max_sentences_callback($args) {
+
+    // Get the saved chatbot_markov_chain_max_sentences value or default to 3
+    $chatbot_markov_chain_max_sentences = esc_attr(get_option('chatbot_markov_chain_max_sentences', '5'));
+
+    // Allow for a range of sentences between 1 and 10 in 1-step increments - Ver 2.2.0
+    ?>
+    <select id="chatbot_markov_chain_max_sentences" name="chatbot_markov_chain_max_sentences">
+        <?php
+        for ($i=1; $i<=10; $i+=1) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($chatbot_markov_chain_max_sentences, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+
+}
+
 // Register API settings - Moved for Ver 2.1.8
 function chatbot_markov_chain_api_settings_init() {
 
@@ -236,6 +255,7 @@ function chatbot_markov_chain_api_settings_init() {
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_build_schedule'); // Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_length'); // Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_next_phrase_length'); // Ver 2.1.6
+    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_max_sentences'); // Ver 2.2.0
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_off_topic_max'); // Ver 2.2.0
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_force_rebuild'); // Ver 2.2.0
 
@@ -278,7 +298,7 @@ function chatbot_markov_chain_api_settings_init() {
 
     add_settings_field(
         'chatbot_markov_chain_build_schedule',
-        'Markov Chain Build Schedule',
+        'Build Schedule',
         'chatbot_markov_chain_build_schedule_callback',
         'chatbot_markov_chain_advanced_settings',
         'chatbot_markov_chain_advanced_settings_section'
@@ -286,7 +306,7 @@ function chatbot_markov_chain_api_settings_init() {
 
     add_settings_field(
         'chatbot_markov_chain_length',
-        'Markov Chain Length',
+        'Chain Length',
         'chatbot_markov_chain_length_callback',
         'chatbot_markov_chain_advanced_settings',
         'chatbot_markov_chain_advanced_settings_section'
@@ -294,8 +314,16 @@ function chatbot_markov_chain_api_settings_init() {
 
     add_settings_field(
         'chatbot_markov_chain_next_phrase_length',
-        'Markov Chain Length Next Phase Length',
+        'Chain Length Next Phase Length',
         'chatbot_markov_chain_next_phrase_length_callback',
+        'chatbot_markov_chain_advanced_settings',
+        'chatbot_markov_chain_advanced_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_markov_chain_max_sentences',
+        'Maximum Sentences',
+        'chatbot_markov_chain_max_sentences_callback',
         'chatbot_markov_chain_advanced_settings',
         'chatbot_markov_chain_advanced_settings_section'
     );

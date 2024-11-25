@@ -23,6 +23,13 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     $tfidf_table = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
     $chainLength = intval(get_option('chatbot_markov_chain_length', 3));
+    $maxSentences = intval(get_option('chatbot_markov_chain_max_sentences', 5)); // Limit to max sentences
+    // Randomize the number of sentences to generate based on a bell curve distribution that peaks at the max sentences
+    $maxSentences = max(1, round(abs(mt_rand(0, $maxSentences - 1) + mt_rand(0, $maxSentences - 1) + mt_rand(0, $maxSentences - 1)) / 3));
+    // Maybe never less than 2 sentences
+    If ($maxSentences < 2) {
+        $maxSentences = 2;
+    }
 
     // Clean up start words
     $startWords = array_filter(array_map(function($word) {
@@ -44,12 +51,21 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
 
     // Attempt to construct a starting key, prioritizing the TF-IDF word if available
     $key = null;
+
     if ($highestScoringWord) {
         foreach ($startWords as $index => $word) {
             if ($word === $highestScoringWord) {
-                $key = implode(' ', array_slice($startWords, max(0, $index - ($chainLength - 1)), $chainLength));
-                if (markov_chain_beaker_key_exists($key, $table_name)) {
-                    break;
+                // Look for chains containing the highest-scoring word
+                for ($offset = 0; $offset < $chainLength; $offset++) {
+                    $start = max(0, $index - $offset);
+                    $end = min($start + $chainLength, count($startWords));
+                    $attemptedKey = implode(' ', array_slice($startWords, $start, $end - $start));
+
+                    // Check if the chain exists in the database
+                    if (markov_chain_beaker_key_exists($attemptedKey, $table_name)) {
+                        $key = $attemptedKey;
+                        break 2; // Exit both loops
+                    }
                 }
             }
         }
@@ -77,7 +93,7 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     // Initialize variables for text generation
     $words = explode(' ', $key);
     $offTopicCount = 0;
-    $offTopicMax = intval(get_option('chatbot_markov_chain_off_topic_max', 5));
+    $sentenceCount = 0;
     $minLength = rand($minLength, $max_tokens / 2);
 
     for ($i = 0; $i < $max_tokens; $i++) {
@@ -93,14 +109,17 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
         // Allow topic drift after minimum length is reached
         if ($i >= $minLength && $primaryKeyword && strpos($nextWord, $primaryKeyword) === false) {
             $offTopicCount++;
-            if ($offTopicMax > 0 && $offTopicCount >= $offTopicMax) {
+            if ($offTopicCount >= intval(get_option('chatbot_markov_chain_off_topic_max', 5))) {
                 break;
             }
         }
 
-        // Check for natural sentence endings
-        if (count($words) >= $minLength && preg_match('/[.!?]$/', $nextWord)) {
-            break;
+        // Check for natural sentence endings and enforce sentence limit
+        if (preg_match('/[.!?]$/', $nextWord)) {
+            $sentenceCount++;
+            if ($sentenceCount >= $maxSentences) {
+                break;
+            }
         }
     }
 
@@ -123,11 +142,16 @@ function finalize_generated_text($text) {
         return strtoupper($matches[0]);
     }, $text);
 
-    // Remove spaces before punctuation
+    // Remove excessive spaces before punctuation
     $text = preg_replace('/\s+([.,!?])/', '$1', $text);
 
+    // Replace multiple spaces with a single space
+    $text = preg_replace('/\s{2,}/', ' ', $text);
+
+    // Ensure proper sentence endings
+    $text = preg_replace('/([^.!?])$/', '$1.', $text);
+
     return trim($text);
-    
 }
 
 // Check if the key exists in the database
@@ -193,6 +217,12 @@ function markov_chain_beaker_get_random_key($table_name) {
 // Clean up the Markov Chain response
 function markov_chain_beaker_clean_up_response($response) {
 
+    // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 25
+    back_trace( 'NOTICE', 'BEFORE CLEANING - $response: ' . $response );
+
+    // Before doing anythning, remove any non-ASCII characters
+    $response = preg_replace('/[^\x20-\x7E]/', '', $response);
+
     // Trim and capitalize
     $response = ucfirst(trim($response));
 
@@ -206,8 +236,19 @@ function markov_chain_beaker_clean_up_response($response) {
         $response .= '.';
     }
 
+    // Remove excessive spaces before punctuation
+    $response = preg_replace('/\s+([.,!?])/', '$1', $response);
+
+    // Capitalize the first letter of each sentence
+    $response = preg_replace_callback('/(?:^|[.!?])\s*(\w)/', function($matches) {
+        return strtoupper($matches[0]);
+    }, $response);
+
     // Fix common grammar issues
     $response = markov_chain_beaker_fix_grammar($response);
+
+    // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 25
+    back_trace( 'NOTICE', 'AFTER CLEANING - $response: ' . $response );
 
     return $response;
 
