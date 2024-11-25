@@ -203,13 +203,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     // Reservoir: Denoting a vast storage or synthesis capability.
 
     // Call the Markov Chain generator using the retrieved Markov Chain and user input
-    $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
-    if ($model == 'markov-chain-flask') {
-        $response = generate_markov_text_flask_model($mc_message, $max_tokens);
-    } else {
-        // Allways fall through to the latest model
-        $response = generate_markov_text_beaker_model($mc_message, $max_tokens);
-    }
+    $response = chatbot_markov_chain_decode($mc_message, $max_tokens);
 
     if (!empty($response)) {
         // Prepare the response body

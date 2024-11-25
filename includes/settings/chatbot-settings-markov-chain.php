@@ -177,6 +177,48 @@ function chatbot_markov_chain_status_section_callback($args) {
     <?php
 }
 
+// Force Rebuild Callback - Ver 2.2.0
+function chatbot_markov_chain_force_rebuild_callback($args) {
+
+    // Get the saved chatbot_markov_chain_force_rebuild value or default to "No"
+    $chatbot_markov_chain_force_rebuild = esc_attr(get_option('chatbot_markov_chain_force_rebuild', 'No'));
+
+    $options = [
+        'No' => 'No',
+        'Yes' => 'Yes'
+    ];
+
+    ?>
+    <select id="chatbot_markov_chain_force_rebuild" name="chatbot_markov_chain_force_rebuild">
+        <?php foreach ($options as $value => $label) : ?>
+            <option value="<?php echo esc_attr($value); ?>" <?php selected($chatbot_markov_chain_force_rebuild, $value); ?>>
+                <?php echo esc_html($label); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+    <?php
+
+}
+
+// Off Topic Max Callback - Ver 2.2.0
+function chatbot_markov_chain_off_topic_max_callback($args) {
+
+    // Get the saved chatbot_markov_chain_off_topic_max value or default to 3
+    $chatbot_markov_chain_off_topic_max = esc_attr(get_option('chatbot_markov_chain_off_topic_max', '3'));
+
+    // Allow for a range of tokens between 1 and 10 in 1-step increments - Ver 2.2.0
+    ?>
+    <select id="chatbot_markov_chain_off_topic_max" name="chatbot_markov_chain_off_topic_max">
+        <?php
+        for ($i=0; $i<=10; $i+=1) {
+            echo '<option value="' . esc_attr($i) . '" ' . selected($chatbot_markov_chain_off_topic_max, (string)$i, false) . '>' . esc_html($i) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+
+}
+
 // Register API settings - Moved for Ver 2.1.8
 function chatbot_markov_chain_api_settings_init() {
 
@@ -194,6 +236,8 @@ function chatbot_markov_chain_api_settings_init() {
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_build_schedule'); // Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_length'); // Ver 2.1.6
     register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_next_phrase_length'); // Ver 2.1.6
+    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_off_topic_max'); // Ver 2.2.0
+    register_setting('chatbot_markov_chain_api_model', 'chatbot_markov_chain_force_rebuild'); // Ver 2.2.0
 
     add_settings_section(
         'chatbot_markov_chain_api_model_general_section',
@@ -252,6 +296,23 @@ function chatbot_markov_chain_api_settings_init() {
         'chatbot_markov_chain_next_phrase_length',
         'Markov Chain Length Next Phase Length',
         'chatbot_markov_chain_next_phrase_length_callback',
+        'chatbot_markov_chain_advanced_settings',
+        'chatbot_markov_chain_advanced_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_markov_chain_off_topic_max',
+        'Off Topic Maximum Drift',
+        'chatbot_markov_chain_off_topic_max_callback',
+        'chatbot_markov_chain_advanced_settings',
+        'chatbot_markov_chain_advanced_settings_section'
+
+    );
+
+    add_settings_field(
+        'chatbot_markov_chain_force_rebuild',
+        'Force Rebuild (Use with caution)',
+        'chatbot_markov_chain_force_rebuild_callback',
         'chatbot_markov_chain_advanced_settings',
         'chatbot_markov_chain_advanced_settings_section'
     );

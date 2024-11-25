@@ -155,8 +155,12 @@ function processContentBatches($last_updated, &$batch_starting_points, $batch_si
 
     back_trace( 'NOTICE', 'processContentBatches - Start');
 
+    // FIXME - For now, we are only processing posts - 2.2.0
     // Process posts, comments, and synthetic data
-    $processing_types = ['posts', 'comments', 'synthetic'];
+    // $processing_types = ['posts', 'comments', 'synthetic'];
+    // $processing_types = ['posts', 'synthetic'];
+    $processing_types = ['posts'];
+
     $all_batches_completed = true; // Assume all batches are completed
 
     foreach ($processing_types as $type) {
@@ -200,6 +204,7 @@ function processContentBatches($last_updated, &$batch_starting_points, $batch_si
     }
 
     prod_trace( 'NOTICE', 'processContentBatches - End');
+
 }
 add_action('chatbot_markov_chain_next_batch', 'runMarkovChatbotAndSaveChain');
 
@@ -312,8 +317,8 @@ function buildMarkovChain($content) {
             $nextWord = $words[$i + $chainLength];
 
             // Clean up the key and next word
-            $key = preg_replace('/[^\w\s\-]/u', '', $key); // Allow alphanumeric, spaces, and hyphens
-            $nextWord = preg_replace('/[^\w\s\-]/u', '', $nextWord);
+            $key = preg_replace('/[^\w\s\-\.,!?]/u', '', $key); // Allow .,!? along with letters, numbers, and hyphens
+            $nextWord = preg_replace('/[^\w\s\-\.,!?]/u', '', $nextWord);
 
             // Skip if key or next word is empty
             if (empty($key) || empty($nextWord)) {
@@ -357,7 +362,7 @@ function clean_up_training_data($content) {
     do {
         $previous_clean_content = $clean_content;
 
-        // Replace &nbsp; and other HTML entities with spaces
+        // Decode HTML entities
         $clean_content = html_entity_decode($clean_content, ENT_QUOTES | ENT_HTML5);
 
         // Strip HTML tags, shortcodes, and comments
@@ -400,6 +405,7 @@ function getDatabaseStats($table_name) {
         'row_count'     => $row_count,
         'table_size_mb' => $table_size,
     ];
+
 }
 
 // Synthetic Data Generation

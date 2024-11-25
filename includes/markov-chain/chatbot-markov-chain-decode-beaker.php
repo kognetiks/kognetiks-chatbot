@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
 
     // Diagnostics
-    back_trace( 'NOTICE', 'Generating Markov Chain response with improved Beaker model');
+    back_trace('NOTICE', 'Generating Markov Chain response with improved Beaker model');
 
     global $chatbot_markov_chain_fallback_response, $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_markov_chain';
@@ -67,7 +67,7 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
         // Allow topic drift after minimum length is reached
         if ($i >= $minLength && $primaryKeyword && strpos($nextWord, $primaryKeyword) === false) {
             $offTopicCount++;
-            if ($offTopicCount >= $offTopicMax) {
+            if ($offTopicMax > 0 && $offTopicCount >= $offTopicMax) {
                 break;
             }
         }
@@ -82,8 +82,26 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     $response = implode(' ', $words);
     $response = markov_chain_beaker_clean_up_response($response);
 
+    // Apply finalize_generated_text function here
+    $response = finalize_generated_text($response);
+
     return $response;
 
+}
+
+// Finalize the generated text
+function finalize_generated_text($text) {
+
+    // Capitalize the first letter of each sentence
+    $text = preg_replace_callback('/(?:^|[.!?])\s*(\w)/', function($matches) {
+        return strtoupper($matches[0]);
+    }, $text);
+
+    // Remove spaces before punctuation
+    $text = preg_replace('/\s+([.,!?])/', '$1', $text);
+
+    return trim($text);
+    
 }
 
 // Check if the key exists in the database
