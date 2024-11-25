@@ -14,10 +14,11 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Generate a sentence using the Markov Chain with context reinforcement
 function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
+
     back_trace('NOTICE', 'Generating Markov Chain response with adjusted coherence handling');
 
     global $chatbot_markov_chain_fallback_response, $wpdb;
-    $table_name = $wpdb->prefix . 'chatbot_markov_chain';
+    $markov_chain_table = $wpdb->prefix . 'chatbot_markov_chain';
     $tfidf_table = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
     $chainLength = intval(get_option('chatbot_markov_chain_length', 3));
@@ -41,6 +42,65 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
         }
     }
 
+    // if one of the $startWords is missing a score, use the highest score - OPTION 1
+    // if ($highestScoringWord) {
+    //     foreach ($startWords as $word) {
+    //         if ($word === $highestScoringWord) {
+    //             $highestScoringWord = null;
+    //             break;
+    //         }
+    //     }
+    // }
+
+    // if one of the $startWords is missing a score, use the average score - OPTION 2
+    // if ($highestScoringWord) {
+    //     $tfidf_results = $wpdb->get_results(
+    //         "SELECT AVG(score) AS average_score FROM $tfidf_table WHERE word IN ('" . implode("','", $startWords) . "')",
+    //         ARRAY_A
+    //     );
+    //     if (!empty($tfidf_results)) {
+    //         $highestScoringWord = $tfidf_results[0]['average_score'];
+    //     }
+    // }
+
+    // Combine TF-IDF with Frequence - OPTION 3
+    $tfidfFrequencyScores = []; // To store combined scores
+    $tfidf_tabe = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
+
+    if ($wpdb->get_var("SHOW TABLES LIKE '$tfidf_table'") == $tfidf_table) {
+
+        foreach ($startWords as $word) {
+            // Get TF-IDF score for the word
+            $tfidfResult = $wpdb->get_row(
+                $wpdb->prepare("SELECT score FROM $tfidf_table WHERE word = %s LIMIT 1", $word),
+                ARRAY_A
+            );
+            $tfidfScore = $tfidfResult['score'] ?? 0;
+
+            // Get frequency for the word
+            $frequencyResult = $wpdb->get_row(
+                $wpdb->prepare("SELECT SUM(frequency) AS frequency FROM $markov_chain_table WHERE word = %s", $word),
+                ARRAY_A
+            );
+            $frequency = $frequencyResult['frequency'] ?? 0;
+
+            // Combine TF-IDF score and frequency into a single metric
+            // Adjust weights as needed (e.g., 70% TF-IDF, 30% frequency)
+            $combinedScore = ($tfidfScore * 0.7) + ($frequency * 0.3);
+
+            // Store the combined score
+            $tfidfFrequencyScores[$word] = $combinedScore;
+        }
+
+        // Sort words by their combined scores in descending order
+        arsort($tfidfFrequencyScores);
+
+        // Take the word with the highest combined score
+        $highestScoringWord = key($tfidfFrequencyScores);
+
+    }
+
+
     // Attempt to construct a starting key
     $key = null;
     if ($highestScoringWord) {
@@ -50,7 +110,7 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
                     $start = max(0, $index - $offset);
                     $end = min($start + $chainLength, count($startWords));
                     $attemptedKey = implode(' ', array_slice($startWords, $start, $end - $start));
-                    if (markov_chain_beaker_key_exists($attemptedKey, $table_name)) {
+                    if (markov_chain_beaker_key_exists($attemptedKey, $markov_chain_table)) {
                         $key = $attemptedKey;
                         break 2;
                     }
@@ -63,7 +123,7 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     if (!$key && !empty($startWords)) {
         for ($i = count($startWords) - $chainLength; $i >= 0; $i--) {
             $attemptedKey = implode(' ', array_slice($startWords, $i, $chainLength));
-            if (markov_chain_beaker_key_exists($attemptedKey, $table_name)) {
+            if (markov_chain_beaker_key_exists($attemptedKey, $markov_chain_table)) {
                 $key = $attemptedKey;
                 break;
             }
@@ -72,7 +132,7 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
 
     // Use a random key if no starting key is found
     if (!$key) {
-        $key = markov_chain_beaker_get_random_key($table_name);
+        $key = markov_chain_beaker_get_random_key($markov_chain_table);
         if (!$key) {
             return $chatbot_markov_chain_fallback_response[array_rand($chatbot_markov_chain_fallback_response)];
         }
@@ -84,7 +144,7 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     $sentenceCount = 0;
 
     for ($i = 0; $i < $max_tokens; $i++) {
-        $nextWord = markov_chain_beaker_get_next_word($key, $table_name);
+        $nextWord = markov_chain_beaker_get_next_word($key, $markov_chain_table);
         if ($nextWord === null) {
             break;
         }
@@ -137,22 +197,22 @@ function finalize_generated_text($text) {
 }
 
 // Check if the key exists in the database
-function markov_chain_beaker_key_exists($key, $table_name) {
+function markov_chain_beaker_key_exists($key, $markov_chain_table) {
 
     global $wpdb;
-    $result = $wpdb->get_var($wpdb->prepare("SELECT 1 FROM $table_name WHERE word = %s LIMIT 1", $key));
+    $result = $wpdb->get_var($wpdb->prepare("SELECT 1 FROM $markov_chain_table WHERE word = %s LIMIT 1", $key));
     return !is_null($result);
 
 }
 
 // Get the next word from the database
-function markov_chain_beaker_get_next_word($currentKey, $table_name) {
+function markov_chain_beaker_get_next_word($currentKey, $markov_chain_table) {
 
     global $wpdb;
 
     // Fetch possible next words with their frequencies
     $results = $wpdb->get_results(
-        $wpdb->prepare("SELECT next_word, frequency FROM $table_name WHERE word = %s", $currentKey),
+        $wpdb->prepare("SELECT next_word, frequency FROM $markov_chain_table WHERE word = %s", $currentKey),
         ARRAY_A
     );
 
@@ -162,7 +222,7 @@ function markov_chain_beaker_get_next_word($currentKey, $table_name) {
         array_shift($keyParts);
         if (count($keyParts) > 0) {
             $newKey = implode(' ', $keyParts);
-            return markov_chain_beaker_get_next_word($newKey, $table_name);
+            return markov_chain_beaker_get_next_word($newKey, $markov_chain_table);
         } else {
             return null;
         }
@@ -189,10 +249,10 @@ function markov_chain_beaker_get_next_word($currentKey, $table_name) {
 }
 
 // Get a random key from the database
-function markov_chain_beaker_get_random_key($table_name) {
+function markov_chain_beaker_get_random_key($markov_chain_table) {
 
     global $wpdb;
-    return $wpdb->get_var("SELECT word FROM $table_name ORDER BY RAND() LIMIT 1");
+    return $wpdb->get_var("SELECT word FROM $markov_chain_table ORDER BY RAND() LIMIT 1");
 
 }
 
