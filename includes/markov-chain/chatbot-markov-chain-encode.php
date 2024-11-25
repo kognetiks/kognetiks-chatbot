@@ -21,15 +21,10 @@ function runMarkovChatbotAndSaveChain() {
     // Step 0: Force a full rebuild if necessary
     $force_rebuild = esc_attr(get_option('chatbot_markov_chain_force_rebuild', 'No'));
     
-    // FIXME - Temporary to force a full rebuild
-    $force_rebuild = 'Yes';
-    back_trace( 'NOTICE', 'Forcing a full rebuild of the Markov Chain');
-
     if ($force_rebuild == 'Yes') {
         back_trace( 'NOTICE', 'Forcing a full rebuild of the Markov Chain');
         dropMarkovChainTable();
-        update_option('chatbot_markov_chain_force_rebuild', 'No');
-        // FIXME - Temporary fix for the last updated timestamp
+        update_option('chatbot_markov_chain_force_rebuild', 'No'); // Reset the flag
         update_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00'); // Reset the timestamp
     }
 
@@ -40,20 +35,31 @@ function runMarkovChatbotAndSaveChain() {
     $last_updated = get_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00');
 
     // Step 3: Initialize batch processing variables
-    $batch_starting_point = get_transient('chatbot_markov_chain_batch_starting_point') ?: 1;
-    $batch_size = max(1, min(intval(get_option('chatbot_markov_chain_batch_size', 100)), 100)); // Limit batch size between 1 and 100
+    $batch_starting_points = get_transient('chatbot_markov_chain_batch_starting_points');
+    if (!$batch_starting_points) {
+        $batch_starting_points = [
+            'posts'     => 1,
+            'comments'  => 1,
+            'synthetic' => 1,
+        ];
+    }
+
+    $batch_size = max(1, min(intval(get_option('chatbot_markov_chain_batch_size', 10)), 100)); // Limit batch size between 1 and 100
+    back_trace( 'NOTICE', 'Batch size: ' . $batch_size);
 
     // Step 4: Get the total number of posts
     $total_posts = wp_count_posts('post')->publish;
+    back_trace( 'NOTICE', 'Total number of posts: ' . $total_posts);
 
     // Step 5: Calculate the number of batches
     $total_batches = ceil($total_posts / $batch_size);
+    back_trace( 'NOTICE', 'Total number of batches: ' . $total_batches);
 
     // Step 6: Set the maximum execution time
     ini_set('max_execution_time', 300);
 
     // Step 7: Start processing content
-    processContentBatches($last_updated, $batch_starting_point, $batch_size);
+    processContentBatches($last_updated, $batch_starting_points, $batch_size);
 
     // Step 8: Report the results of the Markov Chain build
     $stats = getDatabaseStats('chatbot_markov_chain');
@@ -148,38 +154,29 @@ function dropMarkovChainTable() {
 }
 
 // Process content in batches
-function processContentBatches($last_updated, $batch_starting_point, $batch_size) {
+function processContentBatches($last_updated, &$batch_starting_points, $batch_size) {
 
     back_trace( 'NOTICE', 'processContentBatches - Start');
 
-    // Process posts and pages
+    // Process posts, comments, and synthetic data
     $processing_types = ['posts', 'comments', 'synthetic'];
-    $all_batches_completed = true;
+    $all_batches_completed = true; // Assume all batches are completed
 
     foreach ($processing_types as $type) {
 
-        $continue_processing = true;
+        $batch_starting_point = $batch_starting_points[$type];
         prod_trace( 'NOTICE', 'Processing type: ' . $type);
         prod_trace( 'NOTICE', 'Batch starting point: ' . $batch_starting_point);
-    
-        $processed_content = false; // Flag to check if any content was processed
-    
-        while ($continue_processing) {
-            $content = getContentBatch($last_updated, $batch_starting_point, $batch_size, $type);
-    
-            if ($content) {
-                buildMarkovChain($content);
-                $batch_starting_point++;
-                set_transient('chatbot_markov_chain_batch_starting_point', $batch_starting_point, 12 * HOUR_IN_SECONDS);
-                $all_batches_completed = false;
-                $processed_content = true; // Mark that some content was processed
-            } else {
-                $continue_processing = false;
-            }
-        }
-    
-        // Edge case: If no content was processed for this type
-        if (!$processed_content) {
+
+        $content = getContentBatch($last_updated, $batch_starting_point, $batch_size, $type);
+
+        if ($content) {
+            buildMarkovChain($content);
+            $batch_starting_point++;
+            $batch_starting_points[$type] = $batch_starting_point;
+            set_transient('chatbot_markov_chain_batch_starting_points', $batch_starting_points, 12 * HOUR_IN_SECONDS);
+            $all_batches_completed = false; // There are still batches to process
+        } else {
             prod_trace( 'NOTICE', "No content found for processing type: $type. Skipping to next type.");
         }
     }
@@ -198,11 +195,9 @@ function processContentBatches($last_updated, $batch_starting_point, $batch_size
     } else {
 
         update_option('chatbot_markov_chain_build_schedule', 'Completed');
-        if (get_option('chatbot_markov_chain_build_schedule') === 'Completed') {
-            delete_transient('chatbot_markov_chain_batch_starting_point');
-            delete_option('chatbot_markov_chain_build_schedule');
-            back_trace( 'NOTICE', 'All temporary data cleaned up after completion.');
-        }
+        delete_transient('chatbot_markov_chain_batch_starting_points');
+        delete_option('chatbot_markov_chain_build_schedule');
+        back_trace( 'NOTICE', 'All temporary data cleaned up after completion.');
 
     }
 
@@ -280,6 +275,11 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
     }
 
     if ($processing_type == 'synthetic') {
+
+        // Only process synthetic data once
+        if ($batch_starting_point > 1) {
+            return false; // Synthetic data already processed
+        }
 
         // Fetch synthetic data
         $syntheticData = chatbot_markov_chain_synthetic_data_generation();
@@ -409,7 +409,7 @@ function chatbot_markov_chain_synthetic_data_generation() {
 
     // Get the synthetic data model choice
     $syntheticDataModel = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
-    $syntheticDataFile = plugin_dir_path(__FILE__) . 'chatbot-' . $syntheticDataModel . '.txt';
+    $syntheticDataFile = plugin_dir_path(__FILE__) . $syntheticDataModel . '.txt';
 
     // Read the synthetic data from the file
     $syntheticData = file_get_contents($syntheticDataFile);

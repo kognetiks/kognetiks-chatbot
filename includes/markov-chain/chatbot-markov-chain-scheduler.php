@@ -19,6 +19,10 @@ function chatbot_markov_chain_scheduler() {
     // DIAG - Diagnostic - Ver 2.1.6
     back_trace( 'NOTICE', 'chatbot_markov_chain_scheduler - START');
 
+    // FIXME - Force a full rebuild if necessary
+    update_option('chatbot_markov_chain_force_rebuild', 'Yes');
+    prod_trace( 'NOTICE', 'FIXME - chatbot_markov_chain_force_rebuild: Yes');
+
     // Retrieve the schedule setting
     $chatbot_markov_chain_build_schedule = esc_attr(get_option('chatbot_markov_chain_build_schedule', 'Disable'));
 
@@ -44,7 +48,7 @@ function chatbot_markov_chain_scheduler() {
 
     // DIAG - Diagnostic - Ver 2.1.6
     back_trace( 'NOTICE', 'chatbot_markov_chain_scheduler - END');
-    
+
 }
 add_action('chatbot_markov_chain_scheduler_hook', 'chatbot_markov_chain_scheduler');
 
