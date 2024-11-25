@@ -16,10 +16,11 @@ if ( ! defined( 'WPINC' ) ) {
 function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
 
     // Diagnostics
-    back_trace('NOTICE', 'Generating Markov Chain response with improved Beaker model');
+    back_trace('NOTICE', 'Generating Markov Chain response with TF-IDF support in Beaker model');
 
     global $chatbot_markov_chain_fallback_response, $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_markov_chain';
+    $tfidf_table = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
     $chainLength = intval(get_option('chatbot_markov_chain_length', 3));
 
@@ -28,9 +29,34 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
         return preg_replace('/[^\w\s\-]/u', '', trim($word));
     }, $startWords));
 
-    // Attempt to find a starting key
-    $key = $primaryKeyword ?: null;
-    if (!empty($startWords)) {
+    // Check if TF-IDF table exists and find the highest-scoring word
+    $highestScoringWord = null;
+    if ($wpdb->get_var("SHOW TABLES LIKE '$tfidf_table'") == $tfidf_table) {
+        $tfidf_results = $wpdb->get_results(
+            "SELECT word, score FROM $tfidf_table WHERE word IN ('" . implode("','", $startWords) . "') ORDER BY score DESC LIMIT 1",
+            ARRAY_A
+        );
+
+        if (!empty($tfidf_results)) {
+            $highestScoringWord = $tfidf_results[0]['word'];
+        }
+    }
+
+    // Attempt to construct a starting key, prioritizing the TF-IDF word if available
+    $key = null;
+    if ($highestScoringWord) {
+        foreach ($startWords as $index => $word) {
+            if ($word === $highestScoringWord) {
+                $key = implode(' ', array_slice($startWords, max(0, $index - ($chainLength - 1)), $chainLength));
+                if (markov_chain_beaker_key_exists($key, $table_name)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    // Fallback to sliding window approach if no TF-IDF key is found
+    if (!$key && !empty($startWords)) {
         for ($i = count($startWords) - $chainLength; $i >= 0; $i--) {
             $attemptedKey = implode(' ', array_slice($startWords, $i, $chainLength));
             if (markov_chain_beaker_key_exists($attemptedKey, $table_name)) {
