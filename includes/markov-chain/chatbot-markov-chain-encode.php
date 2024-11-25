@@ -20,12 +20,13 @@ function runMarkovChatbotAndSaveChain() {
 
     // Step 0: Force a full rebuild if necessary
     $force_rebuild = esc_attr(get_option('chatbot_markov_chain_force_rebuild', 'No'));
-    
+
     if ($force_rebuild == 'Yes') {
         back_trace( 'NOTICE', 'Forcing a full rebuild of the Markov Chain');
         dropMarkovChainTable();
-        update_option('chatbot_markov_chain_force_rebuild', 'No'); // Reset the flag
-        update_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00'); // Reset the timestamp
+        update_option('chatbot_markov_chain_force_rebuild', 'No');
+        // Reset the timestamp
+        update_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00');
     }
 
     // Step 1: Check if the Markov Chain table exists
@@ -69,7 +70,6 @@ function runMarkovChatbotAndSaveChain() {
     }
 
     back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
-
 }
 
 // Create or update the Markov Chain table
@@ -122,7 +122,6 @@ function createMarkovChainTable() {
     }
 
     prod_trace( 'NOTICE', 'Markov Chain table created/updated successfully.');
-
 }
 // Register the table creation function to run on plugin activation
 register_activation_hook(__FILE__, 'createMarkovChainTable');
@@ -130,7 +129,6 @@ register_activation_hook(__FILE__, 'createMarkovChainTable');
 // Drop the Markov Chain table
 function dropMarkovChainTable() {
 
-    // DIAG - Diagnostic - Ver 2.2.0
     back_trace( 'NOTICE', 'dropMarkovChainTable - Start');
 
     global $wpdb;
@@ -150,7 +148,6 @@ function dropMarkovChainTable() {
     prod_trace( 'NOTICE', 'Markov Chain table dropped successfully.');
 
     return true;
-
 }
 
 // Process content in batches
@@ -194,17 +191,15 @@ function processContentBatches($last_updated, &$batch_starting_points, $batch_si
 
     } else {
 
+        // All batches are completed
+        updateMarkovChainTimestamp(); // Update last_updated here
         update_option('chatbot_markov_chain_build_schedule', 'Completed');
         delete_transient('chatbot_markov_chain_batch_starting_points');
         delete_option('chatbot_markov_chain_build_schedule');
         back_trace( 'NOTICE', 'All temporary data cleaned up after completion.');
-
     }
 
-    updateMarkovChainTimestamp();
-
     prod_trace( 'NOTICE', 'processContentBatches - End');
-
 }
 add_action('chatbot_markov_chain_next_batch', 'runMarkovChatbotAndSaveChain');
 
@@ -223,10 +218,13 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
             'date_query'     => [
                 [
                     'after' => $last_updated,
+                    'inclusive' => true,
                 ],
             ],
             'posts_per_page' => $batch_size,
             'offset'         => $offset,
+            'orderby'        => 'date', // Ensure consistent ordering
+            'order'          => 'ASC',
         ];
 
         $query = new WP_Query($args);
@@ -260,6 +258,8 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
             ],
             'number' => $batch_size,
             'offset' => $offset,
+            'orderby' => 'comment_date', // Ensure consistent ordering
+            'order'   => 'ASC',
         ]);
 
         if (!empty($comments)) {
