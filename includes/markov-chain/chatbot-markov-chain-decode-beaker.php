@@ -14,57 +14,45 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Generate a sentence using the Markov Chain with context reinforcement
 function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
-
-    // Diagnostics
-    back_trace('NOTICE', 'Generating Markov Chain response with TF-IDF support in Beaker model');
+    back_trace('NOTICE', 'Generating Markov Chain response with adjusted coherence handling');
 
     global $chatbot_markov_chain_fallback_response, $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_markov_chain';
     $tfidf_table = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
     $chainLength = intval(get_option('chatbot_markov_chain_length', 3));
-    $maxSentences = intval(get_option('chatbot_markov_chain_max_sentences', 5)); // Limit to max sentences
-    // Randomize the number of sentences to generate based on a bell curve distribution that peaks at the max sentences
-    $maxSentences = max(1, round(abs(mt_rand(0, $maxSentences - 1) + mt_rand(0, $maxSentences - 1) + mt_rand(0, $maxSentences - 1)) / 3));
-    // Maybe never less than 2 sentences
-    If ($maxSentences < 2) {
-        $maxSentences = 2;
-    }
+    $maxSentences = intval(get_option('chatbot_markov_chain_max_sentences', 3));
+    $offTopicMax = intval(get_option('chatbot_markov_chain_off_topic_max', 5));
 
     // Clean up start words
     $startWords = array_filter(array_map(function($word) {
         return preg_replace('/[^\w\s\-]/u', '', trim($word));
     }, $startWords));
 
-    // Check if TF-IDF table exists and find the highest-scoring word
+    // Find the highest-scoring TF-IDF word
     $highestScoringWord = null;
     if ($wpdb->get_var("SHOW TABLES LIKE '$tfidf_table'") == $tfidf_table) {
         $tfidf_results = $wpdb->get_results(
             "SELECT word, score FROM $tfidf_table WHERE word IN ('" . implode("','", $startWords) . "') ORDER BY score DESC LIMIT 1",
             ARRAY_A
         );
-
         if (!empty($tfidf_results)) {
             $highestScoringWord = $tfidf_results[0]['word'];
         }
     }
 
-    // Attempt to construct a starting key, prioritizing the TF-IDF word if available
+    // Attempt to construct a starting key
     $key = null;
-
     if ($highestScoringWord) {
         foreach ($startWords as $index => $word) {
             if ($word === $highestScoringWord) {
-                // Look for chains containing the highest-scoring word
                 for ($offset = 0; $offset < $chainLength; $offset++) {
                     $start = max(0, $index - $offset);
                     $end = min($start + $chainLength, count($startWords));
                     $attemptedKey = implode(' ', array_slice($startWords, $start, $end - $start));
-
-                    // Check if the chain exists in the database
                     if (markov_chain_beaker_key_exists($attemptedKey, $table_name)) {
                         $key = $attemptedKey;
-                        break 2; // Exit both loops
+                        break 2;
                     }
                 }
             }
@@ -94,10 +82,8 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     $words = explode(' ', $key);
     $offTopicCount = 0;
     $sentenceCount = 0;
-    $minLength = rand($minLength, $max_tokens / 2);
 
     for ($i = 0; $i < $max_tokens; $i++) {
-
         $nextWord = markov_chain_beaker_get_next_word($key, $table_name);
         if ($nextWord === null) {
             break;
@@ -109,12 +95,12 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
         // Allow topic drift after minimum length is reached
         if ($i >= $minLength && $primaryKeyword && strpos($nextWord, $primaryKeyword) === false) {
             $offTopicCount++;
-            if ($offTopicCount >= intval(get_option('chatbot_markov_chain_off_topic_max', 5))) {
+            if ($offTopicCount >= $offTopicMax) {
                 break;
             }
         }
 
-        // Check for natural sentence endings and enforce sentence limit
+        // Check sentence boundaries and enforce sentence limit
         if (preg_match('/[.!?]$/', $nextWord)) {
             $sentenceCount++;
             if ($sentenceCount >= $maxSentences) {
@@ -126,30 +112,26 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     // Final cleanup
     $response = implode(' ', $words);
     $response = markov_chain_beaker_clean_up_response($response);
-
-    // Apply finalize_generated_text function here
     $response = finalize_generated_text($response);
 
     return $response;
-
 }
 
-// Finalize the generated text
 function finalize_generated_text($text) {
-
-    // Capitalize the first letter of each sentence
+    // Capitalize first letter of each sentence
     $text = preg_replace_callback('/(?:^|[.!?])\s*(\w)/', function($matches) {
         return strtoupper($matches[0]);
     }, $text);
 
-    // Remove excessive spaces before punctuation
+    // Fix spacing and ensure proper endings
     $text = preg_replace('/\s+([.,!?])/', '$1', $text);
-
-    // Replace multiple spaces with a single space
     $text = preg_replace('/\s{2,}/', ' ', $text);
-
-    // Ensure proper sentence endings
     $text = preg_replace('/([^.!?])$/', '$1.', $text);
+
+    // Split long sentences logically
+    if (str_word_count($text) > 40) {
+        $text = preg_replace('/(\w{10,})(\s+\w{10,})/', '$1. $2', $text);
+    }
 
     return trim($text);
 }
