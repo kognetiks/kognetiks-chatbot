@@ -240,6 +240,10 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
                 $query->the_post();
                 $post_content = get_the_content();
 
+                // DIAG - Diagnostics - Ver 2.2.0
+                back_trace( 'NOTICE', 'Post ID: ' . get_the_ID());
+                back_trave( 'NOTICE', 'Post Title: ' . get_the_title());
+
                 // Clean up the post content
                 $clean_content = clean_up_training_data($post_content);
                 $content .= ' ' . get_the_title() . ' ' . $clean_content;
