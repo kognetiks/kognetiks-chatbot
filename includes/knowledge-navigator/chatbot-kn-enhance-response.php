@@ -118,6 +118,26 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         } else {
             $links[] = "[here](" . $result['url'] . ")";
         }
+
+        // Determine if AI summary should be included
+        $include_ai_summary = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_ai_summary', 'No'));
+        back_trace( 'NOTICE', '$include_ai_summary: ' . $include_ai_summary );
+
+        if ($include_ai_summary == 'Yes') {
+
+            // DIAG - Diagnostics - Ver 2.2.0
+            back_trace( 'NOTICE', 'Generating AI summary' );
+            back_trace( 'NOTICE', '$result[pid]: ' . $result['pid'] );
+
+            $ai_summary = generate_ai_summary($result['pid']);
+            if (!empty($ai_summary)) {
+                $links[] = "<li>" . $ai_summary . "</li>";
+            }
+
+            // DIAG - Diagnostics - Ver 2.2.0
+            back_trace( 'NOTICE', '$ai_summary: ' . $ai_summary );
+
+        }
     }
 
     if (!empty($links)) {

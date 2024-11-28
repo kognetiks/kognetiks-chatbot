@@ -88,7 +88,7 @@ function chatbot_markov_chain_build_results_callback($run_scanner) {
     // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner);
     // back_trace( 'NOTICE', 'chatbot_markov_chain_build_schedule: ' . esc_attr(get_option('chatbot_markov_chain_build_schedule')));
 
-    update_option('chatbot_markov_chain_last_updated', date('Y-m-d H:i:s'));
+    // update_option('chatbot_markov_chain_last_updated', date('Y-m-d H:i:s')); // REMOVED - Ver 2.2.0 - 2924-11-27
 
     if (!isset($run_scanner)) {
         $run_scanner = 'No';

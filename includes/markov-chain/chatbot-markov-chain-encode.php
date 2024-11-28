@@ -35,6 +35,8 @@ function runMarkovChatbotAndSaveChain() {
     // Step 2: Get the last updated timestamp for the Markov Chain
     $last_updated = get_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00');
 
+    back_trace( 'NOTICE', 'Last updated timestamp: ' . $last_updated);
+
     // Step 3: Initialize batch processing variables
     $batch_starting_points = get_transient('chatbot_markov_chain_batch_starting_points');
     if (!$batch_starting_points) {
@@ -151,7 +153,7 @@ function dropMarkovChainTable() {
 }
 
 // Process content in batches
-function processContentBatches($last_updated, &$batch_starting_points, $batch_size) {
+function processContentBatches($last_updated, $batch_starting_points, $batch_size) {
 
     back_trace( 'NOTICE', 'processContentBatches - Start');
 
@@ -215,6 +217,12 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
 
     $offset = ($batch_starting_point - 1) * $batch_size;
 
+    back_trace( 'NOTICE', '$last_updated: ' . $last_updated);
+    back_trace( 'NOTICE', '$batch_starting_point: ' . $batch_starting_point);
+
+    $last_updated_date = date('Y-m-d H:i:s', strtotime($last_updated));
+    back_trace( 'NOTICE', '$last_updated_date: ' . $last_updated_date);
+
     if ($processing_type == 'posts') {
         // Fetch posts and pages
         $args = [
@@ -222,7 +230,8 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
             'post_status'    => 'publish',
             'date_query'     => [
                 [
-                    'after' => $last_updated,
+                    'column' => 'post_modified', // Use the post_modified column
+                    'after'  => $last_updated_date,
                     'inclusive' => true,
                 ],
             ],
@@ -235,23 +244,34 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
         $query = new WP_Query($args);
         $content = '';
 
+        // Count of posts fetched
+        $post_count = $query->post_count;
+        back_trace( 'NOTICE', 'Number of posts fetched: ' . $post_count);
+
         if ($query->have_posts()) {
             while ($query->have_posts()) {
+
                 $query->the_post();
-                $post_content = get_the_content();
+
+                // Clean up the post content
+                $clean_content = clean_up_training_data(get_the_content());
+                $clean_post_title = clean_up_training_data(get_the_title());
 
                 // DIAG - Diagnostics - Ver 2.2.0
                 back_trace( 'NOTICE', 'Post ID: ' . get_the_ID());
-                back_trave( 'NOTICE', 'Post Title: ' . get_the_title());
+                back_trace( 'NOTICE', 'Post Title: ' . get_the_title());                
 
-                // Clean up the post content
-                $clean_content = clean_up_training_data($post_content);
-                $content .= ' ' . get_the_title() . ' ' . $clean_content;
+                $content .= ' ' . $clean_post_title . ' ' . $clean_content;
             }
+
             wp_reset_postdata();
+
             return $content;
+
         } else {
+
             return false;
+
         }
     }
 
@@ -308,7 +328,7 @@ function buildMarkovChain($content) {
     $table_name = $wpdb->prefix . 'chatbot_markov_chain';
 
     // Clean and split the content into words
-    $content = strtolower($content);
+    // $content = strtolower($content);
     $words = preg_split('/\s+/', $content);
 
     // Define the maximum chain length
@@ -316,13 +336,23 @@ function buildMarkovChain($content) {
 
     // Build the Markov Chain for different chain lengths
     for ($chainLength = $maxChainLength; $chainLength >= 1; $chainLength--) {
+
         for ($i = 0; $i <= count($words) - $chainLength - 1; $i++) {
+
             $key = implode(' ', array_slice($words, $i, $chainLength));
             $nextWord = $words[$i + $chainLength];
 
-            // Clean up the key and next word
-            $key = preg_replace('/[^\w\s\-\.,!?]/u', '', $key); // Allow .,!? along with letters, numbers, and hyphens
-            $nextWord = preg_replace('/[^\w\s\-\.,!?]/u', '', $nextWord);
+            // Clean up the key - Ver 2.2.0 - 2024-11-27
+            $key = preg_replace('/[^\w\s\-]/u', '', $key); // Allow only letters, numbers, whitespace, and hyphens
+            $key = strtolower(trim($key));
+
+            // Clean up the next word - Ver 2.2.0 - 2024-11-27
+            // $nextWord = preg_replace('/[^\w\s\-\.,!?]/u', '', $nextWord);
+            $nextWord = trim($nextWord);
+            // Check for double periods at the end - Ver 2.2.0 - 2024-11-27
+            if (preg_match('/\.{2,}$/', $nextWord)) {
+                $nextWord = rtrim($nextWord, '.');
+            }
 
             // Skip if key or next word is empty
             if (empty($key) || empty($nextWord)) {
@@ -347,7 +377,9 @@ function buildMarkovChain($content) {
                     $chainLength, $key, $nextWord, $wpdb->last_error
                 ));
             }
+
         }
+        
     }
 }
 
@@ -364,6 +396,7 @@ function clean_up_training_data($content) {
     $clean_content = $content;
 
     do {
+
         $previous_clean_content = $clean_content;
 
         // Decode HTML entities
@@ -375,17 +408,28 @@ function clean_up_training_data($content) {
         // Remove HTML comments
         $clean_content = preg_replace('/<!--.*?-->/', '', $clean_content);
 
-        // Replace line breaks with spaces
-        $clean_content = preg_replace('/[\r\n]+/', ' ', $clean_content);
+        // Replace line breaks with a period followed by a space
+        $clean_content = preg_replace('/[\r\n]+/', '. ', $clean_content);
 
         // Collapse multiple spaces
         $clean_content = preg_replace('/\s+/', ' ', $clean_content);
 
+        // Trim trailing spaces
+        $clean_content = trim($clean_content);
+
     } while ($clean_content !== $previous_clean_content);
 
-    return trim($clean_content);
+    // Remove unnecessary trailing punctuation or spaces
+    $clean_content = rtrim($clean_content, '.!? ');
 
+    // Add a period only if no punctuation exists at the end
+    if (!preg_match('/[.!?]$/', $clean_content)) {
+        $clean_content .= '.';
+    }
+
+    return $clean_content;
 }
+
 
 // Get stats for a specific table in the database
 function getDatabaseStats($table_name) {

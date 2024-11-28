@@ -124,6 +124,9 @@ require_once plugin_dir_path(__FILE__) . 'includes/transformers/lexical-context-
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-context-model.php'; // Functions - Ver 2.2.0
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-model-scheduler.php'; // Functions - Ver 2.2.0
 
+// Include necessary files - AI Summaries - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/ai-summaries/generate-ai-summaries.php'; // Functions - Ver 2.2.0
+
 // Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
@@ -596,25 +599,25 @@ function chatbot_chatgpt_send_message() {
         $kchat_settings['chatbot_chatgpt_model'] = $model;
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 537 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 602 - $model: ' . $model);
     } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
         $api_key = esc_attr(get_option('chatbot_markov_chain_api_key'));
         $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
         $kchat_settings['chatbot_chatgpt_model'] = $model;
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 544 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 609 - $model: ' . $model);
     } else {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         $kchat_settings['chatbot_chatgpt_model'] = $model;
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 551 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 616 - $model: ' . $model);
     }
 
     // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', 'LINE 555 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 620 - $model: ' . $model);
 
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);

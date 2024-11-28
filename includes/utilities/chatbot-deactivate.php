@@ -98,7 +98,14 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting Anthropic tables');
         // NONE CURRENTLY - Ver 2.2.0
 
-        // Delete Transformer tables
+        // Delete Sentential Transformer tables
+        // back_trace( 'NOTICE', 'Deleting Transformer tables');
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_embeddings");
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_precomputed_vecotrs");
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_sentence_vectors");
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_word_embeddings");
+
+        // Delete Lexical Transformer tables
         // back_trace( 'NOTICE', 'Deleting Transformer tables');
         // NONE CURRENTLY - Ver 2.2.0
 

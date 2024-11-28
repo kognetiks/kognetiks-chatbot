@@ -265,3 +265,87 @@ function chatbot_chatgpt_call_api($api_key, $message) {
     }
     
 }
+
+// Call the ChatGPT API without trappings
+function chatbot_chatgpt_call_api_vanilla($api_key, $message) {
+
+    // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
+    // $api_url = 'https://api.openai.com/v1/chat/completions';
+    $api_url = get_chat_completions_api_url();
+
+    $headers = array(
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'application/json',
+    );
+
+    // Select the OpenAI Model
+    // Get the saved model from the settings or default to "gpt-3.5-turbo"
+    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+ 
+    // Max tokens - Ver 1.4.2
+    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '500')));
+
+    // Conversation Context - Ver 1.6.1
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+
+    // Temperature - Ver 2.1.8
+    $temperature = floatval(esc_attr(get_option('chatbot_chatgpt_temperature', '0.5')));
+
+    // Top P - Ver 2.1.8
+    $top_p = floatval(esc_attr(get_option('chatbot_chatgpt_top_p', '1.0')));
+ 
+    // Added Role, System, Content Static Variable - Ver 1.6.0
+    $body = array(
+        'model' => $model,
+        'max_tokens' => $max_tokens,
+        'temperature' => $temperature,
+        'top_p' => $top_p,
+        'messages' => array(
+            array('role' => 'system', 'content' => $context),
+            array('role' => 'user', 'content' => $message)
+            ),
+    );
+
+    $chatbot_chatgpt_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '50')));
+
+    $args = array(
+        'headers' => $headers,
+        'body' => json_encode($body),
+        'method' => 'POST',
+        'data_format' => 'body',
+        'timeout' => $chatbot_chatgpt_timeout, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
+    );
+
+    $response = wp_remote_post($api_url, $args);
+    // DIAG - Diagnostics - Ver 1.6.7
+    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+
+    // Handle any errors that are returned from the chat engine
+    if (is_wp_error($response)) {
+        return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
+    }
+
+    // DIAG - Diagnostics - Ver 1.8.6
+    // back_trace( 'NOTICE', print_r($response, true));
+
+    // Return json_decode(wp_remote_retrieve_body($response), true);
+    $response_body = json_decode(wp_remote_retrieve_body($response), true);
+    if (isset($response_body['message'])) {
+        $response_body['message'] = trim($response_body['message']);
+        if (!str_ends_with($response_body['message'], '.')) {
+            $response_body['message'] .= '.';
+        }
+    }
+
+    // DIAG - Diagnostics - Ver 1.8.1
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
+    
+    if (!empty($response_body['choices'])) {
+        // Handle the response from the chat engine
+        return $response_body['choices'][0]['message']['content'];
+    } else {
+        // Return a random error message
+        return $localized_errorResponses[array_rand($localized_errorResponses)];
+    }
+
+}

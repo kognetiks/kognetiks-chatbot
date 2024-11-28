@@ -100,10 +100,11 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
 
     }
 
-
     // Attempt to construct a starting key
     $key = null;
     if ($highestScoringWord) {
+        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
+        back_trace( 'NOTICE', 'Attempting to construct a key using $highestScoringWord: ' . $highestScoringWord );
         foreach ($startWords as $index => $word) {
             if ($word === $highestScoringWord) {
                 for ($offset = 0; $offset < $chainLength; $offset++) {
@@ -121,6 +122,8 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
 
     // Fallback to sliding window approach if no TF-IDF key is found
     if (!$key && !empty($startWords)) {
+        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
+        back_trace( 'NOTICE', 'Fallback to sliding window approach using $startWords: ' . implode(' ', $startWords) );
         for ($i = count($startWords) - $chainLength; $i >= 0; $i--) {
             $attemptedKey = implode(' ', array_slice($startWords, $i, $chainLength));
             if (markov_chain_beaker_key_exists($attemptedKey, $markov_chain_table)) {
@@ -130,8 +133,23 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
         }
     }
 
+    // Try reducing the chain length if no key is found
+    if (!$key && $chainLength > 1) {
+        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
+        back_trace( 'NOTICE', 'Fallback to reduced chain length' );
+        for ($i = $chainLength - 1; $i > 0; $i--) {
+            $attemptedKey = implode(' ', array_slice($startWords, -$i));
+            if (markov_chain_beaker_key_exists($attemptedKey, $markov_chain_table)) {
+                $key = $attemptedKey;
+                break;
+            }
+        }
+    }
+
     // Use a random key if no starting key is found
     if (!$key) {
+        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
+        back_trace( 'NOTICE', 'Fallback to random key' );
         $key = markov_chain_beaker_get_random_key($markov_chain_table);
         if (!$key) {
             return $chatbot_markov_chain_fallback_response[array_rand($chatbot_markov_chain_fallback_response)];
@@ -143,14 +161,23 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     $offTopicCount = 0;
     $sentenceCount = 0;
 
+    // Generate the response text
+    // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
+    back_trace( 'NOTICE', 'Building the response text using the key: ' . $key );
+
     for ($i = 0; $i < $max_tokens; $i++) {
         $nextWord = markov_chain_beaker_get_next_word($key, $markov_chain_table);
         if ($nextWord === null) {
+            // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
+            back_trace( 'NOTICE', 'Next word is null so we should be done' );
             break;
         }
 
         $words[] = $nextWord;
         $key = implode(' ', array_slice($words, -$chainLength));
+
+        // Clean up the key
+        $key = preg_replace('/[^\w\s\-]/u', '', $key);
 
         // Allow topic drift after minimum length is reached
         if ($i >= $minLength && $primaryKeyword && strpos($nextWord, $primaryKeyword) === false) {
@@ -177,15 +204,22 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     return $response;
 }
 
+// Finalize the generated text
 function finalize_generated_text($text) {
+
     // Capitalize first letter of each sentence
-    $text = preg_replace_callback('/(?:^|[.!?])\s*(\w)/', function($matches) {
-        return strtoupper($matches[0]);
+    $text = preg_replace_callback('/([.!?]\s*|\A)(\w)/', function ($matches) {
+        return $matches[1] . strtoupper($matches[2]);
     }, $text);
 
-    // Fix spacing and ensure proper endings
-    $text = preg_replace('/\s+([.,!?])/', '$1', $text);
-    $text = preg_replace('/\s{2,}/', ' ', $text);
+    // Fix spacing and punctuation
+    $text = preg_replace('/\s+([.,!?])/', '$1', $text); // Remove space before punctuation
+    $text = preg_replace('/\s{2,}/', ' ', $text); // Collapse multiple spaces
+
+    // Reduce multiple punctuation marks to a single one
+    $text = preg_replace('/([.!?]){2,}/', '$1', $text); // Remove redundant punctuation anywhere
+
+    // Ensure the text ends with a single punctuation mark
     $text = preg_replace('/([^.!?])$/', '$1.', $text);
 
     // Split long sentences logically
@@ -194,13 +228,24 @@ function finalize_generated_text($text) {
     }
 
     return trim($text);
+
 }
 
 // Check if the key exists in the database
 function markov_chain_beaker_key_exists($key, $markov_chain_table) {
 
     global $wpdb;
+
     $result = $wpdb->get_var($wpdb->prepare("SELECT 1 FROM $markov_chain_table WHERE word = %s LIMIT 1", $key));
+
+    if ($result === null) {
+        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
+        back_trace( 'NOTICE', 'Key Not Found in DB - $key: ' . $key );
+    } else {
+        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
+        back_trace( 'NOTICE', 'Key Found in DB - $key: ' . $key );
+    }
+
     return !is_null($result);
 
 }
@@ -209,6 +254,12 @@ function markov_chain_beaker_key_exists($key, $markov_chain_table) {
 function markov_chain_beaker_get_next_word($currentKey, $markov_chain_table) {
 
     global $wpdb;
+
+    // Normalize the key - Ver 2.2.0 - 2024 11 27
+    $currentKey = trim(strtolower($currentKey));
+
+    // Clean up the key
+    $currentKey = preg_replace('/[^\w\s\-]/u', '', $currentKey);
 
     // Fetch possible next words with their frequencies
     $results = $wpdb->get_results(
@@ -262,8 +313,8 @@ function markov_chain_beaker_clean_up_response($response) {
     // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 25
     back_trace( 'NOTICE', 'BEFORE CLEANING - $response: ' . $response );
 
-    // Before doing anythning, remove any non-ASCII characters
-    $response = preg_replace('/[^\x20-\x7E]/', '', $response);
+    // Before doing anything, remove any non-ASCII characters except for curly quotes and other common characters
+    $response = preg_replace('/[^\x20-\x7E\x{2018}\x{2019}\x{201C}\x{201D}]/u', '', $response);
 
     // Trim and capitalize
     $response = ucfirst(trim($response));
