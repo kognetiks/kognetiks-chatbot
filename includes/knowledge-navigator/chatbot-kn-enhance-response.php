@@ -121,6 +121,8 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
         // Determine if AI summary should be included
         $include_ai_summary = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_ai_summary', 'No'));
+        // FIXME - TEMPORARY OVERRIDE
+        $include_ai_summary = 'Yes';
         back_trace( 'NOTICE', '$include_ai_summary: ' . $include_ai_summary );
 
         if ($include_ai_summary == 'Yes') {

@@ -44,6 +44,19 @@ $stopWords = [
     "will", "just", "now", "needn't", "mightn't", "oughtn't", "ain't"
 ];
 
+// Global abbreviations array
+$abbreviations = [
+    // Latin-based Abbreviations
+    "i.e.", "e.g.", "etc.", "et al.", "N.B.", "cf.", "vs.", "viz.", "a.m.", "p.m.",
+    // Time and Date
+    "AD", "BC", "CE", "BCE", "GMT", "EST", "UTC", 
+    // Measurement
+    "lb", "oz", "km", "cm", "ml", "ft",
+    // Titles
+    "Mr.", "Mrs.", "Ms.", "Dr.", "Prof.",
+    // Miscellaneous
+    "FAQ", "DIY", "ASAP", "FYI", "RSVP", "P.S.", "AKA", "DOB", "TBD", "TBA", "ETA", "BTW",
+];
 
 // Declare the $learningMessages array as global
 global $learningMessages;
@@ -92,11 +105,11 @@ $chatbot_chatgpt_bot_prompt = [
 global $chatbot_markov_chain_fallback_response;
 $chatbot_markov_chain_fallback_response = [
     "Sorry, I couldn't find any relevant information to respond to your query. Can you try rephrasing or asking something else?",
-    "I’m not sure I have the right information for that. Could you clarify or ask differently?",
-    "It seems I don’t have the exact details you're looking for. Could you rephrase the question?",
-    "I couldn’t find anything on that topic at the moment. Would you mind trying again?",
+    "I'm not sure I have the right information for that. Could you clarify or ask differently?",
+    "It seems I don't have the exact details you're looking for. Could you rephrase the question?",
+    "I couldn't find anything on that topic at the moment. Would you mind trying again?",
     "I'm afraid I don't have enough information on that. Could you provide more details?",
-    "It looks like I’m missing the answer for that. Perhaps you could rephrase or ask something else?"
+    "It looks like I'm missing the answer for that. Perhaps you could rephrase or ask something else?"
 ];
 
 // Declare the $chatbotFallbackResponses array as global
@@ -108,9 +121,9 @@ $chatbotFallbackResponses = [
     "I may have missed your point. Could you say it differently?",
     "I'm having trouble understanding. Could you ask another way?",
     "That doesn't seem clear to me. Can you rephrase?",
-    "I’m not sure what you mean. Could you try explaining it differently?",
-    "I didn’t get that. Could you ask again in another way?",
-    "I’m a bit confused. Can you provide more details or rephrase?",
+    "I'm not sure what you mean. Could you try explaining it differently?",
+    "I didn't get that. Could you ask again in another way?",
+    "I'm a bit confused. Can you provide more details or rephrase?",
     "I'm sorry, I don't understand. Could you try rewording it?",
-    "That’s unclear to me. Could you ask it in a different way?"
+    "That's unclear to me. Could you ask it in a different way?"
 ];

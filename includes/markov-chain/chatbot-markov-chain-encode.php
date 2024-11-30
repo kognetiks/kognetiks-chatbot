@@ -392,42 +392,53 @@ function updateMarkovChainTimestamp() {
 
 // Clean up inbound text for better Markov Chain processing
 function clean_up_training_data($content) {
-
+    
     $clean_content = $content;
 
     do {
-
         $previous_clean_content = $clean_content;
 
-        // Decode HTML entities
+        // Step 1: Decode HTML entities
         $clean_content = html_entity_decode($clean_content, ENT_QUOTES | ENT_HTML5);
 
-        // Strip HTML tags, shortcodes, and comments
+        // Step 2: Replace non-breaking spaces with standard spaces
+        $clean_content = preg_replace('/\x{00A0}/u', ' ', $clean_content);
+
+        // Step 3: Strip HTML tags, shortcodes, and comments
         $clean_content = wp_strip_all_tags(strip_shortcodes($clean_content));
 
-        // Remove HTML comments
+        // Step 4: Remove HTML comments
         $clean_content = preg_replace('/<!--.*?-->/', '', $clean_content);
 
-        // Replace line breaks with a period followed by a space
-        $clean_content = preg_replace('/[\r\n]+/', '. ', $clean_content);
+        // Step 5: Normalize line breaks and unprintable characters
+        $clean_content = preg_replace('/[\r\n]+/', '. ', $clean_content); // Replace CR/LF with period + space
+        $clean_content = preg_replace('/[^\x20-\x7E]/', ' ', $clean_content); // Replace non-ASCII characters with space
 
-        // Collapse multiple spaces
+        // Step 6: Collapse multiple spaces
         $clean_content = preg_replace('/\s+/', ' ', $clean_content);
 
-        // Trim trailing spaces
+        // Step 7: Ensure proper spacing after punctuation
+        $clean_content = preg_replace('/([.!?])([^\s])/', '$1 $2', $clean_content); // Add space after punctuation if missing
+
+        // Step 8: Split improperly joined words (e.g., camelCase, joinedwords)
+        $clean_content = preg_replace('/(\w)([A-Z])/', '$1 $2', $clean_content); // Split camelCase
+        $clean_content = preg_replace('/(\w)([.,!?])(\w)/', '$1$2 $3', $clean_content); // Split joinedwords around punctuation
+
+        // Step 9: Trim leading and trailing spaces
         $clean_content = trim($clean_content);
 
     } while ($clean_content !== $previous_clean_content);
 
-    // Remove unnecessary trailing punctuation or spaces
+    // Step 10: Remove unnecessary trailing punctuation or spaces
     $clean_content = rtrim($clean_content, '.!? ');
 
-    // Add a period only if no punctuation exists at the end
+    // Step 11: Add a period if no punctuation exists at the end
     if (!preg_match('/[.!?]$/', $clean_content)) {
         $clean_content .= '.';
     }
 
     return $clean_content;
+
 }
 
 

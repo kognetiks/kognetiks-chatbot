@@ -42,6 +42,30 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
         }
     }
 
+    // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 30
+
+    // Loop through the $startWords array and back_trace the word and the score
+    // foreach ($startWords as $word) {
+
+    //     // Break the loop if the counter reaches 10
+    //     if ($counter >= 10) {
+    //         break;
+    //     }
+    
+    //     back_trace('NOTICE', 'Word: ' . $word);
+    //     $tfidf_results = $wpdb->get_results(
+    //         "SELECT word, score FROM $tfidf_table WHERE word = '" . $word . "'",
+    //         ARRAY_A
+    //     );
+    //     if (!empty($tfidf_results)) {
+    //         back_trace('NOTICE', 'Score: ' . $tfidf_results[0]['score']);
+    //     }
+    
+    //     // Increment the counter
+    //     $counter++;
+
+    // }
+
     // if one of the $startWords is missing a score, use the highest score - OPTION 1
     // if ($highestScoringWord) {
     //     foreach ($startWords as $word) {
@@ -98,6 +122,9 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
         // Take the word with the highest combined score
         $highestScoringWord = key($tfidfFrequencyScores);
 
+    } else {
+        // If TF-IDF table is not found, use the highest-scoring word from the startWords array
+        $highestScoringWord = $startWords[0] ?? null;
     }
 
     // Attempt to construct a starting key
@@ -198,36 +225,11 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
 
     // Final cleanup
     $response = implode(' ', $words);
-    $response = markov_chain_beaker_clean_up_response($response);
-    $response = finalize_generated_text($response);
+    // $response = markov_chain_beaker_clean_up_response($response);
+    // $response = finalize_generated_text($response);
+    $response = process_text($response);
 
     return $response;
-}
-
-// Finalize the generated text
-function finalize_generated_text($text) {
-
-    // Capitalize first letter of each sentence
-    $text = preg_replace_callback('/([.!?]\s*|\A)(\w)/', function ($matches) {
-        return $matches[1] . strtoupper($matches[2]);
-    }, $text);
-
-    // Fix spacing and punctuation
-    $text = preg_replace('/\s+([.,!?])/', '$1', $text); // Remove space before punctuation
-    $text = preg_replace('/\s{2,}/', ' ', $text); // Collapse multiple spaces
-
-    // Reduce multiple punctuation marks to a single one
-    $text = preg_replace('/([.!?]){2,}/', '$1', $text); // Remove redundant punctuation anywhere
-
-    // Ensure the text ends with a single punctuation mark
-    $text = preg_replace('/([^.!?])$/', '$1.', $text);
-
-    // Split long sentences logically
-    if (str_word_count($text) > 40) {
-        $text = preg_replace('/(\w{10,})(\s+\w{10,})/', '$1. $2', $text);
-    }
-
-    return trim($text);
 
 }
 
@@ -258,7 +260,7 @@ function markov_chain_beaker_get_next_word($currentKey, $markov_chain_table) {
     // Normalize the key - Ver 2.2.0 - 2024 11 27
     $currentKey = trim(strtolower($currentKey));
 
-    // Clean up the key
+    // Clean up the key removing any non-alphanumeric characters - Ver 2.2.0 - 2024 11 27
     $currentKey = preg_replace('/[^\w\s\-]/u', '', $currentKey);
 
     // Fetch possible next words with their frequencies
@@ -270,13 +272,20 @@ function markov_chain_beaker_get_next_word($currentKey, $markov_chain_table) {
     if (empty($results)) {
         // Try reducing the chain length if no results are found
         $keyParts = explode(' ', $currentKey);
-        array_shift($keyParts);
-        if (count($keyParts) > 0) {
-            $newKey = implode(' ', $keyParts);
-            return markov_chain_beaker_get_next_word($newKey, $markov_chain_table);
-        } else {
-            return null;
+        
+        while (count($keyParts) > 0) {
+            array_shift($keyParts);
+            if (count($keyParts) > 0) {
+                $newKey = implode(' ', $keyParts);
+                $nextWord = markov_chain_beaker_get_next_word($newKey, $markov_chain_table);
+                if ($nextWord !== null) {
+                    return $nextWord;
+                }
+            }
         }
+        
+        // If no results are found with smaller keys, return null
+        return null;
     }
 
     // Calculate total frequency
@@ -303,12 +312,101 @@ function markov_chain_beaker_get_next_word($currentKey, $markov_chain_table) {
 function markov_chain_beaker_get_random_key($markov_chain_table) {
 
     global $wpdb;
+
     return $wpdb->get_var("SELECT word FROM $markov_chain_table ORDER BY RAND() LIMIT 1");
+
+}
+
+// Unified function to clean, format, and correct text - Ver 2.2.0 - 2024 11 28
+function process_text($text) {
+
+    global $abbreviations;
+
+    // DIAG - Diagnostics
+    back_trace('NOTICE', 'BEFORE PROCESSING - $text: ' . $text);
+
+    // Step 1: Remove non-ASCII characters except for common symbols
+    $text = preg_replace('/[^\x20-\x7E\x{2018}\x{2019}\x{201C}\x{201D}]/u', '', $text);
+
+    // Step 2: Replace non-breaking spaces with standard spaces
+    $text = preg_replace('/\x{00A0}/u', ' ', $text);
+
+    // Step 3: Replace special line breaks (U+2028 and U+2029) with period + space
+    $text = preg_replace('/[\x{2028}\x{2029}]/u', '. ', $text);
+
+    // Step 4: Trim and standardize spacing
+    $text = trim($text);
+    $text = preg_replace('/\s+/', ' ', $text); // Collapse multiple spaces
+
+    // Step 5: Fix punctuation spacing
+    $text = preg_replace('/\s+([.,!?])/', '$1', $text); // Remove space before punctuation
+    $text = preg_replace('/([.,!?])([^\s"\'])/', '$1 $2', $text); // Add space after punctuation if missing
+
+    // Step 6: Ensure space after a period and before quotes
+    $text = preg_replace('/([.!?])(")/', '$1 $2', $text); // Add space between punctuation and opening quotes
+
+    // Step 7: Remove redundant punctuation
+    $text = preg_replace('/([.!?])[:;]+/', '$1', $text); // Remove redundant punctuation
+
+    // Step 8: Ensure proper sentence endings
+    $text = preg_replace('/\s*([.!?])\s*$/', '$1', $text); // Ensure a single punctuation mark at the end
+    if (!preg_match('/[.!?]$/', $text)) {
+        $text .= '.'; // Add a period if missing
+    }
+
+    // Step 9: Fix punctuation spacing - Repeated to ensure consistency
+    $text = preg_replace('/\s+([.,!?])/', '$1', $text); // Remove space before punctuation
+    $text = preg_replace('/([.,!?])([^\s"\'])/', '$1 $2', $text); // Add space after punctuation if missing
+
+    // Step 10: Capitalize the first letter of each sentence
+    $text = preg_replace_callback('/(?:^|[.!?])\s*(\w)/', function ($matches) {
+        return strtoupper($matches[0]);
+    }, $text);
+
+    // Final Step: Remove redundant punctuation patterns (e.g., `. ..` becomes `. `)
+    $text = preg_replace('/([.!?])\s+\.\s*\./', '$1 ', $text); // Fix `. ..` to `. `
+    $text = preg_replace('/\.\s+\./', '. ', $text); // Fix `. .` to `. `
+
+    // Final trim and diagnostics
+    $text = trim($text);
+    back_trace('NOTICE', 'AFTER PROCESSING - $text: ' . $text);
+
+    return $text;
+
+}
+
+// FIXME - REPLACED IN Ver 2.2.0 - 2024 11 28
+// Finalize the generated text
+function finalize_generated_text($text) {
+
+    // Capitalize first letter of each sentence
+    $text = preg_replace_callback('/([.!?]\s*|\A)(\w)/', function ($matches) {
+        return $matches[1] . strtoupper($matches[2]);
+    }, $text);
+
+    // Fix spacing and punctuation
+    $text = preg_replace('/\s+([.,!?])/', '$1', $text); // Remove space before punctuation
+    $text = preg_replace('/\s{2,}/', ' ', $text); // Collapse multiple spaces
+
+    // Reduce multiple punctuation marks to a single one
+    $text = preg_replace('/([.!?]){2,}/', '$1', $text); // Remove redundant punctuation anywhere
+
+    // Ensure the text ends with a single punctuation mark
+    $text = preg_replace('/([^.!?])$/', '$1.', $text);
+
+    // Split long sentences logically
+    if (str_word_count($text) > 40) {
+        $text = preg_replace('/(\w{10,})(\s+\w{10,})/', '$1. $2', $text);
+    }
+
+    return trim($text);
 
 }
 
 // Clean up the Markov Chain response
 function markov_chain_beaker_clean_up_response($response) {
+
+    global $abbreviations;
 
     // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 25
     back_trace( 'NOTICE', 'BEFORE CLEANING - $response: ' . $response );
@@ -316,13 +414,27 @@ function markov_chain_beaker_clean_up_response($response) {
     // Before doing anything, remove any non-ASCII characters except for curly quotes and other common characters
     $response = preg_replace('/[^\x20-\x7E\x{2018}\x{2019}\x{201C}\x{201D}]/u', '', $response);
 
+    // Replace U+2028 and U+2029 with a period followed by a space
+    $response = preg_replace('/[\x{2028}\x{2029}]/u', '. ', $response);
+
     // Trim and capitalize
     $response = ucfirst(trim($response));
+
+    // Escape periods in abbreviations for the regular expression
+    $escaped_abbreviations = array_map(function($abbr) {
+        return preg_quote($abbr, '/');
+    }, $abbreviations);
+
+    // Create a regular expression pattern from the abbreviations
+    $abbreviations_pattern = implode('|', $escaped_abbreviations);
 
     // Fix spacing and punctuation
     $response = preg_replace('/\s+/', ' ', $response);
     $response = preg_replace('/\s+([.,!?])/', '$1', $response);
     $response = preg_replace('/([.,!?])([^\s])/', '$1 $2', $response);
+
+    // Handle common abbreviations
+    $response = preg_replace('/\b(' . $abbreviations_pattern . ')\s+/', '$1 ', $response);
 
     // Ensure proper sentence endings
     if (!preg_match('/[.!?]$/', $response)) {
@@ -347,6 +459,7 @@ function markov_chain_beaker_clean_up_response($response) {
 
 }
 
+// FIXME - REPLACED IN Ver 2.2.0 - 2024 11 28
 // Fix common grammar issues in the response
 function markov_chain_beaker_fix_grammar($response) {
 
