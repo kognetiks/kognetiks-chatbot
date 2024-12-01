@@ -1,6 +1,12 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - Enhance Response - Ver 1.6.9 - Updated - Ver 2.1.5 - 2024 09 13
+ * Kognetiks Chatbot for WordPress - Knowledge Navigator - Enhance Response - Ver 1.6.9
+ * 
+ * Updates
+ * 
+ * Ver 2.1.5 - 2024 09 13 - TBD
+ * 
+ * Ver 2.2.0 - 2024 12 01 - Added AI summaries to enhanced responses
  *
  * This file contains the code for to utilize the DB with the TF-IDF data to enhance the chatbots response.
  * 
@@ -113,6 +119,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     // $include_title = 'no';
 
     foreach ($results as $result) {
+
         if ('yes' == $include_title) {
             $links[] = "<li>[" . $result['title'] . "](" . $result['url'] . ")</li>";
         } else {
@@ -122,14 +129,14 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // Determine if AI summary should be included
         $include_ai_summary = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_ai_summary', 'No'));
         // FIXME - TEMPORARY OVERRIDE
+        back_trace( 'NOTICE', 'TEMPORARY OVERRIDE: $include_ai_summary: ' . $include_ai_summary );
         $include_ai_summary = 'Yes';
         back_trace( 'NOTICE', '$include_ai_summary: ' . $include_ai_summary );
 
         if ($include_ai_summary == 'Yes') {
 
             // DIAG - Diagnostics - Ver 2.2.0
-            back_trace( 'NOTICE', 'Generating AI summary' );
-            back_trace( 'NOTICE', '$result[pid]: ' . $result['pid'] );
+            back_trace( 'NOTICE', 'Generating AI summary for $result[pid]: ' . $result['pid'] );
 
             $ai_summary = generate_ai_summary($result['pid']);
             if (!empty($ai_summary)) {
@@ -140,6 +147,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
             back_trace( 'NOTICE', '$ai_summary: ' . $ai_summary );
 
         }
+
     }
 
     if (!empty($links)) {

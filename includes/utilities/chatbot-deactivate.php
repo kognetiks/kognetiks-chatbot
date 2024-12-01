@@ -105,6 +105,10 @@ function chatbot_chatgpt_uninstall(){
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_sentence_vectors");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_word_embeddings");
 
+        // Delete Kognetiks AI Summaries table
+        // back_trace( 'NOTICE', 'Deleting AI Summaries table');
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}kognetiks_ai_summaries");
+
         // Delete Lexical Transformer tables
         // back_trace( 'NOTICE', 'Deleting Transformer tables');
         // NONE CURRENTLY - Ver 2.2.0

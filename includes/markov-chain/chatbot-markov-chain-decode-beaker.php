@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 // Generate a sentence using the Markov Chain with context reinforcement
 function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
     
-    back_trace('NOTICE', 'Generating Markov Chain response with improved starting key selection');
+    back_trace( 'NOTICE', 'Generating Markov Chain response with improved starting key selection');
 
     global $chatbot_markov_chain_fallback_response, $wpdb;
     $markov_chain_table = $wpdb->prefix . 'chatbot_markov_chain';
@@ -47,7 +47,7 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
             if (markov_chain_beaker_key_exists($nGram, $markov_chain_table)) {
                 $key = $nGram;
                 $chainLength = $n; // Adjust chain length
-                back_trace('NOTICE', "Found starting key using n-gram of length $n: $key");
+                back_trace( 'NOTICE', "Found starting key using n-gram of length $n: $key");
                 break 2;
             }
         }
@@ -55,7 +55,7 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
 
     // If no key is found, use fuzzy matching
     if (!$key) {
-        back_trace('NOTICE', 'No exact key found. Attempting fuzzy matching.');
+        back_trace( 'NOTICE', 'No exact key found. Attempting fuzzy matching.');
         $allKeys = markov_chain_beaker_get_all_keys($markov_chain_table);
         $bestMatch = null;
         $highestSimilarity = 0;
@@ -70,13 +70,13 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
 
         if ($bestMatch && $highestSimilarity > 50) { // Threshold can be adjusted
             $key = $bestMatch;
-            back_trace('NOTICE', "Found starting key using fuzzy matching: $key");
+            back_trace( 'NOTICE', "Found starting key using fuzzy matching: $key");
         }
     }
 
     // If still no key is found, use a random key
     if (!$key) {
-        back_trace('NOTICE', 'Fallback to random key');
+        back_trace( 'NOTICE', 'Fallback to random key');
         $key = markov_chain_beaker_get_random_key($markov_chain_table);
         if (!$key) {
             return $chatbot_markov_chain_fallback_response[array_rand($chatbot_markov_chain_fallback_response)];
@@ -89,12 +89,12 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     $sentenceCount = 0;
 
     // Generate the response text
-    back_trace('NOTICE', 'Building the response text using the key: ' . $key);
+    back_trace( 'NOTICE', 'Building the response text using the key: ' . $key);
 
     for ($i = 0; $i < $max_tokens; $i++) {
         $nextWord = markov_chain_beaker_get_next_word($key, $markov_chain_table);
         if ($nextWord === null) {
-            back_trace('NOTICE', 'Next word is null. Ending generation.');
+            back_trace( 'NOTICE', 'Next word is null. Ending generation.');
             break;
         }
 
@@ -220,7 +220,7 @@ function process_text($text) {
     global $abbreviations;
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'BEFORE PROCESSING - $text: ' . $text);
+    back_trace( 'NOTICE', 'BEFORE PROCESSING - $text: ' . $text);
 
     // Step 1: Remove non-ASCII characters except for common symbols
     $text = preg_replace('/[^\x20-\x7E\x{2018}\x{2019}\x{201C}\x{201D}]/u', '', $text);
@@ -266,7 +266,7 @@ function process_text($text) {
 
     // Final trim and diagnostics
     $text = trim($text);
-    back_trace('NOTICE', 'AFTER PROCESSING - $text: ' . $text);
+    back_trace( 'NOTICE', 'AFTER PROCESSING - $text: ' . $text);
 
     return $text;
 

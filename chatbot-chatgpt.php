@@ -125,7 +125,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-conte
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-model-scheduler.php'; // Functions - Ver 2.2.0
 
 // Include necessary files - AI Summaries - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/ai-summaries/generate-ai-summaries.php'; // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/kognetiks-ai-summary/kognetiks-ai-summary.php'; // Summary functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/kognetiks-ai-summary/kognetiks-ai-search.php'; // Search functions - Ver 2.2.0
 
 // Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';

@@ -267,7 +267,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 }
 
 // Call the ChatGPT API without trappings
-function chatbot_chatgpt_call_api_vanilla($api_key, $message) {
+function chatbot_chatgpt_call_api_basic($api_key, $message) {
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     // $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -318,7 +318,7 @@ function chatbot_chatgpt_call_api_vanilla($api_key, $message) {
 
     $response = wp_remote_post($api_url, $args);
     // DIAG - Diagnostics - Ver 1.6.7
-    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {

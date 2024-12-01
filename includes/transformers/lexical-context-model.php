@@ -18,7 +18,7 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
     $max_tokens = 50;
 
     // DIAG - Diagnostic - Ver 2.3.0
-    back_trace('NOTICE', 'transformer_model_lexical_context_response');
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_response');
 
     // Maximum tokens
     if (empty($max_tokens)) {
@@ -48,7 +48,7 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
 function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.3.0
-    back_trace('NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
 
     $cacheFile = __DIR__ . '/lexical_embeddings_cache.php';
 
@@ -180,7 +180,7 @@ function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB)
 function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 50) {
 
     // DIAG - Diagnostic - Ver 2.3.0
-    back_trace('NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
+    back_trace( 'NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
 
     global $stopWords;
 
@@ -234,7 +234,7 @@ function removeStopWordFromEnd($response, $stopWords) {
     // Split the response into words
     $responseWords = preg_split('/\s+/', rtrim($response, " \t\n\r\0\x0B.,!?;:"));
     $lastWord = strtolower(end($responseWords));
-    back_trace('NOTICE', 'removeStopWordFromEnd - Last Word: ' . $lastWord);
+    back_trace( 'NOTICE', 'removeStopWordFromEnd - Last Word: ' . $lastWord);
 
     // Check if the last word is a stop word
     if (in_array($lastWord, $stopWords)) {
