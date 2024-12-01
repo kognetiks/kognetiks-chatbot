@@ -57,7 +57,8 @@ function generate_ai_summary( $pid )  {
     // Fetch the content of the page or post
     // $content = get_post_field( 'post_content', $pid );
     // Query for the post content
-    $content = $wpdb->prepare("SELECT post_content FROM $wpdb->posts WHERE ID = %d", $pid);
+    $query = $wpdb->prepare("SELECT post_content FROM $wpdb->posts WHERE ID = %d", $pid);
+    $content = $wpdb->get_var($query);
 
     // Sanitize the content
     $content = htmlspecialchars(strip_tags($content), ENT_QUOTES, 'UTF-8');
@@ -99,7 +100,7 @@ function generate_ai_summary( $pid )  {
     back_trace( 'NOTICE', '$model: ' . $model );
 
     // Call the API to generate the AI summary
-    if (str_starts_with($model !== null && $model, 'gpt') !== false) {
+    if (str_starts_with($model, 'gpt')) {
 
         // The string 'gpt' is found in $model
         // Reload the model - BELT & SUSPENDERS
@@ -109,7 +110,7 @@ function generate_ai_summary( $pid )  {
         // Send message to ChatGPT API - Ver 1.6.7
         $response = chatbot_chatgpt_call_api_vanilla($api_key, $message);
 
-    } elseif ($model !==null && str_starts_with($model,'nvidia')) {
+    } elseif (str_starts_with($model,'nvidia')) {
 
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8
@@ -118,7 +119,7 @@ function generate_ai_summary( $pid )  {
         $response = chatbot_nvidia_call_api($api_key, $message);
         // back_trace( 'NOTICE', 'LINE 910 - NVIDIA API Response: ' . $response);
 
-    } elseif ($model !== null && str_starts_with($model,'markov')) {
+    } elseif (str_starts_with($model,'markov')) {
 
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.1.8
@@ -126,7 +127,7 @@ function generate_ai_summary( $pid )  {
         // Send message to Markov API - Ver 1.9.7
         $response = chatbot_chatgpt_call_markov_chain_api($message);
 
-    } elseif ($model !== null && str_contains($model,'context-model')) {
+    } elseif (str_contains($model,'context-model')) {
 
         $kchat_settings['model'] = $model;
         // DIAG - Diagnostics - Ver 2.2.0
@@ -136,6 +137,8 @@ function generate_ai_summary( $pid )  {
 
     } else {
 
+        // DIAG - Diagnostics - Ver 2.2.0
+        back_trace( 'NOTICE', 'No valid model found for AI summary generation');
         $response = '';
 
     }

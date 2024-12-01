@@ -14,8 +14,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Generate a sentence using the Markov Chain with context reinforcement
 function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, $primaryKeyword = '', $minLength = 10) {
-
-    back_trace('NOTICE', 'Generating Markov Chain response with adjusted coherence handling');
+    
+    back_trace('NOTICE', 'Generating Markov Chain response with improved starting key selection');
 
     global $chatbot_markov_chain_fallback_response, $wpdb;
     $markov_chain_table = $wpdb->prefix . 'chatbot_markov_chain';
@@ -30,153 +30,53 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
         return preg_replace('/[^\w\s\-]/u', '', trim($word));
     }, $startWords));
 
-    // Find the highest-scoring TF-IDF word
-    $highestScoringWord = null;
-    if ($wpdb->get_var("SHOW TABLES LIKE '$tfidf_table'") == $tfidf_table) {
-        $tfidf_results = $wpdb->get_results(
-            "SELECT word, score FROM $tfidf_table WHERE word IN ('" . implode("','", $startWords) . "') ORDER BY score DESC LIMIT 1",
-            ARRAY_A
-        );
-        if (!empty($tfidf_results)) {
-            $highestScoringWord = $tfidf_results[0]['word'];
+    // Extract n-grams from startWords
+    $nGrams = [];
+    $numWords = count($startWords);
+    for ($n = $chainLength; $n > 0; $n--) {
+        for ($i = 0; $i <= $numWords - $n; $i++) {
+            $nGram = implode(' ', array_slice($startWords, $i, $n));
+            $nGrams[$n][] = $nGram;
         }
     }
 
-    // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 30
-
-    // Loop through the $startWords array and back_trace the word and the score
-    // foreach ($startWords as $word) {
-
-    //     // Break the loop if the counter reaches 10
-    //     if ($counter >= 10) {
-    //         break;
-    //     }
-    
-    //     back_trace('NOTICE', 'Word: ' . $word);
-    //     $tfidf_results = $wpdb->get_results(
-    //         "SELECT word, score FROM $tfidf_table WHERE word = '" . $word . "'",
-    //         ARRAY_A
-    //     );
-    //     if (!empty($tfidf_results)) {
-    //         back_trace('NOTICE', 'Score: ' . $tfidf_results[0]['score']);
-    //     }
-    
-    //     // Increment the counter
-    //     $counter++;
-
-    // }
-
-    // if one of the $startWords is missing a score, use the highest score - OPTION 1
-    // if ($highestScoringWord) {
-    //     foreach ($startWords as $word) {
-    //         if ($word === $highestScoringWord) {
-    //             $highestScoringWord = null;
-    //             break;
-    //         }
-    //     }
-    // }
-
-    // if one of the $startWords is missing a score, use the average score - OPTION 2
-    // if ($highestScoringWord) {
-    //     $tfidf_results = $wpdb->get_results(
-    //         "SELECT AVG(score) AS average_score FROM $tfidf_table WHERE word IN ('" . implode("','", $startWords) . "')",
-    //         ARRAY_A
-    //     );
-    //     if (!empty($tfidf_results)) {
-    //         $highestScoringWord = $tfidf_results[0]['average_score'];
-    //     }
-    // }
-
-    // Combine TF-IDF with Frequence - OPTION 3
-    $tfidfFrequencyScores = []; // To store combined scores
-    $tfidf_tabe = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
-
-    if ($wpdb->get_var("SHOW TABLES LIKE '$tfidf_table'") == $tfidf_table) {
-
-        foreach ($startWords as $word) {
-            // Get TF-IDF score for the word
-            $tfidfResult = $wpdb->get_row(
-                $wpdb->prepare("SELECT score FROM $tfidf_table WHERE word = %s LIMIT 1", $word),
-                ARRAY_A
-            );
-            $tfidfScore = $tfidfResult['score'] ?? 0;
-
-            // Get frequency for the word
-            $frequencyResult = $wpdb->get_row(
-                $wpdb->prepare("SELECT SUM(frequency) AS frequency FROM $markov_chain_table WHERE word = %s", $word),
-                ARRAY_A
-            );
-            $frequency = $frequencyResult['frequency'] ?? 0;
-
-            // Combine TF-IDF score and frequency into a single metric
-            // Adjust weights as needed (e.g., 70% TF-IDF, 30% frequency)
-            $combinedScore = ($tfidfScore * 0.7) + ($frequency * 0.3);
-
-            // Store the combined score
-            $tfidfFrequencyScores[$word] = $combinedScore;
-        }
-
-        // Sort words by their combined scores in descending order
-        arsort($tfidfFrequencyScores);
-
-        // Take the word with the highest combined score
-        $highestScoringWord = key($tfidfFrequencyScores);
-
-    } else {
-        // If TF-IDF table is not found, use the highest-scoring word from the startWords array
-        $highestScoringWord = $startWords[0] ?? null;
-    }
-
-    // Attempt to construct a starting key
+    // Attempt to find a starting key using n-grams
     $key = null;
-    if ($highestScoringWord) {
-        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
-        back_trace( 'NOTICE', 'Attempting to construct a key using $highestScoringWord: ' . $highestScoringWord );
-        foreach ($startWords as $index => $word) {
-            if ($word === $highestScoringWord) {
-                for ($offset = 0; $offset < $chainLength; $offset++) {
-                    $start = max(0, $index - $offset);
-                    $end = min($start + $chainLength, count($startWords));
-                    $attemptedKey = implode(' ', array_slice($startWords, $start, $end - $start));
-                    if (markov_chain_beaker_key_exists($attemptedKey, $markov_chain_table)) {
-                        $key = $attemptedKey;
-                        break 2;
-                    }
-                }
+    foreach ($nGrams as $n => $grams) {
+        foreach ($grams as $nGram) {
+            if (markov_chain_beaker_key_exists($nGram, $markov_chain_table)) {
+                $key = $nGram;
+                $chainLength = $n; // Adjust chain length
+                back_trace('NOTICE', "Found starting key using n-gram of length $n: $key");
+                break 2;
             }
         }
     }
 
-    // Fallback to sliding window approach if no TF-IDF key is found
-    if (!$key && !empty($startWords)) {
-        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
-        back_trace( 'NOTICE', 'Fallback to sliding window approach using $startWords: ' . implode(' ', $startWords) );
-        for ($i = count($startWords) - $chainLength; $i >= 0; $i--) {
-            $attemptedKey = implode(' ', array_slice($startWords, $i, $chainLength));
-            if (markov_chain_beaker_key_exists($attemptedKey, $markov_chain_table)) {
-                $key = $attemptedKey;
-                break;
-            }
-        }
-    }
-
-    // Try reducing the chain length if no key is found
-    if (!$key && $chainLength > 1) {
-        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
-        back_trace( 'NOTICE', 'Fallback to reduced chain length' );
-        for ($i = $chainLength - 1; $i > 0; $i--) {
-            $attemptedKey = implode(' ', array_slice($startWords, -$i));
-            if (markov_chain_beaker_key_exists($attemptedKey, $markov_chain_table)) {
-                $key = $attemptedKey;
-                break;
-            }
-        }
-    }
-
-    // Use a random key if no starting key is found
+    // If no key is found, use fuzzy matching
     if (!$key) {
-        // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
-        back_trace( 'NOTICE', 'Fallback to random key' );
+        back_trace('NOTICE', 'No exact key found. Attempting fuzzy matching.');
+        $allKeys = markov_chain_beaker_get_all_keys($markov_chain_table);
+        $bestMatch = null;
+        $highestSimilarity = 0;
+
+        foreach ($allKeys as $existingKey) {
+            $similarity = similar_text(implode(' ', $startWords), $existingKey, $percent);
+            if ($percent > $highestSimilarity) {
+                $highestSimilarity = $percent;
+                $bestMatch = $existingKey;
+            }
+        }
+
+        if ($bestMatch && $highestSimilarity > 50) { // Threshold can be adjusted
+            $key = $bestMatch;
+            back_trace('NOTICE', "Found starting key using fuzzy matching: $key");
+        }
+    }
+
+    // If still no key is found, use a random key
+    if (!$key) {
+        back_trace('NOTICE', 'Fallback to random key');
         $key = markov_chain_beaker_get_random_key($markov_chain_table);
         if (!$key) {
             return $chatbot_markov_chain_fallback_response[array_rand($chatbot_markov_chain_fallback_response)];
@@ -189,19 +89,18 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     $sentenceCount = 0;
 
     // Generate the response text
-    // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
-    back_trace( 'NOTICE', 'Building the response text using the key: ' . $key );
+    back_trace('NOTICE', 'Building the response text using the key: ' . $key);
 
     for ($i = 0; $i < $max_tokens; $i++) {
         $nextWord = markov_chain_beaker_get_next_word($key, $markov_chain_table);
         if ($nextWord === null) {
-            // DIAG - Diagnostics - Ver 2.2.0 - 2024 11 27
-            back_trace( 'NOTICE', 'Next word is null so we should be done' );
+            back_trace('NOTICE', 'Next word is null. Ending generation.');
             break;
         }
 
         $words[] = $nextWord;
-        $key = implode(' ', array_slice($words, -$chainLength));
+        $keyWords = array_slice($words, -$chainLength);
+        $key = implode(' ', $keyWords);
 
         // Clean up the key
         $key = preg_replace('/[^\w\s\-]/u', '', $key);
@@ -225,12 +124,10 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
 
     // Final cleanup
     $response = implode(' ', $words);
-    // $response = markov_chain_beaker_clean_up_response($response);
-    // $response = finalize_generated_text($response);
     $response = process_text($response);
 
     return $response;
-
+    
 }
 
 // Check if the key exists in the database

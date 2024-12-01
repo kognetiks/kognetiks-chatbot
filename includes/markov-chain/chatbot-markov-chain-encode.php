@@ -421,7 +421,8 @@ function clean_up_training_data($content) {
         $clean_content = preg_replace('/([.!?])([^\s])/', '$1 $2', $clean_content); // Add space after punctuation if missing
 
         // Step 8: Split improperly joined words (e.g., camelCase, joinedwords)
-        $clean_content = preg_replace('/(\w)([A-Z])/', '$1 $2', $clean_content); // Split camelCase
+        // Adjusted to avoid splitting acronyms and specific words
+        $clean_content = preg_replace('/(\w)([A-Z][a-z])/', '$1 $2', $clean_content); // Split camelCase but not acronyms
         $clean_content = preg_replace('/(\w)([.,!?])(\w)/', '$1$2 $3', $clean_content); // Split joinedwords around punctuation
 
         // Step 9: Trim leading and trailing spaces
