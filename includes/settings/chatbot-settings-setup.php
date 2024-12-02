@@ -652,7 +652,7 @@ function chatbot_chatgpt_settings_setup_init() {
         'chatbot_chatgpt_input_rows_callback',
         'chatbot_chatgpt_additional_setup_settings',
         'chatbot_chatgpt_additional_setup_section'
-    );
+    );   
 
 }
 add_action('admin_init', 'chatbot_chatgpt_settings_setup_init');

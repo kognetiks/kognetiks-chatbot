@@ -6,7 +6,7 @@
  * 
  * Ver 2.1.5 - 2024 09 13 - TBD
  * 
- * Ver 2.2.0 - 2024 12 01 - Added AI summaries to enhanced responses
+ * Ver 2.2.1 - 2024 12 01 - Added AI summaries to enhanced responses
  *
  * This file contains the code for to utilize the DB with the TF-IDF data to enhance the chatbots response.
  * 
@@ -25,6 +25,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     global $wpdb;
     global $learningMessages;
     global $stopWords;
+
     $enhanced_response = "";
 
     // Check if the Knowledge Navigator is finished running
@@ -39,10 +40,13 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $words = explode(" ", $message);
     $words = array_diff($words, $stopWords);
 
+    // DIAG - Diagnostics - Ver 2.2.1
+    back_trace( 'NOTICE', 'Input message: ' . $message);
+    back_trace( 'NOTICE', 'Processed words: ' . implode(", ", $words));
+
     // Initialize arrays to hold word scores and results
     $word_scores = array();
     $results = array();
-
     $limit = esc_attr(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
 
     // Calculate total score for each word
@@ -53,6 +57,8 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         $total_score = $wpdb->get_var($query);
         // Store the word and its total score
         $word_scores[$word] = $total_score ? $total_score : 0;
+        // DIAG - Diagnostics - Ver 2.2.1
+        back_trace( 'NOTICE', 'Word: ' . $word . ', Score: ' . $word_scores[$word]);
     }
 
     // Sort words by their scores (lowest to highest)
@@ -83,9 +89,16 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // Execute the query
         $rows = $wpdb->get_results($query);
 
+        // Diagnostic - Ver 2.2.1
+        back_trace( 'NOTICE', 'SQL Query: ' . $query );
+
         // Check if matches are found
-        if (!$wpdb->last_error && !empty($rows)) {
+        if ($rows) {
             foreach ($rows as $row) {
+
+                // Diagnostic - Ver 2.2.1
+                back_trace('INFO', 'Match found: PID=' . $row->pid . ', URL=' . $row->url . ', Title=' . $row->title . ', Score=' . $row->total_score . ', Word Matches=' . $row->word_match_count);
+                
                 $result_key = hash('sha256', $row->url);
                 if (!isset($results[$result_key])) {
                     $results[$result_key] = [
@@ -96,14 +109,25 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
                         'word_match_count' => $row->word_match_count
                     ];
                 }
+
                 if (count($results) >= $limit) {
-                    break 2; // Break out of both loops
+                    break 2;
                 }
+
             }
+        } else {
+
+            back_trace( 'NOTICE', 'No matches found for num_words_to_match=' . $num_words_to_match);
+            
         }
 
-        // Decrease the number of words to match
         $num_words_to_match--;
+
+    }
+
+    // DIAG - Diagnostics - Ver 2.2.1
+    foreach ($results as $result) {
+        back_trace( 'NOTICE', 'Final result: PID=' . $result['pid'] . ', URL=' . $result['url'] . ', Title=' . $result['title'] . ', Score=' . $result['score'] . ', Word Matches=' . $result['word_match_count']);
     }
 
     // Convert results to indexed array
@@ -126,16 +150,14 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
             $links[] = "[here](" . $result['url'] . ")";
         }
 
-        // Determine if AI summary should be included
+        // Determine if AI summary should be included - Ver 2.2.1
         $include_ai_summary = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_ai_summary', 'No'));
-        // FIXME - TEMPORARY OVERRIDE
-        back_trace( 'NOTICE', 'TEMPORARY OVERRIDE: $include_ai_summary: ' . $include_ai_summary );
         $include_ai_summary = 'Yes';
         back_trace( 'NOTICE', '$include_ai_summary: ' . $include_ai_summary );
 
         if ($include_ai_summary == 'Yes') {
 
-            // DIAG - Diagnostics - Ver 2.2.0
+            // DIAG - Diagnostics - Ver 2.2.1
             back_trace( 'NOTICE', 'Generating AI summary for $result[pid]: ' . $result['pid'] );
 
             $ai_summary = generate_ai_summary($result['pid']);
@@ -143,7 +165,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
                 $links[] = "<li>" . $ai_summary . "</li>";
             }
 
-            // DIAG - Diagnostics - Ver 2.2.0
+            // DIAG - Diagnostics - Ver 2.2.1
             back_trace( 'NOTICE', '$ai_summary: ' . $ai_summary );
 
         }

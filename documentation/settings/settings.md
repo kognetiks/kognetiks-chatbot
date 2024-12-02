@@ -13,6 +13,10 @@ The General Settings allow you to customize the basic behavior and appearance of
    - **Default Value**: By default this value will be set to `OpenAI` as the model provider of choice.
    - **Note**: An valid API key obtained from the respective model vendor is required for the chatbot to operate correctly.
 
+   Also see **[API/ChatGPT Settings](api-chatgpt-settings/api-chatgpt-model-settings.md)**
+
+   Also see **[API/NVIDIA Settings](api-nvidia-settings/api-nvidia-model-settings.md)**
+
 ## General Settings
 
 ![Chatbot Settings](general-settings.png)
@@ -172,6 +176,12 @@ By configuring these settings, you ensure that your Kognetiks Chatbot plugin ope
 - **User Expectations**: Including disclaimers can help manage expectations and improve user understanding of the chatbot’s capabilities.
 
 By configuring these settings, you ensure that your Kognetiks Chatbot is customized to provide a welcoming and user-friendly experience for your website visitors.
+
+---
+
+## AI Summaries Settings
+
+See **[AI Summaries Settings](ai-summaries/ai-summaries.md)**
 
 ---
 

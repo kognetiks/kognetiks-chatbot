@@ -120,6 +120,7 @@ function chatbot_chatgpt_kn_settings_init() {
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_suppress_learnings');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_custom_learnings_message');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_enhanced_response_limit');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_enhanced_response_include_ai_summary');
 
     add_settings_section(
         'chatbot_chatgpt_kn_enhanced_response_section',

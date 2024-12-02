@@ -40,7 +40,7 @@ function chatbot_call_ant_api($api_key, $message) {
     // Anthropic.com API Documentation
     // https://docs.anthropic.com/en/api/messages
 
-    // The current Anthropic API URL endpoint for claude-3-5-sonnet-20240620
+    // The current Anthropic API URL endpoint for claude-3-5-sonnet-20241022
     // $api_url = get_chat_completions_api_url();
     // FIXME - TEMP OVERRIDE
     $api_url = 'https://api.anthropic.com/v1/messages';
@@ -53,16 +53,14 @@ function chatbot_call_ant_api($api_key, $message) {
     // Select the Anthropic Model
     // https://docs.anthropic.com/en/docs/about-claude/models
     // 
-    // Claude 3.5 Sonnet - claude-3-5-sonnet-20240620
-    // Claude 3 Opus - claude-3-opus-20240229
+    // Claude 3.5 Sonnet - claude-3-5-sonnet-20241022 or claude-3-5-sonnet-latest
+    // Claude 3 Opus - claude-3-opus-20240229 or claude-3-opus-latest
     // Claude 3 Sonnet - claude-3-sonnet-20240229
     // Claude 3 Haiku - claude-3-haiku-20240307
     //
 
-    // Get the saved model from the settings or default to "claude-3-5-sonnet-20240620"
-    // $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'claude-3-5-sonnet-20240620'));
-    // FIXME - TEMP OVERRIDE
-    $model = 'claude-3-5-sonnet-20240620';
+    // Get the saved model from the settings or default to "claude-3-5-sonnet-latest"
+    $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'claude-3-5-sonnet-latest'));
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
