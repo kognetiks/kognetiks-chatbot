@@ -187,6 +187,32 @@ function generate_ai_summary_api( $model, $content ) {
 
     }
 
+    // REMOVE ANY HTML
+    $response = strip_tags($response);
+
+    // REMOVE MARKDOWN LINKS
+    $response = preg_replace('/\[(.*?)\]\((.*?)\)/', '$1', $response);
+
+    // REMOVE MARKDOWN HEADERS
+    $response = preg_replace('/^#{1,6}\s*(.*)/m', '$1', $response);
+
+    // REMOVE MARKDOWN BOLD AND ITALIC
+    $response = preg_replace('/(\*\*|__)(.*?)\1/', '$2', $response);
+    $response = preg_replace('/(\*|_)(.*?)\1/', '$2', $response);
+
+    // REMOVE MARKDOWN INLINE CODE
+    $response = preg_replace('/`(.*?)`/', '$1', $response);
+
+    // REMOVE MARKDOWN BLOCKQUOTES
+    $response = preg_replace('/^\s*>+\s?(.*)/m', '$1', $response);
+
+    // REMOVE MARKDOWN LISTS
+    $response = preg_replace('/^\s*[-+*]\s+(.*)/m', '$1', $response);
+    $response = preg_replace('/^\s*\d+\.\s+(.*)/m', '$1', $response);
+
+    // REMOVE EXTRA SPACES
+    $response = preg_replace('/\s+/', ' ', $response);
+
     $ai_summary = $response;
 
     return $ai_summary;
