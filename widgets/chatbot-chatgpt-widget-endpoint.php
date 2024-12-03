@@ -52,8 +52,18 @@ if ($chatbot_chatgpt_enable_remote_widget !== 'Yes') {
 //     'kognetiks.com,chatbot-4',
 // ];
 
+// Belt and suspenders: Ensure the shortcodes are registered before proceeding
+register_chatbot_shortcodes();
+
 // Access the global shortcodes array
 global $shortcode_tags;
+
+// Fetch the list of shortcodes
+$shortcode_names = array_keys($shortcode_tags);
+// Output the registered shortcodes for debugging purposes
+// foreach ($shortcode_names as $shortcode_name) {
+//     chatbot_chatgpt_widget_logging('Registered Shortcode', $shortcode_name);
+// }
 
 // Get the shortcode parameter from the URL and sanitize it
 $shortcode_param = isset($_GET['assistant']) ? sanitize_text_field($_GET['assistant']) : '';
@@ -78,8 +88,9 @@ if (empty($allowed_pairs)) {
     // Check the HTTP_REFERER to ensure the request is from an allowed server
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 
-    // Normalize referer to strip www if present
+    // Normalize referer to get the base domain
     $normalized_referer = preg_replace('/^www\./', '', parse_url($referer, PHP_URL_HOST));
+    $base_referer = implode('.', array_slice(explode('.', $normalized_referer), -2));
 
     $is_allowed = false;
 
@@ -91,13 +102,14 @@ if (empty($allowed_pairs)) {
         if (count($pair_parts) === 2) {
             list($allowed_domain, $allowed_shortcode) = $pair_parts;
 
-            // Normalize allowed domain to strip www if present
+            // Normalize allowed domain to get the base domain
             $normalized_domain = preg_replace('/^www\./', '', $allowed_domain);
+            $base_domain = implode('.', array_slice(explode('.', $normalized_domain), -2));
 
             // Debugging: Log the normalized referer and domain for comparison
-            chatbot_chatgpt_widget_logging('Checking Pair', $normalized_referer, $normalized_domain);
+            chatbot_chatgpt_widget_logging('Checking Pair', $base_referer, $base_domain);
 
-            if (!empty($normalized_domain) && strpos($normalized_referer, $normalized_domain) !== false && $allowed_shortcode === $shortcode_param) {
+            if (!empty($base_domain) && $base_referer === $base_domain && $allowed_shortcode === $shortcode_param) {
                 $is_allowed = true;
                 // Log the valid referer and shortcode pair
                 chatbot_chatgpt_widget_logging('Allowed Pair', $referer, $shortcode_param);

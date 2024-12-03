@@ -41,8 +41,8 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $words = array_diff($words, $stopWords);
 
     // DIAG - Diagnostics - Ver 2.2.1
-    back_trace( 'NOTICE', 'Input message: ' . $message);
-    back_trace( 'NOTICE', 'Processed words: ' . implode(", ", $words));
+    // back_trace( 'NOTICE', 'Input message: ' . $message);
+    // back_trace( 'NOTICE', 'Processed words: ' . implode(", ", $words));
 
     // Initialize arrays to hold word scores and results
     $word_scores = array();
@@ -58,7 +58,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // Store the word and its total score
         $word_scores[$word] = $total_score ? $total_score : 0;
         // DIAG - Diagnostics - Ver 2.2.1
-        back_trace( 'NOTICE', 'Word: ' . $word . ', Score: ' . $word_scores[$word]);
+        // back_trace( 'NOTICE', 'Word: ' . $word . ', Score: ' . $word_scores[$word]);
     }
 
     // Sort words by their scores (lowest to highest)
@@ -90,14 +90,14 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         $rows = $wpdb->get_results($query);
 
         // Diagnostic - Ver 2.2.1
-        back_trace( 'NOTICE', 'SQL Query: ' . $query );
+        // back_trace( 'NOTICE', 'SQL Query: ' . $query );
 
         // Check if matches are found
         if ($rows) {
             foreach ($rows as $row) {
 
                 // Diagnostic - Ver 2.2.1
-                back_trace('INFO', 'Match found: PID=' . $row->pid . ', URL=' . $row->url . ', Title=' . $row->title . ', Score=' . $row->total_score . ', Word Matches=' . $row->word_match_count);
+                // back_trace('INFO', 'Match found: PID=' . $row->pid . ', URL=' . $row->url . ', Title=' . $row->title . ', Score=' . $row->total_score . ', Word Matches=' . $row->word_match_count);
                 
                 $result_key = hash('sha256', $row->url);
                 if (!isset($results[$result_key])) {
@@ -117,7 +117,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
             }
         } else {
 
-            back_trace( 'NOTICE', 'No matches found for num_words_to_match=' . $num_words_to_match);
+            // back_trace( 'NOTICE', 'No matches found for num_words_to_match=' . $num_words_to_match);
             
         }
 
@@ -126,9 +126,9 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     }
 
     // DIAG - Diagnostics - Ver 2.2.1
-    foreach ($results as $result) {
-        back_trace( 'NOTICE', 'Final result: PID=' . $result['pid'] . ', URL=' . $result['url'] . ', Title=' . $result['title'] . ', Score=' . $result['score'] . ', Word Matches=' . $result['word_match_count']);
-    }
+    // foreach ($results as $result) {
+    //     back_trace( 'NOTICE', 'Final result: PID=' . $result['pid'] . ', URL=' . $result['url'] . ', Title=' . $result['title'] . ', Score=' . $result['score'] . ', Word Matches=' . $result['word_match_count']);
+    // }
 
     // Convert results to indexed array
     $results = array_values($results);
@@ -153,12 +153,12 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // Determine if AI summary should be included - Ver 2.2.1
         $include_ai_summary = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_ai_summary', 'No'));
         $include_ai_summary = 'Yes';
-        back_trace( 'NOTICE', '$include_ai_summary: ' . $include_ai_summary );
+        // back_trace( 'NOTICE', '$include_ai_summary: ' . $include_ai_summary );
 
         if ($include_ai_summary == 'Yes') {
 
             // DIAG - Diagnostics - Ver 2.2.1
-            back_trace( 'NOTICE', 'Generating AI summary for $result[pid]: ' . $result['pid'] );
+            // back_trace( 'NOTICE', 'Generating AI summary for $result[pid]: ' . $result['pid'] );
 
             $ai_summary = generate_ai_summary($result['pid']);
             if (!empty($ai_summary)) {
@@ -166,7 +166,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
             }
 
             // DIAG - Diagnostics - Ver 2.2.1
-            back_trace( 'NOTICE', '$ai_summary: ' . $ai_summary );
+            // back_trace( 'NOTICE', '$ai_summary: ' . $ai_summary );
 
         }
 
