@@ -4,7 +4,7 @@
 
 Conversational AI platforms - like those from OpenAI, NVIDIA, and others - use natural language processing and machine learning algorithms to interact with users in a human-like manner. They are designed to answer questions, provide suggestions, and engage in conversations with users. This is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, these platforms can be used in various fields such as healthcare, education, finance, and many more.
 
-The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA or others, via their APIs and Models to bring artificial intelligence to life within your WordPress website.
+The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA, Anthropic or other AI platforms, via their APIs and Models to bring artificial intelligence to life within your WordPress website.
 
 **Important Note:** This plugin requires an API key from OpenAI, NVIDIA or other AI platform vendors, to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys or https://build.nvidia.com/nim.
 

@@ -293,18 +293,23 @@ function chatbot_kn_run_phase_1() {
         // Directly use the post content
         $Content = $result->post_content;
 
-        // Check if the post content is not empty
-        if ( !empty($Content) ) {
-            // Ensure the post content is treated as UTF-8
-            $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', mb_detect_encoding($Content));
-
-            // Now call kn_acquire_words with the UTF-8 encoded content
-            kn_acquire_words( $ContentUtf8, 'add' );
-
+        if (!empty($Content)) {
+            // Check if content is already UTF-8
+            if (mb_detect_encoding($Content, 'UTF-8', true) !== 'UTF-8') {
+                // Convert to UTF-8 only if it's not already
+                $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', 'auto');
+            } else {
+                // Content is already UTF-8
+                $ContentUtf8 = $Content;
+            }
+        
+            // Pass UTF-8 content to the function
+            kn_acquire_words($ContentUtf8, 'add');
         } else {
             // Handle the case where content is empty
             continue;
         }
+       
 
         // Increment the number of items analyzed by one
         $chatbot_chatgpt_no_of_items_analyzed++;
@@ -411,18 +416,23 @@ function chatbot_kn_run_phase_3() {
             continue;
         }
        
-        // Check if the comment content is not empty
-        if ( !empty($commentContent) ) {
-            // Ensure the post content is treated as UTF-8
-            $commentContentUtf8 = mb_convert_encoding($commentContent, 'UTF-8', mb_detect_encoding($commentContent));
-
-            // Now call kn_acquire_words with the UTF-8 encoded content
-            kn_acquire_words( $commentContentUtf8 , 'add' );
-
+    // Check if the comment content is not empty
+    if (!empty($commentContent)) {
+        // Check if the content is already UTF-8
+        if (mb_detect_encoding($commentContent, 'UTF-8', true) !== 'UTF-8') {
+            // Convert to UTF-8 only if it's not already UTF-8
+            $commentContentUtf8 = mb_convert_encoding($commentContent, 'UTF-8', 'auto');
         } else {
-            // Handle the case where content is empty
-            continue;
+            // Content is already UTF-8
+            $commentContentUtf8 = $commentContent;
         }
+
+        // Pass UTF-8 content to the function
+        kn_acquire_words($commentContentUtf8, 'add');
+    } else {
+        // Handle the case where content is empty
+        continue;
+    }
 
         // Increment the number of items analyzed by one
         $chatbot_chatgpt_no_of_items_analyzed++;
@@ -603,11 +613,18 @@ function chatbot_kn_run_phase_6() {
         // Directly use the post content
         $Content = $result->post_content;
 
-        // Check if the post content is not empty
-        if ( !empty($Content) ) {
-            // Ensure the post content is treated as UTF-8
-            $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', mb_detect_encoding($Content));
 
+        // Check if the post content is not empty
+        if (!empty($Content)) {
+            // Check if the content is already UTF-8
+            if (mb_detect_encoding($Content, 'UTF-8', true) !== 'UTF-8') {
+                // Convert to UTF-8 only if it's not already UTF-8
+                $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', 'auto');
+            } else {
+                // Content is already UTF-8
+                $ContentUtf8 = $Content;
+            }
+    
             // Now call kn_acquire_words with the UTF-8 encoded content
             $words = kn_acquire_words( $ContentUtf8 , 'skip');
 

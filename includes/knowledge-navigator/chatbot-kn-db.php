@@ -30,6 +30,9 @@ function dbKNStore() {
         }
     }
 
+    // FIXME - IRISH TEXT ENCODING
+    // $charset_collate = "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci";
+
     // Drop table if it exists
     $wpdb->query("DROP TABLE IF EXISTS $table_name");
 
@@ -77,6 +80,9 @@ function dbKNStoreTFIDF() {
         }
     }
 
+    // FIXME - IRISH TEXT ENCODING
+    // $charset_collate = "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci";
+
     // Drop table if it exists
     $wpdb->query("DROP TABLE IF EXISTS $table_name");
 
@@ -120,6 +126,9 @@ function dbKNStoreWordCount() {
             $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
         }
     }
+
+    // FIXME - IRISH TEXT ENCODING
+    // $charset_collate = "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci";
 
     // Drop table if it exists
     $wpdb->query("DROP TABLE IF EXISTS $table_name");

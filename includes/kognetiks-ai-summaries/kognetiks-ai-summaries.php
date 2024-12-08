@@ -33,9 +33,7 @@ function generate_ai_summary( $pid )  {
     // back_trace( 'NOTICE', 'Generating AI summary' );
     // back_trace( 'NOTICE', '$pid: ' . $pid );
 
-    // Set the model
-    $kchat_settings = get_option('kchat_settings'); // Assuming this is how you get the settings
-
+    // Set the model to use for AI summaries
     if (isset($kchat_settings['chatbot_chatgpt_model'])) {
         $model = $kchat_settings['chatbot_chatgpt_model'];
     } else {
@@ -79,6 +77,9 @@ function generate_ai_summary( $pid )  {
                 $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
             } else {
                 $model = null; // No model selected
+                prod_trace( 'ERROR', 'No model selected for AI summary generation' );
+                $ai_summary = null;
+                return;
             }
         }
 
@@ -92,6 +93,11 @@ function generate_ai_summary( $pid )  {
 
     // Trim the AI summary to the specified length
     $ai_summary = wp_trim_words( $ai_summary, $ai_summary_length, '...' );
+
+    // Trim the AI summary if it starts with 'Summary: '
+    if ( str_starts_with($ai_summary, 'Summary: ') ) {
+        $ai_summary = substr($ai_summary, 9);
+    }
 
     // DIAG - Diagnostics - Ver 2.2.1
     // back_trace( 'NOTICE', '$ai_summary: ' . $ai_summary );
@@ -417,6 +423,11 @@ function replace_excerpt_with_ai_summary( $excerpt, $post = null ) {
     $enabled = 'Yes';
     if ( 'Yes' !== $enabled ) {
         return $excerpt; // Return the default excerpt
+    }
+
+    // Ensure this only runs on the front-end
+    if ( is_admin() || wp_doing_ajax() ) {
+        return $excerpt; // Do not run in admin or AJAX requests
     }
 
     // Get the global post if not provided
