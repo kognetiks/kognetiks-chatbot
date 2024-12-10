@@ -197,7 +197,7 @@ While AI-powered applications strive for accuracy, they can sometimes make mista
 
 ## Disclaimer
 
-OpenAI, ChatGPT, and their respective trademarks are registered trademarks of OpenAI. NVIDIA, NIM, and their respective trademarks are registered trademarks of NVIDIA. Anthropic, Claude, and their respective trademarks are registered trademarks of Anthropic. Kognetiks is an independent entity and is neither affiliated with, endorsed by, nor sponsored by OpenAI, NVIDIA, or Anthropic.
+OpenAI, ChatGPT, and their respective trademarks are registered trademarks of OpenAI. NVIDIA, NIM, and their respective trademarks are registered trademarks of NVIDIA. Anthropic, Claude, and their respective trademarks are registered trademarks of Anthropic. Kognetiks is an independent entity and is neither affiliated with, endorsed by, nor sponsored by OpenAI, NVIDIA, Anthropic or other entity.
 
 ---
 
