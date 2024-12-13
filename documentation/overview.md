@@ -157,8 +157,6 @@ Start using AI Summaries today and take your chatbot experience to the next leve
 
 - [Assistants](assistants/manage-assistants.md)
 
-- [AI Summaries Settings](ai-summaries/ai-summaries.md)
-
 - [Avatars](avatars/avatars.md)
 
 - [Appearance](appearance/appearance.md)

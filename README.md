@@ -2,25 +2,11 @@
 
 The **Kognetiks Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI, NVIDIA, and Anthropic (release date TBD). The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
-### Kognetiks AI Summaries 🎉
-
-We’re thrilled to introduce **AI Summaries**, an exciting new feature designed to enhance your chatbot and site search functionality! 
-
-With AI Summaries, your content - whether it’s pages, posts, or other resources - can be automatically summarized by your selected AI Engine, delivering concise, insightful responses to your site visitors.  Here's what you can expect:
-
-- **Enhanced Responses**: Automatically include AI-generated summaries of related links in chatbot replies.  
-- **Improved Search Results**: Replace traditional excerpts with AI summaries for a more dynamic search experience.  
-- **Customizable Summary Length**: Set the word count for summaries, from bite-sized insights to detailed overviews.
-
-This update makes your chatbot smarter, faster, and more engaging, while ensuring that visitors quickly grasp the key takeaways from your content.
-
-Start using AI Summaries today and take your chatbot experience to the next level! 🚀
-
 ## Documentation
 
 ## What's new in Version 2.2.1
 
-* **AI Summaries**: If enabled adds AI generated summaries of posts, pages and other site contents.
+* **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
 * **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
 
 ## What's new in Version 2.2.0

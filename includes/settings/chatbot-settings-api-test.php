@@ -14,31 +14,38 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Test OpenAI Model for any errors - Ver 1.6.3
- function test_api_status() {
+// Test API for status and errors - Ver 1.6.3 - Update Ver 2.2.1
+ function kchat_test_api_status() {
 
-    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+    $chatbot_chatbot_ai_platform_choice = esc_attr(get_option('chatbot_chatbot_ai_platform_choice', 'OpenAI'));
 
     // Reset Status and Error
-    if ($chatbot_ai_platform_choice == 'OpenAI') {
+    if ($chatbot_chatbot_ai_platform_choice == 'OpenAI') {
         update_option('chatbot_chatgpt_api_status', 'API Error Type: Status Unknown');
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', 'NOT SET'));
         // Model and message for testing
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
-        $updated_status = chatbot_test_api($api_key, $model);
+        $updated_status = kchat_fetch_api_status($api_key, $model);
         update_option('chatbot_chatgpt_api_status', $updated_status);
-    } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
+    } elseif ($chatbot_chatbot_ai_platform_choice == 'NVIDIA') {
         update_option('chatbot_nvidia_api_status', 'API Error Type: Status Unknown');
         $api_key = esc_attr(get_option('chatbot_nvidia_api_key', 'NOT SET'));
         // Model and message for testing
         $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
-        $updated_status = chatbot_test_api($api_key, $model);
+        $updated_status = kchat_fetch_api_status($api_key, $model);
         update_option('chatbot_nvidia_api_status', $updated_status);
-    } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
+    } elseif ($chatbot_chatbot_ai_platform_choice == 'Anthropic') {
+        update_option('chatbot_anthropic_api_status', 'API Error Type: Status Unknown');
+        $api_key = esc_attr(get_option('chatbot_anthropic_api_key', 'NOT SET'));
+        // Model and message for testing
+        $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+        $updated_status = kchat_fetch_api_status($api_key, $model);
+        update_option('chatbot_anthropic_api_status', $updated_status);
+    } elseif ($chatbot_chatbot_ai_platform_choice == 'Markov Chain') {
         $updated_status = 'API Testing Not Required';
         update_option('chatbot_markov_chain_api_status', 'API Error Type: Status Unknown');
         update_option('chatbot_markov_chain_api_status', $updated_status);
-    } elseif ($chatbot_ai_platform_choice == 'Transformer') {
+    } elseif ($chatbot_chatbot_ai_platform_choice == 'Transformer') {
         $updated_status = 'API Testing Not Required';
         update_option('chatbot_transformer_model_api_status', 'API Error Type: Status Unknown');
         update_option('chatbot_transformer_model_api_status', $updated_status);
@@ -50,76 +57,269 @@ if ( ! defined( 'WPINC' ) ) {
 
 }
 
-// FIXME - TEST THE ASSISTANT IF PROVIDED - Ver 1.6.7
-function chatbot_test_api($api_key, $model) {
+// Test API for status and errors
+function kchat_fetch_api_status($api_key, $model) {
 
-    // The current API URL endpoint
-    // $api_url = 'https://api.openai.com/v1/chat/completions';
-    $api_url = get_chat_completions_api_url();
-
-    // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', 'API URL: ' . $api_url);
-
-    $headers = array(
-        'Authorization' => 'Bearer ' . $api_key,
-        'Content-Type' => 'application/json',
-    );
-
-    // $message = 'Translate the following English text to French: Hello, world!';
-    $message = 'Test message.';
-
-    $body = array(
-        'model' => $model,
-        'max_tokens' => 100,
-        'temperature' => 0.5,
-        'messages' => array(
-            array('role' => 'system', 'content' => 'You are a test function for Chat.'),
-            array('role' => 'user', 'content' => $message)
-        ),
-    );
-
-    // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', 'API Body: ' . print_r(json_encode($body),true));
-
-    $args = array(
-        'headers' => $headers,
-        'body' => json_encode($body),
-        'method' => 'POST',
-        'data_format' => 'body',
-        'timeout' => 50,
-    );
-
-    $response = wp_remote_post($api_url, $args);
-
-    // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', 'API Response: ' . print_r(json_encode($response),true));
-
-    if (is_wp_error($response)) {
-        // DIAG - Log the response body
-        // back_trace( 'ERROR', $response->get_error_message());
-        return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your AI Platform vendor account for additional information.';
-    }
-
-    $response_body = json_decode(wp_remote_retrieve_body($response), true);
-
-    // DIAG - Log the response body
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body,true));
-
-    // Check for API-specific errors
-    //
-    // https://platform.openai.com/docs/guides/error-codes/api-errors
-    //
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
-    if (isset($response_body['error'])) {
-        $error_type = $response_body['error']['type'] ?? 'Unknown';
-        $error_message = $response_body['error']['message'] ?? 'No additional information.';
-        $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-    } elseif (!empty($response_body['choices'])) {
-        $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-        // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
-    } else {
-        $updated_status = 'Error: Unable to fetch response from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-        // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+
+    $test_message = 'Write a one sentence response to this test message.';
+
+    switch ($chatbot_ai_platform_choice) {
+
+        case 'OpenAI':
+
+            update_option('chatbot_chatgpt_api_status', 'API Error Type: Status Unknown');
+            $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', 'NOT SET'));
+
+            // Model and message for testing
+            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'chatgpt-4o-latest'));
+
+            // The current API URL endpoint
+            // $api_url = 'https://api.openai.com/v1/chat/completions';
+            $api_url = get_chat_completions_api_url();
+
+            $headers = array(
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json',
+            );
+
+            $body = array(
+                'model' => $model,
+                'max_tokens' => 100,
+                'temperature' => 0.5,
+                'messages' => array(
+                    array('role' => 'system', 'content' => 'You are a test function for Chat.'),
+                    array('role' => 'user', 'content' => $test_message)
+                ),
+            );
+
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'API Body: ' . print_r(json_encode($body),true));
+
+            $args = array(
+                'headers' => $headers,
+                'body' => json_encode($body),
+                'method' => 'POST',
+                'data_format' => 'body',
+                'timeout' => 50,
+            );
+
+            $response = wp_remote_post($api_url, $args);
+
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'API Response: ' . print_r(json_encode($response),true));
+
+            if (is_wp_error($response)) {
+                // DIAG - Log the response body
+                // back_trace( 'ERROR', $response->get_error_message());
+                return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your AI Platform vendor account for additional information.';
+            }
+
+            $response_body = json_decode(wp_remote_retrieve_body($response), true);
+
+            // DIAG - Log the response body
+            // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body,true));
+
+            // Check for API-specific errors
+            //
+            // https://platform.openai.com/docs/guides/error-codes/api-errors
+            //
+            $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+
+            if (isset($response_body['error'])) {
+
+                $error_type = $response_body['error']['type'] ?? 'Unknown';
+                $error_message = $response_body['error']['message'] ?? 'No additional information.';
+                $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
+
+            } elseif (!empty($response_body['choices'])) {
+
+                $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
+                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
+
+            
+            } else {
+
+                $updated_status = 'Error: Unable to fetch response from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
+                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+
+            }
+
+            update_option('chatbot_chatgpt_api_status', $updated_status);
+
+            return $updated_status;
+            
+            break;
+
+        case 'NVIDIA':
+
+            update_option('chatbot_nvidia_api_status', 'API Error Type: Status Unknown');
+            $api_key = esc_attr(get_option('chatbot_nvidia_api_key', 'NOT SET'));
+
+            // Model and message for testing
+            $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
+
+            // The current API URL endpoint
+            // $api_url = 'https://api.openai.com/v1/chat/completions';
+            $api_url = get_chat_completions_api_url();
+
+            $headers = array(
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json',
+            );
+
+            $body = array(
+                'model' => $model,
+                'max_tokens' => 100,
+                'temperature' => 0.5,
+                'messages' => array(
+                    array('role' => 'system', 'content' => 'You are a test function for Chat.'),
+                    array('role' => 'user', 'content' => $test_message)
+                ),
+            );
+
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'API Body: ' . print_r(json_encode($body),true));
+
+            $args = array(
+                'headers' => $headers,
+                'body' => json_encode($body),
+                'method' => 'POST',
+                'data_format' => 'body',
+                'timeout' => 50,
+            );
+
+            $response = wp_remote_post($api_url, $args);
+
+            // DIAG - Diagnostics - Ver 2.1.8
+            // back_trace( 'NOTICE', 'API Response: ' . print_r(json_encode($response),true));
+
+            if (is_wp_error($response)) {
+                // DIAG - Log the response body
+                // back_trace( 'ERROR', $response->get_error_message());
+                return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your AI Platform vendor account for additional information.';
+            }
+
+            $response_body = json_decode(wp_remote_retrieve_body($response), true);
+
+            // DIAG - Log the response body
+            // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body,true));
+
+            // Check for API-specific errors
+            //
+            // https://platform.openai.com/docs/guides/error-codes/api-errors
+            //
+            $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+
+            if (isset($response_body['error'])) {
+
+                $error_type = $response_body['error']['type'] ?? 'Unknown';
+                $error_message = $response_body['error']['message'] ?? 'No additional information.';
+                $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
+
+            } elseif (!empty($response_body['choices'])) {
+
+                $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
+                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
+
+            
+            } else {
+
+                $updated_status = 'Error: Unable to fetch response from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
+                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+                
+            }
+
+            update_option('chatbot_chatgpt_api_status', $updated_status);
+
+            return $updated_status;
+            
+            break;
+
+        case 'Anthropic':
+
+            update_option('chatbot_anthropic_api_status', 'API Error Type: Status Unknown');
+            $api_key = esc_attr(get_option('chatbot_anthropic_api_key', 'NOT SET'));
+            
+            // Model and message for testing
+            $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+            
+            // The current ChatGPT API URL endpoint for chatgpt-4o-latest
+            $api_url = ' https://api.anthropic.com/v1/messages';
+
+            // Set the headers
+            $headers = array(
+                'x-api-key' => $api_key,
+                'anthropic-version' => '2023-06-01',
+                'Content-Type' => 'application/json'
+            );
+
+            // Set the body
+            $body = array(
+                'model' => $model,
+                'max_tokens' => 100,
+                'messages' => array(
+                    array(
+                        'role' => 'user',
+                        'content' => $test_message
+                    )
+                )
+            );
+
+            // Encode the body
+            $body = json_encode($body);
+
+            // DIAG - Diagnostics
+            ksum_back_trace( 'NOTICE', 'URL: ' . $api_url);
+            ksum_back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
+            ksum_back_trace( 'NOTICE', 'Body: ' . $body);
+
+            // Call the API
+            $response = wp_remote_post($api_url, array(
+                'headers' => $headers,
+                'body' => $body
+            ));
+
+            // Get the response body
+            $response_body = wp_remote_retrieve_body($response);
+
+            // Check for API-specific errors
+
+            // DIAG - Diagnostics - Ver 2.2.1
+            back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
+
+            if (isset($response_body['error'])) {
+                // Handle error response
+                $error_type = $response_body['error']['type'] ?? 'Unknown';
+                $error_message = $response_body['error']['message'] ?? 'No additional information.';
+                $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
+                back_trace('ERROR', 'API Status: ' . $updated_status);
+            
+            } elseif (isset($response_body['content']) && is_array($response_body['content'])) {
+                // Handle successful response
+                $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
+                back_trace('SUCCESS', 'API Status: ' . $updated_status);
+            
+            } else {
+                // Handle unexpected response structure
+                $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
+                back_trace('ERROR', 'API Status: ' . $updated_status);
+            }
+            
+            update_option('chatbot_anthropic_api_status', $updated_status);
+
+            return $updated_status;
+
+            break;
+
+        default:
+
+            $updated_status = 'API Error Type: Platform Choice Invalid';
+
+            update_option('api_status', $updated_status);
+            
+            break;
+
     }
 
     return $updated_status;
@@ -150,7 +350,7 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
         $api_key = get_option('chatbot_chatgpt_api_key', 'NOT SET');
 
         // Call your test function
-        $test_result = test_api_status($api_key);
+        $test_result = kchat_test_api_status($api_key);
         // DIAG - Log the test result
         // back_trace( 'WARNING', '$test_result' . $test_result);        
 

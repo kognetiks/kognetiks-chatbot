@@ -17,20 +17,6 @@ Effortlessly add conversational AI to your WordPress site! Integrate OpenAI Chat
 
 The **Kognetiks Chatbot for WordPress** is a feature-rich AI plugin that leverages OpenAI’s ChatGPT to deliver an intelligent, conversational experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
 
-🌟 ** Introducting Kognetiks AI Summaries **
-
-We’re thrilled to introduce **AI Summaries**, an exciting new feature designed to enhance your chatbot and site search functionality! 
-
-With AI Summaries, your content - whether it’s pages, posts, or other resources - can be automatically summarized by your selected AI Engine, delivering concise, insightful responses to your site visitors.  Here's what you can expect:
-
-- **Enhanced Responses**: Automatically include AI-generated summaries of related links in chatbot replies.  
-- **Improved Search Results**: Replace traditional excerpts with AI summaries for a more dynamic search experience.  
-- **Customizable Summary Length**: Set the word count for summaries, from bite-sized insights to detailed overviews.
-
-This update makes your chatbot smarter, faster, and more engaging, while ensuring that visitors quickly grasp the key takeaways from your content.
-
-Start using AI Summaries today and take your chatbot experience to the next level!
-
 🌟 **AI Platform Options**:
 
 * With **Version 2.1.8**, the **Kognetiks Chatbot for WordPress** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
@@ -178,7 +164,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 2.2.1 - Release TBD =
 
-* **AI Summaries**: If enabled adds AI generated summaries of posts, pages and other site contents.
+* **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
 * **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
 
 = 2.2.0 - Release 11-22-2024 =

@@ -82,20 +82,19 @@ if (empty($user_id) || $user_id == 0) {
 ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Main files
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-ant-api.php'; // ANT API - Ver 2.0.7
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-api.php'; // ChatGPT API - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-assistant.php'; // GPT Assistants - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-gpt-omni.php'; // ChatGPT API - Ver 2.0.2.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-image-api.php'; // Image API - Ver 1.9.4
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-mc-api.php'; // Markov Chain API - Ver 2.1.6
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-nvi-api.php'; // NVIDIA API - Ver 2.1.8
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tts-api.php'; // TTS API - Ver 1.9.4
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-tm-api.php'; // Transformer Model API - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-stt-api.php'; // STT API - Ver 2.0.1
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php'; // Globals - Ver 1.6.5
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';
-
-require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-flow-api.php'; // ChatGPT API - Ver 1.9.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-anthropic-api.php';         // ANT API - Ver 2.0.7
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-mc.php';      // Kognetiks - Markov Chain API - Ver 2.1.6
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-tm.php';      // Kognetiks - Transformer Model API - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-nvidia-api.php';            // NVIDIA API - Ver 2.1.8
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-assistant.php';  // GPT Assistants - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-chatgpt.php';    // ChatGPT API - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-image.php';      // Image API - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-kflow.php';      // Kognetiks - Flow API - Ver 1.9.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-omni.php';       // ChatGPT API - Ver 2.0.2.1
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-stt.php';        // STT API - Ver 2.0.1
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-tts-api.php';    // TTS API - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-globals.php';                    // Globals - Ver 1.6.5
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-shortcode.php';                  // Shortcode - Ver 1.6.5
 
 // Include necessary files - Appearance - Ver 1.8.1
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-body.php';
@@ -129,6 +128,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/kognetiks-ai-summaries/kogent
 require_once plugin_dir_path(__FILE__) . 'includes/kognetiks-ai-summaries/kognetiks-ai-summaries.php'; // Summary functions - Ver 2.2.1
 
 // Include necessary files - Settings
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-anthropic.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
