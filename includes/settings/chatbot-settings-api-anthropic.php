@@ -20,13 +20,13 @@ function chatbot_anthropic_model_settings_section_callback($args) {
     <p>Configure the default settings for the plugin Anthropic for AI Summary generation.  Start by adding your API key then selecting your choices below.</p>
     <p>More information about Anthropic models and their capability can be found at <a href="https://docs.anthropic.com/en/docs/about-claude/models" target="_blank">https://docs.anthropic.com/en/docs/about-claude/models</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Anthropic settings and additional documentation please click <a href="?page=kognetiks-ai-summaries&tab=support&dir=api-anthropic-settings&file=api-anthropic-model-settings.md">here</a>.</b></p>                                                                                 
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Anthropic settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-anthropic-settings&file=api-anthropic-model-settings.md">here</a>.</b></p>                                                                                 
     <?php
 }
 
 function chatbot_anthropic_api_model_general_section_callback($args) {
     ?>
-    <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from Anthropic to function. You can obtain an API key by signing up at <a href="https://build.anthropic.com/nim?signin=true" target="_blank">https://build.anthropic.com/nim?signin=true</a>.</p>
+    <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from Anthropic to function. You can obtain an API key by signing up at <a href="https://console.anthropic.com/login" target="_blank">https://console.anthropic.com/login</a>.</p>
     <?php
 }
 
@@ -40,11 +40,11 @@ function chatbot_anthropic_api_key_callback($args) {
 
 function chatbot_anthropic_api_model_chat_settings_section_callback($args) {
     ?>
-    <p>Configure the settings for the plugin when using chat models. Depending on the Anthropic model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://docs.api.anthropic.com/nim/reference/models-1" target="_blank">https://docs.api.anthropic.com/nim/reference/models-1</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
+    <p>Configure the settings for the plugin when using chat models. Depending on the Anthropic model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://docs.anthropic.com/en/docs/about-claude/models" target="_blank">https://docs.anthropic.com/en/docs/about-claude/models</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
-        <li><code>&#91;chatbot style="floating" model="anthropic/llama-3.1-nemotron-51b-instruct"&#93;</code> - Style is floating, specific model</li>
-        <li><code>&#91;chatbot style="embedded" model="anthropic/llama-3.1-nemotron-51b-instruct"&#93;</code> - Style is embedded, default chat model</li>
+        <li><code>&#91;chatbot style="floating" model="claude-3-5-sonnet-latest"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="claude-3-5-sonnet-latest"&#93;</code> - Style is embedded, default chat model</li>
     </ul>
     <?php
 }
@@ -52,7 +52,7 @@ function chatbot_anthropic_api_model_chat_settings_section_callback($args) {
 // Anthropic Model Settings Callback - Ver 2.1.8
 function chatbot_anthropic_chat_model_choice_callback($args) {
 
-    $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', 'anthropic/llama-3.1-nemotron-51b-instruct'));
+    $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
     $anthropic_api_enabled = esc_attr(get_option('chatbot_anthropic_api_enabled', 'Yes'));
 
     // Fetch models from the API
@@ -66,10 +66,10 @@ function chatbot_anthropic_chat_model_choice_callback($args) {
     // Check for errors
     if (is_string($models) && strpos($models, 'Error:') === 0) {
         // If there's an error, display the hardcoded list
-        $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', 'anthropic/llama-3.1-nemotron-51b-instruct'));
+        $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
         ?>
         <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
-            <option value="<?php echo esc_attr( 'anthropic/llama-3.1-nemotron-51b-instruct' ); ?>" <?php selected( $model_choice, 'anthropic/llama-3.1-nemotron-51b-instruct' ); ?>><?php echo esc_html( 'anthropic/llama-3.1-nemotron-51b-instruct' ); ?></option>
+            <option value="<?php echo esc_attr( 'claude-3-5-sonnet-latest' ); ?>" <?php selected( $model_choice, 'claude-3-5-sonnet-latest' ); ?>><?php echo esc_html( 'claude-3-5-sonnet-latest' ); ?></option>
         </select>
         <?php
     } else {
@@ -151,13 +151,13 @@ function chatbot_anthropic_top_p_callback($args) {
 // API Advanced settings section callback
 function chatbot_anthropic_api_model_advanced_section_callback($args) {
     ?>
-    <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the Anthropic API.  The default is <code>https://integrate.api.anthropic.com/v1</code>.</p>
+    <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the Anthropic API.  The default is <code>https://api.anthropic.com/v1</code>.</p>
     <?php
 }
 
 // Base URL for the Anthropic API
 function chatbot_anthropic_base_url_callback($args) {
-    $chatbot_anthropic_base_url = esc_attr(get_option('chatbot_anthropic_base_url', 'https://integrate.api.anthropic.com/v1'));
+    $chatbot_anthropic_base_url = esc_attr(get_option('chatbot_anthropic_base_url', 'https://api.anthropic.com/v1'));
     ?>
     <input type="text" id="chatbot_anthropic_base_url" name="chatbot_anthropic_base_url" value="<?php echo esc_attr( $chatbot_anthropic_base_url ); ?>" class="regular-text">
     <?php

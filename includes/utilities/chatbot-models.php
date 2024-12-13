@@ -240,3 +240,89 @@ function chatbot_nvidia_get_models() {
     return $models;
 
 }
+
+// Function to get the Model names from Anthropic API
+function chatbot_anthropic_get_models() {
+
+    // https://docs.anthropic.com/en/api/messages-examples
+    // https://docs.anthropic.com/en/docs/models-overview
+    // https://docs.anthropic.com/en/docs/about-claude/models
+
+    // Default model list
+    $default_model_list = '';
+    $default_model_list = array(
+        array(
+            'id' => 'claude-3-5-sonnet-latest',
+            'object' => 'model',
+            'created' => 20241022,
+            'owned_by' => 'anthropic'
+        ),
+        array(
+            'id' => 'claude-3-5-haiku-latest',
+            'object' => 'model',
+            'created' => 20241022,
+            'owned_by' => 'anthropic'
+        ),
+        array(
+            'id' => 'claude-3-opus-latest',
+            'object' => 'model',
+            'created' => 20240229,
+            'owned_by' => 'anthropic'
+        ),
+        array(
+            'id' => 'claude-3-sonnet-20240229',
+            'object' => 'model',
+            'created' => 20240229,
+            'owned_by' => 'anthropic'
+        ),
+        array(
+            'id' => 'claude-3-haiku-20240307',
+            'object' => 'model',
+            'created' => 20240307,
+            'owned_by' => 'anthropic'
+        )
+    );
+
+    // FIXME - Anthropic API does not have an endpoint for models
+    // Call the API to get the models
+
+    // Decode the JSON response
+    // $data = json_decode($response, true);
+
+    // FIXME - Force an error since there is no api endpoint for models
+    $data = array('error' => array('message' => 'No models endpoint available'));
+
+    // Check for API errors
+    if (isset($data['error'])) {
+        // return "Error: " . $data['error']['message'];
+        // On 1st install needs an API key
+        // So return a short list of the base models until an API key is entered
+        return $default_model_list;
+    }
+
+    // Extract the models from the response
+    if (isset($data['data']) && !is_null($data['data'])) {
+        $models = $data['data'];
+    } else {
+        // Handle the case where 'data' is not set or is null
+        $models = []; // Empty array
+        ksum_prod_trace( 'WARNING', 'Data key is not set or is null in the \$data array.');
+    }
+
+    // Ensure $models is an array
+    if (!is_array($models)) {
+        return $default_model_list;
+    } else {
+        // Sort the models by name
+        usort($models, function($a, $b) {
+            return $a['id'] <=> $b['id'];
+        });
+    }
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
+
+    // Return the list of models
+    return $models;
+
+}

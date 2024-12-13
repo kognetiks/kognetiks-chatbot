@@ -8,25 +8,11 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA, Anthropic 
 
 **Important Note:** This plugin requires an API key from OpenAI, NVIDIA or other AI platform vendors, to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys or https://build.nvidia.com/nim.
 
-### Kognetiks AI Summaries 🎉
-
-We’re thrilled to introduce **AI Summaries**, an exciting new feature designed to enhance your chatbot and site search functionality! 
-
-With AI Summaries, your content - whether it’s pages, posts, or other resources - can be automatically summarized by your selected AI Engine, delivering concise, insightful responses to your site visitors.  Here's what you can expect:
-
-- **Enhanced Responses**: Automatically include AI-generated summaries of related links in chatbot replies.  
-- **Improved Search Results**: Replace traditional excerpts with AI summaries for a more dynamic search experience.  
-- **Customizable Summary Length**: Set the word count for summaries, from bite-sized insights to detailed overviews.
-
-This update makes your chatbot smarter, faster, and more engaging, while ensuring that visitors quickly grasp the key takeaways from your content.
-
-Start using AI Summaries today and take your chatbot experience to the next level! 🚀
-
 ## Documentation
 
 ## What's new in Version 2.2.1
 
-* **AI Summaries**: If enabled adds AI generated summaries of posts, pages and other site contents.
+* **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
 * **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
 
 ## What's new in Version 2.2.0
@@ -154,6 +140,8 @@ Start using AI Summaries today and take your chatbot experience to the next leve
 - [API/ChatGPT Settings](api-chatgpt-settings/api-chatgpt-model-settings.md)
 
 - [API/NVIDIA Settings](api-nvidia-settings/api-nvidia-model-settings.md)
+
+= [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
 
 - [Assistants](assistants/manage-assistants.md)
 
