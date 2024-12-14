@@ -36,7 +36,7 @@ function chatbot_transformer_model_scheduler() {
     prod_trace('NOTICE', 'chatbot_transformer_model_build_schedule: ' . $chatbot_transformer_model_build_schedule);
 
     // Reset the cache file if offset is 0
-    if (get_option('chatbot_transformer_model_offset', 0) === 0) {
+    if (esc_attr(get_option('chatbot_transformer_model_offset', 0)) === 0) {
         transformer_model_sentential_context_reset_cache();
     }
 
@@ -69,8 +69,8 @@ function chatbot_transformer_model_scan() {
     back_trace( 'NOTICE', 'Scan Start');
 
     // Retrieve current state
-    $offset = intval(get_option('chatbot_transformer_model_offset', 0));
-    $batchSize = intval(get_option('chatbot_transform_model_batch_size', 50));
+    $offset = intval(esc_attr(get_option('chatbot_transformer_model_offset', 0)));
+    $batchSize = intval(esc_attr(get_option('chatbot_transform_model_batch_size', 50)));
     $corpus = transformer_model_sentential_context_fetch_content($offset, $batchSize);
 
     if (empty($corpus)) {

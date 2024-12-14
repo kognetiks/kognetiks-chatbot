@@ -33,7 +33,7 @@ function runMarkovChatbotAndSaveChain() {
     createMarkovChainTable();
 
     // Step 2: Get the last updated timestamp for the Markov Chain
-    $last_updated = get_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00');
+    $last_updated = esc_attr(get_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00'));
 
     back_trace( 'NOTICE', 'Last updated timestamp: ' . $last_updated);
 
@@ -47,7 +47,7 @@ function runMarkovChatbotAndSaveChain() {
         ];
     }
 
-    $batch_size = max(1, min(intval(get_option('chatbot_markov_chain_batch_size', 10)), 100)); // Limit batch size between 1 and 100
+    $batch_size = max(1, min(intval(esc_attr(get_option('chatbot_markov_chain_batch_size', 10))), 100)); // Limit batch size between 1 and 100
     back_trace( 'NOTICE', 'Batch size: ' . $batch_size);
 
     // Step 4: Get the total number of posts
@@ -332,7 +332,7 @@ function buildMarkovChain($content) {
     $words = preg_split('/\s+/', $content);
 
     // Define the maximum chain length
-    $maxChainLength = intval(get_option('chatbot_markov_chain_length', 3));
+    $maxChainLength = intval(esc_attr(get_option('chatbot_markov_chain_length', 3)));
 
     // Build the Markov Chain for different chain lengths
     for ($chainLength = $maxChainLength; $chainLength >= 1; $chainLength--) {

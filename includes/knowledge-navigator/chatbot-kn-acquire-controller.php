@@ -229,10 +229,10 @@ function chatbot_kn_run_phase_1() {
     // back_trace( 'NOTICE', 'chatbot_kn_run_phase_1' );
 
     // Get the item count
-    $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
+    $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
-    $chatbot_chatgpt_no_of_items_analyzed = get_option('chatbot_chatgpt_no_of_items_analyzed', 0);
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 100)); // Fetching 100 items at a time
+    $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$offset: ' . $offset );
@@ -244,14 +244,14 @@ function chatbot_kn_run_phase_1() {
 
     // Define published types to include based on settings
     $post_types = [];
-    if (get_option('chatbot_chatgpt_kn_include_pages', 'No') === 'Yes') {
+    if (esc_attr(esc_attr(get_option('chatbot_chatgpt_kn_include_pages', 'No'))) === 'Yes') {
         $post_types[] = 'page';
     }
-    if (get_option('chatbot_chatgpt_kn_include_posts', 'No') === 'Yes') {
+    if (esc_attr(get_option('chatbot_chatgpt_kn_include_posts', 'No')) === 'Yes') {
         $post_types[] = 'post';
         $post_types[] = 'epkb_post_type_1';  // Assuming you always want to include this type
     }
-    if (get_option('chatbot_chatgpt_kn_include_products', 'No') === 'Yes') {
+    if (esc_attr(get_option('chatbot_chatgpt_kn_include_products', 'No')) === 'Yes') {
         $post_types[] = 'product';
     }
 
@@ -339,10 +339,10 @@ function chatbot_kn_run_phase_3() {
     // back_trace( 'NOTICE', 'chatbot_kn_run_phase_3' );
 
     // Get the item count
-    $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
+    $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
-    $chatbot_chatgpt_no_of_items_analyzed = get_option('chatbot_chatgpt_no_of_items_analyzed', 0);
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 100)); // Fetching 100 items at a time
+    $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$offset: ' . $offset );
@@ -353,7 +353,7 @@ function chatbot_kn_run_phase_3() {
     update_option( 'chatbot_chatgpt_kn_item_count', $offset + $batch_size );
 
     // Get the setting for including comments
-    $chatbot_chatgpt_kn_include_comments = get_option('chatbot_chatgpt_kn_include_comments', 'No');
+    $chatbot_chatgpt_kn_include_comments = esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'No'));
 
     // Query WordPress database for comment content
     if ($chatbot_chatgpt_kn_include_comments === 'Yes') {
@@ -468,10 +468,10 @@ function chatbot_kn_run_phase_4() {
     );
     
     // Total number of documents in the corpus
-    $totalDocumentCount = get_option('chatbot_chatgpt_kn_document_count', 0); // Total documents in the corpus
+    $totalDocumentCount = esc_attr(get_option('chatbot_chatgpt_kn_document_count', 0)); // Total documents in the corpus
     
     // Total number of words in the corpus
-    $totalWordCount = get_option('chatbot_chatgpt_kn_total_word_count', 0); // Total words across documents
+    $totalWordCount = esc_attr( get_option('chatbot_chatgpt_kn_total_word_count', 0)); // Total words across documents
 
     foreach ($results as $result) {
 
@@ -549,10 +549,10 @@ function chatbot_kn_run_phase_6() {
     // back_trace( 'NOTICE', 'chatbot_kn_run_phase_5' );
 
     // Get the item count
-    $offset = get_option('chatbot_chatgpt_kn_item_count', 0); // Default offset set to 0 if not specified
+    $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = get_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
-    $chatbot_chatgpt_no_of_items_analyzed = get_option('chatbot_chatgpt_no_of_items_analyzed', 0);
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 100)); // Fetching 100 items at a time
+    $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
 
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$offset: ' . $offset );
@@ -564,14 +564,14 @@ function chatbot_kn_run_phase_6() {
 
     // Define published types to include based on settings
     $post_types = [];
-    if (get_option('chatbot_chatgpt_kn_include_pages', 'No') === 'Yes') {
+    if (esc_attr(get_option('chatbot_chatgpt_kn_include_pages', 'No')) === 'Yes') {
         $post_types[] = 'page';
     }
-    if (get_option('chatbot_chatgpt_kn_include_posts', 'No') === 'Yes') {
+    if (esc_attr(get_option('chatbot_chatgpt_kn_include_posts', 'No')) === 'Yes') {
         $post_types[] = 'post';
         $post_types[] = 'epkb_post_type_1';  // Assuming you always want to include this type
     }
-    if (get_option('chatbot_chatgpt_kn_include_products', 'No') === 'Yes') {
+    if (esc_attr(get_option('chatbot_chatgpt_kn_include_products', 'No')) === 'Yes') {
         $post_types[] = 'product';
     }
 

@@ -64,16 +64,16 @@ function chatbot_openai_get_models() {
     );
 
     // See if the option exists, if not then create it and set the default
-    if (get_option('chatbot_chatgpt_model_choice') === false) {
+    if (esc_attr(get_option('chatbot_chatgpt_model_choice')) === false) {
         update_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo');
     }
-    if (get_option('chatbot_chatgpt_image_model_option') === false) {
+    if (esc_attr(get_option('chatbot_chatgpt_image_model_option')) === false) {
         update_option('chatbot_chatgpt_image_model_option', 'dall-e-3');
     }
-    if (get_option('chatbot_chatgpt_voice_model_option') === false) {
+    if (esc_attr(get_option('chatbot_chatgpt_voice_model_option')) === false) {
         update_option('chatbot_chatgpt_voice_model_option', 'tts-1-hd');
     }
-    if (get_option('chatbot_chatgpt_whisper_model_option') === false) {
+    if (esc_attr(get_option('chatbot_chatgpt_whisper_model_option')) === false) {
         update_option('chatbot_chatgpt_whisper_model_option', 'whisper-1');
     }
 
@@ -174,7 +174,7 @@ function chatbot_nvidia_get_models() {
     );
 
     // See if the option exists, if not then create it and set the default
-    if (get_option('chatbot_nvidia_model_choice') === false) {
+    if (esc_attr(get_option('chatbot_nvidia_model_choice')) === false) {
         update_option('chatbot_nvidia_model_choice', 'nvidia/llama-3_1-nemotron-70b-instruct');
     }
 

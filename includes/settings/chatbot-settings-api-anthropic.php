@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // API/Anthropic settings section callback - Ver 2.1.8
 function chatbot_anthropic_model_settings_section_callback($args) {
     ?>
-    <p>Configure the default settings for the plugin Anthropic for AI Summary generation.  Start by adding your API key then selecting your choices below.</p>
+    <p>Configure the default settings for the plugin Anthropic for chat generation.  Start by adding your API key then selecting your choices below.</p>
     <p>More information about Anthropic models and their capability can be found at <a href="https://docs.anthropic.com/en/docs/about-claude/models" target="_blank">https://docs.anthropic.com/en/docs/about-claude/models</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Anthropic settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-anthropic-settings&file=api-anthropic-model-settings.md">here</a>.</b></p>                                                                                 
@@ -32,7 +32,7 @@ function chatbot_anthropic_api_model_general_section_callback($args) {
 
 // API key field callback
 function chatbot_anthropic_api_key_callback($args) {
-    $api_key = get_option('chatbot_anthropic_api_key');
+    $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
     ?>
     <input type="password" id="chatbot_anthropic_api_key" name="chatbot_anthropic_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
@@ -77,7 +77,7 @@ function chatbot_anthropic_chat_model_choice_callback($args) {
         ?>
         <select id="chatbot_anthropic_model_choice" name="chatbot_anthropic_model_choice">
             <?php foreach ($models as $model): ?>
-                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(get_option('chatbot_anthropic_model_choice'), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
+                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(esc_attr(get_option('chatbot_anthropic_model_choice')), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
             <?php endforeach; ?>
             ?>
         </select>

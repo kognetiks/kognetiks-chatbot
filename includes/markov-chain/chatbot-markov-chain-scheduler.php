@@ -59,7 +59,7 @@ function chatbot_markov_chain_scan() {
     back_trace( 'NOTICE', 'chatbot_markov_chain_scan - Start');
 
     // Get the current schedule setting
-    $run_scanner = get_option('chatbot_markov_chain_build_schedule', 'No');
+    $run_scanner = esc_attr(get_option('chatbot_markov_chain_build_schedule', 'No'));
 
     // Update the status to 'In Process' and log the current time
     update_option('chatbot_markov_chain_build_status', 'In Process');

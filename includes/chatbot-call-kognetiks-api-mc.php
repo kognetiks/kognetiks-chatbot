@@ -72,7 +72,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
     
     // Knowledge Navigator keyword append for context
-    $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
+    $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', ''));
 
     // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
     // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;

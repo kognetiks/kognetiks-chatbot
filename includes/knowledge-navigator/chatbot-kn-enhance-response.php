@@ -29,7 +29,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $enhanced_response = "";
 
     // Check if the Knowledge Navigator is finished running
-    $chatbot_chatgpt_kn_status = get_option('chatbot_chatgpt_kn_status', '');
+    $chatbot_chatgpt_kn_status = esc_attr(get_option('chatbot_chatgpt_kn_status', ''));
     if (false === strpos($chatbot_chatgpt_kn_status, 'Completed')) {
         return;
     }
@@ -139,20 +139,32 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     // Option - Include Title in Enhanced Response
     $include_title = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_title', 'yes'));
-    // FIXME - TEMPORARY - REMOVE THIS
-    // $include_title = 'no';
+
+    // Check if function ksum_generate_ai_summary exists
+    if (!function_exists('ksum_generate_ai_summary')) {
+
+        $include_ai_summary = 'No';
+
+    } else {
+
+        // Determine if AI summary should be included - Ver 2.2.1
+        $include_ai_summary = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_ai_summary', 'No'));
+
+    }
 
     foreach ($results as $result) {
 
         if ('yes' == $include_title) {
+
             $links[] = "<li>[" . $result['title'] . "](" . $result['url'] . ")</li>";
+
         } else {
+
             $links[] = "[here](" . $result['url'] . ")";
+
         }
 
-        // Determine if AI summary should be included - Ver 2.2.1
-        $include_ai_summary = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_ai_summary', 'No'));
-        $include_ai_summary = 'Yes';
+        // DIAG - Diagnostics - Ver 2.2.1
         // back_trace( 'NOTICE', '$include_ai_summary: ' . $include_ai_summary );
 
         if ($include_ai_summary == 'Yes') {
@@ -160,7 +172,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
             // DIAG - Diagnostics - Ver 2.2.1
             // back_trace( 'NOTICE', 'Generating AI summary for $result[pid]: ' . $result['pid'] );
 
-            $ai_summary = generate_ai_summary($result['pid']);
+            $ai_summary = ksum_generate_ai_summary($result['pid']);
             if (!empty($ai_summary)) {
                 $links[] = "<li>" . $ai_summary . "</li>";
             }

@@ -746,7 +746,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
         // Step 1: Create an Assistant
         // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
-        $api_key = get_option('chatbot_chatgpt_api_key', '');
+        $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', ''));
         $assistants_response = createAnAssistant($api_key);
         // DIAG - Diagnostics - Ver 2.1.3 - 2024 08 30
         // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
@@ -819,7 +819,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // $chatgpt_last_response = str_replace($errorResponses, '', $chatgpt_last_response);
     
     // // Knowledge Navigator keyword append for context
-    // $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
+    // $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', ''));
 
     // // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
     // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;

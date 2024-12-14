@@ -46,12 +46,12 @@ function chatbot_chatgpt_uninstall(){
     // back_trace( 'NOTICE', 'PLUGIN UNINSTALL STARTED');
 
     // Ask if the data should be removed, if not return
-    if (get_option('chatbot_chatgpt_delete_data') != 'yes') {
+    if (esc_attr(get_option('chatbot_chatgpt_delete_data')) != 'yes') {
         return;
     }
 
     // Check for a setting that specifies whether to delete data
-    if (get_option('chatbot_chatgpt_delete_data') == 'yes') {
+    if (esc_attr(get_option('chatbot_chatgpt_delete_data')) == 'yes') {
 
         // Delete on-off options
         // back_trace( 'NOTICE', 'Deleting one-off options');
@@ -104,10 +104,6 @@ function chatbot_chatgpt_uninstall(){
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_precomputed_vecotrs");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_sentence_vectors");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_word_embeddings");
-
-        // Delete Kognetiks AI Summaries table - Ver 2.2.1
-        // back_trace( 'NOTICE', 'Deleting AI Summaries table');
-        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}kognetiks_ai_summaries");
 
         // Delete Lexical Transformer tables
         // back_trace( 'NOTICE', 'Deleting Transformer tables');

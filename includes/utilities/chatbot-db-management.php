@@ -237,7 +237,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
     // $user_type can be 'chatbot', 'visitor', 'prompt_tokens', 'completion_tokens', 'total_tokens'
 
     // Check if conversation logging is enabled
-    if (get_option('chatbot_chatgpt_enable_conversation_logging') !== 'On') {
+    if (esc_attr(get_option('chatbot_chatgpt_enable_conversation_logging')) !== 'On') {
         // Logging is disabled, so just return without doing anything
         return;
     }
@@ -325,13 +325,13 @@ function chatbot_chatgpt_conversation_log_cleanup() {
     global $wpdb;
 
     // Check if conversation logging is enabled
-    if (get_option('chatbot_chatgpt_enable_conversation_logging') !== 'On') {
+    if (esc_attr(get_option('chatbot_chatgpt_enable_conversation_logging')) !== 'On') {
         // Logging is disabled, so just return without doing anything
         return;
     }
 
     // Get the number of days to keep the conversation log
-    $days_to_keep = get_option('chatbot_chatgpt_conversation_log_days_to_keep');
+    $days_to_keep = esc_attr(get_option('chatbot_chatgpt_conversation_log_days_to_keep'));
 
     // If the number of days is not set, then set it to 30 days
     if ($days_to_keep === false) {

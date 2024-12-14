@@ -262,7 +262,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $highestSimilarity = max($similarities);
     $averageSimilarity = array_sum($similarities) / count($similarities);
     $matchesAboveThreshold = array_filter($similarities, function($similarity) {
-        return $similarity > floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2));
+        return $similarity > floatval(esc_attr(get_option('chatbot_transformer_model_similarity_threshold', 0.2)));
     });
     $numMatchesAboveThreshold = count($matchesAboveThreshold);
     $totalSentencesAnalyzed = count($sentences);
@@ -275,7 +275,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // Add a similarity threshold
-    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2)); // Default to 0.2
+    $similarityThreshold = floatval(esc_attr(get_option('chatbot_transformer_model_similarity_threshold', 0.2))); // Default to 0.2
 
     // If the highest similarity is below the threshold, return a fallback message
     if ($highestSimilarity < $similarityThreshold) {

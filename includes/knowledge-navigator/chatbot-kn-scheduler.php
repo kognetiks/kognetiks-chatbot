@@ -19,7 +19,7 @@ function knowledge_navigator_scan() {
     // DIAG - Diagnostic - Ver 1.6.3
     // back_trace( 'NOTICE', 'ENTERING knowledge_navigator_scan()');
     
-    $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
+    $run_scanner = esc_attr(get_option('chatbot_chatgpt_knowledge_navigator', 'No'));
     
     // DIAG - Diagnostic - Ver 1.9.6
     // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner );

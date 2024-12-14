@@ -167,14 +167,6 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_additional_setup_settings');
                 echo '</div>';
 
-            } elseif ($active_tab == 'ai_summaries') {
-
-                settings_fields('kognetiks_ai_summaries');
-
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('kognetiks_ai_summaries');
-                echo '</div>';
-
             } elseif ($active_tab == 'api_chatgpt' && $chatbot_ai_platform_choice == 'OpenAI') {
 
                 settings_fields('chatbot_chatgpt_api_chatgpt');

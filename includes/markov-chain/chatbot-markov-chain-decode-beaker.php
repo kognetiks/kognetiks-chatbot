@@ -21,9 +21,9 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     $markov_chain_table = $wpdb->prefix . 'chatbot_markov_chain';
     $tfidf_table = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
-    $chainLength = intval(get_option('chatbot_markov_chain_length', 3));
-    $maxSentences = intval(get_option('chatbot_markov_chain_max_sentences', 3));
-    $offTopicMax = intval(get_option('chatbot_markov_chain_off_topic_max', 5));
+    $chainLength = intval(esc_attr(get_option('chatbot_markov_chain_length', 3)));
+    $maxSentences = intval(esc_attr(get_option('chatbot_markov_chain_max_sentences', 3)));
+    $offTopicMax = intval(esc_attr(et_option('chatbot_markov_chain_off_topic_max', 5)));
 
     // Clean up start words
     $startWords = array_filter(array_map(function($word) {

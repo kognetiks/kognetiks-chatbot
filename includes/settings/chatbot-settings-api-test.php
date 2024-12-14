@@ -340,14 +340,14 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
     // back_trace( 'NOTICE', 'chatgpt_option_updated() called');
 
     // FIXME Retrieve the current value of the chatbot_chatgpt_api_status option
-    $chatbot_chatgpt_api_status = get_option('chatbot_chatgpt_api_status', 'NOT SET');
+    $chatbot_chatgpt_api_status = esc_attr(get_option('chatbot_chatgpt_api_status', 'NOT SET'));
     // DIAG - Log the current value of the chatbot_chatgpt_api_status option
     // back_trace( 'NOTICE', $chatbot_chatgpt_api_status);
     
     // Check if the option updated is related to your plugin settings
     // if ($option_name === 'chatbot_chatgpt_model_choice' || $option_name === 'chatbot_chatgpt_api_key' || empty($chatbot_chatgpt_api_status)) {
     if ($option_name === 'chatbot_chatgpt_model_choice' || $option_name === 'chatbot_chatgpt_api_key') {
-        $api_key = get_option('chatbot_chatgpt_api_key', 'NOT SET');
+        $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', 'NOT SET'));
 
         // Call your test function
         $test_result = kchat_test_api_status($api_key);

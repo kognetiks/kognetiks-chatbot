@@ -179,10 +179,4 @@ By configuring these settings, you ensure that your Kognetiks Chatbot is customi
 
 ---
 
-## AI Summaries Settings
-
-See **[AI Summaries Settings](ai-summaries/ai-summaries.md)**
-
----
-
 - **[Back to the Overview](/overview.md)**

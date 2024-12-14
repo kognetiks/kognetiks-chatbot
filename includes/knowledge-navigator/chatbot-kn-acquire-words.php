@@ -76,7 +76,7 @@ function kn_acquire_words($content, $option = null) {
 
         // Update total word count
         $totalWordCount = count($words);
-        $chatbot_chatgpt_kn_total_word_count = get_option('chatbot_chatgpt_kn_total_word_count', 0);
+        $chatbot_chatgpt_kn_total_word_count = esc_attr(get_option('chatbot_chatgpt_kn_total_word_count', 0));
         $chatbot_chatgpt_kn_total_word_count += $totalWordCount;
         update_option('chatbot_chatgpt_kn_total_word_count', $chatbot_chatgpt_kn_total_word_count);
 

@@ -1356,8 +1356,8 @@ function chatbot_chatgpt_custom_buttons_display() {
 
         // Initialize and set button names and URLs
         for ($i = 1; $i <= $button_count; $i++) {
-            $button_names[$i] = get_option("chatbot_chatgpt_custom_button_name_$i");
-            $button_urls[$i] = get_option("chatbot_chatgpt_custom_button_url_$i");
+            $button_names[$i] = esc_attr(get_option("chatbot_chatgpt_custom_button_name_$i"));
+            $button_urls[$i] = esc_attr(get_option("chatbot_chatgpt_custom_button_url_$i"));
         }
 
         // Generate buttons

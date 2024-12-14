@@ -32,7 +32,7 @@ function chatbot_nvidia_api_model_general_section_callback($args) {
 
 // API key field callback
 function chatbot_nvidia_api_key_callback($args) {
-    $api_key = get_option('chatbot_nvidia_api_key');
+    $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
     ?>
     <input type="password" id="chatbot_nvidia_api_key" name="chatbot_nvidia_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
@@ -77,7 +77,7 @@ function chatbot_nvidia_chat_model_choice_callback($args) {
         ?>
         <select id="chatbot_nvidia_model_choice" name="chatbot_nvidia_model_choice">
             <?php foreach ($models as $model): ?>
-                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(get_option('chatbot_nvidia_model_choice'), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
+                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(esc_attr(get_option('chatbot_nvidia_model_choice')), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
             <?php endforeach; ?>
             ?>
         </select>

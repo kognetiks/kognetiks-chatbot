@@ -155,7 +155,7 @@ function chatbot_chatgpt_enable_custom_buttons_callback($args) {
 
 // Custom buttons settings fields callback - Ver 1.6.5
 function chatbot_chatgpt_custom_button_name_1_callback($args) {
-    $chatbot_chatgpt_custom_button_name_1 = get_option('chatbot_chatgpt_custom_button_name_1');
+    $chatbot_chatgpt_custom_button_name_1 = esc_attr(get_option('chatbot_chatgpt_custom_button_name_1'));
     $value = isset($chatbot_chatgpt_custom_button_name_1) ? sanitize_text_field($chatbot_chatgpt_custom_button_name_1) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_name_1" name="chatbot_chatgpt_custom_button_name_1" value="<?php echo esc_attr($value); ?>" />
@@ -163,7 +163,7 @@ function chatbot_chatgpt_custom_button_name_1_callback($args) {
 }
 
 function chatbot_chatgpt_custom_button_link_1_callback($args) {
-    $chatbot_chatgpt_custom_button_url_1 = get_option('chatbot_chatgpt_custom_button_url_1');
+    $chatbot_chatgpt_custom_button_url_1 = esc_attr(get_option('chatbot_chatgpt_custom_button_url_1'));
     $value = isset($chatbot_chatgpt_custom_button_url_1) ? esc_url($chatbot_chatgpt_custom_button_url_1) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_url_1" name="chatbot_chatgpt_custom_button_url_1" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
@@ -171,7 +171,7 @@ function chatbot_chatgpt_custom_button_link_1_callback($args) {
 }
 
 function chatbot_chatgpt_custom_button_name_2_callback($args) {
-    $chatbot_chatgpt_custom_button_name_2 = get_option('chatbot_chatgpt_custom_button_name_2');
+    $chatbot_chatgpt_custom_button_name_2 = esc_attr(get_option('chatbot_chatgpt_custom_button_name_2'));
     $value = isset($chatbot_chatgpt_custom_button_name_2) ? sanitize_text_field($chatbot_chatgpt_custom_button_name_2) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_name_2" name="chatbot_chatgpt_custom_button_name_2" value="<?php echo esc_attr($value); ?>" />
@@ -179,7 +179,7 @@ function chatbot_chatgpt_custom_button_name_2_callback($args) {
 }
 
 function chatbot_chatgpt_custom_button_link_2_callback($args) {
-    $chatbot_chatgpt_custom_button_url_2 = get_option('chatbot_chatgpt_custom_button_url_2');
+    $chatbot_chatgpt_custom_button_url_2 = esc_attr(get_option('chatbot_chatgpt_custom_button_url_2'));
     $value = isset($chatbot_chatgpt_custom_button_url_2) ? esc_url($chatbot_chatgpt_custom_button_url_2) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_url_2" name="chatbot_chatgpt_custom_button_url_2" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
@@ -187,7 +187,7 @@ function chatbot_chatgpt_custom_button_link_2_callback($args) {
 }
 
 function chatbot_chatgpt_custom_button_name_3_callback($args) {
-    $chatbot_chatgpt_custom_button_name_3 = get_option('chatbot_chatgpt_custom_button_name_3');
+    $chatbot_chatgpt_custom_button_name_3 = esc_attr(get_option('chatbot_chatgpt_custom_button_name_3'));
     $value = isset($chatbot_chatgpt_custom_button_name_3) ? sanitize_text_field($chatbot_chatgpt_custom_button_name_3) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_name_3" name="chatbot_chatgpt_custom_button_name_3" value="<?php echo esc_attr($value); ?>" />
@@ -195,7 +195,7 @@ function chatbot_chatgpt_custom_button_name_3_callback($args) {
 }
 
 function chatbot_chatgpt_custom_button_link_3_callback($args) {
-    $chatbot_chatgpt_custom_button_url_3 = get_option('chatbot_chatgpt_custom_button_url_3');
+    $chatbot_chatgpt_custom_button_url_3 = esc_attr(get_option('chatbot_chatgpt_custom_button_url_3'));
     $value = isset($chatbot_chatgpt_custom_button_url_3) ? esc_url($chatbot_chatgpt_custom_button_url_3) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_url_3" name="chatbot_chatgpt_custom_button_url_3" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
@@ -203,7 +203,7 @@ function chatbot_chatgpt_custom_button_link_3_callback($args) {
 }
 
 function chatbot_chatgpt_custom_button_name_4_callback($args) {
-    $chatbot_chatgpt_custom_button_name_4 = get_option('chatbot_chatgpt_custom_button_name_4');
+    $chatbot_chatgpt_custom_button_name_4 = esc_attr(get_option('chatbot_chatgpt_custom_button_name_4');
     $value = isset($chatbot_chatgpt_custom_button_name_4) ? sanitize_text_field($chatbot_chatgpt_custom_button_name_4) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_name_4" name="chatbot_chatgpt_custom_button_name_4" value="<?php echo esc_attr($value); ?>" />
@@ -211,7 +211,7 @@ function chatbot_chatgpt_custom_button_name_4_callback($args) {
 }
 
 function chatbot_chatgpt_custom_button_link_4_callback($args) {
-    $chatbot_chatgpt_custom_button_url_4 = get_option('chatbot_chatgpt_custom_button_url_4');
+    $chatbot_chatgpt_custom_button_url_4 = esc_attr(get_option('chatbot_chatgpt_custom_button_url_4'));
     $value = isset($chatbot_chatgpt_custom_button_url_4) ? esc_url($chatbot_chatgpt_custom_button_url_4) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_url_4" name="chatbot_chatgpt_custom_button_url_4" value="<?php echo esc_attr($value); ?>" style="width: 400px;" />
