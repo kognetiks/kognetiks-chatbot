@@ -129,7 +129,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
         ?>
         <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
             <?php foreach ($models as $model): ?>
-                <option value="<?php echo esc_attr($model['id']); ?>" <?php selectedesc_attr(get_option('chatbot_chatgpt_model_choice')), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
+                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(esc_attr(get_option('chatbot_chatgpt_model_choice')), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
             <?php endforeach; ?>
             ?>
         </select>

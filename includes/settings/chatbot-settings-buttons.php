@@ -203,7 +203,7 @@ function chatbot_chatgpt_custom_button_link_3_callback($args) {
 }
 
 function chatbot_chatgpt_custom_button_name_4_callback($args) {
-    $chatbot_chatgpt_custom_button_name_4 = esc_attr(get_option('chatbot_chatgpt_custom_button_name_4');
+    $chatbot_chatgpt_custom_button_name_4 = esc_attr(get_option('chatbot_chatgpt_custom_button_name_4'));
     $value = isset($chatbot_chatgpt_custom_button_name_4) ? sanitize_text_field($chatbot_chatgpt_custom_button_name_4) : '';
     ?>
     <input type="text" id="chatbot_chatgpt_custom_button_name_4" name="chatbot_chatgpt_custom_button_name_4" value="<?php echo esc_attr($value); ?>" />
