@@ -307,3 +307,14 @@ function chatbot_chatgpt_custom_learnings_message_callback($args) {
     <input type="text" style="width: 50%;" id="chatbot_chatgpt_custom_learnings_message" name = "chatbot_chatgpt_custom_learnings_message" value="<?php echo esc_attr( $chatbot_chatgpt_custom_learnings_message ); ?>">
     <?php
 }
+
+// Optionally include post or page excerpts with Knowledge Navigator responses - Ver 2.2.1
+function chatbot_chatgpt_enhanced_response_include_excerpts_callback() {
+    $value = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_enhanced_response_include_excerpts" name="chatbot_chatgpt_enhanced_response_include_excerpts">
+        <option value="No" <?php selected( $value, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+        <option value="Yes" <?php selected( $value, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+    </select>
+    <?php
+}

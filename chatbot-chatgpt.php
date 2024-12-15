@@ -722,7 +722,7 @@ function chatbot_chatgpt_send_message() {
 
         case 'OpenAI':
 
-            $api_key = esc_attr(get_option('chatbot_openai_api_key'));
+            $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-4-1106-preview'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;

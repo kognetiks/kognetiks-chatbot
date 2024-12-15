@@ -120,7 +120,7 @@ function chatbot_chatgpt_kn_settings_init() {
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_suppress_learnings');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_custom_learnings_message');
     register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_enhanced_response_limit');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_enhanced_response_include_ai_summary');
+    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_enhanced_response_include_excerpts');
 
     add_settings_section(
         'chatbot_chatgpt_kn_enhanced_response_section',
@@ -149,6 +149,14 @@ function chatbot_chatgpt_kn_settings_init() {
         'chatbot_chatgpt_enhanced_response_limit',
         'Enhanced Response Limit',
         'chatbot_chatgpt_enhanced_response_limit_callback',
+        'chatbot_chatgpt_kn_enhanced_response',
+        'chatbot_chatgpt_kn_enhanced_response_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_enhanced_response_include_excerpts',
+        'Include Post/Page Excerpts',
+        'chatbot_chatgpt_enhanced_response_include_excerpts_callback',
         'chatbot_chatgpt_kn_enhanced_response',
         'chatbot_chatgpt_kn_enhanced_response_section'
     );

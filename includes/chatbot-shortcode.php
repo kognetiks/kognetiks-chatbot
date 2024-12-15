@@ -376,23 +376,41 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Validate and sanitize the model parameter - Ver 1.9.9
     if (!isset($atts['model'])) {
-        if (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
-        } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
-        } else if (esc_attr(get_option('chatbot_transformer_model_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
-        } else {
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+
+        $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'openai'));
+        // DIAG - Diagnostics - Ver 2.2.1
+        back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+
+        switch ($chatbot_ai_platform_choice) {
+            case 'OpenAI':
+                $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+                break;
+            case 'NVIDIA':
+                $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
+                break;
+            case 'Anthropic':
+                $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+                break;
+            case 'Markov Chain':
+                $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
+                break;
+            case 'Transformer':
+                $model = esc_attr(get_option('chatbot_transformer_model_choice', 'lexical-context-model'));
+                break;
+            default:
+                $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         }
+
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
         $assistant_details['model'] = $model;
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'Model (defaulting): ' . $model);
+        back_trace( 'NOTICE', 'LINE 410 - Model (defaulting): ' . $model);
+
     } else {
+
         $model = sanitize_text_field($atts['model']);
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
@@ -400,7 +418,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'Model: ' . $model);
+        back_trace( 'NOTICE', 'LINE 421 Model (paramater): ' . $model);
+
     }
 
     // Validate and sanitize the voice parameter - Ver 1.9.9

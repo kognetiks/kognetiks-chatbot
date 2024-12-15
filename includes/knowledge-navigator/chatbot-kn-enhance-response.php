@@ -140,17 +140,8 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     // Option - Include Title in Enhanced Response
     $include_title = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_title', 'yes'));
 
-    // Check if function ksum_generate_ai_summary exists
-    if (!function_exists('ksum_generate_ai_summary')) {
-
-        $include_ai_summary = 'No';
-
-    } else {
-
-        // Determine if AI summary should be included - Ver 2.2.1
-        $include_ai_summary = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_ai_summary', 'No'));
-
-    }
+    // Decide if the links to site content and exceprts should be included in the response
+    $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
 
     foreach ($results as $result) {
 
@@ -165,16 +156,23 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         }
 
         // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace( 'NOTICE', '$include_ai_summary: ' . $include_ai_summary );
+        // back_trace( 'NOTICE', '$include_post_or_page_excerpt: ' . $include_post_or_page_excerpt );
 
-        if ($include_ai_summary == 'Yes') {
+        if ($include_post_or_page_excerpt == 'Yes') {
 
             // DIAG - Diagnostics - Ver 2.2.1
             // back_trace( 'NOTICE', 'Generating AI summary for $result[pid]: ' . $result['pid'] );
 
-            $ai_summary = ksum_generate_ai_summary($result['pid']);
-            if (!empty($ai_summary)) {
-                $links[] = "<li>" . $ai_summary . "</li>";
+            // $ai_summary = ksum_generate_ai_summary($result['pid']);
+            // if (!empty($ai_summary)) {
+            //     $links[] = "<li>" . $ai_summary . "</li>";
+            // }
+
+            // Fetch the post or page excerpt
+            $post_excerpt = get_the_excerpt($result['pid']);
+
+            if (!empty($post_excerpt)) {
+                $links[] = "<li>" . $post_excerpt . "</li>";
             }
 
             // DIAG - Diagnostics - Ver 2.2.1

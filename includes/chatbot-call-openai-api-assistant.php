@@ -941,14 +941,27 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     update_interaction_tracking();
 
     // Remove citations from the response
-    $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
+    if (isset($assistants_response["data"][0]["content"][0]["text"]["value"])) {
+        $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
+    }
 
     // Check for missing $thread_id in $kchat_settings
     if (!isset($kchat_settings['thread_id'])) {
         $kchat_settings['thread_id'] = $thread_id;
     }
 
-    return $assistants_response["data"][0]["content"][0]["text"]["value"];
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace('NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
+
+    // Return the response text, checking for the fallback content[1][text] if available
+    if (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {
+        return $assistants_response["data"][0]["content"][1]["text"]["value"];
+    } elseif (isset($assistants_response["data"][0]["content"][0]["text"]["value"])) {
+        return $assistants_response["data"][0]["content"][0]["text"]["value"];
+    } else {
+        // Return a default value or an empty string if none exist
+        return '';
+    }
 
 }
 
