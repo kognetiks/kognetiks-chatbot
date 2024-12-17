@@ -1,6 +1,6 @@
-# Kognetiks Chatbot for WordPress
+# Kognetiks Chatbot
 
-The **Kognetiks Chatbot for WordPress** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI, NVIDIA, and Anthropic (release date TBD). The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
+The **Kognetiks Chatbot** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI, NVIDIA, and Anthropic (release date TBD). The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
 ## Documentation
 
@@ -48,7 +48,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's new in Version 2.1.3
 
-* **Remote Server Access**: The **Kognetiks Chatbot for WordPress** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
+* **Remote Server Access**: The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
 * **Improving Math Handling**: Integrated code enhances chatbot’s ability to render complex mathematical expressions.
 * **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
@@ -72,7 +72,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 * **Adjusted Module Name Conflict**: Renamed one module that had a name found with another vendor's plugin.
 * **Reworked Conversation Continuity**: Improved the way the chatbot handles conversation continuity for visitors and logged-in users, ensuring a seamless experience across pages.
-* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WordPress plugin by Kognetiks' with a text message of your choosing.
+* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot plugin by Kognetiks' with a text message of your choosing.
 * **Refactored Inline Styles**: Moved inline styles to an external CSS file for better maintainability and separation of concerns.
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.
@@ -206,7 +206,7 @@ The **Kognetiks Chatbot for WordPress** plugin project is centered around revolu
 
 ## What's New in Version 1.9.5
 
-The latest update for the Kognetiks Chatbot for WordPress plugin, Version 1.9.5, brings an array of new voice options and output formats, alongside improved audio playback controls and enhanced user interface adjustments for a more streamlined experience.
+The latest update for the Kognetiks Chatbot plugin, Version 1.9.5, brings an array of new voice options and output formats, alongside improved audio playback controls and enhanced user interface adjustments for a more streamlined experience.
 
 * **Expanded Voice Options:** We've introduced six new voice options for Text-to-Speech functionalities to cater to diverse preferences and applications. The new voices, including Allow, Echo, Fable, Onyx, Nova, and Shimmer, can be selected to personalize the auditory output of the chatbot. This variety ensures you can choose voices that best fit your brand or personal style.
 
@@ -216,11 +216,11 @@ The latest update for the Kognetiks Chatbot for WordPress plugin, Version 1.9.5,
 
 * **Redesigned API/ChatGPT Settings Page:** The settings page for chat, image, and speech generation parameters has been redesigned for better usability. You can now more easily adjust and tune your settings, ensuring the chatbot performs optimally across all integrated models.
 
-These updates aim to enhance the versatility and visitor experience of the Kognetiks Chatbot for WordPress, continuing our commitment to deliver cutting-edge, customizable, and accessible technology solutions.
+These updates aim to enhance the versatility and visitor experience of the Kognetiks Chatbot, continuing our commitment to deliver cutting-edge, customizable, and accessible technology solutions.
 
 ## What's New in Version 1.9.4
 
-Version 1.9.4 of the **Kognetiks Chatbot for WordPress** plugin introduces personalized greeting options, displays the Assistant's name sourced from OpenAI, expands support to include image and speech models, and integrates DALL-E for image generation alongside Text-to-Speech functionalities for an enriched user interaction.
+Version 1.9.4 of the **Kognetiks Chatbot** plugin introduces personalized greeting options, displays the Assistant's name sourced from OpenAI, expands support to include image and speech models, and integrates DALL-E for image generation alongside Text-to-Speech functionalities for an enriched user interaction.
 
 * **Personalized Greetings:** Users now have the option to personalize both initial and subsequent greetings for the chatbot, enhancing the user experience with a more individualized interaction. Just add any field from your _users or _usermeta tables in WordPress to the Initial Greeting or Subsequent Greeting, such as: "**Hello [first_name], how can I help you today?**".  This can be found under Settings > Kognetiks Chatbot > Settings.
 
@@ -234,7 +234,7 @@ Version 1.9.4 of the **Kognetiks Chatbot for WordPress** plugin introduces perso
 
 ## Features
 
-Welcome to the future of website interaction with **Kognetiks Chatbot for WordPress**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Assistants.
+Welcome to the future of website interaction with **Kognetiks Chatbot**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Assistants.
 
 **🌐 Harnessing Large Language Models for Enhanced Engagement**
 Dive into the world of advanced AI with Large Language Models at the core of the Chatbot. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
@@ -278,7 +278,7 @@ The chatbot is now equipped to generate images using OpenAI's DALL-E models, off
 **🔄Text-to-Speech Conversion:**
 With the integration of Text-to-Speech (TTS) models, the chatbot can now convert text inputs into spoken word, making it accessible for auditory communication and enhancing user engagement through speech. To generate speech from text, use the shortcode **[chatbot style=embedded model=tts-1-1106]**.
 
-**🤖 Why the Kognetiks Chatbot for WordPress?**
+**🤖 Why the Kognetiks Chatbot?**
 ▪ **Natural Conversations:** Experience human-like interactions, thanks to Large Language Model APIs from companies like OpenAI.
 ▪ **Always Available:** Provide round-the-clock assistance in various domains, from healthcare to education.
 ▪ **Seamless Integration:** Effortlessly bring your WordPress site to life with an easy-to-use plugin.
@@ -292,9 +292,9 @@ With the integration of Text-to-Speech (TTS) models, the chatbot can now convert
 For a full list of models, please see [OpenAI's Model Overview](https://platform.openai.com/docs/models/overview).
 
 **🚀 Elevate Your Website Experience**
-The Kognetiks Chatbot for WordPress is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
+The Kognetiks Chatbot is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
 
-Get your Kognetiks Chatbot for WordPress today and redefine your WordPress site with intelligence and a personal touch.
+Get your Kognetiks Chatbot today and redefine your WordPress site with intelligence and a personal touch.
 
 **Note:** This plugin requires an API key from OpenAI. Obtain yours at [OpenAI API Keys](https://platform.openai.com/account/api-keys).
 
@@ -318,7 +318,7 @@ Get your Kognetiks Chatbot for WordPress today and redefine your WordPress site 
 6. For an embedded chatbot on any page add the shortcode: `[chatbot style=embedded]`
 7. Use `[chatbot style=floating|embedded assistant=primary|alternate]` to display the chatbot as a floating chatbot or embedded chatbot with a primary or alternate assistant.
 
-Now your website visitors can enjoy a seamless and personalized chat experience with the Kognetiks Chatbot for WordPress.
+Now your website visitors can enjoy a seamless and personalized chat experience with the Kognetiks Chatbot.
 
 ## Installing the Chatbot on Your WordPress Website
 
@@ -372,7 +372,7 @@ You can also customize the name of the chatbot, as well as changing the initial 
 
 **Is the chatbot available in multiple languages?**
 
-Yes, the Kognetiks Chatbot for WordPress and the OpenAI's ChatGPT API support many different languages. Set the 'Site Language' option in WordPress to your preference.
+Yes, the Kognetiks Chatbot and the OpenAI's ChatGPT API support many different languages. Set the 'Site Language' option in WordPress to your preference.
 
 **Which OpenAI models does the plugin use?**
 
@@ -410,6 +410,6 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 
 OpenAI, ChatGPT, and their respective trademarks are registered trademarks of OpenAI. NVIDIA, NIM, and their respective trademarks are registered trademarks of NVIDIA. Anthropic, Claude, and their respective trademarks are registered trademarks of Anthropic. Kognetiks is an independent entity and is neither affiliated with, endorsed by, nor sponsored by OpenAI, NVIDIA, or Anthropic.
 
-## Thank you for using Kognetiks Chatbot for WordPress
+## Thank you for using Kognetiks Chatbot
 
 Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/ai-powered-chatbot-for-wordpress/) for more information.

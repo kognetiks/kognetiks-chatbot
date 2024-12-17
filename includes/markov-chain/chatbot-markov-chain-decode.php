@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Markov Chain Decode - Flask - Ver 2.1.9
+ * Kognetiks Chatbot - Markov Chain Decode - Flask - Ver 2.1.9
  *
  * This file contains the code for implementing the Markov Chain algorithm
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Transformer Model - Sentential Context Model (SCM) - Ver 2.2.0
+ * Kognetiks Chatbot - Transformer Model - Sentential Context Model (SCM) - Ver 2.2.0
  *
  * This file contains the code for implementing an enhanced Transformer-like algorithm in PHP.
  *

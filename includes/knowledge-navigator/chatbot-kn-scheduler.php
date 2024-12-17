@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - Scheduler - Ver 1.6.3
+ * Kognetiks Chatbot - Knowledge Navigator - Scheduler - Ver 1.6.3
  *
  * This is the file that schedules the Knowledge Navigator.
  * Scheduled can be now, daily, weekly, etc.

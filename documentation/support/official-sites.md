@@ -1,6 +1,6 @@
 # Official Sites
 
-Please visit one of the official sites for more details on the **Kognetiks Chatbot for WordPress** plugin.
+Please visit one of the official sites for more details on the **Kognetiks Chatbot** plugin.
 
 - https://www.kognetiks.com
 
@@ -10,7 +10,7 @@ Please visit one of the official sites for more details on the **Kognetiks Chatb
 
 # Support
 
-Please use one of these resources to obtain support for the **Kognetiks Chatbot for WordPress** plugin.
+Please use one of these resources to obtain support for the **Kognetiks Chatbot** plugin.
 
 - [Support @ Discord](https://discord.gg/nXRzxUKvya)
 

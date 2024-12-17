@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - Enhance Context - Ver 1.6.9
+ * Kognetiks Chatbot - Knowledge Navigator - Enhance Context - Ver 1.6.9
  *
  * This file contains the code for to utilize the DB with the TF-IDF data to enhance the chatbots context.
  * 

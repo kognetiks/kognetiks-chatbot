@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Transients
+ * Kognetiks Chatbot - Transients
  *
  * This file contains the code for managing the transients used
  * to display the Chatbot on the website.

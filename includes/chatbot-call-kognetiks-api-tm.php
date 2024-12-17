@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Transformer Model API - Ver 2.2.0
+ * Kognetiks Chatbot - Transformer Model API - Ver 2.2.0
  *
  * This file contains the code accessing the Transformer API.
  * 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Custom Buttons
+ * Kognetiks Chatbot - Settings - Custom Buttons
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the custom buttons.
  * 

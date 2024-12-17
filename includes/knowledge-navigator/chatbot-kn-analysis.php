@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - TF-IDF Analyzer
+ * Kognetiks Chatbot - Knowledge Navigator - TF-IDF Analyzer
  *
  * This file contains the code for the Chatbot Knowledge Navigator analysis.
  * 

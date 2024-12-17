@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - NVIDIA API - Ver 1.6.9
+ * Kognetiks Chatbot - NVIDIA API - Ver 1.6.9
  *
  * This file contains the code for accessing the NVIDIA API.
  * 

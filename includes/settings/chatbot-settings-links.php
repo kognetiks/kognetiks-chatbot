@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Simplified Settings Links
+ * Kognetiks Chatbot - Simplified Settings Links
  *
  * This file is a simplified version of the Chatbot settings page.
  * It includes links for Settings, Deactivation, and Support.

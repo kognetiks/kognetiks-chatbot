@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - Settings
+ * Kognetiks Chatbot - Knowledge Navigator - Settings
  *
  * This file contains the code for the Chatbot settings page.
  * These are all the options for the Knowledge Navigator.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Transformer - Settings - Ver 2.1.6.1
+ * Kognetiks Chatbot - Transformer - Settings - Ver 2.1.6.1
  *
  * This file contains the code for the Transformer settings page.
  * It manages the settings and other parameters.

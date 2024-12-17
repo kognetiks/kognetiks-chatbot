@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Chatbot ChatGPT WIDGET ENDPOINT - Ver 2.1.3
+ * Kognetiks Chatbot - Chatbot ChatGPT WIDGET ENDPOINT - Ver 2.1.3
  *
  * This file contains the code accessing the Chatbot ChatGPT endpoint.
  * 

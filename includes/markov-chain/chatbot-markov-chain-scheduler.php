@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Markov Chain - Scheduler - Ver 2.1.6
+ * Kognetiks Chatbot - Markov Chain - Scheduler - Ver 2.1.6
  *
  * This is the file that schedules the building of the Markov Chain.
  * Scheduling can be set to now, daily, weekly, etc.

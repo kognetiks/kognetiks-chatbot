@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - ChatGPT Omni - Ver 2.0.2.1
+ * Kognetiks Chatbot - ChatGPT Omni - Ver 2.0.2.1
  *
  * This file contains the code for accessing the ChatGPT API.
  * 

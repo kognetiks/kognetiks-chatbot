@@ -1,6 +1,6 @@
 # Using the Token Data
 
-The Token Data settings allow you to monitor and export the token usage data collected by the **Kognetiks Chatbot for WordPress**. Tokens represent the smallest units of text processed by the chatbot, and tracking their usage helps in managing API costs and understanding chatbot activity. Follow these steps to understand and use these settings:
+The Token Data settings allow you to monitor and export the token usage data collected by the **Kognetiks Chatbot**. Tokens represent the smallest units of text processed by the chatbot, and tracking their usage helps in managing API costs and understanding chatbot activity. Follow these steps to understand and use these settings:
 
 ![Token Data](token-data.png)
 

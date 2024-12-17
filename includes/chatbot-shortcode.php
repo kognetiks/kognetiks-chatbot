@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - [chatbot_chatgpt] Shortcode Registration
+ * Kognetiks Chatbot - [chatbot_chatgpt] Shortcode Registration
  *
  * This file contains the code for registering the shortcode used
  * to display the Chatbot on the website.
@@ -1406,7 +1406,7 @@ function chatbot_chatgpt_attribution() {
         if ($chatbot_chatgpt_custom_attribution == 'Your custom attribution message goes here.' || empty($chatbot_chatgpt_custom_attribution)) { 
             ?>
             <div class="chatbot-attribution">
-                <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" class="chatbot-attribution-link"><?php echo esc_html('Chatbot WordPress plugin by Kognetiks'); ?></a>
+                <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" class="chatbot-attribution-link"><?php echo esc_html('Chatbot plugin by Kognetiks'); ?></a>
             </div>
             <?php
         } else {

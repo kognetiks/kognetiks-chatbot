@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - ChatGPT STT API - Ver 2.0.1
+ * Kognetiks Chatbot - ChatGPT STT API - Ver 2.0.1
  *
  * This file contains the code for generating text using
  * the speech-to-text API.

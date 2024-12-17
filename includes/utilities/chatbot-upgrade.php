@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Upgrade the Plugin
+ * Kognetiks Chatbot - Upgrade the Plugin
  *
  * This file contains the code for upgrading the plugin.
  * It should run with the plugin is activated or updated.

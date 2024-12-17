@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Reporting
+ * Kognetiks Chatbot - Settings - Reporting
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the reporting settings and other parameters.

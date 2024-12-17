@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Options Exporter - Ver 2.0.6
+ * Kognetiks Chatbot - Options Exporter - Ver 2.0.6
  *
  * This file contains the code for exporting the chatbot options.
  * 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Transformer Model - Lexical Context Model (LCM) - Ver 2.2.0
+ * Kognetiks Chatbot - Transformer Model - Lexical Context Model (LCM) - Ver 2.2.0
  *
  * This file contains the code for implementing a Transformer algorithm in PHP
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Notices
+ * Kognetiks Chatbot - Notices
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the notices and other parameters.

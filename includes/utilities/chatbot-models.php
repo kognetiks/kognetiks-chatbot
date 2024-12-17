@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Chatbot Models
+ * Kognetiks Chatbot - Chatbot Models
  *
  * This file contains the code to retrieve the list of available models
  * from OpenAI API and display them in the settings page.

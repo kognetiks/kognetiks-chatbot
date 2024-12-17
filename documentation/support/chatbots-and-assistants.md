@@ -8,7 +8,7 @@
 
 - ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited.
 
-- Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, **Kognetiks Chatbot for WordPress** is a plugin that allows you to effortlessly integrate OpenAI’s ChatGPT API into your website.
+- Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, **Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate OpenAI’s ChatGPT API into your website.
 
 - This provides a powerful, AI-driven chatbot for enhanced user experience and personalized support.
 For more information on using assistants, see https://beta.openai.com/docs/guides/assistants.

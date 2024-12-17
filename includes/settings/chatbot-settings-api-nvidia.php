@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - API/NVIDIA Page
+ * Kognetiks Chatbot - Settings - API/NVIDIA Page
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the API key and other parameters

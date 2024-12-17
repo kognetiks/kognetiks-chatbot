@@ -1,6 +1,6 @@
 # Messages and Diagnostics Settings
 
-The Messages and Diagnostics Settings help you monitor the health and performance of the **Kognetiks Chatbot for WordPress**, providing tools for error logging, API connection checks, and other diagnostics. Follow these steps to configure these options effectively:
+The Messages and Diagnostics Settings help you monitor the health and performance of the **Kognetiks Chatbot**, providing tools for error logging, API connection checks, and other diagnostics. Follow these steps to configure these options effectively:
 
 ![Messages and Diagnotics Overview](messages-and-diagnostics-overiew.png)
 
@@ -55,7 +55,7 @@ The Messages and Diagnostics Settings help you monitor the health and performanc
    - **Selection**: Choose `On` to suppress notices and warnings if you prefer a less verbose experience, otherwise set to `Off` to see all administrative messages associated with the chatbot.
 
 4. **Suppress Attribution**:
-   - **Description**: Allows you to suppress the attribution message ("Chatbot WordPress plugin by Kognetiks") displayed in both the `floating` and `embedded` style of the chatbot.
+   - **Description**: Allows you to suppress the attribution message ("Chatbot plugin by Kognetiks") displayed in both the `floating` and `embedded` style of the chatbot.
    - **Options**: `On` or `Off`.
    - **Selection**: Choose `On` to suppress the attribution message. Set to `Off` to display the message.
 

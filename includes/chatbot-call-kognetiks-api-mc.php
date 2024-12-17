@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Markov Chain API - Ver 2.0.8
+ * Kognetiks Chatbot - Markov Chain API - Ver 2.0.8
  *
  * This file contains the code accessing the Markov Chain API.
  * 

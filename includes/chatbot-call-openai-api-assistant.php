@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Assistants - Ver 1.6.9
+ * Kognetiks Chatbot - Assistants - Ver 1.6.9
  *
  * This file contains the code for access the OpenAI Assistants API.
  * 

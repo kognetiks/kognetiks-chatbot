@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Registration - Knowledge Navigator Settings - Ver 2.0.0
+ * Kognetiks Chatbot - Registration - Knowledge Navigator Settings - Ver 2.0.0
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the registration of settings and other parameters.

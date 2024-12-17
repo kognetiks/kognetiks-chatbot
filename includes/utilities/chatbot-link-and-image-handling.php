@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Link and Image Handling
+ * Kognetiks Chatbot - Link and Image Handling
  *
  * This file contains the code for uploading files as part
  * in support of Custom GPT Assistants via the Chatbot.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Globals - Ver 1.6.5
+ * Kognetiks Chatbot - Globals - Ver 1.6.5
  *
  * This file contains the code for global variables used
  * by the program.

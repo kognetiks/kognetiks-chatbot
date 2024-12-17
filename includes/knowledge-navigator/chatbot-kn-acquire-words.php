@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Knowledge Navigator - Acquire Words
+ * Kognetiks Chatbot - Settings - Knowledge Navigator - Acquire Words
  *
  * This file contains the code for the Chatbot Knowledge Navigator.
  * 

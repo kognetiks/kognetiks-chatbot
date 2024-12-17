@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Deactivate and/or Delete the Plugin
+ * Kognetiks Chatbot - Deactivate and/or Delete the Plugin
  *
  * This file contains the code for deactivating and/or deleting the plugin.
  * 

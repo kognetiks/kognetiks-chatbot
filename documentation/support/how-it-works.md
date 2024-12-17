@@ -1,4 +1,4 @@
-# How the Kognetiks Chatbot for WordPress Plugin Works: A Simple Explanation
+# How the Kognetiks Chatbot Plugin Works: A Simple Explanation
 
 Imagine you are having a conversation with a helpful assistant on a website. This assistant, or chatbot, is designed to provide you with information and answers to your questions.
 

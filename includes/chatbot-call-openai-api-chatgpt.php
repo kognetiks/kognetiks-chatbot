@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - ChatGPT API - Ver 1.6.9
+ * Kognetiks Chatbot - ChatGPT API - Ver 1.6.9
  *
  * This file contains the code for accessing the ChatGPT API.
  * 

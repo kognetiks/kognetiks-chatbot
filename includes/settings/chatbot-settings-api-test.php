@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - API/Model Test
+ * Kognetiks Chatbot - Settings - API/Model Test
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the API key and other parameters

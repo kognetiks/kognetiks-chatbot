@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Diagnostics
+ * Kognetiks Chatbot - Settings - Diagnostics
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the reporting and other parameters
@@ -124,7 +124,7 @@ function chatbot_chatgpt_diagnostics_overview_section_callback($args) {
         <p>The Diagnostics tab checks the API status and set options for diagnostics and notices.</p>
         <p>You can turn on/off console and error logging (as of Version 1.6.5 most are now commented out).</p>
         <!-- <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p> -->
-        <p>You can also suppress attribution ('Chatbot WordPress plugin by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
+        <p>You can also suppress attribution ('Chatbot plugin by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
         <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the diagnostics, messages, and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=messages&file=messages.md">here</a>.</b></p>
     <?php

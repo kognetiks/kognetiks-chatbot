@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Database Management for Reporting - Ver 1.6.3
+ * Kognetiks Chatbot - Database Management for Reporting - Ver 1.6.3
  *
  * This file contains the code for table actions for reporting
  * to display the Chatbot on the website.

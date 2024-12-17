@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - ChatGPT TTS API - Ver 1.9.4
+ * Kognetiks Chatbot - ChatGPT TTS API - Ver 1.9.4
  *
  * This file contains the code for generating images using
  * the text-to-speech API.

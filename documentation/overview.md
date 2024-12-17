@@ -1,10 +1,10 @@
-# **Kognetiks Chatbot for WordPress** Plugin Documentation
+# **Kognetiks Chatbot** Plugin Documentation
 
-**Kognetiks Chatbot for WordPress** is a plugin that allows you to effortlessly integrate OpenAI’s ChatGPT API or NVIDIA's NIM API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
+**Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate OpenAI’s ChatGPT API or NVIDIA's NIM API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
 
 Conversational AI platforms - like those from OpenAI, NVIDIA, and others - use natural language processing and machine learning algorithms to interact with users in a human-like manner. They are designed to answer questions, provide suggestions, and engage in conversations with users. This is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, these platforms can be used in various fields such as healthcare, education, finance, and many more.
 
-The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA, Anthropic or other AI platforms, via their APIs and Models to bring artificial intelligence to life within your WordPress website.
+The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI platforms, via their APIs and Models to bring artificial intelligence to life within your WordPress website.
 
 **Important Note:** This plugin requires an API key from OpenAI, NVIDIA or other AI platform vendors, to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys or https://build.nvidia.com/nim.
 
@@ -54,7 +54,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA, Anthropic 
 
 ## What's new in Version 2.1.3
 
-* **Remote Server Access**: The **Kognetiks Chatbot for WordPress** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
+* **Remote Server Access**: The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
 * **Improving Math Handling**: Integrated code enhances chatbot’s ability to render complex mathematical expressions.
 * **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
@@ -78,7 +78,7 @@ The **Kognetiks Chatbot for WordPress** is powered by OpenAI, NVIDIA, Anthropic 
 
 * **Adjusted Module Name Conflict**: Renamed one module that had a name conflict with another vendor's plugin.
 * **Reworked Conversation Continuity**: Improved the way the chatbot handles conversation continuity for visitors and logged-in users, ensuring a seamless experience across pages.
-* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WordPress plugin by Kognetiks' with a text message of your choosing.
+* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot plugin by Kognetiks' with a text message of your choosing.
 * **Refactored Inline Styles**: Moved inline styles to an external CSS file for better maintainability and separation of concerns.
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.

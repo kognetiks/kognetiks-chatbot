@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - Enhance Response - Ver 1.6.9
+ * Kognetiks Chatbot - Knowledge Navigator - Enhance Response - Ver 1.6.9
  * 
  * Updates
  * 

@@ -1,6 +1,6 @@
 # Configuring the API/Anthropic Settings
 
-The **Kognetiks Chatbot for WordPress** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
+The **Kognetiks Chatbot** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
 
 ![Anthropic API](api-anthropic-settings.png)
 

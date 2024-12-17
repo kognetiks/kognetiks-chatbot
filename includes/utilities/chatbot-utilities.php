@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Utilities - Ver 1.8.1
+ * Kognetiks Chatbot - Utilities - Ver 1.8.1
  *
  * This file contains the code for plugin utilities.
  * It is used to check for mobile devices and other utilities.

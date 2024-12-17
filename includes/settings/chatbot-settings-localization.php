@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Localization
+ * Kognetiks Chatbot - Localization
  *
  * This file contains the code for localization of the Chatbot globals.
  * It uses the ChatGPT API to translate the global variables into your language

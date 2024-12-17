@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - API/Anthropic Page
+ * Kognetiks Chatbot - Settings - API/Anthropic Page
  *
  * This file contains the code for the Anthropic settings page.
  * It allows users to configure the API key and other parameters

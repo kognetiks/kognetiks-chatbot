@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Anthropic API - Ver 2.0.8
+ * Kognetiks Chatbot - Anthropic API - Ver 2.0.8
  *
  * This file contains the code accessing the Anthropic's API.
  * 

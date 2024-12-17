@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Localize
+ * Kognetiks Chatbot - Localize
  *
  * This file contains the code for the Chatbot settings page.
  * It localizes the settings and other parameters.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Threads
+ * Kognetiks Chatbot - Threads
  *
  * This file contains the code for managing the threads used
  * to display the Chatbot on the website.

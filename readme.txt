@@ -1,4 +1,4 @@
-=== Kognetiks Chatbot for WordPress ===
+=== Kognetiks Chatbot ===
 Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, artificial intelligence
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
@@ -15,11 +15,11 @@ Effortlessly add conversational AI to your WordPress site! Integrate OpenAI Chat
 
 **Transform Your WordPress Site with the Kognetiks Chatbot**
 
-The **Kognetiks Chatbot for WordPress** is a feature-rich AI plugin that leverages OpenAI’s ChatGPT to deliver an intelligent, conversational experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
+The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI’s ChatGPT to deliver an intelligent, conversational experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
 
 🌟 **AI Platform Options**:
 
-* With **Version 2.1.8**, the **Kognetiks Chatbot for WordPress** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
+* With **Version 2.1.8**, the **Kognetiks Chatbot** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
 
 * **OpenAI's ChatGPT API**: Engage visitors with natural, human-like responses for rich conversational experiences.
 
@@ -206,7 +206,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 2.1.3 - Released 08-31-2024 =
 
-* **Remote Server Access**: The **Kognetiks Chatbot for WordPress** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
+* **Remote Server Access**: The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
 * **Improving Math Handling**: Integrated code enhances chatbot’s ability to render complex mathematical expressions.
 * **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
@@ -227,7 +227,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 = 2.0.9 - Released 08-17-2024 =
 * **Adjusted Module Name Conflict**: Renamed one module that had a name conflict with another vendor's plugin.
 * **Reworked Conversation Continuity**: Improved the way the chatbot handles conversation continuity for visitors and logged-in users, ensuring a seamless experience across pages.
-* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WordPress plugin by Kognetiks' with a text message of your choosing.
+* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot plugin by Kognetiks' with a text message of your choosing.
 * **Refactored Inline Styles**: Moved inline styles to an external CSS file for better maintainability and separation of concerns.
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.
@@ -373,7 +373,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Hot prompts can be used with floating/embedded and with assistants, i.e., where ever you can add a shortcode.
 
 = 1.9.0 =
-* Changed the name of the chatbot to Kognetiks Chatbot for WordPress
+* Changed the name of the chatbot to Kognetiks Chatbot
 * Re-sequenced user's custom CSS to load for precedence over the plugin's CSS to allow for easier customization.
 * Added functionality to set the audience choice for the chatbot: All Audiences, Logged-in Only, or Visitors Only
 
@@ -474,7 +474,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Added output buffering.
 
 = 1.6.7 =
-* The Kognetiks Chatbot for WordPress now supports Custom GPTs developed in the OpenAI Playground.
+* The Kognetiks Chatbot now supports Custom GPTs developed in the OpenAI Playground.
 * See [https://platform.openai.com/docs/assistants/overview](https://platform.openai.com/docs/assistants/overview) to learn more about Assistants.
 * Added an expanded selection of seasonal avatars celebrating Chinese New Year, Christmas, Fall, Halloween, Spring, Summer, Thanksgiving, and Winter.
 * Enhanced CSS adaptation to improve compatibility across different themes.
