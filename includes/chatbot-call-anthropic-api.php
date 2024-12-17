@@ -202,9 +202,6 @@ function chatbot_call_anthropic_api($api_key, $message) {
         'timeout' => $timeout,
     ));
 
-    // Retrieve and Decode Response
-    $response_body = json_decode(wp_remote_retrieve_body($response), true);
-
     // Handle WP Error
     if (is_wp_error($response)) {
 
@@ -214,11 +211,18 @@ function chatbot_call_anthropic_api($api_key, $message) {
 
     }
 
+    // Retrieve and Decode Response
+    $response_body = json_decode(wp_remote_retrieve_body($response), true);
+
     // Handle API Errors
-    if (isset($response['type']) && $response['type'] === 'error') {
+    if (isset($response_body['error'])) {
+
+        // Extract error type and message safely
+        $error_type = $response_body['error']['type'] ?? 'Unknown Error Type';
+        $error_message = $response_body['error']['message'] ?? 'No additional information.';
 
         // DIAG - Diagnostics
-        prod_trace('ERROR', 'Error: Type: ' . $response_body['error']['type'] . ' Message: ' . $response_body['error']['message']);
+        prod_trace('ERROR', 'Error: Type: Type: ' . $error_type . ' Message: ' . $error_message);
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';
 
     }

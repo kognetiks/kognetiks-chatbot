@@ -141,7 +141,7 @@ The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI pl
 
 - [API/NVIDIA Settings](api-nvidia-settings/api-nvidia-model-settings.md)
 
-= [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
+- [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
 
 - [Assistants](assistants/manage-assistants.md)
 

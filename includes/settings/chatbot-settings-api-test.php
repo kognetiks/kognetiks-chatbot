@@ -281,29 +281,36 @@ function kchat_fetch_api_status($api_key, $model) {
             ));
 
             // Get the response body
-            $response_body = wp_remote_retrieve_body($response);
+            $response_data = json_decode(wp_remote_retrieve_body($response));
 
             // Check for API-specific errors
+            
+            if (isset($response_data['error'])) {
 
-            // DIAG - Diagnostics - Ver 2.2.1
-            back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
-
-            if (isset($response_body['error'])) {
+                // Extract error type and message safely
+                $error_type = $response_data['error']['type'] ?? 'Unknown Error Type';
+                $error_message = $response_data['error']['message'] ?? 'No additional information.';
+            
                 // Handle error response
-                $error_type = $response_body['error']['type'] ?? 'Unknown';
-                $error_message = $response_body['error']['message'] ?? 'No additional information.';
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
                 back_trace('ERROR', 'API Status: ' . $updated_status);
             
-            } elseif (isset($response_body['content']) && is_array($response_body['content'])) {
+            } elseif (isset($response_data['type']) && $response_data['type'] === 'message') {
+
+                // Handle successful response
+                $content_type = $response_data['content'][0]['type'] ?? 'Unknown Content Type';
+                $content_text = $response_data['content'][0]['text'] ?? 'No content available.';
+            
                 // Handle successful response
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
                 back_trace('SUCCESS', 'API Status: ' . $updated_status);
-            
+
             } else {
+
                 // Handle unexpected response structure
                 $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
                 back_trace('ERROR', 'API Status: ' . $updated_status);
+
             }
             
             update_option('chatbot_anthropic_api_status', $updated_status);
