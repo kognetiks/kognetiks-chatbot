@@ -382,7 +382,9 @@ function log_chatbot_error() {
     global $chatbot_chatgpt_plugin_dir_path;
     
     if (isset($_POST['error_message'])) {
+
         $error_message = sanitize_text_field($_POST['error_message']);
+
         $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
 
         // Ensure the directory and index file exist
@@ -413,6 +415,7 @@ function log_chatbot_error() {
         // Append the error message to the log file
         file_put_contents($log_file, $log_message, FILE_APPEND | LOCK_EX);
     }
+    
     wp_die(); // this is required to terminate immediately and return a proper response
 }
 
