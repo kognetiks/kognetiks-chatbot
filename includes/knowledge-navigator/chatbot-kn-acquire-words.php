@@ -22,19 +22,22 @@ function kn_acquire_words($content, $option = null) {
     global $topWords;
 
     // Ensure $content is in UTF-8
-    if (mb_detect_encoding($content, 'UTF-8', true) !== 'UTF-8') {
-        $content = mb_convert_encoding($content, 'UTF-8', 'auto');
-    }
+    // if (mb_detect_encoding($content, 'UTF-8', true) !== 'UTF-8') {
+    //     $content = mb_convert_encoding($content, 'UTF-8', 'auto');
+    // }
 
     // Translate stop words
-    if (get_locale() !== "en_US") {
-        $localized_stopWords = get_localized_stopwords(get_locale(), $stopWords);
-        $localized_stopWords = array_map(function($word) {
-            return mb_convert_encoding($word, 'UTF-8', 'auto');
-        }, $localized_stopWords);
-    } else {
-        $localized_stopWords = $stopWords;
-    }
+    // if (get_locale() !== "en_US") {
+    //     $localized_stopWords = get_localized_stopwords(get_locale(), $stopWords);
+    //     $localized_stopWords = array_map(function($word) {
+    //         return mb_convert_encoding($word, 'UTF-8', 'auto');
+    //     }, $localized_stopWords);
+    // } else {
+    //     $localized_stopWords = $stopWords;
+    // }
+
+    // FIXME - CZECH OVERRIDE - REMOVED IN VER 2.2.1 - 2024-12-24
+    $localized_stopWords = $stopWords;
 
     // Filter out HTML tags
     $words = chatbot_chatgpt_filter_out_html_tags($content);
@@ -61,9 +64,9 @@ function kn_acquire_words($content, $option = null) {
 
         foreach ($words as $word => $count) {
             $word = htmlspecialchars_decode($word, ENT_QUOTES); // Decode HTML entities
-            if (mb_detect_encoding($word, 'UTF-8', true) !== 'UTF-8') {
-                $word = mb_convert_encoding($word, 'UTF-8', 'auto');
-            }
+            // if (mb_detect_encoding($word, 'UTF-8', true) !== 'UTF-8') {
+            //     $word = mb_convert_encoding($word, 'UTF-8', 'auto');
+            // }
             $escaped_word = esc_sql($word);
             $wpdb->query(
                 $wpdb->prepare(

@@ -22,15 +22,15 @@ function dbKNStore() {
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
 
-    // Fallback cascade for invalid or unsupported character sets
-    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
-        if (strpos($charset_collate, 'utf8') === false) {
-            // Fallback to utf8 if utf8mb4 is not supported
-            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
-        }
-    }
+    // // Fallback cascade for invalid or unsupported character sets
+    // if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+    //     if (strpos($charset_collate, 'utf8') === false) {
+    //         // Fallback to utf8 if utf8mb4 is not supported
+    //         $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+    //     }
+    // }
 
-    // FIXME - IRISH TEXT ENCODING
+    // FIXME - IRISH TEXT ENCODING - REMOVED IN VER 2.2.1 - 2024-12-24
     // $charset_collate = "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci";
 
     // Drop table if it exists
@@ -73,14 +73,14 @@ function dbKNStoreTFIDF() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
     // Fallback cascade for invalid or unsupported character sets
-    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
-        if (strpos($charset_collate, 'utf8') === false) {
-            // Fallback to utf8 if utf8mb4 is not supported
-            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
-        }
-    }
+    // if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+    //     if (strpos($charset_collate, 'utf8') === false) {
+    //         // Fallback to utf8 if utf8mb4 is not supported
+    //         $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+    //     }
+    // }
 
-    // FIXME - IRISH TEXT ENCODING
+    // FIXME - IRISH TEXT ENCODING - REMOVED IN VER 2.2.1 - 2024-12-24
     // $charset_collate = "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci";
 
     // Drop table if it exists
@@ -120,14 +120,14 @@ function dbKNStoreWordCount() {
 
     $charset_collate = $wpdb->get_charset_collate();
     // Fallback cascade for invalid or unsupported character sets
-    if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
-        if (strpos($charset_collate, 'utf8') === false) {
-            // Fallback to utf8 if utf8mb4 is not supported
-            $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
-        }
-    }
+    // if (empty($charset_collate) || strpos($charset_collate, 'utf8mb4') === false) {
+    //     if (strpos($charset_collate, 'utf8') === false) {
+    //         // Fallback to utf8 if utf8mb4 is not supported
+    //         $charset_collate = "CHARACTER SET utf8 COLLATE utf8_general_ci";
+    //     }
+    // }
 
-    // FIXME - IRISH TEXT ENCODING
+    // FIXME - IRISH TEXT ENCODING - REMOVED IN VER 2.2.1 - 2024-12-24
     // $charset_collate = "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci";
 
     // Drop table if it exists

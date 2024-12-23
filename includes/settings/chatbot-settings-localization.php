@@ -16,6 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Cache the stopwords for the language - Ver 1.7.2
 function get_localized_stopwords($language_code, $stopWords) {
+
     // Check if the stopwords for this language are already cached
     $cached_stopwords = get_transient('chatbot_chatgpt_stopwords_' . $language_code);
 
@@ -27,6 +28,7 @@ function get_localized_stopwords($language_code, $stopWords) {
     }
 
     return $cached_stopwords;
+    
 }
 
 // Use ChatGPT to translate global variables - Ver 1.7.2

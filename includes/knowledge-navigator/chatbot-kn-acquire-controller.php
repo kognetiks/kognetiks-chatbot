@@ -50,7 +50,7 @@ function chatbot_kn_acquire_controller() {
     $action = esc_attr( get_option( 'chatbot_chatgpt_kn_action', 'initialize' ) ); // Default to run to kick off the process
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
+    back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action: ' . $action  . ' ' . date('Y-m-d H:i:s') );
 
     switch ( $action ) {
         case 'initialize':
@@ -109,14 +109,14 @@ function chatbot_kn_initialization() {
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_phase_1_initialization' );
+    back_trace( 'NOTICE', 'chatbot_kn_phase_1_initialization' );
 
     // Since this is the first step, set the item count = 0
     update_option( 'chatbot_chatgpt_kn_item_count', 0 );
 
     // Define the batch size
     // FIXME - This should be set in the settings and default to 100
-    update_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
+    update_option('chatbot_chatgpt_kn_items_per_batch', 50); // Fetching 100 items at a time
 
     // Reset the chatbot_chatgpt_knowledge_base table
     dbKNStore();
@@ -152,7 +152,7 @@ function chatbot_kn_reinitialization() {
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_phase_2_initialization' );
+    back_trace( 'NOTICE', 'chatbot_kn_phase_2_initialization' );
 
     // Initialize the $topWords array
     $topWords = [];
@@ -216,7 +216,7 @@ function chatbot_kn_count_documents() {
     update_option('chatbot_chatgpt_kn_document_count', $document_count);
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_count_documents: ' . $document_count );
+    back_trace( 'NOTICE', 'chatbot_kn_count_documents: ' . $document_count );
 
 }
 
@@ -226,18 +226,18 @@ function chatbot_kn_run_phase_1() {
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_run_phase_1' );
+    back_trace( 'NOTICE', 'chatbot_kn_run_phase_1' );
 
     // Get the item count
     $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 100)); // Fetching 100 items at a time
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 100 items at a time
     $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$offset: ' . $offset );
-    // back_trace( 'NOTICE', '$batch_size: ' . $batch_size );
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_no_of_items_analyzed: ' . $chatbot_chatgpt_no_of_items_analyzed );
+    back_trace( 'NOTICE', '$offset: ' . $offset );
+    back_trace( 'NOTICE', '$batch_size: ' . $batch_size );
+    back_trace( 'NOTICE', '$chatbot_chatgpt_no_of_items_analyzed: ' . $chatbot_chatgpt_no_of_items_analyzed );
 
     // Set the next starting point
     update_option( 'chatbot_chatgpt_kn_item_count', $offset + $batch_size );
@@ -245,14 +245,27 @@ function chatbot_kn_run_phase_1() {
     // Define published types to include based on settings
     $post_types = [];
     if (esc_attr(esc_attr(get_option('chatbot_chatgpt_kn_include_pages', 'No'))) === 'Yes') {
+        back_trace( 'NOTICE', 'Include pages');
         $post_types[] = 'page';
     }
     if (esc_attr(get_option('chatbot_chatgpt_kn_include_posts', 'No')) === 'Yes') {
+        back_trace( 'NOTICE', 'Include posts');
         $post_types[] = 'post';
         $post_types[] = 'epkb_post_type_1';  // Assuming you always want to include this type
     }
     if (esc_attr(get_option('chatbot_chatgpt_kn_include_products', 'No')) === 'Yes') {
+        back_trace( 'NOTICE', 'Include products');
         $post_types[] = 'product';
+    }
+
+    // If the user did not select any post types, skip and move to phase 2
+    if ( empty( $post_types ) ) {
+        back_trace( 'NOTICE', 'No post types were selected. Moving to phase 2...' );
+        update_option( 'chatbot_chatgpt_kn_action', 'phase 2' );
+
+        // Schedule the next action
+        wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+        return;
     }
 
     // Prepare the SQL query part for post types
@@ -265,15 +278,22 @@ function chatbot_kn_run_phase_1() {
     );
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$prepared_query: ' . $prepared_query );
+    back_trace( 'NOTICE', '$prepared_query: ' . $prepared_query );
 
     // Get the published items
     $results = $wpdb->get_results($prepared_query);
 
+    // Handle any any database errors
+    if ( is_wp_error( $results ) ) {
+        // DIAG - Diagnostics - Ver 1.9.6
+        prod_trace( 'ERROR', 'Database error: ' . $results->get_error_message() );
+        return;
+    }
+
     // If the $results = false, then there are no more items to process
     if ( empty($results) ) {
         // DIAG - Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', 'No more items to process' );
+        back_trace( 'NOTICE', 'No more items to process' );
         update_option( 'chatbot_chatgpt_kn_action', 'phase 2' );
 
         // Schedule the next action
@@ -287,7 +307,7 @@ function chatbot_kn_run_phase_1() {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     // back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        
 
         // Directly use the post content
@@ -295,13 +315,14 @@ function chatbot_kn_run_phase_1() {
 
         if (!empty($Content)) {
             // Check if content is already UTF-8
-            if (mb_detect_encoding($Content, 'UTF-8', true) !== 'UTF-8') {
-                // Convert to UTF-8 only if it's not already
-                $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', 'auto');
-            } else {
-                // Content is already UTF-8
-                $ContentUtf8 = $Content;
-            }
+            // if (mb_detect_encoding($Content, 'UTF-8', true) !== 'UTF-8') {
+            //     // Convert to UTF-8 only if it's not already
+            //     $ContentUtf8 = mb_convert_encoding($Content, 'UTF-8', 'auto');
+            // } else {
+            //     // Content is already UTF-8
+            //     $ContentUtf8 = $Content;
+            // }
+            $ContentUtf8 = $Content;
         
             // Pass UTF-8 content to the function
             kn_acquire_words($ContentUtf8, 'add');
@@ -336,18 +357,18 @@ function chatbot_kn_run_phase_3() {
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_run_phase_3' );
+    back_trace( 'NOTICE', 'chatbot_kn_run_phase_3' );
 
     // Get the item count
     $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 100)); // Fetching 100 items at a time
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 100 items at a time
     $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$offset: ' . $offset );
-    // back_trace( 'NOTICE', '$batch_size: ' . $batch_size );
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_no_of_items_analyzed: ' . $chatbot_chatgpt_no_of_items_analyzed );
+    back_trace( 'NOTICE', '$offset: ' . $offset );
+    back_trace( 'NOTICE', '$batch_size: ' . $batch_size );
+    back_trace( 'NOTICE', '$chatbot_chatgpt_no_of_items_analyzed: ' . $chatbot_chatgpt_no_of_items_analyzed );
 
     // Set the next starting point
     update_option( 'chatbot_chatgpt_kn_item_count', $offset + $batch_size );
@@ -369,12 +390,12 @@ function chatbot_kn_run_phase_3() {
         $results = $wpdb->get_results($prepared_query, ARRAY_A);
     
         // DIAG - Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', '$prepared_query: ' . $prepared_query);
+        back_trace( 'NOTICE', '$prepared_query: ' . $prepared_query);
 
     } else {
 
         // DIAG - Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', 'Exclude comments');
+        back_trace( 'NOTICE', 'Exclude comments');
 
         unset($results);
 
@@ -388,7 +409,7 @@ function chatbot_kn_run_phase_3() {
     // If the $results = false, then there are no more items to process
     if ( empty($results) ) {
         // DIAG - Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', 'No more items to process' );
+        back_trace( 'NOTICE', 'No more items to process' );
         update_option( 'chatbot_chatgpt_kn_action', 'phase 4' );
         // Schedule the next action
         wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
@@ -402,7 +423,7 @@ function chatbot_kn_run_phase_3() {
 
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     // back_trace( 'NOTICE', "Key: $key, Value: $value");
+        //     back_trace( 'NOTICE', "Key: $key, Value: $value");
         // }        
 
         // Directly use the post content
@@ -412,7 +433,7 @@ function chatbot_kn_run_phase_3() {
             // Handle the case where the key does not exist
             $commentContent = "";
             // DIAG - Diagnostics - Ver 1.9.6
-            // back_trace( 'NOTICE', 'Comment has empty content.');
+            back_trace( 'NOTICE', 'Comment has empty content.');
             continue;
         }
        
@@ -521,7 +542,7 @@ function chatbot_kn_run_phase_4() {
 function chatbot_kn_run_phase_5() {
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_run_phase_5' );
+    back_trace( 'NOTICE', 'chatbot_kn_run_phase_5' );
 
     // REINITIALIZE THE BATCH ACQUISITION
 
@@ -530,7 +551,7 @@ function chatbot_kn_run_phase_5() {
 
     // Define the batch size
     // FIXME - This should be set in the settings and default to 100
-    update_option('chatbot_chatgpt_kn_items_per_batch', 100); // Fetching 100 items at a time
+    update_option('chatbot_chatgpt_kn_items_per_batch', 50); // Fetching 100 items at a time
 
     // chatbot_kn_schedule_batch_acquisition();
     update_option( 'chatbot_chatgpt_kn_action', 'phase 6' );
@@ -546,18 +567,18 @@ function chatbot_kn_run_phase_6() {
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_run_phase_5' );
+    back_trace( 'NOTICE', 'chatbot_kn_run_phase_5' );
 
     // Get the item count
     $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
     // FIXME - This should be set in the settings and default to 100
-    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 100)); // Fetching 100 items at a time
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 100 items at a time
     $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$offset: ' . $offset );
-    // back_trace( 'NOTICE', '$batch_size: ' . $batch_size );
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_no_of_items_analyzed: ' . $chatbot_chatgpt_no_of_items_analyzed );
+    back_trace( 'NOTICE', '$offset: ' . $offset );
+    back_trace( 'NOTICE', '$batch_size: ' . $batch_size );
+    back_trace( 'NOTICE', '$chatbot_chatgpt_no_of_items_analyzed: ' . $chatbot_chatgpt_no_of_items_analyzed );
 
     // Set the next starting point
     update_option( 'chatbot_chatgpt_kn_item_count', $offset + $batch_size );
@@ -585,7 +606,7 @@ function chatbot_kn_run_phase_6() {
     );
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$prepared_query: ' . $prepared_query );
+    back_trace( 'NOTICE', '$prepared_query: ' . $prepared_query );
 
     // Get the published items
     $results = $wpdb->get_results($prepared_query);
@@ -593,7 +614,7 @@ function chatbot_kn_run_phase_6() {
     // If the $results = false, then there are no more items to process
     if ( empty($results) ) {
         // DIAG - Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', 'No more items to process' );
+        back_trace( 'NOTICE', 'No more items to process' );
         update_option( 'chatbot_chatgpt_kn_action', 'phase 7' );
 
         // Schedule the next action
@@ -607,7 +628,7 @@ function chatbot_kn_run_phase_6() {
     foreach ($results as $result) {
         // DIAG - Diagnostic - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     // back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        
 
         // Directly use the post content
@@ -711,17 +732,17 @@ function chatbot_kn_output_the_results() {
 
     // Generate directory path
     $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
-    // back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
+    back_trace( 'NOTICE', 'results_dir_path: ' . $results_dir_path);
 
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace( 'ERROR', 'Failed to create directory.');
+        back_trace( 'ERROR', 'Failed to create directory.');
         return;
     }
 
     // DIAG - Log directory path for debugging
-    // back_trace( 'NOTICE', 'Directory path: ' . $results_dir_path);
+    back_trace( 'NOTICE', 'Directory path: ' . $results_dir_path);
 
     // Remove legacy files
     if (file_exists($results_dir_path . 'results-comments.log')) {
@@ -736,7 +757,7 @@ function chatbot_kn_output_the_results() {
 
     // Prepare CSV file for output
     $results_csv_file = $results_dir_path . 'results.csv';
-    // back_trace( 'NOTICE', 'CSV file for output: ' . $results_csv_file);
+    back_trace( 'NOTICE', 'CSV file for output: ' . $results_csv_file);
 
     // Delete CSV file if it already exists
     if (file_exists($results_csv_file)) {
@@ -745,7 +766,7 @@ function chatbot_kn_output_the_results() {
 
     // Prepare JSON file for output
     $results_json_file = $results_dir_path . 'results.json';
-    // back_trace( 'NOTICE', 'JSON file: ' . $results_json_file);
+    back_trace( 'NOTICE', 'JSON file: ' . $results_json_file);
 
     // Delete JSON file if it already exists
     if (file_exists($results_json_file)) {
@@ -765,7 +786,7 @@ function chatbot_kn_output_the_results() {
             $f->fputcsv([$result->word, $result->score]);
         }
     } catch (RuntimeException $e) {
-        // back_trace( 'ERROR', 'Failed to open CSV file for writing: ' . $e->getMessage());
+        back_trace( 'ERROR', 'Failed to open CSV file for writing: ' . $e->getMessage());
     }
 
     // Write JSON for pages, posts, and products
@@ -774,7 +795,7 @@ function chatbot_kn_output_the_results() {
             throw new Exception("Failed to write to JSON file.");
         }
     } catch (Exception $e) {
-        // back_trace( 'ERROR', $e->getMessage());
+        back_trace( 'ERROR', $e->getMessage());
     }
 
     // Close the files
@@ -794,7 +815,7 @@ function chatbot_kn_output_the_results() {
     
     $chatbot_chatgpt_kn_conversation_context .= "and more.";
 
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_conversation_context: ' . $chatbot_chatgpt_kn_conversation_context);
+    back_trace( 'NOTICE', 'chatbot_chatgpt_kn_conversation_context: ' . $chatbot_chatgpt_kn_conversation_context);
     
     // Save the results in the option for later use
     update_option('chatbot_chatgpt_kn_conversation_context', $chatbot_chatgpt_kn_conversation_context);
@@ -804,7 +825,7 @@ function chatbot_kn_output_the_results() {
 
     // // Now write the .log files
     // $tfidf_results = $results_dir_path . 'tfidf_results.csv';
-    // // back_trace( 'NOTICE', 'Log file: ' . $tfidf_results);
+    // back_trace( 'NOTICE', 'Log file: ' . $tfidf_results);
 
     // // Delete log file if it already exists
     // if (file_exists($tfidf_results)) {
@@ -824,7 +845,7 @@ function chatbot_kn_output_the_results() {
     //         $f->fputcsv([$result->id, $result->url, $result->title, $result->word, $result->score]);
     //     }
     // } catch (RuntimeException $e) {
-    //     // back_trace( 'ERROR', 'Failed to open log file for writing: ' . $e->getMessage());
+    //     back_trace( 'ERROR', 'Failed to open log file for writing: ' . $e->getMessage());
     // }
 
     // // Close the file
@@ -845,11 +866,11 @@ function chatbot_kn_output_the_results() {
 function chatbot_kn_wrap_up() {
 
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'chatbot_kn_wrap_up' );
+    back_trace( 'NOTICE', 'chatbot_kn_wrap_up' );
 
     // FIXME - Drop the chatbot_chatgpt_knowledge_base_word_count table
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
+    back_trace( 'NOTICE', 'Dropping chatbot_chatgpt_knowledge_base_word_count table' );
     dbKNClean();
 
     // Save the results message value into the option
