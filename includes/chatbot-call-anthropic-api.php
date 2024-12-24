@@ -258,7 +258,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
 
     // Add the usage to the conversation tracker
 
-    back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens
     $input_tokens = $response_body['usage']['input_tokens'] ?? 0;

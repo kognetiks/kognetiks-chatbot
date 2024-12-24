@@ -15,22 +15,22 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set up the Chatbot Main Menu Page - Ver 1.9.0
-function chatbot_chatgpt_menu_page() {
+// function chatbot_chatgpt_menu_page() {
 
-    add_menu_page(
-        'Chatbot Settings',                     // Page title
-        'Kognetiks Chatbot',                    // Menu title
-        'manage_options',                       // Capability
-        'chatbot-chatgpt',                      // Menu slug
-        'chatbot_chatgpt_settings_page_html',   // Callback function
-        'dashicons-format-chat'                 // Icon URL (optional)
-    );
+//     add_menu_page(
+//         'Chatbot Settings',                     // Page title
+//         'Kognetiks Chatbot',                    // Menu title
+//         'manage_options',                       // Capability
+//         'chatbot-chatgpt',                      // Menu slug
+//         'chatbot_chatgpt_settings_page',   // Callback function
+//         'dashicons-format-chat'                 // Icon URL (optional)
+//     );
 
-}
-add_action('admin_menu', 'chatbot_chatgpt_menu_page');
+// }
+// add_action('admin_menu', 'chatbot_chatgpt_menu_page');
 
 // Settings page HTML - Ver 1.3.0
-function chatbot_chatgpt_settings_page_html() {
+function chatbot_chatgpt_settings_page() {
     
     if (!current_user_can('manage_options')) {
         return;
@@ -76,9 +76,8 @@ function chatbot_chatgpt_settings_page_html() {
     }
 
     ?>
-    <div class="wrap">
-        <!-- <h1><span class="dashicons dashicons-format-chat"></span> <?php echo esc_html(get_admin_page_title()); ?></h1> -->
-        <h1><span class="dashicons dashicons-format-chat"></span> Chatbot Settings</h1>
+    <div id="chatbot-chatgpt-settings" class="wrap">
+        <h1><span class="dashicons dashicons-format-chat" style="font-size: 25px;"></span> Kognetiks Chatbot</h1>
 
        <script>
             window.onload = function() {

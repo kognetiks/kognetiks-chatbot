@@ -270,9 +270,9 @@ function kchat_fetch_api_status($api_key, $model) {
             $body = json_encode($body);
 
             // DIAG - Diagnostics
-            ksum_back_trace( 'NOTICE', 'URL: ' . $api_url);
-            ksum_back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
-            ksum_back_trace( 'NOTICE', 'Body: ' . $body);
+            // back_trace( 'NOTICE', 'URL: ' . $api_url);
+            // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
+            // back_trace( 'NOTICE', 'Body: ' . $body);
 
             // Call the API
             $response = wp_remote_post($api_url, array(
@@ -293,7 +293,7 @@ function kchat_fetch_api_status($api_key, $model) {
             
                 // Handle error response
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-                back_trace('ERROR', 'API Status: ' . $updated_status);
+                // back_trace('ERROR', 'API Status: ' . $updated_status);
             
             } elseif (isset($response_data['type']) && $response_data['type'] === 'message') {
 
@@ -303,13 +303,13 @@ function kchat_fetch_api_status($api_key, $model) {
             
                 // Handle successful response
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                back_trace('SUCCESS', 'API Status: ' . $updated_status);
+                // back_trace('SUCCESS', 'API Status: ' . $updated_status);
 
             } else {
 
                 // Handle unexpected response structure
                 $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-                back_trace('ERROR', 'API Status: ' . $updated_status);
+                // back_trace('ERROR', 'API Status: ' . $updated_status);
 
             }
             

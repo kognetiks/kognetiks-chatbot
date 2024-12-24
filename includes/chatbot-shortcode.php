@@ -379,7 +379,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
         $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'openai'));
         // DIAG - Diagnostics - Ver 2.2.1
-        back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+        // back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
 
         switch ($chatbot_ai_platform_choice) {
             case 'OpenAI':
@@ -407,7 +407,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        back_trace( 'NOTICE', 'LINE 410 - Model (defaulting): ' . $model);
+        // back_trace( 'NOTICE', 'LINE 410 - Model (defaulting): ' . $model);
 
     } else {
 
@@ -418,7 +418,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        back_trace( 'NOTICE', 'LINE 421 Model (paramater): ' . $model);
+        // back_trace( 'NOTICE', 'LINE 421 Model (paramater): ' . $model);
 
     }
 
