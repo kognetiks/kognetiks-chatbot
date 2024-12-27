@@ -166,6 +166,8 @@ WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT
 
 * **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
 * **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
+* **Documentation Updates**: Revised several section of the online documentation to align with current options and previous updates.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.0.
 
 = 2.2.0 - Release 11-22-2024 =
 
