@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot - Transformer Model - Sentential Context Model (SCM) - Ver 2.2.0
+ * Kognetiks Chatbot for WordPress - Transformer Model - Sentential Context Model (SCM) - Ver 2.2.0
  *
  * This file contains the code for implementing an enhanced Transformer-like algorithm in PHP.
  *
@@ -12,75 +12,144 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Main function to get the chatbot's response
+// Transformer Model - Sentential Context Model (SCM)
 function transformer_model_sentential_context_model_response($input, $responseCount = 500) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
+    back_trace('NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
 
-    // MOVED TO transformer-model-scheduler.php
-    // Fetch WordPress content
-    $corpus = transformer_model_sentential_context_fetch_wordpress_content();
+    global $wpdb;
 
-    // Set the window size for co-occurrence matrix
-    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
-    // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'Window Size: ' . $windowSize);
+    // STEP 1 - Determine the number of batches
+    $batchSize = 50;
 
-    // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'Response Count: ' . $responseCount);
+    $totalItems = (int) $wpdb->get_var(
+        "SELECT COUNT(*) 
+         FROM {$wpdb->posts} 
+         WHERE post_status = 'publish' 
+           AND (post_type = 'post' OR post_type = 'page')"
+    );
 
-    // MOVED TO transformer-model-scheduler.php
-    // Build embeddings (with caching for performance)
-    $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
+    // DIAG - Diagnostic - Ver 2.2.1
+    back_trace('NOTICE', 'Total published items: ' . $totalItems);
 
-    // Generate contextual response
-    $response = transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $responseCount);
+    // Calculate the number of batches
+    $numBatches = ceil($totalItems / $batchSize);
 
-    return $response;
+    // DIAG - Diagnostic - Ver 2.2.1
+    back_trace('NOTICE', 'Number of batches: ' . $numBatches);
+
+    // STEP 2 - Initialize array to hold the "best response" from each batch
+    $batchResponses = [];
+
+    // STEP 3 - Loop through the content in batches
+    for ($start = 0; $start < $totalItems; $start += $batchSize) {
+        
+        // Calculate the offset end (e.g., 49 if start=0, 99 if start=50, etc.)
+        $end = $start + $batchSize - 1;
+
+        // DIAG
+        back_trace('NOTICE', sprintf('Processing batch offset %d - %d', $start, $end));
+
+        // STEP 3a - Fetch exactly 50 (or fewer if near the end) published items
+        $corpus = transformer_model_sentential_context_fetch_wordpress_content($start, $end);
+        
+        // STEP 3b - (Re)build or reuse embeddings as needed; depends on your cache logic
+        //     If you have a global or partial cache, you can slice it or re-generate it here.
+        //     For demonstration, assume you have a function that fetches embeddings on the fly:
+        $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
+        // For big performance gains, you might want to keep an in-memory or file-based cache keyed by offsets
+        // or by post IDs. This is just a placeholder:
+        $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
+
+        // STEP 3c - Generate a response for this batch
+        $batchResponse = transformer_model_sentential_context_generate_contextual_response(
+            $input,
+            $embeddings,
+            $corpus,
+            $responseCount
+        );
+
+        // STEP 3d - **Pick the "best" response** from this batch. 
+        //     In some cases, your generate_contextual_response might return a single best result.
+        //     If it returns multiple suggestions, you’d pick the best among them here.
+        //     For example, if it returns an array, you might do something like:
+        //
+        //       $bestFromThisBatch = pick_best_response($batchResponse);
+        //
+        //     For simplicity, assume it returns a single best string.  
+        $bestFromThisBatch = $batchResponse;
+
+        // Collect the best from each batch
+        $batchResponses[] = $bestFromThisBatch;
+
+        // Optional: Freed memory if necessary
+        unset($corpus, $embeddings, $batchResponse);
+
+    }
+
+    // STEP 4 - Second pass: pick the best of the best from all $batchResponses
+    //    This “best” logic is up to you. You might want to run them all back
+    //    through a ranking function or just pick the largest/smallest, etc.
+    //
+    // For demonstration, let’s do a naive approach:
+    $finalBestResponse = '';
+    foreach ($batchResponses as $candidate) {
+        // Example logic: pick the candidate with the greatest length
+        // (Replace with your actual “best” logic.)
+        if (strlen($candidate) > strlen($finalBestResponse)) {
+            $finalBestResponse = $candidate;
+        }
+    }
+
+    // STEP 5 - Return the best overall response
+    return $finalBestResponse;
 
 }
 
 // Function to fetch WordPress page and post content
-function transformer_model_sentential_context_fetch_wordpress_content() {
+function transformer_model_sentential_context_fetch_wordpress_content($content_offset_start = 0, $content_offset_end = 50) {
 
     global $wpdb;
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
+    back_trace('NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
+    back_trace('NOTICE', 'Content Offset Start: ' . $content_offset_start);
+    back_trace('NOTICE', 'Content Offset End: ' . $content_offset_end);
 
     // Query to get post and page content
+    $safeStart = intval($content_offset_start);
+    // e.g. if start=0 and end=49 => 50 items
+    $safeEnd   = intval($content_offset_end) - $safeStart + 1;
+    if ($safeEnd < 1) {
+        $safeEnd = 50; // fallback or 10, up to you
+    }
+
     $results = $wpdb->get_results(
         $wpdb->prepare(
-            "SELECT post_content FROM {$wpdb->posts} WHERE post_status = %s AND (post_type = %s OR post_type = %s)",
-            'publish', 'post', 'page'
+            "SELECT post_content
+               FROM {$wpdb->posts}
+              WHERE post_status = %s
+                AND (post_type = %s OR post_type = %s)
+              LIMIT %d, %d",
+            'publish',
+            'post',
+            'page',
+            $safeStart,
+            $safeEnd
         ),
         ARRAY_A
     );
 
-    // Combine all content into a single string
+    // Combine content
     $content = '';
     foreach ($results as $row) {
         $content .= ' ' . $row['post_content'];
     }
 
-    // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'Content in characters: ' . strlen($content));
-    // Calculate the $content size in MB
-    $content_size = strlen($content) / 1024 / 1024;
-    back_trace( 'NOTICE', 'Content in MB: ' . $content_size . ' MB');
-
     // Clean up the content
     $content = strip_tags($content); // Remove HTML tags
     $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5); // Decode HTML entities
-
-    // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'Content in characters after cleanup: ' . strlen($content));
-    update_option('chatbot_transformer_model_content_size', strlen($content));
-    // Calculate the $content size in MB
-    $content_size = strlen($content) / 1024 / 1024;
-    back_trace( 'NOTICE', 'Content in MB after cleanup: ' . $content_size . ' MB');
-    update_option('chatbot_transformer_model_content_size_mb', $content_size);
 
     return $content;
 
@@ -90,20 +159,13 @@ function transformer_model_sentential_context_fetch_wordpress_content() {
 function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
-
-    back_trace( 'NOTICE', "Memory Limit: " . round( ini_get('memory_limit') / 1024 / 1024, 2 ) . " MB" );
-    back_trace( 'NOTICE', "Memory Usage: " . round( memory_get_usage($real_usage = true) / 1024 / 1024, 2 ) . " MB" );
-    back_trace( 'NOTICE', "Memory allocated: " . round( memory_get_peak_usage() / 1024 / 1024, 2 ) . " MB" );
-    back_trace( 'NOTICE', "Memory Usage (BEFORE): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
+    back_trace('NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
 
     $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
 
     // Check if embeddings are cached
     if (file_exists($cacheFile)) {
         $embeddings = include $cacheFile;
-        back_trace( 'NOTICE', "Memory Usage (AFTER): " . round( memory_get_usage() / 1024 / 1024, 2 ) . " MB" );
-
     } else {
         $embeddings = transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize);
         // Cache the embeddings
@@ -118,7 +180,7 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
 function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
+    // back_trace('NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -160,7 +222,7 @@ function transformer_model_sentential_context_remove_stop_words($words) {
 function transformer_model_sentential_context_cosine_similarity($vectorA, $vectorB) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
+    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
 
     $commonKeys = array_intersect_key($vectorA, $vectorB);
 
@@ -196,8 +258,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     global $chatbotFallbackResponses;
 
     // DIAG - Diagnostic - Ver 2.3.0
-    back_trace( 'NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
-    back_trace( 'NOTICE', 'Max Tokens: ' . $maxTokens);
+    back_trace('NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
+    back_trace('NOTICE', 'Max Tokens: ' . $maxTokens);
 
     // Tokenize the corpus into sentences
     $sentences = preg_split('/(?<=[.?!])\s+/', $corpus);
@@ -258,28 +320,32 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         $similarities[$index] = $similarity;
     }
 
+    // Similarity threshold default to 0.2
+    $similarityThresholdDefault = '0.5';
+
     // Calculate key stats
     $highestSimilarity = max($similarities);
     $averageSimilarity = array_sum($similarities) / count($similarities);
-    $matchesAboveThreshold = array_filter($similarities, function($similarity) {
-        return $similarity > floatval(esc_attr(get_option('chatbot_transformer_model_similarity_threshold', 0.2)));
+    $matchesAboveThreshold = array_filter($similarities, function($similarity) use ($similarityThresholdDefault) {
+        return $similarity > floatval(get_option('chatbot_transformer_model_similarity_threshold', $similarityThresholdDefault));
     });
     $numMatchesAboveThreshold = count($matchesAboveThreshold);
     $totalSentencesAnalyzed = count($sentences);
 
     // Log key stats
-    back_trace( 'NOTICE', 'Key Stats:');
-    back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+    back_trace('NOTICE', 'Key Stats:');
+    back_trace('NOTICE', ' - Similarity Threshold: ' . get_option('chatbot_transformer_model_similarity_threshold', $similarityThresholdDefault));
+    back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // Add a similarity threshold
-    $similarityThreshold = floatval(esc_attr(get_option('chatbot_transformer_model_similarity_threshold', 0.2))); // Default to 0.2
+    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', $similarityThresholdDefault));
 
     // If the highest similarity is below the threshold, return a fallback message
     if ($highestSimilarity < $similarityThreshold) {
-        back_trace( 'NOTICE', 'Low similarity detected: ' . $highestSimilarity);
+        back_trace('NOTICE', 'Low similarity detected: ' . $highestSimilarity);
         return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
     }
 
@@ -296,8 +362,11 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
 
     // Ratios for splitting sentences and tokens
-    $sentenceBeforeRatio = 0.0;
-    $tokenBeforeRatio = 0.0;
+    $sentenceBeforeRatio = 0.25;
+    $tokenBeforeRatio = 0.75;
+
+    // Add a total counter to ensure we don't exceed $maxSentences
+    $totalSentencesUsed = 1; // the best match itself
 
     // Distribute sentences and tokens
     $sentencesBefore = floor($maxSentences * $sentenceBeforeRatio);
@@ -305,18 +374,30 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $tokensBefore = floor($maxTokens * $tokenBeforeRatio);
     $tokensAfter = $maxTokens - $tokensBefore;
 
+    // DIAG - Diagnostic - Ver 2.2.1
+    back_trace('NOTICE', '$maxSentences: ' . $maxSentences);
+    back_trace('NOTICE', '$maxTokens: ' . $maxTokens);
+    back_trace('NOTICE', '$sentencesBefore: ' . $sentencesBefore);
+    back_trace('NOTICE', '$sentencesAfter: ' . $sentencesAfter);
+    back_trace('NOTICE', '$tokensBefore: ' . $tokensBefore);
+    back_trace('NOTICE', '$tokensAfter: ' . $tokensAfter);
+
     $responseWordCount = str_word_count($response);
 
     // Add sentences before the best match
     $tokensUsedBefore = 0;
     $sentencesUsedBefore = 0;
-    for ($i = $bestMatchIndex - 1; $i >= 0 && $sentencesUsedBefore < $sentencesBefore && $tokensUsedBefore < $tokensBefore; $i--) {
+    for ($i = $bestMatchIndex - 1; $i >= 0 && $sentencesUsedBefore < $sentencesBefore && $tokensUsedBefore < $tokensBefore && $totalSentencesUsed < $maxSentences; $i--) {
         $previousSentence = trim($sentences[$i]);
         $sentenceWordCount = str_word_count($previousSentence);
         if ($tokensUsedBefore + $sentenceWordCount <= $tokensBefore) {
             $response = $previousSentence . ' ' . $response;
             $tokensUsedBefore += $sentenceWordCount;
             $sentencesUsedBefore++;
+            $totalSentencesUsed++;
+            if ($sentencesUsedBefore >= $sentencesBefore) {
+                break;
+            }
         } else {
             break;
         }
@@ -325,13 +406,17 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     // Add sentences after the best match
     $tokensUsedAfter = 0;
     $sentencesUsedAfter = 0;
-    for ($i = $bestMatchIndex + 1; $i < count($sentences) && $sentencesUsedAfter < $sentencesAfter && $tokensUsedAfter < $tokensAfter; $i++) {
+    for ($i = $bestMatchIndex + 1; $i < count($sentences) && $sentencesUsedAfter < $sentencesAfter && $tokensUsedAfter < $tokensAfter && $totalSentencesUsed < $maxSentences; $i++) {
         $nextSentence = trim($sentences[$i]);
         $sentenceWordCount = str_word_count($nextSentence);
         if ($tokensUsedAfter + $sentenceWordCount <= $tokensAfter) {
             $response .= ' ' . $nextSentence;
             $tokensUsedAfter += $sentenceWordCount;
             $sentencesUsedAfter++;
+            $totalSentencesUsed++;
+            if ($sentencesUsedAfter >= $sentencesAfter) {
+                break;
+            }
         } else {
             break;
         }
