@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 function transformer_model_sentential_context_model_response($input, $responseCount = 500) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
+    // back_trace('NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
 
     global $wpdb;
 
@@ -31,13 +31,13 @@ function transformer_model_sentential_context_model_response($input, $responseCo
     );
 
     // DIAG - Diagnostic - Ver 2.2.1
-    back_trace('NOTICE', 'Total published items: ' . $totalItems);
+    // back_trace('NOTICE', 'Total published items: ' . $totalItems);
 
     // Calculate the number of batches
     $numBatches = ceil($totalItems / $batchSize);
 
     // DIAG - Diagnostic - Ver 2.2.1
-    back_trace('NOTICE', 'Number of batches: ' . $numBatches);
+    // back_trace('NOTICE', 'Number of batches: ' . $numBatches);
 
     // STEP 2 - Initialize array to hold the "best response" from each batch
     $batchResponses = [];
@@ -49,7 +49,7 @@ function transformer_model_sentential_context_model_response($input, $responseCo
         $end = $start + $batchSize - 1;
 
         // DIAG
-        back_trace('NOTICE', sprintf('Processing batch offset %d - %d', $start, $end));
+        // back_trace('NOTICE', sprintf('Processing batch offset %d - %d', $start, $end));
 
         // STEP 3a - Fetch exactly 50 (or fewer if near the end) published items
         $corpus = transformer_model_sentential_context_fetch_wordpress_content($start, $end);
@@ -113,9 +113,9 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
     global $wpdb;
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
-    back_trace('NOTICE', 'Content Offset Start: ' . $content_offset_start);
-    back_trace('NOTICE', 'Content Offset End: ' . $content_offset_end);
+    // back_trace('NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
+    // back_trace('NOTICE', 'Content Offset Start: ' . $content_offset_start);
+    // back_trace('NOTICE', 'Content Offset End: ' . $content_offset_end);
 
     // Query to get post and page content
     $safeStart = intval($content_offset_start);
@@ -159,7 +159,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
 function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostic - Ver 2.2.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
+    // back_trace('NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
 
     $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
 
@@ -258,8 +258,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     global $chatbotFallbackResponses;
 
     // DIAG - Diagnostic - Ver 2.3.0
-    back_trace('NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
-    back_trace('NOTICE', 'Max Tokens: ' . $maxTokens);
+    // back_trace('NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
+    // back_trace('NOTICE', 'Max Tokens: ' . $maxTokens);
 
     // Tokenize the corpus into sentences
     $sentences = preg_split('/(?<=[.?!])\s+/', $corpus);
@@ -333,19 +333,19 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $totalSentencesAnalyzed = count($sentences);
 
     // Log key stats
-    back_trace('NOTICE', 'Key Stats:');
-    back_trace('NOTICE', ' - Similarity Threshold: ' . get_option('chatbot_transformer_model_similarity_threshold', $similarityThresholdDefault));
-    back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+    // back_trace('NOTICE', 'Key Stats:');
+    // back_trace('NOTICE', ' - Similarity Threshold: ' . get_option('chatbot_transformer_model_similarity_threshold', $similarityThresholdDefault));
+    // back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    // back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    // back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    // back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // Add a similarity threshold
     $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', $similarityThresholdDefault));
 
     // If the highest similarity is below the threshold, return a fallback message
     if ($highestSimilarity < $similarityThreshold) {
-        back_trace('NOTICE', 'Low similarity detected: ' . $highestSimilarity);
+        // back_trace('NOTICE', 'Low similarity detected: ' . $highestSimilarity);
         return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
     }
 
@@ -375,12 +375,12 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $tokensAfter = $maxTokens - $tokensBefore;
 
     // DIAG - Diagnostic - Ver 2.2.1
-    back_trace('NOTICE', '$maxSentences: ' . $maxSentences);
-    back_trace('NOTICE', '$maxTokens: ' . $maxTokens);
-    back_trace('NOTICE', '$sentencesBefore: ' . $sentencesBefore);
-    back_trace('NOTICE', '$sentencesAfter: ' . $sentencesAfter);
-    back_trace('NOTICE', '$tokensBefore: ' . $tokensBefore);
-    back_trace('NOTICE', '$tokensAfter: ' . $tokensAfter);
+    // back_trace('NOTICE', '$maxSentences: ' . $maxSentences);
+    // back_trace('NOTICE', '$maxTokens: ' . $maxTokens);
+    // back_trace('NOTICE', '$sentencesBefore: ' . $sentencesBefore);
+    // back_trace('NOTICE', '$sentencesAfter: ' . $sentencesAfter);
+    // back_trace('NOTICE', '$tokensBefore: ' . $tokensBefore);
+    // back_trace('NOTICE', '$tokensAfter: ' . $tokensAfter);
 
     $responseWordCount = str_word_count($response);
 

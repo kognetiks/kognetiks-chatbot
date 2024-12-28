@@ -100,14 +100,11 @@ function chatbot_chatgpt_uninstall(){
 
         // Delete Sentential Transformer tables
         // back_trace( 'NOTICE', 'Deleting Transformer tables');
-        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_embeddings");
-        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_precomputed_vecotrs");
-        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_sentence_vectors");
-        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_sentential_word_embeddings");
+        // NONE CURENTLY - Ver 2.2.1
 
         // Delete Lexical Transformer tables
         // back_trace( 'NOTICE', 'Deleting Transformer tables');
-        // NONE CURRENTLY - Ver 2.2.0
+        // NONE CURRENTLY - Ver 2.2.1
 
         // Delete ChatGPT transients
         // back_trace( 'NOTICE', 'Deleting transients');
