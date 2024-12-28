@@ -717,7 +717,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
         return;
     }
 
-    // DIAG - Diagnostic - Ver 2.0.2.1
+    // DIAG - Diagnostics - Ver 2.0.2.1
     // back_trace( 'NOTICE', 'File path: ' . $results_csv_file);
 
     if (!file_exists($results_csv_file)) {

@@ -89,15 +89,15 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // Execute the query
         $rows = $wpdb->get_results($query);
 
-        // Diagnostic - Ver 2.2.1
+        // Diagnostics - Ver 2.2.1
         // back_trace( 'NOTICE', 'SQL Query: ' . $query );
 
         // Check if matches are found
         if ($rows) {
             foreach ($rows as $row) {
 
-                // Diagnostic - Ver 2.2.1
-                // back_trace('INFO', 'Match found: PID=' . $row->pid . ', URL=' . $row->url . ', Title=' . $row->title . ', Score=' . $row->total_score . ', Word Matches=' . $row->word_match_count);
+                // Diagnostics - Ver 2.2.1
+                // back_trace( 'INFO', 'Match found: PID=' . $row->pid . ', URL=' . $row->url . ', Title=' . $row->title . ', Score=' . $row->total_score . ', Word Matches=' . $row->word_match_count);
                 
                 $result_key = hash('sha256', $row->url);
                 if (!isset($results[$result_key])) {

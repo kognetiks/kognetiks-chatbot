@@ -91,7 +91,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
     $selectedIcon = esc_attr(get_option('chatbot_chatgpt_avatar_icon_setting', 'icon-001.png'));
     $customAvatarIcon = esc_attr(get_option('chatbot_chatgpt_custom_avatar_icon_setting'));
 
-    // DIAG - Diagnostic - Ver 2.0.3
+    // DIAG - Diagnostics - Ver 2.0.3
     // back_trace( 'NOTICE', "Custom Avatar Icon: " . $customAvatarIcon );
 
     if ($customAvatarIcon !== '') {
@@ -99,7 +99,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
         update_option('chatbot_chatgpt_avatar_icon_setting', $selectedIcon);
     }
 
-    // DIAG - Diagnostic - Ver 2.0.3
+    // DIAG - Diagnostics - Ver 2.0.3
     // back_trace( 'NOTICE', "Selected Icon: " . $selectedIcon );
 
     ?>
@@ -131,7 +131,7 @@ function chatbot_chatgpt_avatar_icon_callback($args) {
                             if ($iconIndex < $iconCount) {
                                 $iconName = sprintf(strtolower(str_replace(' ', '-', $setName)) . "-%03d.png", $iconIndex);
                                 
-                                // DIAG - Diagnostic - Ver 2.0.3
+                                // DIAG - Diagnostics - Ver 2.0.3
                                 // back_trace( 'NOTICE', "Icon Name: " . $iconName );
                                 // back_trace( 'NOTICE', "Selected Icon: " . $selectedIcon );
 

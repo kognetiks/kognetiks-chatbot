@@ -215,7 +215,7 @@ function output_results() {
 
     global $topWords;
 
-    // DIAG - Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostics - Ver 1.6.3
     // back_trace( 'NOTICE', 'ENTER: output_results()');
 
     // Generate the directory path

@@ -951,7 +951,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     }
 
     // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace('NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
+    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
     // Return the response text, checking for the fallback content[1][text] if available
     if (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {

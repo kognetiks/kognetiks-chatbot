@@ -25,11 +25,11 @@ function kn_enhance_context( $message ) {
     $enhancedMessage = explode(' ', $enhancedMessage);
 
     // if (get_locale() !== "en_US") {
-    //     // DIAG - Diagnostic - Ver 1.7.2.1
+    //     // DIAG - Diagnostics - Ver 1.7.2.1
     //     // back_trace( 'NOTICE', 'get_locale()' . get_locale());
     //     // $localized_stopWords = localize_global_stopwords(get_locale(), $stopWords);
     //     $localized_stopWords = get_localized_stopwords(get_locale(), $stopWords);
-    //     // DIAG - Diagnostic - Ver 1.7.2.1
+    //     // DIAG - Diagnostics - Ver 1.7.2.1
     //     // back_trace( 'NOTICE',  '$localized_stopWords ' . $localized_stopWords);
     // } else {
     //     $localized_stopWords = $stopWords;

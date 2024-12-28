@@ -25,7 +25,7 @@ $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)
 // Knowledge Navigator Results
 function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
-    // DIAG - Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostics - Ver 1.6.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_results_callback');
     // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner);
     // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_schedule: ' . esc_attr(get_option('chatbot_chatgpt_kn_schedule')));
@@ -44,7 +44,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
     if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Disable', 'Cancel'])) {
 
-        // DIAG - Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostics - Ver 1.6.3
         // back_trace( 'NOTICE', "$run_scanner: " . $run_scanner);
         // back_trace( 'NOTICE', "max_top_words: " . serialize($GLOBALS['max_top_words']));
         // back_trace( 'NOTICE', "domain: " . serialize($GLOBALS['domain']));

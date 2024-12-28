@@ -95,7 +95,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
 
     $user_tracking = $session_id . '-' . $user_id . '-' . $page_id . '-' . $thread_id . '-' . $assistant_id;
 
-    // Diagnostic - Ver 1.9.5
+    // Diagnostics - Ver 1.9.5
     // back_trace( 'NOTICE', 'chatbot_calll_image_api()');
     // back_trace( 'NOTICE', 'BEGIN $message: ' . $message);
     // back_trace( 'NOTICE', 'BEGIN $model: ' . $model);

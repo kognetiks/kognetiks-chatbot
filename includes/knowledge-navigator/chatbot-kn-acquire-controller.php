@@ -305,7 +305,7 @@ function chatbot_kn_run_phase_1() {
 
     // Loop through query results
     foreach ($results as $result) {
-        // DIAG - Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostics - Ver 1.6.3
         // foreach($result as $key => $value) {
         //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        
@@ -421,7 +421,7 @@ function chatbot_kn_run_phase_3() {
     // Loop through query results
     foreach ($results as $result) {
 
-        // DIAG - Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostics - Ver 1.6.3
         // foreach($result as $key => $value) {
         //     back_trace( 'NOTICE', "Key: $key, Value: $value");
         // }        
@@ -626,7 +626,7 @@ function chatbot_kn_run_phase_6() {
 
     // Loop through query results
     foreach ($results as $result) {
-        // DIAG - Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostics - Ver 1.6.3
         // foreach($result as $key => $value) {
         //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
         // }        

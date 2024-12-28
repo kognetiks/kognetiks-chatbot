@@ -22,7 +22,7 @@ jQuery(document).ready(function ($) {
         return document.querySelector('.chatbot-chatgpt') !== null;
     }
    
-    // DIAG - Diagnostic - Ver 2.1.1.1
+    // DIAG - Diagnostics - Ver 2.1.1.1
     // const sortedKeys = Object.keys(kchat_settings).sort();
     // for (const key of sortedKeys) {
     //     // console.log('Chatbot: NOTICE: kchat_settings: ' + key + ': ' + kchat_settings[key]);

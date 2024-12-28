@@ -56,7 +56,7 @@ function chatbot_chatgpt_kn_analysis_download_csv() {
 
     // Exit early if the file doesn't exist
     if (!file_exists($results_csv_file)) {
-        // DIAG - Diagnostic - Ver 1.9.1
+        // DIAG - Diagnostics - Ver 1.9.1
         // back_trace( 'NOTICE', 'File not found!');
         wp_die('File not found!');
     }
@@ -89,7 +89,7 @@ function chatbot_chatgpt_kn_analysis_download_csv() {
 
     } else {
 
-        // DIAG - Diagnostic - Ver 1.9.1
+        // DIAG - Diagnostics - Ver 1.9.1
         // back_trace( 'NOTICE', 'cURL is not enabled for the file protocol!');
         chatbot_chatgpt_general_admin_notice('cURL is not enabled for the file protocol!');
         // wp_die('cURL is not enabled for the file protocol!');

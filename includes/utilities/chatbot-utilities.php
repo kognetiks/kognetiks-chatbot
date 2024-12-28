@@ -31,7 +31,7 @@ function is_mobile_device() {
 // Function to confirm if curl is enabled
 function can_use_curl_for_file_protocol() {
 
-    // DIAG - Diagnostic - Ver 1.9.1
+    // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', 'can_use_curl_for_file_protocol');
 
     // Check if cURL extension is loaded
@@ -52,7 +52,7 @@ function can_use_curl_for_file_protocol() {
     // Close the cURL session
     curl_close($curl);
 
-    // DIAG - Diagnostic - Ver 1.9.1
+    // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', 'result: ' . print_r($result, true));
 
     // Check if setting the option was successful - true if successful, false if failed
