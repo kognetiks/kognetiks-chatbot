@@ -162,10 +162,11 @@ WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT
 
 == Changelog ==
 
-= 2.2.1 - Release TBD =
+= 2.2.1 - Release 12-28-2024 =
 
 * **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
 * **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
+* **Knowledge Navigator Update**: Added option to include post or page excerpts in chatbot responses when enhanced responses is enabled. 
 * **Documentation Updates**: Revised several section of the online documentation to align with current options and previous updates.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.0.
 
