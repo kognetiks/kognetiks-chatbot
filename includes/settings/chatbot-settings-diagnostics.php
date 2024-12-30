@@ -23,6 +23,7 @@ function chatbot_chatgpt_diagnostics_settings_init() {
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_attribution');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_delete_data');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_enable_beta_features');
 
     add_settings_section(
         'chatbot_chatgpt_diagnostics_overview_section',
@@ -113,6 +114,23 @@ function chatbot_chatgpt_diagnostics_settings_init() {
         'chatbot_chatgpt_delete_data_callback',
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
+    );
+
+    // Enable Beta Features Section - Ver 2.2.1
+    add_settings_section(
+        'chatbot_chatgpt_beta_features_section',            // ID
+        'Beta Feature Settings',                            // Title
+        'chatbot_chatgpt_beta_features_section_callback',   // Callback
+        'chatbot_chatgpt_beta_features'                     // Page
+    );
+
+    // Enable Beta Features - Ver 2.2.1
+    add_settings_field(
+        'chatbot_chatgpt_enable_beta_features',             // ID
+        'Enable Beta Features',                             // Title
+        'chatbot_chatgpt_enable_beta_features_callback',    // Callback
+        'chatbot_chatgpt_beta_features',                    // Page
+        'chatbot_chatgpt_beta_features_section'             // Section
     );
     
 }
@@ -242,6 +260,40 @@ function chatbot_chatgpt_delete_data_callback($args) {
     <select id="chatgpt_delete_data_setting" name="chatbot_chatgpt_delete_data">
     <option value="no" <?php selected( $chatbot_chatgpt_delete_data, 'no' ); ?>><?php echo esc_html( 'DO NOT DELETE' ); ?></option>
     <option value="yes" <?php selected( $chatbot_chatgpt_delete_data, 'yes' ); ?>><?php echo esc_html( 'DELETE ALL DATA' ); ?></option>
+    </select>
+    <?php
+}
+
+// Beta Feature Settings Section - Ver 2.2.1
+function chatbot_chatgpt_beta_features_section_callback($args) {
+    ?>
+        <div class="chatbot-beta-disclaimer">
+            <h3>Caution: Beta Features Ahead 🚧</h3>
+            <p>
+                Enabling Beta Features in the Kognetiks Chatbot plugin is intended for testing and experimental purposes only. 
+                <strong>These features are not fully tested or guaranteed to work as expected</strong> and may cause unexpected behavior, errors, or conflicts with your website.
+            </p>
+            <p><strong>Important Notices:</strong></p>
+            <ol>
+                <li><strong>Backup Your Site:</strong> Before enabling Beta Features, ensure you have a complete backup of your WordPress site and database.</li>
+                <li><strong>Test Environment Recommended:</strong> Beta Features should only be enabled in a testing or staging environment. Avoid enabling them on live or production sites.</li>
+                <li><strong>Use at Your Own Risk:</strong> Kognetiks assumes no liability for issues arising from the use of Beta Features. By enabling them, you accept full responsibility for any changes or damage to your site.</li>
+            </ol>
+            <p>
+                If you're unsure about any of these steps, consult with a web professional or WordPress expert before proceeding.
+            </p>
+        </div>
+    <?php
+}
+
+// Enable Beta Features - Ver 2.2.1
+function chatbot_chatgpt_enable_beta_features_callback($args) {
+    global $chatbot_chatgpt_enable_beta_features;
+    $chatbot_chatgpt_enable_beta_features = esc_attr(get_option('chatbot_chatgpt_enable_beta_features', 'no'));
+    ?>
+    <select id="chatgpt_enable_beta_features_setting" name="chatbot_chatgpt_enable_beta_features">
+    <option value="no" <?php selected( $chatbot_chatgpt_enable_beta_features, 'no' ); ?>><?php echo esc_html( 'NO' ); ?></option>
+    <option value="yes" <?php selected( $chatbot_chatgpt_enable_beta_features, 'yes' ); ?>><?php echo esc_html( 'YES' ); ?></option>
     </select>
     <?php
 }

@@ -18,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_transformer_model_scheduler() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_transformer_model_scheduler - start');
+    back_trace( 'NOTICE', 'chatbot_transformer_model_scheduler - start');
 
     // Retrieve the schedule setting
     $chatbot_transformer_model_build_schedule = esc_attr(get_option('chatbot_transformer_model_build_schedule', 'Disable'));
@@ -27,8 +27,29 @@ function chatbot_transformer_model_scheduler() {
     if (in_array($chatbot_transformer_model_build_schedule, ['No', 'Disable', 'Cancel'])) {
         wp_clear_scheduled_hook('chatbot_transformer_model_scan_hook');
         update_option('chatbot_transformer_model_build_status', 'No Schedule');
+        update_option('chatbot_transformer_model_last_updated', '');
+        update_option('chatbot_transformer_model_offset', 0);
+        update_option('chatbot_transformer_model_content_items_processed', 0);
         prod_trace('NOTICE', 'chatbot_transformer_model_scheduler: ' . $chatbot_transformer_model_build_schedule);
         return;
+    }
+
+    // Exit if the scheduler is already running
+    if (wp_next_scheduled('chatbot_transformer_model_scan_hook')) {
+        prod_trace('NOTICE', 'chatbot_transformer_model_scan_hook already scheduled');
+        return;
+    }
+
+    // Exit if the scheduler is completed
+    if (get_option('chatbot_transformer_model_build_status', 'No Schedule') == 'Completed') {
+        prod_trace('NOTICE', 'chatbot_transformer_model_build_status: Completed');
+        return;
+    }
+
+    // Clear the existing schedule
+    if (wp_next_scheduled('chatbot_transformer_model_scan_hook')) {
+        prod_trace('NOTICE', 'Clear existing schedule');
+        wp_clear_scheduled_hook('chatbot_transformer_model_scan_hook');
     }
 
     // Diagnostic logging
@@ -36,10 +57,13 @@ function chatbot_transformer_model_scheduler() {
 
     // Update the status as 'In Process'
     update_option('chatbot_transformer_model_build_status', 'In Process');
+    update_option('chatbot_transformer_model_last_updated', '');
+    update_option('chatbot_transformer_model_content_items_processed', 0);
+    update_option('chatbot_transformer_model_offset', 0);
     prod_trace('NOTICE', 'chatbot_transformer_model_build_schedule: ' . $chatbot_transformer_model_build_schedule);
 
     // Reset the cache file if offset is 0
-    if (get_option('chatbot_transformer_model_offset', 0) === 0) {
+    if (esc_attr(get_option('chatbot_transformer_model_offset', 0)) == 0) {
         transformer_model_sentential_context_reset_cache();
     }
 
@@ -47,7 +71,7 @@ function chatbot_transformer_model_scheduler() {
     wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_transformer_model_scheduler - end');
+    back_trace( 'NOTICE', 'chatbot_transformer_model_scheduler - end');
 
 }
 add_action('chatbot_transformer_model_scheduler_hook', 'chatbot_transformer_model_scheduler');
@@ -61,6 +85,9 @@ function transformer_model_sentential_context_reset_cache() {
     update_option('chatbot_transformer_model_offset', 0);
     update_option('chatbot_transformer_model_content_items_processed', 0);
     $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE', 'Cache file: ' . $cacheFile);
 
     if (file_exists($cacheFile)) {
         unlink($cacheFile);
@@ -76,7 +103,7 @@ function transformer_model_sentential_context_reset_cache() {
 function chatbot_transformer_model_scan() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'hatbot_transformer_model_scan - start');
+    // back_trace( 'NOTICE', 'chatbot_transformer_model_scan - start');
 
     // Retrieve current state
     $offset = intval(get_option('chatbot_transformer_model_offset', 0));
@@ -87,6 +114,7 @@ function chatbot_transformer_model_scan() {
     if (empty($corpus)) {
         update_option('chatbot_transformer_model_build_status', 'Completed');
         update_option('chatbot_transformer_model_build_schedule', 'Completed');
+        update_option('chatbot_transformer_model_last_updated', date('Y-m-d H:i:s'));
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'All items processed. Scan complete.');
@@ -154,7 +182,12 @@ function transformer_model_sentential_context_cache_embeddings($corpus) {
     foreach ($corpus as $row) {
         $postID = $row['ID'];
         $postContent = strip_tags(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5));
+        // back_trace('NOTICE', 'Processing post ID: ' . $postID);
+        // back_trace('NOTICE', 'Post content: ' . $postContent);
+
         $postEmbeddings = transformer_model_sentential_context_build_cooccurrence_matrix($postContent, 2);
+        // back_trace('NOTICE', 'Post embeddings: ' . print_r($postEmbeddings, true));
+
         $embeddings[$postID] = $postEmbeddings;
     }
 
@@ -165,7 +198,7 @@ function transformer_model_sentential_context_cache_embeddings($corpus) {
     file_put_contents($cacheFile, '<?php return ' . var_export($mergedEmbeddings, true) . ';');
 
     // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - end');
+    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - end');
 
     return $embeddings;
 

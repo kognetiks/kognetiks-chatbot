@@ -401,7 +401,7 @@ function chatbot_chatgpt_settings_page() {
                 do_settings_sections('chatbot_chatgpt_reporting');
                 echo '</div>';
 
-            } elseif ($active_tab == 'diagnostics') {
+            } elseif ($active_tab == 'diagnostics') { // AKA Messages tab
 
                 settings_fields('chatbot_chatgpt_diagnostics');
 
@@ -419,6 +419,10 @@ function chatbot_chatgpt_settings_page() {
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_diagnostics');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_beta_features');
                 echo '</div>';
 
             } elseif ($active_tab == 'appearance') {
