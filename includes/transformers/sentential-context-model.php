@@ -36,8 +36,16 @@ function transformer_model_sentential_context_model_response( $input, $responseC
     // DIAG - Diagnostics - Ver 2.2.1
     // back_trace( 'NOTICE', 'Total published items: ' . $totalItems);
 
+    // Temporarily set $batchSize = $totalItems
+    // $batchSize = $totalItems;
+
+    // back_trace( 'NOTICE', 'Batch size: ' . $batchSize);
+
     // Calculate the number of batches
     $numBatches = ceil($totalItems / $batchSize);
+
+    // $numBatches = 1; // Temporarily set to 1
+    // back_trace( 'NOTICE', 'Number of batches: ' . $numBatches);
 
     // DIAG - Diagnostics - Ver 2.2.1
     // back_trace( 'NOTICE', 'Number of batches: ' . $numBatches);
@@ -66,17 +74,29 @@ function transformer_model_sentential_context_model_response( $input, $responseC
         $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
         // For big performance gains, you might want to keep an in-memory or file-based cache keyed by offsets
         // or by post IDs. This is just a placeholder:
+
         $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
+
+        // back_trace( 'NOTICE', 'Embeddings keys for this batch: ' . print_r(array_keys($embeddings), true));
+        // back_trace( 'NOTICE', 'Embeddings for this batch: ' . print_r($embeddings, true));
 
         // DIAG - Diagnostics - Ver 2.2.1
         // back_trace( 'NOTICE', '$input: ' . $input);
-        if (is_array($embeddings)) {
-            // back_trace('NOTICE', 'Character Length of $embeddings: ' . strlen(print_r($embeddings, true)));
-        } else {
-            // back_trace('NOTICE', '$embeddings is not an array');
-        }
+        // if (is_array($embeddings)) {
+        //     // back_trace('NOTICE', 'Character Length of $embeddings: ' . strlen(print_r($embeddings, true)));
+        // } else {
+        //     // back_trace('NOTICE', '$embeddings is not an array');
+        // }
+
         // back_trace( 'NOTICE', 'Character Length $corpus: ' . strlen($corpus));
         // back_trace( 'NOTICE', '$responseCount: ' . $responseCount);
+
+        // if (isset($embeddings['alan'])) {
+        //     // back_trace( 'NOTICE', 'Found "alan" in embeddings with ' . count($embeddings['alan']) . ' context words.');
+        // }
+        // if (isset($embeddings['turing'])) {
+        //     // back_trace( 'NOTICE', 'Found "turing" in embeddings with ' . count($embeddings['turing']) . ' context words.');
+        // }
 
         // STEP 3c - Generate a response for this batch
         $batchResponse = transformer_model_sentential_context_generate_contextual_response( $input, $embeddings, $corpus, $responseCount );
@@ -169,6 +189,8 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
     foreach ($results as $row) {
         $content .= ' ' . $row['post_content'];
     }
+
+    // back_trace( 'NOTICE', 'Content length: ' . strlen($content));
 
     // Clean up the content
     $content = strip_tags($content); // Remove HTML tags
@@ -278,10 +300,10 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
     // Check for empty vectors
     if (empty($vectorA) || empty($vectorB)) {
         // if (empty($vectorA)) {
-        //     back_trace('NOTICE', 'Empty Vector A');
+        //     // back_trace('NOTICE', 'Empty Vector A');
         // }
         // if (empty($vectorB)) {
-        //     back_trace('NOTICE', 'Empty Vector B');
+        //     // back_trace('NOTICE', 'Empty Vector B');
         // }
         return 0;
     }
@@ -424,6 +446,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         }
     }
 
+    // back_trace( 'NOTICE', '$inputVector = ' . print_r($inputVector, true));
+
     // Compute similarities
     $similarities = [];
     foreach ($sentenceVectors as $index => $vector) {
@@ -441,7 +465,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     }
 
     // Similarity threshold - Default to 0.2
-    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.02));
+    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2));
 
     // Calculate key stats
     $highestSimilarity = max($similarities);
