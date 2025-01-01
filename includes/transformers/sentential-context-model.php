@@ -84,13 +84,13 @@ function transformer_model_sentential_context_model_response( $input, $responseC
         $batchResponse = transformer_model_sentential_context_generate_contextual_response( $input, $embeddings, $corpus, $responseCount );
 
         // STEP 3d - **Pick the "best" response** from this batch. 
-        //     In some cases, the generate_contextual_response might return a single best result.
-        //     If it returns multiple suggestions, you’d pick the best among them here.
-        //     For example, if it returns an array, you might do something like:
-        //
-        //       $bestFromThisBatch = pick_best_response($batchResponse);
-        //
-        //     For simplicity, assume it returns a single best string.  
+        // In some cases, the generate_contextual_response might return a single best result.
+        // If it returns multiple suggestions, pick the best among them here.
+
+        // For example, if it returns an array
+        // $bestFromThisBatch = pick_best_response($batchResponse);
+
+        // For simplicity, assume it returns a single best string.  
         $bestFromThisBatch = $batchResponse;
 
         // Collect the best from each batch
@@ -115,20 +115,45 @@ function transformer_model_sentential_context_model_response( $input, $responseC
     //     }
     // }
 
+    // DIAG - Diagnostics - Ver 2.2.1
+    for ($i = 0; $i < count($batchResponses); $i++) {
+        $cleanedSentence = preg_replace('/\s+/', ' ',  $batchResponses[$i]);
+        back_trace( 'NOTICE', 'Batch Response ' . $i . ': ' . $cleanedSentence);
+    }
+
     // STEP 4 - Return the best overall response
     $finalBestResponse = '';
     // Assemble the $batchResponses as a $corpus
     $corpus = implode(' ', $batchResponses);
-    // STEP 4a - (Re)build or reuse embeddings as needed; depends on your cache logic
+    // STEP 4a - Set the window size
     $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
-    // STEP 4b - For big performance gains, you might want to keep an in-memory or file-based cache keyed by offsets
-    //           or by post IDs. This is just a placeholder:
+    // STEP 4b - Retreive the file-based cache of embeddings
     $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
     // STEP 4c - Run the final best response through the generator one more time
     $finalBestResponse = transformer_model_sentential_context_generate_contextual_response( $input, $embeddings, $corpus, $responseCount );
 
     // STEP 5 - Return the best overall response
     return $finalBestResponse;
+
+}
+
+// Function to pick the best response from a batch
+function pick_best_response($batchResponse) {
+
+    // Assumes: $batchResponse is an array of responses with similarity scores
+    // Example: $batchResponse = [['response' => '...', 'similarity' => 0.9], ...];
+
+    if (empty($batchResponse)) {
+        return null;
+    }
+
+    // Sort the responses by similarity score in descending order
+    usort($batchResponse, function($a, $b) {
+        return $b['similarity'] <=> $a['similarity'];
+    });
+
+    // Return the response with the highest similarity score
+    return $batchResponse[0]['response'];
 
 }
 
@@ -449,19 +474,19 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 
     // DIAG - Diagnostics - Ver 2.2.1
     // Print out each matching sentence and its similarity score
-    foreach ($matchesAboveThreshold as $index => $similarity) {
-        $cleanedSentence = preg_replace('/\s+/', ' ', $sentences[$index]);
-        back_trace( 'NOTICE', 'Sentence: ' . $cleanedSentence );
-        back_trace( 'NOTICE', 'Similarity: ' . $similarity );
-    }
+    // foreach ($matchesAboveThreshold as $index => $similarity) {
+    //     $cleanedSentence = preg_replace('/\s+/', ' ', $sentences[$index]);
+    //     back_trace( 'NOTICE', 'Sentence: ' . $cleanedSentence );
+    //     back_trace( 'NOTICE', 'Similarity: ' . $similarity );
+    // }
 
     // Log key stats
-    back_trace( 'NOTICE', 'Key Stats:');
-    back_trace( 'NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
-    back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+    // back_trace( 'NOTICE', 'Key Stats:');
+    // back_trace( 'NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
+    // back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    // back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    // back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    // back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // If the highest similarity is below the threshold, return a fallback message
     if ($highestSimilarity < $similarityThreshold) {
