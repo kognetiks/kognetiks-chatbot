@@ -465,7 +465,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     }
 
     // Similarity threshold - Default to 0.2
-    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2));
+    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.5));
 
     // Calculate key stats
     $highestSimilarity = max($similarities);
@@ -506,8 +506,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
 
     // Ratios for splitting sentences and tokens
-    $sentenceBeforeRatio = 0.25;
-    $tokenBeforeRatio = 0.75;
+    $sentenceBeforeRatio = floatval(esc_attr(get_option('chatbot_transfomer_model_leading_sentences_ratio', 0.25)));
+    $tokenBeforeRatio = floatval(esc_attr(get_option('chatbot_transfomer_model_leading_sentences_ratio', 0.25)));
 
     // Add a total counter to ensure we don't exceed $maxSentences
     $totalSentencesUsed = 1; // the best match itself
