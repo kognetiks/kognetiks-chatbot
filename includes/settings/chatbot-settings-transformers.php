@@ -100,6 +100,60 @@ function chatbot_transformer_model_word_content_window_size_callback($args) {
 
 }
 
+// Transformer Similarity Threshold Settings Callback - Ver 2.2.1
+function chatbot_transformer_model_similarity_threshold_callback($args) {
+
+    // Get the saved chatbot_transformer_model_similarity_threshold_setting value or default to 0.2
+    $similarity_threshold = esc_attr(get_option('chatbot_transformer_model_similarity_threshold', '0.2'));
+    // Allow for a range of tokens between 0.1 and 1.0 in 0.1-step increments - Ver 2.2.1
+    ?>
+    <select id="chatbot_transformer_model_similarity_threshold" name="chatbot_transformer_model_similarity_threshold">
+        <?php
+        for ($i=1; $i<=10; $i+=1) {
+            echo '<option value="' . esc_attr($i/10) . '" ' . selected($similarity_threshold, (string)($i/10), false) . '>' . esc_html($i/10) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+
+}
+
+// Transformer Leading Sentences Ratio Settings Callback - Ver 2.2.1
+function chatbot_transformer_model_leading_sentences_ratio_callback($args) {
+
+    // Get the saved chatbot_transformer_model_leading_sentences_ratio_setting value or default to 0.2
+    $leading_sentences_ratio = esc_attr(get_option('chatbot_transformer_model_leading_sentences_ratio', '0.2'));
+    // Allow for a range of tokens between 0.1 and 1.0 in 0.1-step increments - Ver 2.2.1
+    ?>
+    <select id="chatbot_transformer_model_leading_sentences_ratio" name="chatbot_transformer_model_leading_sentences_ratio">
+        <?php
+        for ($i=1; $i<=10; $i+=1) {
+            echo '<option value="' . esc_attr($i/10) . '" ' . selected($leading_sentences_ratio, (string)($i/10), false) . '>' . esc_html($i/10) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+
+}
+
+// Transformer Leading Token Ratio Settings Callback - Ver 2.2.1
+function chatbot_transformer_model_leading_token_ratio_callback($args) {
+
+    // Get the saved chatbot_transformer_model_leading_token_ratio_setting value or default to 0.2
+    $leading_token_ratio = esc_attr(get_option('chatbot_transformer_model_leading_token_ratio', '0.2'));
+    // Allow for a range of tokens between 0.1 and 1.0 in 0.1-step increments - Ver 2.2.1
+    ?>
+    <select id="chatbot_transformer_model_leading_token_ratio" name="chatbot_transformer_model_leading_token_ratio">
+        <?php
+        for ($i=1; $i<=10; $i+=1) {
+            echo '<option value="' . esc_attr($i/10) . '" ' . selected($leading_token_ratio, (string)($i/10), false) . '>' . esc_html($i/10) . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+
+}
+
 // Transformer Next Phrase Length Settings Callback - Ver 2.1.6
 function chatbot_transformer_model_sentence_response_length_callback($args) {
 
@@ -197,6 +251,9 @@ function chatbot_transformer_model_api_settings_init() {
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_build_schedule'); // Ver 2.1.6
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_word_content_window_size'); // Ver 2.1.6
     register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_sentence_response_length'); // Ver 2.1.6
+    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_similarity_threshold'); // Ver 2.2.1
+    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_leading_sentences_ratio'); // Ver 2.2.1
+    register_setting('chatbot_transformer_model_api_model', 'chatbot_transformer_model_leading_token_ratio'); // Ver 2.2.1
 
     add_settings_section(
         'chatbot_transformer_model_api_model_general_section',
@@ -255,6 +312,30 @@ function chatbot_transformer_model_api_settings_init() {
         'chatbot_transformer_model_sentence_response_length',
         'Sentence Response Count',
         'chatbot_transformer_model_sentence_response_length_callback',
+        'chatbot_transformer_model_advanced_settings',
+        'chatbot_transformer_model_advanced_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_transformer_model_similarity_threshold',
+        'Similarity Threshold',
+        'chatbot_transformer_model_similarity_threshold_callback',
+        'chatbot_transformer_model_advanced_settings',
+        'chatbot_transformer_model_advanced_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_transformer_model_leading_sentences_ratio',
+        'Leading Sentences Ratio',
+        'chatbot_transformer_model_leading_sentences_ratio_callback',
+        'chatbot_transformer_model_advanced_settings',
+        'chatbot_transformer_model_advanced_settings_section'
+    );
+
+    add_settings_field(
+        'chatbot_transformer_model_leading_token_ratio',
+        'Leading Token Ratio',
+        'chatbot_transformer_model_leading_token_ratio_callback',
         'chatbot_transformer_model_advanced_settings',
         'chatbot_transformer_model_advanced_settings_section'
     );

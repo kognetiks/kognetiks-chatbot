@@ -23,6 +23,14 @@ function chatbot_transformer_model_scheduler() {
     // Retrieve the schedule setting
     $chatbot_transformer_model_build_schedule = esc_attr(get_option('chatbot_transformer_model_build_schedule', 'Disable'));
 
+    // Don't schedule if already completed
+    if ($chatbot_transformer_model_build_schedule === 'Completed') {
+        return;
+    }
+
+    // Retrieve the current status
+    $chatbot_transformer_model_build_status = get_option('chatbot_transformer_model_build_status', 'No Schedule');
+
     // Exit if the scheduler is not enabled
     if (in_array($chatbot_transformer_model_build_schedule, ['No', 'Disable', 'Cancel'])) {
         wp_clear_scheduled_hook('chatbot_transformer_model_scan_hook');
@@ -36,11 +44,14 @@ function chatbot_transformer_model_scheduler() {
 
     // Update the status as 'In Process'
     update_option('chatbot_transformer_model_build_status', 'In Process');
-    prod_trace('NOTICE', 'chatbot_transformer_model_build_schedule: ' . $chatbot_transformer_model_build_schedule);
+    prod_trace('NOTICE', 'chatbot_transformer_model_build_status: ' . $chatbot_transformer_model_build_status);
 
     // Reset the cache file if offset is 0
     if (get_option('chatbot_transformer_model_offset', 0) === 0) {
+        // Reset the cache file and offset
         transformer_model_sentential_context_reset_cache();
+        // Reset the content items processed
+        update_option('chatbot_transformer_model_content_items_processed', 0);
     }
 
     // Schedule the first scan
@@ -85,8 +96,11 @@ function chatbot_transformer_model_scan() {
     $corpus = transformer_model_sentential_context_fetch_content($offset, $batchSize);
 
     if (empty($corpus)) {
+
         update_option('chatbot_transformer_model_build_status', 'Completed');
         update_option('chatbot_transformer_model_build_schedule', 'Completed');
+        update_option('chatbot_transformer_model_last_updated', current_time('mysql'));
+        prod_trace('NOTICE', 'chatbot_transformer_model_build_schedule: ' . $chatbot_transformer_model_build_schedule);
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'All items processed. Scan complete.');
@@ -94,8 +108,11 @@ function chatbot_transformer_model_scan() {
         return;
     }
 
+    // Retrieve the window size
+    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
+
     // Build embeddings
-    $embeddings = transformer_model_sentential_context_cache_embeddings($corpus);
+    $embeddings = transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 2);
 
     // Update the offset
     $processedItems = count($corpus);
@@ -145,27 +162,41 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 }
 
 // Cache embeddings for the fetched content
-function transformer_model_sentential_context_cache_embeddings($corpus) {
+function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 2) {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - start');
 
-    $embeddings = [];
-    foreach ($corpus as $row) {
-        $postID = $row['ID'];
-        $postContent = strip_tags(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5));
-        $postEmbeddings = transformer_model_sentential_context_build_cooccurrence_matrix($postContent, 2);
-        $embeddings[$postID] = $postEmbeddings;
+    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
+
+    // Check if embeddings are cached
+    if (file_exists($cacheFile)) {
+        $embeddings = include $cacheFile;
+    } else {
+        $embeddings = [];
     }
 
-    // Save embeddings to the cache file
-    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
-    $existingCache = file_exists($cacheFile) ? include $cacheFile : [];
-    $mergedEmbeddings = array_merge($existingCache, $embeddings);
-    file_put_contents($cacheFile, '<?php return ' . var_export($mergedEmbeddings, true) . ';');
+    // Build new embeddings
+    foreach ($corpus as $row) {
+        $postContent = strip_tags(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5));
+        $postEmbeddings = transformer_model_sentential_context_build_cooccurrence_matrix($postContent, $windowSize);
+        foreach ($postEmbeddings as $word => $context) {
+            if (!isset($embeddings[$word])) {
+                $embeddings[$word] = $context;
+            } else {
+                foreach ($context as $contextWord => $count) {
+                    if (isset($embeddings[$word][$contextWord])) {
+                        $embeddings[$word][$contextWord] += $count;
+                    } else {
+                        $embeddings[$word][$contextWord] = $count;
+                    }
+                }
+            }
+        }
+    }
 
-    // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - end');
+    // Cache the embeddings
+    file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');
 
     return $embeddings;
 

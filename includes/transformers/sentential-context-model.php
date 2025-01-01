@@ -230,7 +230,7 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
         // back_trace( 'NOTICE', 'Embeddings not found in cache');
 
         // Cache the embeddings
-        file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');
+        // file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');
 
     }
 
@@ -310,11 +310,6 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
 
     $commonKeys = array_intersect_key($vectorA, $vectorB);
 
-    // back_trace('NOTICE', 'Vector A: ' . print_r($vectorA, true));
-    // back_trace('NOTICE', 'Vector B: ' . print_r($vectorB, true));
-    // back_trace('NOTICE', 'Common Keys: ' . print_r($commonKeys, true));
-
-
     if (empty($commonKeys)) {
         // back_trace('NOTICE', 'No common keys found');
         return 0;
@@ -324,22 +319,13 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
     $magnitudeA = 0.0;
     $magnitudeB = 0.0;
 
-    $dotProduct = 0.0;
-    foreach ($vectorA as $key => $value) {
-        if (isset($vectorB[$key])) {
-            $dotProduct += $value * $vectorB[$key];
-        }
+    // Compute dot product and magnitudes
+    foreach ($commonKeys as $key => $value) {
+        $dotProduct += $vectorA[$key] * $vectorB[$key];
     }
 
-    foreach ($vectorA as $value) {
-        $magnitudeA += $value * $value;
-    }
-    $magnitudeA = sqrt($magnitudeA);
-
-    foreach ($vectorB as $value) {
-        $magnitudeB += $value * $value;
-    }
-    $magnitudeB = sqrt($magnitudeB);
+    $magnitudeA = sqrt(array_reduce($vectorA, fn($carry, $val) => $carry + $val * $val, 0.0));
+    $magnitudeB = sqrt(array_reduce($vectorB, fn($carry, $val) => $carry + $val * $val, 0.0));
 
     // back_trace('NOTICE', 'Dot Product: ' . $dotProduct);
     // back_trace('NOTICE', 'Magnitude A: ' . $magnitudeA);
@@ -465,7 +451,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     }
 
     // Similarity threshold - Default to 0.2
-    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.5));
+    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2));
 
     // Calculate key stats
     $highestSimilarity = max($similarities);
@@ -506,8 +492,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
 
     // Ratios for splitting sentences and tokens
-    $sentenceBeforeRatio = floatval(esc_attr(get_option('chatbot_transfomer_model_leading_sentences_ratio', 0.25)));
-    $tokenBeforeRatio = floatval(esc_attr(get_option('chatbot_transfomer_model_leading_sentences_ratio', 0.25)));
+    $sentenceBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_sentences_ratio', 0.25)));
+    $tokenBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_token_ratio', 0.25)));
 
     // Add a total counter to ensure we don't exceed $maxSentences
     $totalSentencesUsed = 1; // the best match itself
