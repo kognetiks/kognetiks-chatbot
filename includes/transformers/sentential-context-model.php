@@ -62,7 +62,7 @@ function transformer_model_sentential_context_model_response( $input, $responseC
         // Calculate the offset end (e.g., 49 if start=0, 99 if start=50, etc.)
         $end = $start + $batchSize - 1;
 
-        // DIAG
+        // DIAG - Diagnostics - Ver 2.2.1
         // back_trace( 'NOTICE', sprintf('Processing batch offset %d - %d', $start, $end));
 
         // STEP 3a - Fetch exactly 50 (or fewer if near the end) published items
@@ -72,31 +72,13 @@ function transformer_model_sentential_context_model_response( $input, $responseC
         //     If you have a global or partial cache, you can slice it or re-generate it here.
         //     For demonstration, assume you have a function that fetches embeddings on the fly:
         $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
+
         // For big performance gains, you might want to keep an in-memory or file-based cache keyed by offsets
         // or by post IDs. This is just a placeholder:
-
         $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
 
         // back_trace( 'NOTICE', 'Embeddings keys for this batch: ' . print_r(array_keys($embeddings), true));
         // back_trace( 'NOTICE', 'Embeddings for this batch: ' . print_r($embeddings, true));
-
-        // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace( 'NOTICE', '$input: ' . $input);
-        // if (is_array($embeddings)) {
-        //     // back_trace('NOTICE', 'Character Length of $embeddings: ' . strlen(print_r($embeddings, true)));
-        // } else {
-        //     // back_trace('NOTICE', '$embeddings is not an array');
-        // }
-
-        // back_trace( 'NOTICE', 'Character Length $corpus: ' . strlen($corpus));
-        // back_trace( 'NOTICE', '$responseCount: ' . $responseCount);
-
-        // if (isset($embeddings['alan'])) {
-        //     // back_trace( 'NOTICE', 'Found "alan" in embeddings with ' . count($embeddings['alan']) . ' context words.');
-        // }
-        // if (isset($embeddings['turing'])) {
-        //     // back_trace( 'NOTICE', 'Found "turing" in embeddings with ' . count($embeddings['turing']) . ' context words.');
-        // }
 
         // STEP 3c - Generate a response for this batch
         $batchResponse = transformer_model_sentential_context_generate_contextual_response( $input, $embeddings, $corpus, $responseCount );
@@ -464,6 +446,14 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     });
     $numMatchesAboveThreshold = count($matchesAboveThreshold);
     $totalSentencesAnalyzed = count($sentences);
+
+    // DIAG - Diagnostics - Ver 2.2.1
+    // Print out each matching sentence and its similarity score
+    foreach ($matchesAboveThreshold as $index => $similarity) {
+        $cleanedSentence = preg_replace('/\s+/', ' ', $sentences[$index]);
+        back_trace( 'NOTICE', 'Sentence: ' . $cleanedSentence );
+        back_trace( 'NOTICE', 'Similarity: ' . $similarity );
+    }
 
     // Log key stats
     back_trace( 'NOTICE', 'Key Stats:');
