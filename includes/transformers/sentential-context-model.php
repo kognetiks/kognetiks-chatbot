@@ -81,7 +81,10 @@ function transformer_model_sentential_context_model_response( $input, $responseC
         // back_trace( 'NOTICE', 'Embeddings for this batch: ' . print_r($embeddings, true));
 
         // STEP 3c - Generate a response for this batch
-        $batchResponse = transformer_model_sentential_context_generate_contextual_response( $input, $embeddings, $corpus, $responseCount );
+        $batchResponse = transformer_model_sentential_context_generate_contextual_response( $input, $embeddings, $corpus, $responseCount, $windowSize );
+
+        // DIAG - Diagnostics - Ver 2.2.1
+        back_trace( 'NOTICE', 'Batch Response: ' . print_r($batchResponse, true));
 
         // STEP 3d - **Pick the "best" response** from this batch. 
         // In some cases, the generate_contextual_response might return a single best result.
@@ -118,7 +121,7 @@ function transformer_model_sentential_context_model_response( $input, $responseC
     // DIAG - Diagnostics - Ver 2.2.1
     for ($i = 0; $i < count($batchResponses); $i++) {
         $cleanedSentence = preg_replace('/\s+/', ' ',  $batchResponses[$i]);
-        back_trace( 'NOTICE', 'Batch Response ' . $i . ': ' . $cleanedSentence);
+        // back_trace( 'NOTICE', 'Batch Response ' . $i . ': ' . $cleanedSentence);
     }
 
     // STEP 4 - Return the best overall response
@@ -130,7 +133,7 @@ function transformer_model_sentential_context_model_response( $input, $responseC
     // STEP 4b - Retreive the file-based cache of embeddings
     $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
     // STEP 4c - Run the final best response through the generator one more time
-    $finalBestResponse = transformer_model_sentential_context_generate_contextual_response( $input, $embeddings, $corpus, $responseCount );
+    $finalBestResponse = transformer_model_sentential_context_generate_contextual_response( $input, $embeddings, $corpus, $responseCount, $windowSize );
 
     // STEP 5 - Return the best overall response
     return $finalBestResponse;
@@ -202,6 +205,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
     // Clean up the content
     $content = strip_tags($content); // Remove HTML tags
     $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5); // Decode HTML entities
+    $content = preg_replace('/[^\w\s]/', '', $content); // Remove non-alphanumeric characters
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Content: ' . $content);
@@ -231,13 +235,11 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
 
     } else {
 
-        $embeddings = transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize);
-
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'Embeddings not found in cache');
 
-        // Cache the embeddings
-        // file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');
+        update_option('chatbot_transformer_model_build_schedule', 'Now');
+        chatbot_transformer_model_scheduler();
 
     }
 
@@ -255,28 +257,40 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix - start');
 
     $matrix = [];
+
+    // Before splitting into words:
+    $corpus = preg_replace('/[^\w\s]/', '', $corpus);  // Remove punctuation
+
     // Tokenize and normalize
-    $words = preg_split('/\s+/', strtolower($corpus));
-    $words = array_map('trim', $words); 
+    $words = explode(' ', strtolower(trim($corpus)));
+    $words = array_filter(array_map('trim', $words));
     $words = transformer_model_sentential_context_remove_stop_words($words); // Remove stop words
 
-    foreach ($words as $i => $word) {
-        if (!isset($matrix[$word])) {
-            $matrix[$word] = [];
-        }
+    // Generate n-grams
+    $ngrams = [];
+    for ($i = 0; $i <= count($words) - $windowSize; $i++) {
+        $ngrams[] = implode(' ', array_slice($words, $i, $windowSize));
+    }
 
-        for ($j = max(0, $i - $windowSize); $j <= min(count($words) - 1, $i + $windowSize); $j++) {
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace('NOTICE', 'Generated Corpus N-Grams: ' . implode(', ', array_slice($ngrams, 0, 10)));
+
+    foreach ($ngrams as $i => $ngram) {
+
+        if (!isset($matrix[$ngram])) {
+            $matrix[$ngram] = [];
+        }
+        
+        for ($j = max(0, $i - $windowSize); $j <= min(count($ngrams) - 1, $i + $windowSize); $j++) {
             if ($i !== $j) {
-                if (isset($words[$j])) {
-                    $contextWord = $words[$j];
-                } else {
-                    // Handle the case where the index does not exist
-                    $contextWord = null; // or any default value
-                }
-                $matrix[$word][$contextWord] = ($matrix[$word][$contextWord] ?? 0) + 1;
+                $contextNgram = $ngrams[$j];
+                $matrix[$ngram][$contextNgram] = ($matrix[$ngram][$contextNgram] ?? 0) + 1;
             }
         }
     }
+
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace('NOTICE', 'Generated Embeddings: ' . print_r(array_slice($matrix, 0, 10), true));
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix - end');
@@ -307,10 +321,10 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
     // Check for empty vectors
     if (empty($vectorA) || empty($vectorB)) {
         // if (empty($vectorA)) {
-        //     // back_trace('NOTICE', 'Empty Vector A');
+        //     back_trace( 'NOTICE', 'Empty Vector A');
         // }
         // if (empty($vectorB)) {
-        //     // back_trace('NOTICE', 'Empty Vector B');
+        //     back_trace( 'NOTICE', 'Empty Vector B');
         // }
         return 0;
     }
@@ -318,7 +332,7 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
     $commonKeys = array_intersect_key($vectorA, $vectorB);
 
     if (empty($commonKeys)) {
-        // back_trace('NOTICE', 'No common keys found');
+        // back_trace( 'NOTICE', 'No common keys found');
         return 0;
     }
 
@@ -334,71 +348,59 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
     $magnitudeA = sqrt(array_reduce($vectorA, fn($carry, $val) => $carry + $val * $val, 0.0));
     $magnitudeB = sqrt(array_reduce($vectorB, fn($carry, $val) => $carry + $val * $val, 0.0));
 
-    // back_trace('NOTICE', 'Dot Product: ' . $dotProduct);
-    // back_trace('NOTICE', 'Magnitude A: ' . $magnitudeA);
-    // back_trace('NOTICE', 'Magnitude B: ' . $magnitudeB);
+    // back_trace( 'NOTICE', '$vectorA: ' . print_r($vectorA, true));
+    // back_trace( 'NOTICE', '$vectorB: ' . print_r($vectorB, true));
+    // back_trace( 'NOTICE', 'Dot Product: ' . $dotProduct);
+    // back_trace( 'NOTICE', 'Magnitude A: ' . $magnitudeA);
+    // back_trace( 'NOTICE', 'Magnitude B: ' . $magnitudeB);
 
     return ($magnitudeA * $magnitudeB) ? $dotProduct / ($magnitudeA * $magnitudeB) : 0.0;
 
 }
 
 // Function to generate a contextual response based on input and embeddings
-function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500) {
+function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500, $windowSize = 3) {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_generate_contextual_response - start');
-
-    // back_trace( 'NOTICE', 'Input: ' . $input);
-    // back_trace( 'NOTICE', 'Character Length $embeddings: ' . strlen(print_r($embeddings, true)));
-    // back_trace( 'NOTICE', 'Character Length $corpus: ' . strlen($corpus));
+    // back_trace('NOTICE', 'Input: ' . $input);
+    // back_trace('NOTICE', 'Embedding Keys: ' . implode(', ', array_slice(array_keys($embeddings), 0, 10)));
+    // back_trace('NOTICE', 'Character Length $corpus: ' . strlen($corpus));
     // back_trace( 'NOTICE', 'Max Tokens: ' . $maxTokens);
-
-    // back_trace('NOTICE', 'Embedding Keys: ' . implode(', ', array_keys($embeddings)));
 
     global $chatbotFallbackResponses;
 
-    // DIAG - Diagnostics - Ver 2.3.0
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
-    // back_trace( 'NOTICE', 'Max Tokens: ' . $maxTokens);
-
     // Tokenize the corpus into sentences
     $sentences = preg_split('/(?<=[.?!])\s+/', $corpus);
-
-    // DIAG - Diagnostics - Ver 2.2.1
-    // Print the first 5 sentences
-    // back_trace( 'NOTICE', 'Sentences: ' . print_r(array_slice($sentences, 0, 5), true));
 
     $sentenceVectors = [];
 
     // Compute embeddings for sentences
     foreach ($sentences as $index => $sentence) {
 
-        $sentenceWords = preg_split('/\s+/', strtolower($sentence));
-        if (empty($sentenceWords)) {
-            // back_trace('NOTICE', 'Tokenization failed for sentence: ' . $sentence);
-        }
+        // Remove punctuation from each sentence
+        $sentence = preg_replace('/[^\w\s]/', '', $sentence);
+
+        // Now split and normalize
+        $sentenceWords = preg_split('/\s+/', strtolower(trim($sentence)));
         $sentenceWords = transformer_model_sentential_context_remove_stop_words($sentenceWords); // Remove stop words
-        // back_trace('NOTICE', 'Words after Stop Word Removal: ' . implode(', ', $sentenceWords));
+
+        // DIAG - Diagnostics - Ver 2.2.1
+        back_trace('NOTICE', 'Words for Sentence ' . $index . ': ' . implode(', ', $sentenceWords));
+
         $sentenceVector = [];
         $wordCount = 0;
 
         foreach ($sentenceWords as $word) {
             if (isset($embeddings[$word])) {
                 foreach ($embeddings[$word] as $contextWord => $value) {
-                    if (!isset($sentenceVector[$contextWord])) {
-                        $sentenceVector[$contextWord] = 0;
-                    }
-                    // Ensure $value is not an array
-                    if (is_array($value)) {
-                        // Handle the case where $value is an array
-                        foreach ($value as $subValue) {
-                            $sentenceVector[$contextWord] += $subValue;
-                        }
-                    } else {
-                        $sentenceVector[$contextWord] += $value;
-                    }
+                    $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
                 }
                 $wordCount++;
+            } else {
+                // DIAG - Diagnostics - Ver 2.2.1
+                // back_trace('NOTICE', 'Word not found in embeddings: ' . $word);
+                $sentenceVector[$word] = 0; // Skip to the next word
             }
         }
 
@@ -408,27 +410,43 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
                 $sentenceVector[$key] /= $wordCount;
             }
         } else {
-            // back_trace('NOTICE', 'Skipping Normalization: Empty Sentence Vector');
+            // DIAG - Diagnostics - Ver 2.2.1
+            // back_trace('NOTICE', 'Empty Sentence Vector for Sentence ' . $index);
         }
-
-        // back_trace('NOTICE', 'Sentence Vector ' . $index . ': ' . print_r($sentenceVector, true));
         
         $sentenceVectors[$index] = $sentenceVector;
 
     }
 
     // Compute the input vector
-    $inputWords = preg_split('/\s+/', strtolower($input));
-    $inputWords = transformer_model_sentential_context_remove_stop_words($inputWords); // Remove stop words
+    $input = strtolower(trim($input));
+    $inputWords = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $input));
+    $inputWords = transformer_model_sentential_context_remove_stop_words($inputWords);
+    // back_trace('NOTICE', 'Processed Input Words: ' . implode(', ', $inputWords));
+
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace('NOTICE', 'Input Words: ' . implode(', ', $inputWords));
+
+    $inputNgrams = [];
+    for ($i = 0; $i <= count($inputWords) - $windowSize; $i++) {
+        $inputNgrams[] = implode(' ', array_slice($inputWords, $i, $windowSize));
+    }
+
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace('NOTICE', 'Input N-Grams: ' . implode(', ', $inputNgrams));
+
     $inputVector = [];
     $wordCount = 0;
 
-    foreach ($inputWords as $word) {
-        if (isset($embeddings[$word])) {
-            foreach ($embeddings[$word] as $contextWord => $value) {
+    foreach ($inputNgrams as $ngram) {
+        if (isset($embeddings[$ngram])) {
+            foreach ($embeddings[$ngram] as $contextWord => $value) {
                 $inputVector[$contextWord] = ($inputVector[$contextWord] ?? 0) + $value;
             }
             $wordCount++;
+        } else {
+            // DIAG - Diagnostics - Ver 2.2.1
+            // back_trace('NOTICE', 'N-Gram not found in embeddings: ' . $ngram);
         }
     }
 
@@ -437,24 +455,36 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         foreach ($inputVector as $key => $value) {
             $inputVector[$key] /= $wordCount;
         }
+    } else {
+        // back_trace('NOTICE', 'Empty Input Vector');
     }
-
-    // back_trace( 'NOTICE', '$inputVector = ' . print_r($inputVector, true));
+    
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace('NOTICE', 'Generated Input Vector: ' . print_r($inputVector, true));
 
     // Compute similarities
     $similarities = [];
     foreach ($sentenceVectors as $index => $vector) {
 
-        // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace( 'NOTICE', 'Sentence Vector ' . $index . ': ' . print_r($vector, true));
-        // back_trace( 'NOTICE', 'Input Vector: ' . print_r($inputVector, true));
+        if (empty($inputVector) || empty($vector)) {
+            // DIAG - Diagnostics - Ver 2.2.1
+            // back_trace('NOTICE', 'Empty Vector Detected for Sentence ' . $index);
+            continue;
+        }
 
         $similarity = transformer_model_sentential_context_cosine_similarity($inputVector, $vector);
         $similarities[$index] = $similarity;
 
-        // DiAG - Diagnostics - Ver 2.2.1
-        // back_trace( 'NOTICE', 'Similarity ' . $index . ': ' . $similarity);
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace('NOTICE', 'Similarity for Sentence ' . $index . ': ' . $similarity . ' | Sentence: ' . $sentences[$index]);
 
+    }
+
+    // Check for highest similarity
+    if (empty($similarities)) {
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace('NOTICE', 'No similarities computed. Returning fallback.');
+        return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
     }
 
     // Similarity threshold - Default to 0.2
@@ -476,8 +506,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     // Print out each matching sentence and its similarity score
     // foreach ($matchesAboveThreshold as $index => $similarity) {
     //     $cleanedSentence = preg_replace('/\s+/', ' ', $sentences[$index]);
-    //     back_trace( 'NOTICE', 'Sentence: ' . $cleanedSentence );
-    //     back_trace( 'NOTICE', 'Similarity: ' . $similarity );
+    //     // back_trace( 'NOTICE', 'Sentence: ' . $cleanedSentence );
+    //     // back_trace( 'NOTICE', 'Similarity: ' . $similarity );
     // }
 
     // Log key stats

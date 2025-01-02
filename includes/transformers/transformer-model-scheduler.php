@@ -35,6 +35,7 @@ function chatbot_transformer_model_scheduler() {
     if (in_array($chatbot_transformer_model_build_schedule, ['No', 'Disable', 'Cancel'])) {
         wp_clear_scheduled_hook('chatbot_transformer_model_scan_hook');
         update_option('chatbot_transformer_model_build_status', 'No Schedule');
+        update_option('chatbot_transformer_model_content_items_processed', 0);
         prod_trace('NOTICE', 'chatbot_transformer_model_scheduler: ' . $chatbot_transformer_model_build_schedule);
         return;
     }
@@ -69,6 +70,9 @@ function transformer_model_sentential_context_reset_cache() {
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_reset_cache - start');
 
+    // DIAG - Diagnostics
+    prod_trace( 'NOTICE', 'Transformer Model Content Cache Reset');
+
     update_option('chatbot_transformer_model_offset', 0);
     update_option('chatbot_transformer_model_content_items_processed', 0);
     $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
@@ -99,8 +103,9 @@ function chatbot_transformer_model_scan() {
 
         update_option('chatbot_transformer_model_build_status', 'Completed');
         update_option('chatbot_transformer_model_build_schedule', 'Completed');
+        update_option('chatbot_transformer_model_content_items_processed', 0);
         update_option('chatbot_transformer_model_last_updated', current_time('mysql'));
-        prod_trace('NOTICE', 'chatbot_transformer_model_build_schedule: ' . $chatbot_transformer_model_build_schedule);
+        prod_trace('NOTICE', 'chatbot_transformer_model_build_schedule: Completed');
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'All items processed. Scan complete.');
@@ -112,7 +117,7 @@ function chatbot_transformer_model_scan() {
     $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
 
     // Build embeddings
-    $embeddings = transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 2);
+    $embeddings = transformer_model_sentential_context_cache_embeddings($corpus, $windowSize);
 
     // Update the offset
     $processedItems = count($corpus);
@@ -121,7 +126,7 @@ function chatbot_transformer_model_scan() {
 
 
     // Log the processed batch
-    // back_trace( 'NOTICE', 'Processed ' . $processedItems . ' items starting at offset ' . $offset);
+    prod_trace( 'NOTICE', 'Processed ' . $processedItems . ' items starting at offset ' . $offset);
 
     // Schedule the next batch if needed
     wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
@@ -162,7 +167,7 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 }
 
 // Cache embeddings for the fetched content
-function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 2) {
+function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - start');
