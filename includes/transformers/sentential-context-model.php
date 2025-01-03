@@ -71,7 +71,7 @@ function transformer_model_sentential_context_model_response( $input, $responseC
         // STEP 3b - (Re)build or reuse embeddings as needed; depends on your cache logic
         //     If you have a global or partial cache, you can slice it or re-generate it here.
         //     For demonstration, assume you have a function that fetches embeddings on the fly:
-        $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
+        $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 2)));
 
         // For big performance gains, you might want to keep an in-memory or file-based cache keyed by offsets
         // or by post IDs. This is just a placeholder:
@@ -105,18 +105,8 @@ function transformer_model_sentential_context_model_response( $input, $responseC
     }
 
     // STEP 4 - Second pass: pick the best of the best from all $batchResponses
-    //    This “best” logic is up to you. You might want to run them all back
-    //    through a ranking function or just pick the largest/smallest, etc.
-    //
-    // For demonstration, let’s do a naive approach:
-    // $finalBestResponse = '';
-    // foreach ($batchResponses as $candidate) {
-    //     // Example logic: pick the candidate with the greatest length
-    //     // (Replace with your actual “best” logic.)
-    //     if (strlen($candidate) > strlen($finalBestResponse)) {
-    //         $finalBestResponse = $candidate;
-    //     }
-    // }
+    //    To find the “best” response, let's run them all back through
+    //    the ranking function one more time.
 
     // DIAG - Diagnostics - Ver 2.2.1
     for ($i = 0; $i < count($batchResponses); $i++) {
@@ -124,17 +114,11 @@ function transformer_model_sentential_context_model_response( $input, $responseC
         back_trace( 'NOTICE', 'Batch Response ' . $i . ': ' . $cleanedSentence);
     }
 
-    // STEP 4 - Return the best overall response - OVERRIDE
-    // if (!empty($batchResponses)) {
-    //     return $batchResponses[0];
-    // }
-
-    // STEP 4 - Return the best overall response
     $finalBestResponse = '';
     // Assemble the $batchResponses as a $corpus
     $corpus = implode(' ', $batchResponses);
     // STEP 4a - Set the window size
-    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
+    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 2)));
     // STEP 4b - Retreive the file-based cache of embeddings
     $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
     // STEP 4c - Run the final best response through the generator one more time
@@ -211,9 +195,11 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
     // back_trace( 'NOTICE', 'Content length: ' . strlen($content));
 
     // Clean up the content
-    // $content = strip_tags($content); // Remove HTML tags
-    // $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5); // Decode HTML entities
-    // $content = preg_replace('/[^\w\s]/', '', $content); // Remove non-alphanumeric characters
+    $content = strip_tags($content); // Remove HTML tags
+    $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5); // Decode HTML entities
+    $content = str_replace(["\r", "\n"], ' ', $content); // Remove newlines
+    $content = preg_replace('/[^\w\s]/', '', $content); // Remove non-alphanumeric characters
+    $content = preg_replace('/\s+/', ' ', $content); // Remove extra whitespace
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Content: ' . $content);
@@ -328,12 +314,12 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
 
     // Check for empty vectors
     if (empty($vectorA) || empty($vectorB)) {
-        if (empty($vectorA)) {
-            back_trace('NOTICE', 'Empty Vector A');
-        }
-        if (empty($vectorB)) {
-            back_trace('NOTICE', 'Empty Vector B');
-        }
+        // if (empty($vectorA)) {
+        //     back_trace('NOTICE', 'Empty Vector A');
+        // }
+        // if (empty($vectorB)) {
+        //     back_trace('NOTICE', 'Empty Vector B');
+        // }
         return 0;
     }
 
@@ -350,7 +336,7 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
         // back_trace('NOTICE', 'No common keys found');
         return 0;
     } else {
-        back_trace('NOTICE', 'Common keys found');
+        // back_trace('NOTICE', 'Common keys found');
     }
 
     $dotProduct = 0.0;
@@ -375,11 +361,6 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 
     global $chatbotFallbackResponses;
 
-    // Check if the input contains 'xyz doohickey company'
-    if (strpos(strtolower($input), 'xyz doohickey company') !== false) {
-        back_trace('NOTICE', 'Input contains "xyz doohickey company"');
-    }
-
     // Tokenize the corpus into sentences while retaining punctuation
     $sentences = preg_split('/(?<=[.!?])\s+(?=[A-Z])/', $corpus);
 
@@ -393,7 +374,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         return !empty($sentence);
     });
 
-    // Log the number of sentences
+    // DIAG - Diagnostics
     back_trace('NOTICE', 'Number of Sentences: ' . count($sentences));
 
     $sentenceVectors = [];
@@ -480,7 +461,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
             $inputVector[$key] /= $wordCount;
         }
     } else {
-        back_trace('NOTICE', 'Empty Input Vector');
+        // back_trace('NOTICE', 'Empty Input Vector');
     }
 
     // Log the input vector
@@ -602,6 +583,9 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
             break;
         }
     }
+
+    // Before returning a response - clean it up
+    $response = preg_replace('/\s+/', ' ', $response); // Remove extra whitespace
 
     // Return the response
     return $response;

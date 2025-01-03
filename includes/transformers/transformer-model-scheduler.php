@@ -40,23 +40,31 @@ function chatbot_transformer_model_scheduler() {
         return;
     }
 
-    // Diagnostic logging
-    // back_trace( 'NOTICE', 'Scheduler started');
-
-    // Update the status as 'In Process'
-    update_option('chatbot_transformer_model_build_status', 'In Process');
-    prod_trace('NOTICE', 'chatbot_transformer_model_build_status: ' . $chatbot_transformer_model_build_status);
-
     // Reset the cache file if offset is 0
-    if (get_option('chatbot_transformer_model_offset', 0) === 0) {
-        // Reset the cache file and offset
+    if (in_array($chatbot_transformer_model_build_schedule, ['Now', 'Hourly', 'Twice Daily', 'Daily', 'Weekly'])) {
+
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', 'Scheduler started');
+
+        // Update the status as 'In Process'
+        update_option('chatbot_transformer_model_build_status', 'In Process');
+
+        // DIAG - Diagnostics
+        prod_trace('NOTICE', 'chatbot_transformer_model_build_status: ' . $chatbot_transformer_model_build_status);
+
+        // Reset the cache fil
         transformer_model_sentential_context_reset_cache();
+
+        // Reset the offset
+        update_option('chatbot_transformer_model_offset', 0);
+
         // Reset the content items processed
         update_option('chatbot_transformer_model_content_items_processed', 0);
-    }
+            
+        // Schedule the first scan
+        wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
 
-    // Schedule the first scan
-    wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
+    }
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'chatbot_transformer_model_scheduler - end');
@@ -79,7 +87,9 @@ function transformer_model_sentential_context_reset_cache() {
 
     if (file_exists($cacheFile)) {
         unlink($cacheFile);
-        // back_trace( 'NOTICE', "$cacheFile deleted");
+        back_trace( 'NOTICE', "$cacheFile deleted");
+    } else {
+        back_trace( 'NOTICE', "$cacheFile not found");
     }
 
     // DIAG - Diagnostics
@@ -114,7 +124,7 @@ function chatbot_transformer_model_scan() {
     }
 
     // Retrieve the window size
-    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
+    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 2)));
 
     // Build embeddings
     $embeddings = transformer_model_sentential_context_cache_embeddings($corpus, $windowSize);
@@ -157,6 +167,9 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
         update_option('chatbot_transformer_model_offset', 0);
         // back_trace( 'NOTICE', 'No more posts to process.');
         return [];
+    } else {
+        // Schedule the next batch
+        wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
     }
 
     // DIAG - Diagnostics
