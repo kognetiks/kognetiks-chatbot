@@ -40,6 +40,8 @@ The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI pl
 
 - [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
 
+- [API/Transformer Settings](api-transformer-settings/api-transformer-model-settings.md) **BETA FEATURE**
+
 - [Assistants](assistants/manage-assistants.md)
 
 - [Avatars](avatars/avatars.md)

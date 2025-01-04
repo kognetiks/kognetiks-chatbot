@@ -109,10 +109,10 @@ function transformer_model_sentential_context_model_response( $input, $responseC
     //    the ranking function one more time.
 
     // DIAG - Diagnostics - Ver 2.2.1
-    for ($i = 0; $i < count($batchResponses); $i++) {
-        $cleanedSentence = preg_replace('/\s+/', ' ',  $batchResponses[$i]);
-        back_trace( 'NOTICE', 'Batch Response ' . $i . ': ' . $cleanedSentence);
-    }
+    // for ($i = 0; $i < count($batchResponses); $i++) {
+    //     $cleanedSentence = preg_replace('/\s+/', ' ',  $batchResponses[$i]);
+    //     back_trace( 'NOTICE', 'Batch Response ' . $i . ': ' . $cleanedSentence);
+    // }
 
     $finalBestResponse = '';
     // Assemble the $batchResponses as a $corpus
@@ -375,7 +375,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     });
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'Number of Sentences: ' . count($sentences));
+    // back_trace('NOTICE', 'Number of Sentences: ' . count($sentences));
 
     $sentenceVectors = [];
 
@@ -430,7 +430,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $inputWords = transformer_model_sentential_context_remove_stop_words($inputWords);
 
     // Log the processed input words
-    back_trace('NOTICE', 'Processed Input Words: ' . implode(', ', $inputWords));
+    // back_trace('NOTICE', 'Processed Input Words: ' . implode(', ', $inputWords));
 
     $inputNgrams = [];
     for ($i = 0; $i <= count($inputWords) - $windowSize; $i++) {
@@ -438,7 +438,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     }
 
     // Log the generated input n-grams
-    back_trace('NOTICE', 'Generated Input N-Grams: ' . print_r($inputNgrams, true));
+    // back_trace('NOTICE', 'Generated Input N-Grams: ' . print_r($inputNgrams, true));
 
     $inputVector = [];
     $wordCount = 0;
@@ -465,7 +465,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     }
 
     // Log the input vector
-    back_trace('NOTICE', 'Generated Input Vector: ' . print_r($inputVector, true));
+    // back_trace('NOTICE', 'Generated Input Vector: ' . print_r($inputVector, true));
 
     // Compute similarities
     $similarities = [];
@@ -487,7 +487,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     // Check for highest similarity
     if (empty($similarities)) {
 
-        back_trace('NOTICE', 'No similarities computed. Returning fallback.');
+        // back_trace('NOTICE', 'No similarities computed. Returning fallback.');
         return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
 
     }
@@ -506,16 +506,16 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $totalSentencesAnalyzed = count($sentences);
 
     // Log key stats
-    back_trace('NOTICE', 'Key Stats:');
-    back_trace('NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
-    back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+    // back_trace('NOTICE', 'Key Stats:');
+    // back_trace('NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
+    // back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    // back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    // back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    // back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // If the highest similarity is below the threshold, return a fallback message
     if ($highestSimilarity < $similarityThreshold) {
-        back_trace('NOTICE', 'Low similarity detected: ' . $highestSimilarity);
+        // back_trace('NOTICE', 'Low similarity detected: ' . $highestSimilarity);
         return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
     }
 

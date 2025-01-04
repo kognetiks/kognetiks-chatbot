@@ -44,7 +44,7 @@ function chatbot_transformer_model_scheduler() {
     if (in_array($chatbot_transformer_model_build_schedule, ['Now', 'Hourly', 'Twice Daily', 'Daily', 'Weekly'])) {
 
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', 'Scheduler started');
+        // back_trace( 'NOTICE', 'Scheduler started');
 
         // Update the status as 'In Process'
         update_option('chatbot_transformer_model_build_status', 'In Process');
@@ -87,9 +87,9 @@ function transformer_model_sentential_context_reset_cache() {
 
     if (file_exists($cacheFile)) {
         unlink($cacheFile);
-        back_trace( 'NOTICE', "$cacheFile deleted");
+        // back_trace( 'NOTICE', "$cacheFile deleted");
     } else {
-        back_trace( 'NOTICE', "$cacheFile not found");
+        // back_trace( 'NOTICE', "$cacheFile not found");
     }
 
     // DIAG - Diagnostics

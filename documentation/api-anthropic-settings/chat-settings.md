@@ -5,7 +5,7 @@ To ensure your Kognetiks Chatbot functions optimally, you need to configure the 
 ![Chat Settings](chat-settings.png)
 
 1. **Anthropic Model Default**:
-   - **Description**: This setting allows you to choose the default OpenAI model your chatbot will use.
+   - **Description**: This setting allows you to choose the default Anthropic model your chatbot will use.
    - **Options**: Depending on the available models, you can select from various options such as `claude-3-5-sonnet-latest`, `claude-3-5-sonnet-latest`, etc.
    - **How to Set**: Select the desired model from the dropdown menu. For instance, `claude-3-5-sonnet-latest`.
 
