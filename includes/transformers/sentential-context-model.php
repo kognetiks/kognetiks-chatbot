@@ -225,7 +225,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
     // Debugging: Optional - Log remaining problematic characters
     // foreach (str_split($content) as $char) {
     //     if (ord($char) < 32 || ord($char) > 126) {
-    //         back_trace('DEBUG', 'Problematic char: "' . json_encode($char) . '" ASCII: ' . ord($char));
+    //         back_trace( 'DEBUG', 'Problematic char: "' . json_encode($char) . '" ASCII: ' . ord($char));
     //     }
     // }
 
@@ -300,7 +300,7 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
     }
 
     // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace('NOTICE', 'Generated Corpus N-Grams: ' . implode(', ', array_slice($ngrams, 0, 10)));
+    // back_trace( 'NOTICE', 'Generated Corpus N-Grams: ' . implode(', ', array_slice($ngrams, 0, 10)));
 
     foreach ($ngrams as $i => $ngram) {
 
@@ -317,7 +317,7 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
     }
 
     // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace('NOTICE', 'Generated Embeddings: ' . print_r(array_slice($matrix, 0, 10), true));
+    // back_trace( 'NOTICE', 'Generated Embeddings: ' . print_r(array_slice($matrix, 0, 10), true));
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix - end');
@@ -343,49 +343,72 @@ function transformer_model_sentential_context_remove_stop_words($words) {
 function transformer_model_sentential_context_cosine_similarity($vectorA, $vectorB) {
 
     // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace('NOTICE', 'transformer_model_sentential_context_cosine_similarity - start');
+    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity - start');
 
     // Check for empty vectors
     if (empty($vectorA) || empty($vectorB)) {
         // if (empty($vectorA)) {
-        //     back_trace('NOTICE', 'Empty Vector A');
+        //     back_trace( 'NOTICE', 'Empty Vector A');
         // }
         // if (empty($vectorB)) {
-        //     back_trace('NOTICE', 'Empty Vector B');
+        //     back_trace( 'NOTICE', 'Empty Vector B');
         // }
         return 0;
     }
 
-    $commonKeys = array_intersect_key($vectorA, $vectorB);
-
-    // Log the contents of vectorA and vectorB
-    // back_trace('NOTICE', 'vectorA: ' . print_r($vectorA, true));
-    // back_trace('NOTICE', 'vectorB: ' . print_r($vectorB, true));
-    // back_trace('NOTICE', 'Keys of vectorA: ' . implode(', ', array_keys($vectorA)));
-    // back_trace('NOTICE', 'Keys of vectorB: ' . implode(', ', array_keys($vectorB)));
-    // back_trace('NOTICE', 'commonKeys: ' . print_r($commonKeys, true));
-
-    if (empty($commonKeys)) {
-        // back_trace('NOTICE', 'No common keys found');
-        return 0;
-    } else {
-        // back_trace('NOTICE', 'Common keys found');
-    }
+    // Combine all keys from both vectors
+    $allKeys = array_unique(array_merge(array_keys($vectorA), array_keys($vectorB)));
 
     $dotProduct = 0.0;
-    foreach ($commonKeys as $key => $value) {
-        $dotProduct += $vectorA[$key] * $vectorB[$key];
+    $sumSquareA = 0.0;
+    $sumSquareB = 0.0;
+
+    foreach ($allKeys as $key) {
+        $valueA = $vectorA[$key] ?? 0.0;
+        $valueB = $vectorB[$key] ?? 0.0;
+
+        $dotProduct += $valueA * $valueB;
+        $sumSquareA += $valueA * $valueA;
+        $sumSquareB += $valueB * $valueB;
     }
 
-    $magnitudeA = sqrt(array_reduce($vectorA, fn($carry, $val) => $carry + $val * $val, 0.0));
-    $magnitudeB = sqrt(array_reduce($vectorB, fn($carry, $val) => $carry + $val * $val, 0.0));
-
-    // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace('NOTICE', 'Dot Product: ' . $dotProduct);
-    // back_trace('NOTICE', 'Magnitude A: ' . $magnitudeA);
-    // back_trace('NOTICE', 'Magnitude B: ' . $magnitudeB);
+    $magnitudeA = sqrt($sumSquareA);
+    $magnitudeB = sqrt($sumSquareB);
 
     return ($magnitudeA * $magnitudeB) ? $dotProduct / ($magnitudeA * $magnitudeB) : 0.0;
+
+    // OLD CODE BELOW
+
+    // $commonKeys = array_intersect_key($vectorA, $vectorB);
+
+    // // Log the contents of vectorA and vectorB
+    // // back_trace( 'NOTICE', 'vectorA: ' . print_r($vectorA, true));
+    // // back_trace( 'NOTICE', 'vectorB: ' . print_r($vectorB, true));
+    // // back_trace( 'NOTICE', 'Keys of vectorA: ' . implode(', ', array_keys($vectorA)));
+    // // back_trace( 'NOTICE', 'Keys of vectorB: ' . implode(', ', array_keys($vectorB)));
+    // // back_trace( 'NOTICE', 'commonKeys: ' . print_r($commonKeys, true));
+
+    // if (empty($commonKeys)) {
+    //     // back_trace( 'NOTICE', 'No common keys found');
+    //     return 0;
+    // } else {
+    //     // back_trace( 'NOTICE', 'Common keys found');
+    // }
+
+    // $dotProduct = 0.0;
+    // foreach ($commonKeys as $key => $value) {
+    //     $dotProduct += $vectorA[$key] * $vectorB[$key];
+    // }
+
+    // $magnitudeA = sqrt(array_reduce($vectorA, fn($carry, $val) => $carry + $val * $val, 0.0));
+    // $magnitudeB = sqrt(array_reduce($vectorB, fn($carry, $val) => $carry + $val * $val, 0.0));
+
+    // // DIAG - Diagnostics - Ver 2.2.1
+    // // back_trace( 'NOTICE', 'Dot Product: ' . $dotProduct);
+    // // back_trace( 'NOTICE', 'Magnitude A: ' . $magnitudeA);
+    // // back_trace( 'NOTICE', 'Magnitude B: ' . $magnitudeB);
+
+    // return ($magnitudeA * $magnitudeB) ? $dotProduct / ($magnitudeA * $magnitudeB) : 0.0;
 
 }
 
@@ -408,7 +431,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     });
 
     // DIAG - Diagnostics
-    // back_trace('NOTICE', 'Number of Sentences: ' . count($sentences));
+    // back_trace( 'NOTICE', 'Number of Sentences: ' . count($sentences));
+    back_trace( 'NOTICE', '$windowSize: ' . $windowSize);
 
     $sentenceVectors = [];
 
@@ -417,6 +441,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 
         // Remove punctuation from each sentence
         $sentence = preg_replace('/[^\w\s]/', '', $sentence);
+        $sentence = strtolower(trim($sentence));
 
         // Now split and normalize
         $sentenceWords = preg_split('/\s+/', strtolower(trim($sentence)));
@@ -440,7 +465,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
                 $ngramCount++;
             } else {
                 // Log that we didn't find an embedding for $ngram
-                // back_trace('NOTICE', 'N-Gram not found in embeddings: ' . $ngram);
+                // back_trace( 'NOTICE', 'N-Gram not found in embeddings: ' . $ngram);
             }
         }
         
@@ -453,7 +478,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         $sentenceVectors[$index] = $sentenceVector;
 
         // Log the sentence vector
-        // back_trace('NOTICE', 'Sentence Vector ' . $index . ': ' . print_r($sentenceVector, true));
+        // back_trace( 'NOTICE', 'Sentence Vector ' . $index . ': ' . print_r($sentenceVector, true));
 
     }
 
@@ -463,7 +488,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $inputWords = transformer_model_sentential_context_remove_stop_words($inputWords);
 
     // Log the processed input words
-    // back_trace('NOTICE', 'Processed Input Words: ' . implode(', ', $inputWords));
+    back_trace( 'NOTICE', 'Processed Input Words: ' . implode(', ', $inputWords));
 
     $inputNgrams = [];
     for ($i = 0; $i <= count($inputWords) - $windowSize; $i++) {
@@ -471,7 +496,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     }
 
     // Log the generated input n-grams
-    // back_trace('NOTICE', 'Generated Input N-Grams: ' . print_r($inputNgrams, true));
+    // back_trace( 'NOTICE', 'Generated Input N-Grams: ' . print_r($inputNgrams, true));
 
     $inputVector = [];
     $wordCount = 0;
@@ -492,8 +517,12 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     if ($wordCount > 0) {
         foreach ($inputVector as $key => $value) {
             $inputVector[$key] /= $wordCount;
+
+            // Log the normalized input vector
+            // back_trace('NOTICE', 'Normalized Input Vector: ' . print_r($inputVector, true));
         }
     } else {
+        $inputVector = [];
         // back_trace('NOTICE', 'Empty Input Vector');
     }
 
