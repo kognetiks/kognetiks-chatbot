@@ -1,6 +1,10 @@
 # Kognetiks Chatbot
 
-The **Kognetiks Chatbot** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI, NVIDIA, and Anthropic (release date TBD). The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
+The **Kognetiks Chatbot** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI, NVIDIA, and Anthropic. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
+
+**🌟 Introducing the Sentential Context Model - BETA FEATURE OFFERING**:
+
+The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's Perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
 ## Documentation
 
@@ -8,21 +12,22 @@ The **Kognetiks Chatbot** plugin project is centered around revolutionizing digi
 
 * **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
 * **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
+* **Sentential Context Model**: Added beta support for the Sentential Context Model, enabling response generation using your site's content without relying on external AI platforms.
 * **Knowledge Navigator Update**: Added option to include post or page excerpts in chatbot responses when enhanced responses is enabled.
 * **Documentation Updates**: Revised several section of the online documentation to align with current options and previous updates.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.0.
 
 ## Features
 
-Welcome to the future of website interaction with **Kognetiks Chatbot**, your gateway to unparalleled visitor engagement powered by OpenAI's ChatGPT Large Language Models (LLMs) and Assistants.
+Welcome to the future of website interaction with **Kognetiks Chatbot**, your gateway to unparalleled visitor engagement powered by your choice of AI Platform from OpenAI, NVIDIA, and Anthropic to deliver an intelligent, conversational AI experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
 
-**🌐 Harnessing Large Language Models for Enhanced Engagement**
+**🌐 Harnessing Large Language Models (LLMs) for Enhanced Engagement**
 Dive into the world of advanced AI with Large Language Models at the core of the Chatbot. These models are trained to understand and respond to user queries in a natural, conversational manner. They're not just chatbots; they're intelligent conversational partners that can engage, inform, and assist your visitors in real time. Whether it's providing detailed answers to complex queries or engaging in casual conversation, these models are equipped to elevate the user experience on your website.
 
 **🌟 Assistants: Tailored Conversational Experiences**
 Unlock the potential of personalized digital interaction. Use the Assistants you develop, trained with your specific knowledge and skills, to revolutionize your website. From handling FAQs to managing bookings and offering customized suggestions, these Assistants are seamlessly integrated into your WordPress site, promising a dynamic and engaging user experience.
 
-**🔀 Multiple Assistants, Multiple Roles**
+**🔀 Multiple Assistants, Multiple Roles on the OpenAI platform only**
 The latest version of the plugin allows for virtually unlimited Assistants, allowing you to deploy a unique assistant wherever you placed the shortcode.  Simply pass the "asst_" ID to the shortcode as one of the parameters.  Discover more about these innovative features at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/) and [OpenAI's Playground](https://platform.openai.com/assistants).
 
 **🔄 Choose Your Style: Embedded or Floating Chatbots**

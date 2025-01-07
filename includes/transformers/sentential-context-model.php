@@ -195,11 +195,39 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
     // back_trace( 'NOTICE', 'Content length: ' . strlen($content));
 
     // Clean up the content
-    $content = strip_tags($content); // Remove HTML tags
-    $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5); // Decode HTML entities
-    $content = str_replace(["\r", "\n"], ' ', $content); // Remove newlines
-    $content = preg_replace('/[^\w\s]/', '', $content); // Remove non-alphanumeric characters
-    $content = preg_replace('/\s+/', ' ', $content); // Remove extra whitespace
+    
+    // 1. Remove WordPress Gutenberg block comments
+    $content = preg_replace('/<!--.*?-->/', '', $content); // Remove all HTML comments
+
+    // 2. Remove HTML tags
+    $content = strip_tags($content); // Remove all HTML tags
+
+    // 3. Decode HTML entities
+    $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8'); // Decode entities
+
+    // 4. Normalize all line breaks and whitespace
+    // Replace multiple newlines, carriage returns, and other whitespace variations with a single space
+    $content = preg_replace('/\r\n|\r|\n|\t|\v|\f|\x{2028}|\x{2029}|&nbsp;/u', ' ', $content);
+
+    // 5. Remove any remaining invisible Unicode characters
+    // Matches all invisible Unicode characters, including non-breaking spaces
+    $content = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}\x{00A0}]/u', '', $content);
+
+    // 6. Remove non-alphanumeric characters, if needed
+    $content = preg_replace('/[^\w\s]/u', '', $content);
+
+    // 7. Collapse multiple spaces into a single space
+    $content = preg_replace('/\s+/', ' ', $content);
+
+    // 8. Trim leading and trailing whitespace
+    $content = trim($content);
+
+    // Debugging: Optional - Log remaining problematic characters
+    // foreach (str_split($content) as $char) {
+    //     if (ord($char) < 32 || ord($char) > 126) {
+    //         back_trace('DEBUG', 'Problematic char: "' . json_encode($char) . '" ASCII: ' . ord($char));
+    //     }
+    // }
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Content: ' . $content);
@@ -252,13 +280,18 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
 
     $matrix = [];
 
-    // Before splitting into words:
-    $corpus = preg_replace('/[^\w\s]/', '', $corpus);  // Remove punctuation
+    // Clean up the corpus
+    $corpus = preg_replace('/\R+/u', ' ', $corpus); // Normalize all line breaks to spaces
+    $corpus = preg_replace('/[^\P{C}\s]/u', '', $corpus); // Remove invisible Unicode control characters
+    $corpus = preg_replace('/\s+/', ' ', $corpus); // Collapse multiple spaces into one
+    $corpus = html_entity_decode($corpus, ENT_QUOTES | ENT_HTML5, 'UTF-8'); // Decode entities
+    $corpus = strtolower(trim($corpus)); // Normalize case and trim whitespace
 
     // Tokenize and normalize
-    $words = explode(' ', strtolower(trim($corpus)));
-    $words = array_filter(array_map('trim', $words));
-    $words = transformer_model_sentential_context_remove_stop_words($words); // Remove stop words
+    $words = array_filter(array_map('trim', explode(' ', $corpus))); // Split into words and trim
+
+    // Remove stop words
+    $words = transformer_model_sentential_context_remove_stop_words($words); // Assuming this handles lowercased words
 
     // Generate n-grams
     $ngrams = [];
@@ -506,12 +539,12 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $totalSentencesAnalyzed = count($sentences);
 
     // Log key stats
-    // back_trace('NOTICE', 'Key Stats:');
-    // back_trace('NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
-    // back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    // back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    // back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    // back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+    back_trace('NOTICE', 'Key Stats:');
+    back_trace('NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
+    back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // If the highest similarity is below the threshold, return a fallback message
     if ($highestSimilarity < $similarityThreshold) {

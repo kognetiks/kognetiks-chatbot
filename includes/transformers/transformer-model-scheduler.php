@@ -131,8 +131,15 @@ function chatbot_transformer_model_scan() {
 
     // Update the offset
     $processedItems = count($corpus);
+    back_trace( 'NOTICE', 'Processed items: ' . $processedItems);
+
     update_option('chatbot_transformer_model_offset', $offset + $processedItems);
+    $chatbot_transformer_model_content_items_processed = intval(get_option('chatbot_transformer_model_content_items_processed', 0));
+
+    back_trace( 'NOTICE', 'chatbot_transformer_model_content_items_processed: ' . $chatbot_transformer_model_content_items_processed);
+
     update_option('chatbot_transformer_model_content_items_processed', $chatbot_transformer_model_content_items_processed + $processedItems);
+    back_trace( 'NOTICE', 'chatbot_transformer_model_content_items_processed: ' . intval(get_option('chatbot_transformer_model_content_items_processed', 0)));
 
 
     // Log the processed batch

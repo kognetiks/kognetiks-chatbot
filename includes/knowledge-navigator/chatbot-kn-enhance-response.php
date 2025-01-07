@@ -6,7 +6,7 @@
  * 
  * Ver 2.1.5 - 2024 09 13 - TBD
  * 
- * Ver 2.2.1 - 2024 12 01 - Added AI summaries to enhanced responses
+ * Ver 2.2.1 - 2024 12 01 - Added excerpts to enhanced responses
  *
  * This file contains the code for to utilize the DB with the TF-IDF data to enhance the chatbots response.
  * 

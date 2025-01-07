@@ -15,15 +15,25 @@ Effortlessly add conversational AI to your WordPress site! Integrate OpenAI Chat
 
 **Transform Your WordPress Site with the Kognetiks Chatbot**
 
-The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI’s ChatGPT to deliver an intelligent, conversational experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
+The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI, NVIDIA, and Anthropic APIs to deliver an intelligent, conversational AI experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
 
 🌟 **AI Platform Options**:
 
-* With **Version 2.1.8**, the **Kognetiks Chatbot** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
+* With **Version 2.1.8**, the **Kognetiks Chatbot** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** and **Anthropic** APIs in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
 
 * **OpenAI's ChatGPT API**: Engage visitors with natural, human-like responses for rich conversational experiences.
 
 * **NVIDIA's NIM API**: Unlock advanced conversational abilities for a highly interactive chatbot.
+
+* **Anthropic's API**: Seamlessly integrate Anthropic's API for cutting-edge conversational capabilities.
+
+🌟 Introducing the Sentential Context Model - **BETA FEATURE OFFERING**:
+
+The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.
+
+This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content — no AI platform connection required.
+
+It's Perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
 🌟 **Key Features**:
 
@@ -82,8 +92,9 @@ Embark on a journey to elevate your website's interactivity with the Chatbot plu
    - Once the installation is complete, activate the plugin by clicking 'Activate Plugin'.
 
 3. **API Key Configuration**
-   - After activation, head to 'Settings > Chatbot' in your dashboard.
-   - Enter your OpenAI API key here. (You can obtain this key from [OpenAI API Keys](https://platform.openai.com/account/api-keys) if you haven't already.)
+   - After activation, head to 'Settings > General' in your dashboard.
+   - Choose the AI Platform you wish to use (OpenAI, NVIDIA, or Anthropic).
+   - Obtain an API key from [OpenAI API Keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), or [Anthropic API Keys](https://www.anthropic.com/).
 
 4. **Customizing Your Chatbot**
    - In the same settings area, tailor the chatbot's appearance and functionality to match your site's style and your specific needs.
@@ -111,7 +122,7 @@ For **frequently asked questions**, please visit [https://kognetiks.com/wordpres
 
 **How do I get an API key?**
 
-Sign up at [OpenAI API Keys]((https://platform.openai.com/account/api-keys)) to obtain your API key. This key is necessary to use the plugin.
+Sign up at [OpenAI API Keys]((https://platform.openai.com/account/api-keys)), [NVIDIA API Keys](https://developer.nvidia.com/nim), or [Anthropic API Keys](https://www.anthropic.com/) to obtain your API key. This key is necessary to use the plugin.
 
 **Can I customize the chatbot's appearance?**
 
@@ -162,11 +173,12 @@ WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT
 
 == Changelog ==
 
-= 2.2.1 - Release 12-28-2024 =
+= 2.2.1 - Release 01-06-2025 =
 
 * **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
 * **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
-* **Knowledge Navigator Update**: Added option to include post or page excerpts in chatbot responses when enhanced responses is enabled. 
+* **Sentential Context Model**: Added beta support for the Sentential Context Model, enabling response generation using your site's content without relying on external AI platforms.
+* **Knowledge Navigator Update**: Added option to include post or page excerpts in chatbot responses when enhanced responses is enabled.
 * **Documentation Updates**: Revised several section of the online documentation to align with current options and previous updates.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.0.
 

@@ -8,6 +8,11 @@ The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI pl
 
 **Important Note:** This plugin requires an API key from OpenAI, NVIDIA or other AI platform vendors, to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys or https://build.nvidia.com/nim.
 
+
+**🌟 Introducing the Sentential Context Model - BETA FEATURE OFFERING**:
+
+The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's Perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
+
 ## Documentation
 
 * **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
@@ -40,8 +45,6 @@ The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI pl
 
 - [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
 
-- [API/Transformer Settings](api-transformer-settings/api-transformer-model-settings.md) **BETA FEATURE**
-
 - [Assistants](assistants/manage-assistants.md)
 
 - [Avatars](avatars/avatars.md)
@@ -59,6 +62,12 @@ The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI pl
 - [Tools](tools/tools.md)
 
 - [Messages](messages/messages.md)
+
+## Beta Features
+
+- [Enabling Beta Features](beta-features/beta-features.md)
+
+- [API/Transformer Settings](api-transformer-settings/api-transformer-model-settings.md) **BETA FEATURE**
 
 ## Support
 

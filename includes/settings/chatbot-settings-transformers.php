@@ -86,7 +86,7 @@ function chatbot_transformer_model_build_schedule_callback($args) {
 function chatbot_transformer_model_word_content_window_size_callback($args) {
 
     // Get the saved chatbot_transformer_model_word_content_window_size_setting value or default to 10
-    $transformer_model_window_length = esc_attr(get_option('chatbot_transformer_model_word_content_window_size', '3'));
+    $transformer_model_window_length = esc_attr(get_option('chatbot_transformer_model_word_content_window_size', '2'));
     // Allow for a range of tokens between 1 and 5 in 1-step increments - Ver 2.1.6
     ?>
     <select id="chatbot_transformer_model_word_content_window_size" name="chatbot_transformer_model_word_content_window_size">
@@ -157,8 +157,8 @@ function chatbot_transformer_model_leading_token_ratio_callback($args) {
 // Transformer Next Phrase Length Settings Callback - Ver 2.1.6
 function chatbot_transformer_model_sentence_response_length_callback($args) {
 
-    // Get the saved chatbot_transformer_model_sentence_response_length_setting value or default to 10
-    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', '3'));
+    // Get the saved chatbot_transformer_model_sentence_response_length_setting value or default to 5
+    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', '5'));
     // Allow for a range of sentences between 1 and 10 in 1-step increments - Ver 2.1.6
     ?>
     <select id="chatbot_transformer_model_sentence_response_length" name="chatbot_transformer_model_sentence_response_length">

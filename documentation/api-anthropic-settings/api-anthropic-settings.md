@@ -13,7 +13,7 @@ The **Kognetiks Chatbot** plugin requires proper configuration to function corre
 
 ## Steps to Configure
 
-1. Navigate to the API Settings section of the Kognetiks Chatbot plugin in your WordPress dashboard.
+1. Navigate to the API Settings section of the **Kognetiks Chatbot** plugin in your WordPress dashboard.
 
 2. Copy your Anthropic API key from [Anthropic](https://console.anthropic.com/login).
 
