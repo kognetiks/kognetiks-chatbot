@@ -2,10 +2,8 @@
 Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, artificial intelligence
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
-Requires at least: 5.5
 Tested up to: 6.7.1
 Stable tag: 2.2.1
-Requires PHP: 7.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -74,6 +72,16 @@ It's Perfect for localized use or content-focused applications, this feature mak
 Get started with the Kognetiks Chatbot today and elevate your website’s interaction with cutting-edge AI technology.
 
 Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/) for more information.
+
+== External services ==
+
+This plugin relies on external AI services for generating summaries. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
+
+- **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
+- **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
+- **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
+
+When you choose a vendor and set up an account, you will be responsible for any fees associated with use of their platform. Please review each provider’s pricing and usage policies before proceeding. By proceeding with one of these services, you also acknowledge that your data, including the text submitted, may be transferred to and processed by the selected AI platform in accordance with their privacy policy.
 
 == Installation ==
 

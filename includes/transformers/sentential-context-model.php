@@ -213,8 +213,8 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
     // Matches all invisible Unicode characters, including non-breaking spaces
     $content = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}\x{00A0}]/u', '', $content);
 
-    // 6. Remove non-alphanumeric characters, if needed
-    $content = preg_replace('/[^\w\s]/u', '', $content);
+    // 6. Remove non-alphanumeric characters, i.e., punctuation, if needed
+    // $content = preg_replace('/[^\w\s]/u', '', $content);
 
     // 7. Collapse multiple spaces into a single space
     $content = preg_replace('/\s+/', ' ', $content);
@@ -332,10 +332,14 @@ function transformer_model_sentential_context_remove_stop_words($words) {
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_remove_stop_words - start');
 
-    // Use global stop words list
-    global $stopWords;
+    // DIAG - Diagnostics - Ver 2.2.1
+    // Temporarily return
+    return $words;
 
-    return array_diff($words, $stopWords);
+    // Use global stop words list
+    // global $stopWords;
+
+    // return array_diff($words, $stopWords);
 
 }
 
@@ -440,7 +444,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     foreach ($sentences as $index => $sentence) {
 
         // Remove punctuation from each sentence
-        $sentence = preg_replace('/[^\w\s]/', '', $sentence);
+        // $sentence = preg_replace('/[^\w\s]/', '', $sentence);
         $sentence = strtolower(trim($sentence));
 
         // Now split and normalize

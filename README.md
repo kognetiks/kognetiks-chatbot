@@ -68,24 +68,38 @@ With the integration of Text-to-Speech (TTS) models, the chatbot can now convert
 ▪ **Always Available:** Provide round-the-clock assistance in various domains, from healthcare to education.
 ▪ **Seamless Integration:** Effortlessly bring your WordPress site to life with an easy-to-use plugin.
 
-**✨ Supported Models from OpenAI**
-▪ gpt series of models including gpt-4o and gpt-4o-mini
-▪ dall-e series of models
-▪ tts series of models
-▪ stt series of models
+**✨ Supported Models from OpenAI, NVIDIA, and Anthropic**
 
-For a full list of models, please see [OpenAI's Model Overview](https://platform.openai.com/docs/models/overview).
+For a full list of OpenAI models, please see [OpenAI's Model Overview](https://platform.openai.com/docs/models/overview).
+
+For a full list of NVIDIA models, please see [NVIDIA's Model Overview](https://docs.nvidia.com/nim/large-language-models/latest/models.html).
+
+For a full list of Anthropic models, please see [Anthropic's Model Overview](https://docs.anthropic.com/en/docs/about-claude/models).
 
 **🚀 Elevate Your Website Experience**
 The Kognetiks Chatbot is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
 
 Get your Kognetiks Chatbot today and redefine your WordPress site with intelligence and a personal touch.
 
-**Note:** This plugin requires an API key from OpenAI. Obtain yours at [OpenAI API Keys](https://platform.openai.com/account/api-keys).
+## External services
+
+This plugin relies on external AI services for generating summaries. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
+
+- **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
+- **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
+- **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
+
+When you choose a vendor and set up an account, you will be responsible for any fees associated with use of their platform. Please review each provider’s pricing and usage policies before proceeding. By proceeding with one of these services, you also acknowledge that your data, including the text submitted, may be transferred to and processed by the selected AI platform in accordance with their privacy policy.
+
+**IMPORTANT:** This plugin requires an API key from OpenAI, NVIDIA or Anthropic. You can obtain yours at
+
+- [OpenAI API Keys](https://platform.openai.com/account/api-keys)
+- [NVIDIA API Keys](https://developer.nvidia.com/nim)
+- [Anthropic API Keys](https://www.anthropic.com/)
 
 ## 🌐 Features at a Glance
 * **Quick Setup:** Integrate easily with API from companies like OpenAI.
-* **Advanced AI Models:** Includes support for the latest GPT-4 Turbo from OpenAI.
+* **Advanced AI Models:** Includes support for the latest LLMs from OpenAI, NVIDIA, and Anthropic.
 * **Customizable Interfaces:** Choose between floating and embedded chatbot styles.
 * **User-Friendly Settings:** Easily manage your API key and other settings.
 * **Intelligent Design:** Smart collapsible chatbot for a cleaner website interface.
@@ -95,7 +109,7 @@ Get your Kognetiks Chatbot today and redefine your WordPress site with intellige
 
 ## Getting Started
 
-1. Obtain your API key by signing up at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
+1. Obtain your API key by signing up with the AI Platform vendor of your choice..
 2. Install and activate the Chatbot plugin.
 3. Navigate to the settings page (Settings > API/Model) and enter your API key.
 4. Customize the chatbot appearance and other parameters as needed.
@@ -120,8 +134,8 @@ Embark on a journey to elevate your website's interactivity with this Chatbot pl
    - Once the installation is complete, activate the plugin by clicking 'Activate Plugin'.
 
 3. **API Key Configuration**
-   - After activation, head to 'Settings > Chatbot' in your dashboard.
-   - Enter your OpenAI API key here. (You can obtain this key from [OpenAI API Keys](https://platform.openai.com/account/api-keys) if you haven't already.)
+   - After activation, head to 'Settings > General' in your dashboard.
+   - Enter the API key you generate with the AI Platform of your choice.
 
 4. **Customizing Your Chatbot**
    - In the same settings area, tailor the chatbot's appearance and functionality to match your site's style and your specific needs.
@@ -147,7 +161,7 @@ With the Kognetiks Chatbot installed, you're now equipped to offer a more dynami
 
 **How do I obtain an API key for the API?**
 
-To obtain an API key, sign up for an account at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys). Once registered, you will have access to your API key.
+To obtain an API key, sign up for an account at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), or [Anthropic API Keys](https://www.anthropic.com/). Once registered, you may create your API key(s).
 
 **Can I customize the appearance of the chatbot?**
 
