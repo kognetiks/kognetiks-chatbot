@@ -81,23 +81,34 @@ The Kognetiks Chatbot is more than just a plugin – it's a transformational too
 
 Get your Kognetiks Chatbot today and redefine your WordPress site with intelligence and a personal touch.
 
-## External services
+## External Services
 
-This plugin relies on external AI services for generating summaries. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
+The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
 
 - **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
 
-When you choose a vendor and set up an account, you will be responsible for any fees associated with use of their platform. Please review each provider’s pricing and usage policies before proceeding. By proceeding with one of these services, you also acknowledge that your data, including the text submitted, may be transferred to and processed by the selected AI platform in accordance with their privacy policy.
+**IMPORTANT**:
 
-**IMPORTANT:** This plugin requires an API key from OpenAI, NVIDIA or Anthropic. You can obtain yours at
+- This plugin requires an API key from OpenAI, NVIDIA, or Anthropic to function. Without an API key, the chatbot cannot process user queries.
 
-- [OpenAI API Keys](https://platform.openai.com/account/api-keys)
-- [NVIDIA API Keys](https://developer.nvidia.com/nim)
-- [Anthropic API Keys](https://www.anthropic.com/)
+- Obtain API keys here:
+
+   - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
+   - [NVIDIA API Keys](https://developer.nvidia.com/nim)
+   - [Anthropic API Keys](https://www.anthropic.com/)
+
+- By entering your API key from the AI provider of your choice and activating the chatbot, you:
+
+   - Consent to sending user queries and related data to the selected AI provider for processing and response generation.
+   - Agree to abide by the provider’s terms of service, pricing, and privacy policy.
+   - Acknowledge that your data, including text submitted by users, may be transferred to and processed by the AI platform in accordance with its privacy policy.
+
+**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider’s pricing and usage policies before proceeding.
 
 ## 🌐 Features at a Glance
+
 * **Quick Setup:** Integrate easily with API from companies like OpenAI.
 * **Advanced AI Models:** Includes support for the latest LLMs from OpenAI, NVIDIA, and Anthropic.
 * **Customizable Interfaces:** Choose between floating and embedded chatbot styles.

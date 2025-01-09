@@ -6,14 +6,37 @@ Conversational AI platforms - like those from OpenAI, NVIDIA, and others - use n
 
 The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI platforms, via their APIs and Models to bring artificial intelligence to life within your WordPress website.
 
-**Important Note:** This plugin requires an API key from OpenAI, NVIDIA or other AI platform vendors, to function correctly. You can obtain an API key by signing up at https://platform.openai.com/account/api-keys or https://build.nvidia.com/nim.
+## External Services
 
+The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
 
-**🌟 Introducing the Sentential Context Model - BETA FEATURE OFFERING**:
+- **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
+- **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
+- **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
+
+**IMPORTANT**:
+
+- This plugin requires an API key from OpenAI, NVIDIA, or Anthropic to function. Without an API key, the chatbot cannot process user queries.
+
+- Obtain API keys here:
+
+   - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
+   - [NVIDIA API Keys](https://developer.nvidia.com/nim)
+   - [Anthropic API Keys](https://www.anthropic.com/)
+
+- By entering your API key from the AI provider of your choice and activating the chatbot, you:
+
+   - Consent to sending user queries and related data to the selected AI provider for processing and response generation.
+   - Agree to abide by the provider’s terms of service, pricing, and privacy policy.
+   - Acknowledge that your data, including text submitted by users, may be transferred to and processed by the AI platform in accordance with its privacy policy.
+
+**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider’s pricing and usage policies before proceeding.
+
+## Introducing the Sentential Context Model - BETA FEATURE OFFERING
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's Perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## Documentation
+## What's New in Version 2.2.1
 
 * **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
 * **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.

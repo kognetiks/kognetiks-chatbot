@@ -115,8 +115,8 @@ function chatbot_kn_initialization() {
     update_option( 'chatbot_chatgpt_kn_item_count', 0 );
 
     // Define the batch size
-    // FIXME - This should be set in the settings and default to 100
-    update_option('chatbot_chatgpt_kn_items_per_batch', 50); // Fetching 100 items at a time
+    // FIXME - This should be set in the settings and default to 50
+    update_option('chatbot_chatgpt_kn_items_per_batch', 50); // Fetching 50 items at a time
 
     // Reset the chatbot_chatgpt_knowledge_base table
     dbKNStore();
@@ -230,8 +230,8 @@ function chatbot_kn_run_phase_1() {
 
     // Get the item count
     $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
-    // FIXME - This should be set in the settings and default to 100
-    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 100 items at a time
+    // FIXME - This should be set in the settings and default to 50
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 50 items at a time
     $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -361,8 +361,8 @@ function chatbot_kn_run_phase_3() {
 
     // Get the item count
     $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
-    // FIXME - This should be set in the settings and default to 100
-    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 100 items at a time
+    // FIXME - This should be set in the settings and default to 50
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 50 items at a time
     $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
 
     // DIAG - Diagnostics - Ver 1.9.6
@@ -550,8 +550,8 @@ function chatbot_kn_run_phase_5() {
     update_option( 'chatbot_chatgpt_kn_item_count', 0 );
 
     // Define the batch size
-    // FIXME - This should be set in the settings and default to 100
-    update_option('chatbot_chatgpt_kn_items_per_batch', 50); // Fetching 100 items at a time
+    // FIXME - This should be set in the settings and default to 50
+    update_option('chatbot_chatgpt_kn_items_per_batch', 50); // Fetching 50 items at a time
 
     // chatbot_kn_schedule_batch_acquisition();
     update_option( 'chatbot_chatgpt_kn_action', 'phase 6' );
@@ -571,8 +571,8 @@ function chatbot_kn_run_phase_6() {
 
     // Get the item count
     $offset = esc_attr(get_option('chatbot_chatgpt_kn_item_count', 0)); // Default offset set to 0 if not specified
-    // FIXME - This should be set in the settings and default to 100
-    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 100 items at a time
+    // FIXME - This should be set in the settings and default to 50
+    $batch_size = esc_attr(get_option('chatbot_chatgpt_kn_items_per_batch', 50)); // Fetching 50 items at a time
     $chatbot_chatgpt_no_of_items_analyzed = esc_attr(get_option('chatbot_chatgpt_no_of_items_analyzed', 0));
 
     // DIAG - Diagnostics - Ver 1.9.6
