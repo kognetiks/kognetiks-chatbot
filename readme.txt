@@ -1,6 +1,6 @@
 === Kognetiks Chatbot ===
 Contributors: Kognetiks
-Tags: chatbot, chatgpt, openai, nvidia, artificial intelligence
+Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.7.1
 Stable tag: 2.2.1

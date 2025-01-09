@@ -77,6 +77,13 @@ function transformer_model_sentential_context_model_response( $input, $responseC
         // or by post IDs. This is just a placeholder:
         $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
 
+        $normalizedEmbeddings = [];
+        foreach ($embeddings as $key => $values) {
+            $normalizedKey = strtolower(trim(preg_replace('/[^\w\s]/', '', $key)));
+            $normalizedEmbeddings[$normalizedKey] = $values;
+        }
+        $embeddings = $normalizedEmbeddings;
+
         // back_trace( 'NOTICE', 'Embeddings keys for this batch: ' . print_r(array_keys($embeddings), true));
         // back_trace( 'NOTICE', 'Embeddings for this batch: ' . print_r($embeddings, true));
 
@@ -111,7 +118,7 @@ function transformer_model_sentential_context_model_response( $input, $responseC
     // DIAG - Diagnostics - Ver 2.2.1
     // for ($i = 0; $i < count($batchResponses); $i++) {
     //     $cleanedSentence = preg_replace('/\s+/', ' ',  $batchResponses[$i]);
-    //     back_trace( 'NOTICE', 'Batch Response ' . $i . ': ' . $cleanedSentence);
+    //     // back_trace( 'NOTICE', 'Batch Response ' . $i . ': ' . $cleanedSentence);
     // }
 
     $finalBestResponse = '';
@@ -194,40 +201,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
 
     // back_trace( 'NOTICE', 'Content length: ' . strlen($content));
 
-    // Clean up the content
-    
-    // 1. Remove WordPress Gutenberg block comments
-    $content = preg_replace('/<!--.*?-->/', '', $content); // Remove all HTML comments
-
-    // 2. Remove HTML tags
-    $content = strip_tags($content); // Remove all HTML tags
-
-    // 3. Decode HTML entities
-    $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8'); // Decode entities
-
-    // 4. Normalize all line breaks and whitespace
-    // Replace multiple newlines, carriage returns, and other whitespace variations with a single space
-    $content = preg_replace('/\r\n|\r|\n|\t|\v|\f|\x{2028}|\x{2029}|&nbsp;/u', ' ', $content);
-
-    // 5. Remove any remaining invisible Unicode characters
-    // Matches all invisible Unicode characters, including non-breaking spaces
-    $content = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}\x{00A0}]/u', '', $content);
-
-    // 6. Remove non-alphanumeric characters, i.e., punctuation, if needed
-    // $content = preg_replace('/[^\w\s]/u', '', $content);
-
-    // 7. Collapse multiple spaces into a single space
-    $content = preg_replace('/\s+/', ' ', $content);
-
-    // 8. Trim leading and trailing whitespace
-    $content = trim($content);
-
-    // Debugging: Optional - Log remaining problematic characters
-    // foreach (str_split($content) as $char) {
-    //     if (ord($char) < 32 || ord($char) > 126) {
-    //         back_trace( 'DEBUG', 'Problematic char: "' . json_encode($char) . '" ASCII: ' . ord($char));
-    //     }
-    // }
+    $content = transformer_model_sentential_context_clean($content);
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Content: ' . $content);
@@ -281,13 +255,10 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
     $matrix = [];
 
     // Clean up the corpus
-    $corpus = preg_replace('/\R+/u', ' ', $corpus); // Normalize all line breaks to spaces
-    $corpus = preg_replace('/[^\P{C}\s]/u', '', $corpus); // Remove invisible Unicode control characters
-    $corpus = preg_replace('/\s+/', ' ', $corpus); // Collapse multiple spaces into one
-    $corpus = html_entity_decode($corpus, ENT_QUOTES | ENT_HTML5, 'UTF-8'); // Decode entities
-    $corpus = strtolower(trim($corpus)); // Normalize case and trim whitespace
+    $corpus = transformer_model_sentential_context_clean($corpus);
 
     // Tokenize and normalize
+    $corpus = $corpus ?? ''; // Ensure $corpus is a string
     $words = array_filter(array_map('trim', explode(' ', $corpus))); // Split into words and trim
 
     // Remove stop words
@@ -352,10 +323,10 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
     // Check for empty vectors
     if (empty($vectorA) || empty($vectorB)) {
         // if (empty($vectorA)) {
-        //     back_trace( 'NOTICE', 'Empty Vector A');
+        //     // back_trace( 'NOTICE', 'Empty Vector A');
         // }
         // if (empty($vectorB)) {
-        //     back_trace( 'NOTICE', 'Empty Vector B');
+        //     // back_trace( 'NOTICE', 'Empty Vector B');
         // }
         return 0;
     }
@@ -416,10 +387,66 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
 
 }
 
+// Function to clean up text
+function transformer_model_sentential_context_clean($source_content){
+
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace( 'NOTICE', 'transformer_model_sentential_context_model_clean - start');
+
+    // Clean up the corpus
+    // $source_content = preg_replace('/\R+/u', ' ', $source_content); // Normalize all line breaks to spaces
+    // $source_content = preg_replace('/[^\P{C}\s]/u', '', $source_content); // Remove invisible Unicode control characters
+    // $source_content = preg_replace('/\s+/', ' ', $source_content); // Collapse multiple spaces into one
+    // $source_content = html_entity_decode($source_content, ENT_QUOTES | ENT_HTML5, 'UTF-8'); // Decode entities
+    // $source_content = strtolower(trim($source_content)); // Normalize case and trim whitespace
+
+    // Clean up the content
+    
+    // 1. Remove WordPress Gutenberg block comments
+    $source_content = preg_replace('/<!--.*?-->/', '', $source_content); // Remove all HTML comments
+
+    // 2. Remove HTML tags
+    $source_content = strip_tags($source_content); // Remove all HTML tags
+
+    // 3. Decode HTML entities
+    $source_content = html_entity_decode($source_content, ENT_QUOTES | ENT_HTML5, 'UTF-8'); // Decode entities
+
+    // 4. Normalize all line breaks and whitespace
+    // Replace multiple newlines, carriage returns, and other whitespace variations with a single space
+    $source_content = preg_replace('/\r\n|\r|\n|\t|\v|\f|\x{2028}|\x{2029}|&nbsp;/u', '. ', $source_content);
+
+    // 5. Remove any remaining invisible Unicode characters
+    // Matches all invisible Unicode characters, including non-breaking spaces
+    $source_content = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}\x{00A0}]/u', '', $source_content);
+
+    // 6. Remove non-alphanumeric characters, i.e., punctuation, if needed
+    // $source_content = preg_replace('/[^\w\s]/u', '', $source_content);
+
+    // 7. Collapse multiple spaces into a single space
+    $source_content = preg_replace('/\s+/', ' ', $source_content);
+
+    // 8. Trim leading and trailing whitespace
+    $source_content = trim($source_content);
+
+    // Debugging: Optional - Log remaining problematic characters
+    // foreach (str_split($source_content) as $char) {
+    //     if (ord($char) < 32 || ord($char) > 126) {
+    //         // back_trace( 'DEBUG', 'Problematic char: "' . json_encode($char) . '" ASCII: ' . ord($char));
+    //     }
+    // }
+    
+    return $source_content;
+
+}
+
 // Function to generate a contextual response based on input and embeddings
-function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500, $windowSize = 3) {
+function transformer_model_sentential_context_generate_contextual_response($input, $embeddingsFilePath, $corpus, $maxTokens = 500, $windowSize = 3) {
 
     global $chatbotFallbackResponses;
+
+    // Embeddings cache
+    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
+    // back_trace( 'NOTICE', '$cacheFile: ' . $cacheFile);
 
     // Tokenize the corpus into sentences while retaining punctuation
     $sentences = preg_split('/(?<=[.!?])\s+(?=[A-Z])/', $corpus);
@@ -436,55 +463,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Number of Sentences: ' . count($sentences));
-    back_trace( 'NOTICE', '$windowSize: ' . $windowSize);
-
-    $sentenceVectors = [];
-
-    // Compute embeddings for sentences
-    foreach ($sentences as $index => $sentence) {
-
-        // Remove punctuation from each sentence
-        // $sentence = preg_replace('/[^\w\s]/', '', $sentence);
-        $sentence = strtolower(trim($sentence));
-
-        // Now split and normalize
-        $sentenceWords = preg_split('/\s+/', strtolower(trim($sentence)));
-        $sentenceWords = transformer_model_sentential_context_remove_stop_words($sentenceWords); // Remove stop words
-
-        $sentenceVector = [];
-        $ngramCount = 0;
-
-        // Initialize $sentenceNgrams as an empty array
-        $sentenceNgrams = [];
-        for ($i = 0; $i <= count($sentenceWords) - $windowSize; $i++) {
-            $sentenceNgrams[] = implode(' ', array_slice($sentenceWords, $i, $windowSize));
-        }
-
-        // For each n-gram in this sentence, see if we have an embedding
-        foreach ($sentenceNgrams as $ngram) {
-            if (isset($embeddings[$ngram])) {
-                foreach ($embeddings[$ngram] as $contextWord => $value) {
-                    $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
-                }
-                $ngramCount++;
-            } else {
-                // Log that we didn't find an embedding for $ngram
-                // back_trace( 'NOTICE', 'N-Gram not found in embeddings: ' . $ngram);
-            }
-        }
-        
-        // Normalize
-        if ($ngramCount > 0) {
-            foreach ($sentenceVector as $k => $val) {
-                $sentenceVector[$k] /= $ngramCount;
-            }
-        }
-        $sentenceVectors[$index] = $sentenceVector;
-
-        // Log the sentence vector
-        // back_trace( 'NOTICE', 'Sentence Vector ' . $index . ': ' . print_r($sentenceVector, true));
-
-    }
+    // back_trace( 'NOTICE', '$windowSize: ' . $windowSize);
 
     // Compute the input vector
     $input = strtolower(trim($input));
@@ -492,28 +471,22 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $inputWords = transformer_model_sentential_context_remove_stop_words($inputWords);
 
     // Log the processed input words
-    back_trace( 'NOTICE', 'Processed Input Words: ' . implode(', ', $inputWords));
-
-    $inputNgrams = [];
-    for ($i = 0; $i <= count($inputWords) - $windowSize; $i++) {
-        $inputNgrams[] = implode(' ', array_slice($inputWords, $i, $windowSize));
-    }
-
-    // Log the generated input n-grams
-    // back_trace( 'NOTICE', 'Generated Input N-Grams: ' . print_r($inputNgrams, true));
+    // back_trace( 'NOTICE', 'Processed Input Words: ' . implode(', ', $inputWords));
 
     $inputVector = [];
     $wordCount = 0;
 
-    foreach ($inputNgrams as $ngram) {
-        if (isset($embeddings[$ngram])) {
-            foreach ($embeddings[$ngram] as $contextWord => $value) {
+    for ($i = 0; $i <= count($inputWords) - $windowSize; $i++) {
+        $ngram = implode(' ', array_slice($inputWords, $i, $windowSize));
+        $ngramEmbeddings = transformer_model_lazy_load_embeddings($cacheFile, $ngram);
+        if ($ngramEmbeddings) {
+            foreach ($ngramEmbeddings as $contextWord => $value) {
                 $inputVector[$contextWord] = ($inputVector[$contextWord] ?? 0) + $value;
             }
             $wordCount++;
         } else {
             // Log that we didn't find an embedding for $ngram
-            // back_trace('NOTICE', 'Input N-Gram not found in embeddings: ' . $ngram);
+            // back_trace( 'NOTICE', 'Input N-Gram not found in embeddings: ' . $ngram);
         }
     }
 
@@ -521,139 +494,144 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     if ($wordCount > 0) {
         foreach ($inputVector as $key => $value) {
             $inputVector[$key] /= $wordCount;
-
-            // Log the normalized input vector
-            // back_trace('NOTICE', 'Normalized Input Vector: ' . print_r($inputVector, true));
         }
     } else {
         $inputVector = [];
-        // back_trace('NOTICE', 'Empty Input Vector');
+        // back_trace( 'NOTICE', 'Empty Input Vector');
     }
 
-    // Log the input vector
-    // back_trace('NOTICE', 'Generated Input Vector: ' . print_r($inputVector, true));
+    // Limit vector size to reduce memory usage
+    $inputVector = array_slice($inputVector, 0, 100, true);
 
-    // Compute similarities
-    $similarities = [];
-    foreach ($sentenceVectors as $index => $vector) {
+    // back_trace( 'NOTICE', 'Generated Input Vector: ' . print_r(array_slice($inputVector, 0, 10), true)); // Log partial vector for debugging
 
-        if (empty($inputVector) || empty($vector)) {
-            // back_trace('NOTICE', 'Empty Vector Detected for Sentence ' . $index);
+    // Process sentences in batches
+    $highestSimilarity = -INF;
+    $bestMatchIndex = -1;
+
+    $batchSize = 500; // Process sentences in smaller batches
+    for ($batchStart = 0; $batchStart < count($sentences); $batchStart += $batchSize) {
+        $sentenceBatch = array_slice($sentences, $batchStart, $batchSize);
+
+        foreach ($sentenceBatch as $index => $sentence) {
+            $sentence = transformer_model_sentential_context_clean($sentence);
+            $sentenceWords = preg_split('/\s+/', strtolower(trim($sentence)));
+            $sentenceWords = transformer_model_sentential_context_remove_stop_words($sentenceWords);
+
+            $sentenceVector = [];
+            $ngramCount = 0;
+
+            for ($i = 0; $i <= count($sentenceWords) - $windowSize; $i++) {
+                $ngram = implode(' ', array_slice($sentenceWords, $i, $windowSize));
+                $ngramEmbeddings = transformer_model_lazy_load_embeddings($embeddingsFilePath, $ngram);
+                if ($ngramEmbeddings) {
+                    foreach ($ngramEmbeddings as $contextWord => $value) {
+                        $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
+                    }
+                    $ngramCount++;
+                }
+            }
+
+            if ($ngramCount > 0) {
+                foreach ($sentenceVector as $k => $val) {
+                    $sentenceVector[$k] /= $ngramCount;
+                }
+            }
+
+            // Limit vector size to reduce memory usage
+            $sentenceVector = array_slice($sentenceVector, 0, 100, true);
+
+            if (empty($inputVector) || empty($sentenceVector)) {
+                continue;
+            }
+
+            $similarity = transformer_model_sentential_context_cosine_similarity($inputVector, $sentenceVector);
+
+            if ($similarity > $highestSimilarity) {
+                $highestSimilarity = $similarity;
+                $bestMatchIndex = $batchStart + $index;
+            }
+        }
+
+        // Log memory usage after each batch
+        // back_trace( 'NOTICE', 'Memory usage after batch ' . $batchStart . ': ' . memory_get_usage(true));
+    }
+
+    if ($highestSimilarity === -INF) {
+        // back_trace( 'NOTICE', 'No similarities computed. Returning fallback.');
+        return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
+    }
+
+    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2));
+    // back_trace( 'NOTICE', 'Highest Similarity: ' . $highestSimilarity);
+
+    if ($highestSimilarity < $similarityThreshold) {
+        // back_trace( 'NOTICE', 'Low similarity detected: ' . $highestSimilarity);
+        return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
+    }
+
+    $response = trim($sentences[$bestMatchIndex]);
+
+    // Add surrounding sentences
+    $maxSentences = intval(get_option('chatbot_transformer_model_sentence_response_length', 5));
+    $tokensBefore = floor($maxTokens * 0.25);
+    $tokensAfter = $maxTokens - $tokensBefore;
+
+    $sentencesBefore = floor($maxSentences * 0.25);
+    $sentencesAfter = $maxSentences - $sentencesBefore;
+
+    for ($i = $bestMatchIndex - 1, $count = 0; $i >= 0 && $count < $sentencesBefore; $i--, $count++) {
+        $response = trim($sentences[$i]) . ' ' . $response;
+    }
+
+    for ($i = $bestMatchIndex + 1, $count = 0; $i < count($sentences) && $count < $sentencesAfter; $i++, $count++) {
+        $response .= ' ' . trim($sentences[$i]);
+    }
+
+    $response = preg_replace('/\s+/', ' ', $response);
+
+    return $response;
+
+}
+
+// Lazy load embeddings for a specific n-gram from the cache file
+function transformer_model_lazy_load_embeddings($filePath, $ngram) {
+    if (!is_string($filePath) || !file_exists($filePath)) {
+        // back_trace( 'ERROR', 'Invalid embeddings file path: ' . print_r($filePath, true));
+        return null;
+    }
+
+    $fileHandle = fopen($filePath, 'r');
+    if (!$fileHandle) {
+        // back_trace( 'ERROR', "Unable to open embeddings cache file: $filePath");
+        return null;
+    }
+
+    while (($line = fgets($fileHandle)) !== false) {
+        $line = trim($line);
+
+        // Skip malformed or empty lines
+        if (empty($line) || !str_contains($line, '|')) {
             continue;
         }
 
-        $similarity = transformer_model_sentential_context_cosine_similarity($inputVector, $vector);
-        $similarities[$index] = $similarity;
+        $parts = explode('|', $line, 2);
+        if (count($parts) !== 2) {
+            // back_trace( 'WARNING', "Malformed line in cache file: $line");
+            continue;
+        }
 
-        // Log the similarity for each sentence
-        // back_trace('NOTICE', 'Similarity for Sentence ' . $index . ': ' . $similarity . ' | Sentence: ' . $sentences[$index]);
-
-    }
-
-    // Check for highest similarity
-    if (empty($similarities)) {
-
-        // back_trace('NOTICE', 'No similarities computed. Returning fallback.');
-        return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
-
-    }
-
-    // Similarity threshold - Default to 0.2
-    $similarityThreshold = floatval(get_option('chatbot_transformer_model_similarity_threshold', 0.2));
-
-    // Calculate key stats
-    $highestSimilarity = max($similarities);
-    $averageSimilarity = array_sum($similarities) / count($similarities);
-
-    $matchesAboveThreshold = array_filter($similarities, function($similarity) use ($similarityThreshold) {
-        return $similarity > $similarityThreshold;
-    });
-    $numMatchesAboveThreshold = count($matchesAboveThreshold);
-    $totalSentencesAnalyzed = count($sentences);
-
-    // Log key stats
-    back_trace('NOTICE', 'Key Stats:');
-    back_trace('NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
-    back_trace('NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    back_trace('NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    back_trace('NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    back_trace('NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
-
-    // If the highest similarity is below the threshold, return a fallback message
-    if ($highestSimilarity < $similarityThreshold) {
-        // back_trace('NOTICE', 'Low similarity detected: ' . $highestSimilarity);
-        return $chatbotFallbackResponses[array_rand($chatbotFallbackResponses)];
-    }
-
-    // Find the index of the most similar sentence
-    arsort($similarities);
-    $bestMatchIndex = key($similarities);
-    $bestMatchSentence = trim($sentences[$bestMatchIndex]);
-
-    // Initialize the response
-    $response = $bestMatchSentence;
-
-    // Retrieve settings
-    $maxSentences = intval(esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 5)));
-    $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
-
-    // Ratios for splitting sentences and tokens
-    $sentenceBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_sentences_ratio', 0.25)));
-    $tokenBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_token_ratio', 0.25)));
-
-    // Add a total counter to ensure we don't exceed $maxSentences
-    $totalSentencesUsed = 1; // the best match itself
-
-    // Distribute sentences and tokens
-    $sentencesBefore = floor($maxSentences * $sentenceBeforeRatio);
-    $sentencesAfter = $maxSentences - $sentencesBefore;
-    $tokensBefore = floor($maxTokens * $tokenBeforeRatio);
-    $tokensAfter = $maxTokens - $tokensBefore;
-
-    $responseWordCount = str_word_count($response);
-
-    // Add sentences before the best match
-    $tokensUsedBefore = 0;
-    $sentencesUsedBefore = 0;
-    for ($i = $bestMatchIndex - 1; $i >= 0 && $sentencesUsedBefore < $sentencesBefore && $tokensUsedBefore < $tokensBefore && $totalSentencesUsed < $maxSentences; $i--) {
-        $previousSentence = trim($sentences[$i]);
-        $sentenceWordCount = str_word_count($previousSentence);
-        if ($tokensUsedBefore + $sentenceWordCount <= $tokensBefore) {
-            $response = $previousSentence . ' ' . $response;
-            $tokensUsedBefore += $sentenceWordCount;
-            $sentencesUsedBefore++;
-            $totalSentencesUsed++;
-            if ($sentencesUsedBefore >= $sentencesBefore) {
-                break;
-            }
-        } else {
-            break;
+        list($key, $values) = $parts;
+        if ($key === $ngram) {
+            fclose($fileHandle);
+            return unserialize($values);
         }
     }
 
-    // Add sentences after the best match
-    $tokensUsedAfter = 0;
-    $sentencesUsedAfter = 0;
-    for ($i = $bestMatchIndex + 1; $i < count($sentences) && $sentencesUsedAfter < $sentencesAfter && $tokensUsedAfter < $tokensAfter && $totalSentencesUsed < $maxSentences; $i++) {
-        $nextSentence = trim($sentences[$i]);
-        $sentenceWordCount = str_word_count($nextSentence);
-        if ($tokensUsedAfter + $sentenceWordCount <= $tokensAfter) {
-            $response .= ' ' . $nextSentence;
-            $tokensUsedAfter += $sentenceWordCount;
-            $sentencesUsedAfter++;
-            $totalSentencesUsed++;
-            if ($sentencesUsedAfter >= $sentencesAfter) {
-                break;
-            }
-        } else {
-            break;
-        }
-    }
+    fclose($fileHandle);
 
-    // Before returning a response - clean it up
-    $response = preg_replace('/\s+/', ' ', $response); // Remove extra whitespace
+    // DIAG = Diagnostics
+    // back_trace( 'NOTICE', "N-Gram not found in embeddings cache: $ngram");
 
-    // Return the response
-    return $response;
-
+    return null;
 }
