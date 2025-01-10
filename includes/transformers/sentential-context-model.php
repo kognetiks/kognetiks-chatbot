@@ -23,6 +23,11 @@ function transformer_model_sentential_context_model_response( $input, $responseC
 
     global $wpdb;
 
+    // Clean the input
+    $input = transformer_model_sentential_context_clean($input);
+    // DIAG - Diagnostics - Ver 2.2.1
+    back_trace( 'NOTICE', 'Cleaned Input: ' . $input);
+
     // STEP 1 - Determine the number of batches
     $batchSize = 50;
 
@@ -371,64 +376,71 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
         return 0;
     }
 
-    // Combine all keys from both vectors
-    $allKeys = array_unique(array_merge(array_keys($vectorA), array_keys($vectorB)));
+    // Either OPTION_1 or OPTION_2
+    $similarity_option = get_option('chatbot_transformer_model_similarity_option', 'OPTION_1');
 
-    $dotProduct = 0.0;
-    $sumSquareA = 0.0;
-    $sumSquareB = 0.0;
+    if ($similarity_option === 'OPTION_1') {
 
-    foreach ($allKeys as $key) {
-        $valueA = $vectorA[$key] ?? 0.0;
-        $valueB = $vectorB[$key] ?? 0.0;
+        // Combine all keys from both vectors
+        $allKeys = array_unique(array_merge(array_keys($vectorA), array_keys($vectorB)));
 
-        $dotProduct += $valueA * $valueB;
-        $sumSquareA += $valueA * $valueA;
-        $sumSquareB += $valueB * $valueB;
+        $dotProduct = 0.0;
+        $sumSquareA = 0.0;
+        $sumSquareB = 0.0;
+
+        foreach ($allKeys as $key) {
+            $valueA = $vectorA[$key] ?? 0.0;
+            $valueB = $vectorB[$key] ?? 0.0;
+
+            $dotProduct += $valueA * $valueB;
+            $sumSquareA += $valueA * $valueA;
+            $sumSquareB += $valueB * $valueB;
+        }
+
+        $magnitudeA = sqrt($sumSquareA);
+        $magnitudeB = sqrt($sumSquareB);
+
+        return ($magnitudeA * $magnitudeB) ? $dotProduct / ($magnitudeA * $magnitudeB) : 0.0;
+
+    } else {
+
+        $commonKeys = array_intersect_key($vectorA, $vectorB);
+
+        // Log the contents of vectorA and vectorB
+        // back_trace( 'NOTICE', 'vectorA: ' . print_r($vectorA, true));
+        // back_trace( 'NOTICE', 'vectorB: ' . print_r($vectorB, true));
+        // back_trace( 'NOTICE', 'Keys of vectorA: ' . implode(', ', array_keys($vectorA)));
+        // back_trace( 'NOTICE', 'Keys of vectorB: ' . implode(', ', array_keys($vectorB)));
+        // back_trace( 'NOTICE', 'commonKeys: ' . print_r($commonKeys, true));
+
+        if (empty($commonKeys)) {
+            // back_trace( 'NOTICE', 'No common keys found');
+            return 0;
+        } else {
+            // back_trace( 'NOTICE', 'Common keys found');
+        }
+
+        $dotProduct = 0.0;
+        foreach ($commonKeys as $key => $value) {
+            $dotProduct += $vectorA[$key] * $vectorB[$key];
+        }
+
+        $magnitudeA = sqrt(array_reduce($vectorA, fn($carry, $val) => $carry + $val * $val, 0.0));
+        $magnitudeB = sqrt(array_reduce($vectorB, fn($carry, $val) => $carry + $val * $val, 0.0));
+
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace( 'NOTICE', 'Dot Product: ' . $dotProduct);
+        // back_trace( 'NOTICE', 'Magnitude A: ' . $magnitudeA);
+        // back_trace( 'NOTICE', 'Magnitude B: ' . $magnitudeB);
+
+        return ($magnitudeA * $magnitudeB) ? $dotProduct / ($magnitudeA * $magnitudeB) : 0.0;
+
     }
-
-    $magnitudeA = sqrt($sumSquareA);
-    $magnitudeB = sqrt($sumSquareB);
-
-    return ($magnitudeA * $magnitudeB) ? $dotProduct / ($magnitudeA * $magnitudeB) : 0.0;
-
-    // OLD CODE BELOW
-
-    // $commonKeys = array_intersect_key($vectorA, $vectorB);
-
-    // // Log the contents of vectorA and vectorB
-    // // back_trace( 'NOTICE', 'vectorA: ' . print_r($vectorA, true));
-    // // back_trace( 'NOTICE', 'vectorB: ' . print_r($vectorB, true));
-    // // back_trace( 'NOTICE', 'Keys of vectorA: ' . implode(', ', array_keys($vectorA)));
-    // // back_trace( 'NOTICE', 'Keys of vectorB: ' . implode(', ', array_keys($vectorB)));
-    // // back_trace( 'NOTICE', 'commonKeys: ' . print_r($commonKeys, true));
-
-    // if (empty($commonKeys)) {
-    //     // back_trace( 'NOTICE', 'No common keys found');
-    //     return 0;
-    // } else {
-    //     // back_trace( 'NOTICE', 'Common keys found');
-    // }
-
-    // $dotProduct = 0.0;
-    // foreach ($commonKeys as $key => $value) {
-    //     $dotProduct += $vectorA[$key] * $vectorB[$key];
-    // }
-
-    // $magnitudeA = sqrt(array_reduce($vectorA, fn($carry, $val) => $carry + $val * $val, 0.0));
-    // $magnitudeB = sqrt(array_reduce($vectorB, fn($carry, $val) => $carry + $val * $val, 0.0));
-
-    // // DIAG - Diagnostics - Ver 2.2.1
-    // // back_trace( 'NOTICE', 'Dot Product: ' . $dotProduct);
-    // // back_trace( 'NOTICE', 'Magnitude A: ' . $magnitudeA);
-    // // back_trace( 'NOTICE', 'Magnitude B: ' . $magnitudeB);
-
-    // return ($magnitudeA * $magnitudeB) ? $dotProduct / ($magnitudeA * $magnitudeB) : 0.0;
 
 }
 
 // Function to clean up text
-function transformer_model_sentential_context_clean($source_content){
+function transformer_model_sentential_context_clean($source_content) {
 
     // DIAG - Diagnostics - Ver 2.2.1
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_model_clean - start');
@@ -480,14 +492,36 @@ function transformer_model_sentential_context_clean($source_content){
 }
 
 // Function to generate a contextual response based on input and embeddings
-function transformer_model_sentential_context_generate_contextual_response($input, $embeddingsFilePath, $corpus, $maxTokens = 500, $windowSize = 3) {
+function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500, $windowSize = 3) {
+
+    // DIAG - Diagnostics
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
+    back_trace( 'NOTICE', '$input: ' . $input);
+    // back_trace( 'NOTICE', '$embeddings: ' . $embeddings);
+    if (empty($embeddings)) {
+        back_trace( 'NOTICE', '$embeddings empty');
+    } else {
+        back_trace( 'NOTICE', '$embeddings Length: ' . count($embeddings));
+    }
+    // back_trace( 'NOTICE', '$corpus: ' . $corpus);
+    if (empty($corpus)) {
+        back_trace( 'NOTICE', '$orpus empty');
+    } else {
+        back_trace( 'NOTICE', '$corpus Length: ' . strlen($corpus));
+    }
+    back_trace( 'NOTICE', '$maxTokens: ' . $maxTokens);
+    back_trace( 'NOTICE', '$windowSize: ' . $windowSize);
 
     global $chatbotFallbackResponses;
 
+
     // Embeddings cache
-    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
+    // $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
     // back_trace( 'NOTICE', '$cacheFile: ' . $cacheFile);
 
+    // Set this to point to the cache directory
+    $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
+    
     // Tokenize the corpus into sentences while retaining punctuation
     $sentences = preg_split('/(?<=[.!?])\s+(?=[A-Z])/', $corpus);
 
@@ -506,50 +540,68 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     // back_trace( 'NOTICE', '$windowSize: ' . $windowSize);
 
     // Compute the input vector
-    $input = strtolower(trim($input));
+    $input = strtolower(trim($input)); // Normalize case and trim whitespace
     $inputWords = preg_split('/\s+/', preg_replace('/[^\w\s]/', '', $input));
-    $inputWords = transformer_model_sentential_context_remove_stop_words($inputWords);
+    $inputWords = transformer_model_sentential_context_remove_stop_words($inputWords); // Remove stop words
 
     // Log the processed input words
-    // back_trace( 'NOTICE', 'Processed Input Words: ' . implode(', ', $inputWords));
+    back_trace( 'NOTICE', 'Processed Input Words: ' . implode(', ', $inputWords));
 
     $inputVector = [];
     $wordCount = 0;
 
     for ($i = 0; $i <= count($inputWords) - $windowSize; $i++) {
+
         $ngram = implode(' ', array_slice($inputWords, $i, $windowSize));
-        $ngramEmbeddings = transformer_model_lazy_load_embeddings($cacheFile, $ngram);
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', 'Input N-Gram: ' . $ngram);
+
+        $ngramEmbeddings = transformer_model_lazy_load_embeddings($cacheDir, $ngram);
+
         if ($ngramEmbeddings) {
+
             foreach ($ngramEmbeddings as $contextWord => $value) {
                 $inputVector[$contextWord] = ($inputVector[$contextWord] ?? 0) + $value;
             }
             $wordCount++;
+
         } else {
+
             // Log that we didn't find an embedding for $ngram
             // back_trace( 'NOTICE', 'Input N-Gram not found in embeddings: ' . $ngram);
+
         }
+
     }
 
     // Normalize the input vector
     if ($wordCount > 0) {
+
         foreach ($inputVector as $key => $value) {
             $inputVector[$key] /= $wordCount;
         }
+
     } else {
+
         $inputVector = [];
-        // back_trace( 'NOTICE', 'Empty Input Vector');
+        back_trace( 'NOTICE', 'Empty Input Vector');
+
     }
 
     // Limit vector size to reduce memory usage
     $inputVector = array_slice($inputVector, 0, 100, true);
 
-    // back_trace( 'NOTICE', 'Generated Input Vector: ' . print_r(array_slice($inputVector, 0, 10), true)); // Log partial vector for debugging
+    // DIAG - Diagnostics
+    back_trace( 'NOTICE', 'Generated Input Vector: ' . print_r(array_slice($inputVector, 0, 10), true)); // Log partial vector for debugging
 
     // Process sentences in batches
     $highestSimilarity = -INF;
     $bestMatchIndex = -1;
 
-    $batchSize = 500; // Process sentences in smaller batches
+    // FIXME - Temporary increase the maximum execution time
+    set_time_limit(300); // Increase the maximum execution time to 300 seconds
+
+    $batchSize = 1000; // Process sentences in smaller batches
     for ($batchStart = 0; $batchStart < count($sentences); $batchStart += $batchSize) {
         $sentenceBatch = array_slice($sentences, $batchStart, $batchSize);
 
@@ -563,7 +615,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 
             for ($i = 0; $i <= count($sentenceWords) - $windowSize; $i++) {
                 $ngram = implode(' ', array_slice($sentenceWords, $i, $windowSize));
-                $ngramEmbeddings = transformer_model_lazy_load_embeddings($embeddingsFilePath, $ngram);
+                $ngramEmbeddings = transformer_model_lazy_load_embeddings($cacheDir, $ngram);
                 if ($ngramEmbeddings) {
                     foreach ($ngramEmbeddings as $contextWord => $value) {
                         $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
@@ -579,7 +631,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
             }
 
             // Limit vector size to reduce memory usage
-            $sentenceVector = array_slice($sentenceVector, 0, 100, true);
+            // $sentenceVector = array_slice($sentenceVector, 0, 100, true);
 
             if (empty($inputVector) || empty($sentenceVector)) {
                 continue;
@@ -594,7 +646,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
         }
 
         // Log memory usage after each batch
-        // back_trace( 'NOTICE', 'Memory usage after batch ' . $batchStart . ': ' . memory_get_usage(true));
+        back_trace( 'NOTICE', 'Memory usage after batch ' . $batchStart . ': ' . memory_get_usage(true));
+
     }
 
     if ($highestSimilarity === -INF) {
@@ -637,8 +690,9 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 // Lazy load embeddings for a specific n-gram from the cache file
 function transformer_model_lazy_load_embeddings($cacheDir, $ngram) {
 
+    // Validate that the cache directory is a string
     if (!is_string($cacheDir)) {
-        // back_trace('ERROR', 'Cache directory is not a string: ' . print_r($cacheDir, true));
+        back_trace('ERROR', 'Cache directory is not a string: ' . print_r($cacheDir, true));
         return null;
     }
 
@@ -648,14 +702,24 @@ function transformer_model_lazy_load_embeddings($cacheDir, $ngram) {
 
     // Check if the cache file exists
     if (!file_exists($cacheFile)) {
-        // back_trace('NOTICE', "Cache file not found for n-gram: $ngram");
-        return null;
+        // back_trace('NOTICE', "Cache file not found for n-gram: $ngram | Expected file: $cacheFile");
+        return null; // Return early if the cache file doesn't exist
     }
 
     // Load the cache file
     $embeddings = include $cacheFile;
 
-    // Return the n-gram's embedding if it exists
-    return $embeddings[$ngram] ?? null;
+    // Check if the n-gram exists in the cache
+    if (!isset($embeddings[$ngram])) {
+        // back_trace('NOTICE', "N-Gram not found in cache: $ngram | Cache file: $cacheFile");
+        return null; // Return early if the n-gram isn't found
+    }
+
+    // Log success
+    // back_trace('NOTICE', "N-Gram found in cache: $ngram | Cache file: $cacheFile");
+
+    // Return the n-gram's embedding
+    return $embeddings[$ngram];
 
 }
+
