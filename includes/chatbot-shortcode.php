@@ -1304,12 +1304,20 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
 }
-// add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
-// add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
-// add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
-// add_shortcode('chatbot-1', 'chatbot_chatgpt_shortcode');
-// add_shortcode('chatbot-2', 'chatbot_chatgpt_shortcode');
-// add_shortcode('chatbot-3', 'chatbot_chatgpt_shortcode');
+// FIXME - TEMPORARY - Ver 2.2.1 - 2025 01 09
+add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
+add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-1', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-2', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-3', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-4', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-5', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-6', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-7', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-8', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-9', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-10', 'chatbot_chatgpt_shortcode');
 
 // Dynamic Shortcode - Ver 2.0.6
 function register_chatbot_shortcodes($number_of_shortcodes = null) {

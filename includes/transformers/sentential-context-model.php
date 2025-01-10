@@ -210,39 +210,79 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
 
 }
 
-// Function to build or retrieve cached embeddings
+// Function to build or retrieve cached embeddings by alphabet
 function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 2) {
 
-    // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_get_cached_embeddings - start');
+    // Define the cache directory
+    $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
 
-    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
+    if (!is_dir($cacheDir)) {
+        mkdir($cacheDir, 0755, true);
+    }
 
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Cache File: ' . $cacheFile);
+    // Initialize the embeddings array
+    $embeddings = [];
 
-    // Check if embeddings are cached
-    if (file_exists($cacheFile)) {
+    // Check if the cache files already exist
+    $cacheFiles = glob($cacheDir . '*.php');
 
-        $embeddings = include $cacheFile;
+    if (!empty($cacheFiles)) {
 
-        // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'Embeddings found in cache');
+        // Load all cache files
+        foreach ($cacheFiles as $file) {
+            $letter = basename($file, '.php');
+            $embeddings[$letter] = include $file;
+        }
+
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace('NOTICE', 'Embeddings loaded from cache files.');
 
     } else {
 
-        // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'Embeddings not found in cache');
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace('NOTICE', 'Embeddings cache files not found. Building cache...');
 
-        update_option('chatbot_transformer_model_build_schedule', 'Now');
-        chatbot_transformer_model_scheduler();
+        // Build embeddings dynamically
+        $corpus = transformer_model_sentential_context_clean($corpus);
+        $words = preg_split('/\s+/', strtolower(trim($corpus)));
+
+        // Generate n-grams and assign meaningful context
+        for ($i = 0; $i <= count($words) - $windowSize; $i++) {
+            $ngram = implode(' ', array_slice($words, $i, $windowSize));
+
+            // Assign n-gram to the corresponding letter file
+            $firstChar = strtolower($ngram[0]);
+
+            // Example: Use actual context data instead of 'dummy_context'
+            if (!isset($embeddings[$firstChar][$ngram])) {
+                $embeddings[$firstChar][$ngram] = generate_context_for_ngram($ngram, $corpus); // Replace this with your actual context generation logic
+            }
+        }
+
+        // Save embeddings to cache files
+        foreach ($embeddings as $letter => $letterEmbeddings) {
+
+            $filePath = $cacheDir . $letter . '.php';
+            file_put_contents($filePath, '<?php return ' . var_export($letterEmbeddings, true) . ';');
+        }
+
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace('NOTICE', 'Embeddings cache files created.');
 
     }
 
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_get_cached_embeddings - end');
-
     return $embeddings;
+
+}
+
+// Generate meaningful context for an n-gram
+function generate_context_for_ngram($ngram, $corpus) {
+
+    // Generate meaningful context for the n-gram
+    // Example: Count occurrences of n-gram in the corpus
+    return [
+        'occurrence_count' => substr_count($corpus, $ngram),
+    ];
 
 }
 
@@ -595,43 +635,27 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 }
 
 // Lazy load embeddings for a specific n-gram from the cache file
-function transformer_model_lazy_load_embeddings($filePath, $ngram) {
-    if (!is_string($filePath) || !file_exists($filePath)) {
-        // back_trace( 'ERROR', 'Invalid embeddings file path: ' . print_r($filePath, true));
+function transformer_model_lazy_load_embeddings($cacheDir, $ngram) {
+
+    if (!is_string($cacheDir)) {
+        // back_trace('ERROR', 'Cache directory is not a string: ' . print_r($cacheDir, true));
         return null;
     }
 
-    $fileHandle = fopen($filePath, 'r');
-    if (!$fileHandle) {
-        // back_trace( 'ERROR', "Unable to open embeddings cache file: $filePath");
+    // Determine the cache file based on the first character of the n-gram
+    $firstChar = strtolower($ngram[0]);
+    $cacheFile = rtrim($cacheDir, '/') . '/' . $firstChar . '.php';
+
+    // Check if the cache file exists
+    if (!file_exists($cacheFile)) {
+        // back_trace('NOTICE', "Cache file not found for n-gram: $ngram");
         return null;
     }
 
-    while (($line = fgets($fileHandle)) !== false) {
-        $line = trim($line);
+    // Load the cache file
+    $embeddings = include $cacheFile;
 
-        // Skip malformed or empty lines
-        if (empty($line) || !str_contains($line, '|')) {
-            continue;
-        }
+    // Return the n-gram's embedding if it exists
+    return $embeddings[$ngram] ?? null;
 
-        $parts = explode('|', $line, 2);
-        if (count($parts) !== 2) {
-            // back_trace( 'WARNING', "Malformed line in cache file: $line");
-            continue;
-        }
-
-        list($key, $values) = $parts;
-        if ($key === $ngram) {
-            fclose($fileHandle);
-            return unserialize($values);
-        }
-    }
-
-    fclose($fileHandle);
-
-    // DIAG = Diagnostics
-    // back_trace( 'NOTICE', "N-Gram not found in embeddings cache: $ngram");
-
-    return null;
 }

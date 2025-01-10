@@ -72,84 +72,80 @@ function chatbot_transformer_model_scheduler() {
 }
 add_action('chatbot_transformer_model_scheduler_hook', 'chatbot_transformer_model_scheduler');
 
-// Reset the cache file and offset
+// Reset the cache files and offset
 function transformer_model_sentential_context_reset_cache() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_reset_cache - start');
+    back_trace('NOTICE', 'transformer_model_sentential_context_reset_cache - start');
 
-    // DIAG - Diagnostics
-    prod_trace( 'NOTICE', 'Transformer Model Content Cache Reset');
+    // Log reset activity
+    prod_trace('NOTICE', 'Transformer Model Content Cache Reset');
 
+    // Reset offset and content items processed
     update_option('chatbot_transformer_model_offset', 0);
     update_option('chatbot_transformer_model_content_items_processed', 0);
-    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
 
-    if (file_exists($cacheFile)) {
-        unlink($cacheFile);
-        // back_trace( 'NOTICE', "$cacheFile deleted");
+    // Cache folder path
+    $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
+
+    // Check if the directory exists
+    if (is_dir($cacheDir)) {
+        // Open directory and delete all files inside
+        $files = glob($cacheDir . '*.php'); // Get all PHP files in the directory
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file); // Delete the file
+                // back_trace('NOTICE', "Deleted cache file: $file");
+            }
+        }
+        // Optionally, delete the folder itself if required
+        // rmdir($cacheDir); // Uncomment if you want to remove the folder
     } else {
-        // back_trace( 'NOTICE', "$cacheFile not found");
+        back_trace('NOTICE', "Cache directory not found: $cacheDir");
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_reset_cache - end');
+    back_trace('NOTICE', 'transformer_model_sentential_context_reset_cache - end');
 
 }
+
 
 // Check if the Transformer Model needs to be built or updated
 function chatbot_transformer_model_scan() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'hatbot_transformer_model_scan - start');
+    back_trace('NOTICE', 'chatbot_transformer_model_scan - start');
 
     // Retrieve current state
     $offset = intval(get_option('chatbot_transformer_model_offset', 0));
     $batchSize = intval(get_option('chatbot_transform_model_batch_size', 50));
-    $chatbot_transformer_model_content_items_processed = intval(get_option('chatbot_transformer_model_content_items_processed', 0));
     $corpus = transformer_model_sentential_context_fetch_content($offset, $batchSize);
 
     if (empty($corpus)) {
-
         update_option('chatbot_transformer_model_build_status', 'Completed');
         update_option('chatbot_transformer_model_build_schedule', 'Completed');
-        update_option('chatbot_transformer_model_content_items_processed', 0);
         update_option('chatbot_transformer_model_last_updated', current_time('mysql'));
         prod_trace('NOTICE', 'chatbot_transformer_model_build_schedule: Completed');
-
-        // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'All items processed. Scan complete.');
-
         return;
     }
 
     // Retrieve the window size
     $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 2)));
 
-    // Build embeddings
-    $embeddings = transformer_model_sentential_context_cache_embeddings($corpus, $windowSize);
+    // Build embeddings with the updated logic
+    transformer_model_sentential_context_cache_embeddings($corpus, $windowSize);
 
     // Update the offset
     $processedItems = count($corpus);
-    back_trace( 'NOTICE', 'Processed items: ' . $processedItems);
-
     update_option('chatbot_transformer_model_offset', $offset + $processedItems);
-    $chatbot_transformer_model_content_items_processed = intval(get_option('chatbot_transformer_model_content_items_processed', 0));
 
-    back_trace( 'NOTICE', 'chatbot_transformer_model_content_items_processed: ' . $chatbot_transformer_model_content_items_processed);
-
-    update_option('chatbot_transformer_model_content_items_processed', $chatbot_transformer_model_content_items_processed + $processedItems);
-    back_trace( 'NOTICE', 'chatbot_transformer_model_content_items_processed: ' . intval(get_option('chatbot_transformer_model_content_items_processed', 0)));
-
-
-    // Log the processed batch
-    prod_trace( 'NOTICE', 'Processed ' . $processedItems . ' items starting at offset ' . $offset);
+    prod_trace('NOTICE', "Processed $processedItems items starting at offset $offset");
 
     // Schedule the next batch if needed
     wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Next batch scheduled');
+    back_trace('NOTICE', 'chatbot_transformer_model_scan - end');
 
 }
 add_action('chatbot_transformer_model_scan_hook', 'chatbot_transformer_model_scan');
@@ -190,39 +186,91 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - start');
+    back_trace('NOTICE', 'transformer_model_sentential_context_cache_embeddings - start');
 
-    $cacheFile = __DIR__ . '/sentential_embeddings_cache.php';
+    $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
 
-    // Check if embeddings are cached
-    if (file_exists($cacheFile)) {
-        $embeddings = include $cacheFile;
-    } else {
-        $embeddings = [];
+    // Ensure the cache directory exists
+    if (!is_dir($cacheDir)) {
+        mkdir($cacheDir, 0755, true);
     }
 
-    // Build new embeddings
+    $cacheUpdates = []; // To group updates by file
+
+    // Process the content to build embeddings
     foreach ($corpus as $row) {
+
         $postContent = strip_tags(html_entity_decode($row['post_content'], ENT_QUOTES | ENT_HTML5));
         $postEmbeddings = transformer_model_sentential_context_build_cooccurrence_matrix($postContent, $windowSize);
+
+        // Group embeddings by their cache file
         foreach ($postEmbeddings as $word => $context) {
-            if (!isset($embeddings[$word])) {
-                $embeddings[$word] = $context;
+
+            // Sanitize word
+            $word = preg_replace('/[^\w\s]/u', '', $word);
+            $word = strtolower(trim($word));
+
+            // Skip empty or invalid keys
+            if (empty($word)) {
+                continue;
+            }
+
+            $firstChar = strtolower($word[0]); // Determine the first character of the n-gram
+            if (!preg_match('/[a-z]/', $firstChar)) {
+                $firstChar = 'other'; // Handle non-alphabetic characters
+            }
+
+            // Sanitize context keys and values
+            foreach ($context as $contextWord => $count) {
+                $contextWord = preg_replace('/[^\w\s]/u', '', $contextWord);
+                $contextWord = strtolower(trim($contextWord));
+                if (!empty($contextWord)) {
+                    $context[$contextWord] = intval($count); // Ensure count is an integer
+                } else {
+                    unset($context[$contextWord]); // Remove invalid context words
+                }
+            }
+
+            // Add to cache updates grouped by file
+            $cacheUpdates[$firstChar][$word] = $contextUpdates[$word] ?? [];
+            if (!isset($cacheUpdates[$firstChar][$word])) {
+                $cacheUpdates[$firstChar][$word] = $context;
             } else {
                 foreach ($context as $contextWord => $count) {
-                    if (isset($embeddings[$word][$contextWord])) {
-                        $embeddings[$word][$contextWord] += $count;
-                    } else {
-                        $embeddings[$word][$contextWord] = $count;
-                    }
+                    $cacheUpdates[$firstChar][$word][$contextWord] = 
+                        ($cacheUpdates[$firstChar][$word][$contextWord] ?? 0) + $count;
                 }
             }
         }
     }
 
-    // Cache the embeddings
-    file_put_contents($cacheFile, '<?php return ' . var_export($embeddings, true) . ';');
+    // Write updates to cache files
+    foreach ($cacheUpdates as $fileKey => $embeddings) {
+        $cacheFile = $cacheDir . $fileKey . '.php';
 
-    return $embeddings;
+        // Load existing cache if it exists
+        $existingEmbeddings = [];
+        if (file_exists($cacheFile)) {
+            $existingEmbeddings = include $cacheFile;
+        }
+
+        // Merge updates with existing embeddings
+        foreach ($embeddings as $word => $context) {
+            if (!isset($existingEmbeddings[$word])) {
+                $existingEmbeddings[$word] = $context;
+            } else {
+                foreach ($context as $contextWord => $count) {
+                    $existingEmbeddings[$word][$contextWord] = 
+                        ($existingEmbeddings[$word][$contextWord] ?? 0) + $count;
+                }
+            }
+        }
+
+        // Write the updated cache file
+        file_put_contents($cacheFile, '<?php return ' . var_export($existingEmbeddings, true) . ';');
+    }
+
+    back_trace('NOTICE', 'transformer_model_sentential_context_cache_embeddings - end');
 
 }
+
