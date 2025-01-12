@@ -594,44 +594,28 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     // DIAG - Diagnostics
     back_trace( 'NOTICE', 'Generated Input Vector: ' . print_r(array_slice($inputVector, 0, 10), true)); // Log partial vector for debugging
 
+    // FIXME - Temporary increase the maximum execution time
+    set_time_limit(300); // Increase the maximum execution time to 300 seconds
+
+    // Load or generate precomputed sentence vectors
+    $sentenceVectors = loadPrecomputedSentenceVectors($cacheDir);
+
+    if (empty($sentenceVectors)) {
+        $sentenceVectors = generateSentenceVectorsInChunks($sentences, $cacheDir, $windowSize);
+    }
+
     // Process sentences in batches
     $highestSimilarity = -INF;
     $bestMatchIndex = -1;
 
-    // FIXME - Temporary increase the maximum execution time
-    set_time_limit(300); // Increase the maximum execution time to 300 seconds
+    $sentenceVectors = loadPrecomputedSentenceVectors($cacheDir); // Load precomputed vectors
+    $batchSize = 50; // Adjust based on performance testing
 
-    $batchSize = 1000; // Process sentences in smaller batches
     for ($batchStart = 0; $batchStart < count($sentences); $batchStart += $batchSize) {
         $sentenceBatch = array_slice($sentences, $batchStart, $batchSize);
 
         foreach ($sentenceBatch as $index => $sentence) {
-            $sentence = transformer_model_sentential_context_clean($sentence);
-            $sentenceWords = preg_split('/\s+/', strtolower(trim($sentence)));
-            $sentenceWords = transformer_model_sentential_context_remove_stop_words($sentenceWords);
-
-            $sentenceVector = [];
-            $ngramCount = 0;
-
-            for ($i = 0; $i <= count($sentenceWords) - $windowSize; $i++) {
-                $ngram = implode(' ', array_slice($sentenceWords, $i, $windowSize));
-                $ngramEmbeddings = transformer_model_lazy_load_embeddings($cacheDir, $ngram);
-                if ($ngramEmbeddings) {
-                    foreach ($ngramEmbeddings as $contextWord => $value) {
-                        $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
-                    }
-                    $ngramCount++;
-                }
-            }
-
-            if ($ngramCount > 0) {
-                foreach ($sentenceVector as $k => $val) {
-                    $sentenceVector[$k] /= $ngramCount;
-                }
-            }
-
-            // Limit vector size to reduce memory usage
-            // $sentenceVector = array_slice($sentenceVector, 0, 100, true);
+            $sentenceVector = $sentenceVectors[$batchStart + $index] ?? computeSentenceVector($sentence, $cacheDir, $windowSize);
 
             if (empty($inputVector) || empty($sentenceVector)) {
                 continue;
@@ -645,9 +629,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
             }
         }
 
-        // Log memory usage after each batch
-        back_trace( 'NOTICE', 'Memory usage after batch ' . $batchStart . ': ' . memory_get_usage(true));
-
+        back_trace('NOTICE', 'Memory usage after batch ' . $batchStart . ': ' . memory_get_usage(true));
     }
 
     if ($highestSimilarity === -INF) {
@@ -684,6 +666,192 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $response = preg_replace('/\s+/', ' ', $response);
 
     return $response;
+
+}
+
+// Compute the vector for a sentence
+function loadPrecomputedSentenceVectors($cacheDir) {
+
+    // DIAG - Diagnostics
+    back_trace('NOTICE', 'loadPrecomputedSentenceVectors - start');
+
+    // Ensure cache directory ends with a slash
+    $cacheDir = rtrim($cacheDir, '/');
+
+    // Path to the cache file
+    $cacheFile = $cacheDir . '/sentence_vectors.php';
+
+    // Check if the cache file exists
+    if (!file_exists($cacheFile)) {
+        prod_trace('ERROR', "Cache file does not exist: $cacheFile");
+        return [];
+    }
+
+    // Include the cache file
+    $sentenceVectors = include $cacheFile;
+
+    // Validate the content of the cache file
+    if (!is_array($sentenceVectors)) {
+        prod_trace('ERROR', "Cache file is invalid or not an array: $cacheFile");
+        return [];
+    }
+
+    // DIAG - Diagnostics
+    back_trace('NOTICE', "Loaded precomputed sentence vectors from cache: $cacheFile");
+    return $sentenceVectors;
+
+}
+
+// Precompute sentence vectors in chunks
+function generateSentenceVectorsInChunks($sentences, $cacheDir, $windowSize, $chunkSize = 100) {
+
+    $sentenceVectors = [];
+    $cacheFile = rtrim($cacheDir, '/') . '/sentence_vectors.php';
+
+    // Load existing cache if available
+    if (file_exists($cacheFile)) {
+
+        $sentenceVectors = include $cacheFile;
+        if (!is_array($sentenceVectors)) {
+            $sentenceVectors = [];
+            // DIAG - Diagnostics
+            back_trace('NOTICE', "Existing cache is invalid, starting fresh: $cacheFile");
+        } else {
+            // DIAG - Diagnostics
+            back_trace('NOTICE', "Loaded existing cache with " . count($sentenceVectors) . " vectors.");
+        }
+
+    }
+
+    for ($chunkStart = 0; $chunkStart < count($sentences); $chunkStart += $chunkSize) {
+        
+        $chunk = array_slice($sentences, $chunkStart, $chunkSize);
+
+        foreach ($chunk as $index => $sentence) {
+
+            $globalIndex = $chunkStart + $index;
+            if (isset($sentenceVectors[$globalIndex])) {
+                continue; // Skip already computed vectors
+            }
+
+            $sentenceWords = preg_split('/\s+/', strtolower(trim($sentence)));
+            $sentenceWords = transformer_model_sentential_context_remove_stop_words($sentenceWords);
+
+            $sentenceVector = [];
+            $ngramCount = 0;
+
+            for ($i = 0; $i <= count($sentenceWords) - $windowSize; $i++) {
+                $ngram = implode(' ', array_slice($sentenceWords, $i, $windowSize));
+                $ngramEmbeddings = transformer_model_lazy_load_embeddings($cacheDir, $ngram);
+
+                if ($ngramEmbeddings) {
+                    foreach ($ngramEmbeddings as $contextWord => $value) {
+                        $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
+                    }
+                    $ngramCount++;
+                }
+            }
+
+            if ($ngramCount > 0) {
+                foreach ($sentenceVector as $k => $val) {
+                    $sentenceVector[$k] /= $ngramCount;
+                }
+            }
+
+            $sentenceVectors[$globalIndex] = $sentenceVector;
+
+        }
+
+        // Save intermediate progress
+        $result = file_put_contents($cacheFile, '<?php return ' . var_export($sentenceVectors, true) . ';');
+        if ($result === false) {
+            // DIAG - Diagnostics
+            prod_trace('ERROR', "Failed to save intermediate cache: $cacheFile");
+        } else {
+            // DIAG - Diagnostics
+            back_trace('NOTICE', "Intermediate cache saved: $cacheFile");
+        }
+    }
+
+    // DIAG - Diagnostics
+    back_trace('NOTICE', "All sentence vectors generated and saved to cache: $cacheFile");
+    return $sentenceVectors;
+
+}
+
+// Function to compute the vector for a sentence
+function computeSentenceVector($sentence, $cacheDir, $windowSize) {
+    
+    $sentenceWords = preg_split('/\s+/', strtolower(trim($sentence))); // Split sentence into words
+    $sentenceWords = transformer_model_sentential_context_remove_stop_words($sentenceWords); // Remove stop words
+
+    $sentenceVector = [];
+    $ngramCount = 0;
+
+    // Loop through n-grams in the sentence
+    for ($i = 0; $i <= count($sentenceWords) - $windowSize; $i++) {
+        $ngram = implode(' ', array_slice($sentenceWords, $i, $windowSize));
+        $ngramEmbeddings = transformer_model_lazy_load_embeddings($cacheDir, $ngram);
+
+        if ($ngramEmbeddings) {
+            foreach ($ngramEmbeddings as $contextWord => $value) {
+                $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
+            }
+            $ngramCount++;
+        }
+    }
+
+    // Normalize the sentence vector
+    if ($ngramCount > 0) {
+        foreach ($sentenceVector as $key => $value) {
+            $sentenceVector[$key] /= $ngramCount;
+        }
+    }
+
+    return $sentenceVector;
+
+}
+
+// Precompute sentence vectors for all sentences in the corpus
+function generateSentenceVectors($sentences, $cacheDir, $windowSize) {
+
+    $sentenceVectors = [];
+
+    foreach ($sentences as $index => $sentence) {
+        $sentenceWords = preg_split('/\s+/', strtolower(trim($sentence)));
+        $sentenceWords = transformer_model_sentential_context_remove_stop_words($sentenceWords);
+
+        $sentenceVector = [];
+        $ngramCount = 0;
+
+        for ($i = 0; $i <= count($sentenceWords) - $windowSize; $i++) {
+            $ngram = implode(' ', array_slice($sentenceWords, $i, $windowSize));
+            $ngramEmbeddings = transformer_model_lazy_load_embeddings($cacheDir, $ngram);
+
+            if ($ngramEmbeddings) {
+                foreach ($ngramEmbeddings as $contextWord => $value) {
+                    $sentenceVector[$contextWord] = ($sentenceVector[$contextWord] ?? 0) + $value;
+                }
+                $ngramCount++;
+            }
+        }
+
+        if ($ngramCount > 0) {
+            foreach ($sentenceVector as $k => $val) {
+                $sentenceVector[$k] /= $ngramCount;
+            }
+        }
+
+        $sentenceVectors[$index] = $sentenceVector;
+    }
+
+    // Save vectors to a cache file
+    $cacheFile = rtrim($cacheDir, '/') . '/sentence_vectors.php';
+    file_put_contents($cacheFile, '<?php return ' . var_export($sentenceVectors, true) . ';');
+
+    back_trace('NOTICE', "Sentence vectors generated and saved to cache: $cacheFile");
+
+    return $sentenceVectors;
 
 }
 
