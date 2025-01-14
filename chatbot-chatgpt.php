@@ -121,7 +121,6 @@ require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-c
 // Include necessary files - Transformer Model - Ver 2.2.0
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/lexical-context-model.php'; // Functions - Ver 2.2.0
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-context-model.php'; // Functions - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-search-model.php'; // Functions - Ver 2.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-model-scheduler.php'; // Functions - Ver 2.2.0
 
 // Include necessary files - Settings

@@ -188,9 +188,6 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     } elseif ($model == 'sentential-context-model') {
         // Call the transformer model with the user input - transformer-sentence-based
         $response = transformer_model_sentential_context_model_response($transformer_model_message, $max_tokens);
-    } elseif ( $model == 'sentential-search-model') {
-        // Call the transformer model with the user input - transformer-search-based
-        $response = transformer_model_sentential_search_model_response($transformer_model_message, $max_tokens);
     } else {
         // Incorrect model selected
         $response = 'ERROR: Incorrect model selected. Please check the settings.';
