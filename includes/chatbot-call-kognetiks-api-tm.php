@@ -178,13 +178,22 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     // Retrieve max tokens from the settings
     $max_tokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', '500')));
 
+    // DIAG - Diagnostics - Ver 2.2.1
+    back_trace( 'NOTICE', '$model: ' . $model);
+
     // Call the transformer model with the user input
     if ($model == 'lexical-context-model') {
         // Call the transformer model with the user input - transformer-word-based
         $response = transformer_model_lexical_context_response($transformer_model_message, $max_tokens);
-    } else {
+    } elseif ($model == 'sentential-context-model') {
         // Call the transformer model with the user input - transformer-sentence-based
         $response = transformer_model_sentential_context_model_response($transformer_model_message, $max_tokens);
+    } elseif ( $model == 'sentential-search-model') {
+        // Call the transformer model with the user input - transformer-search-based
+        $response = transformer_model_sentential_search_model_response($transformer_model_message, $max_tokens);
+    } else {
+        // Incorrect model selected
+        $response = 'ERROR: Incorrect model selected. Please check the settings.';
     }
 
     if (!empty($response)) {

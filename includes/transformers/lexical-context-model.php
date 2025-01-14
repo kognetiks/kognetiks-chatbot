@@ -45,7 +45,7 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
 }
 
 // Function to get cached embeddings
-function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 2) {
+function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostics - Ver 2.3.0
     // back_trace( 'NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
@@ -92,7 +92,7 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
 }
 
 // Function to build a PMI matrix for word embeddings
-function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize = 2) {
+function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostics - Ver 2.3.0
     // back_trace( 'NOTICE', 'transformer_model_lexical_context_build_pmi_matrix' );

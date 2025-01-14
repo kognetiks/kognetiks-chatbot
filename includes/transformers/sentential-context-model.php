@@ -29,7 +29,8 @@ function transformer_model_sentential_context_model_response( $input, $responseC
     back_trace( 'NOTICE', 'Cleaned Input: ' . $input);
 
     // STEP 1 - Determine the number of batches
-    $batchSize = 50;
+    // $batchSize = 50;
+    $batchSize = 10; // Quick Wins - 2025-01-13
 
     $totalItems = (int) $wpdb->get_var(
         "SELECT COUNT(*) 
@@ -71,7 +72,7 @@ function transformer_model_sentential_context_model_response( $input, $responseC
         // back_trace( 'NOTICE', sprintf('Processing batch offset %d - %d', $start, $end));
 
         // STEP 3a - Fetch exactly 50 (or fewer if near the end) published items
-        $corpus = transformer_model_sentential_context_fetch_wordpress_content($start, $end);
+        $corpus = transformer_model_sentential_context_fetch_wordpress_content($start, $end, $input);
         
         // STEP 3b - (Re)build or reuse embeddings as needed; depends on your cache logic
         //     If you have a global or partial cache, you can slice it or re-generate it here.
@@ -165,7 +166,7 @@ function pick_best_response($batchResponse) {
 }
 
 // Function to fetch WordPress page and post content
-function transformer_model_sentential_context_fetch_wordpress_content($content_offset_start = 0, $content_offset_end = 50) {
+function transformer_model_sentential_context_fetch_wordpress_content_OLD($content_offset_start = 0, $content_offset_end = 50, $input = null) {
 
     global $wpdb;
 
@@ -173,6 +174,31 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
     // back_trace( 'NOTICE', 'Content Offset Start: ' . $content_offset_start);
     // back_trace( 'NOTICE', 'Content Offset End: ' . $content_offset_end);
+
+    // Only fetch content with words from the input
+    if (empty($input)) {
+        return '';
+    }
+    // DIAG - Diagnostics - Ver 2.2.1
+    back_trace( 'NOTICE', '$input: ' . $input);
+
+    // Step 1 - Start by removing stop words from the input
+    $words = array_filter(array_map('trim', explode(' ', strtolower($input)))); // Split into words and trim
+    $words = transformer_model_sentential_context_remove_stop_words_alternate($words);
+
+    // Step 2 - Build a LIKE contition for each word
+    $likeClauses = [];
+    foreach ($words as $word) {
+        $likeClauses[] = "post_content LIKE '%" . esc_sql($word) . "%'";
+    }
+    // DIAG - Diagnostics - Ver 2.2.1
+    back_trace( 'NOTICE', 'LIKE Clauses: ' . implode(', ', $likeClauses));
+
+    // Step 3 - Join the LIKE clauses with AND or OR depending on your requirements (usually OR is more inclusive)
+    $likeCondition = implode(' OR ', $likeClauses);
+
+    // Step 4 - Limit the number of items to fetch
+    $limit = 15;
 
     // Query to get post and page content
     $safeStart = intval($content_offset_start);
@@ -188,10 +214,12 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
                FROM {$wpdb->posts}
               WHERE post_status = %s
                 AND (post_type = %s OR post_type = %s)
+                AND (%s)
               LIMIT %d, %d",
             'publish',
             'post',
             'page',
+            $likeCondition,
             $safeStart,
             $safeEnd
         ),
@@ -204,7 +232,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
         $content .= ' ' . $row['post_content'];
     }
 
-    // back_trace( 'NOTICE', 'Content length: ' . strlen($content));
+    back_trace( 'NOTICE', 'Content length: ' . strlen($content));
 
     $content = transformer_model_sentential_context_clean($content);
 
@@ -215,8 +243,111 @@ function transformer_model_sentential_context_fetch_wordpress_content($content_o
 
 }
 
+/**
+ * Fetch WordPress page/post content matching any of the terms
+ * from $input (after removing stop words and punctuation).
+ *
+ * @param string $input  The user’s query (e.g., "What is the Clickbait Conundrum?")
+ * @param int    $start  Offset start (e.g., 0)
+ * @param int    $limit  Number of rows to fetch (e.g., 15)
+ *
+ * @return string Combined post content matching the user’s query
+ */
+function transformer_model_sentential_context_fetch_wordpress_content($start = 0, $limit = 50, $input = null) {
+    
+    global $wpdb;
+
+    // 0. Bail early if $input is empty.
+    if (empty($input)) {
+        return '';
+    }
+
+    // 1. Split into words, lower them, remove stop words, remove punctuation.
+    $words = preg_split('/\s+/', strtolower(trim($input)));
+    // Remove blank entries if any
+    $words = array_filter($words);
+    // Use your existing remove-stop-words function
+    $words = transformer_model_sentential_context_remove_stop_words_alternate($words);
+
+    // Strip punctuation from each word
+    $cleanedWords = [];
+    foreach ($words as $w) {
+        // Keep letters/numbers only; drop punctuation like ? ! , .
+        $cleaned = preg_replace('/[^\p{L}\p{N}]+/u', '', $w);
+        if (!empty($cleaned)) {
+            $cleanedWords[] = $cleaned;
+        }
+    }
+
+    // If nothing remains after cleaning, return empty.
+    if (empty($cleanedWords)) {
+        return '';
+    }
+
+    // 2. Build placeholders for each cleaned word: post_content LIKE %s
+    $likeClauses  = [];
+    $queryParams  = [];
+
+    foreach ($cleanedWords as $term) {
+        // We'll do "post_content LIKE %s"
+        // The actual string is '%$term%'
+        $likeClauses[]  = 'post_content LIKE %s';
+        $queryParams[]  = '%' . $wpdb->esc_like($term) . '%';
+    }
+
+    // Join with OR — we want matches if *any* word is found in the content
+    $likeCondition = implode(' OR ', $likeClauses);
+
+    // Build the full SQL with placeholders
+    // We'll have placeholders for [status, post_type, post_type, (N times for the LIKEs), $start, $limit].
+    // For clarity, we do:
+    // - 3 placeholders for status/post_type
+    // - count($cleanedWords) placeholders for the LIKE
+    // - 2 placeholders for limit offsets
+    //
+    // Final order:
+    // 1) 'publish'
+    // 2) 'post'
+    // 3) 'page'
+    // 4..N) The actual words (the LIKEs)
+    // Last 2) $start, $limit
+    $sql = "
+        SELECT post_content
+        FROM {$wpdb->posts}
+        WHERE post_status = %s
+          AND (post_type = %s OR post_type = %s)
+          AND ($likeCondition)
+        LIMIT %d, %d
+    ";
+
+    // Merge all parameters in the correct order
+    $params = array_merge(
+        [ 'publish', 'post', 'page' ],
+        $queryParams,
+        [ (int)$start, (int)$limit ]
+    );
+
+    // 3. Run the query
+    $results = $wpdb->get_results($wpdb->prepare($sql, $params), ARRAY_A);
+
+    // Combine the content
+    $content = '';
+    foreach ($results as $row) {
+        $content .= ' ' . $row['post_content'];
+    }
+
+    // 4. Clean up the combined content
+    $content = transformer_model_sentential_context_clean($content);
+
+    // Log the final length for debugging
+    back_trace( 'NOTICE', "Pre-filtered content length: " . strlen($content));
+
+    return $content;
+}
+
+
 // Function to build or retrieve cached embeddings by alphabet
-function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 2) {
+function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 3) {
 
     // Define the cache directory
     $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
@@ -240,12 +371,12 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
         }
 
         // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace('NOTICE', 'Embeddings loaded from cache files.');
+        // back_trace( 'NOTICE', 'Embeddings loaded from cache files.');
 
     } else {
 
         // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace('NOTICE', 'Embeddings cache files not found. Building cache...');
+        // back_trace( 'NOTICE', 'Embeddings cache files not found. Building cache...');
 
         // Build embeddings dynamically
         $corpus = transformer_model_sentential_context_clean($corpus);
@@ -272,7 +403,7 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
         }
 
         // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace('NOTICE', 'Embeddings cache files created.');
+        // back_trace( 'NOTICE', 'Embeddings cache files created.');
 
     }
 
@@ -292,7 +423,7 @@ function generate_context_for_ngram($ngram, $corpus) {
 }
 
 // Function to build a co-occurrence matrix for word embeddings
-function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 2) {
+function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostics - Ver 2.2.1
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix - start');
@@ -356,6 +487,19 @@ function transformer_model_sentential_context_remove_stop_words($words) {
     // global $stopWords;
 
     // return array_diff($words, $stopWords);
+
+}
+
+// Function to remove stop words from an array of words
+function transformer_model_sentential_context_remove_stop_words_alternate($words) {
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE', 'transformer_model_sentential_context_remove_stop_words_alternate - start');
+
+    // Use global stop words list
+    global $stopWords;
+
+    return array_diff($words, $stopWords);
 
 }
 
@@ -439,6 +583,51 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
 
 }
 
+// Function to calculate cosine similarity between two vectors (optimized) - Ver 2.2.1 - 2025-01-13
+function optimized_cosine_similarity_intersect($vectorA, $vectorB) {
+
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace( 'NOTICE', 'optimized_cosine_similarity_intersect - start');
+
+    if (empty($vectorA) || empty($vectorB)) {
+        return 0.0;
+    }
+
+    // Magnitudes
+    $sumSquareA = 0.0;
+    foreach ($vectorA as $valA) {
+        $sumSquareA += $valA * $valA;
+    }
+    $sumSquareB = 0.0;
+    foreach ($vectorB as $valB) {
+        $sumSquareB += $valB * $valB;
+    }
+
+    // Dot product (intersection only)
+    $dotProduct = 0.0;
+    if (count($vectorA) < count($vectorB)) {
+        foreach ($vectorA as $key => $valA) {
+            if (isset($vectorB[$key])) {
+                $dotProduct += $valA * $vectorB[$key];
+            }
+        }
+    } else {
+        foreach ($vectorB as $key => $valB) {
+            if (isset($vectorA[$key])) {
+                $dotProduct += $valB * $vectorA[$key];
+            }
+        }
+    }
+
+    $magnitudeA = sqrt($sumSquareA);
+    $magnitudeB = sqrt($sumSquareB);
+
+    return ($magnitudeA * $magnitudeB > 0.0)
+        ? $dotProduct / ($magnitudeA * $magnitudeB)
+        : 0.0;
+
+}
+
 // Function to clean up text
 function transformer_model_sentential_context_clean($source_content) {
 
@@ -505,7 +694,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     }
     // back_trace( 'NOTICE', '$corpus: ' . $corpus);
     if (empty($corpus)) {
-        back_trace( 'NOTICE', '$orpus empty');
+        back_trace( 'NOTICE', '$corpus empty');
     } else {
         back_trace( 'NOTICE', '$corpus Length: ' . strlen($corpus));
     }
@@ -609,7 +798,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $bestMatchIndex = -1;
 
     $sentenceVectors = loadPrecomputedSentenceVectors($cacheDir); // Load precomputed vectors
-    $batchSize = 50; // Adjust based on performance testing
+    // $batchSize = 50; // Adjust based on performance testing
+    $batchSize = 10; // Quick Wins - 2025-01-13
 
     for ($batchStart = 0; $batchStart < count($sentences); $batchStart += $batchSize) {
         $sentenceBatch = array_slice($sentences, $batchStart, $batchSize);
@@ -621,7 +811,8 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
                 continue;
             }
 
-            $similarity = transformer_model_sentential_context_cosine_similarity($inputVector, $sentenceVector);
+            // $similarity = transformer_model_sentential_context_cosine_similarity($inputVector, $sentenceVector);
+            $similarity = optimized_cosine_similarity_intersect($inputVector, $sentenceVector);
 
             if ($similarity > $highestSimilarity) {
                 $highestSimilarity = $similarity;
@@ -629,8 +820,9 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
             }
         }
 
-        back_trace('NOTICE', 'Memory usage after batch ' . $batchStart . ': ' . memory_get_usage(true));
+        // back_trace( 'NOTICE', 'Memory usage after batch ' . $batchStart . ': ' . memory_get_usage(true));
     }
+    unset($sentenceVectors); // Quick Wins - 2025-01-13
 
     if ($highestSimilarity === -INF) {
         // back_trace( 'NOTICE', 'No similarities computed. Returning fallback.');
@@ -673,7 +865,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
 function loadPrecomputedSentenceVectors($cacheDir) {
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'loadPrecomputedSentenceVectors - start');
+    back_trace( 'NOTICE', 'loadPrecomputedSentenceVectors - start');
 
     // Ensure cache directory ends with a slash
     $cacheDir = rtrim($cacheDir, '/');
@@ -697,7 +889,7 @@ function loadPrecomputedSentenceVectors($cacheDir) {
     }
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', "Loaded precomputed sentence vectors from cache: $cacheFile");
+    back_trace( 'NOTICE', "Loaded precomputed sentence vectors from cache: $cacheFile");
     return $sentenceVectors;
 
 }
@@ -715,10 +907,10 @@ function generateSentenceVectorsInChunks($sentences, $cacheDir, $windowSize, $ch
         if (!is_array($sentenceVectors)) {
             $sentenceVectors = [];
             // DIAG - Diagnostics
-            back_trace('NOTICE', "Existing cache is invalid, starting fresh: $cacheFile");
+            back_trace( 'NOTICE', "Existing cache is invalid, starting fresh: $cacheFile");
         } else {
             // DIAG - Diagnostics
-            back_trace('NOTICE', "Loaded existing cache with " . count($sentenceVectors) . " vectors.");
+            back_trace( 'NOTICE', "Loaded existing cache with " . count($sentenceVectors) . " vectors.");
         }
 
     }
@@ -769,12 +961,12 @@ function generateSentenceVectorsInChunks($sentences, $cacheDir, $windowSize, $ch
             prod_trace('ERROR', "Failed to save intermediate cache: $cacheFile");
         } else {
             // DIAG - Diagnostics
-            back_trace('NOTICE', "Intermediate cache saved: $cacheFile");
+            back_trace( 'NOTICE', "Intermediate cache saved: $cacheFile");
         }
     }
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', "All sentence vectors generated and saved to cache: $cacheFile");
+    back_trace( 'NOTICE', "All sentence vectors generated and saved to cache: $cacheFile");
     return $sentenceVectors;
 
 }
@@ -849,7 +1041,7 @@ function generateSentenceVectors($sentences, $cacheDir, $windowSize) {
     $cacheFile = rtrim($cacheDir, '/') . '/sentence_vectors.php';
     file_put_contents($cacheFile, '<?php return ' . var_export($sentenceVectors, true) . ';');
 
-    back_trace('NOTICE', "Sentence vectors generated and saved to cache: $cacheFile");
+    back_trace( 'NOTICE', "Sentence vectors generated and saved to cache: $cacheFile");
 
     return $sentenceVectors;
 
@@ -860,7 +1052,7 @@ function transformer_model_lazy_load_embeddings($cacheDir, $ngram) {
 
     // Validate that the cache directory is a string
     if (!is_string($cacheDir)) {
-        back_trace('ERROR', 'Cache directory is not a string: ' . print_r($cacheDir, true));
+        back_trace( 'ERROR', 'Cache directory is not a string: ' . print_r($cacheDir, true));
         return null;
     }
 
@@ -870,7 +1062,7 @@ function transformer_model_lazy_load_embeddings($cacheDir, $ngram) {
 
     // Check if the cache file exists
     if (!file_exists($cacheFile)) {
-        // back_trace('NOTICE', "Cache file not found for n-gram: $ngram | Expected file: $cacheFile");
+        // back_trace( 'NOTICE', "Cache file not found for n-gram: $ngram | Expected file: $cacheFile");
         return null; // Return early if the cache file doesn't exist
     }
 
@@ -879,12 +1071,12 @@ function transformer_model_lazy_load_embeddings($cacheDir, $ngram) {
 
     // Check if the n-gram exists in the cache
     if (!isset($embeddings[$ngram])) {
-        // back_trace('NOTICE', "N-Gram not found in cache: $ngram | Cache file: $cacheFile");
+        back_trace( 'NOTICE', "N-Gram not found in cache: $ngram | Cache file: $cacheFile");
         return null; // Return early if the n-gram isn't found
     }
 
     // Log success
-    // back_trace('NOTICE', "N-Gram found in cache: $ngram | Cache file: $cacheFile");
+    back_trace( 'NOTICE', "N-Gram found in cache: $ngram | Cache file: $cacheFile");
 
     // Return the n-gram's embedding
     return $embeddings[$ngram];

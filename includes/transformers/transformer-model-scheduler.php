@@ -76,7 +76,7 @@ add_action('chatbot_transformer_model_scheduler_hook', 'chatbot_transformer_mode
 function transformer_model_sentential_context_reset_cache() {
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'transformer_model_sentential_context_reset_cache - start');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_reset_cache - start');
 
     // Log reset activity
     prod_trace('NOTICE', 'Transformer Model Content Cache Reset');
@@ -95,17 +95,17 @@ function transformer_model_sentential_context_reset_cache() {
         foreach ($files as $file) {
             if (is_file($file)) {
                 unlink($file); // Delete the file
-                // back_trace('NOTICE', "Deleted cache file: $file");
+                // back_trace( 'NOTICE', "Deleted cache file: $file");
             }
         }
         // Optionally, delete the folder itself if required
         // rmdir($cacheDir); // Uncomment if you want to remove the folder
     } else {
-        back_trace('NOTICE', "Cache directory not found: $cacheDir");
+        back_trace( 'NOTICE', "Cache directory not found: $cacheDir");
     }
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'transformer_model_sentential_context_reset_cache - end');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_reset_cache - end');
 
 }
 
@@ -114,7 +114,7 @@ function transformer_model_sentential_context_reset_cache() {
 function chatbot_transformer_model_scan() {
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'chatbot_transformer_model_scan - start');
+    back_trace( 'NOTICE', 'chatbot_transformer_model_scan - start');
 
     // Retrieve current state
     $offset = intval(get_option('chatbot_transformer_model_offset', 0));
@@ -145,7 +145,7 @@ function chatbot_transformer_model_scan() {
     wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'chatbot_transformer_model_scan - end');
+    back_trace( 'NOTICE', 'chatbot_transformer_model_scan - end');
 
 }
 add_action('chatbot_transformer_model_scan_hook', 'chatbot_transformer_model_scan');
@@ -186,7 +186,7 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', 'transformer_model_sentential_context_cache_embeddings - start');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - start');
 
     $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
 
@@ -270,7 +270,7 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
         file_put_contents($cacheFile, '<?php return ' . var_export($existingEmbeddings, true) . ';');
     }
 
-    back_trace('NOTICE', 'transformer_model_sentential_context_cache_embeddings - end');
+    back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - end');
 
 }
 

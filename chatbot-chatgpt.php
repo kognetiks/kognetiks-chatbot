@@ -121,6 +121,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-c
 // Include necessary files - Transformer Model - Ver 2.2.0
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/lexical-context-model.php'; // Functions - Ver 2.2.0
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-context-model.php'; // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-search-model.php'; // Functions - Ver 2.2.1
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-model-scheduler.php'; // Functions - Ver 2.2.0
 
 // Include necessary files - Settings
@@ -1169,6 +1170,13 @@ function chatbot_chatgpt_send_message() {
             $response = chatbot_chatgpt_call_markov_chain_api($message);
 
         } elseif ($model !== null && str_contains($model,'context-model')) {
+            $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.2.0
+            // back_trace( 'NOTICE', 'Calling Transformer Model API');
+            // Send message to Transformer Model API - Ver 2.2.0
+            $response = chatbot_chatgpt_call_transformer_model_api($message);
+
+        } elseif ($model !== null && str_contains($model,'search-model')) {
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.0
             // back_trace( 'NOTICE', 'Calling Transformer Model API');

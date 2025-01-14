@@ -45,6 +45,7 @@ $stopWords = [
 ];
 
 // Global abbreviations array
+global $abbreviations;
 $abbreviations = [
     // Latin-based Abbreviations
     "i.e.", "e.g.", "etc.", "et al.", "N.B.", "cf.", "vs.", "viz.", "a.m.", "p.m.",
@@ -81,6 +82,16 @@ $errorResponses = [
     " There might be a temporary issue with the API. Please try your request again in a little while.",
     " The API encountered an error, but don't worry, it happens. Let's give it another shot later.",
     " It looks like there could be a technical problem with the API. Feel free to try again in a bit to see if things are working smoothly."
+];
+
+// Declare the $no_matching_content_response array as global
+global $no_matching_content_response;
+$no_matching_content_response = [
+    " I'm sorry, but I couldn't find any relevant information on that topic. Would you like to try something else?",
+    " Unfortunately, I couldn't locate any relevant information on that topic. Would you like to ask something else?",
+    " I'm afraid I couldn't find any relevant information on that topic. Would you like to try another question?",
+    " I couldn't find any relevant information on that topic. Would you like to ask something else?",
+    " I'm sorry, but I couldn't find any information on that topic. Would you like to try another question?",
 ];
 
 // Declare the $chatbot_chatgpt_bot_prompt as global - Ver 1.6.6
