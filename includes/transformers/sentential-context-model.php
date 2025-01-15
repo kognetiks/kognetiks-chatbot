@@ -55,7 +55,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         return '';
     }
     // DIAG - Diagnostics - Ver 2.2.1
-    back_trace( 'NOTICE', '$input: ' . $input);
+    // back_trace( 'NOTICE', '$input: ' . $input);
 
     // Step 1 - Normalize and remove stop words
     $input = preg_replace('/[^\w\s]/', '', $input);
@@ -91,10 +91,14 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     $remaining_words = array_diff($words, $existing_words);
 
     // DIAG - Diagnostic - Ver 2.2.1 - Print the words and scores
-    for ($i = 0; $i < count($results); $i++) {
-        back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
-    }
+    // for ($i = 0; $i < count($results); $i++) {
+    //     back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
+    // }
 
+    // Ensure results meet the limit
+    if (count($results) > $limit) {
+        $results = array_slice($results, 0, $limit);
+    }
 
     // foreach ($remaining_words as $word) {
     //     if (count($results) >= $limit) {
@@ -103,14 +107,9 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     //     $results[] = ['word' => $word, 'score' => 0];
     // }
 
-    // Ensure results meet the limit
-    // if (count($results) > $limit) {
-    //     $results = array_slice($results, 0, $limit);
-    // }
-
-    // $results = array_merge($results, array_map(function($word) {
-    //     return ['word' => $word, 'score' => 0];
-    // }, $remaining_words));
+    $results = array_merge($results, array_map(function($word) {
+        return ['word' => $word, 'score' => 0];
+    }, $remaining_words));
 
     // Step 4 - Build the LIKE condition
     $final_words = array_column($results, 'word');
@@ -122,7 +121,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     $like_condition = implode(' AND ', $like_clauses);
 
     // DIAG - Diagnostic - Ver 2.2.1
-    back_trace( 'NOTICE', 'Like Condition: ' . $like_condition);
+    // back_trace( 'NOTICE', 'Like Condition: ' . $like_condition);
 
     // Step 5 - Fetch WordPress content
     $sql = $wpdb->prepare("
@@ -392,13 +391,13 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $totalSentencesAnalyzed = count($sentences);
 
     // Before returning repsonse log the key stats
-    back_trace( 'NOTICE', 'Key Stats:');
-    back_trace( 'NOTICE', ' - Input: ' . $input);
-    back_trace( 'NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
-    back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+    // back_trace( 'NOTICE', 'Key Stats:');
+    // back_trace( 'NOTICE', ' - Input: ' . $input);
+    // back_trace( 'NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
+    // back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    // back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    // back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    // back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // Return the response
     return $response;
