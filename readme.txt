@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.7.1
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -197,6 +197,10 @@ WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.2.2 - Release TBD =
+
+* **TBD**: TBD
 
 = 2.2.1 - Release 01-06-2025 =
 

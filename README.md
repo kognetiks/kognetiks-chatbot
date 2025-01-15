@@ -8,14 +8,9 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## Documentation
 
-## What's new in Version 2.2.1
+## What's new in Version 2.2.2
 
-* **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
-* **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
-* **Sentential Context Model**: Added beta support for the Sentential Context Model, enabling response generation using your site's content without relying on external AI platforms.
-* **Knowledge Navigator Update**: Added option to include post or page excerpts in chatbot responses when enhanced responses is enabled.
-* **Documentation Updates**: Revised several section of the online documentation to align with current options and previous updates.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.0.
+* **TBD**: TBD
 
 ## Features
 
