@@ -31,7 +31,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content — no AI platform connection required.
 
-It's Perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
+It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
 
 🌟 **Key Features**:

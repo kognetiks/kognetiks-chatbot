@@ -34,7 +34,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 ## Introducing the Sentential Context Model - BETA FEATURE OFFERING
 
-The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's Perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
+The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
 ## What's New in Version 2.2.1
 
