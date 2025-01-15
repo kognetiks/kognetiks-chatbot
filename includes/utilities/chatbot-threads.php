@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Threads
+ * Kognetiks Chatbot - Threads
  *
  * This file contains the code for managing the threads used
  * to display the Chatbot on the website.
@@ -31,7 +31,7 @@ function set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_
     // back_trace( 'NOTICE', '$assistant_id_thread_key: ' . $assistant_id_thread_key);
 
     // Retrieve the chatbot_chatgpt_thread_retention_period option
-    $thread_retention_period = (int) get_option('chatbot_chatgpt_thread_retention_period', 36);
+    $thread_retention_period = (int) esc_attr(get_option('chatbot_chatgpt_thread_retention_period', 36));
     // back_trace( 'NOTICE', '$thread_retention_period: ' . $thread_retention_period);
 
     // Store the style and the assistant value with unique keys

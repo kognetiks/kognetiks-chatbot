@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Chatbot Models
+ * Kognetiks Chatbot - Chatbot Models
  *
  * This file contains the code to retrieve the list of available models
  * from OpenAI API and display them in the settings page.
@@ -64,16 +64,16 @@ function chatbot_openai_get_models() {
     );
 
     // See if the option exists, if not then create it and set the default
-    if (get_option('chatbot_chatgpt_model_choice') === false) {
+    if (esc_attr(get_option('chatbot_chatgpt_model_choice')) === false) {
         update_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo');
     }
-    if (get_option('chatbot_chatgpt_image_model_option') === false) {
+    if (esc_attr(get_option('chatbot_chatgpt_image_model_option')) === false) {
         update_option('chatbot_chatgpt_image_model_option', 'dall-e-3');
     }
-    if (get_option('chatbot_chatgpt_voice_model_option') === false) {
+    if (esc_attr(get_option('chatbot_chatgpt_voice_model_option')) === false) {
         update_option('chatbot_chatgpt_voice_model_option', 'tts-1-hd');
     }
-    if (get_option('chatbot_chatgpt_whisper_model_option') === false) {
+    if (esc_attr(get_option('chatbot_chatgpt_whisper_model_option')) === false) {
         update_option('chatbot_chatgpt_whisper_model_option', 'whisper-1');
     }
 
@@ -174,7 +174,7 @@ function chatbot_nvidia_get_models() {
     );
 
     // See if the option exists, if not then create it and set the default
-    if (get_option('chatbot_nvidia_model_choice') === false) {
+    if (esc_attr(get_option('chatbot_nvidia_model_choice')) === false) {
         update_option('chatbot_nvidia_model_choice', 'nvidia/llama-3_1-nemotron-70b-instruct');
     }
 
@@ -234,6 +234,92 @@ function chatbot_nvidia_get_models() {
     }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
+    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
+
+    // Return the list of models
+    return $models;
+
+}
+
+// Function to get the Model names from Anthropic API
+function chatbot_anthropic_get_models() {
+
+    // https://docs.anthropic.com/en/api/messages-examples
+    // https://docs.anthropic.com/en/docs/models-overview
+    // https://docs.anthropic.com/en/docs/about-claude/models
+
+    // Default model list
+    $default_model_list = '';
+    $default_model_list = array(
+        array(
+            'id' => 'claude-3-5-sonnet-latest',
+            'object' => 'model',
+            'created' => 20241022,
+            'owned_by' => 'anthropic'
+        ),
+        array(
+            'id' => 'claude-3-5-haiku-latest',
+            'object' => 'model',
+            'created' => 20241022,
+            'owned_by' => 'anthropic'
+        ),
+        array(
+            'id' => 'claude-3-opus-latest',
+            'object' => 'model',
+            'created' => 20240229,
+            'owned_by' => 'anthropic'
+        ),
+        array(
+            'id' => 'claude-3-sonnet-20240229',
+            'object' => 'model',
+            'created' => 20240229,
+            'owned_by' => 'anthropic'
+        ),
+        array(
+            'id' => 'claude-3-haiku-20240307',
+            'object' => 'model',
+            'created' => 20240307,
+            'owned_by' => 'anthropic'
+        )
+    );
+
+    // FIXME - Anthropic API does not have an endpoint for models
+    // Call the API to get the models
+
+    // Decode the JSON response
+    // $data = json_decode($response, true);
+
+    // FIXME - Force an error since there is no api endpoint for models
+    $data = array('error' => array('message' => 'No models endpoint available'));
+
+    // Check for API errors
+    if (isset($data['error'])) {
+        // return "Error: " . $data['error']['message'];
+        // On 1st install needs an API key
+        // So return a short list of the base models until an API key is entered
+        return $default_model_list;
+    }
+
+    // Extract the models from the response
+    if (isset($data['data']) && !is_null($data['data'])) {
+        $models = $data['data'];
+    } else {
+        // Handle the case where 'data' is not set or is null
+        $models = []; // Empty array
+        ksum_prod_trace( 'WARNING', 'Data key is not set or is null in the \$data array.');
+    }
+
+    // Ensure $models is an array
+    if (!is_array($models)) {
+        return $default_model_list;
+    } else {
+        // Sort the models by name
+        usort($models, function($a, $b) {
+            return $a['id'] <=> $b['id'];
+        });
+    }
+
+    // DIAG - Diagnostics
     // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
 
     // Return the list of models

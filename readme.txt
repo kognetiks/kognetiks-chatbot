@@ -1,11 +1,9 @@
-=== Kognetiks Chatbot for WordPress ===
+=== Kognetiks Chatbot ===
 Contributors: Kognetiks
-Tags: chatbot, chatgpt, openai, nvidia, artificial intelligence
+Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
-Requires at least: 5.5
 Tested up to: 6.7.1
-Stable tag: 2.2.0
-Requires PHP: 7.0
+Stable tag: 2.2.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -15,15 +13,26 @@ Effortlessly add conversational AI to your WordPress site! Integrate OpenAI Chat
 
 **Transform Your WordPress Site with the Kognetiks Chatbot**
 
-The **Kognetiks Chatbot for WordPress** is a feature-rich AI plugin that leverages OpenAI’s ChatGPT to deliver an intelligent, conversational experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
+The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI, NVIDIA, and Anthropic APIs to deliver an intelligent, conversational AI experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
 
 🌟 **AI Platform Options**:
 
-* With **Version 2.1.8**, the **Kognetiks Chatbot for WordPress** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
+* The **Kognetiks Chatbot** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** and **Anthropic** APIs in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
 
 * **OpenAI's ChatGPT API**: Engage visitors with natural, human-like responses for rich conversational experiences.
 
 * **NVIDIA's NIM API**: Unlock advanced conversational abilities for a highly interactive chatbot.
+
+* **Anthropic's API**: Seamlessly integrate Anthropic's API for cutting-edge conversational capabilities.
+
+🌟 Introducing the Sentential Context Model - **BETA FEATURE OFFERING**:
+
+The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.
+
+This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content — no AI platform connection required.
+
+It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
+
 
 🌟 **Key Features**:
 
@@ -65,6 +74,32 @@ Get started with the Kognetiks Chatbot today and elevate your website’s intera
 
 Visit us at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/) for more information.
 
+== External Services ==
+
+The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
+
+- **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
+- **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
+- **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
+
+**IMPORTANT**:
+
+- This plugin requires an API key from OpenAI, NVIDIA, or Anthropic to function. Without an API key, the chatbot cannot process user queries.
+
+- Obtain API keys here:
+
+   - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
+   - [NVIDIA API Keys](https://developer.nvidia.com/nim)
+   - [Anthropic API Keys](https://www.anthropic.com/)
+
+- By entering your API key from the AI provider of your choice and activating the chatbot, you:
+
+   - Consent to sending user queries and related data to the selected AI provider for processing and response generation.
+   - Agree to abide by the provider’s terms of service, pricing, and privacy policy.
+   - Acknowledge that your data, including text submitted by users, may be transferred to and processed by the AI platform in accordance with its privacy policy.
+
+**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider’s pricing and usage policies before proceeding.
+
 == Installation ==
 
 **Installing the Chatbot on Your WordPress Website**
@@ -82,8 +117,9 @@ Embark on a journey to elevate your website's interactivity with the Chatbot plu
    - Once the installation is complete, activate the plugin by clicking 'Activate Plugin'.
 
 3. **API Key Configuration**
-   - After activation, head to 'Settings > Chatbot' in your dashboard.
-   - Enter your OpenAI API key here. (You can obtain this key from [OpenAI API Keys](https://platform.openai.com/account/api-keys) if you haven't already.)
+   - After activation, head to 'Settings > General' in your dashboard.
+   - Choose the AI Platform you wish to use (OpenAI, NVIDIA, or Anthropic).
+   - Obtain an API key from [OpenAI API Keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), or [Anthropic API Keys](https://www.anthropic.com/).
 
 4. **Customizing Your Chatbot**
    - In the same settings area, tailor the chatbot's appearance and functionality to match your site's style and your specific needs.
@@ -111,7 +147,7 @@ For **frequently asked questions**, please visit [https://kognetiks.com/wordpres
 
 **How do I get an API key?**
 
-Sign up at [OpenAI API Keys]((https://platform.openai.com/account/api-keys)) to obtain your API key. This key is necessary to use the plugin.
+Sign up at [OpenAI API Keys]((https://platform.openai.com/account/api-keys)), [NVIDIA API Keys](https://developer.nvidia.com/nim), or [Anthropic API Keys](https://www.anthropic.com/) to obtain your API key. This key is necessary to use the plugin.
 
 **Can I customize the chatbot's appearance?**
 
@@ -131,7 +167,7 @@ With the Kognetiks Chatbot installed, you're now equipped to offer a more dynami
 
 == Disclaimer ==
 
-OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetiks is not a partner of, endorsed by, or sponsored by OpenAI.
+WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, or Anthropic.
 
 == Screenshots ==
 
@@ -161,6 +197,15 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.2.1 - Release 01-06-2025 =
+
+* **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
+* **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
+* **Sentential Context Model**: Added beta support for the Sentential Context Model, enabling response generation using your site's content without relying on external AI platforms.
+* **Knowledge Navigator Update**: Added option to include post or page excerpts in chatbot responses when enhanced responses is enabled.
+* **Documentation Updates**: Revised several section of the online documentation to align with current options and previous updates.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.0.
 
 = 2.2.0 - Release 11-22-2024 =
 
@@ -201,7 +246,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 
 = 2.1.3 - Released 08-31-2024 =
 
-* **Remote Server Access**: The **Kognetiks Chatbot for WordPress** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
+* **Remote Server Access**: The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
 * **Improving Math Handling**: Integrated code enhances chatbot’s ability to render complex mathematical expressions.
 * **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
@@ -222,7 +267,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 = 2.0.9 - Released 08-17-2024 =
 * **Adjusted Module Name Conflict**: Renamed one module that had a name conflict with another vendor's plugin.
 * **Reworked Conversation Continuity**: Improved the way the chatbot handles conversation continuity for visitors and logged-in users, ensuring a seamless experience across pages.
-* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot WordPress plugin by Kognetiks' with a text message of your choosing.
+* **Alternate Attribution Message**: Allows for replacing the attribution message with 'Chatbot plugin by Kognetiks' with a text message of your choosing.
 * **Refactored Inline Styles**: Moved inline styles to an external CSS file for better maintainability and separation of concerns.
 * **floating-style CSS Class Rename**: Renamed the .floating-style CSS class to chatbot-floating-style to avoid conflicts with other plugins or themes.
 * **embedded-style CSS Class Rename**: Renamed the .embedded-style CSS class to chatbot-embedded-style to avoid conflicts with other plugins or themes.
@@ -368,7 +413,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Hot prompts can be used with floating/embedded and with assistants, i.e., where ever you can add a shortcode.
 
 = 1.9.0 =
-* Changed the name of the chatbot to Kognetiks Chatbot for WordPress
+* Changed the name of the chatbot to Kognetiks Chatbot
 * Re-sequenced user's custom CSS to load for precedence over the plugin's CSS to allow for easier customization.
 * Added functionality to set the audience choice for the chatbot: All Audiences, Logged-in Only, or Visitors Only
 
@@ -469,7 +514,7 @@ OpenAI, ChatGPT, and related marks are registered trademarks of OpenAI. Kognetik
 * Added output buffering.
 
 = 1.6.7 =
-* The Kognetiks Chatbot for WordPress now supports Custom GPTs developed in the OpenAI Playground.
+* The Kognetiks Chatbot now supports Custom GPTs developed in the OpenAI Playground.
 * See [https://platform.openai.com/docs/assistants/overview](https://platform.openai.com/docs/assistants/overview) to learn more about Assistants.
 * Added an expanded selection of seasonal avatars celebrating Chinese New Year, Christmas, Fall, Halloween, Spring, Summer, Thanksgiving, and Winter.
 * Enhanced CSS adaptation to improve compatibility across different themes.

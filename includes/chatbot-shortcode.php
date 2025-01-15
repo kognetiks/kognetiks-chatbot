@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - [chatbot_chatgpt] Shortcode Registration
+ * Kognetiks Chatbot - [chatbot_chatgpt] Shortcode Registration
  *
  * This file contains the code for registering the shortcode used
  * to display the Chatbot on the website.
@@ -92,7 +92,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
         // back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
-        $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
+        $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_markov_chain_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_transformer_model_api_enabled', 'No')) == 'Yes') {
@@ -376,23 +376,41 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // Validate and sanitize the model parameter - Ver 1.9.9
     if (!isset($atts['model'])) {
-        if (esc_attr(get_option('chatbot_nvidia_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
-        } else if (esc_attr(get_option('chatbot_markov_chain_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-2024-09-17'));
-        } else if (esc_attr(get_option('chatbot_transformer_model_api_enabled')) == 'Yes') {
-            $model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
-        } else {
-            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+
+        $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'openai'));
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+
+        switch ($chatbot_ai_platform_choice) {
+            case 'OpenAI':
+                $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+                break;
+            case 'NVIDIA':
+                $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
+                break;
+            case 'Anthropic':
+                $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+                break;
+            case 'Markov Chain':
+                $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
+                break;
+            case 'Transformer':
+                $model = esc_attr(get_option('chatbot_transformer_model_choice', 'lexical-context-model'));
+                break;
+            default:
+                $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         }
+
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
         $assistant_details['model'] = $model;
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'Model (defaulting): ' . $model);
+        // back_trace( 'NOTICE', 'LINE 410 - Model (defaulting): ' . $model);
+
     } else {
+
         $model = sanitize_text_field($atts['model']);
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
@@ -400,7 +418,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'Model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 421 Model (paramater): ' . $model);
+
     }
 
     // Validate and sanitize the voice parameter - Ver 1.9.9
@@ -1285,12 +1304,20 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
 }
-// add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
-// add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
-// add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
-// add_shortcode('chatbot-1', 'chatbot_chatgpt_shortcode');
-// add_shortcode('chatbot-2', 'chatbot_chatgpt_shortcode');
-// add_shortcode('chatbot-3', 'chatbot_chatgpt_shortcode');
+// FIXME - TEMPORARY - Ver 2.2.1 - 2025 01 09
+add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
+add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-1', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-2', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-3', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-4', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-5', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-6', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-7', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-8', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-9', 'chatbot_chatgpt_shortcode');
+add_shortcode('chatbot-10', 'chatbot_chatgpt_shortcode');
 
 // Dynamic Shortcode - Ver 2.0.6
 function register_chatbot_shortcodes($number_of_shortcodes = null) {
@@ -1356,8 +1383,8 @@ function chatbot_chatgpt_custom_buttons_display() {
 
         // Initialize and set button names and URLs
         for ($i = 1; $i <= $button_count; $i++) {
-            $button_names[$i] = get_option("chatbot_chatgpt_custom_button_name_$i");
-            $button_urls[$i] = get_option("chatbot_chatgpt_custom_button_url_$i");
+            $button_names[$i] = esc_attr(get_option("chatbot_chatgpt_custom_button_name_$i"));
+            $button_urls[$i] = esc_attr(get_option("chatbot_chatgpt_custom_button_url_$i"));
         }
 
         // Generate buttons
@@ -1387,7 +1414,7 @@ function chatbot_chatgpt_attribution() {
         if ($chatbot_chatgpt_custom_attribution == 'Your custom attribution message goes here.' || empty($chatbot_chatgpt_custom_attribution)) { 
             ?>
             <div class="chatbot-attribution">
-                <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" class="chatbot-attribution-link"><?php echo esc_html('Chatbot WordPress plugin by Kognetiks'); ?></a>
+                <a href="https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/?utm_source=chatbot&utm_medium=website&utm_campaign=powered_by&utm_id=plugin" target="_blank" rel="noopener noreferrer" class="chatbot-attribution-link"><?php echo esc_html('Chatbot plugin by Kognetiks'); ?></a>
             </div>
             <?php
         } else {

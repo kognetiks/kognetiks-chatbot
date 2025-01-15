@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Markov Chain - Scheduler - Ver 2.1.6
+ * Kognetiks Chatbot - Markov Chain - Scheduler - Ver 2.1.6
  *
  * This is the file that schedules the building of the Markov Chain.
  * Scheduling can be set to now, daily, weekly, etc.
@@ -16,8 +16,12 @@ if ( ! defined( 'WPINC' ) ) {
 // Handle long-running scripts with a scheduled event function - Ver 1.6.1
 function chatbot_markov_chain_scheduler() {
 
-    // DIAG - Diagnostic - Ver 2.1.6
+    // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'chatbot_markov_chain_scheduler - START');
+
+    // FIXME - Force a full rebuild if necessary
+    // update_option('chatbot_markov_chain_force_rebuild', 'Yes');
+    // prod_trace( 'NOTICE', 'FIXME - chatbot_markov_chain_force_rebuild: Yes');
 
     // Retrieve the schedule setting
     $chatbot_markov_chain_build_schedule = esc_attr(get_option('chatbot_markov_chain_build_schedule', 'Disable'));
@@ -42,8 +46,9 @@ function chatbot_markov_chain_scheduler() {
     // Update the status as 'Completed'
     update_option('chatbot_markov_chain_build_status', 'Completed');
 
-    // DIAG - Diagnostic - Ver 2.1.6
+    // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'chatbot_markov_chain_scheduler - END');
+
 }
 add_action('chatbot_markov_chain_scheduler_hook', 'chatbot_markov_chain_scheduler');
 
@@ -54,7 +59,7 @@ function chatbot_markov_chain_scan() {
     // back_trace( 'NOTICE', 'chatbot_markov_chain_scan - Start');
 
     // Get the current schedule setting
-    $run_scanner = get_option('chatbot_markov_chain_build_schedule', 'No');
+    $run_scanner = esc_attr(get_option('chatbot_markov_chain_build_schedule', 'No'));
 
     // Update the status to 'In Process' and log the current time
     update_option('chatbot_markov_chain_build_status', 'In Process');
@@ -78,12 +83,12 @@ add_action('chatbot_markov_chain_scan_hook', 'chatbot_markov_chain_scan');
 // Markov Chain Build Schedule handler
 function chatbot_markov_chain_build_results_callback($run_scanner) {
 
-    // DIAG - Diagnostic - Ver 2.1.6
+    // DIAG - Diagnostics - Ver 2.1.6
     // back_trace( 'NOTICE', 'chatbot_markov_chain_build_results_callback');
     // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner);
     // back_trace( 'NOTICE', 'chatbot_markov_chain_build_schedule: ' . esc_attr(get_option('chatbot_markov_chain_build_schedule')));
 
-    update_option('chatbot_markov_chain_last_updated', date('Y-m-d H:i:s'));
+    // update_option('chatbot_markov_chain_last_updated', date('Y-m-d H:i:s')); // REMOVED - Ver 2.2.0 - 2924-11-27
 
     if (!isset($run_scanner)) {
         $run_scanner = 'No';

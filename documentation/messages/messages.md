@@ -1,6 +1,6 @@
 # Messages and Diagnostics Settings
 
-The Messages and Diagnostics Settings help you monitor the health and performance of the **Kognetiks Chatbot for WordPress**, providing tools for error logging, API connection checks, and other diagnostics. Follow these steps to configure these options effectively:
+The Messages and Diagnostics Settings help you monitor the health and performance of the **Kognetiks Chatbot**, providing tools for error logging, API connection checks, and other diagnostics. Follow these steps to configure these options effectively:
 
 ![Messages and Diagnotics Overview](messages-and-diagnostics-overiew.png)
 
@@ -36,7 +36,7 @@ The Messages and Diagnostics Settings help you monitor the health and performanc
      - `Error`: Error messages.
    - **Selection**: Choose the appropriate level based on your need for diagnostics information. `Off` is the default and recommended setting for general use. Use `Error` for in-depth troubleshooting. `Error` logs all levels.
 
-   **NOTE:** You can enable error and console logging at any time, however in the production releases of the chatbot all error logging has been commented.
+   **NOTE:** You can enable error and console logging at any time, however in the production releases of the chatbot all error logging has been commented out.
 
 2. **Custom Error Message**:
    - **Description**: This setting allows administrators to define a custom error message that will be displayed to users when the chatbot encounters an issue. This ensures a more consistent and branded user experience, even in cases of unexpected errors.
@@ -50,12 +50,12 @@ The Messages and Diagnostics Settings help you monitor the health and performanc
      - **WordPress Error Logging**: You may also need to turn on WordPress error logging to fully utilize this feature.
 
 3. **Suppress Notices and Warnings**:
-   - **Description**: Allows you to suppress notices and warnings such as those associated with the **Knowledge Navigator** and other administrative functions.  These messages and warnings are not shown to users, only to administrator.
+   - **Description**: Allows you to suppress notices and warnings such as those associated with the **Knowledge Navigator** and other administrative functions.  These messages and warnings are not shown to users, only to site administrators.
    - **Options**: `On` or `Off`.
    - **Selection**: Choose `On` to suppress notices and warnings if you prefer a less verbose experience, otherwise set to `Off` to see all administrative messages associated with the chatbot.
 
 4. **Suppress Attribution**:
-   - **Description**: Allows you to suppress the attribution message ("Chatbot WordPress plugin by Kognetiks") displayed in both the `floating` and `embedded` style of the chatbot.
+   - **Description**: Allows you to suppress the attribution message ("Chatbot plugin by Kognetiks") displayed in both the `floating` and `embedded` style of the chatbot.
    - **Options**: `On` or `Off`.
    - **Selection**: Choose `On` to suppress the attribution message. Set to `Off` to display the message.
 

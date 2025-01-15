@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings Page
+ * Kognetiks Chatbot - Settings Page
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the bot name, start status, and greetings.
@@ -15,22 +15,22 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Set up the Chatbot Main Menu Page - Ver 1.9.0
-function chatbot_chatgpt_menu_page() {
+// function chatbot_chatgpt_menu_page() {
 
-    add_menu_page(
-        'Chatbot Settings',                     // Page title
-        'Kognetiks Chatbot',                    // Menu title
-        'manage_options',                       // Capability
-        'chatbot-chatgpt',                      // Menu slug
-        'chatbot_chatgpt_settings_page_html',   // Callback function
-        'dashicons-format-chat'                 // Icon URL (optional)
-    );
+//     add_menu_page(
+//         'Chatbot Settings',                     // Page title
+//         'Kognetiks Chatbot',                    // Menu title
+//         'manage_options',                       // Capability
+//         'chatbot-chatgpt',                      // Menu slug
+//         'chatbot_chatgpt_settings_page',   // Callback function
+//         'dashicons-format-chat'                 // Icon URL (optional)
+//     );
 
-}
-add_action('admin_menu', 'chatbot_chatgpt_menu_page');
+// }
+// add_action('admin_menu', 'chatbot_chatgpt_menu_page');
 
 // Settings page HTML - Ver 1.3.0
-function chatbot_chatgpt_settings_page_html() {
+function chatbot_chatgpt_settings_page() {
     
     if (!current_user_can('manage_options')) {
         return;
@@ -76,9 +76,8 @@ function chatbot_chatgpt_settings_page_html() {
     }
 
     ?>
-    <div class="wrap">
-        <!-- <h1><span class="dashicons dashicons-format-chat"></span> <?php echo esc_html(get_admin_page_title()); ?></h1> -->
-        <h1><span class="dashicons dashicons-format-chat"></span> Chatbot Settings</h1>
+    <div id="chatbot-chatgpt-settings" class="wrap">
+        <h1><span class="dashicons dashicons-format-chat" style="font-size: 25px;"></span> Kognetiks Chatbot</h1>
 
        <script>
             window.onload = function() {
@@ -120,6 +119,7 @@ function chatbot_chatgpt_settings_page_html() {
             <a href="?page=chatbot-chatgpt&tab=general" class="nav-tab <?php echo $active_tab == 'general' ? 'nav-tab-active' : ''; ?>">General</a>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=api_chatgpt" class="nav-tab <?php echo $active_tab == 'api_chatgpt' ? 'nav-tab-active' : ''; ?>">API/ChatGPT</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'NVIDIA') { ?><a href="?page=chatbot-chatgpt&tab=api_nvidia" class="nav-tab <?php echo $active_tab == 'api_nvidia' ? 'nav-tab-active' : ''; ?>">API/NVIDIA</a> <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Anthropic') { ?><a href="?page=chatbot-chatgpt&tab=api_anthropic" class="nav-tab <?php echo $active_tab == 'api_anthropic' ? 'nav-tab-active' : ''; ?>">API/Anthropic</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Markov Chain') { ?><a href="?page=chatbot-chatgpt&tab=api_markov" class="nav-tab <?php echo $active_tab == 'api_markov' ? 'nav-tab-active' : ''; ?>">API/Markov</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Transformer') { ?><a href="?page=chatbot-chatgpt&tab=api_transformer" class="nav-tab <?php echo $active_tab == 'api_transformer' ? 'nav-tab-active' : ''; ?>">API/Transformer</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=gpt_assistants" class="nav-tab <?php echo $active_tab == 'gpt_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>  <?php } ?>
@@ -159,12 +159,10 @@ function chatbot_chatgpt_settings_page_html() {
                 echo '</div>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                // settings_fields('chatbot_chatgpt_settings');
                 do_settings_sections('chatbot_chatgpt_greetings_settings');
                 echo '</div>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                // settings_fields('chatbot_chatgpt_settings');
                 do_settings_sections('chatbot_chatgpt_additional_setup_settings');
                 echo '</div>';
 
@@ -229,6 +227,30 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_nvidia_api_model_advanced');
                 echo '</div>';
 
+            
+            } elseif ($active_tab == 'api_anthropic' && $chatbot_ai_platform_choice == 'Anthropic') {
+
+                settings_fields('chatbot_anthropic_api_model');
+
+                // NVIDIA API Settings - Ver 2.1.8
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_anthropic_model_settings_general');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_anthropic_api_model_general');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_anthropic_api_model_chat_settings');
+                echo '</div>';
+
+                // Advanced Settings
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_anthropic_api_model_advanced');
+                echo '</div>';
+
             } elseif ($active_tab == 'api_markov' && $chatbot_ai_platform_choice == 'Markov Chain') {
 
                 settings_fields('chatbot_markov_chain_api_model');
@@ -267,10 +289,10 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_transformer_model_api_model_general');
                 echo '</div>';
 
-                // Transformer Chat Settings - Ver 2.2.0
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_transformer_model_status');
-                echo '</div>';
+                // Transformer Chat Settings - Ver 2.2.1
+                // echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_transformer_model_status');
+                // echo '</div>';
 
                 // Transformer Advanced Settings - Ver 2.2.0
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
@@ -379,7 +401,7 @@ function chatbot_chatgpt_settings_page_html() {
                 do_settings_sections('chatbot_chatgpt_reporting');
                 echo '</div>';
 
-            } elseif ($active_tab == 'diagnostics') {
+            } elseif ($active_tab == 'diagnostics') { // AKA Messages tab
 
                 settings_fields('chatbot_chatgpt_diagnostics');
 
@@ -397,6 +419,10 @@ function chatbot_chatgpt_settings_page_html() {
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_diagnostics');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_beta_features');
                 echo '</div>';
 
             } elseif ($active_tab == 'appearance') {

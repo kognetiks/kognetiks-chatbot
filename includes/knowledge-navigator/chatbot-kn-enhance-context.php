@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - Enhance Context - Ver 1.6.9
+ * Kognetiks Chatbot - Knowledge Navigator - Enhance Context - Ver 1.6.9
  *
  * This file contains the code for to utilize the DB with the TF-IDF data to enhance the chatbots context.
  * 
@@ -24,16 +24,19 @@ function kn_enhance_context( $message ) {
 
     $enhancedMessage = explode(' ', $enhancedMessage);
 
-    if (get_locale() !== "en_US") {
-        // DIAG - Diagnostic - Ver 1.7.2.1
-        // back_trace( 'NOTICE', 'get_locale()' . get_locale());
-        // $localized_stopWords = localize_global_stopwords(get_locale(), $stopWords);
-        $localized_stopWords = get_localized_stopwords(get_locale(), $stopWords);
-        // DIAG - Diagnostic - Ver 1.7.2.1
-        // back_trace( 'NOTICE',  '$localized_stopWords ' . $localized_stopWords);
-    } else {
-        $localized_stopWords = $stopWords;
-    }
+    // if (get_locale() !== "en_US") {
+    //     // DIAG - Diagnostics - Ver 1.7.2.1
+    //     // back_trace( 'NOTICE', 'get_locale()' . get_locale());
+    //     // $localized_stopWords = localize_global_stopwords(get_locale(), $stopWords);
+    //     $localized_stopWords = get_localized_stopwords(get_locale(), $stopWords);
+    //     // DIAG - Diagnostics - Ver 1.7.2.1
+    //     // back_trace( 'NOTICE',  '$localized_stopWords ' . $localized_stopWords);
+    // } else {
+    //     $localized_stopWords = $stopWords;
+    // }
+
+    // FIXME - CZECH OVERRIDE - REMOVED IN VER 2.2.1 - 2024-12-24
+    $localized_stopWords = $stopWords;
 
     // Filter out stop words
     $enhancedMessage = array_diff($enhancedMessage, $localized_stopWords);

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Registration
+ * Kognetiks Chatbot - Registration
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the registration of settings and other parameters.

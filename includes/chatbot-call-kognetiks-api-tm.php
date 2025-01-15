@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Transformer Model API - Ver 2.2.0
+ * Kognetiks Chatbot - Transformer Model API - Ver 2.2.0
  *
  * This file contains the code accessing the Transformer API.
  * 
@@ -72,7 +72,7 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
     
     // Knowledge Navigator keyword append for context
-    $chatbot_chatgpt_kn_conversation_context = get_option('chatbot_chatgpt_kn_conversation_context', '');
+    $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', ''));
 
     // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
     // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
@@ -144,6 +144,10 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
 
+    // FIXME - LETS OVERRIDE $CONTEXT FOR NOW - Ver 2.2.1 - 2024-12-27
+    $context = '';
+    $chatbot_chatgpt_kn_conversation_context = '';
+
     // DIAG Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
     // back_trace( 'NOTICE', '$context: ' . $context);
@@ -174,13 +178,19 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     // Retrieve max tokens from the settings
     $max_tokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', '500')));
 
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace( 'NOTICE', '$model: ' . $model);
+
     // Call the transformer model with the user input
     if ($model == 'lexical-context-model') {
         // Call the transformer model with the user input - transformer-word-based
         $response = transformer_model_lexical_context_response($transformer_model_message, $max_tokens);
-    } else {
+    } elseif ($model == 'sentential-context-model') {
         // Call the transformer model with the user input - transformer-sentence-based
         $response = transformer_model_sentential_context_model_response($transformer_model_message, $max_tokens);
+    } else {
+        // Incorrect model selected
+        $response = 'ERROR: Incorrect model selected. Please check the settings.';
     }
 
     if (!empty($response)) {
@@ -197,8 +207,7 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
             $response_body['choices'][0]['message']['content'] .= '.';
         }
         // back_trace( 'NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
-    
-        // Set the success response code
+            // Set the success response code
         $response_body['response']['code'] = 200; // Success code
     
     } else {

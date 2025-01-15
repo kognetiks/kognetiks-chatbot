@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Manage Widget Logs - Ver 2.1.3
+ * Kognetiks Chatbot - Manage Widget Logs - Ver 2.1.3
  *
  * This file contains the code for managing Widget logs
  * 

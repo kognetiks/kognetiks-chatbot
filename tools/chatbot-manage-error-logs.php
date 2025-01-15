@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Manage Error Logs - Ver 2.0.7
+ * Kognetiks Chatbot - Manage Error Logs - Ver 2.0.7
  *
  * This file contains the code for managing error logs
  * 

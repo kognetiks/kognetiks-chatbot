@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Kflow API - Ver 1.9.5
+ * Kognetiks Chatbot - Kflow API - Ver 1.9.5
  *
  * This file contains the code accessing the Kflow API.
  * 

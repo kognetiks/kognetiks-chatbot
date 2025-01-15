@@ -1,6 +1,6 @@
 # Configuring the API/NVIDIA Settings
 
-The **Kognetiks Chatbot for WordPress** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
+The **Kognetiks Chatbot** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
 
 ![NVIDIA API](api-nvidia-settings.png)
 

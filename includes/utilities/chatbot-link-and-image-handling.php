@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Link and Image Handling
+ * Kognetiks Chatbot - Link and Image Handling
  *
  * This file contains the code for uploading files as part
  * in support of Custom GPT Assistants via the Chatbot.
@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_check_for_links_and_images( $response ) {
 
-    // DIAG - Diagnostic - Ver 1.9.1
+    // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', "Entering chatbot_chatgpt_check_for_links_and_images()" );
     // back_trace( 'NOTICE', "Response: " . print_r($response, true) );
 

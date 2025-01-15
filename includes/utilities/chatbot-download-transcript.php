@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Download Transcript - Ver 1.9.9
+ * Kognetiks Chatbot - Download Transcript - Ver 1.9.9
  *
  * This file contains the code for uploading files as part
  * in support of Custom GPT Assistants via the Chatbot.

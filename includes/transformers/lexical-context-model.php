@@ -17,8 +17,8 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
 
     $max_tokens = 50;
 
-    // DIAG - Diagnostic - Ver 2.3.0
-    back_trace('NOTICE', 'transformer_model_lexical_context_response');
+    // DIAG - Diagnostics - Ver 2.3.0
+    // back_trace( 'NOTICE', 'transformer_model_lexical_context_response');
 
     // Maximum tokens
     if (empty($max_tokens)) {
@@ -45,10 +45,10 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
 }
 
 // Function to get cached embeddings
-function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 2) {
+function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 3) {
 
-    // DIAG - Diagnostic - Ver 2.3.0
-    back_trace('NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
+    // DIAG - Diagnostics - Ver 2.3.0
+    // back_trace( 'NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
 
     $cacheFile = __DIR__ . '/lexical_embeddings_cache.php';
 
@@ -68,8 +68,8 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
 
     global $wpdb;
 
-    // DIAG - Diagnostic - Ver 2.3.0
-    back_trace( 'NOTICE', 'transformer_model_lexical_context_fetch_wordpress_content' );
+    // DIAG - Diagnostics - Ver 2.3.0
+    // back_trace( 'NOTICE', 'transformer_model_lexical_context_fetch_wordpress_content' );
 
     // Query to get post and page content
     $results = $wpdb->get_results(
@@ -92,10 +92,10 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
 }
 
 // Function to build a PMI matrix for word embeddings
-function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize = 2) {
+function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize = 3) {
 
-    // DIAG - Diagnostic - Ver 2.3.0
-    back_trace( 'NOTICE', 'transformer_model_lexical_context_build_pmi_matrix' );
+    // DIAG - Diagnostics - Ver 2.3.0
+    // back_trace( 'NOTICE', 'transformer_model_lexical_context_build_pmi_matrix' );
 
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
     $vocab = array_unique($words);
@@ -141,7 +141,7 @@ function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize
 // Function to calculate cosine similarity between two vectors
 function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB) {
 
-    // DIAG - Diagnostic - Ver 2.3.0
+    // DIAG - Diagnostics - Ver 2.3.0
     // back_trace( 'NOTICE', 'transformer_model_lexical_context_cosine_similarity' );
 
     $dotProduct = 0;
@@ -173,8 +173,8 @@ function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB)
 // Function to generate a contextual response
 function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 50) {
 
-    // DIAG - Diagnostic - Ver 2.3.0
-    back_trace('NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
+    // DIAG - Diagnostics - Ver 2.3.0
+    // back_trace( 'NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
 
     global $stopWords;
 
@@ -228,7 +228,7 @@ function removeStopWordFromEnd($response, $stopWords) {
     // Split the response into words
     $responseWords = preg_split('/\s+/', rtrim($response, " \t\n\r\0\x0B.,!?;:"));
     $lastWord = strtolower(end($responseWords));
-    back_trace('NOTICE', 'removeStopWordFromEnd - Last Word: ' . $lastWord);
+    // back_trace( 'NOTICE', 'removeStopWordFromEnd - Last Word: ' . $lastWord);
 
     // Check if the last word is a stop word
     if (in_array($lastWord, $stopWords)) {

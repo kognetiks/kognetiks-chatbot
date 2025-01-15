@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Reporting
+ * Kognetiks Chatbot - Settings - Reporting
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the reporting settings and other parameters.
@@ -357,7 +357,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
     }
 
     // Retrieve the reporting period
-    $reporting_period = get_option('chatbot_chatgpt_reporting_period');
+    $reporting_period = esc_attr(get_option('chatbot_chatgpt_reporting_period'));
 
     // Parsing shortcode attributes
     $a = shortcode_atts( array(
@@ -372,7 +372,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
         
         // Get the reporting period from the options
-        $reporting_period = get_option('chatbot_chatgpt_reporting_period');
+        $reporting_period = gesc_attr(et_option('chatbot_chatgpt_reporting_period'));
         
         // Calculate the start date and group by clause based on the reporting period
         if($reporting_period === 'Daily') {
@@ -445,7 +445,7 @@ function chatbot_chatgpt_interactions_table() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
 
     // Get the reporting period from the options
-    $reporting_period = get_option('chatbot_chatgpt_reporting_period');
+    $reporting_period = esc_attr(get_option('chatbot_chatgpt_reporting_period'));
     
         // Calculate the start date and group by clause based on the reporting period
         if($reporting_period === 'Daily') {
@@ -554,7 +554,7 @@ function chatbot_chatgpt_total_tokens() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     
     // Get the reporting period from the options
-    $reporting_period = get_option('chatbot_chatgpt_reporting_period');
+    $reporting_period = esc_attr(get_option('chatbot_chatgpt_reporting_period'));
     
     // Calculate the start date and group by clause based on the reporting period
     if ($reporting_period === 'Daily') {
@@ -717,7 +717,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
         return;
     }
 
-    // DIAG - Diagnostic - Ver 2.0.2.1
+    // DIAG - Diagnostics - Ver 2.0.2.1
     // back_trace( 'NOTICE', 'File path: ' . $results_csv_file);
 
     if (!file_exists($results_csv_file)) {

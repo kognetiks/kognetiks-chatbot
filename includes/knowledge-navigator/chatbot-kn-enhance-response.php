@@ -1,6 +1,12 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - Enhance Response - Ver 1.6.9 - Updated - Ver 2.1.5 - 2024 09 13
+ * Kognetiks Chatbot - Knowledge Navigator - Enhance Response - Ver 1.6.9
+ * 
+ * Updates
+ * 
+ * Ver 2.1.5 - 2024 09 13 - TBD
+ * 
+ * Ver 2.2.1 - 2024 12 01 - Added excerpts to enhanced responses
  *
  * This file contains the code for to utilize the DB with the TF-IDF data to enhance the chatbots response.
  * 
@@ -19,10 +25,11 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     global $wpdb;
     global $learningMessages;
     global $stopWords;
+
     $enhanced_response = "";
 
     // Check if the Knowledge Navigator is finished running
-    $chatbot_chatgpt_kn_status = get_option('chatbot_chatgpt_kn_status', '');
+    $chatbot_chatgpt_kn_status = esc_attr(get_option('chatbot_chatgpt_kn_status', ''));
     if (false === strpos($chatbot_chatgpt_kn_status, 'Completed')) {
         return;
     }
@@ -33,10 +40,13 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $words = explode(" ", $message);
     $words = array_diff($words, $stopWords);
 
+    // DIAG - Diagnostics - Ver 2.2.1
+    // back_trace( 'NOTICE', 'Input message: ' . $message);
+    // back_trace( 'NOTICE', 'Processed words: ' . implode(", ", $words));
+
     // Initialize arrays to hold word scores and results
     $word_scores = array();
     $results = array();
-
     $limit = esc_attr(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
 
     // Calculate total score for each word
@@ -47,6 +57,8 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         $total_score = $wpdb->get_var($query);
         // Store the word and its total score
         $word_scores[$word] = $total_score ? $total_score : 0;
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace( 'NOTICE', 'Word: ' . $word . ', Score: ' . $word_scores[$word]);
     }
 
     // Sort words by their scores (lowest to highest)
@@ -77,9 +89,16 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
         // Execute the query
         $rows = $wpdb->get_results($query);
 
+        // Diagnostics - Ver 2.2.1
+        // back_trace( 'NOTICE', 'SQL Query: ' . $query );
+
         // Check if matches are found
-        if (!$wpdb->last_error && !empty($rows)) {
+        if ($rows) {
             foreach ($rows as $row) {
+
+                // Diagnostics - Ver 2.2.1
+                // back_trace( 'INFO', 'Match found: PID=' . $row->pid . ', URL=' . $row->url . ', Title=' . $row->title . ', Score=' . $row->total_score . ', Word Matches=' . $row->word_match_count);
+                
                 $result_key = hash('sha256', $row->url);
                 if (!isset($results[$result_key])) {
                     $results[$result_key] = [
@@ -90,15 +109,26 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
                         'word_match_count' => $row->word_match_count
                     ];
                 }
+
                 if (count($results) >= $limit) {
-                    break 2; // Break out of both loops
+                    break 2;
                 }
+
             }
+        } else {
+
+            // back_trace( 'NOTICE', 'No matches found for num_words_to_match=' . $num_words_to_match);
+            
         }
 
-        // Decrease the number of words to match
         $num_words_to_match--;
+
     }
+
+    // DIAG - Diagnostics - Ver 2.2.1
+    // foreach ($results as $result) {
+    //     back_trace( 'NOTICE', 'Final result: PID=' . $result['pid'] . ', URL=' . $result['url'] . ', Title=' . $result['title'] . ', Score=' . $result['score'] . ', Word Matches=' . $result['word_match_count']);
+    // }
 
     // Convert results to indexed array
     $results = array_values($results);
@@ -109,15 +139,47 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     // Option - Include Title in Enhanced Response
     $include_title = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_title', 'yes'));
-    // FIXME - TEMPORARY - REMOVE THIS
-    // $include_title = 'no';
+
+    // Decide if the links to site content and exceprts should be included in the response
+    $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
 
     foreach ($results as $result) {
+
         if ('yes' == $include_title) {
+
             $links[] = "<li>[" . $result['title'] . "](" . $result['url'] . ")</li>";
+
         } else {
+
             $links[] = "[here](" . $result['url'] . ")";
+
         }
+
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace( 'NOTICE', '$include_post_or_page_excerpt: ' . $include_post_or_page_excerpt );
+
+        if ($include_post_or_page_excerpt == 'Yes') {
+
+            // DIAG - Diagnostics - Ver 2.2.1
+            // back_trace( 'NOTICE', 'Generating AI summary for $result[pid]: ' . $result['pid'] );
+
+            // $ai_summary = ksum_generate_ai_summary($result['pid']);
+            // if (!empty($ai_summary)) {
+            //     $links[] = "<li>" . $ai_summary . "</li>";
+            // }
+
+            // Fetch the post or page excerpt
+            $post_excerpt = get_the_excerpt($result['pid']);
+
+            if (!empty($post_excerpt)) {
+                $links[] = "<li>" . $post_excerpt . "</li>";
+            }
+
+            // DIAG - Diagnostics - Ver 2.2.1
+            // back_trace( 'NOTICE', '$ai_summary: ' . $ai_summary );
+
+        }
+
     }
 
     if (!empty($links)) {

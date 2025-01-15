@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Setup Page
+ * Kognetiks Chatbot - Settings - Setup Page
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the setup settings and other parameters.
@@ -164,23 +164,15 @@ function chatbot_ai_platform_choice_callback($args) {
     <select id="chatbot_ai_platform_choice" name="chatbot_ai_platform_choice">
         <option value="OpenAI" <?php selected( $chatbot_ai_platform_choice, 'OpenAI' ); ?>><?php echo esc_html( 'OpenAI' ); ?></option>
         <option value="NVIDIA" <?php selected( $chatbot_ai_platform_choice, 'NVIDIA' ); ?>><?php echo esc_html( 'NVIDIA' ); ?></option>
-        <!-- <option value="Anthropic" <?php selected( $chatbot_ai_platform_choice, 'Anthropic' ); ?>><?php echo esc_html( 'Anthropic' ); ?></option> -->
-        <!-- <option value="Markov Chain" <?php selected( $chatbot_ai_platform_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option> -->
-        <!-- <option value="Transformer" <?php selected( $chatbot_ai_platform_choice, 'Transformer' ); ?>><?php echo esc_html( 'Transformer' ); ?></option> -->
+        <option value="Anthropic" <?php selected( $chatbot_ai_platform_choice, 'Anthropic' ); ?>><?php echo esc_html( 'Anthropic' ); ?></option>
+        <?php
+        $chatbot_chatgpt_enable_beta_features = esc_attr(get_option('chatbot_chatgpt_enable_beta_features', 'no'));
+        if ($chatbot_chatgpt_enable_beta_features === 'yes') : ?>
+            <!-- <option value="Markov Chain" <?php selected( $chatbot_ai_platform_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option> -->
+            <option value="Transformer" <?php selected( $chatbot_ai_platform_choice, 'Transformer' ); ?>><?php echo esc_html( 'Transformer' ); ?></option>
+        <?php endif; ?>
     </select>
     <?php
-
-    // if ($chatbot_ai_platform_choice == 'OpenAI') {
-    //     echo '<p><b>OpenAI ChatGPT is the default AI Platform for the Chatbot plugin.</b></p>';
-    // } elseif ($chatbot_ai_platform_choice == 'NVIDIA') {
-    //     echo '<p><b>NVIDIA ChatGPT is the NVIDIA AI Platform for the Chatbot plugin.</b></p>';
-    // } elseif ($chatbot_ai_platform_choice == 'Anthropic') {
-    //     echo '<p><b>Anthropic ChatGPT is the Anthropic AI Platform for the Chatbot plugin.</b></p>';
-    // } elseif ($chatbot_ai_platform_choice == 'Markov Chain') {
-    //     echo '<p><b>Markov Chain is the Markov Chain AI Platform for the Chatbot plugin.</b></p>';
-    // } elseif ($chatbot_ai_platform_choice == 'Transformer') {
-    //     echo '<p><b>Transformer is the Transformer AI Platform for the Chatbot plugin.</b></p>';
-    // }
 
 }
 
@@ -652,7 +644,7 @@ function chatbot_chatgpt_settings_setup_init() {
         'chatbot_chatgpt_input_rows_callback',
         'chatbot_chatgpt_additional_setup_settings',
         'chatbot_chatgpt_additional_setup_section'
-    );
+    );   
 
 }
 add_action('admin_init', 'chatbot_chatgpt_settings_setup_init');

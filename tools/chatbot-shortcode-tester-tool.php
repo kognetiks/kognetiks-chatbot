@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Chatbot Shortcode Tester - Ver 2.0.6
+ * Kognetiks Chatbot - Chatbot Shortcode Tester - Ver 2.0.6
  *
  * Accepts up to three parameters and will display them.
  *

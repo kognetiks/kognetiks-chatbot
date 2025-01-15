@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - Scheduler - Ver 1.6.3
+ * Kognetiks Chatbot - Knowledge Navigator - Scheduler - Ver 1.6.3
  *
  * This is the file that schedules the Knowledge Navigator.
  * Scheduled can be now, daily, weekly, etc.
@@ -16,12 +16,12 @@ if ( ! defined( 'WPINC' ) ) {
 // Handle long-running scripts with a scheduled event function - Ver 1.6.1
 function knowledge_navigator_scan() {
 
-    // DIAG - Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostics - Ver 1.6.3
     // back_trace( 'NOTICE', 'ENTERING knowledge_navigator_scan()');
     
-    $run_scanner = get_option('chatbot_chatgpt_knowledge_navigator', 'No');
+    $run_scanner = esc_attr(get_option('chatbot_chatgpt_knowledge_navigator', 'No'));
     
-    // DIAG - Diagnostic - Ver 1.9.6
+    // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner );
 
     // The second parameter is the default value if the option is not set.
@@ -40,14 +40,14 @@ function knowledge_navigator_scan() {
     update_option('chatbot_chatgpt_kn_results', '');
 
     // New process to acquire the content - Ver 1.9.6 - 2024 04 18
-    // DIAG - Diagnostic - Ver 1.9.6
+    // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_action - schedule kicked off' );
 
     update_option( 'chatbot_chatgpt_kn_action', 'initialize' );
 
     chatbot_kn_acquire_controller();
 
-    // DIAG - Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostics - Ver 1.6.3
     // back_trace( 'NOTICE', 'EXITING knowledge_navigator_scan()');
 
 }

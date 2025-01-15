@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Clear Conversation - Ver 1.8.6
+ * Kognetiks Chatbot - Clear Conversation - Ver 1.8.6
  *
  * This file contains the code for uploading files as part
  * in support of Custom GPT Assistants via the Chatbot.

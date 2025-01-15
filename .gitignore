@@ -21,6 +21,7 @@ transcripts/*
 downloads/*
 chatbot-logs/*
 widget-logs/*
+includes/transformers/sentential_embeddings_cache/*
 
 # Allow tracking of only the index.php file in the results folder
 !results/index.php
@@ -30,6 +31,7 @@ widget-logs/*
 !downloads/index.php
 !chatbot-logs/index.php
 !widget-logs/index.php
+!includes/transformers/sentential_embeddings_cache/index.php
 
 # Ignore specific files
 includes/transformers/sentential_embeddings_cache.php

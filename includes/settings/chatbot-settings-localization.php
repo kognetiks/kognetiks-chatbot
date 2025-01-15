@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Localization
+ * Kognetiks Chatbot - Localization
  *
  * This file contains the code for localization of the Chatbot globals.
  * It uses the ChatGPT API to translate the global variables into your language
@@ -16,6 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Cache the stopwords for the language - Ver 1.7.2
 function get_localized_stopwords($language_code, $stopWords) {
+
     // Check if the stopwords for this language are already cached
     $cached_stopwords = get_transient('chatbot_chatgpt_stopwords_' . $language_code);
 
@@ -27,6 +28,7 @@ function get_localized_stopwords($language_code, $stopWords) {
     }
 
     return $cached_stopwords;
+    
 }
 
 // Use ChatGPT to translate global variables - Ver 1.7.2
@@ -40,7 +42,7 @@ function localize_global_stopwords($language_code, $stopWords) {
     $stopWordsTemp = $stopWords;
 
     // Get the API key
-    $api_key = get_option('chatbot_chatgpt_api_key');
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
         $stopWords_string = implode("\n",$stopWords);
         $translated_array = explode("\n", $stopWords_string);
@@ -139,7 +141,7 @@ function localize_global_learningMessages($language_code, $learningMessages) {
     $learningMessagesTemp = $learningMessages;
 
     // Get the API key
-    $api_key = get_option('chatbot_chatgpt_api_key');
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
         $learningMessages_string = implode("\n", $learningMessages);
         $translated_array = explode("\n", $learningMessages_string);
@@ -242,7 +244,7 @@ function localize_global_errorResponses($language_code, $errorResponses) {
     $errorResponsesTemp = $errorResponses;
 
     // Get the API key
-    $api_key = get_option('chatbot_chatgpt_api_key');
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
         $errorResponses_string = implode("\n", $errorResponses);
         $translated_array = explode("\n", $errorResponses_string);

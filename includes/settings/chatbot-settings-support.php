@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Support Pages - Overhauled in Ver 2.0.2.1
+ * Kognetiks Chatbot - Settings - Support Pages - Overhauled in Ver 2.0.2.1
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the support settings and other parameters.

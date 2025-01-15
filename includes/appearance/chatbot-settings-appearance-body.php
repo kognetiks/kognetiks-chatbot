@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Appearance - Ver 1.8.1
+ * Kognetiks Chatbot - Settings - Appearance - Ver 1.8.1
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the appearance settings and other parameters.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Options Helper Function - Ver 2.0.5
+ * Kognetiks Chatbot - Options Helper Function - Ver 2.0.5
  *
  * This file contains the code for uploading files as part
  * in support of Custom GPT Assistants via the Chatbot.

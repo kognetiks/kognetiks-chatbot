@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Utilities - Ver 1.8.1
+ * Kognetiks Chatbot - Utilities - Ver 1.8.1
  *
  * This file contains the code for plugin utilities.
  * It is used to check for mobile devices and other utilities.
@@ -31,7 +31,7 @@ function is_mobile_device() {
 // Function to confirm if curl is enabled
 function can_use_curl_for_file_protocol() {
 
-    // DIAG - Diagnostic - Ver 1.9.1
+    // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', 'can_use_curl_for_file_protocol');
 
     // Check if cURL extension is loaded
@@ -52,7 +52,7 @@ function can_use_curl_for_file_protocol() {
     // Close the cURL session
     curl_close($curl);
 
-    // DIAG - Diagnostic - Ver 1.9.1
+    // DIAG - Diagnostics - Ver 1.9.1
     // back_trace( 'NOTICE', 'result: ' . print_r($result, true));
 
     // Check if setting the option was successful - true if successful, false if failed
@@ -77,7 +77,7 @@ function create_directory_and_index_file($dir_path) {
 
     // Check if the index.php file exists, if not create it
     if (!file_exists($index_file_path)) {
-        $file_content = "<?php\n// Silence is golden.\n\n// Load WordPress Environment\n\$wp_load_path = dirname(__FILE__, 5) . '/wp-load.php';\nif (file_exists(\$wp_load_path)) {\n    require_once(\$wp_load_path);\n} else {\n    exit('Could not find wp-load.php');\n}\n\n// Force a 404 error\nstatus_header(404);\nnocache_headers();\ninclude(get_404_template());\nexit;\n?>";
+        $file_content = "<?php\n// Silence is golden.\n\n";
         file_put_contents($index_file_path, $file_content);
     }
 

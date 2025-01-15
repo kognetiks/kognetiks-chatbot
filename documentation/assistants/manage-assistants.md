@@ -108,7 +108,7 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
 
 ## Remote Widget Access
 
-The **Kognetiks Chatbot for WordPress** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes, for example ```kognetiks.com,chatbot-4``` which will only allow calls from kognetiks.com and only then to chatbot-4.  Your resources are valuable, take appropriate precautions when allowing remote server access.
+The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes, for example ```kognetiks.com,chatbot-4``` which will only allow calls from kognetiks.com and only then to chatbot-4.  Your resources are valuable, take appropriate precautions when allowing remote server access.
 
 ![Remote Widget Settings](remote-widget-settings.png)
 
@@ -127,7 +127,7 @@ The **Kognetiks Chatbot for WordPress** now includes the advanced feature to all
 3. **Widget Logging**:
     - **Description**: Widget logging records valid and invalid access to your chatbot(s) from remote servers.  This is especially helpful to ensure that your resources are used only by those that you have allowed.  On the ```Tools``` tab you will find a section titled **Manage Widget Access Logs** where you can download and delete remote widget access.
 
-For more information refer to the [Managing Remote Assess to the Kognetiks Chatbot for WordPress](remote-widget-settings.md) section for details on how to configure a remote server.
+For more information refer to the [Managing Remote Assess to the Kognetiks Chatbot](remote-widget-settings.md) section for details on how to configure a remote server.
    
 ---
 

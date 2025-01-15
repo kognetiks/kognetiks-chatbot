@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - API/ChatGPT Page
+ * Kognetiks Chatbot - Settings - API/ChatGPT Page
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the API key and other parameters
@@ -20,7 +20,7 @@ function chatbot_chatgpt_model_settings_section_callback($args) {
     <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/ChatGPT Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-model-settings&file=api-model-settings.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/ChatGPT Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-chatgpt-settings&file=api-chatgpt-model-settings.md">here</a>.</b></p>
     <?php
 }
 
@@ -86,7 +86,7 @@ function chatbot_chatgpt_api_chatgpt_advanced_section_callback($args) {
 
 // API key field callback
 function chatbot_chatgpt_api_key_callback($args) {
-    $api_key = get_option('chatbot_chatgpt_api_key');
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     ?>
     <input type="password" id="chatbot_chatgpt_api_key" name="chatbot_chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
@@ -129,7 +129,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
         ?>
         <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
             <?php foreach ($models as $model): ?>
-                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_model_choice'), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
+                <option value="<?php echo esc_attr($model['id']); ?>" <?php selected(esc_attr(get_option('chatbot_chatgpt_model_choice')), $model['id']); ?>><?php echo esc_html($model['id']); ?></option>
             <?php endforeach; ?>
             ?>
         </select>
@@ -220,6 +220,11 @@ function get_nvidia_api_base_url() {
     return esc_attr(get_option('chatbot_nvidia_base_url', 'https://integrate.api.nvidia.com/v1'));
 }
 
+// Base URL for the Anthropic - Ver 2.2.1
+function get_anthropic_api_base_url() {
+    return esc_attr(get_option('chatbot_anthropic_base_url', 'https://api.anthropic.com/v1'));
+}
+
 function get_threads_api_url() {
     return get_openai_api_base_url() . "/threads";
 }
@@ -231,10 +236,14 @@ function get_files_api_url() {
 function get_chat_completions_api_url() {
 
     // Enable for either ChatGPT or NVIDIA - Ver 2.1.8
-    if (get_option('chatbot_nvidia_api_enabled') == 'Yes' || get_option('chatbot_ai_platform_choice') == 'NVIDIA') {
+    if (get_option('chatbot_nvidia_api_enabled') == 'Yes' || esc_attr(get_option('chatbot_ai_platform_choice')) == 'NVIDIA') {
         // DIAG - Diagnostics - Ver 2.1.8
         // back_trace( 'NOTICE', 'get_chat_completions_api_url: NVIDIA API' );
         return get_nvidia_api_base_url() . "/chat/completions";
+    } else if (get_option('chatbot_anthropic_api_enabled') == 'Yes' || esc_attr(get_option('chatbot_ai_platform_choice')) == 'Anthropic') {
+        // DIAG - Diagnostics - Ver 2.2.1
+        // back_trace( 'NOTICE', 'get_chat_completions_api_url: Anthropic API' );
+        return get_anthropic_api_base_url() . "/messages";
     } else {
         // DIAG - Diagnostics - Ver 2.1.8
         // back_trace( 'NOTICE', 'get_chat_completions_api_url: OpenAI API' );
@@ -296,7 +305,7 @@ function chatbot_chatgpt_voice_model_option_callback($args) {
         ?>
         <select id="chatbot_chatgpt_voice_model_option" name="chatbot_chatgpt_voice_model_option">
             <?php foreach ($voice_models as $voice_model): ?>
-                <option value="<?php echo esc_attr($voice_model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_voice_model_option'), $voice_model['id']); ?>><?php echo esc_html($voice_model['id']); ?></option>
+                <option value="<?php echo esc_attr($voice_model['id']); ?>" <?php selected(esc_attr(get_option('chatbot_chatgpt_voice_model_option')), $voice_model['id']); ?>><?php echo esc_html($voice_model['id']); ?></option>
             <?php endforeach; ?>
         </select>
         <?php  
@@ -390,7 +399,7 @@ function chatbot_chatgpt_image_model_option_callback($args) {
         ?>
         <select id="chatbot_chatgpt_image_model_option" name="chatbot_chatgpt_image_model_option">
             <?php foreach ($image_models as $image_model): ?>
-                <option value="<?php echo esc_attr($image_model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_image_model_option'), $image_model['id']); ?>><?php echo esc_html($image_model['id']); ?></option>
+                <option value="<?php echo esc_attr($image_model['id']); ?>" <?php selected(esc_attr(get_option('chatbot_chatgpt_image_model_option')), $image_model['id']); ?>><?php echo esc_html($image_model['id']); ?></option>
             <?php endforeach; ?>
         </select>
         <?php  
@@ -556,7 +565,7 @@ function chatbot_chatgpt_whisper_model_option_callback($args) {
             ?>
             <select id="chatbot_chatgpt_whisper_model_option" name="chatbot_chatgpt_whisper_model_option">
                 <?php foreach ($whisper_models as $whisper_model): ?>
-                    <option value="<?php echo esc_attr($whisper_model['id']); ?>" <?php selected(get_option('chatbot_chatgpt_whisper_model_option'), $whisper_model['id']); ?>><?php echo esc_html($whisper_model['id']); ?></option>
+                    <option value="<?php echo esc_attr($whisper_model['id']); ?>" <?php selected(esc_attr(get_option('chatbot_chatgpt_whisper_model_option')), $whisper_model['id']); ?>><?php echo esc_html($whisper_model['id']); ?></option>
                 <?php endforeach; ?>
             </select>
             <?php  

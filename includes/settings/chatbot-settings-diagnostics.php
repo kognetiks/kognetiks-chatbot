@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Settings - Diagnostics
+ * Kognetiks Chatbot - Settings - Diagnostics
  *
  * This file contains the code for the Chatbot settings page.
  * It allows users to configure the reporting and other parameters
@@ -23,6 +23,7 @@ function chatbot_chatgpt_diagnostics_settings_init() {
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_suppress_attribution');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_custom_attribution');
     register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_delete_data');
+    register_setting('chatbot_chatgpt_diagnostics', 'chatbot_chatgpt_enable_beta_features');
 
     add_settings_section(
         'chatbot_chatgpt_diagnostics_overview_section',
@@ -114,6 +115,23 @@ function chatbot_chatgpt_diagnostics_settings_init() {
         'chatbot_chatgpt_diagnostics',
         'chatbot_chatgpt_diagnostics_section'
     );
+
+    // Enable Beta Features Section - Ver 2.2.1
+    add_settings_section(
+        'chatbot_chatgpt_beta_features_section',            // ID
+        'Beta Feature Settings',                            // Title
+        'chatbot_chatgpt_beta_features_section_callback',   // Callback
+        'chatbot_chatgpt_beta_features'                     // Page
+    );
+
+    // Enable Beta Features - Ver 2.2.1
+    add_settings_field(
+        'chatbot_chatgpt_enable_beta_features',             // ID
+        'Enable Beta Features',                             // Title
+        'chatbot_chatgpt_enable_beta_features_callback',    // Callback
+        'chatbot_chatgpt_beta_features',                    // Page
+        'chatbot_chatgpt_beta_features_section'             // Section
+    );
     
 }
 add_action('admin_init', 'chatbot_chatgpt_diagnostics_settings_init');
@@ -124,7 +142,7 @@ function chatbot_chatgpt_diagnostics_overview_section_callback($args) {
         <p>The Diagnostics tab checks the API status and set options for diagnostics and notices.</p>
         <p>You can turn on/off console and error logging (as of Version 1.6.5 most are now commented out).</p>
         <!-- <p>You can also suppress attribution ('Chatbot & Knowledge Navigator by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p> -->
-        <p>You can also suppress attribution ('Chatbot WordPress plugin by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
+        <p>You can also suppress attribution ('Chatbot plugin by Kognetiks') and notices by setting the value to 'On' (suppress) or 'Off' (no suppression).</p>
         <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
         <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the diagnostics, messages, and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=messages&file=messages.md">here</a>.</b></p>
     <?php
@@ -156,7 +174,7 @@ function chatbot_chatgpt_diagnostics_section_callback($args) {
 // API Status and Results section callback - Ver 2.0.7
 function chatbot_chatgpt_diagnostics_api_status_section_callback($args) {
 
-        $updated_status = test_api_status();
+        $updated_status = kchat_test_api_status();
     ?>
         <p>API STATUS: <b><?php echo esc_html( $updated_status ); ?></b></p>
     <?php
@@ -166,7 +184,7 @@ function chatbot_chatgpt_diagnostics_api_status_section_callback($args) {
 // Call the api-test.php file to test the API
 function chatbot_chatgpt_api_test_callback($args) {
 
-    $updated_status = test_api_status();
+    $updated_status = kchat_test_api_status();
     ?>
     <p>API STATUS: <b><?php echo esc_html( $updated_status ); ?></b></p>
     <?php
@@ -242,6 +260,40 @@ function chatbot_chatgpt_delete_data_callback($args) {
     <select id="chatgpt_delete_data_setting" name="chatbot_chatgpt_delete_data">
     <option value="no" <?php selected( $chatbot_chatgpt_delete_data, 'no' ); ?>><?php echo esc_html( 'DO NOT DELETE' ); ?></option>
     <option value="yes" <?php selected( $chatbot_chatgpt_delete_data, 'yes' ); ?>><?php echo esc_html( 'DELETE ALL DATA' ); ?></option>
+    </select>
+    <?php
+}
+
+// Beta Feature Settings Section - Ver 2.2.1
+function chatbot_chatgpt_beta_features_section_callback($args) {
+    ?>
+        <div class="chatbot-beta-disclaimer">
+            <h3>Caution: Beta Features Ahead 🚧</h3>
+            <p>
+                Enabling Beta Features in the Kognetiks Chatbot plugin is intended for testing and experimental purposes only. 
+                <strong>These features are not fully tested or guaranteed to work as expected</strong> and may cause unexpected behavior, errors, or conflicts with your website.
+            </p>
+            <p><strong>Important Notices:</strong></p>
+            <ol>
+                <li><strong>Backup Your Site:</strong> Before enabling Beta Features, ensure you have a complete backup of your WordPress site and database.</li>
+                <li><strong>Test Environment Recommended:</strong> Beta Features should only be enabled in a testing or staging environment. Avoid enabling them on live or production sites.</li>
+                <li><strong>Use at Your Own Risk:</strong> Kognetiks assumes no liability for issues arising from the use of Beta Features. By enabling them, you accept full responsibility for any changes or damage to your site.</li>
+            </ol>
+            <p>
+                If you're unsure about any of these steps, consult with a web professional or WordPress expert before proceeding.
+            </p>
+        </div>
+    <?php
+}
+
+// Enable Beta Features - Ver 2.2.1
+function chatbot_chatgpt_enable_beta_features_callback($args) {
+    global $chatbot_chatgpt_enable_beta_features;
+    $chatbot_chatgpt_enable_beta_features = esc_attr(get_option('chatbot_chatgpt_enable_beta_features', 'no'));
+    ?>
+    <select id="chatgpt_enable_beta_features_setting" name="chatbot_chatgpt_enable_beta_features">
+    <option value="no" <?php selected( $chatbot_chatgpt_enable_beta_features, 'no' ); ?>><?php echo esc_html( 'NO' ); ?></option>
+    <option value="yes" <?php selected( $chatbot_chatgpt_enable_beta_features, 'yes' ); ?>><?php echo esc_html( 'YES' ); ?></option>
     </select>
     <?php
 }
@@ -382,7 +434,9 @@ function log_chatbot_error() {
     global $chatbot_chatgpt_plugin_dir_path;
     
     if (isset($_POST['error_message'])) {
+
         $error_message = sanitize_text_field($_POST['error_message']);
+
         $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
 
         // Ensure the directory and index file exist
@@ -413,6 +467,7 @@ function log_chatbot_error() {
         // Append the error message to the log file
         file_put_contents($log_file, $log_message, FILE_APPEND | LOCK_EX);
     }
+    
     wp_die(); // this is required to terminate immediately and return a proper response
 }
 

@@ -22,6 +22,11 @@ The Enhanced Response settings allow you to customize how additional information
    - **Options**: A numeric value between `1` and `10` items (the default is 3).
    - **Selection**: Choose a number based on how much supplementary content you want to provide without overwhelming the user.
 
+4. **Include Post/Page Excerpts**:
+   - **Decription**: This setting determines if post or page excerpts are include with any learning messages.
+   - **Options**: `Yes` to return post or page excerpts with learning messages, `No` (default) to exclude excerpts.
+   - **Selection**: Choose the option that best fist your content strategy and user engagement goals.
+
 ## Steps to Configure
 
 1. Navigate to the Knowledge Navigator Enhanced Response Settings section of the Kognetiks Chatbot plugin in your WordPress dashboard.
@@ -32,7 +37,9 @@ The Enhanced Response settings allow you to customize how additional information
 
 4. Set the `Enhanced Response Limit` to the number of enhanced responses you want to display with each chatbot interaction.
 
-5. Click 'Save Settings' to apply your changes.
+5. Set the `Include Post/Page Excerpts` dropdown to the desired option (`Yes` or `No`).
+
+6. Click 'Save Settings' to apply your changes.
 
 ## Tips
 

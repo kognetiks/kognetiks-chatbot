@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Knowledge Navigator - Settings
+ * Kognetiks Chatbot - Knowledge Navigator - Settings
  *
  * This file contains the code for the Chatbot settings page.
  * These are all the options for the Knowledge Navigator.
@@ -25,10 +25,10 @@ $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)
 // Knowledge Navigator Results
 function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
-    // DIAG - Diagnostic - Ver 1.6.3
+    // DIAG - Diagnostics - Ver 1.6.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_results_callback');
     // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner);
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_schedule: ' . get_option('chatbot_chatgpt_kn_schedule'));
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_schedule: ' . esc_attr(get_option('chatbot_chatgpt_kn_schedule')));
 
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
     // update_option('chatbot_chatgpt_kn_schedule', 'No');
@@ -36,7 +36,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
     global $topWords;
 
     // Must be one of: Now, Hourly, Twice Daily, Weekly
-    // $run_scanner = get_option('chatbot_chatgpt_kn_schedule', 'No');
+    // $run_scanner = esc_attr(get_option('chatbot_chatgpt_kn_schedule', 'No'));
 
     if (!isset($run_scanner)) {
         $run_scanner = 'No';
@@ -44,7 +44,7 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
     if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Disable', 'Cancel'])) {
 
-        // DIAG - Diagnostic - Ver 1.6.3
+        // DIAG - Diagnostics - Ver 1.6.3
         // back_trace( 'NOTICE', "$run_scanner: " . $run_scanner);
         // back_trace( 'NOTICE', "max_top_words: " . serialize($GLOBALS['max_top_words']));
         // back_trace( 'NOTICE', "domain: " . serialize($GLOBALS['domain']));
@@ -208,7 +208,7 @@ function chatbot_chatgpt_kn_schedule_callback($args) {
 }
 
 function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
-    $GLOBALS['max_top_words'] = intval(get_option('chatbot_chatgpt_kn_maximum_top_words', 250));
+    $GLOBALS['max_top_words'] = intval(esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 250)));
     ?>
     <select id="chatbot_chatgpt_kn_maximum_top_words" name="chatbot_chatgpt_kn_maximum_top_words">
         <?php
@@ -261,7 +261,7 @@ function chatbot_chatgpt_kn_include_comments_callback($args) {
 }
 
 function chatbot_chatgpt_enhanced_response_limit_callback($args) {
-    $chatbot_chatgpt_enhanced_response_limit = intval(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
+    $chatbot_chatgpt_enhanced_response_limit = intval(esc_attr(get_option('chatbot_chatgpt_enhanced_response_limit', 3)));
     ?>
     <select id="chatbot_chatgpt_enhanced_response_limit" name="chatbot_chatgpt_enhanced_response_limit">
         <?php
@@ -274,7 +274,7 @@ function chatbot_chatgpt_enhanced_response_limit_callback($args) {
 }
 
 function chatbot_chatgpt_kn_tuning_percentage_callback($args) {
-    $chatbot_chatgpt_kn_tuning_percentage = intval(get_option('chatbot_chatgpt_kn_tuning_percentage', 25));
+    $chatbot_chatgpt_kn_tuning_percentage = intval(esc_attr(get_option('chatbot_chatgpt_kn_tuning_percentage', 25)));
     ?>
     <select id="chatbot_chatgpt_kn_tuning_percentage" name="chatbot_chatgpt_kn_tuning_percentage">
         <?php
@@ -305,5 +305,16 @@ function chatbot_chatgpt_custom_learnings_message_callback($args) {
     $chatbot_chatgpt_custom_learnings_message = esc_attr(get_option('chatbot_chatgpt_custom_learnings_message', 'More information may be found here ...'));
     ?>
     <input type="text" style="width: 50%;" id="chatbot_chatgpt_custom_learnings_message" name = "chatbot_chatgpt_custom_learnings_message" value="<?php echo esc_attr( $chatbot_chatgpt_custom_learnings_message ); ?>">
+    <?php
+}
+
+// Optionally include post or page excerpts with Knowledge Navigator responses - Ver 2.2.1
+function chatbot_chatgpt_enhanced_response_include_excerpts_callback() {
+    $value = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_enhanced_response_include_excerpts" name="chatbot_chatgpt_enhanced_response_include_excerpts">
+        <option value="No" <?php selected( $value, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+        <option value="Yes" <?php selected( $value, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+    </select>
     <?php
 }

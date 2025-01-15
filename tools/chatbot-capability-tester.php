@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Capability Tester - Ver 2.0.6
+ * Kognetiks Chatbot - Capability Tester - Ver 2.0.6
  *
  * This file contains the code for testing user capabilities
  * and displaying the results.

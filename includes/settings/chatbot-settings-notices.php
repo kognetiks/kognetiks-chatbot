@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Notices
+ * Kognetiks Chatbot - Notices
  *
  * This file contains the code for the Chatbot settings page.
  * It handles the notices and other parameters.
@@ -33,7 +33,7 @@ function display_option_value_admin_notice() {
         return;
     }
 
-    $kn_results = get_option('chatbot_chatgpt_kn_results');
+    $kn_results = esc_attr(get_option('chatbot_chatgpt_kn_results'));
     if ($kn_results) {
         // Check if notice is already dismissed
         $dismiss_url = wp_nonce_url(
@@ -44,8 +44,8 @@ function display_option_value_admin_notice() {
         echo '<div class="notice notice-success is-dismissible"><p><strong>Kognetiks Chatbot:</strong> ' . $kn_results . ' <a href="' . $dismiss_url . '">Dismiss</a></p></div>';
     }
 
-    $kn_status = get_option('chatbot_chatgpt_kn_status');
-    $kn_dismissed = get_option('chatbot_chatgpt_kn_dismissed');
+    $kn_status = esc_attr(get_option('chatbot_chatgpt_kn_status'));
+    $kn_dismissed = esc_attr(get_option('chatbot_chatgpt_kn_dismissed'));
 
     if ($kn_status === 'Disable' || $kn_dismissed === '1') {
         return;

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Chatbot Assistants - Ver 2.0.4
+ * Kognetiks Chatbot - Chatbot Assistants - Ver 2.0.4
  *
  * This file contains the code for table actions for managing assistants
  * to display the chatbot conversation on a page on the website.

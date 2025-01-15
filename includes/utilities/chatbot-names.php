@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Retrieves the Name of the Assistant
+ * Kognetiks Chatbot - Retrieves the Name of the Assistant
  *
  * This file contains the code to retrieve the name of the Assistant
  * from the OpenAI platform.  It uses the Assistant ID to make the request.

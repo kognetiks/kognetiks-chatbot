@@ -22,10 +22,10 @@ jQuery(document).ready(function ($) {
         return document.querySelector('.chatbot-chatgpt') !== null;
     }
    
-    // DIAG - Diagnostic - Ver 2.1.1.1
+    // DIAG - Diagnostics - Ver 2.1.1.1
     // const sortedKeys = Object.keys(kchat_settings).sort();
     // for (const key of sortedKeys) {
-    //     console.log('Chatbot: NOTICE: kchat_settings: ' + key + ': ' + kchat_settings[key]);
+    //     // console.log('Chatbot: NOTICE: kchat_settings: ' + key + ': ' + kchat_settings[key]);
     // }
 
     let chatbot_chatgpt_Elements = $('#chatbot-chatgpt').hide();
@@ -85,7 +85,7 @@ jQuery(document).ready(function ($) {
     //     var footerTop = site-footer.getBoundingClientRect().top;
 
     //     var visible-distance = footerTop - headerBottom;
-    //     console.log('Chatbot: NOTICE: Distance:  + distance + 'px');
+    //     // console.log('Chatbot: NOTICE: Distance:  + distance + 'px');
     // }
     
     if (chatbot_chatgpt_display_style === 'embedded') {
@@ -1217,7 +1217,7 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', true);
             },
             success: function(response) {
-                console.error('Chatbot: NOTICE: Response from server', response);
+                // console.error('Chatbot: NOTICE: Response from server', response);
                 $('#chatbot-chatgpt-upload-file-input').val(''); // Clear the file input after successful upload
                 appendMessage('File(s) successfully uploaded.', 'bot');
             },
@@ -1437,7 +1437,7 @@ jQuery(document).ready(function ($) {
         // DIAG - Diagnostics - Ver 1.5.0
         // nuclearOption = 'Off';
         // if (nuclearOption === 'On') {
-        //     console.log('Chatbot: NOTICE: ***** NUCLEAR OPTION IS ON ***** ');
+        //     // console.log('Chatbot: NOTICE: ***** NUCLEAR OPTION IS ON ***** ');
         //     sessionStorage.removeItem('chatbot_chatgpt_conversation' + '_' + assistant_id);
         //     // Removed in Ver 1.6.1
         //     sessionStorage.removeItem('chatgpt_last_response');
@@ -1445,7 +1445,7 @@ jQuery(document).ready(function ($) {
 
         // DIAG - Diagnostics - Ver 1.5.0
         // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
-        //     console.log('Chatbot: NOTICE: loadChatbotStatus - BEFORE DECISION');
+        //     // console.log('Chatbot: NOTICE: loadChatbotStatus - BEFORE DECISION');
         // }
 
         // Decide what to do for a new visitor - Ver 1.5.0
@@ -1486,7 +1486,7 @@ jQuery(document).ready(function ($) {
 
         // DIAG - Diagnostics - Ver 1.5.0
         // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
-        //     console.log('Chatbot: NOTICE: loadChatbotStatus - AFTER DECISION');
+        //     // console.log('Chatbot: NOTICE: loadChatbotStatus - AFTER DECISION');
         // }
         
         // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
@@ -1515,7 +1515,7 @@ jQuery(document).ready(function ($) {
         // setTimeout(() => {
         //     // DIAG - Diagnostics - Ver 1.5.0
         //     // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
-        //     //     console.log('Chatbot: NOTICE: scrollToBottom");
+        //     //     // console.log('Chatbot: NOTICE: scrollToBottom");
         //     // }
         //     if (conversation && conversation.length > 0) {
         //         conversation.scrollTop(conversation[0].scrollHeight);
@@ -1535,7 +1535,7 @@ jQuery(document).ready(function ($) {
             
             // DIAG - Diagnostics - Ver 2.0.3
             // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
-            //    console.log('Chatbot: NOTICE: scrollToLastBotResponse');
+            //    // console.log('Chatbot: NOTICE: scrollToLastBotResponse');
             // }
     
             const botTexts = document.querySelectorAll('.chatbot-bot-text');
@@ -1543,8 +1543,8 @@ jQuery(document).ready(function ($) {
     
             // DIAG - Diagnostics - Ver 2.0.3
             // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
-            //     console.log('Chatbot: NOTICE: Bot Texts:', botTexts);
-            //     console.log('Chatbot: NOTICE: Conversation:', conversation);
+            //     // console.log('Chatbot: NOTICE: Bot Texts:', botTexts);
+            //     // console.log('Chatbot: NOTICE: Conversation:', conversation);
             // }
     
             if (botTexts && botTexts.length > 0 && conversation) {
@@ -1553,10 +1553,10 @@ jQuery(document).ready(function ($) {
 
                 // DIAG - Diagnostics - Ver 2.0.3
                 // if (kchat_settings.chatbot_chatgpt_diagnostics === 'On') {
-                //     console.log('Chatbot: NOTICE: Last Bot Text:', lastBotText);
-                //     console.log('Chatbot: NOTICE: Last Bot Text OffsetTop:', lastBotText.offsetTop);
-                //     console.log('Chatbot: NOTICE: Conversation OffsetTop:', conversation.offsetTop);
-                //     console.log('Chatbot: NOTICE: Top Position:', topPosition);
+                //     // console.log('Chatbot: NOTICE: Last Bot Text:', lastBotText);
+                //     // console.log('Chatbot: NOTICE: Last Bot Text OffsetTop:', lastBotText.offsetTop);
+                //     // console.log('Chatbot: NOTICE: Conversation OffsetTop:', conversation.offsetTop);
+                //     // console.log('Chatbot: NOTICE: Top Position:', topPosition);
                 // }
     
                 // Scroll to the top of the last bot message
