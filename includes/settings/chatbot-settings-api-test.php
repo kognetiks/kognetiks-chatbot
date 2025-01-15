@@ -319,6 +319,14 @@ function kchat_fetch_api_status($api_key, $model) {
 
             break;
 
+        case 'Transformer':
+
+            $updated_status = 'API Testing Not Required';
+            update_option('chatbot_transformer_model_api_status', 'API Testing Not Required');
+            update_option('chatbot_transformer_model_api_status', $updated_status);
+
+            break;
+
         default:
 
             $updated_status = 'API Error Type: Platform Choice Invalid';

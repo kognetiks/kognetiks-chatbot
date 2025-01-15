@@ -24,14 +24,18 @@ function chatbot_transformer_model_settings_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using transformer models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
-        <li><code>&#91;chatbot style="floating" model="lexical-context-model"&#93;</code> - Style is floating, specific model</li>
+        <!-- <li><code>&#91;chatbot style="floating" model="lexical-context-model"&#93;</code> - Style is floating, specific model</li> -->
+        <!-- <li><code>&#91;chatbot style="embedded" model="lexical-context-model"&#93;</code> - Style is embedded, specific model</li> -->
+        <li><code>&#91;chatbot style="floating" model="sentential-context-model"&#93;</code> - Style is floating, specific model</li>
         <li><code>&#91;chatbot style="embedded" model="sentential-context-model"&#93;</code> - Style is embedded, specific model</li>
     </ul>
     <!-- <p>A Transformer Model generates text using a local algorithm based on the <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)" target="_blank" rel="noopener noreferrer">deep learning architecture</a>, a concept developed by researchers at Google and based on the multi-head attention mechanism proposed in a 2017 paper titled 'Attention Is All You Need'. The transformer-inspired models included here are trained on your site's published content, including pages and posts. These models run locally on your server and are not available on the OpenAI platform. Although these models may not match the sophistication of OpenAI's offerings and might occasionally generate nonsensical output, they can still be effective, especially when your site contains a large amount of content.</p>  -->
     <p><strong>Transformer-Inspired Models</strong>: The transformer-inspired models (below) in this plugin generate text using local algorithms inspired by the <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)" target="_blank" rel="noopener noreferrer">Transformer deep learning architecture</a>, a concept developed by researchers at Google in their 2017 paper "Attention Is All You Need". While these models do not implement the full transformer architecture, they utilize similar principles, such as word embeddings and context analysis, to generate responses based on your site's content. They run locally on your server, providing privacy and control over the data. Although less advanced than models like those provided by OpenAI, NVIDIA, or Anthropic and may sometimes produce nonsensical output, they can be effective, especially when your site contains a substantial amount of content.</p>
     <p><strong>The Sentential Context Model (SCM) is a sentence-based model.</strong> The SCM operates at the level of entire sentences, analyzing the structure and meaning of sentences to generate coherent and contextually relevant responses. By comparing input sentences with sentences from your WordPress content, the SCM selects the most appropriate responses based on sentence-level similarity. This approach allows the chatbot to provide more comprehensive and context-aware replies, enhancing user interactions with more natural and meaningful conversations. <strong>When to use SCM</strong>: Ideal for generating more comprehensive and context-aware responses, particularly when conversational flow and coherence are important.</p>
-    <p><strong>The Lexical Context Model (LCM) is a word-based model.</strong> The LCM focuses on individual words and their relationships within the text. It utilizes word embeddings derived from co-occurrence matrices to understand the context in which words appear. By analyzing word-level similarities between the user's input and the content from your WordPress site, the LCM generates responses that are relevant based on specific keywords and phrases. This model is effective for generating quick and pertinent answers by leveraging word-level context. <strong>When to use LCM</strong>: Best suited for quick, keyword-focused answers where speed and relevance to specific terms are prioritized.</p>
-    <p>Privacy Advantage: Both models process data locally on your server, ensuring that user interactions and site content are not sent to external services. This enhances privacy and allows you to maintain control over your data.</p>
+    <!-- <p><strong>The Lexical Context Model (LCM) is a word-based model. (COMING SOON)</strong> The LCM focuses on individual words and their relationships within the text. It utilizes word embeddings derived from co-occurrence matrices to understand the context in which words appear. By analyzing word-level similarities between the user's input and the content from your WordPress site, the LCM generates responses that are relevant based on specific keywords and phrases. This model is effective for generating quick and pertinent answers by leveraging word-level context. <strong>When to use LCM</strong>: Best suited for quick, keyword-focused answers where speed and relevance to specific terms are prioritized.</p> -->
+    <p><strong>Privacy Advantage</strong>: The tranformer models process data locally on your server, ensuring that user interactions and site content are not sent to external services. This enhances privacy and allows you to maintain control over your data.</p>
+    <p><strong>NOTE</strong>: Currently in beta, the Transformer-Inspired Models are under active development and may occasionally produce nonsensical or irrelevant responses. We are continuously improving the models to enhance their performance and accuracy.</p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Transformer API and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-transformer-settings&file=api-transformer-model-settings.md">here</a>.</b></p>
     <?php
 }
 
@@ -46,7 +50,7 @@ function chatbot_transformer_model_advanced_settings_section_callback($args) {
 
     ?>
     <p>Configure the advanced settings for the plugin when using the Transformer Models.</p>
-    <p>Schedule the transformer model build process to run at different intervals. The build process trains the model on your site's published content, including pages and posts. The model is then used to generate text for the chatbot. The build process can be resource-intensive, so it is recommended to run it during off-peak hours or less frequently on high-traffic sites.</p>
+    <!-- <p>Schedule the transformer model build process to run at different intervals. The build process trains the model on your site's published content, including pages and posts. The model is then used to generate text for the chatbot. The build process can be resource-intensive, so it is recommended to run it during off-peak hours or less frequently on high-traffic sites.</p> -->
     <?php
 
 }
@@ -292,13 +296,13 @@ function chatbot_transformer_model_api_settings_init() {
         'chatbot_transformer_model_advanced_settings'
     );
 
-    add_settings_field(
-        'chatbot_transformer_model_build_schedule',
-        'Transformer Model Build Schedule',
-        'chatbot_transformer_model_build_schedule_callback',
-        'chatbot_transformer_model_advanced_settings',
-        'chatbot_transformer_model_advanced_settings_section'
-    );
+    // add_settings_field(
+    //     'chatbot_transformer_model_build_schedule',
+    //     'Transformer Model Build Schedule',
+    //     'chatbot_transformer_model_build_schedule_callback',
+    //     'chatbot_transformer_model_advanced_settings',
+    //     'chatbot_transformer_model_advanced_settings_section'
+    // );
 
     add_settings_field(
         'chatbot_transformer_model_word_content_window_size',

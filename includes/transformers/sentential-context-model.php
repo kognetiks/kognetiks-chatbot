@@ -55,7 +55,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         return '';
     }
     // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace( 'NOTICE', '$input: ' . $input);
+    back_trace( 'NOTICE', '$input: ' . $input);
 
     // Step 1 - Normalize and remove stop words
     $input = preg_replace('/[^\w\s]/', '', $input);
@@ -90,17 +90,27 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     $existing_words = array_column($results, 'word');
     $remaining_words = array_diff($words, $existing_words);
 
-    foreach ($remaining_words as $word) {
-        if (count($results) >= $limit) {
-            break;
-        }
-        $results[] = ['word' => $word, 'score' => 0];
+    // DIAG - Diagnostic - Ver 2.2.1 - Print the words and scores
+    for ($i = 0; $i < count($results); $i++) {
+        back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
     }
 
+
+    // foreach ($remaining_words as $word) {
+    //     if (count($results) >= $limit) {
+    //         break;
+    //     }
+    //     $results[] = ['word' => $word, 'score' => 0];
+    // }
+
     // Ensure results meet the limit
-    if (count($results) > $limit) {
-        $results = array_slice($results, 0, $limit);
-    }
+    // if (count($results) > $limit) {
+    //     $results = array_slice($results, 0, $limit);
+    // }
+
+    // $results = array_merge($results, array_map(function($word) {
+    //     return ['word' => $word, 'score' => 0];
+    // }, $remaining_words));
 
     // Step 4 - Build the LIKE condition
     $final_words = array_column($results, 'word');
@@ -110,6 +120,9 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         $like_clauses[] = "post_content LIKE '%" . esc_sql($escaped_word) . "%'";
     }
     $like_condition = implode(' AND ', $like_clauses);
+
+    // DIAG - Diagnostic - Ver 2.2.1
+    back_trace( 'NOTICE', 'Like Condition: ' . $like_condition);
 
     // Step 5 - Fetch WordPress content
     $sql = $wpdb->prepare("

@@ -289,10 +289,10 @@ function chatbot_chatgpt_settings_page() {
                 do_settings_sections('chatbot_transformer_model_api_model_general');
                 echo '</div>';
 
-                // Transformer Chat Settings - Ver 2.2.0
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_transformer_model_status');
-                echo '</div>';
+                // Transformer Chat Settings - Ver 2.2.1
+                // echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_transformer_model_status');
+                // echo '</div>';
 
                 // Transformer Advanced Settings - Ver 2.2.0
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';

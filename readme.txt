@@ -17,7 +17,7 @@ The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI, NVI
 
 🌟 **AI Platform Options**:
 
-* With **Version 2.1.8**, the **Kognetiks Chatbot** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** and **Anthropic** APIs in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
+* The **Kognetiks Chatbot** let you choose the ideal AI Platform for your site, now supporting **NVIDIA's NIM API** and **Anthropic** APIs in addition to **OpenAI's ChatGPT API** for flexible, powerful conversational capabilities.
 
 * **OpenAI's ChatGPT API**: Engage visitors with natural, human-like responses for rich conversational experiences.
 
@@ -32,6 +32,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content — no AI platform connection required.
 
 It's Perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
+
 
 🌟 **Key Features**:
 

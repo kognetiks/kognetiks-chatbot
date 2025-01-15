@@ -179,7 +179,7 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     $max_tokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', '500')));
 
     // DIAG - Diagnostics - Ver 2.2.1
-    back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Call the transformer model with the user input
     if ($model == 'lexical-context-model') {
