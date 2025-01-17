@@ -208,7 +208,7 @@ global $voice;
 $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
 // DIAG - Diagnostics
-back_trace( 'NOTICE', 'AI Platform: ' . $chatbot_ai_platform_choice);
+// back_trace( 'NOTICE', 'AI Platform: ' . $chatbot_ai_platform_choice);
 
 switch ($chatbot_ai_platform_choice) {
 
@@ -363,7 +363,7 @@ switch ($chatbot_ai_platform_choice) {
             $model = 'deepseek-chat';
             update_option('chatbot_deepseek_model_choice', $model);
             // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+            // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
         } elseif (empty($model)) {
             $model = 'deepseek-chat';
         }
@@ -1171,7 +1171,7 @@ function chatbot_chatgpt_send_message() {
         $voice = isset($kchat_settings['voice']) ? $kchat_settings['voice'] : null;
 
         // FIXME - TESTING - Ver 2.1.8
-        back_trace( 'NOTICE', 'LINE 1098 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 1174 - $model: ' . $model);
 
         if (str_starts_with($model !== null && $model, 'gpt-4o')) {
 
@@ -1239,7 +1239,7 @@ function chatbot_chatgpt_send_message() {
 
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.2
-            back_trace( 'NOTICE', 'Calling DeepSeek API');
+            // back_trace( 'NOTICE', 'Calling DeepSeek API');
             // Send message to DeepSeek API - Ver 2.2.2
             $response = chatbot_call_deepseek_api($api_key, $message);
 

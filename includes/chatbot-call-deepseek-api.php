@@ -30,9 +30,9 @@ function chatbot_call_deepseek_api($api_key, $message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 2.2.2
-    back_trace( 'NOTICE', 'chatbot_call_deepseek_api - start');
-    back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $api_key: ' . $api_key);
-    back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $message: ' . $message);
+    // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - start');
+    // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $api_key: ' . $api_key);
+    // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $message: ' . $message);
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
@@ -47,7 +47,7 @@ function chatbot_call_deepseek_api($api_key, $message) {
     $api_url = get_chat_completions_api_url();
 
     // DIAG - Diagnostics - Ver 2.2.2
-    back_trace( 'NOTICE', '$api_url: ' . $api_url);
+    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
 
     // Select the DeepSeek Model
     // https://api-docs.deepseek.com/quick_start/pricing
@@ -194,15 +194,15 @@ function chatbot_call_deepseek_api($api_key, $message) {
     addEntry('chatbot_chatgpt_context_history', $message);
 
     // DIAG - Diagnostics - Ver 2.2.2
-    back_trace( 'NOTICE', '$body: ' . $body);
+    // back_trace( 'NOTICE', '$body: ' . $body);
 
     // Convert the body array to JSON
     $body_json = json_encode($body);
 
     // DIAG Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
-    back_trace( 'NOTICE', '$context: ' . $context);
-    back_trace( 'NOTICE', '$message: ' . $message);  
+    // back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$message: ' . $message);  
 
     // API Call
     $response = wp_remote_post($api_url, array(
@@ -237,7 +237,7 @@ function chatbot_call_deepseek_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Get the user ID and page ID
     if (empty($user_id)) {

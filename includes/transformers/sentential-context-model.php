@@ -398,13 +398,13 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $totalSentencesAnalyzed = count($sentences);
 
     // Before returning repsonse log the key stats
-    back_trace( 'NOTICE', 'Key Stats:');
-    back_trace( 'NOTICE', ' - Input: ' . $input);
-    back_trace( 'NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
-    back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+    // back_trace( 'NOTICE', 'Key Stats:');
+    // back_trace( 'NOTICE', ' - Input: ' . $input);
+    // back_trace( 'NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
+    // back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    // back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    // back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    // back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // Return the response
     return $response;
