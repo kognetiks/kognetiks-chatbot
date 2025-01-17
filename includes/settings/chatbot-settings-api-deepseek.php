@@ -40,7 +40,7 @@ function chatbot_deepseek_api_key_callback($args) {
 
 function chatbot_deepseek_api_model_chat_settings_section_callback($args) {
     ?>
-    <p>Configure the settings for the plugin when using chat models. Depending on the DeepSeek model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://docs.anthropic.com/en/docs/about-claude/models" target="_blank">https://docs.anthropic.com/en/docs/about-claude/models</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
+    <p>Configure the settings for the plugin when using chat models. Depending on the DeepSeek model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank">hhttps://api-docs.deepseek.com/quick_start/pricing</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
         <li><code>&#91;chatbot style="floating" model="deepseek-chat"&#93;</code> - Style is floating, specific model</li>
@@ -53,7 +53,7 @@ function chatbot_deepseek_api_model_chat_settings_section_callback($args) {
 function chatbot_deepseek_chat_model_choice_callback($args) {
 
     $model_choice = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
-    $anthropic_api_enabled = esc_attr(get_option('chatbot_deepseek_api_enabled', 'Yes'));
+    $deepseek_api_enabled = esc_attr(get_option('chatbot_deepseek_api_enabled', 'Yes'));
 
     // Fetch models from the API
     $models = chatbot_deepseek_get_models();
@@ -227,8 +227,23 @@ function chatbot_deepseek_api_settings_init() {
         'chatbot_deepseek_api_model_general_section'
     );
 
-    register_setting('chatbot_deepseek_api_model', 'chatbot_deepseek_model_choice', 'sanitize_anthropic_model_choice');
-    register_setting('chatbot_deepseek_api_model', 'chatbot_deepseek_max_tokens_setting', 'sanitize_anthropic_max_tokens_setting');
+    register_setting(
+        'chatbot_deepseek_api_model',
+        'chatbot_deepseek_model_choice',
+                array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+
+    register_setting(
+        'chatbot_deepseek_api_model',
+        'chatbot_deepseek_max_tokens_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     add_settings_section(
         'chatbot_deepseek_api_model_chat_settings_section',

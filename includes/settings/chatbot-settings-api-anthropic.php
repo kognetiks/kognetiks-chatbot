@@ -215,8 +215,23 @@ function chatbot_anthropic_api_settings_init() {
         'chatbot_anthropic_api_model_general_section'
     );
 
-    register_setting('chatbot_anthropic_api_model', 'chatbot_anthropic_model_choice', 'sanitize_anthropic_model_choice');
-    register_setting('chatbot_anthropic_api_model', 'chatbot_anthropic_max_tokens_setting', 'sanitize_anthropic_max_tokens_setting');
+    register_setting(
+        'chatbot_anthropic_api_model',
+        'chatbot_anthropic_model_choice',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
+
+    register_setting(
+        'chatbot_anthropic_api_model',
+        'chatbot_anthropic_max_tokens_setting',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     add_settings_section(
         'chatbot_anthropic_api_model_chat_settings_section',

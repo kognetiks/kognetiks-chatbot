@@ -258,6 +258,7 @@ function kchat_fetch_api_status($api_key, $model) {
             $body = array(
                 'model' => $model,
                 'max_tokens' => 100,
+                'system' => 'You are a helpful assistant.',
                 'messages' => array(
                     array(
                         'role' => 'user',
@@ -269,6 +270,8 @@ function kchat_fetch_api_status($api_key, $model) {
             // Encode the body
             $body = json_encode($body);
 
+            $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
+
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'URL: ' . $api_url);
             // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
@@ -277,11 +280,32 @@ function kchat_fetch_api_status($api_key, $model) {
             // Call the API
             $response = wp_remote_post($api_url, array(
                 'headers' => $headers,
-                'body' => $body
+                'body' => $body,
+                'timeout' => $timeout,
             ));
 
             // Get the response body
-            $response_data = json_decode(wp_remote_retrieve_body($response));
+            // $response_data = json_decode(wp_remote_retrieve_body($response));
+
+            // API Call
+            $response = wp_remote_post($api_url, array(
+                'headers' => $headers,
+                'body'    => $body,
+                'timeout' => $timeout,
+            ));
+
+
+            // Handle WP Error
+            if (is_wp_error($response)) {
+
+                // DIAG - Diagnostics
+                prod_trace('ERROR', 'Error: ' . $response->get_error_message());
+                return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
+
+            }
+
+            // Retrieve and Decode Response
+            $response_data = json_decode(wp_remote_retrieve_body($response), true);
 
             // Check for API-specific errors
             

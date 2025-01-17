@@ -118,14 +118,26 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         return ['word' => $word, 'score' => 0];
     }, $remaining_words));
 
+    // Define the window size
+    $window_size = get_option('chatbot_transformer_model_word_content_windows_size', 3); // Default to 3 if not set
+
     // Step 4 - Build the LIKE condition
     $final_words = array_column($results, 'word');
-    $like_clauses = [];
-    foreach ($final_words as $word) {
-        $escaped_word = $wpdb->esc_like($word);
-        $like_clauses[] = "post_content LIKE '%" . esc_sql($escaped_word) . "%'";
+    $like_conditions = [];
+
+    // Use a sliding window to group words
+    for ($i = 0; $i <= count($final_words) - $window_size; $i++) {
+        $group = array_slice($final_words, $i, $window_size);
+        $group_clauses = [];
+        foreach ($group as $word) {
+            $escaped_word = $wpdb->esc_like($word);
+            $group_clauses[] = "post_content LIKE '%" . esc_sql($escaped_word) . "%'";
+        }
+        $like_conditions[] = '(' . implode(' AND ', $group_clauses) . ')';
     }
-    $like_condition = implode(' AND ', $like_clauses);
+
+    // Combine all groups with OR
+    $like_condition = implode(' OR ', $like_conditions);
 
     // DIAG - Diagnostic - Ver 2.2.1
     // back_trace( 'NOTICE', 'Like Condition: ' . $like_condition);
@@ -335,7 +347,7 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $response = $bestMatchSentence;
 
     // Retrieve settings
-    $maxSentences = intval(esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 5)));
+    $maxSentences = intval(esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 10)));
     $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
 
     // Ratios for splitting sentences and tokens

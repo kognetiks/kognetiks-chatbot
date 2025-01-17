@@ -130,7 +130,7 @@ function chatbot_transformer_model_scan() {
     }
 
     // Retrieve the window size
-    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 2)));
+    $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
 
     // Build embeddings with the updated logic
     transformer_model_sentential_context_cache_embeddings($corpus, $windowSize);

@@ -860,7 +860,7 @@ function chatbot_chatgpt_send_message() {
     }
 
     // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', 'LINE 787 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 863 - $model: ' . $model);
 
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
@@ -902,7 +902,7 @@ function chatbot_chatgpt_send_message() {
     $model = $kchat_settings['chatbot_chatgpt_model'];
 
     // FIXME - TESTING - Ver 2.1.8
-    // back_trace( 'NOTICE', 'LINE 829 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 905 - $model: ' . $model);
     
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
@@ -917,7 +917,7 @@ function chatbot_chatgpt_send_message() {
     $model = isset($kchat_settings['chatbot_chatgpt_model']) ? $kchat_settings['chatbot_chatgpt_model'] : '';
 
     // FIXME - TESTING - Ver 2.1.8
-    // back_trace( 'NOTICE', 'LINE 681 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 920 - $model: ' . $model);
 
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
@@ -1151,8 +1151,8 @@ function chatbot_chatgpt_send_message() {
         };
 
         // FIXME - TESTING - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 856 - $model: ' . $model);
-        // back_trace( 'NOTICE', 'LINE 857 - $kchat_settings[model]: ' . $kchat_settings['model']);
+        // back_trace( 'NOTICE', 'LINE 1154 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 1155 - $kchat_settings[model]: ' . $kchat_settings['model']);
 
         // if (str_starts_with($model,'dall')) {
         //     // back_trace ( 'NOTICE', 'Using Image API');
@@ -1173,7 +1173,7 @@ function chatbot_chatgpt_send_message() {
         // FIXME - TESTING - Ver 2.1.8
         // back_trace( 'NOTICE', 'LINE 1174 - $model: ' . $model);
 
-        if (str_starts_with($model !== null && $model, 'gpt-4o')) {
+        if ($model !== null && str_starts_with($model, 'gpt-4o')) {
 
             // The string 'gpt-4o' is found in $model
             // Reload the model - BELT & SUSPENDERS
@@ -1258,13 +1258,6 @@ function chatbot_chatgpt_send_message() {
             // Send message to Transformer Model API - Ver 2.2.0
             $response = chatbot_chatgpt_call_transformer_model_api($message);
 
-        } elseif ($model !== null && str_contains($model,'search-model')) {
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.2.0
-            // back_trace( 'NOTICE', 'Calling Transformer Model API');
-            // Send message to Transformer Model API - Ver 2.2.0
-            $response = chatbot_chatgpt_call_transformer_model_api($message);
-
         } else {
 
             // Reload the model - BELT & SUSPENDERS
@@ -1297,7 +1290,7 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
         // DIAG - Diagnostics - Ver 2.0.5
-        // back_trace( 'NOTICE', 'LINE 944 - Response: ' . $response);
+        // back_trace( 'NOTICE', '$response: ' . $response);
 
         // FIXME - Append extra message - Ver 2.1.1.1.1
         // Danger Will Robinson! Danger!
@@ -1305,7 +1298,7 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 1045 - $response: ' . $response);
+        // back_trace( 'NOTICE', '$response: ' . $response);
 
         // Return response
         wp_send_json_success($response);

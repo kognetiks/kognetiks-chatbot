@@ -1,12 +1,12 @@
-# API/Anthropic Settings
+# API/DeepSeek Settings
 
-Configure the default settings for the chatbot to use Anthropic for chat, voice, and image generation. Start by adding your API key then selecting your choices. Don't forget to click "Save Settings" at the very bottom of the page.
+Configure the default settings for the chatbot to use DeepSeek for chat, voice, and image generation. Start by adding your API key then selecting your choices. Don't forget to click "Save Settings" at the very bottom of the page.
 
-More information about Anthropic models and their capability can be found at https://docs.anthropic.com/en/docs/about-claude/models.
+More information about DeepSeek models and their capability can be found at https://docs.anthropic.com/en/docs/about-claude/models.
 
 ## Sections
 
-- [API Settings](api-anthropic-settings.md)
+- [API Settings](api-deepseek-settings.md)
 
 - [Chat Settings](chat-settings.md)
 
