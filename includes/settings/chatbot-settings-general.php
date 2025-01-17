@@ -44,122 +44,17 @@ function chatbot_ai_platform_choice_callback($args) {
 
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
-    if (empty($chatbot_ai_platform_choice) || $chatbot_ai_platform_choice == 'OpenAI') {
-
+    $platforms = ['OpenAI', 'NVIDIA', 'Markov Chain', 'Transformer', 'Anthropic', 'DeepSeek'];
+    if (!in_array($chatbot_ai_platform_choice, $platforms)) {
         $chatbot_ai_platform_choice = 'OpenAI';
-        update_option('chatbot_ai_platform_choice', 'OpenAI');
-        update_option('chatbot_chatgpt_api_enabled', 'Yes');
-        $chatbot_chatgpt_api_enabled = 'Yes';
-
-        update_option('chatbot_nvidia_api_enabled', 'No');
-        $chatbot_nvidia_api_enabled = 'No';
-
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-        $chatbot_nvidia_api_enabled = 'No';
-
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-        $chatbot_transformer_model_api_enabled = 'No';
-        
-        update_option('chatbot_anthropic_api_enabled', 'No');
-        $chatbot_anthropic_api_enabled = 'No';
-
-    } else if ($chatbot_ai_platform_choice == 'NVIDIA') {
-
-        $chatbot_ai_platform_choice = 'NVIDIA';
-        update_option('chatbot_ai_platform_choice', 'NVIDIA');
-        update_option('chatbot_nvidia_api_enabled', 'Yes');
-        $chatbot_nvidia_api_enabled = 'Yes';
-
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-        $chatbot_chatgpt_api_enabled = 'No';
-
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-        $chatbot_markov_chain_api_enabled = 'No';
-
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-        $chatbot_transformer_model_api_enabled = 'No';
-        
-        update_option('chatbot_anthropic_api_enabled', 'No');
-        $chatbot_anthropic_api_enabled = 'No';
-
-    } else if ($chatbot_ai_platform_choice == 'Markov Chain') {
-
-        $chatbot_ai_platform_choice = 'Markov Chain';
-        update_option('chatbot_ai_platform_choice', 'Markov Chain');
-        update_option('chatbot_markov_chain_api_enabled', 'Yes');
-        $chatbot_markov_chain_api_enabled = 'Yes';
-
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-        $chatbot_chatgpt_api_enabled = 'No';
-
-        update_option('chatbot_nvidia_api_enabled', 'No');
-        $chatbot_nvidia_api_enabled = 'No';
-
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-        $chatbot_transformer_model_api_enabled = 'No';
-        
-        update_option('chatbot_anthropic_api_enabled', 'No');
-        $chatbot_anthropic_api_enabled = 'No';
-
-    } else if ($chatbot_ai_platform_choice == 'Transformer') {
-
-        $chatbot_ai_platform_choice = 'Transformer';
-        update_option('chatbot_ai_platform_choice', 'Transformer');
-        update_option('chatbot_transformer_model_api_enabled', 'Yes');
-        $chatbot_transformer_model_api_enabled = 'Yes';
-
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-        $chatbot_chatgpt_api_enabled = 'No';
-
-        update_option('chatbot_nvidia_api_enabled', 'No');
-        $chatbot_nvidia_api_enabled = 'No';
-
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-        $chatbot_markov_chain_api_enabled = 'No';
-
-        update_option('chatbot_anthropic_api_enabled', 'No');
-        $chatbot_anthropic_api_enabled = 'No';
-
-    } else if ($chatbot_ai_platform_choice == 'Anthropic') {
-
-        $chatbot_ai_platform_choice = 'Anthropic';
-        update_option('chatbot_ai_platform_choice', 'Anthropic');
-        update_option('chatbot_anthropic_api_enabled', 'Yes');
-        $chatbot_anthropic_api_enabled = 'Yes';
-
-        update_option('chatbot_chatgpt_api_enabled', 'No');
-        $chatbot_chatgpt_api_enabled = 'No';
-
-        update_option('chatbot_nvidia_api_enabled', 'No');
-        $chatbot_nvidia_api_enabled = 'No';
-
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-        $chatbot_transformer_model_api_enabled = 'No';
-        
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-        $chatbot_markov_chain_api_enabled = 'No';
-
-    } else {
-
-        $chatbot_ai_platform_choice = 'OpenAI';
-        update_option('chatbot_ai_platform_choice', 'OpenAI');
-        update_option('chatbot_chatgpt_api_enabled', 'Yes');
-        $chatbot_chatgpt_api_enabled = 'Yes';
-
-        update_option('chatbot_nvidia_api_enabled', 'No');
-        $chatbot_nvidia_api_enabled = 'No';
-
-        update_option('chatbot_markov_chain_api_enabled', 'No');
-        $chatbot_markov_chain_api_enabled = 'No';
-
-        update_option('chatbot_transformer_model_api_enabled', 'No');
-        $chatbot_transformer_model_api_enabled = 'No';
-        
-        update_option('chatbot_anthropic_api_enabled', 'No');
-        $chatbot_anthropic_api_enabled = 'No';
-
     }
-
+    update_option('chatbot_ai_platform_choice', $chatbot_ai_platform_choice);
+    
+    foreach ($platforms as $platform) {
+        $enabled = $chatbot_ai_platform_choice === $platform ? 'Yes' : 'No';
+        update_option("chatbot_" . strtolower(str_replace(' ', '_', $platform)) . "_api_enabled", $enabled);
+    }
+    
     ?>
     <select id="chatbot_ai_platform_choice" name="chatbot_ai_platform_choice">
         <option value="OpenAI" <?php selected( $chatbot_ai_platform_choice, 'OpenAI' ); ?>><?php echo esc_html( 'OpenAI' ); ?></option>
@@ -168,6 +63,7 @@ function chatbot_ai_platform_choice_callback($args) {
         <?php
         $chatbot_chatgpt_enable_beta_features = esc_attr(get_option('chatbot_chatgpt_enable_beta_features', 'no'));
         if ($chatbot_chatgpt_enable_beta_features === 'yes') : ?>
+            <option value="DeepSeek" <?php selected( $chatbot_ai_platform_choice, 'DeepSeek' ); ?>><?php echo esc_html( 'DeepSeek' ); ?></option>
             <!-- <option value="Markov Chain" <?php selected( $chatbot_ai_platform_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option> -->
             <option value="Transformer" <?php selected( $chatbot_ai_platform_choice, 'Transformer' ); ?>><?php echo esc_html( 'Transformer' ); ?></option>
         <?php endif; ?>

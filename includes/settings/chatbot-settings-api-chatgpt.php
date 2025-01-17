@@ -16,21 +16,26 @@ if ( ! defined( 'WPINC' ) ) {
 
 // API/ChatGPT Settings section callback - Ver 1.3.0 - Updated Ver 2.0.2.1
 function chatbot_chatgpt_model_settings_section_callback($args) {
+
     ?>
     <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/ChatGPT Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-chatgpt-settings&file=api-chatgpt-model-settings.md">here</a>.</b></p>
     <?php
+
 }
 
 function chatbot_chatgpt_api_chatgpt_general_section_callback($args) {
+
     ?>
     <p>Configure the settings for the plugin by adding your API key. This plugin requires an API key from OpenAI to function. You can obtain an API key by signing up at <a href="https://platform.openai.com/account/api-keys" target="_blank">https://platform.openai.com/account/api-keys</a>.</p>
     <?php
+
 }
 
 function chatbot_chatgpt_api_chatgpt_chat_section_callback($args) {
+
     ?>
     <p>Configure the settings for the plugin when using chat models. Depending on the OpenAI model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank">https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -40,9 +45,11 @@ function chatbot_chatgpt_api_chatgpt_chat_section_callback($args) {
         <!-- <li><code>&#91;chatbot style=embedded model=chat&#93;</code> - Style is embedded, default chat model</li> -->
     </ul>
     <?php
+
 }
 
 function chatbot_chatgpt_api_chatgpt_image_section_callback($args) {
+
     ?>
     <p>Configure the settings for the plugin when using image models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -51,9 +58,11 @@ function chatbot_chatgpt_api_chatgpt_image_section_callback($args) {
         <!-- <li><code>&#91;chatbot style=embedded model=image&#93;</code> - Style is embedded, default image model</li> -->
     </ul>
     <?php
+
 }
 
 function chatbot_chatgpt_api_chatgpt_voice_section_callback($args) {
+
     ?>
     <p>Configure the settings for the plugin when using audio models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -64,10 +73,12 @@ function chatbot_chatgpt_api_chatgpt_voice_section_callback($args) {
     </ul>
     <p>There are also the default options for the "read aloud" button on the chatbot interface</p>
     <?php
+
 }
 
 // Whisper Section Callback - Ver 2.0.1
 function chatbot_chatgpt_api_chatgpt_whisper_section_callback($args) {
+
     ?>
     <p>Configure the settings for the plugin when using whisper models. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
@@ -76,20 +87,26 @@ function chatbot_chatgpt_api_chatgpt_whisper_section_callback($args) {
         <!-- <li><code>&#91;chatbot style=embedded model=whisper&#93;</code> - Style is embedded, default whisper model</li> -->
     </ul>
     <?php
+
 }
 
 function chatbot_chatgpt_api_chatgpt_advanced_section_callback($args) {
+
     ?>
     <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
     <?php
+
 }
 
 // API key field callback
 function chatbot_chatgpt_api_key_callback($args) {
+
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+
     ?>
     <input type="password" id="chatbot_chatgpt_api_key" name="chatbot_chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
+
 }
 
 // OpenAI Models
@@ -140,6 +157,7 @@ function chatbot_chatgpt_model_choice_callback($args) {
 
 // Max Tokens choice - Ver 1.4.2
 function chatgpt_max_tokens_setting_callback($args) {
+
     // Get the saved chatbot_chatgpt_max_tokens_setting or default to 500
     $max_tokens = esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '500'));
     // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
@@ -152,10 +170,12 @@ function chatgpt_max_tokens_setting_callback($args) {
         ?>
     </select>
     <?php
+
 }
 
 // Conversation Context - Ver 1.6.1
 function chatbot_chatgpt_conversation_context_callback($args) {
+
     // Get the value of the setting we've registered with register_setting()
     $chatbot_chatgpt_conversation_context = esc_attr(get_option('chatbot_chatgpt_conversation_context'));
 
@@ -170,11 +190,13 @@ function chatbot_chatgpt_conversation_context_callback($args) {
     <!-- Define the textarea field. -->
     <textarea id='chatbot_chatgpt_conversation_context' name='chatbot_chatgpt_conversation_context' rows='5' cols='50' maxlength='12500'><?php echo esc_html(stripslashes($chatbot_chatgpt_conversation_context)); ?></textarea>
     <?php
+
 }
 
 // Set chatbot_chatgpt_temperature - Ver 2.0.1
 // https://platform.openai.com/docs/assistants/how-it-works/temperature
 function chatbot_chatgpt_temperature_callback($args) {
+
     $temperature = esc_attr(get_option('chatbot_chatgpt_temperature', 0.50));
     ?>
     <select id="chatbot_chatgpt_temperature" name="chatbot_chatgpt_temperature">
@@ -185,11 +207,13 @@ function chatbot_chatgpt_temperature_callback($args) {
         ?>
     </select>
     <?php
+
 }
 
 // Set chatbot_chatgpt_top_p - Ver 2.0.1
 // https://platform.openai.com/docs/assistants/how-it-works/top-p
 function chatbot_chatgpt_top_p_callback($args) {
+
     $top_p = esc_attr(get_option('chatbot_chatgpt_top_p', 1.00));
     ?>
     <select id="chatbot_chatgpt_top_p" name="chatbot_chatgpt_top_p">
@@ -200,55 +224,16 @@ function chatbot_chatgpt_top_p_callback($args) {
         ?>
     </select>
     <?php
+
 }
 
 // Base URL for the OpenAI API - Ver 1.8.1
 function chatbot_chatgpt_base_url_callback($args) {
+
     $chatbot_chatgpt_base_url = esc_attr(get_option('chatbot_chatgpt_base_url', 'https://api.openai.com/v1'));
     ?>
     <input type="text" id="chatbot_chatgpt_base_url" name="chatbot_chatgpt_base_url" value="<?php echo esc_attr( $chatbot_chatgpt_base_url ); ?>" class="regular-text">
     <?php
-}
-
-// Base URL function calls - Ver 1.8.1
-function get_openai_api_base_url() {
-    return esc_attr(get_option('chatbot_chatgpt_base_url', 'https://api.openai.com/v1'));
-}
-
-// Base URL for the NVIDIA - Ver 2.1.8
-function get_nvidia_api_base_url() {
-    return esc_attr(get_option('chatbot_nvidia_base_url', 'https://integrate.api.nvidia.com/v1'));
-}
-
-// Base URL for the Anthropic - Ver 2.2.1
-function get_anthropic_api_base_url() {
-    return esc_attr(get_option('chatbot_anthropic_base_url', 'https://api.anthropic.com/v1'));
-}
-
-function get_threads_api_url() {
-    return get_openai_api_base_url() . "/threads";
-}
-
-function get_files_api_url() {
-    return get_openai_api_base_url() . "/files";
-}
-
-function get_chat_completions_api_url() {
-
-    // Enable for either ChatGPT or NVIDIA - Ver 2.1.8
-    if (get_option('chatbot_nvidia_api_enabled') == 'Yes' || esc_attr(get_option('chatbot_ai_platform_choice')) == 'NVIDIA') {
-        // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'get_chat_completions_api_url: NVIDIA API' );
-        return get_nvidia_api_base_url() . "/chat/completions";
-    } else if (get_option('chatbot_anthropic_api_enabled') == 'Yes' || esc_attr(get_option('chatbot_ai_platform_choice')) == 'Anthropic') {
-        // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace( 'NOTICE', 'get_chat_completions_api_url: Anthropic API' );
-        return get_anthropic_api_base_url() . "/messages";
-    } else {
-        // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'get_chat_completions_api_url: OpenAI API' );
-        return get_openai_api_base_url() . "/chat/completions";
-    }
 
 }
 

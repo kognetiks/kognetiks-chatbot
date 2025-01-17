@@ -9,7 +9,7 @@
  * License:     GPLv3 or later
  * License URI: https://www.gnu.org/licenses/gpl-30.html
  * 
- * Copyright (c) 2024 Stephen Howell
+ * Copyright (c) 2023-2025 Stephen Howell
  *  
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU
  * General Public License version 3, as published by the Free Software Foundation. You may NOT assume
@@ -83,6 +83,7 @@ ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-anthropic-api.php';         // ANT API - Ver 2.0.7
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-deepseek-api.php';          // ChatGPT API - Ver 2.2.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-mc.php';      // Kognetiks - Markov Chain API - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-tm.php';      // Kognetiks - Transformer Model API - Ver 2.2.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-nvidia-api.php';            // NVIDIA API - Ver 2.1.8
@@ -103,29 +104,30 @@ require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-a
 require_once plugin_dir_path(__FILE__) . 'includes/appearance/chatbot-settings-appearance-user-css.php';
 
 // Include necessary files - Knowledge Navigator
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-controller.php'; // Knowledge Navigator Acquisition - Ver 1.9.6
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php'; // Knowledge Navigator Acquisition - Ver 1.9.6
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-analysis.php'; // Knowledge Navigator Analysis- Ver 1.6.2
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-db.php'; // Knowledge Navigator - Database Management - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-context.php'; // Knowledge Navigator - Enhance Context - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-response.php'; // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php'; // Knowledge Navigator - Scheduler - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php'; // Knowledge Navigator - Settings - Ver 1.6.1
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-controller.php';  // Knowledge Navigator Acquisition - Ver 1.9.6
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-acquire-words.php';       // Knowledge Navigator Acquisition - Ver 1.9.6
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-analysis.php';            // Knowledge Navigator Analysis- Ver 1.6.2
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-db.php';                  // Knowledge Navigator - Database Management - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-context.php';     // Knowledge Navigator - Enhance Context - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-enhance-response.php';    // Knowledge Navigator - TD-IDF Response Enhancement - Ver 1.6.9
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-scheduler.php';           // Knowledge Navigator - Scheduler - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/knowledge-navigator/chatbot-kn-settings.php';            // Knowledge Navigator - Settings - Ver 1.6.1
 
 // Include necessary files - Markov Chain - Ver 2.1.9
-require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-decode.php'; // Functions - Ver 2.1.9
-require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-decode-beaker.php'; // Functions - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-encode.php'; // Functions - Ver 2.1.9
-require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-scheduler.php'; // Functions - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-decode.php';           // Functions - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-decode-beaker.php';    // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-encode.php';           // Functions - Ver 2.1.9
+require_once plugin_dir_path(__FILE__) . 'includes/markov-chain/chatbot-markov-chain-scheduler.php';        // Functions - Ver 2.1.9
 
 // Include necessary files - Transformer Model - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/transformers/lexical-context-model.php'; // Functions - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-context-model.php'; // Functions - Ver 2.2.0
-require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-model-scheduler.php'; // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformers/lexical-context-model.php';                 // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-context-model.php';              // Functions - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-model-scheduler.php';           // Functions - Ver 2.2.0
 
 // Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-anthropic.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-deepseek.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
@@ -151,27 +153,29 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-tra
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
 // Include necessary files - Utilities - Ver 1.9.0
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants.php'; // Assistants Management - Ver 2.0.4
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php'; // Ver 1.9.2
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php'; // Database Management for Reporting - Ver 1.6.3
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php'; // Deactivation - Ver 1.9.9
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-download-transcript.php'; // Functions - Ver 1.9.9
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php'; // Functions - Ver 1.8.6
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-download.php'; // Download a file via the API - Ver 2.0.3
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper.php'; // Functions - Ver 2.0.3
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php'; // Functions - Ver 1.7.6
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php'; // Functions - Ver 1.9.6
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php'; // Globals - Ver 1.9.1
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php'; // Functions - Ver 1.9.4
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php'; // Functions - Ver 1.9.4
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php'; // Functions - Ver 2.0.5
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php'; // Ver 1.7.2.1
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-file.php'; // Ver 1.9.2
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php'; // Ver 1.7.2
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php'; // Ver 1.6.7
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php'; // Ver 1.8.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-api-endpoints.php';                // API Endpoints - Ver 2.2.2
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants.php';                   // Assistants Management - Ver 2.0.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php';         // Ver 1.9.2
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php';                // Database Management for Reporting - Ver 1.6.3
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php';                   // Deactivation - Ver 1.9.9
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-download-transcript.php';          // Functions - Ver 1.9.9
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-erase-conversation.php';           // Functions - Ver 1.8.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-download.php';                // Download a file via the API - Ver 2.0.3
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper.php';                  // Functions - Ver 2.0.3
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php';                  // Functions - Ver 1.7.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php';         // Functions - Ver 1.9.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php';      // Globals - Ver 1.9.1
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php';                       // Functions - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php';                        // Functions - Ver 1.9.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-options-helper.php';               // Functions - Ver 2.0.5
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php';                      // Ver 1.7.2.1
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-file.php';              // Ver 1.9.2
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php';                   // Ver 1.7.2
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php';                      // Ver 1.6.7
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php';                    // Ver 1.8.6
 
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php'; // Version 2.0.2.1
+// Third-party libraries
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php';                            // Version 2.0.2.1
 
 // Include necessary files - Tools - Ver 2.0.6
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-capability-tester.php';
@@ -203,6 +207,9 @@ global $voice;
 // FIXME - SEE AI Platform Selection setting - Ver 2.1.8
 $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
+// DIAG - Diagnostics
+back_trace( 'NOTICE', 'AI Platform: ' . $chatbot_ai_platform_choice);
+
 switch ($chatbot_ai_platform_choice) {
 
     case 'OpenAI':
@@ -217,6 +224,9 @@ switch ($chatbot_ai_platform_choice) {
     
         $chatbot_anthropic_api_enabled = 'No';
         update_option('chatbot_anthropic_api_enabled', 'No');
+
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
 
         $chatbot_markov_chain_api_enabled = 'No';
         update_option('chatbot_markov_chain_api_enabled', 'No');
@@ -257,6 +267,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_anthropic_api_enabled = 'No';
         update_option('chatbot_anthropic_api_enabled', 'No');
 
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
+
         $chatbot_markov_chain_api_enabled = 'No';
         update_option('chatbot_markov_chain_api_enabled', 'No');
 
@@ -295,6 +308,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_anthropic_api_enabled = 'Yes';
         update_option('chatbot_anthropic_api_enabled', 'Yes');
 
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
+
         $chatbot_markov_chain_api_enabled = 'No';
         update_option('chatbot_markov_chain_api_enabled', 'No');
 
@@ -320,6 +336,47 @@ switch ($chatbot_ai_platform_choice) {
 
         break;
 
+    case 'DeepSeek':
+
+        update_option('chatbot_ai_platform_choice', 'DeepSeek');
+
+        $chatbot_chatgpt_api_enabled = 'No';
+        update_option('chatbot_chatgpt_api_enabled', 'No');
+
+        $chatbot_nvidia_api_enabled = 'No';
+        update_option('chatbot_nvidia_api_enabled', 'No');
+
+        $chatbot_anthropic_api_enabled = 'No';
+        update_option('chatbot_anthropic_api_enabled', 'No');
+
+        $chatbot_deepseek_api_enabled = 'Yes';
+        update_option('chatbot_deepseek_api_enabled', 'Yes');
+
+        $chatbot_markov_chain_api_enabled = 'No';
+        update_option('chatbot_markov_chain_api_enabled', 'No');
+
+        $chatbot_transformer_model_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+
+        // Model choice - Ver 2.2.1
+        if (esc_attr(get_option('chatbot_deepseek_model_choice')) === null) {
+            $model = 'deepseek-chat';
+            update_option('chatbot_deepseek_model_choice', $model);
+            // DIAG - Diagnostics
+            back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+        } elseif (empty($model)) {
+            $model = 'deepseek-chat';
+        }
+
+        // Disable Read Aloud - Ver 2.2.1
+        update_option('chatbot_chatgpt_read_aloud_option', 'no');
+        // Disable File Uploads - Ver 2.2.1
+        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
+        // Disable MP3 Uploads - Ver 2.2.1
+        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
+
+        break;
+
     case 'Markov Chain':
 
         update_option('chatbot_ai_platform_choice', 'Markov Chain');
@@ -332,6 +389,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_anthropic_api_enabled = 'No';
         update_option('chatbot_anthropic_api_enabled', 'No');
+
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
 
         $chatbot_markov_chain_api_enabled = 'Yes';
         update_option('chatbot_markov_chain_api_enabled', 'Yes');
@@ -370,7 +430,10 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_anthropic_api_enabled = 'No';
         update_option('chatbot_anthropic_api_enabled', 'No');
-    
+
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
+   
         $chatbot_markov_chain_api_enabled = 'No';
         update_option('chatbot_markov_chain_api_enabled', 'No');
 
@@ -408,6 +471,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_anthropic_api_enabled = 'No';
         update_option('chatbot_anthropic_api_enabled', 'No');
+
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
 
         $chatbot_markov_chain_api_enabled = 'No';
         update_option('chatbot_markov_chain_api_enabled', 'No');
@@ -728,7 +794,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 730 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 797 - $model: ' . $model);
             break;
 
         case 'NVIDIA':
@@ -738,7 +804,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 740 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 807 - $model: ' . $model);
             break;
 
         case 'Anthropic':
@@ -748,9 +814,18 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 750 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 817 - $model: ' . $model);
             break;
 
+        case 'DeepSeek':
+
+            $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
+            $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
+            $kchat_settings['chatbot_chatgpt_model'] = $model;
+            $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.2.2
+            // back_trace( 'NOTICE', 'LINE 827 - $model: ' . $model);
+            break;
         
         case 'Markov Chain':
 
@@ -759,7 +834,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 761 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 837 - $model: ' . $model);
             break;
 
         case 'Transformer':
@@ -769,7 +844,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 771 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 847 - $model: ' . $model);
             break;
 
         default:
@@ -779,7 +854,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 781 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 857 - $model: ' . $model);
             break;
 
     }
@@ -1096,7 +1171,7 @@ function chatbot_chatgpt_send_message() {
         $voice = isset($kchat_settings['voice']) ? $kchat_settings['voice'] : null;
 
         // FIXME - TESTING - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 1098 - $model: ' . $model);
+        back_trace( 'NOTICE', 'LINE 1098 - $model: ' . $model);
 
         if (str_starts_with($model !== null && $model, 'gpt-4o')) {
 
@@ -1159,6 +1234,14 @@ function chatbot_chatgpt_send_message() {
             // back_trace( 'NOTICE', 'Calling Anthropic API');
             // Send message to Claude API - Ver 2.1.8
             $response = chatbot_call_anthropic_api($api_key, $message);
+
+        } elseif ($model !==null && str_starts_with($model,'deepseek')) {
+
+            $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.2.2
+            back_trace( 'NOTICE', 'Calling DeepSeek API');
+            // Send message to DeepSeek API - Ver 2.2.2
+            $response = chatbot_call_deepseek_api($api_key, $message);
 
         } elseif ($model !== null && str_starts_with($model,'markov')) {
 

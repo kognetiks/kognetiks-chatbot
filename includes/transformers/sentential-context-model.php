@@ -18,6 +18,11 @@ function transformer_model_sentential_context_model_response($input, $responseCo
     // DIAG - Diagnostic - Ver 2.2.1
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
 
+    // Normalize the input string - Ver 2.2.2
+    if (class_exists('Normalizer')) {
+        $input = Normalizer::normalize($input, Normalizer::FORM_C);
+    }
+
     // MOVED TO transformer-model-scheduler.php
     // Fetch WordPress content
     $corpus = transformer_model_sentential_context_fetch_wordpress_content( $input );
@@ -58,8 +63,10 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     // back_trace( 'NOTICE', '$input: ' . $input);
 
     // Step 1 - Normalize and remove stop words
-    $input = preg_replace('/[^\w\s]/', '', $input);
-    $words = array_filter(array_map('trim', explode(' ', strtolower($input))));
+    // $input = preg_replace('/[^\w\s]/', '', $input);
+    $input = preg_replace('/[^\p{L}\s]/u', '', $input); // Ver 2.2.2
+    // $words = array_filter(array_map('trim', explode(' ', strtolower($input))));
+    $words = array_filter(array_map('trim', explode(' ', mb_strtolower($input, 'UTF-8')))); // Ver 2.2.2
     $words = transformer_model_sentential_context_remove_stop_words($words);
 
     // Step 2 - Query the TF-IDF table for the highest-scoring words
@@ -391,13 +398,13 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $totalSentencesAnalyzed = count($sentences);
 
     // Before returning repsonse log the key stats
-    // back_trace( 'NOTICE', 'Key Stats:');
-    // back_trace( 'NOTICE', ' - Input: ' . $input);
-    // back_trace( 'NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
-    // back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    // back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    // back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    // back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
+    back_trace( 'NOTICE', 'Key Stats:');
+    back_trace( 'NOTICE', ' - Input: ' . $input);
+    back_trace( 'NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
+    back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
+    back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
+    back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
+    back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // Return the response
     return $response;

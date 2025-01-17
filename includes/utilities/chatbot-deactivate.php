@@ -69,6 +69,10 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting Anthropic options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_anthropic%'");
 
+        // Delete DeepSeek options
+        // back_trace( 'NOTICE', 'Deleting DeepSeek options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_deepseek%'");
+
         // Delete Markov Chain options
         // back_trace( 'NOTICE', 'Deleting Markov Chain options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_markov%'");

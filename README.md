@@ -63,13 +63,16 @@ With the integration of Text-to-Speech (TTS) models, the chatbot can now convert
 ▪ **Always Available:** Provide round-the-clock assistance in various domains, from healthcare to education.
 ▪ **Seamless Integration:** Effortlessly bring your WordPress site to life with an easy-to-use plugin.
 
-**✨ Supported Models from OpenAI, NVIDIA, and Anthropic**
+**✨ Supported Models from OpenAI, NVIDIA, Anthropic, and DeepSeek**
 
-For a full list of OpenAI models, please see [OpenAI's Model Overview](https://platform.openai.com/docs/models/overview).
+For a full list of models see:
 
-For a full list of NVIDIA models, please see [NVIDIA's Model Overview](https://docs.nvidia.com/nim/large-language-models/latest/models.html).
+- [OpenAI's Model Overview](https://platform.openai.com/docs/models/overview)
+- [NVIDIA's Model Overview](https://docs.nvidia.com/nim/large-language-models/latest/models.html)
+- [Anthropic's Model Overview](https://docs.anthropic.com/en/docs/about-claude/models)
+- [DeepSeek's Model Overview](https://api-docs.deepseek.com/quick_start/pricing)
 
-For a full list of Anthropic models, please see [Anthropic's Model Overview](https://docs.anthropic.com/en/docs/about-claude/models).
+For a full list of Deep
 
 **🚀 Elevate Your Website Experience**
 The Kognetiks Chatbot is more than just a plugin – it's a transformational tool for your website. With advanced AI technology at its core, it promises a unique and interactive experience for your visitors.
@@ -83,16 +86,18 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
+- **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
 
 **IMPORTANT**:
 
-- This plugin requires an API key from OpenAI, NVIDIA, or Anthropic to function. Without an API key, the chatbot cannot process user queries.
+- This plugin requires an API key from OpenAI, NVIDIA, Anthropic or DeepSeek to function. Without an API key, the chatbot cannot process user queries.
 
 - Obtain API keys here:
 
    - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
+   - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
 
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
@@ -213,7 +218,7 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 
 ## Disclaimer
 
-WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, or Anthropic.
+WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic or DeepSeek.
 
 ## Thank you for using Kognetiks Chatbot
 

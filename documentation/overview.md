@@ -13,16 +13,18 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
+- **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
 
 **IMPORTANT**:
 
-- This plugin requires an API key from OpenAI, NVIDIA, or Anthropic to function. Without an API key, the chatbot cannot process user queries.
+- This plugin requires an API key from OpenAI, NVIDIA, Anthropic or DeepSeek to function. Without an API key, the chatbot cannot process user queries.
 
 - Obtain API keys here:
 
    - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
+   - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
 
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
@@ -63,6 +65,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 - [API/NVIDIA Settings](api-nvidia-settings/api-nvidia-model-settings.md)
 
 - [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
+
+- [API/DeepSeek Settings](api-deepseek-settings/api-deepseek-model-settings.md)
 
 - [Assistants](assistants/manage-assistants.md)
 
@@ -110,8 +114,7 @@ While AI-powered applications strive for accuracy, they can sometimes make mista
 
 ## Disclaimer
 
-WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, or Anthropic.
-
+WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic or DeepSeek.
 ---
 
 * **[Back to the Overview](/overview.md)**

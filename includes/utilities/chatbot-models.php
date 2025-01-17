@@ -326,3 +326,64 @@ function chatbot_anthropic_get_models() {
     return $models;
 
 }
+
+// Function to get the Model names from DeepSeek API
+function chatbot_deepseek_get_models() {
+
+    // https://api-docs.deepseek.com/
+    // https://api-docs.deepseek.com/quick_start/pricing
+
+    // Default model list
+    $default_model_list = '';
+    $default_model_list = array(
+        array(
+            'id' => 'deepseek-chat',
+            'object' => 'model',
+            'created' => 20250116,
+            'owned_by' => 'deepseek'
+        ),
+    );
+
+    // FIXME - DeepSeek API does not have an endpoint for models
+    // Call the API to get the models
+
+    // Decode the JSON response
+    // $data = json_decode($response, true);
+
+    // FIXME - Force an error since there is no api endpoint for models
+    $data = array('error' => array('message' => 'No models endpoint available'));
+
+    // Check for API errors
+    if (isset($data['error'])) {
+        // return "Error: " . $data['error']['message'];
+        // On 1st install needs an API key
+        // So return a short list of the base models until an API key is entered
+        return $default_model_list;
+    }
+
+    // Extract the models from the response
+    if (isset($data['data']) && !is_null($data['data'])) {
+        $models = $data['data'];
+    } else {
+        // Handle the case where 'data' is not set or is null
+        $models = []; // Empty array
+        ksum_prod_trace( 'WARNING', 'Data key is not set or is null in the \$data array.');
+    }
+
+    // Ensure $models is an array
+    if (!is_array($models)) {
+        return $default_model_list;
+    } else {
+        // Sort the models by name
+        usort($models, function($a, $b) {
+            return $a['id'] <=> $b['id'];
+        });
+    }
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
+
+    // Return the list of models
+    return $models;
+
+}
