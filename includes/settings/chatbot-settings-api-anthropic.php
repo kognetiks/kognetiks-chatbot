@@ -186,10 +186,10 @@ function chatbot_anthropic_timeout_setting_callback($args) {
 function chatbot_anthropic_api_settings_init() {
 
     add_settings_section(
-        'chatbot_anthropic_settings_section',
-        'API/Anthropic Settings',
-        'chatbot_anthropic_model_settings_section_callback',
-        'chatbot_anthropic_model_settings_general'
+        'chatbot_anthropic_settings_section',                   // ID used to identify this section and with which to register options
+        'API/Anthropic Settings',                               // Title to be displayed on the administration page
+        'chatbot_anthropic_model_settings_section_callback',    // Callback used to render the description of the section
+        'chatbot_anthropic_model_settings_general'              // Page on which to add this section of options
     );
 
     // API/Anthropic settings tab - Ver 2.1.8

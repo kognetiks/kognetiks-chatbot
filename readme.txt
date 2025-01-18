@@ -203,6 +203,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 = 2.2.2 - Release TBD =
 
 * **DeepSeek API Integration**: Added support for DeepSeek's API to provide advanced conversational capabilities for the chatbot.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.1.
 
 = 2.2.1 - Release 01-06-2025 =
 

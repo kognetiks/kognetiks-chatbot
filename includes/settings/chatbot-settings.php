@@ -460,6 +460,14 @@ function chatbot_chatgpt_settings_page() {
                 do_settings_sections('chatbot_chatgpt_appearance');
                 echo '</div>';
 
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_appearance_icons_overview');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_appearance_icons');
+                echo '</div>';
+
             // IDEA Coming Soon in Ver 3.0.0
             // } elseif ($active_tab == 'premium') {
             //     settings_fields('chatbot_chatgpt_premium');
