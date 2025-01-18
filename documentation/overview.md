@@ -41,6 +41,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 ## What's New in Version 2.2.2
 
 * **DeepSeek API Integration**: Added support for DeepSeek's API to provide advanced conversational capabilities for the chatbot.
+* **Select Translations**: The plugin's literals, including chatbot-user interaction messages, have been translated into the following languages: Czech, German, Spanish, French, Italian, Polish, Portuguese, and Russian.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.1.
 
 ## Past Updates

@@ -389,7 +389,7 @@ function chatbot_chatgpt_appearance_restore_default_settings() {
     delete_option('chatbot_chatgpt_appearance_width_narrow');
 
     // Now override the css with the default color
-    chatbot_chatgpt_appearance_appearance_css_settings();
+    chatbot_chatgpt_appearance_custom_css_settings();
 
     // Update the width setting to 'Narrow'
     // update_option ('chatbot_chatgpt_width_setting', 'Narrow');
@@ -400,33 +400,33 @@ function chatbot_chatgpt_appearance_restore_default_settings() {
 }
 
 // Override the css with the color chosen by the user
-function chatbot_chatgpt_appearance_appearance_css_settings() {
+function chatbot_chatgpt_appearance_custom_css_settings() {
     
     // Color settings
-    chatbot_chatgpt_appearance_background_appearance_css_settings();
-    chatbot_chatgpt_appearance_header_background_appearance_css_settings();
+    chatbot_chatgpt_appearance_background_custom_css_settings();
+    chatbot_chatgpt_appearance_header_background_custom_css_settings();
 
     // Text settings
-    chatbot_chatgpt_appearance_text_color_appearance_css_settings();
-    chatbot_chatgpt_appearance_user_text_background_appearance_css_settings();
-    chatbot_chatgpt_appearance_bot_text_background_appearance_css_settings();
-    chatbot_chatgpt_appearance_greeting_text_color_appearance_css_settings();
-    chatbot_chatgpt_appearance_header_text_color_appearance_css_settings();
+    chatbot_chatgpt_appearance_text_color_custom_css_settings();
+    chatbot_chatgpt_appearance_user_text_background_custom_css_settings();
+    chatbot_chatgpt_appearance_bot_text_background_custom_css_settings();
+    chatbot_chatgpt_appearance_greeting_text_color_custom_css_settings();
+    chatbot_chatgpt_appearance_header_text_color_custom_css_settings();
 
     // Dimension settings
-    chatbot_chatgpt_appearance_width_wide_appearance_css_settings();
-    chatbot_chatgpt_appearance_width_narrow_appearance_css_settings();
+    chatbot_chatgpt_appearance_width_wide_custom_css_settings();
+    chatbot_chatgpt_appearance_width_narrow_custom_css_settings();
 
     // Image settings
-    chatbot_chatgpt_appearance_image_width_appearance_css_settings();
+    chatbot_chatgpt_appearance_image_width_custom_css_settings();
 
     // Inject inline css
-    chatbot_chatgpt_appearance_inject_appearance_css_settings();
+    chatbot_chatgpt_appearance_inject_custom_css_settings();
 
 }
 
 // Inject the custom css settings
-function chatbot_chatgpt_appearance_inject_appearance_css_settings() {
+function chatbot_chatgpt_appearance_inject_custom_css_settings() {
 
     global $page_id;
 
@@ -468,8 +468,7 @@ function chatbot_chatgpt_appearance_inject_appearance_css_settings() {
     
 }
 // Hook into wp_footer
-add_action('wp_footer', 'chatbot_chatgpt_appearance_inject_appearance_css_settings');
-
+add_action('wp_footer', 'chatbot_chatgpt_appearance_inject_custom_css_settings');
 
 // Custom Icons Section Callback - Ver 2.2.2
 function chatbot_chatgpt_appearance_icons_appearance_section_callback() {
