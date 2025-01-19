@@ -206,7 +206,7 @@ function chatbot_chatgpt_upload_files() {
         global $chatbot_chatgpt_fixed_literal_messages;
         // Define a default fallback message
         $default_message = 'Oops! Please select a file to upload.';
-        $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[5]) 
+        $error_message = isset($chatbot_chatgpt_fixed_literal_messages[5]) 
             ? $chatbot_chatgpt_fixed_literal_messages[5] 
             : $default_message;
         return array(
@@ -339,7 +339,7 @@ function chatbot_chatgpt_upload_mp3() {
                 global $chatbot_chatgpt_fixed_literal_messages;
                 // Define a default fallback message
                 $default_message = "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
-                $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[4]) 
+                $error_message = isset($chatbot_chatgpt_fixed_literal_messages[4]) 
                     ? $chatbot_chatgpt_fixed_literal_messages[4] 
                     : $default_message;
                 $responses[] = array(
@@ -417,7 +417,7 @@ function chatbot_chatgpt_upload_mp3() {
         global $chatbot_chatgpt_fixed_literal_messages;
         // Define a default fallback message
         $default_message = 'Oops! Please select a file to upload.';
-        $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[5]) 
+        $error_message = isset($chatbot_chatgpt_fixed_literal_messages[5]) 
             ? $chatbot_chatgpt_fixed_literal_messages[5] 
             : $default_message;
         return array(

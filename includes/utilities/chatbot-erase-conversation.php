@@ -114,7 +114,7 @@ function chatbot_chatgpt_erase_conversation_handler() {
         global $chatbot_chatgpt_fixed_literal_messages;
         // Define a default fallback message
         $default_message = 'Conversation cleared. Please wait while the page reloads.';
-        $success_message = !empty($chatbot_chatgpt_fixed_literal_messages[16])
+        $success_message = isset($chatbot_chatgpt_fixed_literal_messages[16])
             ? $chatbot_chatgpt_fixed_literal_messages[16]
             : $default_message;
         // Send error response
@@ -123,7 +123,7 @@ function chatbot_chatgpt_erase_conversation_handler() {
         global $chatbot_chatgpt_fixed_literal_messages;
         // Define a default fallback message
         $default_message = 'Conversation cleared.';
-        $success_message = !empty($chatbot_chatgpt_fixed_literal_messages[17])
+        $success_message = isset($chatbot_chatgpt_fixed_literal_messages[17])
             ? $chatbot_chatgpt_fixed_literal_messages[17]
             : $default_message;
         // Send error response
@@ -143,7 +143,7 @@ function chatbot_chatgpt_erase_conversation_handler() {
         
     // Define a default fallback message
     $default_message = 'Conversation not cleared.';
-    $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[18])
+    $error_message = isset($chatbot_chatgpt_fixed_literal_messages[18])
         ? $chatbot_chatgpt_fixed_literal_messages[18]
         : $default_message;
     // Send error response

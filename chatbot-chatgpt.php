@@ -872,10 +872,9 @@ function chatbot_chatgpt_send_message() {
         global $chatbot_chatgpt_fixed_literal_messages;
         // Define a default fallback message
         $default_message = 'Error: Invalid API key or Message. Please check the plugin settings.';
-        $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[15]) 
+        $error_message = isset($chatbot_chatgpt_fixed_literal_messages[15]) 
             ? $chatbot_chatgpt_fixed_literal_messages[15] 
             : $default_message;
-    
         // Send error response
         wp_send_json_error($error_message);
     }
@@ -1132,7 +1131,7 @@ function chatbot_chatgpt_send_message() {
             global $chatbot_chatgpt_fixed_literal_messages;
             // Define a default fallback message
             $default_message = 'Oops! Something went wrong on our end. Please try again later!';
-            $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[0]) 
+            $error_message = isset($chatbot_chatgpt_fixed_literal_messages[0]) 
                 ? $chatbot_chatgpt_fixed_literal_messages[0] 
                 : $default_message;
         
@@ -1326,7 +1325,7 @@ function chatbot_chatgpt_send_message() {
     global $chatbot_chatgpt_fixed_literal_messages;       
     // Define a default fallback message
     $default_message = 'Oops! I fell through the cracks!';
-    $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[1]) 
+    $error_message = isset($chatbot_chatgpt_fixed_literal_messages[1]) 
         ? $chatbot_chatgpt_fixed_literal_messages[1] 
         : $default_message;
 
