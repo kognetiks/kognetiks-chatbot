@@ -82,7 +82,9 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         );
         $rows = $wpdb->get_results($query);
 
-        if (!$wpdb->last_error && !empty($rows)) {
+        if ($wpdb->last_error) {
+            prod_trace( 'ERROR', 'WordPress database error: ' . $wpdb->last_error);
+        } elseif (!empty($rows)) {
             foreach ($rows as $row) {
                 $results[] = ['word' => $row->word, 'score' => $row->score];
             }
@@ -226,6 +228,10 @@ function transformer_model_sentential_context_remove_stop_words($words) {
     // Use global stop words list
     global $stopWords;
 
+    if (!is_array($stopWords)) {
+        $stopWords = array(); // Ensure $stopWords is an array
+    }
+
     return array_diff($words, $stopWords);
 
 }
@@ -347,12 +353,12 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $response = $bestMatchSentence;
 
     // Retrieve settings
-    $maxSentences = intval(esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 10)));
-    $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
+    $maxSentences = intval(esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 20)));
+    $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 10000)));
 
     // Ratios for splitting sentences and tokens
-    $sentenceBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_sentences_ratio', '0.2'))); // 20% of sentences before
-    $tokenBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_token_ratio', '0.2')));    // 20% of tokens before
+    $sentenceBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_sentences_ratio', '0.2')));  // 20% of sentences before
+    $tokenBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_token_ratio', '0.2')));         // 20% of tokens before
 
     // Distribute sentences and tokens
     $sentencesBefore = floor($maxSentences * $sentenceBeforeRatio);

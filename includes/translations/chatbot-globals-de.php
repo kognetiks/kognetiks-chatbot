@@ -135,3 +135,23 @@ $chatbotFallbackResponses = [
     "Entschuldigung, ich verstehe das nicht. Können Sie es umformulieren?",
     "Das ist für mich unklar. Könnten Sie es anders stellen?"
 ];
+
+// Declare the $chatbot_chatgpt_fixed_error_messages
+global $chatbot_chatgpt_fixed_error_messages;
+$chatbot_chatgpt_fixed_error_messages = [
+    "Ups! Auf unserer Seite ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut!",                     // [0]
+    "Ups! Ich bin durch die Lücken gefallen!",                                                                      // [1]
+    "Ups! Datei-Upload fehlgeschlagen.",                                                                            // [2]
+    "Ups! Ihr API-Schlüssel fehlt. Bitte geben Sie Ihren API-Schlüssel in den Chatbot-Einstellungen ein.",          // [3]
+    "Ups! Beim Hochladen ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",                        // [4]
+    "Ups! Bitte wählen Sie eine Datei zum Hochladen aus.",                                                          // [5]
+    "Ups! Sie haben das Nachrichtenlimit erreicht. Bitte versuchen Sie es später erneut.",                          // [6]
+    "Ups! Auf unserer Seite ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut!",                     // [7]
+    "Ups! Beim Herunterladen des Transkripts ist ein Problem aufgetreten. Bitte versuchen Sie es später erneut.",   // [8]
+    "Ups! Es gibt keine Antwort zum Vorlesen.",                                                                     // [9]
+    "Ups! Diese Anfrage ist abgelaufen. Bitte versuchen Sie es erneut.",                                            // [10]
+    "Ups! Text-zu-Sprache-Konvertierung fehlgeschlagen. Bitte versuchen Sie es erneut.",                            // [11]
+    "Ups! Nicht unterstützter Dateityp. Bitte versuchen Sie es erneut.",                                            // [12]
+    "Ups! Datei-Upload fehlgeschlagen. Bitte versuchen Sie es erneut.",                                             // [13]
+    "Ups! Das Gespräch konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",                               // [14]
+];

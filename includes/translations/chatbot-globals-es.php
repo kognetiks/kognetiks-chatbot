@@ -135,3 +135,23 @@ $chatbotFallbackResponses = [
     "Lo siento, no entiendo. ¿Podría intentar reformularlo?",
     "Eso no está claro para mí. ¿Podría preguntarlo de una manera diferente?"
 ];
+
+// Declare the $chatbot_chatgpt_fixed_error_messages
+global $chatbot_chatgpt_fixed_error_messages;
+$chatbot_chatgpt_fixed_error_messages = [
+    "¡Ups! Algo salió mal de nuestro lado. Por favor, inténtalo de nuevo más tarde.",                   // [0]
+    "¡Ups! ¡Me he caído por las grietas!",                                                              // [1]
+    "¡Ups! La carga del archivo falló.",                                                                // [2]
+    "¡Ups! Falta tu clave API. Por favor, introduce tu clave API en la configuración del chatbot.",     // [3]
+    "¡Ups! Algo salió mal durante la carga. Por favor, inténtalo de nuevo más tarde.",                  // [4]
+    "¡Ups! Por favor selecciona un archivo para cargar.",                                               // [5]
+    "¡Ups! Has alcanzado el límite de mensajes. Por favor, inténtalo de nuevo más tarde.",              // [6]
+    "¡Ups! Algo salió mal de nuestro lado. Por favor, inténtalo de nuevo más tarde.",                   // [7]
+    "¡Ups! Hubo un problema al descargar la transcripción. Por favor, inténtalo de nuevo más tarde.",   // [8]
+    "¡Ups! No hay ninguna respuesta para leer en voz alta.",                                            // [9]
+    "¡Ups! Esta solicitud se agotó. Por favor, inténtalo de nuevo.",                                    // [10]
+    "¡Ups! Falló la conversión de texto a voz. Por favor, inténtalo de nuevo.",                         // [11]
+    "¡Ups! Tipo de archivo no compatible. Por favor, inténtalo de nuevo.",                              // [12]
+    "¡Ups! Falló la carga del archivo. Por favor, inténtalo de nuevo.",                                 // [13]
+    "¡Ups! No se pudo borrar la conversación. Por favor, inténtalo de nuevo.",                          // [14]
+];

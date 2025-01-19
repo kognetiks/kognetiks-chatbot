@@ -139,3 +139,23 @@ $chatbotFallbackResponses = [
     "I'm sorry, I don't understand. Could you try rewording it?",
     "That's unclear to me. Could you ask it in a different way?"
 ];
+
+// Declare the $chatbot_chatgpt_fixed_error_messages
+global $chatbot_chatgpt_fixed_error_messages;
+$chatbot_chatgpt_fixed_error_messages = [
+    "Oops! Something went wrong on our end. Please try again later!",                    // [0]
+    "Oops! I fell through the cracks!",                                                  // [1]
+    "Oops! File upload failed.",                                                         // [2]
+    "Oops! Your API key is missing. Please enter your API key in the Chatbot settings.", // [3]
+    "Oops! Something went wrong during the upload. Please try again later.",             // [4]
+    "Oops! Please select a file to upload.",                                             // [5]
+    "Oops! You have reached the message limit. Please try again later.",                 // [6]
+    "Oops! Something went wrong on our end. Please try again later.",                    // [7]
+    "Oops! There was a problem downloading the transcript. Please try again later.",     // [8]
+    "Oops! There is no response to read out loud.",                                      // [9]
+    "Oops! This request timed out. Please try again.",                                   // [10]
+    "Oops! Failed to convert text to speech. Please try again.",                         // [11]
+    "Oops! Unsupported file type. Please try again.",                                    // [12]
+    "Oops! Failed to upload file. Please try again.",                                    // [13]
+    "Oops! Unable to clear conversation. Please try again.",                             // [14]
+];

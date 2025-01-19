@@ -135,3 +135,23 @@ $chatbotFallbackResponses = [
     "Desculpe, não entendi. Você pode tentar reformular?",
     "Isso não está claro para mim. Você pode perguntar de outra forma?"
 ];
+
+// Declare the $chatbot_chatgpt_fixed_error_messages
+global $chatbot_chatgpt_fixed_error_messages;
+$chatbot_chatgpt_fixed_error_messages = [
+    "Ops! Algo deu errado do nosso lado. Por favor, tente novamente mais tarde.",                           // [0]
+    "Ops! Eu caí pelas rachaduras!",                                                                        // [1]
+    "Ops! O upload do arquivo falhou.",                                                                     // [2]
+    "Ops! Sua chave de API está ausente. Por favor, insira sua chave de API nas configurações do Chatbot.", // [3]
+    "Ops! Algo deu errado durante o upload. Por favor, tente novamente mais tarde.",                        // [4]
+    "Ops! Por favor, selecione um arquivo para fazer upload.",                                              // [5]
+    "Ops! Você atingiu o limite de mensagens. Por favor, tente novamente mais tarde.",                      // [6]
+    "Ops! Algo deu errado do nosso lado. Por favor, tente novamente mais tarde.",                           // [7]
+    "Ops! Ocorreu um problema ao baixar a transcrição. Por favor, tente novamente mais tarde.",             // [8]
+    "Ops! Não há resposta para ler em voz alta.",                                                           // [9]
+    "Ops! Esta solicitação expirou. Por favor, tente novamente.",                                           // [10]
+    "Ops! Falha ao converter texto em fala. Por favor, tente novamente.",                                   // [11]
+    "Ops! Tipo de arquivo não suportado. Por favor, tente novamente.",                                      // [12]
+    "Ops! Falha ao fazer upload do arquivo. Por favor, tente novamente.",                                   // [13]
+    "Ops! Não foi possível limpar a conversa. Por favor, tente novamente.",                                 // [14]
+];

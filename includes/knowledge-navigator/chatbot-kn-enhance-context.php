@@ -57,6 +57,12 @@ function kn_enhance_context( $message ) {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
     $results = [];
 
+    // Check if the table exists
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$table_name}'") !== $table_name) {
+        prod_trace( 'WARNING', 'Table ' . $table_name . ' does not exist. Skipping knowledge base match step.');
+        return null; // Skip processing if the table doesn't exist
+    }
+
     $limit = esc_attr(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
     
     foreach ($enhancedMessage as $word) {

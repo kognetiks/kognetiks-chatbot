@@ -135,3 +135,23 @@ $chatbotFallbackResponses = [
     "Przepraszam, nie rozumiem. Czy możesz spróbować to przeformułować?",
     "To jest dla mnie niejasne. Czy możesz zapytać w inny sposób?"
 ];
+
+// Declare the $chatbot_chatgpt_fixed_error_messages
+global $chatbot_chatgpt_fixed_error_messages;
+$chatbot_chatgpt_fixed_error_messages = [
+    "Ups! Coś poszło nie tak po naszej stronie. Spróbuj ponownie później.",                     // [0]
+    "Ups! Wpadłem w szczelinę!",                                                                // [1]
+    "Ups! Przesyłanie pliku nie powiodło się.",                                                 // [2]
+    "Ups! Brakuje Twojego klucza API. Wprowadź swój klucz API w ustawieniach Chatbota.",        // [3]
+    "Ups! Coś poszło nie tak podczas przesyłania. Spróbuj ponownie później.",                   // [4]
+    "Ups! Wybierz plik do przesłania.",                                                         // [5]
+    "Ups! Osiągnąłeś limit wiadomości. Spróbuj ponownie później.",                              // [6]
+    "Ups! Coś poszło nie tak po naszej stronie. Spróbuj ponownie później.",                     // [7]
+    "Ups! Wystąpił problem podczas pobierania transkrypcji. Spróbuj ponownie później.",         // [8]
+    "Ups! Brak odpowiedzi do odczytania na głos.",                                              // [9]
+    "Ups! Żądanie przekroczyło limit czasu. Spróbuj ponownie.",                                 // [10]
+    "Ups! Konwersja tekstu na mowę nie powiodła się. Spróbuj ponownie.",                        // [11]
+    "Ups! Nieobsługiwany typ pliku. Spróbuj ponownie.",                                         // [12]
+    "Ups! Przesyłanie pliku nie powiodło się. Spróbuj ponownie.",                               // [13]
+    "Ups! Nie można usunąć rozmowy. Spróbuj ponownie.",                                         // [14]
+];

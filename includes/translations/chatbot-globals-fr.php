@@ -135,3 +135,23 @@ $chatbotFallbackResponses = [
     "Je suis désolé, je ne comprends pas. Pouvez-vous essayer de reformuler ?",
     "Ce n'est pas clair pour moi. Pouvez-vous poser la question d'une manière différente ?"
 ];
+
+// Declare the $chatbot_chatgpt_fixed_error_messages
+global $chatbot_chatgpt_fixed_error_messages;
+$chatbot_chatgpt_fixed_error_messages = [
+    "Oups ! Quelque chose s'est mal passé de notre côté. Veuillez réessayer plus tard.",                        // [0]
+    "Oups ! Je suis tombé à travers les mailles du filet !",                                                    // [1]
+    "Oups ! Le téléchargement du fichier a échoué.",                                                            // [2]
+    "Oups ! Votre clé API est manquante. Veuillez entrer votre clé API dans les paramètres du chatbot.",        // [3]
+    "Oups ! Une erreur s'est produite pendant le téléchargement. Veuillez réessayer plus tard.",                // [4]
+    "Oups ! Veuillez sélectionner un fichier à télécharger.",                                                   // [5]
+    "Oups ! Vous avez atteint la limite de messages. Veuillez réessayer plus tard.",                            // [6]
+    "Oups ! Quelque chose s'est mal passé de notre côté. Veuillez réessayer plus tard.",                        // [7]
+    "Oups ! Un problème est survenu lors du téléchargement de la transcription. Veuillez réessayer plus tard.", // [8]
+    "Oups ! Il n'y a pas de réponse à lire à haute voix.",                                                      // [9]
+    "Oups ! Cette requête a expiré. Veuillez réessayer.",                                                       // [10]
+    "Oups ! La conversion du texte en parole a échoué. Veuillez réessayer.",                                    // [11]
+    "Oups ! Type de fichier non pris en charge. Veuillez réessayer.",                                           // [12]
+    "Oups ! Le téléchargement du fichier a échoué. Veuillez réessayer.",                                        // [13]
+    "Oups ! Impossible de supprimer la conversation. Veuillez réessayer.",                                      // [14]
+];

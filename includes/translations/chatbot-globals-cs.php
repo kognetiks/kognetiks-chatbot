@@ -135,3 +135,23 @@ $chatbotFallbackResponses = [
     "Omlouvám se, nerozumím. Můžete to zkusit přeformulovat?",
     "To mi není jasné. Můžete to položit jiným způsobem?"
 ];
+
+// Declare the $chatbot_chatgpt_fixed_error_messages
+global $chatbot_chatgpt_fixed_error_messages;
+$chatbot_chatgpt_fixed_error_messages = [
+    "Jejda! Na naší straně došlo k chybě. Zkuste to prosím znovu později!",                         // [0]
+    "Jejda! Propadl jsem trhlinou!",                                                                // [1]
+    "Jejda! Nahrání souboru selhalo.",                                                              // [2]
+    "Jejda! Chybí váš API klíč. Prosím, zadejte svůj API klíč v nastavení Chatbota.",               // [3]
+    "Jejda! Během nahrávání došlo k chybě. Zkuste to prosím znovu později.",                        // [4]
+    "Jejda! Prosím vyberte soubor k nahrání.",                                                      // [5]
+    "Jejda! Dosáhli jste limitu zpráv. Zkuste to prosím znovu později.",                            // [6]
+    "Jejda! Na naší straně došlo k chybě. Zkuste to prosím znovu později.",                         // [7]
+    "Jejda! Došlo k problému při stahování přepisu. Zkuste to prosím znovu později.",               // [8]
+    "Jejda! Neexistuje žádná odpověď k předčítání.",                                                // [9]
+    "Jejda! Tento požadavek vypršel. Zkuste to prosím znovu.",                                      // [10]
+    "Jejda! Nepodařilo se převést text na řeč. Zkuste to prosím znovu.",                            // [11]
+    "Jejda! Nepodporovaný typ souboru. Zkuste to prosím znovu.",                                    // [12]
+    "Jejda! Nahrání souboru selhalo. Zkuste to prosím znovu.",                                      // [13]
+    "Jejda! Nelze vymazat konverzaci. Zkuste to prosím znovu.",                                     // [14]
+];

@@ -107,8 +107,8 @@ function chatbot_transformer_model_word_content_window_size_callback($args) {
 // Transformer Similarity Threshold Settings Callback - Ver 2.2.1
 function chatbot_transformer_model_similarity_threshold_callback($args) {
 
-    // Get the saved chatbot_transformer_model_similarity_threshold_setting value or default to 0.2
-    $similarity_threshold = esc_attr(get_option('chatbot_transformer_model_similarity_threshold', '0.2'));
+    // Get the saved chatbot_transformer_model_similarity_threshold_setting value or default to 0.5
+    $similarity_threshold = esc_attr(get_option('chatbot_transformer_model_similarity_threshold', '0.5'));
     // Allow for a range of tokens between 0.1 and 1.0 in 0.1-step increments - Ver 2.2.1
     ?>
     <select id="chatbot_transformer_model_similarity_threshold" name="chatbot_transformer_model_similarity_threshold">
@@ -161,13 +161,13 @@ function chatbot_transformer_model_leading_token_ratio_callback($args) {
 // Transformer Next Phrase Length Settings Callback - Ver 2.1.6
 function chatbot_transformer_model_sentence_response_length_callback($args) {
 
-    // Get the saved chatbot_transformer_model_sentence_response_length_setting value or default to 10
-    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', '10'));
-    // Allow for a range of sentences between 1 and 10 in 1-step increments - Ver 2.1.6
+    // Get the saved chatbot_transformer_model_sentence_response_length_setting value or default to 20
+    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', '20'));
+    // Allow for a range of sentences between 1 and 20 in 1-step increments - Ver 2.1.6
     ?>
     <select id="chatbot_transformer_model_sentence_response_length" name="chatbot_transformer_model_sentence_response_length">
         <?php
-        for ($i=1; $i<=10; $i+=1) {
+        for ($i=1; $i<=20; $i+=1) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($sentence_response_length, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>
@@ -196,14 +196,14 @@ function chatbot_transformer_model_choice_callback($args) {
 // Max Tokens choice - Ver 2.1.9
 function chatbot_transformer_model_max_tokens_setting_callback($args) {
 
-    // Get the saved chatbot_transformer_model_max_tokens or default to 500
-    $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', '500'));
+    // Get the saved chatbot_transformer_model_max_tokens or default to 10000
+    $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', '10000'));
 
     // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
     ?>
     <select id="chatbot_transformer_model_max_tokens" name="chatbot_transformer_model_max_tokens">
         <?php
-        for ($i=100; $i<=4000; $i+=100) {
+        for ($i=100; $i<=50000; $i+=100) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>

@@ -21,6 +21,18 @@ function generate_markov_text_beaker_model($startWords = [], $max_tokens = 500, 
     $markov_chain_table = $wpdb->prefix . 'chatbot_markov_chain';
     $tfidf_table = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
+    // Check if the table exists
+    if ($wpdb->get_var("SHOW TABLES LIKE '$tfidf_table'") !== $tfidf_table) {
+        prod_trace( 'WARNING', 'Table ' . $tfidf_table . ' does not exist. Skipping knowledge base match step.');
+        return null; // Skip processing if the table doesn't exist
+    }
+
+    // Check if the table exists
+    if ($wpdb->get_var("SHOW TABLES LIKE '$markov_chain_table'") !== $markov_chain_table) {
+        prod_trace( 'WARNING', 'Table ' . $markov_chain_table . ' does not exist. Skipping knowledge base match step.');
+        return null; // Skip processing if the table doesn't exist
+    }
+
     $chainLength = intval(esc_attr(get_option('chatbot_markov_chain_length', 3)));
     $maxSentences = intval(esc_attr(get_option('chatbot_markov_chain_max_sentences', 3)));
     $offTopicMax = intval(esc_attr(et_option('chatbot_markov_chain_off_topic_max', 5)));

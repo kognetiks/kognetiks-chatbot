@@ -135,3 +135,23 @@ $chatbotFallbackResponses = [
     "Mi dispiace, non capisco. Puoi provare a riformularlo?",
     "Non mi è chiaro. Puoi porre la domanda in un modo diverso?"
 ];
+
+// Declare the $chatbot_chatgpt_fixed_error_messages
+global $chatbot_chatgpt_fixed_error_messages;
+$chatbot_chatgpt_fixed_error_messages = [
+    "Ops! Qualcosa è andato storto da parte nostra. Per favore, riprova più tardi.",                            // [0]
+    "Ops! Sono caduto attraverso le crepe!",                                                                    // [1]
+    "Ops! Caricamento del file non riuscito.",                                                                  // [2]
+    "Ops! La tua chiave API è mancante. Inserisci la tua chiave API nelle impostazioni del chatbot.",           // [3]
+    "Ops! Si è verificato un errore durante il caricamento. Per favore, riprova più tardi.",                    // [4]
+    "Ops! Seleziona un file da caricare, per favore.",                                                          // [5]
+    "Ops! Hai raggiunto il limite di messaggi. Per favore, riprova più tardi.",                                 // [6]
+    "Ops! Qualcosa è andato storto da parte nostra. Per favore, riprova più tardi.",                            // [7]
+    "Ops! Si è verificato un problema durante il download della trascrizione. Per favore, riprova più tardi.",  // [8]
+    "Ops! Non c'è alcuna risposta da leggere ad alta voce.",                                                    // [9]
+    "Ops! Questa richiesta è scaduta. Per favore, riprova.",                                                    // [10]
+    "Ops! Conversione del testo in voce non riuscita. Per favore, riprova.",                                    // [11]
+    "Ops! Tipo di file non supportato. Per favore, riprova.",                                                   // [12]
+    "Ops! Caricamento del file non riuscito. Per favore, riprova.",                                             // [13]
+    "Ops! Impossibile cancellare la conversazione. Per favore, riprova.",                                       // [14]
+];

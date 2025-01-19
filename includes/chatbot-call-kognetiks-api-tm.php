@@ -98,23 +98,7 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
         // Focus the content based on the message from the user
         $enhancedContext = kn_enhance_context($message);
 
-        // Original Context Instructions
-        // $context = $sys_message . ' Here is some information that might be helpful in responding: ' . $enhancedContext . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Second attempt at Context Instructions
-        // $contextInstructions = ' Here is some information that might be helpful in your response: ';
-        // $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $sys_message. ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Third attempt at Context Instructions
-        // $contextInstructions = ' Try to only use this information in responding to input. ';
-        // $contextInstructions = ' Incorporate this information into your response. ';
-        // $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $sys_message. ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Fourth attempt at Context Instructions
-        // $contextInstructions = ' Use this information to help guide your response. ';
-        // $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Fifth attempt at Context Instructions
+        // Add Context Instructions
         $contextInstructions = ' Use this information to help guide your response. ';
         $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
@@ -128,7 +112,6 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
 
     }
 
-    
     // Conversation Continuity - Ver 2.1.8
     $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
 
@@ -176,7 +159,7 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     ];
 
     // Retrieve max tokens from the settings
-    $max_tokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', '500')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', '10000')));
 
     // DIAG - Diagnostics - Ver 2.2.1
     // back_trace( 'NOTICE', '$model: ' . $model);

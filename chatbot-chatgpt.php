@@ -1120,21 +1120,29 @@ function chatbot_chatgpt_send_message() {
         }
 
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
-            // Return response
-            // back_trace( 'NOTICE', '$response ' . print_r($response,true));
-            wp_send_json_error('Oops! Something went wrong on our end. Please try again later!');
-        } else {
-            // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Check for links and images in response before returning');
-            $response = chatbot_chatgpt_check_for_links_and_images($response);
 
-            // FIXME - Append extra message - Ver 2.1.1.1.1
-            // Danger Will Robinson! Danger!
+            global $chatbot_chatgpt_fixed_error_messages;
+            // Define a default fallback message
+            $default_message = 'Oops! Something went wrong on our end. Please try again later!';
+            $error_message = !empty($chatbot_chatgpt_fixed_error_messages[0]) 
+                ? $chatbot_chatgpt_fixed_error_messages[0] 
+                : $default_message;
+        
+            // Send error response
+            wp_send_json_error($error_message);
+
+        } else {
+
+            // Process response for links and images
+            $response = chatbot_chatgpt_check_for_links_and_images($response);
+        
+            // Append any extra message if configured
             $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
             $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
-
-            // Return response
+        
+            // Send success response
             wp_send_json_success($response);
+
         }
 
     } else {
@@ -1307,7 +1315,15 @@ function chatbot_chatgpt_send_message() {
 
     // DIAG - Diagnostics
     // back_trace( 'ERROR', 'Oops! I fell through the cracks!');
-    wp_send_json_error('Oops! I fell through the cracks!');
+    global $chatbot_chatgpt_fixed_error_messages;       
+    // Define a default fallback message
+    $default_message = 'Oops! I fell through the cracks!';
+    $error_message = !empty($chatbot_chatgpt_fixed_error_messages[1]) 
+        ? $chatbot_chatgpt_fixed_error_messages[1] 
+        : $default_message;
+
+    // Send error response
+    wp_send_json_error($error_message);
 
 }
 
