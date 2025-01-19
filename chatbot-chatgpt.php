@@ -869,7 +869,15 @@ function chatbot_chatgpt_send_message() {
     if (!$api_key || !$message) {
         // DIAG - Diagnostics
         // back_trace( 'ERROR', 'Invalid API Key or Message.');
-        wp_send_json_error('Error: Invalid API key or Message. Please check the plugin settings.');
+        global $chatbot_chatgpt_fixed_literal_messages;
+        // Define a default fallback message
+        $default_message = 'Error: Invalid API key or Message. Please check the plugin settings.';
+        $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[15]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[15] 
+            : $default_message;
+    
+        // Send error response
+        wp_send_json_error($error_message);
     }
     
     // Removed in Ver 1.8.6 - 2024 02 15
@@ -1121,11 +1129,11 @@ function chatbot_chatgpt_send_message() {
 
         if (str_starts_with($response, 'Error:') || str_starts_with($response, 'Failed:')) {
 
-            global $chatbot_chatgpt_fixed_error_messages;
+            global $chatbot_chatgpt_fixed_literal_messages;
             // Define a default fallback message
             $default_message = 'Oops! Something went wrong on our end. Please try again later!';
-            $error_message = !empty($chatbot_chatgpt_fixed_error_messages[0]) 
-                ? $chatbot_chatgpt_fixed_error_messages[0] 
+            $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[0]) 
+                ? $chatbot_chatgpt_fixed_literal_messages[0] 
                 : $default_message;
         
             // Send error response
@@ -1315,11 +1323,11 @@ function chatbot_chatgpt_send_message() {
 
     // DIAG - Diagnostics
     // back_trace( 'ERROR', 'Oops! I fell through the cracks!');
-    global $chatbot_chatgpt_fixed_error_messages;       
+    global $chatbot_chatgpt_fixed_literal_messages;       
     // Define a default fallback message
     $default_message = 'Oops! I fell through the cracks!';
-    $error_message = !empty($chatbot_chatgpt_fixed_error_messages[1]) 
-        ? $chatbot_chatgpt_fixed_error_messages[1] 
+    $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[1]) 
+        ? $chatbot_chatgpt_fixed_literal_messages[1] 
         : $default_message;
 
     // Send error response

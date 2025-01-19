@@ -140,9 +140,9 @@ $chatbotFallbackResponses = [
     "That's unclear to me. Could you ask it in a different way?"
 ];
 
-// Declare the $chatbot_chatgpt_fixed_error_messages
-global $chatbot_chatgpt_fixed_error_messages;
-$chatbot_chatgpt_fixed_error_messages = [
+// Declare the $chatbot_chatgpt_fixed_literal_messages
+global $chatbot_chatgpt_fixed_literal_messages;
+$chatbot_chatgpt_fixed_literal_messages = [
     "Oops! Something went wrong on our end. Please try again later!",                    // [0]
     "Oops! I fell through the cracks!",                                                  // [1]
     "Oops! File upload failed.",                                                         // [2]
@@ -158,4 +158,8 @@ $chatbot_chatgpt_fixed_error_messages = [
     "Oops! Unsupported file type. Please try again.",                                    // [12]
     "Oops! Failed to upload file. Please try again.",                                    // [13]
     "Oops! Unable to clear conversation. Please try again.",                             // [14]
+    "Error: Invalid API key or Message. Please check the plugin settings.",              // [15]
+    "Conversation cleared. Please wait while the page reloads.",                         // [16]
+    "Conversation cleared.",                                                             // [17]
+    "Conversation not cleared.",                                                         // [18]
 ];

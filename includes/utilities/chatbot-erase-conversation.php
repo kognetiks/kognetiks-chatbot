@@ -111,9 +111,23 @@ function chatbot_chatgpt_erase_conversation_handler() {
     // back_trace( 'NOTICE', '$chatbot_chatgpt_force_page_reload: ' . $chatbot_chatgpt_force_page_reload);
 
     if ($chatbot_chatgpt_force_page_reload == 'Yes') {
-        wp_send_json_success('Conversation cleared. Please wait while the page reloads.');
+        global $chatbot_chatgpt_fixed_literal_messages;
+        // Define a default fallback message
+        $default_message = 'Conversation cleared. Please wait while the page reloads.';
+        $success_message = !empty($chatbot_chatgpt_fixed_literal_messages[16])
+            ? $chatbot_chatgpt_fixed_literal_messages[16]
+            : $default_message;
+        // Send error response
+        wp_send_json_success($success_message);
     } else {
-        wp_send_json_success('Conversation cleared.');
+        global $chatbot_chatgpt_fixed_literal_messages;
+        // Define a default fallback message
+        $default_message = 'Conversation cleared.';
+        $success_message = !empty($chatbot_chatgpt_fixed_literal_messages[17])
+            ? $chatbot_chatgpt_fixed_literal_messages[17]
+            : $default_message;
+        // Send error response
+        wp_send_json_success($success_message);
     }
 
 
@@ -125,7 +139,15 @@ function chatbot_chatgpt_erase_conversation_handler() {
     // back_trace( 'NOTICE', '$transient_type: ' . $transient_type);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
-    wp_send_json_error('Conversation not cleared.');
+    global $chatbot_chatgpt_fixed_literal_messages;
+        
+    // Define a default fallback message
+    $default_message = 'Conversation not cleared.';
+    $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[18])
+        ? $chatbot_chatgpt_fixed_literal_messages[18]
+        : $default_message;
+    // Send error response
+    wp_send_json_error($error_message);
 
 }
 

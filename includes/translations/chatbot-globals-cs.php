@@ -136,9 +136,9 @@ $chatbotFallbackResponses = [
     "To mi není jasné. Můžete to položit jiným způsobem?"
 ];
 
-// Declare the $chatbot_chatgpt_fixed_error_messages
-global $chatbot_chatgpt_fixed_error_messages;
-$chatbot_chatgpt_fixed_error_messages = [
+// Declare the $chatbot_chatgpt_fixed_literal_messages
+global $chatbot_chatgpt_fixed_literal_messages;
+$chatbot_chatgpt_fixed_literal_messages = [
     "Jejda! Na naší straně došlo k chybě. Zkuste to prosím znovu později!",                         // [0]
     "Jejda! Propadl jsem trhlinou!",                                                                // [1]
     "Jejda! Nahrání souboru selhalo.",                                                              // [2]
@@ -154,4 +154,8 @@ $chatbot_chatgpt_fixed_error_messages = [
     "Jejda! Nepodporovaný typ souboru. Zkuste to prosím znovu.",                                    // [12]
     "Jejda! Nahrání souboru selhalo. Zkuste to prosím znovu.",                                      // [13]
     "Jejda! Nelze vymazat konverzaci. Zkuste to prosím znovu.",                                     // [14]
+    "Chyba: Neplatný klíč API nebo zpráva. Zkontrolujte prosím nastavení pluginu.",                 // [15]
+    "Rozhovor byl vymazán. Počkejte, prosím, až se stránka znovu načte.",                           // [16]
+    "Rozhovor byl vymazán.",                                                                        // [17]
+    "Konverzace nebyla vymazána.",                                                                  // [18]                       
 ];

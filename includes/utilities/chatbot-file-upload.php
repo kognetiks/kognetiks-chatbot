@@ -42,8 +42,8 @@ function chatbot_chatgpt_upload_files() {
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
         $default_message = 'Oops! File upload failed.';
-        $error_message = !empty($chatbot_chatgpt_fixed_error_messages[2]) 
-            ? $chatbot_chatgpt_fixed_error_messages[2] 
+        $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[2]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[2] 
             : $default_message;
         $responses[] = array(
             'status' => 'error',
@@ -64,8 +64,8 @@ function chatbot_chatgpt_upload_files() {
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     if (empty($api_key)) {
         $default_message = 'Oops! Your API key is missing. Please enter your API key in the Chatbot settings.';
-        $error_message = !empty($chatbot_chatgpt_fixed_error_messages[3]) 
-            ? $chatbot_chatgpt_fixed_error_messages[3] 
+        $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[3]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[3] 
             : $default_message;
         $responses[] = array(
             'status' => 'error',
@@ -87,8 +87,8 @@ function chatbot_chatgpt_upload_files() {
 
             if ($_FILES['file']['error'][$i] > 0) {
                 $default_message = "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
-                $error_message = !empty($chatbot_chatgpt_fixed_error_messages[4]) 
-                    ? $chatbot_chatgpt_fixed_error_messages[4] 
+                $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[4]) 
+                    ? $chatbot_chatgpt_fixed_literal_messages[4] 
                     : $default_message;
                 $responses[] = array(
                     'status' => 'error',
@@ -116,8 +116,8 @@ function chatbot_chatgpt_upload_files() {
             if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
                 // Define a default fallback message
                 $default_message = "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
-                $error_message = !empty($chatbot_chatgpt_fixed_error_messages[4]) 
-                    ? $chatbot_chatgpt_fixed_error_messages[4] 
+                $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[4]) 
+                    ? $chatbot_chatgpt_fixed_literal_messages[4] 
                     : $default_message;
                 $responses[] = array(
                     'status' => 'error',
@@ -203,11 +203,11 @@ function chatbot_chatgpt_upload_files() {
 
     } else {
         // back_trace( 'ERROR', 'No files selected for upload.');
-        global $chatbot_chatgpt_fixed_error_messages;
+        global $chatbot_chatgpt_fixed_literal_messages;
         // Define a default fallback message
         $default_message = 'Oops! Please select a file to upload.';
-        $error_message = !empty($chatbot_chatgpt_fixed_error_messages[5]) 
-            ? $chatbot_chatgpt_fixed_error_messages[5] 
+        $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[5]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[5] 
             : $default_message;
         return array(
             'status' => 'error',
@@ -336,11 +336,11 @@ function chatbot_chatgpt_upload_mp3() {
             // back_trace( 'NOTICE', '$file_path: ' . $file_path);
 
             if ($_FILES['file']['error'][$i] > 0) {
-                global $chatbot_chatgpt_fixed_error_messages;
+                global $chatbot_chatgpt_fixed_literal_messages;
                 // Define a default fallback message
                 $default_message = "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
-                $error_message = !empty($chatbot_chatgpt_fixed_error_messages[4]) 
-                    ? $chatbot_chatgpt_fixed_error_messages[4] 
+                $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[4]) 
+                    ? $chatbot_chatgpt_fixed_literal_messages[4] 
                     : $default_message;
                 $responses[] = array(
                     'status' => 'error',
@@ -414,11 +414,11 @@ function chatbot_chatgpt_upload_mp3() {
 
     } else {
         // back_trace( 'ERROR', 'No files selected for upload.');
-        global $chatbot_chatgpt_fixed_error_messages;
+        global $chatbot_chatgpt_fixed_literal_messages;
         // Define a default fallback message
         $default_message = 'Oops! Please select a file to upload.';
-        $error_message = !empty($chatbot_chatgpt_fixed_error_messages[5]) 
-            ? $chatbot_chatgpt_fixed_error_messages[5] 
+        $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[5]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[5] 
             : $default_message;
         return array(
             'status' => 'error',

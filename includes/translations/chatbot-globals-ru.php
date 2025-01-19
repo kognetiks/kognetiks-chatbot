@@ -136,9 +136,9 @@ $chatbotFallbackResponses = [
     "Это мне неясно. Можете спросить по-другому?"
 ];
 
-// Declare the $chatbot_chatgpt_fixed_error_messages
-global $chatbot_chatgpt_fixed_error_messages;
-$chatbot_chatgpt_fixed_error_messages = [
+// Declare the $chatbot_chatgpt_fixed_literal_messages
+global $chatbot_chatgpt_fixed_literal_messages;
+$chatbot_chatgpt_fixed_literal_messages = [
     "Упс! На нашей стороне что-то пошло не так. Пожалуйста, попробуйте позже.",                 // [0]
     "Упс! Я провалился сквозь трещины!",                                                        // [1]
     "Упс! Загрузка файла не удалась.",                                                          // [2]
@@ -154,4 +154,8 @@ $chatbot_chatgpt_fixed_error_messages = [
     "Упс! Неподдерживаемый тип файла. Пожалуйста, попробуйте снова.",                           // [12]
     "Упс! Не удалось загрузить файл. Пожалуйста, попробуйте снова.",                            // [13]
     "Упс! Не удалось очистить беседу. Пожалуйста, попробуйте снова.",                           // [14]
+    "Ошибка: Неверный ключ API или сообщение. Пожалуйста, проверьте настройки плагина.",        // [15]
+    "Беседа очищена. Пожалуйста, подождите, пока страница перезагрузится.",                     // [16]
+    "Беседа очищена.",                                                                          // [17]
+    "Беседа не очищена.",                                                                       // [18]
 ];

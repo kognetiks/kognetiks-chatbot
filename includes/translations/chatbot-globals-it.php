@@ -136,9 +136,9 @@ $chatbotFallbackResponses = [
     "Non mi è chiaro. Puoi porre la domanda in un modo diverso?"
 ];
 
-// Declare the $chatbot_chatgpt_fixed_error_messages
-global $chatbot_chatgpt_fixed_error_messages;
-$chatbot_chatgpt_fixed_error_messages = [
+// Declare the $chatbot_chatgpt_fixed_literal_messages
+global $chatbot_chatgpt_fixed_literal_messages;
+$chatbot_chatgpt_fixed_literal_messages = [
     "Ops! Qualcosa è andato storto da parte nostra. Per favore, riprova più tardi.",                            // [0]
     "Ops! Sono caduto attraverso le crepe!",                                                                    // [1]
     "Ops! Caricamento del file non riuscito.",                                                                  // [2]
@@ -154,4 +154,8 @@ $chatbot_chatgpt_fixed_error_messages = [
     "Ops! Tipo di file non supportato. Per favore, riprova.",                                                   // [12]
     "Ops! Caricamento del file non riuscito. Per favore, riprova.",                                             // [13]
     "Ops! Impossibile cancellare la conversazione. Per favore, riprova.",                                       // [14]
+    "Errore: Chiave API o messaggio non valido. Controlla le impostazioni del plugin.",                         // [15]
+    "Conversazione cancellata. Attendere mentre la pagina si ricarica.",                                        // [16]
+    "Conversazione cancellata.",                                                                                // [17]
+    "Conversazione non cancellata.",                                                                            // [18]
 ];

@@ -136,9 +136,9 @@ $chatbotFallbackResponses = [
     "Isso não está claro para mim. Você pode perguntar de outra forma?"
 ];
 
-// Declare the $chatbot_chatgpt_fixed_error_messages
-global $chatbot_chatgpt_fixed_error_messages;
-$chatbot_chatgpt_fixed_error_messages = [
+// Declare the $chatbot_chatgpt_fixed_literal_messages
+global $chatbot_chatgpt_fixed_literal_messages;
+$chatbot_chatgpt_fixed_literal_messages = [
     "Ops! Algo deu errado do nosso lado. Por favor, tente novamente mais tarde.",                           // [0]
     "Ops! Eu caí pelas rachaduras!",                                                                        // [1]
     "Ops! O upload do arquivo falhou.",                                                                     // [2]
@@ -154,4 +154,8 @@ $chatbot_chatgpt_fixed_error_messages = [
     "Ops! Tipo de arquivo não suportado. Por favor, tente novamente.",                                      // [12]
     "Ops! Falha ao fazer upload do arquivo. Por favor, tente novamente.",                                   // [13]
     "Ops! Não foi possível limpar a conversa. Por favor, tente novamente.",                                 // [14]
+    "Erro: Chave de API ou mensagem inválida. Por favor, verifique as configurações do plugin.",            // [15]
+    "Conversa apagada. Por favor, aguarde enquanto a página recarrega.",                                    // [16]
+    "Conversa apagada.",                                                                                    // [17]
+    "Conversa não apagada.",                                                                                // [18]
 ];

@@ -136,9 +136,9 @@ $chatbotFallbackResponses = [
     "Eso no está claro para mí. ¿Podría preguntarlo de una manera diferente?"
 ];
 
-// Declare the $chatbot_chatgpt_fixed_error_messages
-global $chatbot_chatgpt_fixed_error_messages;
-$chatbot_chatgpt_fixed_error_messages = [
+// Declare the $chatbot_chatgpt_fixed_literal_messages
+global $chatbot_chatgpt_fixed_literal_messages;
+$chatbot_chatgpt_fixed_literal_messages = [
     "¡Ups! Algo salió mal de nuestro lado. Por favor, inténtalo de nuevo más tarde.",                   // [0]
     "¡Ups! ¡Me he caído por las grietas!",                                                              // [1]
     "¡Ups! La carga del archivo falló.",                                                                // [2]
@@ -154,4 +154,8 @@ $chatbot_chatgpt_fixed_error_messages = [
     "¡Ups! Tipo de archivo no compatible. Por favor, inténtalo de nuevo.",                              // [12]
     "¡Ups! Falló la carga del archivo. Por favor, inténtalo de nuevo.",                                 // [13]
     "¡Ups! No se pudo borrar la conversación. Por favor, inténtalo de nuevo.",                          // [14]
+    "Error: Clave API o mensaje no válido. Por favor, verifica la configuración del complemento.",      // [15]
+    "Conversación borrada. Por favor, espera mientras se recarga la página.",                           // [16]
+    "Conversación borrada.",                                                                            // [17]
+    "Conversación no borrada.",                                                                         // [18]
 ];

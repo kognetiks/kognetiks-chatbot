@@ -136,9 +136,9 @@ $chatbotFallbackResponses = [
     "To jest dla mnie niejasne. Czy możesz zapytać w inny sposób?"
 ];
 
-// Declare the $chatbot_chatgpt_fixed_error_messages
-global $chatbot_chatgpt_fixed_error_messages;
-$chatbot_chatgpt_fixed_error_messages = [
+// Declare the $chatbot_chatgpt_fixed_literal_messages
+global $chatbot_chatgpt_fixed_literal_messages;
+$chatbot_chatgpt_fixed_literal_messages = [
     "Ups! Coś poszło nie tak po naszej stronie. Spróbuj ponownie później.",                     // [0]
     "Ups! Wpadłem w szczelinę!",                                                                // [1]
     "Ups! Przesyłanie pliku nie powiodło się.",                                                 // [2]
@@ -154,4 +154,8 @@ $chatbot_chatgpt_fixed_error_messages = [
     "Ups! Nieobsługiwany typ pliku. Spróbuj ponownie.",                                         // [12]
     "Ups! Przesyłanie pliku nie powiodło się. Spróbuj ponownie.",                               // [13]
     "Ups! Nie można usunąć rozmowy. Spróbuj ponownie.",                                         // [14]
+    "Błąd: Nieprawidłowy klucz API lub wiadomość. Sprawdź ustawienia wtyczki.",                 // [15]
+    "Rozmowa została usunięta. Proszę czekać, aż strona się odświeży.",                         // [16]
+    "Rozmowa została usunięta.",                                                                // [17]
+    "Rozmowa nie została usunięta.",                                                            // [18]
 ];

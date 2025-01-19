@@ -136,9 +136,9 @@ $chatbotFallbackResponses = [
     "Das ist für mich unklar. Könnten Sie es anders stellen?"
 ];
 
-// Declare the $chatbot_chatgpt_fixed_error_messages
-global $chatbot_chatgpt_fixed_error_messages;
-$chatbot_chatgpt_fixed_error_messages = [
+// Declare the $chatbot_chatgpt_fixed_literal_messages
+global $chatbot_chatgpt_fixed_literal_messages;
+$chatbot_chatgpt_fixed_literal_messages = [
     "Ups! Auf unserer Seite ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut!",                     // [0]
     "Ups! Ich bin durch die Lücken gefallen!",                                                                      // [1]
     "Ups! Datei-Upload fehlgeschlagen.",                                                                            // [2]
@@ -154,4 +154,8 @@ $chatbot_chatgpt_fixed_error_messages = [
     "Ups! Nicht unterstützter Dateityp. Bitte versuchen Sie es erneut.",                                            // [12]
     "Ups! Datei-Upload fehlgeschlagen. Bitte versuchen Sie es erneut.",                                             // [13]
     "Ups! Das Gespräch konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",                               // [14]
+    "Fehler: Ungültiger API-Schlüssel oder Nachricht. Bitte überprüfen Sie die Plug-in-Einstellungen.",             // [15]
+    "Konversation gelöscht. Bitte warten, während die Seite neu geladen wird.",                                     // [16]
+    "Konversation gelöscht.",                                                                                       // [17]
+    "Konversation nicht gelöscht.",                                                                                 // [18]
 ];

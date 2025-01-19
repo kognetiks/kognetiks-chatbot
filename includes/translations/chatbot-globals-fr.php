@@ -136,9 +136,9 @@ $chatbotFallbackResponses = [
     "Ce n'est pas clair pour moi. Pouvez-vous poser la question d'une manière différente ?"
 ];
 
-// Declare the $chatbot_chatgpt_fixed_error_messages
-global $chatbot_chatgpt_fixed_error_messages;
-$chatbot_chatgpt_fixed_error_messages = [
+// Declare the $chatbot_chatgpt_fixed_literal_messages
+global $chatbot_chatgpt_fixed_literal_messages;
+$chatbot_chatgpt_fixed_literal_messages = [
     "Oups ! Quelque chose s'est mal passé de notre côté. Veuillez réessayer plus tard.",                        // [0]
     "Oups ! Je suis tombé à travers les mailles du filet !",                                                    // [1]
     "Oups ! Le téléchargement du fichier a échoué.",                                                            // [2]
@@ -154,4 +154,8 @@ $chatbot_chatgpt_fixed_error_messages = [
     "Oups ! Type de fichier non pris en charge. Veuillez réessayer.",                                           // [12]
     "Oups ! Le téléchargement du fichier a échoué. Veuillez réessayer.",                                        // [13]
     "Oups ! Impossible de supprimer la conversation. Veuillez réessayer.",                                      // [14]
+    "Erreur : Clé API ou message invalide. Veuillez vérifier les paramètres du plugin.",                        // [15]
+    "Conversation effacée. Veuillez patienter pendant que la page se recharge.",                                // [16]
+    "Conversation effacée.",                                                                                    // [17]
+    "Conversation non effacée.",                                                                                // [18]
 ];
