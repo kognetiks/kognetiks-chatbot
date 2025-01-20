@@ -656,6 +656,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
         // 'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
         // 'chatbot_chatgpt_message_limit_period_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime')),
+            // Add icons to globals - Ver 2.2.2
+        'chatbot_chatgpt_appearance_open_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_open_icon', '')),
+        'chatbot_chatgpt_appearance_collapse_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_collapse_icon', '')),
+        'chatbot_chatgpt_appearance_erase_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_erase_icon', '')),
+        'chatbot_chatgpt_appearance_mic_enabled_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_mic_enabled_icon', '')),
+        'chatbot_chatgpt_appearance_mic_disabled_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_mic_disabled_icon', '')),
     ));
 
     // back_trace( 'NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));

@@ -14,7 +14,12 @@ jQuery(document).ready(function ($) {
             'chatbot_chatgpt_start_status',
             'chatbot_chatgpt_start_status_new_visitor',
             'chatbot_chatgpt_opened',
-            'chatbot_chatgpt_last_reset'
+            'chatbot_chatgpt_last_reset',
+            'chatbot_chatgpt_appearance_open_icon',
+            'chatbot_chatgpt_appearance_collapse_icon',
+            'chatbot_chatgpt_appearance_erase_icon',
+            'chatbot_chatgpt_appearance_mic_enabled_icon',
+            'chatbot_chatgpt_appearance_mic_disabled_icon',
         ];
         
         if (typeof kchat_settings === "object") {

@@ -118,6 +118,7 @@ While AI-powered applications strive for accuracy, they can sometimes make mista
 ## Disclaimer
 
 WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic or DeepSeek.
+
 ---
 
 * **[Back to the Overview](/overview.md)**

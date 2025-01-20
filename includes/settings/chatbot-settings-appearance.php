@@ -38,7 +38,7 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_open_icon',
         array(
-            'type'              => 'type',
+            'type'              => 'string',
             'sanitize_callback' => 'sanitize_url',
         )
     );
@@ -48,7 +48,7 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_collapse_icon',
         array(
-            'type'              => 'type',
+            'type'              => 'string',
             'sanitize_callback' => 'sanitize_url',
         )
     );
@@ -58,7 +58,7 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_erase_icon',
         array(
-            'type'              => 'type',
+            'type'              => 'string',
             'sanitize_callback' => 'sanitize_url',
         )
     );
@@ -68,7 +68,7 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_mic_enabled_icon',
         array(
-            'type'              => 'type',
+            'type'              => 'string',
             'sanitize_callback' => 'sanitize_url',
         )
     );
@@ -78,7 +78,7 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_mic_disabled_icon',
         array(
-            'type'              => 'type',
+            'type'              => 'string',
             'sanitize_callback' => 'sanitize_url',
         )
     );
@@ -88,7 +88,7 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_send_icon',
         array(
-            'type'              => 'type',
+            'type'              => 'string',
             'sanitize_callback' => 'sanitize_url',
         )
     );
@@ -98,7 +98,7 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_attach_icon',
         array(
-            'type'              => 'type',
+            'type'              => 'string',
             'sanitize_callback' => 'sanitize_url',
         )
     );
@@ -108,7 +108,7 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_read_aloud_icon',
         array(
-            'type'              => 'type',
+            'type'              => 'string',
             'sanitize_callback' => 'sanitize_url',
         )
     );
@@ -118,7 +118,7 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_download_icon',
         array(
-            'type'              => 'type',
+            'type'              => 'string',
             'sanitize_callback' => 'sanitize_url',
         )
     );
@@ -492,7 +492,7 @@ function chatbot_chatgpt_appearance_icons_overview_section_callback(){
 function chatbot_chatgpt_appearance_open_icon_callback() {
     $chatbot_chatgpt_appearance_open_icon = esc_attr(get_option('chatbot_chatgpt_appearance_open_icon', ''));
     ?>
-    <img src="<?php echo plugins_url('../../assets/icons/chat_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Open Icon" style="width: 20px; height: 20px;" />
+    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('open_icon'); ?>" alt="Open Icon" style="width: 20px; height: 20px;" />
     <input type="text" id="chatbot_chatgpt_appearance_open_icon" name="chatbot_chatgpt_appearance_open_icon" value="<?php echo $chatbot_chatgpt_appearance_open_icon; ?>" size="50" />
     <?php
 }
@@ -501,7 +501,7 @@ function chatbot_chatgpt_appearance_open_icon_callback() {
 function chatbot_chatgpt_appearance_collapse_icon_callback() {
     $chatbot_chatgpt_appearance_collapse_icon = esc_attr(get_option('chatbot_chatgpt_appearance_collapse_icon', ''));
     ?>
-    <img src="<?php echo plugins_url('../../assets/icons/close_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Collapse Icon" style="width: 20px; height: 20px;" />
+    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('collapse_icon'); ?>" alt="Collapse Icon" style="width: 20px; height: 20px;" />
     <input type="text" id="chatbot_chatgpt_appearance_collapse_icon" name="chatbot_chatgpt_appearance_collapse_icon" value="<?php echo $chatbot_chatgpt_appearance_collapse_icon; ?>" size="50" />
     <?php
 }
@@ -510,7 +510,7 @@ function chatbot_chatgpt_appearance_collapse_icon_callback() {
 function chatbot_chatgpt_appearance_erase_icon_callback() {
     $chatbot_chatgpt_appearance_erase_icon = esc_attr(get_option('chatbot_chatgpt_appearance_erase_icon', ''));
     ?>
-    <img src="<?php echo plugins_url('../../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Icon" style="width: 20px; height: 20px;" />
+    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Icon" style="width: 20px; height: 20px;" />
     <input type="text" id="chatbot_chatgpt_appearance_erase_icon" name="chatbot_chatgpt_appearance_erase_icon" value="<?php echo $chatbot_chatgpt_appearance_erase_icon; ?>" size="50" />
     <?php
 }
@@ -519,7 +519,7 @@ function chatbot_chatgpt_appearance_erase_icon_callback() {
 function chatbot_chatgpt_appearance_mic_enabled_icon_callback() {
     $chatbot_chatgpt_appearance_mic_enabled_icon = esc_attr(get_option('chatbot_chatgpt_appearance_mic_enabled_icon', ''));
     ?>
-    <img src="<?php echo plugins_url('../../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Mic Enabled Icon" style="width: 20px; height: 20px;" />
+    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>"  alt="Mic Enabled Icon" style="width: 20px; height: 20px;" />
     <input type="text" id="chatbot_chatgpt_mic_appearance_enabled_icon" name="chatbot_chatgpt_appearance_mic_enabled_icon" value="<?php echo $chatbot_chatgpt_appearance_mic_enabled_icon; ?>" size="50" />
     <?php
 }
@@ -528,7 +528,7 @@ function chatbot_chatgpt_appearance_mic_enabled_icon_callback() {
 function chatbot_chatgpt_appearance_mic_disabled_icon_callback() {
     $chatbot_chatgpt_appearance_mic_disabled_icon = esc_attr(get_option('chatbot_chatgpt_appearance_mic_disabled_icon', ''));
     ?>
-    <img src="<?php echo plugins_url('../../assets/icons/mic_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Mic Disabled Icon" style="width: 20px; height: 20px;" />
+    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_disabled_icon'); ?>" lt="Mic Disabled Icon" style="width: 20px; height: 20px;" />
     <input type="text" id="chatbot_chatgpt_appearance_mic_disabled_icon" name="chatbot_chatgpt_appearance_mic_disabled_icon" value="<?php echo $chatbot_chatgpt_appearance_mic_disabled_icon; ?>" size="50" />
     <?php
 }
@@ -537,7 +537,7 @@ function chatbot_chatgpt_appearance_mic_disabled_icon_callback() {
 function chatbot_chatgpt_appearance_send_icon_callback() {
     $chatbot_chatgpt_appearance_send_icon = esc_attr(get_option('chatbot_chatgpt_appearance_send_icon', ''));
     ?>
-    <img src="<?php echo plugins_url('../../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send Icon" style="width: 20px; height: 20px;" />
+    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send Icon" style="width: 20px; height: 20px;" />
     <input type="text" id="chatbot_chatgpt_appearance_send_icon" name="chatbot_chatgpt_appearance_send_icon" value="<?php echo $chatbot_chatgpt_appearance_send_icon; ?>" size="50" />
     <?php
 }
@@ -546,7 +546,7 @@ function chatbot_chatgpt_appearance_send_icon_callback() {
 function chatbot_chatgpt_appearance_attach_icon_callback() {
     $chatbot_chatgpt_appearance_attach_icon = esc_attr(get_option('chatbot_chatgpt_appearance_attach_icon', ''));
     ?>
-    <img src="<?php echo plugins_url('../../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Attach Icon" style="width: 20px; height: 20px;" />
+    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Attach Icon" style="width: 20px; height: 20px;" />
     <input type="text" id="chatbot_chatgpt_appearance_attach_icon" name="chatbot_chatgpt_appearance_attach_icon" value="<?php echo $chatbot_chatgpt_appearance_attach_icon; ?>" size="50" />
     <?php
 }
@@ -555,7 +555,7 @@ function chatbot_chatgpt_appearance_attach_icon_callback() {
 function chatbot_chatgpt_appearance_read_aloud_icon_callback() {
     $chatbot_chatgpt_appearance_read_aloud_icon = esc_attr(get_option('chatbot_chatgpt_appearance_read_aloud_icon', ''));
     ?>
-    <img src="<?php echo plugins_url('../../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Aloud Icon" style="width: 20px; height: 20px;" />
+    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Aloud Icon" style="width: 20px; height: 20px;" />
     <input type="text" id="chatbot_chatgpt_appearance_read_aloud_icon" name="chatbot_chatgpt_appearance_read_aloud_icon" value="<?php echo $chatbot_chatgpt_appearance_read_aloud_icon; ?>" size="50" />
     <?php
 }
@@ -564,13 +564,17 @@ function chatbot_chatgpt_appearance_read_aloud_icon_callback() {
 function chatbot_chatgpt_appearance_download_icon_callback() {
     $chatbot_chatgpt_appearance_download_icon = esc_attr(get_option('chatbot_chatgpt_appearance_download_icon', ''));
     ?>
-    <img src="<?php echo plugins_url('../../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Icon" style="width: 20px; height: 20px;" />
+    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Icon" style="width: 20px; height: 20px;" />
     <input type="text" id="chatbot_chatgpt_appearance_download_icon" name="chatbot_chatgpt_appearance_download_icon" value="<?php echo $chatbot_chatgpt_appearance_download_icon; ?>" size="50" />
     <?php
 }
 
 // Function to set custom icons
 function chatbot_chatgpt_appearance_icon_path($icon_common_name) {
+
+    // DIAG - Diagnostics
+    back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_icon_path()');
+    back_trace( 'NOTICE', 'Icon Common Name: ' . $icon_common_name);
 
     switch ($icon_common_name) {
         case 'open_icon':
