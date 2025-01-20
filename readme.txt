@@ -204,6 +204,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 
 * **DeepSeek API Integration**: Added support for DeepSeek's API to provide advanced conversational capabilities for the chatbot.
 * **Select Translations**: The plugin's literals, including chatbot-user interaction messages, have been translated into the following languages: Czech, German, Spanish, French, Italian, Polish, Portuguese, and Russian.
+* **Customizable Icons**: Added support for custom icons to replace the default chatbot icons for send, attached, read aloud, and others.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.1.
 
 = 2.2.1 - Release 01-06-2025 =

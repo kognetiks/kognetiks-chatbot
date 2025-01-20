@@ -1122,12 +1122,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         </div>
         <div id="chatbot-chatgpt-buttons-container">
             <button id="chatbot-chatgpt-submit" title="Send Message">
-                <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
+                <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send">
             </button>
             <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
                 <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                 <button id="chatbot-chatgpt-upload-file" title="Upload Files">
-                    <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload File">
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
@@ -1138,7 +1138,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
                 <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
                 <button id="chatbot-chatgpt-upload-mp3" title="Upload an Audio/Video">
-                    <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload MP3">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload MP3">
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
@@ -1147,21 +1147,21 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </script>
             <?php endif; ?>
             <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
-                <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
+                <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Conversation">
             </button>
             <?php if ($chatbot_chatgpt_read_aloud_option == 'yes' && $voice != 'none'): ?>
                 <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
-                    <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Out Loud">
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
                 <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
-                    <img src="<?php echo plugins_url('../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>" alt="Speech Recognition">
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
                 <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                    <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Transcript">
                 </button>
             <?php endif; ?>
             </div>
@@ -1257,12 +1257,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             </div>
             <div id="chatbot-chatgpt-buttons-container">
                 <button id="chatbot-chatgpt-submit" title="Send Message">
-                    <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
+                <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send">
                 </button>
                 <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
                     <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                     <button id="chatbot-chatgpt-upload-file" title="Upload Files">
-                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload File">
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
@@ -1273,7 +1273,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
                     <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
                     <button id="chatbot-chatgpt-upload-mp3" title="Upload MP3">
-                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload MP3">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload MP3">
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
@@ -1282,21 +1282,21 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </script>
                 <?php endif; ?>
                 <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
-                    <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Conversation">
                 </button>
                 <?php if ($chatbot_chatgpt_read_aloud_option == 'yes' && $voice != 'none'): ?>
                     <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
-                        <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Out Loud">
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
                     <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
-                        <img src="<?php echo plugins_url('../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>" alt="Speech Recognition">
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
                     <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                        <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Transcript">
                     </button>
                 <?php endif; ?>
             </div>

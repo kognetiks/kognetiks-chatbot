@@ -568,3 +568,79 @@ function chatbot_chatgpt_appearance_download_icon_callback() {
     <input type="text" id="chatbot_chatgpt_appearance_download_icon" name="chatbot_chatgpt_appearance_download_icon" value="<?php echo $chatbot_chatgpt_appearance_download_icon; ?>" size="50" />
     <?php
 }
+
+// Function to set custom icons
+function chatbot_chatgpt_appearance_icon_path($icon_common_name) {
+
+    switch ($icon_common_name) {
+        case 'open_icon':
+            // EXAMPLE: chatbot_chatgpt_appearance_icon_path('open_icon')
+            $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_open_icon', ''));
+            if ( $icon_path == '') {
+                $icon_path = plugins_url('../../assets/icons/chat_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
+            }
+            break;
+        case 'collapse_icon':
+            // EXAMPLE: chatbot_chatgpt_appearance_icon_path('collapse_icon')
+            $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_collapse_icon', ''));
+            if ( $icon_path == '') {
+                $icon_path = plugins_url('../../assets/icons/close_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
+            }
+            break;
+        case 'erase_icon':
+            // EXAMPLE: chatbot_chatgpt_appearance_icon_path('erase_icon')
+            $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_erase_icon', ''));
+            if ( $icon_path == '') {
+                $icon_path = plugins_url('../../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
+            }
+            break;
+        case 'mic_enabled_icon':
+            // EXAMPLE: chatbot_chatgpt_appearance_icon_path('mic_enabled_icon')
+            $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_mic_enabled_icon', ''));
+            if ( $icon_path == '') {
+                $icon_path = plugins_url('../../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
+            }
+            break;
+        case 'mic_disabled_icon':
+            // EXAMPLE: chatbot_chatgpt_appearance_icon_path('mic_disabled_icon')
+            $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_mic_disabled_icon', ''));
+            if ( $icon_path == '') {
+                $icon_path = plugins_url('../../assets/icons/mic_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
+            }
+            break;
+        case 'send_icon':
+            // EXAMPLE: chatbot_chatgpt_appearance_icon_path('send_icon')
+            $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_send_icon', ''));
+            if ( $icon_path == '') {
+                $icon_path = plugins_url('../../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
+                // error_log ('send_icon: ' . $icon_path);
+            }   
+            break;
+        case 'attach_icon':
+            // EXAMPLE: chatbot_chatgpt_appearance_icon_path('attach_icon')
+            $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_attach_icon', ''));
+            if ( $icon_path == '') {
+                $icon_path = plugins_url('../../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
+            }
+            break;
+        case 'read_aloud_icon':
+            // EXAMPLE: chatbot_chatgpt_appearance_icon_path('read_aloud_icon')
+            $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_read_aloud_icon', ''));
+            if ( $icon_path == '') {
+                $icon_path = plugins_url('../../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
+            }
+            break;
+        case 'download_icon':
+            // EXAMPLE: chatbot_chatgpt_appearance_icon_path('download_icon')
+            $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_download_icon', ''));
+            if ( $icon_path == '') {
+                $icon_path = plugins_url('../../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
+            }
+            break;
+        default:
+            $icon_path = '';
+    }
+
+    return $icon_path;
+    
+}
