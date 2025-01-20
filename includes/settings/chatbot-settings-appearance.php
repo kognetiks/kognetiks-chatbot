@@ -573,8 +573,8 @@ function chatbot_chatgpt_appearance_download_icon_callback() {
 function chatbot_chatgpt_appearance_icon_path($icon_common_name) {
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_icon_path()');
-    back_trace( 'NOTICE', 'Icon Common Name: ' . $icon_common_name);
+    // back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_icon_path()');
+    // back_trace( 'NOTICE', 'Icon Common Name: ' . $icon_common_name);
 
     switch ($icon_common_name) {
         case 'open_icon':
