@@ -38,12 +38,9 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's New in Version 2.2.2
+## What's New in Version 2.2.3
 
-* **DeepSeek API Integration**: Added support for DeepSeek's API to provide advanced conversational capabilities for the chatbot.
-* **Select Translations**: The plugin's literals, including chatbot-user interaction messages, have been translated into the following languages: Czech, German, Spanish, French, Italian, Polish, Portuguese, and Russian.
-* **Customizable Icons**: Added support for custom icons to replace the default chatbot icons for send, attached, read aloud, and others.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.1.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.2.
 
 ## Past Updates
 
