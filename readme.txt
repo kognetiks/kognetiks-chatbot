@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.7.1
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -81,16 +81,18 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
+- **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
 
 **IMPORTANT**:
 
-- This plugin requires an API key from OpenAI, NVIDIA, or Anthropic to function. Without an API key, the chatbot cannot process user queries.
+- This plugin requires an API key from OpenAI, NVIDIA, Anthropic or DeepSeek to function. Without an API key, the chatbot cannot process user queries.
 
 - Obtain API keys here:
 
    - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
+   - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
 
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
@@ -118,7 +120,7 @@ Embark on a journey to elevate your website's interactivity with the Chatbot plu
 
 3. **API Key Configuration**
    - After activation, head to 'Settings > General' in your dashboard.
-   - Choose the AI Platform you wish to use (OpenAI, NVIDIA, or Anthropic).
+   - Choose the AI Platform you wish to use (OpenAI, NVIDIA, Anthropic or DeepSeek).
    - Obtain an API key from [OpenAI API Keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), or [Anthropic API Keys](https://www.anthropic.com/).
 
 4. **Customizing Your Chatbot**
@@ -167,7 +169,7 @@ With the Kognetiks Chatbot installed, you're now equipped to offer a more dynami
 
 == Disclaimer ==
 
-WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, or Anthropic.
+WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic or DeepSeek.
 
 == Screenshots ==
 
@@ -197,6 +199,13 @@ WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.2.2 - Release 01-21-2025 =
+
+* **DeepSeek API Integration**: Added support for DeepSeek's API to provide advanced conversational capabilities for the chatbot.
+* **Select Translations**: The plugin's literals, including chatbot-user interaction messages, have been translated into the following languages: Czech, German, Spanish, French, Italian, Polish, Portuguese, and Russian.
+* **Customizable Icons**: Added support for custom icons to replace the default chatbot icons for send, attached, read aloud, and others.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.1.
 
 = 2.2.1 - Release 01-06-2025 =
 

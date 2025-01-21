@@ -18,6 +18,11 @@ function transformer_model_sentential_context_model_response($input, $responseCo
     // DIAG - Diagnostic - Ver 2.2.1
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
 
+    // Normalize the input string - Ver 2.2.2
+    if (class_exists('Normalizer')) {
+        $input = Normalizer::normalize($input, Normalizer::FORM_C);
+    }
+
     // MOVED TO transformer-model-scheduler.php
     // Fetch WordPress content
     $corpus = transformer_model_sentential_context_fetch_wordpress_content( $input );
@@ -58,8 +63,10 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     // back_trace( 'NOTICE', '$input: ' . $input);
 
     // Step 1 - Normalize and remove stop words
-    $input = preg_replace('/[^\w\s]/', '', $input);
-    $words = array_filter(array_map('trim', explode(' ', strtolower($input))));
+    // $input = preg_replace('/[^\w\s]/', '', $input);
+    $input = preg_replace('/[^\p{L}\s]/u', '', $input); // Ver 2.2.2
+    // $words = array_filter(array_map('trim', explode(' ', strtolower($input))));
+    $words = array_filter(array_map('trim', explode(' ', mb_strtolower($input, 'UTF-8')))); // Ver 2.2.2
     $words = transformer_model_sentential_context_remove_stop_words($words);
 
     // Step 2 - Query the TF-IDF table for the highest-scoring words
@@ -75,7 +82,9 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         );
         $rows = $wpdb->get_results($query);
 
-        if (!$wpdb->last_error && !empty($rows)) {
+        if ($wpdb->last_error) {
+            prod_trace( 'ERROR', 'WordPress database error: ' . $wpdb->last_error);
+        } elseif (!empty($rows)) {
             foreach ($rows as $row) {
                 $results[] = ['word' => $row->word, 'score' => $row->score];
             }
@@ -111,14 +120,26 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         return ['word' => $word, 'score' => 0];
     }, $remaining_words));
 
+    // Define the window size
+    $window_size = get_option('chatbot_transformer_model_word_content_windows_size', 3); // Default to 3 if not set
+
     // Step 4 - Build the LIKE condition
     $final_words = array_column($results, 'word');
-    $like_clauses = [];
-    foreach ($final_words as $word) {
-        $escaped_word = $wpdb->esc_like($word);
-        $like_clauses[] = "post_content LIKE '%" . esc_sql($escaped_word) . "%'";
+    $like_conditions = [];
+
+    // Use a sliding window to group words
+    for ($i = 0; $i <= count($final_words) - $window_size; $i++) {
+        $group = array_slice($final_words, $i, $window_size);
+        $group_clauses = [];
+        foreach ($group as $word) {
+            $escaped_word = $wpdb->esc_like($word);
+            $group_clauses[] = "post_content LIKE '%" . esc_sql($escaped_word) . "%'";
+        }
+        $like_conditions[] = '(' . implode(' AND ', $group_clauses) . ')';
     }
-    $like_condition = implode(' AND ', $like_clauses);
+
+    // Combine all groups with OR
+    $like_condition = implode(' OR ', $like_conditions);
 
     // DIAG - Diagnostic - Ver 2.2.1
     // back_trace( 'NOTICE', 'Like Condition: ' . $like_condition);
@@ -206,6 +227,10 @@ function transformer_model_sentential_context_remove_stop_words($words) {
 
     // Use global stop words list
     global $stopWords;
+
+    if (!is_array($stopWords)) {
+        $stopWords = array(); // Ensure $stopWords is an array
+    }
 
     return array_diff($words, $stopWords);
 
@@ -328,12 +353,12 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $response = $bestMatchSentence;
 
     // Retrieve settings
-    $maxSentences = intval(esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 5)));
-    $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 500)));
+    $maxSentences = intval(esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 20)));
+    $maxTokens = intval(esc_attr(get_option('chatbot_transformer_model_max_tokens', 10000)));
 
     // Ratios for splitting sentences and tokens
-    $sentenceBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_sentences_ratio', '0.2'))); // 20% of sentences before
-    $tokenBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_token_ratio', '0.2')));    // 20% of tokens before
+    $sentenceBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_sentences_ratio', '0.2')));  // 20% of sentences before
+    $tokenBeforeRatio = floatval(esc_attr(get_option('chatbot_transformer_model_leading_token_ratio', '0.2')));         // 20% of tokens before
 
     // Distribute sentences and tokens
     $sentencesBefore = floor($maxSentences * $sentenceBeforeRatio);

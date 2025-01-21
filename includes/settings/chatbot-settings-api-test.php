@@ -258,12 +258,122 @@ function kchat_fetch_api_status($api_key, $model) {
             $body = array(
                 'model' => $model,
                 'max_tokens' => 100,
+                'system' => 'You are a helpful assistant.',
                 'messages' => array(
                     array(
                         'role' => 'user',
                         'content' => $test_message
                     )
                 )
+            );
+
+            // Encode the body
+            $body = json_encode($body);
+
+            $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
+
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'URL: ' . $api_url);
+            // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
+            // back_trace( 'NOTICE', 'Body: ' . $body);
+
+            // Call the API
+            $response = wp_remote_post($api_url, array(
+                'headers' => $headers,
+                'body' => $body,
+                'timeout' => $timeout,
+            ));
+
+            // Get the response body
+            // $response_data = json_decode(wp_remote_retrieve_body($response));
+
+            // API Call
+            $response = wp_remote_post($api_url, array(
+                'headers' => $headers,
+                'body'    => $body,
+                'timeout' => $timeout,
+            ));
+
+
+            // Handle WP Error
+            if (is_wp_error($response)) {
+
+                // DIAG - Diagnostics
+                prod_trace('ERROR', 'Error: ' . $response->get_error_message());
+                return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
+
+            }
+
+            // Retrieve and Decode Response
+            $response_data = json_decode(wp_remote_retrieve_body($response), true);
+
+            // Check for API-specific errors
+            
+            if (isset($response_data['error'])) {
+
+                // Extract error type and message safely
+                $error_type = $response_data['error']['type'] ?? 'Unknown Error Type';
+                $error_message = $response_data['error']['message'] ?? 'No additional information.';
+            
+                // Handle error response
+                $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
+                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+            
+            } elseif (isset($response_data['type']) && $response_data['type'] === 'message') {
+
+                // Handle successful response
+                $content_type = $response_data['content'][0]['type'] ?? 'Unknown Content Type';
+                $content_text = $response_data['content'][0]['text'] ?? 'No content available.';
+            
+                // Handle successful response
+                $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
+                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
+
+            } else {
+
+                // Handle unexpected response structure
+                $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
+                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+
+            }
+            
+            update_option('chatbot_anthropic_api_status', $updated_status);
+
+            return $updated_status;
+
+            break;
+
+        case 'DeepSeek':
+
+            update_option('chatbot_deepseek_api_status', 'API Error Type: Status Unknown');
+            $api_key = esc_attr(get_option('chatbot_deepseek_api_key', 'NOT SET'));
+            
+            // Model and message for testing
+            $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
+            
+            // The current DeepSeek API URL endpoint
+            $api_url = 'https://api.deepseek.com/chat/completions';
+
+            // Set the headers
+            $headers = array(
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $api_key
+            );
+
+            // Set the body
+            $body = array(
+                'model' => $model,
+                'messages' => array(
+                    array(
+                        'role' => 'system',
+                        'content' => 'You are a helpful assistant.'
+                    ),
+                    array(
+                        'role' => 'user',
+                        'content' => $test_message
+                    )
+                ),
+                'stream' => false,
             );
 
             // Encode the body
@@ -283,23 +393,25 @@ function kchat_fetch_api_status($api_key, $model) {
             // Get the response body
             $response_data = json_decode(wp_remote_retrieve_body($response));
 
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Response: ' . print_r($response_data, true));
+
             // Check for API-specific errors
-            
-            if (isset($response_data['error'])) {
+            if (isset($response_data->error)) {
 
                 // Extract error type and message safely
-                $error_type = $response_data['error']['type'] ?? 'Unknown Error Type';
-                $error_message = $response_data['error']['message'] ?? 'No additional information.';
+                $error_type = $response_data->error->type ?? 'Unknown Error Type';
+                $error_message = $response_data->error->message ?? 'No additional information.';
             
                 // Handle error response
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
                 // back_trace( 'ERROR', 'API Status: ' . $updated_status);
             
-            } elseif (isset($response_data['type']) && $response_data['type'] === 'message') {
+            } elseif (isset($response_data->choices[0]->message)) {
 
                 // Handle successful response
-                $content_type = $response_data['content'][0]['type'] ?? 'Unknown Content Type';
-                $content_text = $response_data['content'][0]['text'] ?? 'No content available.';
+                $content_type = $response_data->choices[0]->message->role ?? 'Unknown Content Type';
+                $content_text = $response_data->choices[0]->message->content ?? 'No content available.';
             
                 // Handle successful response
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';

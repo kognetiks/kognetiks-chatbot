@@ -36,6 +36,12 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base';
 
+    // Check if the table exists
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$table_name}'") !== $table_name) {
+        prod_trace( 'WARNING', 'Table ' . $table_name . ' does not exist. Skipping knowledge base match step.');
+        return null; // Skip processing if the table doesn't exist
+    }
+
     // Split the message into words and remove stop words
     $words = explode(" ", $message);
     $words = array_diff($words, $stopWords);

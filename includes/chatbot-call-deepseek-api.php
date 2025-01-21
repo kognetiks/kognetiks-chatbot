@@ -1,8 +1,8 @@
 <?php
 /**
- * Kognetiks Chatbot - Anthropic API - Ver 2.0.8
+ * Kognetiks Chatbot - DeepSeek API - Ver 2.2.2
  *
- * This file contains the code accessing the Anthropic's API.
+ * This file contains the code accessing the DeepSeek's API.
  * 
  *
  * @package chatbot-chatgpt
@@ -13,8 +13,8 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Call the Anthropic API
-function chatbot_call_anthropic_api($api_key, $message) {
+// Call the DeepSeek API
+function chatbot_call_deepseek_api($api_key, $message) {
 
     global $session_id;
     global $user_id;
@@ -29,40 +29,43 @@ function chatbot_call_anthropic_api($api_key, $message) {
     
     global $errorResponses;
 
-    // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_call_api()');
+    // DIAG - Diagnostics - Ver 2.2.2
+    // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - start');
+    // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $api_key: ' . $api_key);
+    // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $message: ' . $message);
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
-    // Anthropic.com API Documentation
-    // https://docs.anthropic.com/en/api/messages
+    // DeepSeek.com API Documentation
+    // https://api.deepseek.com/chat/completions
 
-    // The current Anthropic API URL endpoint for claude-3-5-sonnet-latest
-    // $api_url = 'https://api.anthropic.com/v1/messages';
+    // The current DeepSeek API URL endpoint for deepseek-chat
+    // $api_url = 'https://api.deepseek.com/chat/completions';
     $api_url = get_chat_completions_api_url();
 
-    // Select the Anthropic Model
-    // https://docs.anthropic.com/en/docs/about-claude/models
+    // DIAG - Diagnostics - Ver 2.2.2
+    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
+
+    // Select the DeepSeek Model
+    // https://api-docs.deepseek.com/quick_start/pricing
     // 
-    // Claude 3.5 Sonnet - claude-3-5-sonnet-20241022 or claude-3-5-sonnet-latest
-    // Claude 3 Opus - claude-3-opus-20240229 or claude-3-opus-latest
-    // Claude 3 Sonnet - claude-3-sonnet-20240229
-    // Claude 3 Haiku - claude-3-haiku-20240307
+    // DeepSeek Chat - deepseek-chat
     //
 
-    // Get the saved model from the settings or default to "claude-3-5-sonnet-latest"
-    $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+    // Get the saved model from the settings or default to "deepseek-chat"
+    $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
     // FIXME - THIS SHOULD BE USING THE $kchat_settings['model'] - Ver 2.2.1
     // $model = $kchat_settings['model'];
  
     // Max tokens
-    $max_tokens = intval(esc_attr(get_option('chatbot_anthropic_max_tokens_setting', '1024')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_deepseek_max_tokens_setting', '1024')));
 
     // Conversation Context - Ver 1.6.1
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+    $raw_context = $context;
  
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
@@ -132,38 +135,41 @@ function chatbot_call_anthropic_api($api_key, $message) {
         $context = $conversation_history . ' ' . $context;
     }
 
-    // DIAG Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$context: ' . $context);
+    // FIXME - Set $context to null - Ver 2.2.2 - 2025-01-16
+    // $context = $raw_context;
 
-    // Build the Anthropic API request body
+    // Build the DeepSeek API request body
 
     // Define the header
     $headers = array(
-        'x-api-key' => $api_key,
-        'anthropic-version' => '2023-06-01',
-        'content-type' => 'application/json'
+        'Content-Type' => 'application/json',
+        'Authorization' => 'Bearer ' . $api_key
     );
-
-    // https://docs.anthropic.com/en/docs/about-claude/models#model-names
-    // 8192 output tokens is in beta and requires the header anthropic-beta: max-tokens-3-5-sonnet-2024-07-15. If the header is not specified, the limit is 4096 tokens.
 
     // Define the request body
     $body = json_encode(array(
         'model' => $model,
         'max_tokens' => $max_tokens,
-        'system' => $context, // Top-level parameter for system message
         'messages' => array(
+            array(
+                'role' => 'system',
+                'content' => $context, // System input
+            ),
             array(
                 'role' => 'user',
                 'content' => $message, // User input
             ),
         ),
+        'stream' => false,
     ));
 
-    $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
+    $timeout = esc_attr(get_option('chatbot_deepseek_timeout_setting', 240 ));
 
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
+
+    // DIAG - Diagnostics - Ver 2.2.2
+    // back_trace( 'NOTICE', '$body: ' . $body);
 
     // Convert the body array to JSON
     $body_json = json_encode($body);
@@ -176,37 +182,37 @@ function chatbot_call_anthropic_api($api_key, $message) {
     // API Call
     $response = wp_remote_post($api_url, array(
         'headers' => $headers,
-        'body'    => $body,
+        'body' => $body,
         'timeout' => $timeout,
     ));
 
     // Handle WP Error
     if (is_wp_error($response)) {
-
+    
         // DIAG - Diagnostics
         prod_trace('ERROR', 'Error: ' . $response->get_error_message());
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
-
+    
     }
-
+    
     // Retrieve and Decode Response
-    $response_body = json_decode(wp_remote_retrieve_body($response), true);
-
+    $response_body = json_decode(wp_remote_retrieve_body($response));
+    
     // Handle API Errors
-    if (isset($response_body['error'])) {
-
+    if (isset($response_body->error)) {
+    
         // Extract error type and message safely
-        $error_type = $response_body['error']['type'] ?? 'Unknown Error Type';
-        $error_message = $response_body['error']['message'] ?? 'No additional information.';
-
+        $error_type = $response_body->error->type ?? 'Unknown Error Type';
+        $error_message = $response_body->error->message ?? 'No additional information.';
+    
         // DIAG - Diagnostics
-        prod_trace('ERROR', 'Error: Type: Type: ' . $error_type . ' Message: ' . $error_message);
+        prod_trace('ERROR', 'Error: Type: ' . $error_type . ' Message: ' . $error_message);
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';
-
+    
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -221,7 +227,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
         }
     }
 
-    // DIAG - Diagnostics - Ver 1.8.6
+    // DIAG - Diagnostics - Ver 2.2.2
     // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
@@ -239,12 +245,11 @@ function chatbot_call_anthropic_api($api_key, $message) {
     // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens
-    $input_tokens = $response_body['usage']['input_tokens'] ?? 0;
-    $output_tokens = $response_body['usage']['output_tokens'] ?? 0;
+    $input_tokens = $response_body->usage->prompt_tokens ?? 0;
+    $output_tokens = $response_body->usage->completion_tokens ?? 0;
     $total_tokens = $input_tokens + $output_tokens;
 
-    if ($response['response']['code'] == 200) {
-
+    if ($response_body->response->code == 200) { // Ensure response code logic matches your API
         if ($input_tokens > 0) {
             append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $input_tokens);
         }
@@ -256,17 +261,14 @@ function chatbot_call_anthropic_api($api_key, $message) {
         if ($total_tokens > 0) {
             append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $total_tokens);
         }
-
     }
 
-    if (isset($response_body['content'][0]['text']) && !empty($response_body['content'][0]['text'])) {
-
-        $response_text = $response_body['content'][0]['text'];
+    // Access response content properly
+    if (isset($response_body->choices[0]->message->content) && !empty($response_body->choices[0]->message->content)) {
+        $response_text = $response_body->choices[0]->message->content;
         addEntry('chatbot_chatgpt_context_history', $response_text);
         return $response_text;
-
     } else {
-
         prod_trace('WARNING', 'No valid response text found in API response.');
 
         $localized_errorResponses = (get_locale() !== "en_US") 
@@ -277,3 +279,4 @@ function chatbot_call_anthropic_api($api_key, $message) {
     }
     
 }
+

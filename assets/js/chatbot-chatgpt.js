@@ -51,25 +51,37 @@ jQuery(document).ready(function ($) {
     plugins_url = kchat_settings['plugins_url'];
 
     // Get an open icon for the chatbot - Ver 1.8.6
-    chatbotopenicon = plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    // chatbotopenicon = plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    chatbotopenicon = kchat_settings.chatbot_chatgpt_appearance_open_icon || plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
     chatbotopenicon = $('<img>')
     .attr('id', 'chatbot-open-icon')
     .attr('class', 'chatbot-open-icon')
-    .attr('src', chatbotopenicon);
+    .attr('src', chatbotopenicon)
+    .attr('decoding', 'async')
+    .attr('width', '24')
+    .attr('height', '24');
 
     // Get a collapse icon for the chatbot - Ver 1.8.6
-    chatbotcollapseicon = plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
+    // chatbotcollapseicon = plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
+    chatbotcollapseicon = kchat_settings.chatbot_chatgpt_appearance_collapse_icon || plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
     chatbotcollapseicon = $('<img>')
     .attr('id', 'chatbot-collapse-icon')
     .attr('class', 'chatbot-collapse-icon')
-    .attr('src', chatbotcollapseicon);
+    .attr('src', chatbotcollapseicon)
+    .attr('decoding', 'async')
+    .attr('width', '24')
+    .attr('height', '24');
 
     // Get an erase icon for the chatbot - Ver 1.8.6
-    chatboteraseicon = plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
+    // chatboteraseicon = plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
+    chatboteraseicon = kchat_settings.chatbot_chatgpt_appearance_erase_icon || plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
     chatboteraseicon = $('<img>')
     .attr('id', 'chatbot-erase-icon')
     .attr('class', 'chatbot-erase-icon')
-    .attr('src', chatboteraseicon);
+    .attr('src', chatboteraseicon)
+    .attr('decoding', 'async')
+    .attr('width', '24')
+    .attr('height', '24');
 
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
@@ -955,16 +967,29 @@ jQuery(document).ready(function ($) {
     //
 
     // Get a microphone icon for the chatbot
+    // chatbotopenicon = plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    chatbotmicenabledicon = kchat_settings.chatbot_chatgpt_appearance_mic_enabled_icon || plugins_url + 'assets/icons/' + 'mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png';
+    // console.log('Chatbot: NOTICE: kchat_settings.chatbot_chatgpt_appearance_mic_enabled_icon: ' + kchat_settings.chatbot_chatgpt_appearance_mic_enabled_icon);
+    // console.log('Chatbot: NOTICE: chatbotmicenabledicon: ' + chatbotmicenabledicon);
     const micIcon = $('<img>')
+        .attr('decoding', 'async')
         .attr('id', 'chatbot-mic-icon')
         .attr('class', 'chatbot-mic-icon')
-        .attr('src', plugins_url + 'assets/icons/' + 'mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png');
+        .attr('src', chatbotmicenabledicon)
+        .attr('width', '24')
+        .attr('height', '24');
 
     // Get a microphone slash icon for the chatbot
+    chatbotmicdisabledicon = kchat_settings.chatbot_chatgpt_appearance_mic_disabled_icon || plugins_url + 'assets/icons/' + 'mic_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.png';
+    // console.log('Chatbot: NOTICE: kchat_settings.chatbot_chatgpt_appearance_mic_disabled_icon: ' + kchat_settings.chatbot_chatgpt_appearance_mic_disabled_icon);
+    // console.log('Chatbot: NOTICE: chatbotmicdisabledicon: ' + chatbotmicdisabledicon);
     const micSlashIcon = $('<img>')
+        .attr('decoding', 'async')
         .attr('id', 'chatbot-mic-slash-icon')
         .attr('class', 'chatbot-mic-icon')
-        .attr('src', plugins_url + 'assets/icons/' + 'mic_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.png');
+        .attr('src', chatbotmicdisabledicon)
+        .attr('width', '24')
+        .attr('height', '24');
 
     // Add the initial icon (microphone on) to the button
     $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);

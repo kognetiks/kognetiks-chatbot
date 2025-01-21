@@ -89,6 +89,18 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_nvidia_voice_option', 'none'));
+    } elseif (esc_attr(get_option('chatbot_anthropic_api_enabled', 'No')) == 'Yes') {
+        // DIAG - Diagnostics - Ver 2.1.8
+        // back_trace( 'NOTICE', 'Anthropic chatbot is enabled');
+        $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
+        $voice_choice = esc_attr(get_option('chatbot_anthropic_voice_option', 'none'));
+    } elseif (esc_attr(get_option('chatbot_deepseek_api_enabled', 'No')) == 'Yes') {
+        // DIAG - Diagnostics - Ver 2.1.8
+        // back_trace( 'NOTICE', 'DeepSeek chatbot is enabled');
+        $model_choice = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
+        $voice_choice = esc_attr(get_option('chatbot_deepseek_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
         // back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
@@ -377,7 +389,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Validate and sanitize the model parameter - Ver 1.9.9
     if (!isset($atts['model'])) {
 
-        $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'openai'));
+        $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
         // DIAG - Diagnostics - Ver 2.2.1
         // back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
 
@@ -390,6 +402,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 break;
             case 'Anthropic':
                 $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+                break;
+            case 'DeepSeek':
+                $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
                 break;
             case 'Markov Chain':
                 $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
@@ -407,7 +422,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'LINE 410 - Model (defaulting): ' . $model);
+        // back_trace( 'NOTICE', 'LINE 425 - Model (defaulting): ' . $model);
 
     } else {
 
@@ -418,7 +433,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'LINE 421 Model (paramater): ' . $model);
+        // back_trace( 'NOTICE', 'LINE 436 Model (paramater): ' . $model);
 
     }
 
@@ -641,6 +656,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         'chatbot_chatgpt_custom_error_message' => esc_attr(get_option('chatbot_chatgpt_custom_error_message', 'Your custom error message goes here.')),
         // 'chatbot_chatgpt_message_limit_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_setting', '999')),
         // 'chatbot_chatgpt_message_limit_period_setting' => esc_attr(get_option('chatbot_chatgpt_message_limit_period_setting', 'Lifetime')),
+            // Add icons to globals - Ver 2.2.2
+        'chatbot_chatgpt_appearance_open_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_open_icon', '')),
+        'chatbot_chatgpt_appearance_collapse_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_collapse_icon', '')),
+        'chatbot_chatgpt_appearance_erase_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_erase_icon', '')),
+        'chatbot_chatgpt_appearance_mic_enabled_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_mic_enabled_icon', '')),
+        'chatbot_chatgpt_appearance_mic_disabled_icon' => esc_attr(get_option('chatbot_chatgpt_appearance_mic_disabled_icon', '')),
     ));
 
     // back_trace( 'NOTICE', '$kchat_settings after array_merge: ' . print_r($kchat_settings, true));
@@ -1107,12 +1128,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         </div>
         <div id="chatbot-chatgpt-buttons-container">
             <button id="chatbot-chatgpt-submit" title="Send Message">
-                <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
+                <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send">
             </button>
             <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
                 <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                 <button id="chatbot-chatgpt-upload-file" title="Upload Files">
-                    <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload File">
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
@@ -1123,7 +1144,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
                 <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
                 <button id="chatbot-chatgpt-upload-mp3" title="Upload an Audio/Video">
-                    <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload MP3">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload MP3">
                 </button>
                 <script type="text/javascript">
                     document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
@@ -1132,21 +1153,21 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 </script>
             <?php endif; ?>
             <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
-                <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
+                <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Conversation">
             </button>
             <?php if ($chatbot_chatgpt_read_aloud_option == 'yes' && $voice != 'none'): ?>
                 <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
-                    <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Out Loud">
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
                 <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
-                    <img src="<?php echo plugins_url('../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>" alt="Speech Recognition">
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
                 <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                    <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Transcript">
                 </button>
             <?php endif; ?>
             </div>
@@ -1242,12 +1263,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             </div>
             <div id="chatbot-chatgpt-buttons-container">
                 <button id="chatbot-chatgpt-submit" title="Send Message">
-                    <img src="<?php echo plugins_url('../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Send">
+                <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send">
                 </button>
                 <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
                     <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
                     <button id="chatbot-chatgpt-upload-file" title="Upload Files">
-                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload File">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload File">
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
@@ -1258,7 +1279,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
                     <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
                     <button id="chatbot-chatgpt-upload-mp3" title="Upload MP3">
-                        <img src="<?php echo plugins_url('../assets/icons/attach_file_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Upload MP3">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload MP3">
                     </button>
                     <script type="text/javascript">
                         document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
@@ -1267,21 +1288,21 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                     </script>
                 <?php endif; ?>
                 <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
-                    <img src="<?php echo plugins_url('../assets/icons/delete_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Erase Conversation">
+                    <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Conversation">
                 </button>
                 <?php if ($chatbot_chatgpt_read_aloud_option == 'yes' && $voice != 'none'): ?>
                     <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
-                        <img src="<?php echo plugins_url('../assets/icons/text_to_speech_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Read Out Loud">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Out Loud">
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
                     <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
-                        <img src="<?php echo plugins_url('../assets/icons/mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Speech Recognition">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>" alt="Speech Recognition">
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
                     <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
-                        <img src="<?php echo plugins_url('../assets/icons/download_FILL0_wght400_GRAD0_opsz24.png', __FILE__); ?>" alt="Download Transcript">
+                        <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Transcript">
                     </button>
                 <?php endif; ?>
             </div>

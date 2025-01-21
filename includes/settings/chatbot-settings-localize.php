@@ -45,7 +45,12 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_width_setting' => 'Narrow',
         'chatbot_chatgpt_force_page_reload' => 'No',
         'chatbot_chatgpt_conversation_continuation' => 'Off',
-        'chatbot_chatgpt_diagnostics' => 'Off'
+        'chatbot_chatgpt_diagnostics' => 'Off',
+        'chatbot_chatgpt_appearance_open_icon' => '',
+        'chatbot_chatgpt_appearance_collapse_icon' => '',
+        'chatbot_chatgpt_appearance_erase_icon' => '',
+        'chatbot_chatgpt_appearance_mic_enabled_icon' => '',
+        'chatbot_chatgpt_appearance_mic_disabled_icon' => '',
     );
 
     // Revised for Ver 1.5.0 
@@ -78,7 +83,12 @@ function chatbot_chatgpt_localize(){
         'chatbot_chatgpt_width_setting',
         'chatbot_chatgpt_force_page_reload',
         'chatbot_chatgpt_conversation_continuation',
-        'chatbot_chatgpt_diagnostics'
+        'chatbot_chatgpt_diagnostics',
+        'chatbot_chatgpt_appearance_open_icon',
+        'chatbot_chatgpt_appearance_collapse_icon',
+        'chatbot_chatgpt_appearance_erase_icon',
+        'chatbot_chatgpt_appearance_mic_enabled_icon',
+        'chatbot_chatgpt_appearance_mic_disabled_icon',
     );
 
     $kchat_settings = [];

@@ -107,23 +107,7 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
         // Focus the content based on the message from the user
         $enhancedContext = kn_enhance_context($message);
 
-        // Original Context Instructions
-        // $context = $sys_message . ' Here is some information that might be helpful in responding: ' . $enhancedContext . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Second attempt at Context Instructions
-        // $contextInstructions = ' Here is some information that might be helpful in your response: ';
-        // $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $sys_message. ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Third attempt at Context Instructions
-        // $contextInstructions = ' Try to only use this information in responding to input. ';
-        // $contextInstructions = ' Incorporate this information into your response. ';
-        // $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $sys_message. ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Fourth attempt at Context Instructions
-        // $contextInstructions = ' Use this information to help guide your response. ';
-        // $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // Fifth attempt at Context Instructions
+        // Addt Context Instructions
         $contextInstructions = ' Use this information to help guide your response. ';
         $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 

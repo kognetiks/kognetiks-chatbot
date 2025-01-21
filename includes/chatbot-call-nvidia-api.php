@@ -92,36 +92,28 @@ function chatbot_nvidia_call_api($api_key, $message) {
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', ''));
 
-    // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
-    // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-    // Added "We previously have been talking about the following things: " - Ver 1.9.5 - 2024 04 12
     $sys_message = 'We previously have been talking about the following things: ';
 
-        // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$context: ' . $context);
-
-    //
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
-    //
-    $useEnhancedContext = esc_attr(get_option('chatbot_nvidia_use_enhanced_context'), '');
+    $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context', 'Yes'));
 
-    // DIAG Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$useEnhancedContext: ' . $useEnhancedContext);
 
     if ($useEnhancedContext == 'Yes') {
 
-        // DIAG Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', '$enhancedContext: ' . $enhancedContext);
-
-        // Focus the content based on the message from the user
-        $enhancedContext = kn_enhance_context($message);
-
-        // Context Instructions
-        $contextInstructions = ' Use this information to help guide your response. ';
-        $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // DIAG Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', '$chatbot_chatgpt_kn_conversation_context: ' . $chatbot_chatgpt_kn_conversation_context);
+        // Enhance the context with transformer results - Ver 2.2.2 - 2025-01-17
+        $temp = [];
+        $temp['model'] = $model;
+        $temp['kchat_model_setting'] = $kchat_settings['model'];
+        $model = 'sentential-context-model';
+        $kchat_settings['model'] = 'sentential-context-model';
+        $transformer_context = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_call_transformer_model_api($message);
+        $transformer_context = preg_replace('/\s+/', ' ', $transformer_context);
+        // DIAG Diagnostics - Ver 2.2.2 - 2025-01-17
+        // back_trace( 'NOTICE', '$transformer_context: ' . $transformer_context);
+        $context = $transformer_context . ' ' . $context . ' ' . $chatgpt_last_response . ' ' . $chatbot_chatgpt_kn_conversation_context;
+        // back_trace( 'NOTICE', '$context: ' . $context);
+        $kchat_settings['model'] = $temp['kchat_model_setting'];
+        $model = $temp['model'];
 
     } else {
 

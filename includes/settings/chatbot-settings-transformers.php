@@ -30,7 +30,7 @@ function chatbot_transformer_model_settings_section_callback($args) {
         <li><code>&#91;chatbot style="embedded" model="sentential-context-model"&#93;</code> - Style is embedded, specific model</li>
     </ul>
     <!-- <p>A Transformer Model generates text using a local algorithm based on the <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)" target="_blank" rel="noopener noreferrer">deep learning architecture</a>, a concept developed by researchers at Google and based on the multi-head attention mechanism proposed in a 2017 paper titled 'Attention Is All You Need'. The transformer-inspired models included here are trained on your site's published content, including pages and posts. These models run locally on your server and are not available on the OpenAI platform. Although these models may not match the sophistication of OpenAI's offerings and might occasionally generate nonsensical output, they can still be effective, especially when your site contains a large amount of content.</p>  -->
-    <p><strong>Transformer-Inspired Models</strong>: The transformer-inspired models (below) in this plugin generate text using local algorithms inspired by the <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)" target="_blank" rel="noopener noreferrer">Transformer deep learning architecture</a>, a concept developed by researchers at Google in their 2017 paper "Attention Is All You Need". While these models do not implement the full transformer architecture, they utilize similar principles, such as word embeddings and context analysis, to generate responses based on your site's content. They run locally on your server, providing privacy and control over the data. Although less advanced than models like those provided by OpenAI, NVIDIA, or Anthropic and may sometimes produce nonsensical output, they can be effective, especially when your site contains a substantial amount of content.</p>
+    <p><strong>Transformer-Inspired Models</strong>: The transformer-inspired models (below) in this plugin generate text using local algorithms inspired by the <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)" target="_blank" rel="noopener noreferrer">Transformer deep learning architecture</a>, a concept developed by researchers at Google in their 2017 paper "Attention Is All You Need". While these models do not implement the full transformer architecture, they utilize similar principles, such as word embeddings and context analysis, to generate responses based on your site's content. They run locally on your server, providing privacy and control over the data. Although less advanced than models like those provided by OpenAI, NVIDIA, Anthropic or DeepSeek and may sometimes produce nonsensical output, they can be effective, especially when your site contains a substantial amount of content.</p>
     <p><strong>The Sentential Context Model (SCM) is a sentence-based model.</strong> The SCM operates at the level of entire sentences, analyzing the structure and meaning of sentences to generate coherent and contextually relevant responses. By comparing input sentences with sentences from your WordPress content, the SCM selects the most appropriate responses based on sentence-level similarity. This approach allows the chatbot to provide more comprehensive and context-aware replies, enhancing user interactions with more natural and meaningful conversations. <strong>When to use SCM</strong>: Ideal for generating more comprehensive and context-aware responses, particularly when conversational flow and coherence are important.</p>
     <!-- <p><strong>The Lexical Context Model (LCM) is a word-based model. (COMING SOON)</strong> The LCM focuses on individual words and their relationships within the text. It utilizes word embeddings derived from co-occurrence matrices to understand the context in which words appear. By analyzing word-level similarities between the user's input and the content from your WordPress site, the LCM generates responses that are relevant based on specific keywords and phrases. This model is effective for generating quick and pertinent answers by leveraging word-level context. <strong>When to use LCM</strong>: Best suited for quick, keyword-focused answers where speed and relevance to specific terms are prioritized.</p> -->
     <p><strong>Privacy Advantage</strong>: The tranformer models process data locally on your server, ensuring that user interactions and site content are not sent to external services. This enhances privacy and allows you to maintain control over your data.</p>
@@ -89,8 +89,8 @@ function chatbot_transformer_model_build_schedule_callback($args) {
 // Transformer Length Options Callback - Ver 2.1.6
 function chatbot_transformer_model_word_content_window_size_callback($args) {
 
-    // Get the saved chatbot_transformer_model_word_content_window_size_setting value or default to 10
-    $transformer_model_window_length = esc_attr(get_option('chatbot_transformer_model_word_content_window_size', '2'));
+    // Get the saved chatbot_transformer_model_word_content_window_size_setting value or default to 3
+    $transformer_model_window_length = esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3));
     // Allow for a range of tokens between 1 and 5 in 1-step increments - Ver 2.1.6
     ?>
     <select id="chatbot_transformer_model_word_content_window_size" name="chatbot_transformer_model_word_content_window_size">
@@ -107,8 +107,8 @@ function chatbot_transformer_model_word_content_window_size_callback($args) {
 // Transformer Similarity Threshold Settings Callback - Ver 2.2.1
 function chatbot_transformer_model_similarity_threshold_callback($args) {
 
-    // Get the saved chatbot_transformer_model_similarity_threshold_setting value or default to 0.2
-    $similarity_threshold = esc_attr(get_option('chatbot_transformer_model_similarity_threshold', '0.2'));
+    // Get the saved chatbot_transformer_model_similarity_threshold_setting value or default to 0.5
+    $similarity_threshold = esc_attr(get_option('chatbot_transformer_model_similarity_threshold', '0.5'));
     // Allow for a range of tokens between 0.1 and 1.0 in 0.1-step increments - Ver 2.2.1
     ?>
     <select id="chatbot_transformer_model_similarity_threshold" name="chatbot_transformer_model_similarity_threshold">
@@ -161,13 +161,13 @@ function chatbot_transformer_model_leading_token_ratio_callback($args) {
 // Transformer Next Phrase Length Settings Callback - Ver 2.1.6
 function chatbot_transformer_model_sentence_response_length_callback($args) {
 
-    // Get the saved chatbot_transformer_model_sentence_response_length_setting value or default to 5
-    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', '5'));
-    // Allow for a range of sentences between 1 and 10 in 1-step increments - Ver 2.1.6
+    // Get the saved chatbot_transformer_model_sentence_response_length_setting value or default to 20
+    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', '20'));
+    // Allow for a range of sentences between 1 and 20 in 1-step increments - Ver 2.1.6
     ?>
     <select id="chatbot_transformer_model_sentence_response_length" name="chatbot_transformer_model_sentence_response_length">
         <?php
-        for ($i=1; $i<=10; $i+=1) {
+        for ($i=1; $i<=20; $i+=1) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($sentence_response_length, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>
@@ -196,14 +196,14 @@ function chatbot_transformer_model_choice_callback($args) {
 // Max Tokens choice - Ver 2.1.9
 function chatbot_transformer_model_max_tokens_setting_callback($args) {
 
-    // Get the saved chatbot_transformer_model_max_tokens or default to 500
-    $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', '500'));
+    // Get the saved chatbot_transformer_model_max_tokens or default to 10000
+    $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', '10000'));
 
     // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
     ?>
     <select id="chatbot_transformer_model_max_tokens" name="chatbot_transformer_model_max_tokens">
         <?php
-        for ($i=100; $i<=4000; $i+=100) {
+        for ($i=100; $i<=50000; $i+=100) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>
