@@ -279,4 +279,3 @@ function chatbot_call_deepseek_api($api_key, $message) {
     }
     
 }
-

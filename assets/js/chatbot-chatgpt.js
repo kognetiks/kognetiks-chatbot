@@ -566,7 +566,7 @@ jQuery(document).ready(function ($) {
     
         // Step 11: Consolidate line breaks and remove extra spaces
         markdown = markdown.replace(/\n{2,}/g, '\n').split(/\n/g).map((line, index) => {
-            return line.match(/^<h|<p|<ul|<pre|<blockquote/) ? line : line.trim() ? `${line}<br>` : '';
+            return line.match(/^<h|<p|<ul|<pre|<blockquote/) ? line : line.trim() ? `${line}<p>` : '';
         }).join('');
    
         // Step 12: Reinsert predefined HTML tags

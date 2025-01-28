@@ -7,13 +7,13 @@ Stable tag: 2.2.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Effortlessly add conversational AI to your WordPress site! Integrate OpenAI ChatGPT or NVIDIA NIM for powerful, responsive support and engagement.
+Effortlessly add conversational AI to your WordPress site! Integrate AI Chat from leading AI vendors for powerful, responsive support and engagement.
 
 == Description ==
 
 **Transform Your WordPress Site with the Kognetiks Chatbot**
 
-The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI, NVIDIA, and Anthropic APIs to deliver an intelligent, conversational AI experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
+The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI, NVIDIA, Anthropic and DeepSeek APIs to deliver an intelligent, conversational AI experience on your website. This plugin is ideal for businesses, educators, and bloggers who want to automate customer support, enhance user interaction, and provide personalized assistance in real-time.
 
 🌟 **AI Platform Options**:
 
@@ -24,6 +24,8 @@ The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI, NVI
 * **NVIDIA's NIM API**: Unlock advanced conversational abilities for a highly interactive chatbot.
 
 * **Anthropic's API**: Seamlessly integrate Anthropic's API for cutting-edge conversational capabilities.
+
+* **DeepSeek's API**: Enhance your chatbot with DeepSeek's API for advanced conversational features.
 
 🌟 Introducing the Sentential Context Model - **BETA FEATURE OFFERING**:
 
@@ -202,6 +204,8 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 
 = 2.2.3 - Release TBD =
 
+* **DeepSeek Reasoner**: Added a select for DeepSeek's Reasoner model (which points to teh new DeepSeek-R1 model) supporting advanced conversational capabilities for the chatbot.
+* **Response Formating**: Improved the formatting of chatbot responses to ensure better readability and clarity.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.2.
 
 = 2.2.2 - Release 01-21-2025 =
