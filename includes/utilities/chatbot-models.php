@@ -331,7 +331,7 @@ function chatbot_anthropic_get_models() {
 function chatbot_deepseek_get_models() {
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE' , 'chatbot_deepseek_get_models()');
+    // back_trace( 'NOTICE' , 'chatbot_deepseek_get_models');
 
     $api_key = '';
 
@@ -353,33 +353,40 @@ function chatbot_deepseek_get_models() {
         ),
     );
 
-    // Call the API to get the models
-    $curl = curl_init();
+    // Check if the API key is empty
+    if (empty($api_key)) {
 
-    curl_setopt_array($curl, array(
-    CURLOPT_URL => 'https://api.deepseek.com/models',
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_ENCODING => '',
-    CURLOPT_MAXREDIRS => 10,
-    CURLOPT_TIMEOUT => 0,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    CURLOPT_CUSTOMREQUEST => 'GET',
-    CURLOPT_HTTPHEADER => array(
-        'Accept: application/json',
-        'Authorization: Bearer ' . $api_key
-    ),
-    ));
+        return $default_model_list;
 
-    $response = curl_exec($curl);
+    }
 
-    curl_close($curl);
+    $deepseek_models_url = esc_attr(get_option('chatbot_deepseek_base_url'));
+    $deepseek_models_url = rtrim($deepseek_models_url, '/') . '/models';
+
+    // Set headers
+    $args = array(
+        'headers' => array(
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $api_key,
+        ),
+    );
+
+    // Perform the request
+    $response = wp_remote_get($deepseek_models_url, $args);
 
     // DIAG - Diagnostics
-    back_trace('NOTICE', '$response: ' . print_r($response, true));
+    // kognetiks_ai_summaries_back_trace('NOTICE', '$response: ' . print_r($response, true));
+    
+    // Check for errors in the response
+    if (is_wp_error($response)) {
+
+        return $default_model_list;
+
+    }
 
     // Decode the JSON response
-    $data = json_decode($response, true);
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
 
     // Check if the response is valid and contains data
     if (isset($data['data']) && is_array($data['data'])) {
@@ -403,29 +410,7 @@ function chatbot_deepseek_get_models() {
         );
     }
 
-    // Extract the models from the response
-    if (isset($data['data']) && !is_null($data['data'])) {
-        $models = $data['data'];
-    } else {
-        // Handle the case where 'data' is not set or is null
-        $models = []; // Empty array
-        prod_trace( 'WARNING', 'Data key is not set or is null in the \$data array.');
-    }
-
-    // Ensure $models is an array
-    if (!is_array($models)) {
-        return $default_model_list;
-    } else {
-        // Sort the models by name
-        usort($models, function($a, $b) {
-            return $a['id'] <=> $b['id'];
-        });
-    }
-
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
-
-    // Return the list of models
-    return $models;
+    // DeepSeek API does not have an endpoint for models
+    return $default_model_list;
 
 }
