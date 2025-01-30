@@ -36,7 +36,7 @@ function chatbot_transformer_model_scheduler() {
         wp_clear_scheduled_hook('chatbot_transformer_model_scan_hook');
         update_option('chatbot_transformer_model_build_status', 'No Schedule');
         update_option('chatbot_transformer_model_content_items_processed', 0);
-        // prod_trace('NOTICE', 'chatbot_transformer_model_scheduler: ' . $chatbot_transformer_model_build_schedule);
+        // prod_trace( 'NOTICE', 'chatbot_transformer_model_scheduler: ' . $chatbot_transformer_model_build_schedule);
         return;
     }
 
@@ -50,7 +50,7 @@ function chatbot_transformer_model_scheduler() {
         update_option('chatbot_transformer_model_build_status', 'In Process');
 
         // DIAG - Diagnostics
-        prod_trace('NOTICE', 'chatbot_transformer_model_build_status: ' . $chatbot_transformer_model_build_status);
+        prod_trace( 'NOTICE', 'chatbot_transformer_model_build_status: ' . $chatbot_transformer_model_build_status);
 
         // Reset the cache fil
         transformer_model_sentential_context_reset_cache();
@@ -79,7 +79,7 @@ function transformer_model_sentential_context_reset_cache() {
     // back_trace( 'NOTICE', 'transformer_model_sentential_context_reset_cache - start');
 
     // Log reset activity
-    prod_trace('NOTICE', 'Transformer Model Content Cache Reset');
+    prod_trace( 'NOTICE', 'Transformer Model Content Cache Reset');
 
     // Reset offset and content items processed
     update_option('chatbot_transformer_model_offset', 0);
@@ -125,7 +125,7 @@ function chatbot_transformer_model_scan() {
         update_option('chatbot_transformer_model_build_status', 'Completed');
         update_option('chatbot_transformer_model_build_schedule', 'Completed');
         update_option('chatbot_transformer_model_last_updated', current_time('mysql'));
-        prod_trace('NOTICE', 'chatbot_transformer_model_build_schedule: Completed');
+        prod_trace( 'NOTICE', 'chatbot_transformer_model_build_schedule: Completed');
         return;
     }
 
@@ -139,7 +139,7 @@ function chatbot_transformer_model_scan() {
     $processedItems = count($corpus);
     update_option('chatbot_transformer_model_offset', $offset + $processedItems);
 
-    prod_trace('NOTICE', "Processed $processedItems items starting at offset $offset");
+    prod_trace( 'NOTICE', "Processed $processedItems items starting at offset $offset");
 
     // Schedule the next batch if needed
     wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');

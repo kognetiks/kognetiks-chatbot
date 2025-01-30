@@ -481,7 +481,7 @@ function chatbot_markov_chain_synthetic_data_generation() {
     $syntheticData = file_get_contents($syntheticDataFile);
 
     if ($syntheticData === false) {
-        prod_trace('ERROR', 'Failed to read synthetic data file: ' . $syntheticDataFile);
+        prod_trace( 'ERROR', 'Failed to read synthetic data file: ' . $syntheticDataFile);
         return '';
     } else {
         prod_trace( 'NOTICE', 'Synthetic Data read successfully');

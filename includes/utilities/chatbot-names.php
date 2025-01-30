@@ -77,7 +77,7 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
     // Check for API errors in the response
     if (isset($data['error'])) {
-        back_trace( 'ERROR', 'OpenAI API Error: ' . $data['error']['message']);
+        prod_trace( 'ERROR', 'OpenAI API Error: ' . $data['error']['message']);
         return false;
     }
 

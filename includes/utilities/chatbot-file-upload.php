@@ -256,7 +256,7 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
         // Read chunk of data
         $chunk_data = fread($handle, $chunk_size);
         if ($chunk_data === false) {
-            error_log('Error: Failed to read file chunk.');
+            prod_trace( 'ERROR', 'Failed to read file chunk.');
             fclose($handle);
             return false;
         }

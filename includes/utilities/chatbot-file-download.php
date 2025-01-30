@@ -68,7 +68,7 @@ function download_openai_file($file_id, $filename) {
         $file_content = wp_remote_retrieve_body($response);
 
         if (empty($file_content)) {
-            back_trace( 'ERROR', 'Error: Retrieved file content is empty.');
+            prod_trace( 'ERROR', 'Error: Retrieved file content is empty.');
             return false;
         }
 
@@ -77,7 +77,7 @@ function download_openai_file($file_id, $filename) {
 
         // Save the file locally
         if (file_put_contents($file_path, $file_content) === false) {
-            back_trace( 'ERROR', 'Error: Failed to save file locally.');
+            prod_trace( 'ERROR', 'Error: Failed to save file locally.');
             return false;
         }
 
@@ -87,7 +87,7 @@ function download_openai_file($file_id, $filename) {
     } else {
 
         // DIAG - Diagnostics - Ver 2.0.3
-        // back_trace( 'ERROR', 'Failed to retrieve the file: ' . $http_code);
+        prod_trace( 'ERROR', 'Failed to retrieve the file: ' . $http_code);
         return false;
     }
 }
