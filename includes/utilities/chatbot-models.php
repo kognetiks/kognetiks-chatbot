@@ -82,29 +82,29 @@ function chatbot_openai_get_models() {
         return $default_model_list;
     }
 
-    // Initialize cURL session
-    $ch = curl_init();
-
     $openai_models_url = esc_attr(get_option('chatbot_chatgpt_base_url'));
     $openai_models_url = rtrim($openai_models_url, '/') . '/models';
 
-    // Set the URL
-    curl_setopt($ch, CURLOPT_URL, "$openai_models_url");
+    // Set HTTP request arguments
+    $args = array(
+        'headers' => array(
+            'Content-Type'  => 'application/json',
+            'Authorization' => 'Bearer ' . $api_key
+        ),
+        'timeout' => 15, // Set a timeout to avoid long waits
+    );
 
-    // Include the headers
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        "Content-Type: application/json",
-        "Authorization: Bearer " . $api_key
-    ));
-    // Return the response as a string instead of directly outputting it
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    // Make the request using WP HTTP API
+    $response = wp_remote_get($openai_models_url, $args);
 
-    // Execute the request and decode the JSON response into an associative array
-    $response = curl_exec($ch);
-    curl_close($ch);
+    // Check for errors
+    if (is_wp_error($response)) {
+        prod_trace( 'ERROR' . 'Error fetching OpenAI models: ' . $response->get_error_message());
+        return $default_model_list;
+    }
 
     // Decode the JSON response
-    $data = json_decode($response, true);
+    $data = json_decode(wp_remote_retrieve_body($response), true);
 
     // Check for API errors
     if (isset($data['error'])) {
@@ -183,34 +183,36 @@ function chatbot_nvidia_get_models() {
         return $default_model_list;
     }
 
-    // Initialize cURL session
-    $ch = curl_init();
-
     $nvidia_models_url = esc_attr(get_option('chatbot_nvidia_base_url'));
     $nvidia_models_url = rtrim($nvidia_models_url, '/') . '/models';
 
-    // Set the URL
-    curl_setopt($ch, CURLOPT_URL, "$nvidia_models_url");
-    // Include the headers
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        "Content-Type: application/json",
-        "Authorization: Bearer " . $api_key
-    ));
-    // Return the response as a string instead of directly outputting it
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    // Set HTTP request arguments
+    $args = array(
+        'headers' => array(
+            'Content-Type'  => 'application/json',
+            'Authorization' => 'Bearer ' . $api_key
+        ),
+        'timeout' => 15, // Avoid long waits
+    );
 
-    // Execute the request and decode the JSON response into an associative array
-    $response = curl_exec($ch);
-    curl_close($ch);
+    // Make the request using WP HTTP API
+    $response = wp_remote_get($nvidia_models_url, $args);
 
-    // Decode the JSON response
-    $data = json_decode($response, true);
+    // Check for errors
+    if (is_wp_error($response)) {
+        prod_trace( 'ERROR' , 'Error fetching NVIDIA models: ' . $response->get_error_message());
+        return $default_model_list;
+    }
 
-    // Check for API errors
-    if (isset($data['error'])) {
-        // return "Error: " . $data['error']['message'];
-        // On 1st install needs an API key
-        // So return a short list of the base models until an API key is entered
+    // Retrieve response body
+    $response_body = wp_remote_retrieve_body($response);
+
+    // Decode JSON response
+    $data = json_decode($response_body, true);
+
+    // Validate JSON
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        prod_trace( 'ERROR' , 'Invalid JSON response from NVIDIA API.');
         return $default_model_list;
     }
 

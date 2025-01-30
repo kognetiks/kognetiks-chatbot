@@ -41,41 +41,45 @@ function download_openai_file($file_id, $filename) {
     // API endpoint to retrieve the file content
     $api_file_url = "https://api.openai.com/v1/files/$file_id/content";
 
-    // Initialize cURL session
-    $ch = curl_init($api_file_url);
+    // Set up HTTP request arguments
+    $args = array(
+        'headers' => array(
+            'Authorization' => 'Bearer ' . $api_key
+        ),
+        'timeout' => 30, // Prevent long wait times
+    );
 
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Authorization: Bearer $api_key"
-    ]);
+    // Make the request using WP HTTP API
+    $response = wp_remote_get($api_file_url, $args);
 
-    // Execute cURL request
-    $response = curl_exec($ch);
-
-    // Check for cURL errors
-    if (curl_errno($ch)) {
-        // DIAG - Diagnostics - Ver 2.0.3
-        // back_trace( 'ERROR', 'cURL error: ' . curl_error($ch));
-        curl_close($ch);
-        // FIXME - Return an error message
+    // Check for request errors
+    if (is_wp_error($response)) {
+        back_trace( 'ERROR', 'Error retrieving file from OpenAI: ' . $response->get_error_message());
         return false;
     }
 
-    // Get HTTP status code
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    // Close cURL session
-    curl_close($ch);
+    // Retrieve HTTP status code
+    $http_code = wp_remote_retrieve_response_code($response);
 
     // Check if the request was successful
     if ($http_code == 200) {
 
-        // Define the file path
-        $file_path = $downloads_dir . $filename;
+        // Retrieve response body (file contents)
+        $file_content = wp_remote_retrieve_body($response);
 
-        // Save the file content locally
-        file_put_contents($file_path, $response);
+        if (empty($file_content)) {
+            back_trace( 'ERROR', 'Error: Retrieved file content is empty.');
+            return false;
+        }
+
+        // Define the full file path
+        $file_path = trailingslashit($downloads_dir) . $filename;
+
+        // Save the file locally
+        if (file_put_contents($file_path, $file_content) === false) {
+            back_trace( 'ERROR', 'Error: Failed to save file locally.');
+            return false;
+        }
 
         // Return the file URL
         return content_url('plugins/' . basename($chatbot_chatgpt_plugin_dir_path) . '/downloads/' . $filename);
