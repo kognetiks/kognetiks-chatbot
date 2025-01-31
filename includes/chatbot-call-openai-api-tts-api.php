@@ -142,77 +142,57 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     } else {
         $long_message = false;
     }
-    
-    // Creating the array to be converted to JSON
-    $body = array(
-      'model' => $model,
-      'voice' => $voice,
-      'input' => $message
-    );
-    
-    // Encoding the array to JSON
-    $json_body = json_encode($body);
-    
-    // Initialize cURL session
-    $ch = curl_init($api_url);
-    
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $json_body);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $api_key
-    ));
-    
-    // Execute the cURL request and capture the response
-    $response = curl_exec($ch);
 
-    if (!$response) {
-        // Log error or handle it
-        // back_trace( 'NOTICE', 'cURL error: ' . curl_error($ch));
-        return 'Error: in cURL: ' . curl_error($ch);
+    // Creating the array to be converted to JSON
+    $body = [
+        'model'  => $model,
+        'voice'  => $voice,
+        'input'  => $message,
+    ];
+
+    // Encode the array to JSON
+    $json_body = json_encode($body);
+
+    // Set up HTTP request arguments
+    $args = [
+        'method'    => 'POST',
+        'body'      => $json_body,
+        'headers'   => [
+            'Content-Type'  => 'application/json',
+            'Authorization'  => 'Bearer ' . $api_key,
+        ],
+        'timeout'   => 30,
+    ];
+
+    // Send request using WP HTTP API
+    $response = wp_remote_post($api_url, $args);
+
+    // Check for WP errors
+    if (is_wp_error($response)) {
+        return 'Error: ' . $response->get_error_message();
     }
-    
+
+    // Retrieve HTTP response code
+    $http_code = wp_remote_retrieve_response_code($response);
+    $response_body = wp_remote_retrieve_body($response);
+
     // Check the HTTP response code
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     if ($http_code !== 200) {
-        // Log or handle API error response
-        // back_trace( 'NOTICE', 'API responded with HTTP code ' . $http_code . ': ' . $response);
-        return 'Error: API responded with HTTP code ' . $http_code;
+        return 'Error: API responded with HTTP code ' . $http_code . ': ' . $response_body;
     }
 
     // Write the audio to a file
-    $result = file_put_contents($audio_file, $response);
+    $result = file_put_contents($audio_file, $response_body);
 
-    // DIAG - Diagnostics - Ver 1.9.4
-    // back_trace( 'NOTICE', '$response: ' . $response );
-    
-    // Check for errors
-    if (curl_errno($ch)) {
-        // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', 'Error in cURL: ' . curl_error($ch));
-        return 'Error: ' . curl_error($ch);
-    } else {
-
-        // VERSION WITH CONTROLS AND LINK
-        // Play on page
-        // $audio_output = "<div><center><audio controls autoplay><source src='" . $audio_file_url . "' type='audio/mpeg'></audio></center></div>";
-        // Process the response
-        // $audio_output .= "[Listen here](" . $audio_file_url .")";
-
-        // VERSION WITHOUT CONTROL AND LINK
-        // Play on page
-        $audio_output = "<div><center><audio autoplay><source src='" . $audio_file_url . "' type='audio/mpeg'></audio></center></div>";
-        // Process the response
-        $audio_output .= "[Listen](" . $audio_file_url .")";
-
+    if ($result === false) {
+        return 'Error: Failed to write the audio file.';
     }
-    
-    // Close the cURL session
-    curl_close($ch);
 
-        // DIAG - Diagnostics - Ver 1.6.7
+    // Generate audio output
+    $audio_output = "<div><center><audio autoplay><source src='" . esc_url($audio_file_url) . "' type='audio/mpeg'></audio></center></div>";
+    $audio_output .= "[Listen](" . esc_url($audio_file_url) . ")";
+
+    // DIAG - Diagnostics - Ver 1.6.7
     // back_trace( 'NOTICE', '$decoded: ' . $decoded);
 
     // Get the user ID and page ID
