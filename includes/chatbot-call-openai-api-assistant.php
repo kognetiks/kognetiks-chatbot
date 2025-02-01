@@ -13,16 +13,22 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Step 1: Create an Assistant
+// -------------------------------------------------------------------------
+// Step 1: Create a thread
+// -------------------------------------------------------------------------
 function createAnAssistant($api_key) {
 
-    // DIAG - Diagnostics - Ver 2.0.9
-    // back_trace( 'NOTICE', 'Step 1: createAnAssistant()');
+    // DIAG - Diagnostics - Ver 2.2.3
+    // back_trace( 'NOTICE', 'Step 1 - createAnAssistant()');
 
+    // Set your API key and assistant ID here:
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', ''));
+
+    // Base URL for the beta threads endpoints
     // $url = "https://api.openai.com/v1/threads";
     $url = get_threads_api_url();
 
-    // DIAG - Diagnostics - Ver 2.0.9
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '$url: ' . $url);
 
     $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
@@ -32,48 +38,90 @@ function createAnAssistant($api_key) {
         $beta_version = "assistants=v1";
     }
 
-    // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
-
-    $headers = array(
-        "Content-Type: application/json",
-        "OpenAI-Beta: " . $beta_version,
-        "Authorization: Bearer " . $api_key
-    );
-
-    $context = stream_context_create(array(
-        'http' => array(
-            'method' => 'POST',
-            'header' => $headers,
-            'ignore_errors' => true // This allows the function to proceed even if there's an HTTP error
-        )
-    ));
-
-    $response = fetchDataUsingCurl($url, $context);
-
-    // DIAG - Diagnostics - Ver 2.0.9
-
-    return json_decode($response, true);
+    // Prepare common headers
+    $headers = [
+        "Content-Type"  => "application/json",
+        "OpenAI-Beta"   => $beta_version,
+        "Authorization" => "Bearer " . $api_key,
+    ];    
     
+
+    // $url = "https://api.openai.com/v1/threads";
+    // $url = get_threads_api_url();
+
+    // $thread_create_url = $url;
+    // $thread_data = [
+    //     "messages" => [
+    //         [
+    //             "role"    => "user",
+    //             "content" => $message,
+    //         ],
+    //     ],
+    // ];
+
+    // Debug request payload
+    // back_trace('NOTICE', 'Thread Data: ' . json_encode($thread_data, JSON_PRETTY_PRINT));
+
+    $response = wp_remote_post($url, [
+        "headers"       => $headers,
+        "timeout"       => 30,
+    ]);
+
+    // Retrieve API response
+    $body = wp_remote_retrieve_body($response);
+    // back_trace('NOTICE', 'Thread Response: ' . print_r($body, true));
+
+    $thread_response = json_decode($body, true);
+
+    // Handle API errors
+    if (isset($thread_response['error'])) {
+        // back_trace('ERROR', 'OpenAI API Error: ' . json_encode($thread_response['error'], JSON_PRETTY_PRINT));
+        return "Error: " . $thread_response['error']['message'];
+    }
+
+    // Ensure thread ID is present
+    if (!isset($thread_response["id"])) {
+        // back_trace('ERROR', 'Thread ID Missing in Response: ' . print_r($thread_response, true));
+        return "Error: Thread ID not returned.";
+    }
+
+    return $thread_response;
+
+    // $thread_id = $thread_response["id"];
+
+    // return $thread_id;
+
 }
 
+// -------------------------------------------------------------------------
 // Step 2: EMPTY STEP
+// -------------------------------------------------------------------------
 
-// Step 3: Add a Message to a Thread
+// -------------------------------------------------------------------------
+// Step 3: Add a message
+// -------------------------------------------------------------------------
 function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
-    global $session_id;
-
-    // DIAG - Diagnostics - Ver 2.0.9
-    // back_trace( 'NOTICE', 'Step 3: addAMessage()');
+    // DIAG - Diagnostics - Ver 2.2.3
+    // back_trace( 'NOTICE', 'Step 3 - addAMessage()');
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$prompt: ' . $prompt);
     // back_trace( 'NOTICE', '$context: ' . $context);
     // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
+    global $session_id;
+
     // Set the URL
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
-    // DIAG - Diagnostics - Ver 2.0.9
+
+    // Set your API key and assistant ID here:
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', ''));
+
+    // Base URL for the beta threads endpoints
+    // $url = "https://api.openai.com/v1/threads";
+    $url = get_threads_api_url();
+
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '$url: ' . $url);
 
     $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
@@ -82,13 +130,12 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     } else {
         $beta_version = "assistants=v1";
     }
-    // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
 
+    // Prepare common headers
     $headers = [
-        'Content-Type: application/json',
-        'OpenAI-Beta: ' . $beta_version,
-        'Authorization: Bearer ' . $api_key
+        "Content-Type"  => "application/json",
+        "OpenAI-Beta"   => $beta_version,
+        "Authorization" => "Bearer " . $api_key,
     ];
 
     // DIAG - Diagnostics - Ver 1.9.3
@@ -155,55 +202,51 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
     // back_trace( 'NOTICE', '$file_id: ' . gettype($file_id));
     // back_trace( 'NOTICE', '$file_id: ' . gettype([$file_id]));
     // back_trace( 'NOTICE', '$file_id: ' . print_r([$file_id], true));
-    // back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
+    back_trace( 'NOTICE', 'addAMessage() - $data: ' . print_r($data, true));
 
-    // Initialize cURL session
-    $ch = curl_init();
+    // Make a POST request using WordPress HTTP API
+    $response = wp_remote_post($url, [
+        'headers'       => $headers, 
+        'body'          => json_encode($data), 
+        'timeout'       => 30,
+        'ignore_errors' => true, // Capture API error messages
+    ]);
 
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    // DIAG - Debug API Response
+    // back_trace('NOTICE', 'addAMessage() - $response: ' . print_r($response, true));
 
-    // Execute cURL session
-    $response = curl_exec($ch);
-
-    // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r($response, true));
-
-    // Check for cURL errors
-    if (curl_errno($ch)) {
-        // DIAG - Diagnostics - Ver 2.1.5
-        prod_trace( 'ERROR', 'Curl error: ' . curl_error($ch));
-        curl_close($ch);
+    // Check for WP_Error
+    if (is_wp_error($response)) {
+        prod_trace('ERROR', 'WP_Error: ' . $response->get_error_message());
         return null;
     }
 
-    // Close cURL session
-    curl_close($ch);
+    // Retrieve response body
+    $response_body = wp_remote_retrieve_body($response);
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'addAMessage() - $response: ' . print_r($response, true));
     
     // Return the API response
-    return json_decode($response, true);
+    // return json_decode($response, true);
+    return json_decode($response_body, true);
 
 }
 
+// -------------------------------------------------------------------------
 // Step 4: Run the Assistant
+// -------------------------------------------------------------------------
 function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
-    global $kchat_settings;
-
-    // DIAG - Diagnostics - Ver 2.0.9
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Step 4: runTheAssistant()');
+
+    global $kchat_settings;
     
     // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs";
     $url = get_threads_api_url() . '/' . $thread_id . '/runs';
 
-    // DIAG - Diagnostics - Ver 2.0.9
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '$url: ' . $url);
 
     $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
@@ -212,13 +255,18 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     } else {
         $beta_version = "assistants=v1";
     }
-    // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+
+    // Prepare common headers
+    $headers = [
+        "Content-Type"  => "application/json",
+        "OpenAI-Beta"   => $beta_version,
+        "Authorization" => "Bearer " . $api_key,
+    ];
 
     // Get the max prompt and completion tokens - Ver 2.0.1
     // https://platform.openai.com/docs/assistants/how-it-works/max-completion-and-max-prompt-tokens
     
-    // Request body additional features - Ver 2.0.9
+    // Request body additional features - Ver 2.2.3
     // https://platform.openai.com/docs/api-reference/runs/createRun
 
     $max_prompt_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_prompt_tokens', 20000));
@@ -226,26 +274,20 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     $temperature = (float) esc_attr(get_option('chatbot_chatgpt_temperature', 0.5));
     $top_p = (float) esc_attr(get_option('chatbot_chatgpt_top_p', 1.0));
 
-    // Additional instructions - Ver 2.0.9
+    // Additional instructions - Ver 2.2.3
     $additional_instruction = null;
     if (isset($kchat_settings['additional_instructions']) && $kchat_settings['additional_instructions'] !== null) {
         $additional_instructions = $kchat_settings['additional_instructions'];
         // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     }
 
-    // DIAG - Diagnostics - Ver 2.0.9
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '========================================');
     // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
     // back_trace( 'NOTICE', '$max_completion_tokens: ' . $max_completion_tokens);
     // back_trace( 'NOTICE', '$temperature: ' . $temperature);
     // back_trace( 'NOTICE', '$top_p: ' . $top_p);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
-
-    $headers = array(
-        "Content-Type: application/json",
-        "OpenAI-Beta: " . $beta_version,
-        "Authorization: Bearer " . $api_key
-    );
 
     $data = array(
         "assistant_id" => $assistant_id,
@@ -260,67 +302,86 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
         "additional_instructions" => $additional_instructions,
     );
 
-    $context = stream_context_create(array(
-        'http' => array(
-            'method' => 'POST',
-            'header' => $headers,
-            'content' => json_encode($data),
-            'ignore_errors' => true // This allows the function to proceed even if there's an HTTP error
-        )
-    ));
-
-    $response = fetchDataUsingCurl($url, $context);
-
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
-
-    // Check for false response
-    if ($response === FALSE) {
-        // DIAG - Diagnostics
-        // back_trace( 'ERROR', 'Error unable to fetch response');
-        return "Error: Unable to fetch response.";
-    }
-
-    // Check HTTP response code
-    if (http_response_code() != 200) {
-        // DIAG - Diagnostics - Ver 2.1.
-        prod_trace( 'ERROR', 'HTTP response code: ' . print_r(http_response_code(), true));
-        // return "Error: HTTP response code " . http_response_code();
-    }
-
-    // Check for an error response without decoding
-    if (strpos($response, '"error"') !== false && strpos($response, '"message"') !== false) {
-
-        // prod_trace( 'ERROR', print_r($response, true));
-
-        // Extract the error message and type using regular expressions
-        preg_match('/"message"\s*:\s*"([^"]+)"/', $response, $messageMatch);
-        preg_match('/"type"\s*:\s*"([^"]+)"/', $response, $typeMatch);
+    $response = wp_remote_post($url, [
+        "headers"       => $headers,
+        "body"          => json_encode($data),
+        "ignore_errors" => true,
+        "timeout"       => 30,
+    ]);
     
-        $errorMessage = $messageMatch[1] ?? 'Unknown error';
-        $errorType = $typeMatch[1] ?? 'Unknown type';
+    // Log the full response for debugging
+    // back_trace('NOTICE', 'Step 4 - Full Response: ' . print_r($response, true));
     
-        // Handle the error
-        prod_trace( 'ERROR', $errorMessage);
-        prod_trace( 'ERROR', $errorType);
-    } else {
-        // No error found, proceed with normal logic
-        // prod_trace( 'INFO', 'No errors found. Proceeding with the operation.');
+    // Ensure the response is valid
+    if (is_wp_error($response)) {
+        $error_message = $response->get_error_message();
+        prod_trace('ERROR', "Error fetching response: {$error_message}");
+        return "Error: Unable to fetch response. {$error_message}";
     }
     
-    // DIAG - Diagnostics  Ver 2.0.1
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    // Retrieve the response body
+    $response_body = wp_remote_retrieve_body($response);
     
-    return json_decode($response, true);
+    // Decode the JSON response
+    $response_data = json_decode($response_body, true);
+    
+    // Log the decoded response
+    // back_trace('NOTICE', 'Step 4 - Decoded Response: ' . print_r($response_data, true));
+    
+    // Retrieve the HTTP response code
+    $http_code = wp_remote_retrieve_response_code($response);
+    
+    // Handle non-200 responses
+    // if ($http_code !== 200) {
+    //     prod_trace('ERROR', "HTTP response code: {$http_code}");
+    //     return "Error: HTTP response code {$http_code}";
+    // }
+    
+    // Check if an error exists in the API response
+    if (isset($response_data['error'])) {
+        $errorMessage = $response_data['error']['message'] ?? 'Unknown error';
+        $errorType = $response_data['error']['type'] ?? 'Unknown type';
+    
+        prod_trace('ERROR', "OpenAI API Error: {$errorMessage}");
+        prod_trace('ERROR', "Error Type: {$errorType}");
+    
+        return "Error: {$errorMessage}";
+    }
+    
+    // ✅ If no errors, return the decoded response
+    return $response_data;    
 
 }
 
+// -------------------------------------------------------------------------
 // Step 5: Get the Run's Status
+// -------------------------------------------------------------------------
 function getTheRunsStatus($thread_id, $runId, $api_key) {
 
-    // DIAG - Diagnostics - Ver 2.0.9
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Step 5: getTheRunsStatus()');
 
     global $sleepTime;
+
+    // Build the API URL
+    $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId;
+
+    // DIAG - Diagnostics - Ver 2.2.3
+    // back_trace( 'NOTICE', '$url: ' . $url);
+
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+    if ( $assistant_beta_version == 'v2' ) {
+        $beta_version = "assistants=v2";
+    } else {
+        $beta_version = "assistants=v1";
+    }
+
+    // Prepare common headers
+    $headers = [
+        "Content-Type"  => "application/json",
+        "OpenAI-Beta"   => $beta_version,
+        "Authorization" => "Bearer " . $api_key,
+    ];
 
     $status = "";
 
@@ -337,131 +398,172 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
 
     while ($status != "completed" && $totalRetryCount < $maxTotalRetries) {
 
-        // Build the API URL
-        $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId;
-        // back_trace( 'NOTICE', '$url: ' . $url);
-
-        // Determine the beta version
-        $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-        $beta_version = ($assistant_beta_version == 'v2') ? 'assistants=v2' : 'assistants=v1';
-        // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
-
-        // Prepare headers as an array
-        $headers = array(
-            "Content-Type: application/json",
-            "OpenAI-Beta: " . $beta_version,
-            "Authorization: Bearer " . $api_key
-        );
-
-        // Prepare the stream context options
-        $contextOptions = array(
-            'http' => array(
-                'method' => 'GET',
-                'header' => $headers
-            )
-        );
-        $context = stream_context_create($contextOptions);
-
-        // Fetch data using your existing fetchDataUsingCurl function
-        $response = fetchDataUsingCurl($url, $context);
-
-        // Decode JSON response with error handling
-        $responseArray = json_decode($response, true);
-        if ($responseArray === null && json_last_error() !== JSON_ERROR_NONE) {
-            prod_trace( 'ERROR', 'JSON decode error: ' . json_last_error_msg());
-            break; // Exit the loop or handle the error appropriately
+        $response = wp_remote_post($url, [
+            "headers"       => $headers,
+            "timeout"       => 30,
+        ]);
+    
+        // ✅ Check if `wp_remote_post()` returned an error
+        if (is_wp_error($response)) {
+            prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
+            return "Error: Failed to communicate with the API.";
         }
-
-        // back_trace( 'NOTICE', '$responseArray: ' . print_r($responseArray, true));
-
-        // Check if 'status' exists in the response
+    
+        // ✅ Extract the body safely
+        $response_body = wp_remote_retrieve_body($response);
+    
+        // ✅ Ensure response body is a string before decoding
+        if (!is_string($response_body) || empty($response_body)) {
+            prod_trace('ERROR', 'Error: API returned an empty or invalid response.');
+            return "Error: Empty API response.";
+        }
+    
+        // ✅ Decode JSON response safely
+        $responseArray = json_decode($response_body, true);
+    
+        // ✅ Handle JSON decoding errors explicitly
+        if ($responseArray === null && json_last_error() !== JSON_ERROR_NONE) {
+            prod_trace('ERROR', 'JSON decode error: ' . json_last_error_msg());
+            return "Error: Failed to parse API response.";
+        }
+    
+        // ✅ Debugging: Log the decoded response
+        // back_trace('NOTICE', 'Step 5 - Decoded Response: ' . print_r($responseArray, true));
+    
+        // ✅ Check if 'status' exists in the response
         if (isset($responseArray["status"])) {
             $status = $responseArray["status"];
-
+    
             // Handle 'failed' status indicating rate limit reached
             if ($status == "failed") {
-                // back_trace( 'ERROR', "ALERT - FAILED STATUS RETURNED IN STEP 5");
-                prod_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . $status);
-                prod_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
-
-                // Check if last_error exists and code is rate_limit_exceeded
+                prod_trace('ERROR', "Error - Step 5: " . $status);
+                prod_trace('ERROR', '$responseArray: ' . print_r($responseArray, true));
+    
+                // ✅ Handle rate limiting
                 if (isset($responseArray['last_error']) && $responseArray['last_error']['code'] === 'rate_limit_exceeded') {
-                    // Extract the message
                     $message = $responseArray['last_error']['message'] ?? '';
-
-                    // Use regex to find the seconds in the message
+    
                     if (preg_match('/Please try again in (\d+\.\d+)s/', $message, $matches)) {
-                        // Convert the seconds to microseconds and add 0.5 seconds
                         $sleepTime = (int) ceil(($matches[1] + 0.5) * 1000000);
-                        prod_trace( 'ERROR', 'ALERT - RATE LIMIT REACHED - Sleeping for ' . $sleepTime . ' microseconds');
-                        break; // Exit after calculating sleep time
+                        prod_trace('ERROR', 'ALERT - RATE LIMIT REACHED - Sleeping for ' . $sleepTime . ' microseconds');
+                        break;
                     } else {
-                        prod_trace( 'ERROR', 'Exiting Step 5 - UNABLE TO PARSE RETRY TIME');
+                        prod_trace('ERROR', 'Exiting Step 5 - UNABLE TO PARSE RETRY TIME');
                         break;
                     }
                 }
             }
-
+    
             // Handle 'incomplete' status
             if ($status == "incomplete") {
                 if (isset($responseArray["incomplete_details"])) {
-                    $incomplete_details = $responseArray["incomplete_details"];
-                    // back_trace( 'ERROR', "ALERT - INCOMPLETE STATUS RETURNED IN STEP 5");
-                    prod_trace( 'ERROR', "Error - GPT Assistant - Step 5: " . print_r($incomplete_details, true));
-                    prod_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
+                    prod_trace('ERROR', "Error - Step 5: " . print_r($responseArray["incomplete_details"], true));
                     break;
                 }
             }
-
-        } else {
-            prod_trace( 'ERROR', 'Error - GPT Assistant - Step 5: Status not found in response.');
-            break;
+    
         }
-
-        // Check if the status is not completed
+    
+        // ✅ Handle exponential backoff if status is not "completed"
         if ($status != "completed") {
-
-            // Exponential backoff
             usleep($sleepTime);
-
-            // Increment the retry counts
             $retryCount++;
             $totalRetryCount++;
-
-            // Check if we need to reset the sleep time
+    
             if ($retryCount >= $maxRetriesBeforeReset) {
-                // Reset the sleep time to a random value within the specified range
                 $sleepTime = rand($resetRangeMin, $resetRangeMax);
                 $retryCount = 0;
             } else {
-                // Double the sleep time for the next iteration, up to the maximum
                 $sleepTime = min($sleepTime * 2, $maxSleep);
             }
-
-            // back_trace( 'NOTICE', 'Sleeping for ' . $sleepTime . ' microseconds');
-
-            // Check if maximum total retries have been reached
+    
             if ($totalRetryCount >= $maxTotalRetries) {
-                prod_trace( 'ERROR', 'Error - GPT Assistant - Step 5: Maximum retries reached. Exiting loop.');
+                prod_trace('ERROR', 'Error - GPT Assistant - Step 5: Maximum retries reached. Exiting loop.');
                 break;
             }
         }
     }
-
+    
     return $status;
+    
 
 }
 
+// -------------------------------------------------------------------------
 // Step 6: Get the Run's Steps
+// -------------------------------------------------------------------------
 function getTheRunsSteps($thread_id, $runId, $api_key) {
 
-    // DIAG - Diagnostics - Ver 2.0.9
-    // back_trace( 'NOTICE', 'Step 6: getTheRunsSteps()');
+    // DIAG - Diagnostics - Ver 2.2.3
+    // back_trace('NOTICE', 'Step 6: getTheRunsSteps()');
 
-    // $url = "https://api.openai.com/v1/threads/" . $thread_id ."/runs/" . $runId ."/steps";
+    // Construct the API URL
     $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
 
-    // DIAG - Diagnostics - Ver 2.0.9
+    // Determine API version
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+    if ( $assistant_beta_version == 'v2' ) {
+        $beta_version = "assistants=v2";
+    } else {
+        $beta_version = "assistants=v1";
+    }
+
+    // Prepare request headers
+    $headers = [
+        "Content-Type"  => "application/json",
+        "OpenAI-Beta"   => $beta_version,
+        "Authorization" => "Bearer " . $api_key
+    ];
+
+    // 🚀 ✅ FIX: Change from `wp_remote_post()` to `wp_remote_get()`
+    $response = wp_remote_get($url, [
+        "headers"       => $headers,
+        "timeout"       => 30,
+    ]);
+
+    // ✅ Handle request errors
+    if (is_wp_error($response)) {
+        prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
+        return "Error: Failed to communicate with the API.";
+    }
+
+    // ✅ Extract response body safely
+    $response_body = wp_remote_retrieve_body($response);
+
+    // ✅ Ensure response body is a valid string before decoding
+    if (!is_string($response_body) || empty($response_body)) {
+        prod_trace('ERROR', 'Error: API returned an empty or invalid response.');
+        return "Error: Empty API response.";
+    }
+
+    // ✅ Decode JSON response safely
+    $response_data = json_decode($response_body, true);
+
+    // ✅ Handle JSON decoding errors explicitly
+    if ($response_data === null && json_last_error() !== JSON_ERROR_NONE) {
+        prod_trace('ERROR', 'JSON decode error: ' . json_last_error_msg());
+        return "Error: Failed to parse API response.";
+    }
+
+    // ✅ Debugging: Log the decoded response
+    // back_trace('NOTICE', 'Step 6 - Decoded Response: ' . print_r($response_data, true));
+
+    return $response_data;
+
+}
+
+// -------------------------------------------------------------------------
+// Step 7: Get the Step's Status
+// -------------------------------------------------------------------------
+function getTheStepsStatus($thread_id, $runId, $api_key) {
+
+    // DIAG - Diagnostics - Ver 2.2.3
+    // back_trace( 'NOTICE', 'Step 7: getTheStepsStatus()');
+
+    // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/" . $runId . "/steps";
+    $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
+
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '$url: ' . $url);
 
     $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
@@ -473,120 +575,129 @@ function getTheRunsSteps($thread_id, $runId, $api_key) {
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
 
-    $headers = array(
-        "Content-Type: application/json",
-        "OpenAI-Beta: " . $beta_version,
-        "Authorization: Bearer " . $api_key
-    );
+    // Prepare request headers
+    $headers = [
+        "Content-Type"  => "application/json",
+        "OpenAI-Beta"   => $beta_version,
+        "Authorization" => "Bearer " . $api_key
+    ];
 
-    $context = stream_context_create(array(
-        'http' => array(
-            'method' => 'GET',
-            'header' => $headers
-    )));
-    $response = fetchDataUsingCurl($url, $context);
+    // Retry settings
+    $max_retries = 30; // Max retries before giving up
+    $retry_count = 0;
+    $sleep_time = 500000; // 0.5 seconds
 
-    return json_decode($response, true);
-}
+    while ($retry_count < $max_retries) {
 
-// Step 7: Get the Step's Status
-function getTheStepsStatus($thread_id, $runId, $api_key) {
+        // 🚀 ✅ FIX: Changed from `wp_remote_post()` to `wp_remote_get()`
+        $response = wp_remote_get($url, [
+            "headers"       => $headers,
+            "timeout"       => 30,
+        ]);
 
-    // DIAG - Diagnostics - Ver 2.0.9
-    // back_trace( 'NOTICE', 'Step 7: getTheStepsStatus()');
-
-    $status = false;
-
-    while (!$status) {
-
-        // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/" . $runId . "/steps";
-        $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
-
-        // DIAG - Diagnostics - Ver 2.0.9
-        // back_trace( 'NOTICE', '$url: ' . $url);
-
-        $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-        if ( $assistant_beta_version == 'v2' ) {
-            $beta_version = "assistants=v2";
-        } else {
-            $beta_version = "assistants=v1";
-        }
-        // DIAG - Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
-        
-        $headers = array(
-            "Content-Type: application/json",
-            "OpenAI-Beta: " . $beta_version,
-            "Authorization: Bearer " . $api_key
-        );
-
-        $context = stream_context_create(array(
-            'http' => array(
-                'method' => 'GET',
-                'header' => $headers
-        )));
-        $response = fetchDataUsingCurl($url, $context);
-
-        $responseArray = json_decode($response, true);
-
-        if (array_key_exists("data", $responseArray) && !is_null($responseArray["data"])) {
-            $data = $responseArray["data"];
-        } else {
-            // DIAG - Handle error here
-            $status = "failed";
-            // DIAG - Diagnostics - Ver 2.1.5
-            prod_trace( 'ERROR', "Error - GPT Assistant - Step 7");
-            prod_trace( 'ERROR', '$responseArray: ' . print_r($responseArray, true));
-            exit;
+        // ✅ Handle request errors
+        if (is_wp_error($response)) {
+            prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
+            return "Error: Failed to communicate with the API.";
         }
 
-        foreach ($data as $item) {
-            if ($item["status"] == "completed") {
-                $status = true;
-                break;
+        // ✅ Extract response body safely
+        $response_body = wp_remote_retrieve_body($response);
+
+        // ✅ Ensure response body is valid before decoding
+        if (!is_string($response_body) || empty($response_body)) {
+            prod_trace('ERROR', 'Error: API returned an empty or invalid response.');
+            return "Error: Empty API response.";
+        }
+
+        // ✅ Decode JSON response safely
+        $responseArray = json_decode($response_body, true);
+
+        // ✅ Handle JSON decoding errors explicitly
+        if ($responseArray === null && json_last_error() !== JSON_ERROR_NONE) {
+            prod_trace('ERROR', 'JSON decode error: ' . json_last_error_msg());
+            return "Error: Failed to parse API response.";
+        }
+
+        // ✅ Debugging: Log the decoded response
+        // back_trace('NOTICE', 'Step 7 - Decoded Response: ' . print_r($responseArray, true));
+
+        // ✅ Check for "data" field
+        if (isset($responseArray["data"]) && is_array($responseArray["data"])) {
+            foreach ($responseArray["data"] as $item) {
+                if (isset($item["status"]) && $item["status"] === "completed") {
+                    return "completed";
+                }
             }
+        } else {
+            // ✅ Log and return failure if "data" field is missing
+            prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Invalid API response.');
+            return "Error: Missing 'data' in API response.";
         }
 
-        if (!$status) {
-            // DIAG - Diagnostics - Ver 2.0.9
-            // back_trace  ( 'NOTICE', '$status: ' . print_r($responseArray, true));
-            // Sleep for 0.5 (was 5 prior to v 1.7.6) seconds before polling again
-            // sleep(5);
-            usleep(500000);
-        }
+        // Sleep before retrying
+        usleep($sleep_time);
+        $retry_count++;
     }
+
+    // ✅ Log and return failure if retries exceeded
+    prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Maximum retries reached.');
+    return "Error: Maximum retries reached.";
+
 }
 
+// -------------------------------------------------------------------------
 // Step 8: Get the Message
+// -------------------------------------------------------------------------
 function getTheMessage($thread_id, $api_key) {
 
-    // DIAG - Diagnostics - Ver 2.0.9
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Step 8: getTheMessage()');
 
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
 
-    // DIAG - Diagnostics - Ver 2.0.9
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '$url: ' . $url);
 
     $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    $beta_version = $assistant_beta_version == 'v2' ? "assistants=v2" : "assistants=v1";
+    if ( $assistant_beta_version == 'v2' ) {
+        $beta_version = "assistants=v2";
+    } else {
+        $beta_version = "assistants=v1";
+    }
+    // DIAG - Diagnostics - Ver 1.9.6
+    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
 
-    $headers = array(
-        "Content-Type: application/json",
-        "OpenAI-Beta: " . $beta_version,
-        "Authorization: Bearer " . $api_key
-    );
+    $headers = [
+        'Content-Type'  => 'application/json',
+        'OpenAI-Beta'   => $beta_version,
+        'Authorization' => 'Bearer ' . $api_key
+    ];
 
-    $context = stream_context_create(array(
-        'http' => array(
-            'method' => 'GET',
-            'header' => $headers
-    )));
-    $response = fetchDataUsingCurl($url, $context);
-    $response_data = json_decode($response, true);
+    // Fetch the response
+    $response = wp_remote_get($url, [
+        "headers" => $headers,
+        "timeout" => 30,
+    ]);
+
+    // ✅ Handle request errors
+    if (is_wp_error($response)) {
+        prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
+        return "Error: Failed to communicate with the API.";
+    }
+
+    // ✅ Extract response body
+    $response_body = wp_remote_retrieve_body($response);
+
+    // ✅ Ensure the response is a valid JSON string before decoding
+    $response_data = json_decode($response_body, true);
+    if ($response_data === null) {
+        prod_trace('ERROR', 'JSON Decode Error: ' . json_last_error_msg());
+        return "Error: Invalid JSON response from API.";
+    }
 
     // DIAG - Diagnostics - Ver 2.0.3
-    // back_trace( 'NOTICE', '$response_data: ' . print_r($response_data, true));
+    back_trace( 'NOTICE', 'Step 8 - $response_data: ' . print_r($response_data, true));
 
     // Download any file attachments - Ver 2.0.3
     if (isset($response_data['data']) && is_array($response_data['data'])) {
@@ -829,7 +940,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $prompt = $message;
         
     // Fetch the file id - Ver 1.7.9
-    // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 1.9.2 - 2024 03 06
+    // FIXME - FETCH ALL FILE IDS AND ADD THEM TO THE MESSAGE - Ver 2.2.3
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 2.0.3
@@ -965,39 +1076,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
 }
 
-// Fetch data with cURL - Ver 1.7.6
-function fetchDataUsingCurl($url, $context) {
-
-    // Initialize a cURL session
-    $curl = curl_init($url);
-
-    // Set cURL options
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-
-    // If there is a context (which usually contains stream context options), set the corresponding cURL options
-    if ($context) {
-        $context_options = stream_context_get_options($context);
-        if (isset($context_options['http']['method'])) {
-            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $context_options['http']['method']);
-        }
-        if (isset($context_options['http']['header'])) {
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $context_options['http']['header']);
-        }
-        if (isset($context_options['http']['content'])) {
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $context_options['http']['content']);
-        }
-    }
-
-    // Execute cURL session and close it
-    $response = curl_exec($curl);
-    curl_close($curl);
-
-    return $response;
-
-}
-
-// Retrieve the first file id - Ver 1.9.2
+// -------------------------------------------------------------------------
+// Retrieve the first file id - Ver 2.2.3
+// -------------------------------------------------------------------------
 function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id ) {
+
+    // DIAG - Diagnostics - Ver 2.2.3
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $user_id . ', ' . $page_id);
 
     global $session_id;
     global $user_id;
@@ -1047,51 +1132,60 @@ function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id ) {
     }
 
     // Join the file ids into a comma-separated string and return it
-    // DIAG - Diagnostics - Ver 1.9.2
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . implode(',', $file_ids));
 
     // return implode(',', $file_ids);
 
     // Join the file ids into a comma-separated string and return it
-    // DIAG - Diagnostics - Ver 1.9.2
+    // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . print_r($file_ids, true));
 
     return $file_ids;
 
 }
 
-// Cleanup in Aisle 4 on OpenAI - Ver 1.7.9
+// -------------------------------------------------------------------------
+// Cleanup in Aisle 4 on OpenAI - Ver 2.2.3
+// -------------------------------------------------------------------------
 function deleteUploadedFile($file_id) {
+
+    // DIAG - Diagnostics - Ver 2.2.3
+    // back_trace( 'NOTICE', 'deleteUploadedFile(): ' . $file_id);
 
     // Get the API key
     $apiKey = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
+    // Construct the API URL
     // $url = 'https://api.openai.com/v1/files/' . $file_id;
     $url = get_files_api_url() . '/' . $file_id;
-    // DIAG - Diagnostics - Ver 2.0.9
-    // back_trace( 'NOTICE', '$url: ' . $url);
-    
-    $curl = curl_init($url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
-    curl_setopt($curl, CURLOPT_HTTPHEADER, [
-      'Authorization: Bearer ' . $apiKey,
-      'Content-Type: application/json'
+
+    // Send DELETE request using WP functions
+    $response = wp_remote_request($url, [
+        'method'    => 'DELETE',
+        'timeout'   => 15,
+        'headers'   => [
+            'Authorization'  => 'Bearer ' . $apiKey,
+            'Content-Type'   => 'application/json',
+        ]
     ]);
-    
-    $response = curl_exec($curl);
-    $http_status_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    curl_close($curl);
+
+    // Handle errors
+    if (is_wp_error($response)) {
+        prod_trace( 'ERROR', 'Error deleting file from OpenAI: ' . $response->get_error_message());
+        return false;
+    }
+
+    // Get the HTTP status code
+    $http_status_code = wp_remote_retrieve_response_code($response);
     
     if ($http_status_code == 200 || $http_status_code == 204) {
         // DIAG - Diagnostics - Ver 1.7.9
         // back_trace( 'SUCCESS', "File deleted successfully.\n");
     } else {
-        // If the request was not successful, you may want to handle it differently,
-        // such as logging an error or retrying the request.
         // DIAG - Diagnostics - Ver 1.7.9
-        // back_trace( 'ERROR', "HTTP status code: $http_status_code\n");
-        // back_trace( 'ERROR', "Response: $response\n");
+        prod_trace( 'ERROR', "HTTP status code: $http_status_code\n");
+        prod_trace( 'ERROR', "Response: $response\n");
     }
 
 }
