@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.7.1
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -202,20 +202,25 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 
 == Changelog ==
 
-= 2.2.3 - Release TBD =
+= 2.2.4 - Released TBD =
+
+* **TBD**: TBD
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.3.
+
+= 2.2.3 - Released 02-03-2025 =
 
 * **DeepSeek Reasoner**: Added a select for DeepSeek's Reasoner model (which points to the new DeepSeek-R1 model) supporting advanced conversational capabilities for the chatbot.
 * **Response Formating**: Improved the formatting of chatbot responses to ensure better readability and clarity.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.2.
 
-= 2.2.2 - Release 01-21-2025 =
+= 2.2.2 - Released 01-21-2025 =
 
 * **DeepSeek API Integration**: Added support for DeepSeek's API to provide advanced conversational capabilities for the chatbot.
 * **Select Translations**: The plugin's literals, including chatbot-user interaction messages, have been translated into the following languages: Czech, German, Spanish, French, Italian, Polish, Portuguese, and Russian.
 * **Customizable Icons**: Added support for custom icons to replace the default chatbot icons for send, attached, read aloud, and others.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.1.
 
-= 2.2.1 - Release 01-06-2025 =
+= 2.2.1 - Released 01-06-2025 =
 
 * **Anthropic API Integration**: Added support for Anthropic's API to provide advanced conversational capabilities for the chatbot.
 * **NVIDIA Settings**: Added support documentation for the NVIDIA API settings.
@@ -224,7 +229,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 * **Documentation Updates**: Revised several section of the online documentation to align with current options and previous updates.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.0.
 
-= 2.2.0 - Release 11-22-2024 =
+= 2.2.0 - Released 11-22-2024 =
 
 * **Rate Limit Exceeded Errors**: Added improved error handling for rate limit exceeded errors to retry the request after the delay specified by the API.
 
@@ -232,7 +237,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 
 * **Bug Fixes**: Removed extra line breaks after the chatbot's response, among other minor issues identified after the release of version 2.1.8.
 
-= 2.1.8 - Release 11-05-2024 =
+= 2.1.8 - Released 11-05-2024 =
 
 * **NVIDIA NIM API Integration**: Added support for NVIDIA's NIM API to provide advanced conversational capabilities for the chatbot.
 * **Assistant Management**: Resolved the issue with adding, updating and deleting Assistants when using Firefox browser.
@@ -240,7 +245,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with assistant management.
 * **Additional Security**: Enhanced security to reduce vulnerabilities associated with accessing chatbot support pages.
 
-= 2.1.7 - Release 10-06-2024 =
+= 2.1.7 - Released 10-06-2024 =
 
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.1.6.
 
