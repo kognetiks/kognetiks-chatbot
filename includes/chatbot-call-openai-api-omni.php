@@ -184,7 +184,7 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
         // DIAG - Diagnostics - Ver 2.0.2.1
-        // back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
+        prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
         return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 

@@ -28,38 +28,6 @@ function is_mobile_device() {
 
 }
 
-// Function to confirm if curl is enabled
-function can_use_curl_for_file_protocol() {
-
-    // DIAG - Diagnostics - Ver 1.9.1
-    // back_trace( 'NOTICE', 'can_use_curl_for_file_protocol');
-
-    // Check if cURL extension is loaded
-    if (!function_exists('curl_init')) {
-        return false;
-    }
-    
-    // Initialize a cURL session to test settings
-    $curl = curl_init();
-    if (!$curl) {
-        return false;
-    }
-    
-    // Attempt to set CURLOPT_PROTOCOLS to include CURLPROTO_FILE
-    // This is a "trial" setting to see if setting fails
-    $result = @curl_setopt($curl, CURLOPT_PROTOCOLS, CURLPROTO_FILE | CURLPROTO_HTTP | CURLPROTO_HTTPS);
-    
-    // Close the cURL session
-    curl_close($curl);
-
-    // DIAG - Diagnostics - Ver 1.9.1
-    // back_trace( 'NOTICE', 'result: ' . print_r($result, true));
-
-    // Check if setting the option was successful - true if successful, false if failed
-    return $result;
-    
-}
-
 // Function to create a directory and an index.php file
 function create_directory_and_index_file($dir_path) {
     // Ensure the directory ends with a slash

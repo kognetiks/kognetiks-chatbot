@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Call the ChatGPT API
+// Call the ChatGPT Image API using WP functions
 function chatbot_chatgpt_call_image_api($api_key, $message) {
 
     global $session_id;
@@ -26,27 +26,24 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     global $model;
     global $voice;
 
-    global $learningMessages;
-    global $errorResponses;
+    // Ensure API key is set
+    if (empty($api_key)) {
+        $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+        if (empty($api_key)) {
+            global $chatbot_chatgpt_fixed_literal_messages;
+            // Define a default fallback message
+            $default_message = 'Oops! Something went wrong on our end. Please try again later!';
+            $error_message = isset($chatbot_chatgpt_fixed_literal_messages[15]) 
+                ? $chatbot_chatgpt_fixed_literal_messages[15] 
+                : $default_message;
+            return $error_message;
+        }
+    }
 
-    // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_call_api()');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
-
-    // The current ChatGPT API URL endpoint for image generation
+    // OpenAI Image API endpoint
     $api_url = 'https://api.openai.com/v1/images/generations';
 
-    $headers = array(
-        'Authorization' => 'Bearer ' . $api_key,
-        'Content-Type' => 'application/json',
-    );
-
-    // Select the OpenAI Model
-    // One of dall-e-2, dall-e-3
+    // Select the OpenAI Model (dall-e-2 or dall-e-3)
     if ( !empty($kchat_settings['model']) ) {
         $model = $kchat_settings['model'];
         // DIAG - Diagnostics - Ver 1.9.4
@@ -57,43 +54,34 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
         // back_trace( 'NOTICE', '$model from get_option: ' . $model);
     }
 
-    // Rules
-    // https://platform.openai.com/docs/api-reference/images/create
-
-    // If $message length is greater than 1000 characters and model is dall-e-2, truncate the message to 1000 characters
-    if (strlen($message) > 1000 && $model == 'dall-e-2') {
+    // Enforce message length constraints based on model
+    if ($model === 'dall-e-2' && strlen($message) > 1000) {
         $message = substr($message, 0, 1000);
-    }
-    // If $message length is greater than 4000 characters and model is dall-e-3, truncate the message to 4000 characters
-    if (strlen($message) > 4000 && $model == 'dall-e-3') {
+    } elseif ($model === 'dall-e-3' && strlen($message) > 4000) {
         $message = substr($message, 0, 4000);
     }
 
+    // Set number of images to generate
     $quantity = intval(esc_attr(get_option('chatbot_chatgpt_image_output_quantity', '1')));
     // The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1 is supported.
-    if ($model == 'dall-e-3') {
-        $quantity = 1;
+    if ($model === 'dall-e-3') {
+        $quantity = 1; // dall-e-3 only supports `n=1`
     }
 
+    // Define allowed image sizes based on the model
     $size = esc_attr(get_option('chatbot_chatgpt_image_output_size', '1024x1024'));
-    // If the $model is dall-e-2, then size muss be one of 256x256, 512x512, or 1024x1024
-    if ($model == 'dall-e-2') {
-        if ($size != '256x256' && $size != '512x512' && $size != '1024x1024') {
-            $size = '1024x1024';
-        }
-    }
-    // If the $model is dall-e-3, then size muss be one of 1024x1024, 1792x1024, or 1024x1792
-    if ($model == 'dall-e-3') {
-        if ($size != '1024x1024' && $size != '1792x1024' && $size != '1024x1792') {
-            $size = '1024x1024';
-        }
+        // If the $model is dall-e-2, then size muss be one of 256x256, 512x512, or 1024x1024
+    $allowed_sizes = ($model === 'dall-e-2') ? ['256x256', '512x512', '1024x1024'] : ['1024x1024', '1792x1024', '1024x1792'];
+    if (!in_array($size, $allowed_sizes)) {
+        $size = '1024x1024';
     }
 
+    // Additional image parameters (for dall-e-3)
     $quality = esc_attr(get_option('chatbot_chatgpt_image_quality_output', 'standard'));
-
     $style = esc_attr(get_option('chatbot_chatgpt_image_style_output', 'vivid'));
 
-    $user_tracking = $session_id . '-' . $user_id . '-' . $page_id . '-' . $thread_id . '-' . $assistant_id;
+    // User tracking data
+    $user_tracking = implode('-', [$session_id, $user_id, $page_id, $thread_id, $assistant_id]);
 
     // Diagnostics - Ver 1.9.5
     // back_trace( 'NOTICE', 'chatbot_calll_image_api()');
@@ -104,118 +92,61 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     // back_trace( 'NOTICE', 'BEGIN $quality: ' . $quality);
     // back_trace( 'NOTICE', 'BEGIN $style: ' . $style);
 
+    // Prepare the request body
+    $body = [
+        'model'   => $model,
+        'prompt'  => $message,
+        'n'       => $quantity,
+        'size'    => $size,
+        'user'    => $user_tracking
+    ];
 
-    if ( $model = 'dall-e-2' ) {
-        // Prepare the request body
-        $body = json_encode(array(
-            'model' => $model,
-            'prompt' => $message,
-            'n' => $quantity,
-            'size' => $size,
-            'user' => $user_tracking,
-        ));
-    } elseif ( $model = 'dall-e-3' ) {
-        // Prepare the request body
-        $body = json_encode(array(
-            'model' => $model,
-            'prompt' => $message,
-            'n' => $quantity,
-            'size' => $size,
-            'quality' => $quality,
-            'style' => $style,
-            'user' => $user_tracking,
-        ));
+    // Include additional parameters for dall-e-3
+    if ($model === 'dall-e-3') {
+        $body['quality'] = $quality;
+        $body['style'] = $style;
     }
 
-    // Initialize cURL session
-    $ch = curl_init();
+    // Send the API request using WordPress HTTP API
+    $response = wp_remote_post($api_url, [
+        'method'    => 'POST',
+        'timeout'   => 30,
+        'headers'   => [
+            'Authorization'  => 'Bearer ' . $api_key,
+            'Content-Type'   => 'application/json'
+        ],
+        'body'      => json_encode($body)
+    ]);
 
-    // Set the options for the cURL request
-    curl_setopt($ch, CURLOPT_URL, "https://api.openai.com/v1/images/generations");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $api_key
-    ));
-
-    // Execute the request and capture the response
-    $response = curl_exec($ch);
-
-    // Check for errors
-    if(curl_errno($ch)) {
-        // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', 'Error: ' . curl_error($ch));
-        return 'Error: ' . curl_errno($ch).' Please check Settings for a valid API key or your OpenAI account for additional information.';
-    } else {
-        $response_body = json_decode($response, true);
-        // Process the response, which includes image data
-        // Return the URL of the generated image (if applicable)
-        // if (isset($response_body['data'][0]['url'])) {
-        //     // back_trace( 'NOTICE', 'Generated Image URL: ' . $decoded['data'][0]['url']);
-        //     $image_url = $response_body['data'][0]['url'];
-        // }
+    // Handle errors
+    if (is_wp_error($response)) {
+        prod_trace( 'ERROR', 'chatbot_chatgpt_call_image_api() - Error: ' . $response->get_error_message());
+        return 'Error: ' . $response->get_error_message();
     }
 
-    // Close cURL session
-    curl_close($ch);
+    $http_code = wp_remote_retrieve_response_code($response);
+    $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
-    // DIAG - Diagnostics - Ver 1.6.7
-    // back_trace( 'NOTICE', '$decoded: ' . $decoded);
-
-    // Get the user ID and page ID
-    if (empty($user_id)) {
-        $user_id = get_current_user_id(); // Get current user ID
-    }
-    if (empty($page_id)) {
-        $page_id = get_the_id(); // Get current page ID
-        if (empty($page_id)) {
-            // $page_id = get_queried_object_id(); // Get the ID of the queried object if $page_id is not set
-            // Changed - Ver 1.9.1 - 2024 03 05
-            $page_id = get_the_ID(); // Get the ID of the queried object if $page_id is not set
-        }
+    // Handle API errors
+    if ($http_code !== 200 || isset($response_body['error'])) {
+        $error_message = $response_body['error']['message'] ?? 'Unknown API Error';
+        prod_trace( 'ERROR', 'chatbot_chatgpt_call_image_api() - Error: API responded with HTTP code ' . $http_code . ': ' . $error_message);
+        return 'Error: API responded with HTTP code ' . $http_code . ': ' . $error_message;
     }
 
-
-    if (!empty($response_body['data'][0]['url'])) {
-
-        // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-        // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-        // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
-
-        // Add the usage to the conversation tracker
-        // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);
-        // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
-        // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
-
-        // return $response_body['data'][0]['url'];
-        // return "![Your generated image]($image_url)";
-
-        $image_url = '';
+    // Process the response and return generated image URLs
+    if (!empty($response_body['data'])) {
         $image_urls = '';
-
-        // Check the array for the number of images generated
-        for ($i = 0; $i < $quantity; $i++) {
-            if (isset($response_body['data'][$i]['url'])) {
-                // DIAG - Diagnostics - Ver 1.9.5
-                // back_trace( 'NOTICE', 'Generated Image URL: ' . $response_body['data'][0]['url']);
-                $image_url = $response_body['data'][$i]['url'];
-                $image_urls .= "![Your generated image]($image_url)\n";
+        foreach ($response_body['data'] as $image_data) {
+            if (!empty($image_data['url'])) {
+                $image_url = $image_data['url'];
+                $image_urls .= "![Generated Image]($image_url)\n";
             }
         }
         return $image_urls;
-    } else {
-        // FIXME - Decide what to return here - it's an error
-        // back_trace( 'ERROR', 'API ERROR ' . print_r($response_body, true));
-        if (get_locale() !== "en_US") {
-            $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-        } else {
-            $localized_errorResponses = $errorResponses;
-        }
-        // Return a random error message
-        return $localized_errorResponses[array_rand($localized_errorResponses)];
     }
-    
+
+    // Return a localized error message if no images were generated
+    return $errorResponses[array_rand($errorResponses)] ?? 'Error: No images generated.';
+
 }

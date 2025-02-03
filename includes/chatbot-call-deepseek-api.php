@@ -190,7 +190,7 @@ function chatbot_call_deepseek_api($api_key, $message) {
     if (is_wp_error($response)) {
     
         // DIAG - Diagnostics
-        prod_trace('ERROR', 'Error: ' . $response->get_error_message());
+        prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
     
     }
@@ -206,7 +206,7 @@ function chatbot_call_deepseek_api($api_key, $message) {
         $error_message = $response_body->error->message ?? 'No additional information.';
     
         // DIAG - Diagnostics
-        prod_trace('ERROR', 'Error: Type: ' . $error_type . ' Message: ' . $error_message);
+        prod_trace( 'ERROR', 'Error: Type: ' . $error_type . ' Message: ' . $error_message);
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';
     
     }
@@ -269,7 +269,7 @@ function chatbot_call_deepseek_api($api_key, $message) {
         addEntry('chatbot_chatgpt_context_history', $response_text);
         return $response_text;
     } else {
-        prod_trace('WARNING', 'No valid response text found in API response.');
+        prod_trace( 'WARNING', 'No valid response text found in API response.');
 
         $localized_errorResponses = (get_locale() !== "en_US") 
             ? get_localized_errorResponses(get_locale(), $errorResponses) 
@@ -279,4 +279,3 @@ function chatbot_call_deepseek_api($api_key, $message) {
     }
     
 }
-

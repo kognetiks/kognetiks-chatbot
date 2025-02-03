@@ -566,8 +566,8 @@ jQuery(document).ready(function ($) {
     
         // Step 11: Consolidate line breaks and remove extra spaces
         markdown = markdown.replace(/\n{2,}/g, '\n').split(/\n/g).map((line, index) => {
-            return line.match(/^<h|<p|<ul|<pre|<blockquote/) ? line : line.trim() ? `${line}<br>` : '';
-        }).join('');
+            return line.match(/^<h|<p|<ul|<pre|<blockquote/) ? line : line.trim() ? `${line}</p>` : '';
+        }).filter(line => line.trim() !== '').join('');
    
         // Step 12: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
@@ -576,10 +576,9 @@ jQuery(document).ready(function ($) {
 
         // Penultimate step: Check for extra line breaks at the end
         markdown = markdown.replace(/<br>\s*$/, '');
-        // Check again for extra line breaks at the end
-        markdown = markdown.replace(/<br>\s*$/, '');
-        // Check again for extra line breaks at the end
-        markdown = markdown.replace(/<br>\s*$/, '');
+
+        // Penultimate step: Remove the last paragraph tag if it's empty
+        markdown = markdown.replace(/<p>\s*<\/p>$/, '');
 
         // Return final output wrapped in a div
         return `<div>${markdown.trim()}</div>`;

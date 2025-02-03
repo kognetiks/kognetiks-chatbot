@@ -82,29 +82,29 @@ function chatbot_openai_get_models() {
         return $default_model_list;
     }
 
-    // Initialize cURL session
-    $ch = curl_init();
-
     $openai_models_url = esc_attr(get_option('chatbot_chatgpt_base_url'));
     $openai_models_url = rtrim($openai_models_url, '/') . '/models';
 
-    // Set the URL
-    curl_setopt($ch, CURLOPT_URL, "$openai_models_url");
+    // Set HTTP request arguments
+    $args = array(
+        'headers' => array(
+            'Content-Type'  => 'application/json',
+            'Authorization' => 'Bearer ' . $api_key
+        ),
+        'timeout' => 15, // Set a timeout to avoid long waits
+    );
 
-    // Include the headers
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        "Content-Type: application/json",
-        "Authorization: Bearer " . $api_key
-    ));
-    // Return the response as a string instead of directly outputting it
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    // Make the request using WP HTTP API
+    $response = wp_remote_get($openai_models_url, $args);
 
-    // Execute the request and decode the JSON response into an associative array
-    $response = curl_exec($ch);
-    curl_close($ch);
+    // Check for errors
+    if (is_wp_error($response)) {
+        prod_trace( 'ERROR' . 'Error fetching OpenAI models: ' . $response->get_error_message());
+        return $default_model_list;
+    }
 
     // Decode the JSON response
-    $data = json_decode($response, true);
+    $data = json_decode(wp_remote_retrieve_body($response), true);
 
     // Check for API errors
     if (isset($data['error'])) {
@@ -183,34 +183,36 @@ function chatbot_nvidia_get_models() {
         return $default_model_list;
     }
 
-    // Initialize cURL session
-    $ch = curl_init();
-
     $nvidia_models_url = esc_attr(get_option('chatbot_nvidia_base_url'));
     $nvidia_models_url = rtrim($nvidia_models_url, '/') . '/models';
 
-    // Set the URL
-    curl_setopt($ch, CURLOPT_URL, "$nvidia_models_url");
-    // Include the headers
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        "Content-Type: application/json",
-        "Authorization: Bearer " . $api_key
-    ));
-    // Return the response as a string instead of directly outputting it
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    // Set HTTP request arguments
+    $args = array(
+        'headers' => array(
+            'Content-Type'  => 'application/json',
+            'Authorization' => 'Bearer ' . $api_key
+        ),
+        'timeout' => 15, // Avoid long waits
+    );
 
-    // Execute the request and decode the JSON response into an associative array
-    $response = curl_exec($ch);
-    curl_close($ch);
+    // Make the request using WP HTTP API
+    $response = wp_remote_get($nvidia_models_url, $args);
 
-    // Decode the JSON response
-    $data = json_decode($response, true);
+    // Check for errors
+    if (is_wp_error($response)) {
+        prod_trace( 'ERROR' , 'Error fetching NVIDIA models: ' . $response->get_error_message());
+        return $default_model_list;
+    }
 
-    // Check for API errors
-    if (isset($data['error'])) {
-        // return "Error: " . $data['error']['message'];
-        // On 1st install needs an API key
-        // So return a short list of the base models until an API key is entered
+    // Retrieve response body
+    $response_body = wp_remote_retrieve_body($response);
+
+    // Decode JSON response
+    $data = json_decode($response_body, true);
+
+    // Validate JSON
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        prod_trace( 'ERROR' , 'Invalid JSON response from NVIDIA API.');
         return $default_model_list;
     }
 
@@ -330,8 +332,17 @@ function chatbot_anthropic_get_models() {
 // Function to get the Model names from DeepSeek API
 function chatbot_deepseek_get_models() {
 
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE' , 'chatbot_deepseek_get_models');
+
+    $api_key = '';
+
+    // Retrieve the API key
+    $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
+
     // https://api-docs.deepseek.com/
     // https://api-docs.deepseek.com/quick_start/pricing
+    // https://api.deepseek.com/models
 
     // Default model list
     $default_model_list = '';
@@ -339,51 +350,65 @@ function chatbot_deepseek_get_models() {
         array(
             'id' => 'deepseek-chat',
             'object' => 'model',
-            'created' => 20250116,
+            'created' => null,
             'owned_by' => 'deepseek'
         ),
     );
 
-    // FIXME - DeepSeek API does not have an endpoint for models
-    // Call the API to get the models
-
-    // Decode the JSON response
-    // $data = json_decode($response, true);
-
-    // FIXME - Force an error since there is no api endpoint for models
-    $data = array('error' => array('message' => 'No models endpoint available'));
-
-    // Check for API errors
-    if (isset($data['error'])) {
-        // return "Error: " . $data['error']['message'];
-        // On 1st install needs an API key
-        // So return a short list of the base models until an API key is entered
+    // Check if the API key is empty
+    if (empty($api_key)) {
         return $default_model_list;
     }
 
-    // Extract the models from the response
-    if (isset($data['data']) && !is_null($data['data'])) {
-        $models = $data['data'];
-    } else {
-        // Handle the case where 'data' is not set or is null
-        $models = []; // Empty array
-        ksum_prod_trace( 'WARNING', 'Data key is not set or is null in the \$data array.');
-    }
+    $deepseek_models_url = esc_attr(get_option('chatbot_deepseek_base_url'));
+    $deepseek_models_url = rtrim($deepseek_models_url, '/') . '/models';
 
-    // Ensure $models is an array
-    if (!is_array($models)) {
-        return $default_model_list;
-    } else {
-        // Sort the models by name
-        usort($models, function($a, $b) {
-            return $a['id'] <=> $b['id'];
-        });
-    }
+    // Set headers
+    $args = array(
+        'headers' => array(
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $api_key,
+        ),
+    );
+
+    // Perform the request
+    $response = wp_remote_get($deepseek_models_url, $args);
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    
+    // Check for errors in the response
+    if (is_wp_error($response)) {
+        return $default_model_list;
+    }
 
-    // Return the list of models
-    return $models;
+    // Decode the JSON response
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+
+    // Check if the response is valid and contains data
+    if (isset($data['data']) && is_array($data['data'])) {
+        $default_model_list = array_map(function($model) {
+            return array(
+                'id' => $model['id'],
+                'object' => $model['object'],
+                'created' => null, // Assuming 'created' is not provided in the response
+                'owned_by' => $model['owned_by']
+            );
+        }, $data['data']);
+    } else {
+        // Handle the case where the response is not valid
+        $default_model_list = array(
+            array(
+                'id' => 'deepseek-chat',
+                'object' => 'model',
+                'created' => null,
+                'owned_by' => 'deepseek'
+            ),
+        );
+    }
+
+    // DeepSeek API does not have an endpoint for models
+    return $default_model_list;
 
 }

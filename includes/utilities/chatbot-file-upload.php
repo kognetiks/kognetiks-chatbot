@@ -55,7 +55,7 @@ function chatbot_chatgpt_upload_files() {
     } else {
         $index_file_path = $uploads_dir . '/index.php';
         if (!file_exists($index_file_path)) {
-            $file_content = "<?php\n// Silence is golden.\n\n// Load WordPress Environment\n\$wp_load_path = dirname(__FILE__, 5) . '/wp-load.php';\nif (file_exists(\$wp_load_path)) {\n    require_once(\$wp_load_path);\n} else {\n    exit('Could not find wp-load.php');\n}\n\n// Force a 404 error\nstatus_header(404);\nnocache_headers();\ninclude(get_404_template());\nexit;\n?>";
+            $file_content = "<?php\n// Silence is golden.\n\n";
             file_put_contents($index_file_path, $file_content);
         }
     }
@@ -86,122 +86,138 @@ function chatbot_chatgpt_upload_files() {
             // back_trace( 'NOTICE', '$file_path: ' . $file_path);
 
             if ($_FILES['file']['error'][$i] > 0) {
-                $default_message = "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
                 $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[4]) 
                     ? $chatbot_chatgpt_fixed_literal_messages[4] 
-                    : $default_message;
-                $responses[] = array(
+                    : "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
+
+                $responses[] = [
                     'status' => 'error',
                     'message' => $error_message
-                );
+                ];
                 $error_flag = true;
-                // back_trace( 'NOTICE', 'Error during file upload.');
-                http_response_code(415); // Send a 415 Unsupported Media Type status code
-                exit;
+                // back_trace( 'ERROR', 'Error during file upload.');
+                // Send a 415 Unsupported Media Type status code
+                wp_send_json_error($responses, 415);
             }
 
-            // $validation_result = upload_validation(array('name' => $_FILES['file']['name'][$i], 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
-            $validation_result = upload_validation(array('name' => basename($_FILES['file']['name'][$i]), 'tmp_name' => $_FILES['file']['tmp_name'][$i]));
+            // Validate file
+            $validation_result = upload_validation([
+                'name' => basename($_FILES['file']['name'][$i]),
+                'tmp_name' => $_FILES['file']['tmp_name'][$i]
+            ]);
+
             if (is_array($validation_result) && isset($validation_result['error'])) {
-                $responses[] = array(
+                $responses[] = [
                     'status' => 'error',
                     'message' => $validation_result['error']
-                );
+                ];
                 $error_flag = true;
                 // back_trace( 'NOTICE', $validation_result['error']);
-                http_response_code(415); // Send a 415 Unsupported Media Type status code
-                exit;
+                // Send a 415 Unsupported Media Type status code
+                wp_send_json_error($responses, 415);
             }
 
+            // Move file to uploads directory
             if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $file_path)) {
-                // Define a default fallback message
-                $default_message = "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
                 $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[4]) 
                     ? $chatbot_chatgpt_fixed_literal_messages[4] 
-                    : $default_message;
-                $responses[] = array(
+                    : "Oops! Something went wrong during the upload of {$_FILES['file']['name'][$i]}. Please try again later.";
+
+                $responses[] = [
                     'status' => 'error',
                     'message' => $error_message
-                );
+                ];
                 $error_flag = true;
                 // back_trace( 'NOTICE', 'Error during file upload.');
-                http_response_code(415); // Send a 415 Unsupported Media Type status code
-                exit;
+                // Send a 415 Unsupported Media Type status code
+                wp_send_json_error($responses, 415);
             }
 
-            // ***************************************************************************
-            // DECIDE IF THE UPLOADED FILE IS AN IMAGE OR NON-IMAGE
-            // 
-            // SET A TRANSIENT FOR THE FILE TYPE
-            // ***************************************************************************
-
+            // Determine file type
             $file_mime_type = mime_content_type($file_path);
-            if ($file_mime_type === 'image/') {
-                $purpose = 'vision';
-            } else {
-                $purpose = 'assistants';
+            $purpose = (strpos($file_mime_type, 'image/') === 0) ? 'vision' : 'assistants';
+
+            // Prepare API request
+            $api_url = get_files_api_url();
+
+            // Open file in a way that works with WP HTTP API
+            $filename = basename($file_path);
+            $file_mime_type = mime_content_type($file_path);
+            $file_data = file_get_contents($file_path);
+
+            $boundary = wp_generate_password(24); // Generate a unique boundary for multipart encoding
+
+            // Construct multipart body manually
+            $body = "--{$boundary}\r\n";
+            $body .= "Content-Disposition: form-data; name=\"purpose\"\r\n\r\n";
+            $body .= "{$purpose}\r\n";
+            $body .= "--{$boundary}\r\n";
+            $body .= "Content-Disposition: form-data; name=\"file\"; filename=\"{$filename}\"\r\n";
+            $body .= "Content-Type: {$file_mime_type}\r\n\r\n";
+            $body .= $file_data . "\r\n";
+            $body .= "--{$boundary}--\r\n";
+
+            // Set up HTTP request arguments
+            $args = [
+                'method'    => 'POST',
+                'headers'   => [
+                    'Authorization'  => 'Bearer ' . $api_key,
+                    'Content-Type'   => 'multipart/form-data; boundary=' . $boundary
+                ],
+                'body'      => $body,
+                'timeout'   => 30,
+            ];
+
+            // Send request using WP HTTP API
+            $response = wp_remote_post($api_url, $args);
+
+            // Check for errors
+            if (is_wp_error($response)) {
+                $responses[] = [
+                    'status' => 'error',
+                    'message' => 'API Error: ' . $response->get_error_message()
+                ];
+                $error_flag = true;
+                unlink($file_path); // Cleanup file
+                continue;
             }
 
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, get_files_api_url());
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $api_key));
-            
-            // Always send as multipart/form-data
-            $post_fields = [
-                'purpose' => $purpose, // Set purpose based on file type
-                'file' => new CURLFile($file_path)
-            ];
-            
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $post_fields);
+            $http_status = wp_remote_retrieve_response_code($response);
+            $response_body = wp_remote_retrieve_body($response);
+            $responseData = json_decode($response_body, true);
 
-            $response = curl_exec($ch);
-            $http_status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-            if (curl_errno($ch)) {
-                $responses[] = array(
+            // Handle API errors
+            if ($http_status != 200 || isset($responseData['error'])) {
+                $errorMessage = $responseData['error']['message'] ?? 'Unknown error occurred.';
+                $responses[] = [
                     'status' => 'error',
                     'http_status' => $http_status,
-                    'message' => 'Error:' . curl_error($ch)
-                );
-                // back_trace( 'ERROR', 'CURL error: ' . curl_error($ch));
-            } else {
-                $responseData = json_decode($response, true);
-                if ($http_status != 200 || isset($responseData['error'])) {
-                    $errorMessage = $responseData['error']['message'] ?? 'Unknown error occurred.';
-                    $responses[] = array(
-                        'status' => 'error',
-                        'http_status' => $http_status,
-                        'message' => $errorMessage
-                    );
-                    // back_trace( 'ERROR', 'API error: ' . $errorMessage);
-                } else {
-
-                    // back_trace( 'NOTICE', 'File ' . $newFileName . ' uploaded successfully. ID: ' . $responseData['id']);
-                    // back_trace( 'NOTICE', 'Purpose: ' . $purpose);
-                    // back_trace( 'NOTICE', 'Session ID: ' . $session_id);
-                    // back_trace( 'NOTICE', 'File No: ' . $i);
-
-                    set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $responseData['id'], $session_id, $i);
-                    set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $purpose, $session_id,  $responseData['id']);
-                    $responses[] = array(
-                        'status' => 'success',
-                        'http_status' => $http_status,
-                        'id' => $responseData['id'],
-                        'message' => 'File ' . $newFileName . ' uploaded successfully.'
-                    );
-                    // back_trace( 'NOTICE', 'File ' . $newFileName . ' uploaded successfully. ID: ' . $responseData['id']);
-                }
+                    'message' => $errorMessage
+                ];
+                unlink($file_path); // Cleanup file
+                continue;
             }
 
-            unlink($file_path); // Delete the file after successful upload
-            curl_close($ch);
+            // Store API response
+            set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $responseData['id'], $session_id, $i);
+            set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $purpose, $session_id, $responseData['id']);
 
+            $responses[] = [
+                'status' => 'success',
+                'http_status' => $http_status,
+                'id' => $responseData['id'],
+                'message' => 'File ' . $newFileName . ' uploaded successfully.'
+            ];
+
+            // Delete file after successful upload
+            unlink($file_path);
         }
 
+        
         return $responses;
 
     } else {
+
         // back_trace( 'ERROR', 'No files selected for upload.');
         global $chatbot_chatgpt_fixed_literal_messages;
         // Define a default fallback message
@@ -213,6 +229,7 @@ function chatbot_chatgpt_upload_files() {
             'status' => 'error',
             'message' => $error_message
         );
+
     }
 
 }
@@ -224,46 +241,78 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
     $file_size = filesize($file_path);
     $handle = fopen($file_path, "rb");
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, get_files_api_url());
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $api_key));
+    if (!$handle) {
+        prod_trace( 'ERROR', 'Unable to open file for reading.');
+        return false;
+    }
+
+    // Get the API URL
+    $url = get_files_api_url();
 
     $chunk_number = 0;
+    $total_chunks = ceil($file_size / $chunk_size);
+
     while (!feof($handle)) {
+        // Read chunk of data
         $chunk_data = fread($handle, $chunk_size);
-        $base64_encoded_chunk = base64_encode($chunk_data);
-        $post_fields = [
-            'purpose' => 'assistants',
-            'file' => $base64_encoded_chunk,
-            'file_name' => $file_name,
-            'file_type' => $file_type,
-            'chunk_number' => $chunk_number,
-            'total_chunks' => ceil($file_size / $chunk_size)
-        ];
-
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_fields);
-
-        $response = curl_exec($ch);
-        $http_status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        if (curl_errno($ch)) {
-            // back_trace( 'ERROR', 'CURL error during chunk upload: ' . curl_error($ch));
+        if ($chunk_data === false) {
+            prod_trace( 'ERROR', 'Failed to read file chunk.');
+            fclose($handle);
             return false;
         }
 
-        $responseData = json_decode($response, true);
+        // Base64 encode the chunk
+        $base64_encoded_chunk = base64_encode($chunk_data);
+
+        // Prepare POST fields
+        $post_fields = [
+            'purpose'       => 'assistants',
+            'file'          => $base64_encoded_chunk,
+            'file_name'     => $file_name,
+            'file_type'     => $file_type,
+            'chunk_number'  => $chunk_number,
+            'total_chunks'  => $total_chunks
+        ];
+
+        // Set up HTTP request arguments
+        $args = [
+            'method'    => 'POST',
+            'headers'   => [
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type'  => 'application/json'
+            ],
+            'body'      => json_encode($post_fields),
+            'timeout'   => 30 // Prevent long wait times
+        ];
+
+        // Send request
+        $response = wp_remote_post($url, $args);
+
+        // Check for errors
+        if (is_wp_error($response)) {
+            prod_trace( 'ERROR', 'Error during chunk upload: ' . $response->get_error_message());
+            fclose($handle);
+            return false;
+        }
+
+        // Retrieve HTTP response code
+        $http_status = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+        $responseData = json_decode($response_body, true);
+
+        // Check if the API returned an error
         if ($http_status != 200 || isset($responseData['error'])) {
             $errorMessage = $responseData['error']['message'] ?? 'Unknown error occurred.';
-            // back_trace( 'ERROR', 'API error during chunk upload: ' . $errorMessage);
+            prod_trace( 'ERROR', 'API error during chunk upload: ' . $errorMessage);
+            fclose($handle);
             return false;
         }
 
         $chunk_number++;
+
     }
 
     fclose($handle);
-    curl_close($ch);
 
     return true;
 

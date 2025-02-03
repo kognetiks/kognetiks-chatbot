@@ -61,40 +61,22 @@ function chatbot_chatgpt_kn_analysis_download_csv() {
         wp_die('File not found!');
     }
 
-    if (can_use_curl_for_file_protocol()) {
+    // Read the file contents using WordPress functions
+    $csv_data = file_get_contents($results_csv_file);
 
-        // Initialize a cURL session
-        $curl = curl_init();
-
-        // Set the cURL options
-        curl_setopt($curl, CURLOPT_URL, 'file://' . realpath($results_csv_file));
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
-        // Execute the cURL session
-        $csv_data = curl_exec($curl);
-
-        // Check for errors
-        if ($csv_data === false) {
-            wp_die('Error reading file: ' . curl_error($curl));
-        }
-
-        // Close the cURL session
-        curl_close($curl);
-
-        // Deliver the file for download
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment;filename=Knowledge Navigator Results.csv');
-        echo $csv_data;
-        exit;
-
-    } else {
-
-        // DIAG - Diagnostics - Ver 1.9.1
-        // back_trace( 'NOTICE', 'cURL is not enabled for the file protocol!');
-        chatbot_chatgpt_general_admin_notice('cURL is not enabled for the file protocol!');
-        // wp_die('cURL is not enabled for the file protocol!');
-
+    // Check if reading the file was successful
+    if ($csv_data === false) {
+        wp_die('Error reading file.');
     }
+
+    // Set headers for file download
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="Knowledge Navigator Results.csv"');
+    header('Content-Length: ' . filesize($results_csv_file));
+
+    // Output the file contents
+    readfile($results_csv_file);
+    exit;
 
 }
 add_action('admin_post_chatbot_chatgpt_kn_analysis_download_csv', 'chatbot_chatgpt_kn_analysis_download_csv');

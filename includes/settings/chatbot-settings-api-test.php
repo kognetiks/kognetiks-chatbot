@@ -299,7 +299,7 @@ function kchat_fetch_api_status($api_key, $model) {
             if (is_wp_error($response)) {
 
                 // DIAG - Diagnostics
-                prod_trace('ERROR', 'Error: ' . $response->get_error_message());
+                prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
                 return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
 
             }

@@ -34,42 +34,54 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
-    // Initialize cURL session
-    $ch = curl_init();
-
-    // Set the URL, including the Assistant ID
-    curl_setopt($ch, CURLOPT_URL, "https://api.openai.com/v1/assistants/" . $assistant_id_lookup);
-    // Set the HTTP request to GET
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-    // Include the headers
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        "Content-Type: application/json",
-        "OpenAI-Beta: assistants=v1",
-        "Authorization: Bearer " . $api_key
-    ));
-    // Return the response as a string instead of directly outputting it
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-    // Execute the request and decode the JSON response into an associative array
-    $response = json_decode(curl_exec($ch), true);
-    curl_close($ch);
-
-    // Check for errors during the execution or in the response
-    if($response === false) {
-        // back_trace( 'ERROR', 'cURL Error: ' . curl_error($ch));
+    // Ensure API key is set
+    if (empty($api_key)) {
+        // back_trace( 'ERROR', 'Missing API key for retrieving assistant name.');
         return false;
-    } elseif(isset($response['error'])) {
-        // back_trace( 'ERROR', 'API Error: ' . $response['error']['message']);
-        return false;
-    } else {
-        // If no errors, print the Assistant's name
-        // back_trace( 'NOTICE', 'Assistant Name: ' . $response['name']);
-        if ($response !== null) {
-            return $response['name'];
-        } else {
-            // Handle the error appropriately
-            return false;
-        }
     }
+
+    // Set the OpenAI API URL
+    $url = "https://api.openai.com/v1/assistants/" . urlencode($assistant_id_lookup);
+
+    // Set HTTP request arguments
+    $args = array(
+        'method'  => 'GET',
+        'headers' => array(
+            'Content-Type'  => 'application/json',
+            'OpenAI-Beta'   => 'assistants=v2',
+            'Authorization' => 'Bearer ' . $api_key
+        ),
+        'timeout' => 15, // Avoid long waits
+    );
+
+    // Make the request using WP HTTP API
+    $response = wp_remote_get($url, $args);
+
+    // Check for errors
+    if (is_wp_error($response)) {
+        prod_trace( 'ERROR', 'Error fetching Assistant name: ' . $response->get_error_message());
+        return false;
+    }
+
+    // Retrieve response body
+    $response_body = wp_remote_retrieve_body($response);
+
+    // Decode JSON response
+    $data = json_decode($response_body, true);
+
+    // Validate JSON
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        prod_trace( 'ERROR', 'Invalid JSON response from OpenAI API.');
+        return false;
+    }
+
+    // Check for API errors in the response
+    if (isset($data['error'])) {
+        prod_trace( 'ERROR', 'OpenAI API Error: ' . $data['error']['message']);
+        return false;
+    }
+
+    // Return the Assistant's name if it exists
+    return $data['name'] ?? false;
 
 }
