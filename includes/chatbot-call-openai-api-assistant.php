@@ -69,7 +69,7 @@ function createAnAssistant($api_key) {
     }
 
     // DIAG - Diagnostics - Ver 2.2.3
-    back_trace( 'NOTICE', 'Step 1 - $thread_response["id"]: ' . $thread_response["id"]);
+    // back_trace( 'NOTICE', 'Step 1 - $thread_response["id"]: ' . $thread_response["id"]);
 
     return $thread_response;
 
@@ -85,10 +85,10 @@ function createAnAssistant($api_key) {
 function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // DIAG - Diagnostics - Ver 2.2.3
-    back_trace( 'NOTICE', 'Step 3 - addAMessage()');
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', '$prompt: ' . $prompt);
-    back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', 'Step 3 - addAMessage()');
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$prompt: ' . $prompt);
+    // back_trace( 'NOTICE', '$context: ' . $context);
     // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     global $session_id;
@@ -198,7 +198,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Step 4 - runTheAssistant()');
-    back_trace( 'NOTICE', 'Step 4 - $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'Step 4 - $thread_id: ' . $thread_id);
 
     global $kchat_settings;
     
@@ -455,7 +455,7 @@ function getTheRunsSteps($thread_id, $runId, $api_key) {
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace('NOTICE', 'Step 6 - getTheRunsSteps()');
-    back_trace( 'NOTICE', 'Step 6 - $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'Step 6 - $thread_id: ' . $thread_id);
 
     // Construct the API URL
     $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
@@ -519,7 +519,7 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Step 7 - getTheStepsStatus()');
-    back_trace( 'NOTICE', 'Step 7 - $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'Step 7 - $thread_id: ' . $thread_id);
 
     // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/" . $runId . "/steps";
     $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
@@ -614,7 +614,7 @@ function getTheMessage($thread_id, $api_key) {
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Step 8 - getTheMessage()');
-    back_trace( 'NOTICE', 'Step 8 - $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'Step 8 - $thread_id: ' . $thread_id);
 
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
 
@@ -775,12 +775,12 @@ function getTheMessage($thread_id, $api_key) {
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id) {
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$page_id: ' . $page_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$message: ' . $message);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     // back_trace( 'NOTICE', '$model: ' . $model);
@@ -795,13 +795,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'NOTICE', '$thread_id is empty');
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         if (empty($thread_id)) {
-            back_trace( 'NOTICE', '$thread_id was empty');
+            // back_trace( 'NOTICE', '$thread_id was empty');
         } else {
-            back_trace( 'NOTICE', '$thread_id was empty but found a $thread_id: ' . $thread_id);
+            // back_trace( 'NOTICE', '$thread_id was empty but found a $thread_id: ' . $thread_id);
         }
     } else {
-        back_trace( 'NOTICE', '$thread_id was NOT empty');
-        back_trace( 'NOTICE', '$thread_id was NOT empty but passed as $thread_id: ' . $thread_id);
+        // back_trace( 'NOTICE', '$thread_id was NOT empty');
+        // back_trace( 'NOTICE', '$thread_id was NOT empty but passed as $thread_id: ' . $thread_id);
     }
 
     // If the thread_id is not set, create a new thread
@@ -819,7 +819,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         $thread_id = $assistants_response["id"];
         $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024-08-26
         // DIAG - Diagnostics - Ver 2.2.3
-        back_trace( 'NOTICE', '$thread_id ' . $thread_id);
+        // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
         // back_trace( 'NOTICE', '$assistant_id ' . $assistant_id);
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
@@ -858,9 +858,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     }
 
     // DIAG - Diagnostics - Ver 2.2.3
-    back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $prompt: ' . $prompt);
-    back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $content: ' . $context);
+    // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $prompt: ' . $prompt);
+    // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $content: ' . $context);
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
 
     if (empty($file_id)) {
