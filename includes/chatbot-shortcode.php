@@ -690,12 +690,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // DIAG - Diagnostics - Ver 2.0.5
     // back_trace( 'NOTICE', '$use_assistant_name: ' . $use_assistant_name);
 
-    if ($use_assistant_name == 'Yes' && !empty($assistant_id)) {
+    if ($use_assistant_name == 'Yes' && !empty($assistant_id) && $assistant_id !== 'original') {
         // FIXME - CAN I AVOID THIS CALL TO OPENAI?
         $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
         $bot_name = !empty($assistant_name) ? $assistant_name : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     } else {
-        $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
+        back_trace( 'NOTICE', 'bot_name: ' . $bot_name);
     }
 
     // MOVED FURTHER DOWN - Ver 2.1.2 - 2024 08 28

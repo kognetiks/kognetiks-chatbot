@@ -36,7 +36,7 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
     // Ensure API key is set
     if (empty($api_key)) {
-        back_trace( 'ERROR', 'Missing API key for retrieving assistant name.');
+        // back_trace( 'ERROR', 'Missing API key for retrieving assistant name.');
         return false;
     }
 
@@ -59,7 +59,7 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
     // Check for errors
     if (is_wp_error($response)) {
-        back_trace( 'ERROR', 'Error fetching Assistant name: ' . $response->get_error_message());
+        prod_trace( 'ERROR', 'Error fetching Assistant name: ' . $response->get_error_message());
         return false;
     }
 
@@ -71,7 +71,7 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
     // Validate JSON
     if (json_last_error() !== JSON_ERROR_NONE) {
-        back_trace( 'ERROR', 'Invalid JSON response from OpenAI API.');
+        prod_trace( 'ERROR', 'Invalid JSON response from OpenAI API.');
         return false;
     }
 

@@ -357,9 +357,7 @@ function chatbot_deepseek_get_models() {
 
     // Check if the API key is empty
     if (empty($api_key)) {
-
         return $default_model_list;
-
     }
 
     $deepseek_models_url = esc_attr(get_option('chatbot_deepseek_base_url'));
@@ -377,13 +375,11 @@ function chatbot_deepseek_get_models() {
     $response = wp_remote_get($deepseek_models_url, $args);
 
     // DIAG - Diagnostics
-    // kognetiks_ai_summaries_back_trace('NOTICE', '$response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
     
     // Check for errors in the response
     if (is_wp_error($response)) {
-
         return $default_model_list;
-
     }
 
     // Decode the JSON response

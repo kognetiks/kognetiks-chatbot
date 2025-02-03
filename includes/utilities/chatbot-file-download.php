@@ -54,7 +54,7 @@ function download_openai_file($file_id, $filename) {
 
     // Check for request errors
     if (is_wp_error($response)) {
-        back_trace( 'ERROR', 'Error retrieving file from OpenAI: ' . $response->get_error_message());
+        prod_trace( 'ERROR', 'Error retrieving file from OpenAI: ' . $response->get_error_message());
         return false;
     }
 

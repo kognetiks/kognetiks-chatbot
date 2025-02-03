@@ -52,19 +52,19 @@ function createAnAssistant($api_key) {
 
     // Retrieve API response
     $body = wp_remote_retrieve_body($response);
-    // back_trace('NOTICE', 'Thread Response: ' . print_r($body, true));
+    // back_trace( 'NOTICE', 'Thread Response: ' . print_r($body, true));
 
     $thread_response = json_decode($body, true);
 
     // Handle API errors
     if (isset($thread_response['error'])) {
-        // back_trace('ERROR', 'OpenAI API Error: ' . json_encode($thread_response['error'], JSON_PRETTY_PRINT));
+        // back_trace( 'ERROR', 'OpenAI API Error: ' . json_encode($thread_response['error'], JSON_PRETTY_PRINT));
         return "Error: " . $thread_response['error']['message'];
     }
 
     // Ensure thread ID is present
     if (!isset($thread_response["id"])) {
-        // back_trace('ERROR', 'Thread ID Missing in Response: ' . print_r($thread_response, true));
+        // back_trace( 'ERROR', 'Thread ID Missing in Response: ' . print_r($thread_response, true));
         return "Error: Thread ID not returned.";
     }
 
@@ -269,7 +269,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     ]);
     
     // Log the full response for debugging
-    // back_trace('NOTICE', 'Step 4 - Full Response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', 'Step 4 - Full Response: ' . print_r($response, true));
     
     // Ensure the response is valid
     if (is_wp_error($response)) {
@@ -285,7 +285,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     $response_data = json_decode($response_body, true);
     
     // Log the decoded response
-    // back_trace('NOTICE', 'Step 4 - Decoded Response: ' . print_r($response_data, true));
+    // back_trace( 'NOTICE', 'Step 4 - Decoded Response: ' . print_r($response_data, true));
     
     // Retrieve the HTTP response code
     $http_code = wp_remote_retrieve_response_code($response);
@@ -387,7 +387,7 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
         }
     
         // ✅ Debugging: Log the decoded response
-        // back_trace('NOTICE', 'Step 5 - Decoded Response: ' . print_r($responseArray, true));
+        // back_trace( 'NOTICE', 'Step 5 - Decoded Response: ' . print_r($responseArray, true));
     
         // ✅ Check if 'status' exists in the response
         if (isset($responseArray["status"])) {
@@ -454,7 +454,7 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
 function getTheRunsSteps($thread_id, $runId, $api_key) {
 
     // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace('NOTICE', 'Step 6 - getTheRunsSteps()');
+    // back_trace( 'NOTICE', 'Step 6 - getTheRunsSteps()');
     // back_trace( 'NOTICE', 'Step 6 - $thread_id: ' . $thread_id);
 
     // Construct the API URL
@@ -506,7 +506,7 @@ function getTheRunsSteps($thread_id, $runId, $api_key) {
     }
 
     // ✅ Debugging: Log the decoded response
-    // back_trace('NOTICE', 'Step 6 - Decoded Response: ' . print_r($response_data, true));
+    // back_trace( 'NOTICE', 'Step 6 - Decoded Response: ' . print_r($response_data, true));
 
     return $response_data;
 
@@ -581,7 +581,7 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
         }
 
         // ✅ Debugging: Log the decoded response
-        // back_trace('NOTICE', 'Step 7 - Decoded Response: ' . print_r($responseArray, true));
+        // back_trace( 'NOTICE', 'Step 7 - Decoded Response: ' . print_r($responseArray, true));
 
         // ✅ Check for "data" field
         if (isset($responseArray["data"]) && is_array($responseArray["data"])) {

@@ -83,7 +83,7 @@ function chatbot_chatgpt_upload_files() {
         for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
             $newFileName = generate_random_string() . '.' . pathinfo($_FILES['file']['name'][$i], PATHINFO_EXTENSION);
             $file_path = $uploads_dir . $newFileName;
-            back_trace( 'NOTICE', '$file_path: ' . $file_path);
+            // back_trace( 'NOTICE', '$file_path: ' . $file_path);
 
             if ($_FILES['file']['error'][$i] > 0) {
                 $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[4]) 
@@ -95,7 +95,7 @@ function chatbot_chatgpt_upload_files() {
                     'message' => $error_message
                 ];
                 $error_flag = true;
-                back_trace( 'ERROR', 'Error during file upload.');
+                // back_trace( 'ERROR', 'Error during file upload.');
                 // Send a 415 Unsupported Media Type status code
                 wp_send_json_error($responses, 415);
             }
@@ -112,7 +112,7 @@ function chatbot_chatgpt_upload_files() {
                     'message' => $validation_result['error']
                 ];
                 $error_flag = true;
-                back_trace( 'NOTICE', $validation_result['error']);
+                // back_trace( 'NOTICE', $validation_result['error']);
                 // Send a 415 Unsupported Media Type status code
                 wp_send_json_error($responses, 415);
             }
@@ -128,7 +128,7 @@ function chatbot_chatgpt_upload_files() {
                     'message' => $error_message
                 ];
                 $error_flag = true;
-                back_trace( 'NOTICE', 'Error during file upload.');
+                // back_trace( 'NOTICE', 'Error during file upload.');
                 // Send a 415 Unsupported Media Type status code
                 wp_send_json_error($responses, 415);
             }

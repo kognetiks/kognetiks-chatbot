@@ -173,52 +173,38 @@ function chatbot_chatgpt_settings_page() {
 
             } elseif ($active_tab == 'api_chatgpt' && $chatbot_ai_platform_choice == 'OpenAI') {
 
-                back_trace( 'NOTICE', '$active_tab: ' . $active_tab);
-				back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
-
-                back_trace( 'NOTICE', 'BEFORE settings_fields(chatbot_chatgpt_api_chatgpt)');
-
                 settings_fields('chatbot_chatgpt_api_chatgpt');
 
-                back_trace( 'NOTICE', 'AFTER settings_fields(chatbot_chatgpt_api_chatgpt)');
-
-                back_trace( 'NOTICE', 'BEFORE do_settings_sections(chatbot_chatgpt_model_settings_general)');
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_model_settings_general');
                 echo '</div>';
 
                 // API Settings - Ver 1.9.5
-                back_trace( 'NOTICE', 'BEFORE do_settings_sections(chatbot_chatgpt_api_chatgpt_general)');
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_chatgpt_general');
                 echo '</div>';
 
                 // ChatGPT API Settings - Ver 1.9.5
-                back_trace( 'NOTICE', 'BEFORE do_settings_sections(chatbot_chatgpt_api_chatgpt_chat)');
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_chatgpt_chat');
                 echo '</div>';
 
                 // Voice Settings - Ver 1.9.5
-                back_trace( 'NOTICE', 'BEFORE do_settings_sections(chatbot_chatgpt_api_chatgpt_voice)');
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_chatgpt_voice');
                 echo '</div>';
 
                 // Whisper Settings - Ver 2.0.1
-                back_trace( 'NOTICE', 'BEFORE do_settings_sections(chatbot_chatgpt_api_chatgpt_whisper)');
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_chatgpt_whisper');
                 echo '</div>';
 
                 // Image Settings - Ver 1.9.5
-                back_trace( 'NOTICE', 'BEFORE do_settings_sections(chatbot_chatgpt_api_chatgpt_image)');
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_chatgpt_image');
                 echo '</div>';
 
                 // Advanced Settings - Ver 1.9.5
-                back_trace( 'NOTICE', 'BEFORE do_settings_sections(chatbot_chatgpt_api_chatgpt_advanced)');
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_chatgpt_advanced');
                 echo '</div>';

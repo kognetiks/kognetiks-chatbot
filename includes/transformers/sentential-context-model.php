@@ -144,6 +144,11 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     // DIAG - Diagnostic - Ver 2.2.1
     // back_trace( 'NOTICE', 'Like Condition: ' . $like_condition);
 
+    // Handle error for no matching content
+    if (empty($like_condition)) {
+        return $no_matching_content_response[array_rand($no_matching_content_response)];
+    }
+
     // Step 5 - Fetch WordPress content
     $sql = $wpdb->prepare("
         SELECT post_content

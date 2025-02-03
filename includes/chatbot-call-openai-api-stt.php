@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', 'chatbot_chatgpt_call_stt_api()' );
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_stt_api()' );
 
     global $chatbot_chatgpt_plugin_dir_path;
     global $session_id;
@@ -37,18 +37,22 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
         if (empty($api_key)) {
             // Return an error message if the API key is not set
-            if (get_locale() !== "en_US") {
-                $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-            } else {
-                $localized_errorResponses = $errorResponses;
-            }
+            $localized_errorResponses = (get_locale() !== "en_US") 
+                ? get_localized_errorResponses(get_locale(), $errorResponses) 
+                : $errorResponses;
             return $localized_errorResponses[array_rand($localized_errorResponses)];
         }
     }
 
-    // Determine the correct API URL based on STT option
-    $api_url = 'https://api.openai.com/v1/audio/transcriptions';
-    if ($stt_option == 'translate') {
+    // Check for the STT option
+    // Default to 'transcribe' if the option is not set
+    if ( empty($stt_option) or $stt_option == 'transcribe' or $stt_option == 'transcription-only') {
+        // Transcription API URL
+        $api_url = 'https://api.openai.com/v1/audio/transcriptions';
+    } elseif ( $stt_option == 'translate' ) {
+        // Translate API URL
+        // For supported languages see:
+        // https://platform.openai.com/docs/guides/speech-to-text/supported-languages
         $api_url = 'https://api.openai.com/v1/audio/translations';
     }
 
@@ -68,21 +72,35 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     finfo_close($finfo);
 
     if (strpos($mime_type, 'audio/') === false && strpos($mime_type, 'video/') === false) {
+        // DIAG - Diagnostics
+        // back_trace( 'ERROR', '$mime_type: ' . $mime_type);
         return "Error: The file is not an audio or video file. Please upload an audio or video file.";
     }
 
-    // Prepare the request body
-    $body = array(
-        'model'           => esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1')),
-        'file'            => new CURLFile($audio_file_name, $mime_type, basename($audio_file_name)),
-        'response_format' => 'text',
-        'prompt'          => $message
-    );
+    // Read the file content
+    $file_data = file_get_contents($audio_file_name);
+    $boundary = wp_generate_password(24, false);
+
+    // Construct multipart request body manually
+    $body = "--{$boundary}\r\n";
+    $body .= "Content-Disposition: form-data; name=\"model\"\r\n\r\n";
+    $body .= esc_attr(get_option('chatbot_chatgpt_whisper_model_option', 'whisper-1')) . "\r\n";
+    $body .= "--{$boundary}\r\n";
+    $body .= "Content-Disposition: form-data; name=\"response_format\"\r\n\r\n";
+    $body .= "text\r\n";
+    $body .= "--{$boundary}\r\n";
+    $body .= "Content-Disposition: form-data; name=\"prompt\"\r\n\r\n";
+    $body .= "{$message}\r\n";
+    $body .= "--{$boundary}\r\n";
+    $body .= "Content-Disposition: form-data; name=\"file\"; filename=\"" . basename($audio_file_name) . "\"\r\n";
+    $body .= "Content-Type: {$mime_type}\r\n\r\n";
+    $body .= $file_data . "\r\n";
+    $body .= "--{$boundary}--\r\n";
 
     // Set up request headers
     $headers = array(
-        'Content-Type: multipart/form-data',
-        'Authorization' => 'Bearer ' . $api_key,
+        'Authorization'   => 'Bearer ' . $api_key,
+        'Content-Type'    => 'multipart/form-data; boundary=' . $boundary
     );
 
     // Make the request using wp_remote_post()
@@ -95,8 +113,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
 
     // Handle errors
     if (is_wp_error($response)) {
-        // DIAG - Diagnostics
-        back_trace( 'ERROR', 'WP error: ' . $response->get_error_message() );
+        prod_trace( 'ERROR', 'WP error: ' . $response->get_error_message() );
         return 'Error: ' . $response->get_error_message();
     }
 
@@ -111,7 +128,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     if (isset($response_data['error'])) {
         http_response_code(400);
         // DIAG - Diagnostics
-        back_trace( 'ERROR', 'API error: ' . $response_data['error']['message'] );
+        prod_trace( 'ERROR', 'API error: ' . $response_data['error']['message'] );
         return 'Error: ' . esc_html($response_data['error']['message']);
     }
 
@@ -128,11 +145,11 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
 
 }
 
-// Process the transcription using ChatGPT to correct spelling and formatting.
+//Process the transcription using ChatGPT to correct spelling and formatting.
 function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcription) {
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', 'chatbot_chatgpt_post_process_transcription()' );
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_post_process_transcription()' );
 
     // Get API URL for text processing
     $api_url = get_chat_completions_api_url();
@@ -171,7 +188,7 @@ function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcr
     // Make the request using wp_remote_post()
     $response = wp_remote_post($api_url, array(
         'method'    => 'POST',
-        'timeout'   => 0,
+        'timeout'   => 30,
         'body'      => $body_string,
         'headers'   => $headers
     ));
@@ -179,7 +196,7 @@ function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcr
     // Handle errors
     if (is_wp_error($response)) {
         // DIAG - Diagnostics
-        back_trace( 'ERROR', 'WP error: ' . $response->get_error_message() );
+        prod_trace( 'ERROR', 'WP error: ' . $response->get_error_message() );
         return 'Error in API request: ' . $response->get_error_message();
     }
 
@@ -197,4 +214,5 @@ function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcr
     $final_response = '**The transcription:** ' . $transcription . PHP_EOL . PHP_EOL . '**The analysis:** ' . $analysis;
 
     return !empty($final_response) ? $final_response : 'No transcription text found.';
+
 }
