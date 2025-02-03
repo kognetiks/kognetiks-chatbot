@@ -695,7 +695,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
         $bot_name = !empty($assistant_name) ? $assistant_name : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     } else {
-        back_trace( 'NOTICE', 'bot_name: ' . $bot_name);
+        $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     }
 
     // MOVED FURTHER DOWN - Ver 2.1.2 - 2024 08 28
