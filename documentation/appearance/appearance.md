@@ -59,6 +59,14 @@ The Appearance Settings allow you to customize the visual aspects of your chatbo
     - **Description**: Allows you to add custom CSS to further style the chatbot.
     - **Input**: Enter any custom CSS rules to override the default styles and achieve specific design requirements.
 
+14. **Enable Glyph Rendering**:
+
+   - **Description**: Allows you to enable/disable glyph rendering for responses that include mathematical formulas.
+   - **Options**: `Yes` or `No`.
+   - **Selection**: Choose `Yes` (default) to enable glyph rendering or choose `No` to disable glyph rendering.
+
+![Glyph Rendering](glyph-rendering.png)
+
 ## Steps to Configure
 
 1. Navigate to the Appearance Settings section of the Kognetiks Chatbot plugin in your WordPress dashboard.

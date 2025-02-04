@@ -204,7 +204,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 
 = 2.2.4 - Released TBD =
 
-* **TBD**: TBD
+* **Glyph Rendering**: Added support to enable/disable glyph rendering for the chatbot's response, enabled by default.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.3.
 
 = 2.2.3 - Released 02-03-2025 =

@@ -10,7 +10,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.2.4
 
-* **TBD**: TBD
+* **Glyph Rendering**: Added support to enable/disable glyph rendering for the chatbot's response, enabled by default.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.3.
 
 ## Features
