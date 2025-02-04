@@ -203,8 +203,7 @@ function chatbot_nvidia_call_api($api_key, $message) {
 
     if (isset($response_body['choices'][0]['message']['content'])) {
         // Extract the assistant's message content
-        $message_content = trim($response_body['choices'][0]['message']['content']);
-        
+        $message_content = trim($response_body['choices'][0]['message']['content']);   
         // Ensure the response ends with a period
         if (!str_ends_with($message_content, '.')) {
             $message_content .= '.';

@@ -1106,6 +1106,9 @@ function chatbot_chatgpt_send_message() {
         // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
 
+        // Replace " ." at the end of $response with "."
+        $response = str_replace(" .", ".", $response);
+
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
         if ( $chatbot_chatgpt_suppress_learnings != 'None') {
