@@ -28,53 +28,47 @@ function chatbot_chatgpt_content_search( $search_prompt ) {
 
     $tf_idf_table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
 
-    // Remove stopwords from the $search_prompt
-    $search_prompt = preg_replace('/\b(' . implode('|', $stopWords) . ')\b/i', '', $search_prompt);
-    
-    // Remove any punctuation from the search prompt
-    $search_prompt = preg_replace('/[^\w\s\'-]/', '', $search_prompt);
-    
-    // Convert the search prompt into an array of words
-    $words = preg_split('/\s+/', trim($search_prompt));
-    
+    // Remove stopwords and punctuation, then normalize whitespace
+    $search_prompt = preg_replace(
+        [
+            '/\b(' . implode('|', $stopWords) . ')\b/i', // Remove stopwords
+            '/[^\w\s\'-]/', // Remove unwanted punctuation except apostrophes and hyphens
+            '/\s+/' // Normalize whitespace (replace multiple spaces with a single space)
+        ],
+        [' ', '', ' '], 
+        trim($search_prompt)
+    );
+
+    // Convert the cleaned search prompt into an array of words
+    $words = array_filter(preg_split('/\s+/', $search_prompt)); // Removes empty values
+
     // Initialize an array to store valid words
     $filtered_words = [];
-    
+
     foreach ($words as $word) {
-        $word = trim($word);
-        if ($word === '') {
-            continue; // Skip empty entries
-        }
-    
         // Check if the word exists in the TF-IDF database table
         $exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $tf_idf_table_name WHERE word LIKE %s", $word));
-    
+
         if ($exists > 0) {
-            back_trace( 'NOTICE', 'Word exists: ' . $word );
+            // back_trace('NOTICE', 'Word exists: ' . $word);
             $filtered_words[] = $word; // Retain the word
         } else {
-            back_trace( 'NOTICE', 'Word does not exist: ' . $word );
+            // back_trace('NOTICE', 'Word does not exist: ' . $word);
         }
     }
-    
-    // Reconstruct the filtered search prompt
-    $search_prompt = implode(' ', $filtered_words);
-    
-    // Split prompt into individual words without punctuation
-    $cleaned_prompt = preg_replace('/[^\w\s\'-]/', '', $search_prompt);
-    
-    // Normalize whitespace (replace multiple spaces with a single space)
-    $cleaned_prompt = preg_replace('/\s+/', ' ', trim($cleaned_prompt));
-    
+
+    // Reconstruct the final cleaned search prompt
+    $cleaned_prompt = implode(' ', $filtered_words);
+
     // DIAG - Diagnostic - Ver 2.2.4
-    back_trace('NOTICE', '$cleaned_prompt: ' . $cleaned_prompt);
+    // back_trace('NOTICE', '$cleaned_prompt: ' . $cleaned_prompt);
 
     $words = preg_split('/\s+/', trim($cleaned_prompt));
     $words = array_filter($words); // remove any empty entries
 
     // If somehow no words, bail
     if ( empty( $words ) ) {
-        return array();
+        return '';
     }
     
     // Build the SUM(...) expression. For each word, we do:
@@ -186,8 +180,8 @@ function chatbot_chatgpt_content_search( $search_prompt ) {
 
     // DIAG - Diagnostic - Ver 2.2.4
     // back_trace( 'NOTICE', '$content_string: ' . $content_string);
-    back_trace( 'NOTICE', 'Character count: ' . strlen( $content_string ) );
-    back_trace( 'NOTICE', 'Word count: ' . str_word_count( $content_string ) );
+    // back_trace( 'NOTICE', 'Character count: ' . strlen( $content_string ) );
+    // back_trace( 'NOTICE', 'Word count: ' . str_word_count( $content_string ) );
 
     return $content_string;
 
