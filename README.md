@@ -10,6 +10,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.2.4
 
+* **Improved Knowledge Navigator**: Enhanced the Knowledge Navigator to provide more accurate and relevant responses based on your site's content.
 * **Glyph Rendering**: Added support to enable/disable glyph rendering for the chatbot's response, enabled by default.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.3.
 
