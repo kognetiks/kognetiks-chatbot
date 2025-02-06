@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.7.1
-Stable tag: 2.2.4
+Stable tag: 2.2.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -202,7 +202,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 
 == Changelog ==
 
-= 2.2.4 - Released TBD =
+= 2.2.5 - Released TBD =
+
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.4.
+
+= 2.2.4 - Released 02-06-2025 =
 
 * **Improved Knowledge Navigator**: Enhanced the Knowledge Navigator to provide more accurate and relevant responses based on your site's content.
 * **Glyph Rendering**: Added support to enable/disable glyph rendering for the chatbot's response, enabled by default.
