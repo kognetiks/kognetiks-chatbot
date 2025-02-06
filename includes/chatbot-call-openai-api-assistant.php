@@ -868,23 +868,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     if ($useEnhancedContext == 'Yes') {
 
-        // Enhance the context with transformer results - Ver 2.2.4 2025-02-04
-        // $temp = [];
-        // $temp['model'] = $model;
-        // $temp['kchat_model_setting'] = $kchat_settings['model'];
-        $model = 'sentential-context-model';
-        $kchat_settings['model'] = 'sentential-context-model';
-        $transformer_context = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_call_transformer_model_api($message);
-        $transformer_context = preg_replace('/\s+/', ' ', $transformer_context);
-        // DIAG Diagnostics - Ver 2.2.2 - 2025-01-17
-        // back_trace( 'NOTICE', '$transformer_context: ' . $transformer_context);
-        // $context = $transformer_context . ' ' . $context . ' ' . $chatgpt_last_response . ' ' . $chatbot_chatgpt_kn_conversation_context;
-        // back_trace( 'NOTICE', '$context: ' . $context);
-        // $kchat_settings['model'] = $temp['kchat_model_setting'];
-        // $model = $temp['model'];
-
-        // Append the transformer context to the prompt
-        $prompt = $prompt . ' ' . $transformer_context;
+        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
+        If ( !empty ($search_results) ) {
+            // Append the transformer context to the prompt
+            $prompt = $prompt . ' ' . $search_results;
+        }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
         // back_trace( 'NOTICE', '$prompt: ' . $prompt);
 

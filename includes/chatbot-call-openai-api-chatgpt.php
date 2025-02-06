@@ -91,25 +91,18 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     $sys_message = 'We previously have been talking about the following things: ';
 
-    // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
+    // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4
     $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context', 'Yes'));
 
     if ($useEnhancedContext == 'Yes') {
 
-        // Enhance the context with transformer results - Ver 2.2.2 - 2025-01-17
-        $temp = [];
-        $temp['model'] = $model;
-        $temp['kchat_model_setting'] = $kchat_settings['model'];
-        $model = 'sentential-context-model';
-        $kchat_settings['model'] = 'sentential-context-model';
-        $transformer_context = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_call_transformer_model_api($message);
-        $transformer_context = preg_replace('/\s+/', ' ', $transformer_context);
-        // DIAG Diagnostics - Ver 2.2.2 - 2025-01-17
-        // back_trace( 'NOTICE', '$transformer_context: ' . $transformer_context);
-        $context = $transformer_context . ' ' . $context . ' ' . $chatgpt_last_response . ' ' . $chatbot_chatgpt_kn_conversation_context;
+        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
+        If ( !empty ($search_results) ) {
+            // Append the transformer context to the prompt
+            $context = $search_results;
+        }
+        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
         // back_trace( 'NOTICE', '$context: ' . $context);
-        $kchat_settings['model'] = $temp['kchat_model_setting'];
-        $model = $temp['model'];
 
     } else {
 
@@ -166,7 +159,11 @@ function chatbot_chatgpt_call_api($api_key, $message) {
         'timeout' => $chatbot_chatgpt_timeout, // Increase the timeout values to 15 seconds to wait just a bit longer for a response from the engine
     );
 
+    // DIAG - Diagnostics - Ver 2.2.4
+    // back_trace( 'NOTICE', '$args: ' . print_r($args, true));
+
     $response = wp_remote_post($api_url, $args);
+ 
     // DIAG - Diagnostics - Ver 1.6.7
     // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
