@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.2.3
+ * Version:     2.2.4
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -30,7 +30,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.2.3';
+$chatbot_chatgpt_plugin_version = '2.2.4';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -156,6 +156,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-api-endpoints.php';                // API Endpoints - Ver 2.2.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants.php';                   // Assistants Management - Ver 2.0.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php';         // Ver 1.9.2
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-content-search.php';               // Functions - Ver 2.2.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php';                // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php';                   // Deactivation - Ver 1.9.9
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-download-transcript.php';          // Functions - Ver 1.9.9
@@ -670,29 +671,34 @@ add_action('wp_enqueue_scripts', 'chatbot_chatgpt_enqueue_scripts');
 // https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js
 // https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js
 function enqueue_mathjax_with_custom_config() {
+    
+    // Check to see if MathJax is enabled
+    if (esc_attr(get_option('chatbot_chatgpt_enable_mathjax','Yes')) === 'Yes') {
 
-    global $chatbot_chatgpt_plugin_version;
-    global $chatbot_chatgpt_plugin_dir_url;
+        global $chatbot_chatgpt_plugin_version;
+        global $chatbot_chatgpt_plugin_dir_url;
 
-    // Add the MathJax configuration script
-    $mathjax_config = "
-    window.MathJax = {
-        tex: {
-            inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
-            displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
-        },
-        chtml: {
-            fontURL: '" . plugin_dir_url(__FILE__) . "assets/fonts/woff-v2'
-        }
-    };
-    ";
+        // Add the MathJax configuration script
+        $mathjax_config = "
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+                displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
+            },
+            chtml: {
+                fontURL: '" . plugin_dir_url(__FILE__) . "assets/fonts/woff-v2'
+            }
+        };
+        ";
 
-    // Enqueue the MathJax script
-    // wp_enqueue_script( 'mathjax', plugin_dir_url(__FILE__) . 'assets/js/tex-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
-    wp_enqueue_script( 'mathjax', $chatbot_chatgpt_plugin_dir_url . 'assets/js/tex-mml-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
+        // Enqueue the MathJax script
+        // wp_enqueue_script( 'mathjax', plugin_dir_url(__FILE__) . 'assets/js/tex-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
+        wp_enqueue_script( 'mathjax', $chatbot_chatgpt_plugin_dir_url . 'assets/js/tex-mml-chtml.js', array(), $chatbot_chatgpt_plugin_version, true );
 
-    // Add the inline script before MathJax script
-    wp_add_inline_script( 'mathjax', $mathjax_config, 'before' );
+        // Add the inline script before MathJax script
+        wp_add_inline_script( 'mathjax', $mathjax_config, 'before' );
+
+    }
 
 }
 add_action( 'wp_enqueue_scripts', 'enqueue_mathjax_with_custom_config' );
@@ -1100,6 +1106,9 @@ function chatbot_chatgpt_send_message() {
 
         // Send message to Custom GPT API - Ver 1.6.7
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
+
+        // Replace " ." at the end of $response with "."
+        $response = str_replace(" .", ".", $response);
 
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));

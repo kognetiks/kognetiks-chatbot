@@ -200,7 +200,7 @@ function chatbot_chatgpt_call_markov_chain_api($message) {
     
         // Ensure the message ends with a period, exclamation point, or question mark
         if (!preg_match('/[.!?]$/', $response_body['choices'][0]['message']['content'])) {
-            $response_body['choices'][0]['message']['content'] .= '.';
+            $response_body['choices'][0]['message']['content'] = rtrim($response_body['choices'][0]['message']['content']) . '.';
         }
         // back_trace( 'NOTICE', '$response_body["choices"][0]["message"]["content"]: ' . $response_body['choices'][0]['message']['content']);
     

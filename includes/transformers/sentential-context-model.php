@@ -40,6 +40,7 @@ function transformer_model_sentential_context_model_response($input, $responseCo
     $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
 
     // Generate contextual response
+    // back_trace( 'NOTICE', '$responseCount: ' . $responseCount);
     $response = transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $responseCount);
 
     return $response;
@@ -68,6 +69,12 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     // $words = array_filter(array_map('trim', explode(' ', strtolower($input))));
     $words = array_filter(array_map('trim', explode(' ', mb_strtolower($input, 'UTF-8')))); // Ver 2.2.2
     $words = transformer_model_sentential_context_remove_stop_words($words);
+
+    // FIXME - OVERRIDE - Ver 2.2.4
+    $all_words = $words;
+
+    // DIAG - Diagnostic - Ver 2.2.4
+    // back_trace( 'NOTICE', 'Words: ' . implode(', ', $words));
 
     // Step 2 - Query the TF-IDF table for the highest-scoring words
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
@@ -120,6 +127,11 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         return ['word' => $word, 'score' => 0];
     }, $remaining_words));
 
+    // DIAG - Diagnostic - Ver 2.2.1 - Print the words and scores
+    // for ($i = 0; $i < count($results); $i++) {
+    //     back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
+    // }
+
     // Define the window size
     $window_size = get_option('chatbot_transformer_model_word_content_windows_size', 3); // Default to 3 if not set
 
@@ -127,6 +139,9 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     $final_words = array_column($results, 'word');
     $like_conditions = [];
 
+    $final_words = $all_words;
+
+    // // ORIGINAL APPROACH
     // Use a sliding window to group words
     for ($i = 0; $i <= count($final_words) - $window_size; $i++) {
         $group = array_slice($final_words, $i, $window_size);
@@ -137,11 +152,41 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         }
         $like_conditions[] = '(' . implode(' AND ', $group_clauses) . ')';
     }
-
     // Combine all groups with OR
     $like_condition = implode(' OR ', $like_conditions);
 
-    // DIAG - Diagnostic - Ver 2.2.1
+    // // VERION 2
+    // for ($i = 0; $i <= count($final_words) - $window_size; $i++) {
+    //     $group = array_slice($final_words, $i, $window_size);
+    //     $group_clauses = [];
+    //     foreach ($group as $word) {
+    //         $escaped_word = $wpdb->esc_like($word);
+    //         $group_clauses[] = "post_content LIKE '%" . esc_sql($escaped_word) . "%'";
+    //     }
+    //     // At least half of the words must match
+    //     $like_conditions[] = '(' . implode(' OR ', $group_clauses) . ')';
+    // }
+    // $like_condition = implode(' AND ', $like_conditions);
+
+    // // VERSION 3
+    // $search_terms = implode(' ', array_map('esc_sql', $final_words));
+    // $like_condition = "MATCH(post_content) AGAINST ('$search_terms' IN NATURAL LANGUAGE MODE)";
+
+    // // VERSION 4
+    // for ($i = 0; $i <= count($final_words) - $window_size; $i++) {
+    //     $group = array_slice($final_words, $i, $window_size);
+    //     $group_clauses = [];
+    //     foreach ($group as $word) {
+    //         $escaped_word = $wpdb->esc_like($word);
+    //         $group_clauses[] = "post_content LIKE '%" . esc_sql($escaped_word) . "%'";
+    //     }
+    //     // Require at least one match per group
+    //     $like_conditions[] = '(' . implode(' OR ', $group_clauses) . ')';
+    // }
+    // // Require at least one group to match
+    // $like_condition = implode(' AND ', $like_conditions);
+
+    // DIAG - Diagnostic - Ver 2.2.4
     // back_trace( 'NOTICE', 'Like Condition: ' . $like_condition);
 
     // Handle error for no matching content

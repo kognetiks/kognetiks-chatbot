@@ -32,6 +32,17 @@ function chatbot_chatgpt_appearance_settings_init() {
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_width_setting');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_reset');
     register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_appearance_user_css_setting');
+    register_setting('chatbot_chatgpt_appearance', 'chatbot_chatgpt_enable_mathjax');
+
+    // Enable MathJax
+    register_setting(
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_enable_mathjax',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+        )
+    );
 
     // Open Icon
     register_setting(
@@ -239,6 +250,14 @@ function chatbot_chatgpt_appearance_settings_init() {
         'chatbot_chatgpt_appearance_user_css_setting',
         'Custom CSS',
         'chatbot_chatgpt_appearance_user_css_setting_callback',
+        'chatbot_chatgpt_appearance',
+        'chatbot_chatgpt_appearance_section'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_enable_mathjax',
+        'Enable Glyph Rendering',
+        'chatbot_chatgpt_enable_mathjax_callback',
         'chatbot_chatgpt_appearance',
         'chatbot_chatgpt_appearance_section'
     );
@@ -469,6 +488,17 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings() {
 }
 // Hook into wp_footer
 add_action('wp_footer', 'chatbot_chatgpt_appearance_inject_custom_css_settings');
+
+// MathJax Settings - Ver 2.2.4
+function chatbot_chatgpt_enable_mathjax_callback() {
+    $chatbot_chatgpt_enable_mathjax = esc_attr(get_option('chatbot_chatgpt_enable_mathjax', 'Yes'));
+    ?>
+    <label for="chatbot_chatgpt_enable_mathjax"></label><select id="chatbot_chatgpt_enable_mathjax" name="chatbot_chatgpt_enable_mathjax">
+        <option value="Yes" <?php selected( $chatbot_chatgpt_enable_mathjax, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $chatbot_chatgpt_enable_mathjax, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php
+}
 
 // Custom Icons Section Callback - Ver 2.2.2
 function chatbot_chatgpt_appearance_icons_appearance_section_callback() {

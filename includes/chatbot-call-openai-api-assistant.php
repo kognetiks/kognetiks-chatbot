@@ -863,6 +863,21 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $content: ' . $context);
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
 
+    // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4
+    $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context', 'Yes'));
+
+    if ($useEnhancedContext == 'Yes') {
+
+        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
+        If ( !empty ($search_results) ) {
+            // Append the transformer context to the prompt
+            $prompt = $prompt . ' ' . $search_results;
+        }
+        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
+        // back_trace( 'NOTICE', '$prompt: ' . $prompt);
+
+    }
+
     if (empty($file_id)) {
         // back_trace( 'NOTICE', 'No file to retrieve');
         $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, '');

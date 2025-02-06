@@ -491,11 +491,16 @@ jQuery(document).ready(function ($) {
         }
 
         // MathJax rendering - Ver 2.1.2 - 2024 08 29
-        MathJax.typesetPromise([messageElement[0]])
-        .then(() => {
-            // console.log("MathJax rendering complete");
-        })
-        .catch((err) => console.log("MathJax rendering failed: ", err));
+        if (typeof MathJax !== 'undefined') {
+            // console.log("MathJax is loaded.");
+            MathJax.typesetPromise([messageElement[0]])
+                .then(() => {
+                    // console.log("MathJax rendering complete");
+                })
+                .catch((err) => console.log("MathJax rendering failed: ", err));
+        } else {
+            // console.log("MathJax is not loaded.");
+        }
 
     }
 
