@@ -320,6 +320,23 @@ function chatbot_chatgpt_speech_recognition_callback($args) {
     <?php    
 }
 
+// Advanced Content Search - Ver 2.2.4
+function chatbot_chatgpt_advanced_search_settings_callback($args) {
+    ?>
+    <p>Configure the advanced content search settings for the Chatbot plugin.</p>
+    <?php
+}
+
+// Enable Advanced Content Search - Ver 2.2.4
+function chatbot_chatgpt_use_advanced_content_search_callback($args) {
+    $chatbot_chatgpt_use_advanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_use_advanced_content_search" name="chatbot_chatgpt_use_advanced_content_search">
+        <option value="Yes" <?php selected( $chatbot_chatgpt_use_advanced_content_search, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $chatbot_chatgpt_use_advanced_content_search, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php
+}
 
 // Register the settings
 function chatbot_chatgpt_settings_setup_init() {
@@ -349,6 +366,7 @@ function chatbot_chatgpt_settings_setup_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_user_message_limit_period_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_visitor_message_limit_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_visitor_message_limit_period_setting');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_use_advanced_content_search');
 
     register_setting('chatbot_chatgpt_settings', 'chatbot_ai_platform_choice');
 
@@ -541,6 +559,22 @@ function chatbot_chatgpt_settings_setup_init() {
         'chatbot_chatgpt_additional_setup_settings',
         'chatbot_chatgpt_additional_setup_section'
     );   
+
+    // Chatbot Settings - Advanced Search Settings
+    add_settings_section(
+        'chatbot_chatgpt_advanced_search_settings_section',
+        'Advanced Search Settings',
+        'chatbot_chatgpt_advanced_search_settings_callback',
+        'chatbot_chatgpt_advanced_search_settings'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_use_advanced_content_search',
+        'Enable Advanced Content Search',
+        'chatbot_chatgpt_use_advanced_content_search_callback',
+        'chatbot_chatgpt_advanced_search_settings',
+        'chatbot_chatgpt_advanced_search_settings_section'
+    );
 
 }
 add_action('admin_init', 'chatbot_chatgpt_settings_setup_init');
