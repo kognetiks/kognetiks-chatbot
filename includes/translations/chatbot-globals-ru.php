@@ -121,6 +121,7 @@ $chatbot_chatgpt_bot_prompt = [
 ];
 
 // Declare the $chatbotFallbackResponses array as global
+global $chatbotFallbackResponses;
 $chatbotFallbackResponses = [
     "Я не совсем понял это. Можете попробовать переформулировать?",
     "Хм, я не уверен, что понял. Можете объяснить по-другому?",

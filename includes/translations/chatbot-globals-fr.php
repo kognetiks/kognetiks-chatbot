@@ -121,6 +121,7 @@ $chatbot_markov_chain_fallback_response = [
 ];
 
 // Declare the $chatbotFallbackResponses array as global
+global $chatbotFallbackResponses;
 $chatbotFallbackResponses = [
     "Je n'ai pas bien saisi cela. Pouvez-vous essayer de reformuler ?",
     "Hmm, je ne suis pas sûr d'avoir compris. Pouvez-vous expliquer différemment ?",
