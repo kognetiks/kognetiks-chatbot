@@ -202,8 +202,9 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and relate
 
 == Changelog ==
 
-= 2.2.5 - Released TBD =
+= 2.2.5 - Released 2025-02-16 =
 
+* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site’s existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.4.
 
 = 2.2.4 - Released 02-06-2025 =
