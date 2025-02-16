@@ -1,5 +1,10 @@
 # Past Update
 
+## What's New in Version 2.2.5
+
+* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site’s existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.4.
+
 ## What's New in Version 2.2.4
 
 * **Improved Knowledge Navigator**: Enhanced the Knowledge Navigator to provide more accurate and relevant responses based on your site's content.
