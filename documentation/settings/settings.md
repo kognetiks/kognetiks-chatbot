@@ -131,6 +131,16 @@ The General Settings allow you to customize the basic behavior and appearance of
    - **Options**: Set a numeric value.
    - **Selection**: Choose a value like `5` to allow more space for user input, or adjust based on your layout preferences.
 
+## Advanced Search Settings
+
+![Advanced Search Settings](advanced-search-settings.png)
+
+1. **Enable Advanced Content Search**:
+
+   - **Description**: When enabled, this feature allows the chatbot to pull information from your site’s existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
+   - **Options**: `Yes` or `No`.
+   - **Selection**: Choose `Yes` if you want the AI to reference your local content when responding to user queries.
+
 ## Steps to Configure
 
 1. Navigate to the General Settings section of the Kognetiks Chatbot plugin in your WordPress dashboard.

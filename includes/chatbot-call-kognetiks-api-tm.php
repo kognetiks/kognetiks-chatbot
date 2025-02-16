@@ -85,12 +85,12 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     //
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
     //
-    $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context', 'No'));
+    $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
 
     // DIAG Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$useEnhancedContext: ' . $useEnhancedContext);
+    // back_trace( 'NOTICE', '$use_enhanced_content_search: ' . $use_enhanced_content_search);
 
-    if ($useEnhancedContext == 'Yes') {
+    if ($use_enhanced_content_search == 'Yes') {
 
         // DIAG Diagnostics - Ver 1.9.6
         // back_trace( 'NOTICE', '$enhancedContext: ' . $enhancedContext);

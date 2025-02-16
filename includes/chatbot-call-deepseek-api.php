@@ -96,13 +96,10 @@ function chatbot_call_deepseek_api($api_key, $message) {
 
     $sys_message = 'We previously have been talking about the following things: ';
 
-    // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
-    $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context', 'Yes'));
-
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4
-    $useEnhancedContext = esc_attr(get_option('chatbot_chatgpt_use_enhanced_context', 'Yes'));
+    $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
 
-    if ($useEnhancedContext == 'Yes') {
+    if ($use_enhanced_content_search == 'Yes') {
 
         $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
         If ( !empty ($search_results) ) {
