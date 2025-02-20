@@ -77,6 +77,10 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting Markov Chain options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_markov%'");
 
+        // Delete Local options
+        // back_trace( 'NOTICE', 'Deleting Local options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_local%'");
+
         // Delete Transformer options
         // back_trace( 'NOTICE', 'Deleting Transformer options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_transformer_model%'");

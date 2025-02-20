@@ -86,6 +86,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-anthropic-api.ph
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-deepseek-api.php';          // ChatGPT API - Ver 2.2.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-mc.php';      // Kognetiks - Markov Chain API - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-tm.php';      // Kognetiks - Transformer Model API - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-local-api.php';             // Local API - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-nvidia-api.php';            // NVIDIA API - Ver 2.1.8
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-assistant.php';  // GPT Assistants - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-chatgpt.php';    // ChatGPT API - Ver 1.6.9
@@ -234,6 +235,9 @@ switch ($chatbot_ai_platform_choice) {
     
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
+
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
         
         // Model choice - Ver 1.9.4
         if (esc_attr(get_option('chatbot_chatgpt_model_choice')) === null) {
@@ -276,7 +280,10 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
-    
+
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+
         // Model choice - Ver 2.1.8
         if (esc_attr(get_option('chatbot_nvidia_model_choice')) === null) {
             $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
@@ -318,6 +325,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
 
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+        
         // Model choice - Ver 2.2.1
         if (esc_attr(get_option('chatbot_anthropic_model_choice')) === null) {
             $model = 'claude-3-5-sonnet-latest';
@@ -358,7 +368,10 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
-
+        
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+        
         // Model choice - Ver 2.2.1
         if (esc_attr(get_option('chatbot_deepseek_model_choice')) === null) {
             $model = 'deepseek-chat';
@@ -399,7 +412,10 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
-         
+        
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+                 
         // Model choice - Ver 2.1.8
         if (esc_attr(get_option('chatbot_markov_chain_model_choice')) === null) {
             $model = 'markov-chain-flask';
@@ -439,7 +455,10 @@ switch ($chatbot_ai_platform_choice) {
         update_option('chatbot_markov_chain_api_enabled', 'No');
 
         $chatbot_transformer_model_api_enabled = 'Yes';
-        update_option('chatbot_transformer_model_api_enabled', 'Yes');   
+        update_option('chatbot_transformer_model_api_enabled', 'Yes');
+        
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No'); 
     
         // Model choice - Ver 2.2.0
         if (esc_attr(get_option('chatbot_transformer_model_choice')) === null) {
@@ -449,6 +468,53 @@ switch ($chatbot_ai_platform_choice) {
             // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
         } elseif (empty($model)) {
             $model = 'sentential-context-model';
+        }
+
+        // Disable Read Aloud - Ver 2.2.1
+        update_option('chatbot_chatgpt_read_aloud_option', 'no');
+        // Disable File Uploads - Ver 2.2.1
+        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
+        // Disable MP3 Uploads - Ver 2.2.1
+        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
+
+        break;
+
+    case 'Local':
+
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+
+        update_option('chatbot_ai_platform_choice', 'Local');
+
+        $chatbot_chatgpt_api_enabled = 'No';
+        update_option('chatbot_chatgpt_api_enabled', 'No');
+    
+        $chatbot_nvidia_api_enabled = 'No';
+        update_option('chatbot_nvidia_api_enabled', 'No');
+
+        $chatbot_anthropic_api_enabled = 'No';
+        update_option('chatbot_anthropic_api_enabled', 'No');
+
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
+    
+        $chatbot_markov_chain_api_enabled = 'No';
+        update_option('chatbot_markov_chain_api_enabled', 'No');
+
+        $chatbot_transformer_model_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        
+        $chatbot_local_api_enabled = 'Yes';
+        update_option('chatbot_local_api_enabled', 'Yes'); 
+    
+        // Model choice - Ver 2.2.0
+        if (esc_attr(get_option('chatbot_local_model_choice')) === null) {
+            $model = 'llama3.2-3b-instruct';
+            update_option('chatbot_transformer_model_choice', $model);
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+        } elseif (empty($model)) {
+            $model = 'llama3.2-3b-instruct';
         }
 
         // Disable Read Aloud - Ver 2.2.1
@@ -800,7 +866,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 797 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 869 - $model: ' . $model);
             break;
 
         case 'NVIDIA':
@@ -810,7 +876,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 807 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 879 - $model: ' . $model);
             break;
 
         case 'Anthropic':
@@ -820,7 +886,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 817 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 889 - $model: ' . $model);
             break;
 
         case 'DeepSeek':
@@ -830,7 +896,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.2
-            // back_trace( 'NOTICE', 'LINE 827 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 899 - $model: ' . $model);
             break;
         
         case 'Markov Chain':
@@ -840,7 +906,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 837 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 909 - $model: ' . $model);
             break;
 
         case 'Transformer':
@@ -850,7 +916,17 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 847 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 919 - $model: ' . $model);
+            break;
+
+        case 'Local':
+
+            $api_key = esc_attr(get_option('chatbot_local_api_key', 'NOT REQUIRED'));
+            $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
+            $kchat_settings['chatbot_chatgpt_model'] = $model;
+            $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.2.6
+            back_trace( 'NOTICE', 'LINE 929 - $model: ' . $model);
             break;
 
         default:
@@ -860,7 +936,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 857 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 939 - $model: ' . $model);
             break;
 
     }
@@ -915,7 +991,7 @@ function chatbot_chatgpt_send_message() {
     $model = $kchat_settings['chatbot_chatgpt_model'];
 
     // FIXME - TESTING - Ver 2.1.8
-    // back_trace( 'NOTICE', 'LINE 905 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 904 - $model: ' . $model);
     
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
@@ -1175,8 +1251,8 @@ function chatbot_chatgpt_send_message() {
         };
 
         // FIXME - TESTING - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 1154 - $model: ' . $model);
-        // back_trace( 'NOTICE', 'LINE 1155 - $kchat_settings[model]: ' . $kchat_settings['model']);
+        // back_trace( 'NOTICE', 'LINE 1254 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 1255 - $kchat_settings[model]: ' . $kchat_settings['model']);
 
         // if (str_starts_with($model,'dall')) {
         //     // back_trace ( 'NOTICE', 'Using Image API');
@@ -1281,6 +1357,13 @@ function chatbot_chatgpt_send_message() {
             // back_trace( 'NOTICE', 'Calling Transformer Model API');
             // Send message to Transformer Model API - Ver 2.2.0
             $response = chatbot_chatgpt_call_transformer_model_api($message);
+
+        } elseif ($model !== null && str_starts_with($model,'llama3.2-3b-instruct')) {
+            $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.2.6
+            // back_trace( 'NOTICE', 'Calling Local Model API');
+            // Send message to Local Model API - Ver 2.2.6
+            $response = chatbot_chatgpt_call_local_model_api($message);
 
         } else {
 

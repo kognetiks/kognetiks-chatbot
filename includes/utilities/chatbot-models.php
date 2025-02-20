@@ -412,3 +412,39 @@ function chatbot_deepseek_get_models() {
     return $default_model_list;
 
 }
+
+// Function to get the Model names from local API
+function chatbot_chatgpt_local_fetch_models() {
+
+    // DiAG - Diagnostics
+    back_trace( 'NOTICE', 'chatbot_chatgpt_local_fetch_models');
+
+    // Get the API URL
+    $api_url = get_api_base_url() . '/models';
+    
+    // Prepare the request
+    $args = array(
+        'timeout'     => 30,
+        'redirection' => 10,
+        'headers'     => array(),
+    );
+
+    // Send the request
+    $response = wp_remote_get($api_url, $args);
+
+    // Check for errors
+    if (is_wp_error($response)) {
+        // Log the error
+        prod_trace( 'ERROR', $response->get_error_message());
+        return 'Error: ' . $response->get_error_message();
+    }
+
+    // Retrieve response body
+    $body = wp_remote_retrieve_body($response);
+
+    // DiAG - Diagnostics
+    back_trace( 'NOTICE', '$body: ' . $body);
+
+    return $body ?: 'No models returned.';
+
+}

@@ -412,6 +412,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             case 'Transformer':
                 $model = esc_attr(get_option('chatbot_transformer_model_choice', 'lexical-context-model'));
                 break;
+            case 'Local':
+                $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
+                break;
             default:
                 $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         }
