@@ -20,8 +20,8 @@ function chatbot_local_model_settings_section_callback($args) {
     <p>Configure the default settings for the Chatbot plugin to use a Local Server for chat generation.  Start by adding your API key then selecting your choices below.  <strong>NOTE</strong>: This may not be required in your configuration.</p>
     <p>More information about Local models and their capability can be found at <a href="https://huggingface.co/models?library=gguf&sort=downloads" target="_blank">https://huggingface.co/models?library=gguf&sort=downloads</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Local settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-local-settings&file=api-local-model-settings.md">here</a>.</b></p>
     <p><strong>IMPORTANT</strong>: If you are using the Local API, you will need to have installed and configured the JAN.AI engine on your own server.  This plugin does not provide a server or an AI engine. The JAN.AI server is an open source ChatGTP-alternatvie that runs 100% on your systems.  Find details here: <a href="https://jan.ai/" target="_blank">https://jan.ai/</a>.</p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Local settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-local-settings&file=api-local-model-settings.md">here</a>.</b></p>
     <?php
 }
 

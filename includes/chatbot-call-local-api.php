@@ -351,7 +351,7 @@ function chatbot_local_get_models() {
     // For each model in the $response_body, add the model to return array
     $models = array();
     foreach ($response_body['data'] as $model) {
-        if ($model['status'] == 'downloaded'){
+        if (isset($model['status']) && $model['status'] == 'downloaded') {
             $models[] = $model['id'];
         }
     }

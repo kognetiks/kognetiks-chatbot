@@ -12,6 +12,9 @@
 .idea/
 debug/
 package.json
+Queries.md
+Tests.md
+ToDo.md
 
 # Ignore all files in the results folder
 results/*

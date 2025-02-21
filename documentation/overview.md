@@ -14,6 +14,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
 - **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
+- **JAN.AI**: [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy)
 
 **IMPORTANT**:
 
@@ -38,9 +39,10 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's New in Version 2.2.5
+## What's New in Version 2.2.6
 
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.6.
+* **Local Server**: Added support for the JAN.AI local server, enabling users to run AI models on their own servers for enhanced control and flexibility.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.5.
 
 ## Past Updates
 
@@ -67,6 +69,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 - [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
 
 - [API/DeepSeek Settings](api-deepseek-settings/api-deepseek-model-settings.md)
+
+- [API/Local Server Settings](api-local-settings/api-local-model-settings.md)
 
 - [Assistants](assistants/manage-assistants.md)
 

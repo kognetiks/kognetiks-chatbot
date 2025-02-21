@@ -228,13 +228,6 @@ function chatbot_call_deepseek_api($api_key, $message) {
     // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
-
-    // Add the usage to the conversation tracker
-
     // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens
@@ -242,7 +235,13 @@ function chatbot_call_deepseek_api($api_key, $message) {
     $output_tokens = $response_body->usage->completion_tokens ?? 0;
     $total_tokens = $input_tokens + $output_tokens;
 
-    if ($response_body->response->code == 200) { // Ensure response code logic matches your API
+    // DIAG - Diagnostics - Ver 1.8.1
+    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $input_tokens);
+    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $output_tokens);
+    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $total_tokens);
+
+    // Check if the response content is not empty
+    if (!empty($response_body->choices[0]->message->content)) {
         if ($input_tokens > 0) {
             append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $input_tokens);
         }

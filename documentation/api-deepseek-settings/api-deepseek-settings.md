@@ -6,7 +6,7 @@ The **Kognetiks Chatbot** plugin requires proper configuration to function corre
 
 1. **DeepSeek API Key**:
 
-   - **Description**: This field is for your DeepSeek API key, which is necessary for the plugin to access the NVIDIA functionality.
+   - **Description**: This field is for your DeepSeek API key, which is necessary for the plugin to access the DeepSeek functionality.
    - **How to obtain**: You can get your API key by signing up at [DeepSeek](https://platform.deepseek.com/sign_in).
    - **Input**: Paste your API key in the provided field.
 

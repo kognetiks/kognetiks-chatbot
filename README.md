@@ -10,6 +10,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.2.6
 
+* **Local Server**: Added support for the JAN.AI local server, enabling users to run AI models on their own servers for enhanced control and flexibility.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.5.
 
 ## Features
@@ -71,6 +72,7 @@ For a full list of models see:
 - [NVIDIA's Model Overview](https://docs.nvidia.com/nim/large-language-models/latest/models.html)
 - [Anthropic's Model Overview](https://docs.anthropic.com/en/docs/about-claude/models)
 - [DeepSeek's Model Overview](https://api-docs.deepseek.com/quick_start/pricing)
+- [JAN.AI's Model Overview](https://jan.ai/docs/models/manage-models#add-models)
 
 For a full list of Deep
 
@@ -87,6 +89,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
 - **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
+- **JAN.AI**: [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy)
 
 **IMPORTANT**:
 
