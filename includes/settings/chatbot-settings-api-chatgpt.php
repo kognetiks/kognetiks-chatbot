@@ -18,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_model_settings_section_callback($args) {
 
     ?>
-    <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
+    <p>Configure the default settings for the Chatbot plugin to use OpenAI for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about ChatGPT models and their capability can be found at <a href="https://platform.openai.com/docs/models/overview" target="_blank">https://platform.openai.com/docs/models/overview</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/ChatGPT Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-chatgpt-settings&file=api-chatgpt-model-settings.md">here</a>.</b></p>
@@ -93,7 +93,7 @@ function chatbot_chatgpt_api_chatgpt_whisper_section_callback($args) {
 function chatbot_chatgpt_api_chatgpt_advanced_section_callback($args) {
 
     ?>
-    <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
+    <p><strong>CAUTION</strong>: Configure the advanced settings for the plugin. Enter the base URL for the OpenAI API.  The default is <code>https://api.openai.com/v1</code>.</p>
     <?php
 
 }

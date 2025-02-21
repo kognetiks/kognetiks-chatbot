@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // API/DeepSeek settings section callback - Ver 2.1.8
 function chatbot_deepseek_model_settings_section_callback($args) {
     ?>
-    <p>Configure the default settings for the plugin DeepSeek for chat generation.  Start by adding your API key then selecting your choices below.</p>
+    <p>Configure the default settings for the Chatbot plugin to use DeepSeek for chat generation.  Start by adding your API key then selecting your choices below.</p>
     <p>More information about DeepSeek models and their capability can be found at <a href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank">https://api-docs.deepseek.com/quick_start/pricing</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/DeepSeek settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-deepseek-settings&file=api-deepseek-model-settings.md">here</a>.</b></p>
@@ -160,7 +160,7 @@ function chatbot_deepseek_top_p_callback($args) {
 function chatbot_deepseek_api_model_advanced_section_callback($args) {
 
     ?>
-    <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the DeepSeek API.  The default is <code>https://api.deepseek.com</code>.</p>
+    <p><strong>CAUTION</strong>: Configure the advanced settings for the plugin. Enter the base URL for the DeepSeek API.  The default is <code>https://api.deepseek.com</code>.</p>
     <?php
 
 }

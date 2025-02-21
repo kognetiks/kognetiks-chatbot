@@ -126,10 +126,12 @@ require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-conte
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-model-scheduler.php';           // Functions - Ver 2.2.0
 
 // Include necessary files - Settings
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-anthropic.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-anthropic.php';            // Anthropic
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';              // OpenAI ChatGPT
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-deepseek.php';             // DeepSeek
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';               // NVIDIA
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-local.php';                // Local Server - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-deepseek.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-avatar.php';
@@ -479,12 +481,12 @@ switch ($chatbot_ai_platform_choice) {
 
         break;
 
-    case 'Local':
+    case 'Local Server':
 
         // DIAG - Diagnostics
         back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
 
-        update_option('chatbot_ai_platform_choice', 'Local');
+        update_option('chatbot_ai_platform_choice', 'Local Server');
 
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
@@ -919,14 +921,14 @@ function chatbot_chatgpt_send_message() {
             // back_trace( 'NOTICE', 'LINE 919 - $model: ' . $model);
             break;
 
-        case 'Local':
+        case 'Local Server':
 
             $api_key = esc_attr(get_option('chatbot_local_api_key', 'NOT REQUIRED'));
             $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.6
-            back_trace( 'NOTICE', 'LINE 929 - $model: ' . $model);
+            back_trace( 'NOTICE', 'LINE 931 - $model: ' . $model);
             break;
 
         default:
@@ -936,7 +938,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 939 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 941 - $model: ' . $model);
             break;
 
     }
@@ -948,7 +950,8 @@ function chatbot_chatgpt_send_message() {
     $message = sanitize_text_field($_POST['message']);
 
     // Check for missing API key or message
-    if (!$api_key || !$message) {
+    // if (!$api_key || !$message) {
+    if ( !$message ) {
         // DIAG - Diagnostics
         // back_trace( 'ERROR', 'Invalid API Key or Message.');
         global $chatbot_chatgpt_fixed_literal_messages;
@@ -1271,9 +1274,12 @@ function chatbot_chatgpt_send_message() {
         $voice = isset($kchat_settings['voice']) ? $kchat_settings['voice'] : null;
 
         // FIXME - TESTING - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 1174 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 1176 - $model: ' . $model);
 
         $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+
+        // DIAG - Diagnostics - Ver 2.2.6
+        back_trace( 'NOTICE', 'LINE - 1281 - $chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
 
         switch ($chatbot_ai_platform_choice) {
 
@@ -1390,11 +1396,11 @@ function chatbot_chatgpt_send_message() {
 
                 break;
 
-            case 'Local':
+            case 'Local Server':
 
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.2.6
-                // back_trace( 'NOTICE', 'Calling Local Model API');
+                back_trace( 'NOTICE', 'Calling Local Model API');
                 // Send message to Local Model API - Ver 2.2.6
                 $response = chatbot_chatgpt_call_local_model_api($message);
 

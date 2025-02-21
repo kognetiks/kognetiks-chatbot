@@ -414,10 +414,10 @@ function chatbot_deepseek_get_models() {
 }
 
 // Function to get the Model names from local API
-function chatbot_chatgpt_local_fetch_models() {
+function chatbot_local_fetch_models() {
 
     // DiAG - Diagnostics
-    back_trace( 'NOTICE', 'chatbot_chatgpt_local_fetch_models');
+    back_trace( 'NOTICE', 'chatbot_local_fetch_models');
 
     // Get the API URL
     $api_url = get_api_base_url() . '/models';

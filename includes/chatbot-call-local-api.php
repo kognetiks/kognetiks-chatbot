@@ -30,14 +30,14 @@ function chatbot_chatgpt_call_local_model_api($message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 2.2.2
-    // back_trace( 'NOTICE', 'chatbot_call_local_api - start');
-    // back_trace( 'NOTICE', 'chatbot_call_local_api - $api_key: ' . $api_key);
-    // back_trace( 'NOTICE', 'chatbot_call_local_api - $message: ' . $message);
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', 'chatbot_call_local_api - start');
+    back_trace( 'NOTICE', 'chatbot_call_local_api - $api_key: ' . $api_key);
+    back_trace( 'NOTICE', 'chatbot_call_local_api - $message: ' . $message);
+    back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Jan.ai Download
     // https://jan.ai/download
@@ -68,7 +68,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
     // update_option('chatbot_local_model_choice', 'llama3.2-3b-instruct');
 
     // Start the model
-    chatbot_chatgpt_local_start_model();
+    chatbot_local_start_model();
 
     // API key for the local server - Typically not needed
     $api_key = esc_attr(get_option('chatbot_local_api_key', ''));
@@ -263,18 +263,18 @@ function chatbot_chatgpt_call_local_model_api($message) {
 
 
 // Start the chat completions model
-function chatbot_chatgpt_local_start_model() {
+function chatbot_local_start_model() {
 
     // DiAG - Diagnostics
-    back_trace( 'NOTICE', 'chatbot_chatgpt_local_start_model');
+    back_trace( 'NOTICE', 'chatbot_local_start_model');
 
-    global $chatbot_chatgpt_local_model_status;
+    global $chatbot_local_model_status;
 
     // Fetch the models
-    // chatbot_chatgpt_local_fetch_models();
+    // chatbot_local_fetch_models();
 
     // Get the model choice
-    update_option('chatbot_local_model_choice', 'llama3.2-3b-instruct');
+    // update_option('chatbot_local_model_choice', 'llama3.2-3b-instruct');
     // update_option('chatbot_local_model_choice', 'DeepSeek-R1-Distill-Qwen-14B-Q5_K_S.gguf');
     // update_option('chatbot_local_model_choice', 'Mistral-Small-24B-Instruct-2501-Q4_K_M.gguf');
     // update_option('chatbot_local_model_choice', 'Llama-3.2-3B-Instruct-uncensored-Q6_K_L.gguf');
@@ -304,7 +304,7 @@ function chatbot_chatgpt_local_start_model() {
     back_trace( 'NOTICE', '$model: ' . $model);
 
     // Set the API URL
-    $api_url = esc_attr(get_option('clockwork_cortext_chat_completions_api_url','http://127.0.0.1:1337/v1')) . '/models/start';
+    $api_url = esc_attr(get_option('chatbot_local_base_url','http://127.0.0.1:1337/v1')) . '/models/start';
 
     // Prepare the data
     $data = array(
@@ -327,7 +327,7 @@ function chatbot_chatgpt_local_start_model() {
         // Log the error
         prod_trace( 'ERROR', $error_message);
         // Set the model status
-        $clockwork_cortext_model_status = 'error';
+        $chatbot_local_model_status = 'error';
         return $response;
     }
 
@@ -338,8 +338,52 @@ function chatbot_chatgpt_local_start_model() {
     back_trace( 'NOTICE', '$response_body: ' . $response_body);
 
     // Set the model status
-    $chatbot_chatgpt_local_model_status = 'started';
+    $chatbot_local_model_status = 'started';
 
     return $response_body;
+    
+}
+
+// Fetch the local models
+function chatbot_local_get_models() {
+    
+    // DiAG - Diagnostics
+    back_trace( 'NOTICE', 'chatbot_local_get_models');
+
+    // Set the API URL
+    $api_url = esc_attr(get_option('chatbot_local_base_url','http://127.0.0.1:1337/v1')) . '/models';
+
+    // Send the request
+    $response = wp_remote_get($api_url, array(
+        'headers' => array(
+            'Content-Type' => 'application/json',
+        ),
+    ));
+
+    // Check for errors
+    if (is_wp_error($response)) {
+        $error_message = $response->get_error_message();
+        // Log the error
+        prod_trace( 'ERROR', $error_message);
+        // Return a default model in teh $models array
+        $models = array('llama3.2-3b-instruct');
+        return $models;
+    }
+
+    // Get the response body
+    $response_body = json_decode(wp_remote_retrieve_body($response), true);
+
+    // DiAG - Diagnostics
+    back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
+
+    // For each model in the $response_body, add the model to return array
+    $models = array();
+    foreach ($response_body['data'] as $model) {
+        if ($model['status'] == 'downloaded'){
+            $models[] = $model['id'];
+        }
+    }
+
+    return $models;
     
 }

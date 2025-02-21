@@ -45,7 +45,7 @@ function get_api_base_url() {
             break;
 
         // Base URL for the Local API calls - Ver 2.2.6
-        case 'Local':
+        case 'Local Server':
 
             return esc_attr(get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1'));
             break;
@@ -105,7 +105,7 @@ function get_chat_completions_api_url() {
             break;
 
         // Base URL for the Local API calls - Ver 2.2.6
-        case 'Local':
+        case 'Local Server':
 
             return get_api_base_url() . "/chat/completions";
             break;

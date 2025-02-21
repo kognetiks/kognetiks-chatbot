@@ -44,7 +44,7 @@ function chatbot_ai_platform_choice_callback($args) {
 
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
-    $platforms = ['OpenAI', 'NVIDIA', 'Markov Chain', 'Transformer', 'Anthropic', 'DeepSeek'];
+    $platforms = ['OpenAI', 'NVIDIA', 'Markov Chain', 'Transformer', 'Anthropic', 'DeepSeek', 'Local Server'];
     if (!in_array($chatbot_ai_platform_choice, $platforms)) {
         $chatbot_ai_platform_choice = 'OpenAI';
     }
@@ -61,6 +61,7 @@ function chatbot_ai_platform_choice_callback($args) {
         <option value="NVIDIA" <?php selected( $chatbot_ai_platform_choice, 'NVIDIA' ); ?>><?php echo esc_html( 'NVIDIA' ); ?></option>
         <option value="Anthropic" <?php selected( $chatbot_ai_platform_choice, 'Anthropic' ); ?>><?php echo esc_html( 'Anthropic' ); ?></option>
         <option value="DeepSeek" <?php selected( $chatbot_ai_platform_choice, 'DeepSeek' ); ?>><?php echo esc_html( 'DeepSeek' ); ?></option>
+        <option value="Local Server" <?php selected( $chatbot_ai_platform_choice, 'Local Server' ); ?>><?php echo esc_html( 'Local Server' ); ?></option>
         <?php
         $chatbot_chatgpt_enable_beta_features = esc_attr(get_option('chatbot_chatgpt_enable_beta_features', 'no'));
         if ($chatbot_chatgpt_enable_beta_features === 'yes') : ?>
