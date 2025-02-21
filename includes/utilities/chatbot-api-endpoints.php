@@ -47,7 +47,7 @@ function get_api_base_url() {
         // Base URL for the Local API calls - Ver 2.2.6
         case 'Local':
 
-            return esc_attr(get_option('chatbot_local_base_url', 'https://127.0.0.1:1337/v1'));
+            return esc_attr(get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1'));
             break;
 
         default:
@@ -100,6 +100,12 @@ function get_chat_completions_api_url() {
 
         // Base URL for the DeepSeek API calls - Ver 2.2.2
         case 'DeepSeek':
+
+            return get_api_base_url() . "/chat/completions";
+            break;
+
+        // Base URL for the Local API calls - Ver 2.2.6
+        case 'Local':
 
             return get_api_base_url() . "/chat/completions";
             break;

@@ -1273,106 +1273,140 @@ function chatbot_chatgpt_send_message() {
         // FIXME - TESTING - Ver 2.1.8
         // back_trace( 'NOTICE', 'LINE 1174 - $model: ' . $model);
 
-        if ($model !== null && str_starts_with($model, 'gpt-4o')) {
+        $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
-            // The string 'gpt-4o' is found in $model
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling ChatGPT Omni API');
-            // Send message to ChatGPT API - Ver 1.6.7
-            $response = chatbot_chatgpt_call_omni($api_key, $message);
+        switch ($chatbot_ai_platform_choice) {
 
-        } elseif ($model !== null && str_starts_with($model, 'gpt')) {
+            case 'OpenAI':
 
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling ChatGPT API');
-            // Send message to ChatGPT API - Ver 1.6.7
-            $response = chatbot_chatgpt_call_api($api_key, $message);
+                switch ($model) {
 
-        } elseif ($model !== null && str_starts_with($model, 'dall')) {
+                    case str_starts_with($model, 'gpt-4o'):
 
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling Dall E Image API');
-            // Send message to Image API - Ver 1.9.4
-            $response = chatbot_chatgpt_call_image_api($api_key, $message);
+                        // The string 'gpt-4o' is found in $model
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'Calling ChatGPT Omni API');
+                        // Send message to ChatGPT API - Ver 1.6.7
+                        $response = chatbot_chatgpt_call_omni($api_key, $message);
 
-        } elseif ($model !== null && str_starts_with($model, 'tts')) {
+                        break;
 
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            $kchat_settings['voice'] = $voice;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling TTS API');
-            // Send message to TTS API - Text-to-speech - Ver 1.9.5
-            $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
+                    case str_starts_with($model, 'gpt'):
+                        
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'Calling ChatGPT API');
+                        // Send message to ChatGPT API - Ver 1.6.7
+                        $response = chatbot_chatgpt_call_api($api_key, $message);
 
-        } elseif ($model !== null && str_starts_with($model,'whisper')) {
+                        break;
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling STT API');
-            // Send message to STT API - Speech-to-text - Ver 1.9.6
-            $response = chatbot_chatgpt_call_stt_api($api_key, $message);
+                    case str_starts_with($model, 'dall'):
 
-        } elseif ($model !==null && str_starts_with($model,'nvidia')) {
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'Calling Dall E Image API');
+                        // Send message to Image API - Ver 1.9.4
+                        $response = chatbot_chatgpt_call_image_api($api_key, $message);
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling NVIDIA API');
-            // Send message to NVIDIA API - Ver 2.1.8
-            $response = chatbot_nvidia_call_api($api_key, $message);
+                        break;
 
-        } elseif ($model !==null && str_starts_with($model,'claude')) {
+                    case str_starts_with($model, 'tts'):
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling Anthropic API');
-            // Send message to Claude API - Ver 2.1.8
-            $response = chatbot_call_anthropic_api($api_key, $message);
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        $kchat_settings['voice'] = $voice;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'Calling TTS API');
+                        // Send message to TTS API - Text-to-speech - Ver 1.9.5
+                        $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
 
-        } elseif ($model !==null && str_starts_with($model,'deepseek')) {
+                        break;
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.2.2
-            // back_trace( 'NOTICE', 'Calling DeepSeek API');
-            // Send message to DeepSeek API - Ver 2.2.2
-            $response = chatbot_call_deepseek_api($api_key, $message);
+                    case str_starts_with($model, 'whisper'):
+                        
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'Calling STT API');
+                        // Send message to STT API - Speech-to-text - Ver 1.9.6
+                        $response = chatbot_chatgpt_call_stt_api($api_key, $message);
 
-        } elseif ($model !== null && str_starts_with($model,'markov')) {
+                        break;
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling Markov Chain API');
-            // Send message to Markov API - Ver 1.9.7
-            $response = chatbot_chatgpt_call_markov_chain_api($message);
+                }
 
-        } elseif ($model !== null && str_contains($model,'context-model')) {
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.2.0
-            // back_trace( 'NOTICE', 'Calling Transformer Model API');
-            // Send message to Transformer Model API - Ver 2.2.0
-            $response = chatbot_chatgpt_call_transformer_model_api($message);
+            case 'NVIDIA':
 
-        } elseif ($model !== null && str_starts_with($model,'llama3.2-3b-instruct')) {
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.2.6
-            // back_trace( 'NOTICE', 'Calling Local Model API');
-            // Send message to Local Model API - Ver 2.2.6
-            $response = chatbot_chatgpt_call_local_model_api($message);
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.1.8
+                // back_trace( 'NOTICE', 'Calling NVIDIA API');
+                // Send message to NVIDIA API - Ver 2.1.8
+                $response = chatbot_nvidia_call_api($api_key, $message);
 
-        } else {
+                break;
 
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            // back_trace( 'NOTICE', 'Calling ' .$model . ' Model API');
-            // Send message to ChatGPT API - Ver 1.6.7
-            $response = chatbot_chatgpt_call_api($api_key, $message);
+            case 'Anthropic':
             
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.1.8
+                // back_trace( 'NOTICE', 'Calling Anthropic API');
+                // Send message to Claude API - Ver 2.1.8
+                $response = chatbot_call_anthropic_api($api_key, $message);
+
+                break;
+
+            case 'DeepSeek':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.2.2
+                // back_trace( 'NOTICE', 'Calling DeepSeek API');
+                // Send message to DeepSeek API - Ver 2.2.2
+                $response = chatbot_call_deepseek_api($api_key, $message);
+
+                break;
+
+            case 'Markov Chain':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.1.8
+                // back_trace( 'NOTICE', 'Calling Markov Chain API');
+                // Send message to Markov API - Ver 1.9.7
+                $response = chatbot_chatgpt_call_markov_chain_api($message);
+
+                break;
+
+            case 'Transformer':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.2.0
+                // back_trace( 'NOTICE', 'Calling Transformer Model API');
+                // Send message to Transformer Model API - Ver 2.2.0
+                $response = chatbot_chatgpt_call_transformer_model_api($message);
+
+                break;
+
+            case 'Local':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.2.6
+                // back_trace( 'NOTICE', 'Calling Local Model API');
+                // Send message to Local Model API - Ver 2.2.6
+                $response = chatbot_chatgpt_call_local_model_api($message);
+
+                break;
+
+            default:
+
+                $kchat_settings['model'] = $model;
+                // back_trace( 'NOTICE', 'Calling ' .$model . ' Model API');
+                // Send message to ChatGPT API - Ver 1.6.7
+                $response = chatbot_chatgpt_call_api($api_key, $message);
+
         }
         
         // DIAG - Diagnostics
