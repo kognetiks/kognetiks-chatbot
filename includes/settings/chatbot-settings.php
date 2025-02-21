@@ -75,10 +75,10 @@ function chatbot_chatgpt_settings_page() {
         chatbot_chatgpt_appearance_restore_default_settings();
     }
 
-    back_trace( 'NOTICE', 'chatbot_chatgpt_settings_page() - $active_tab: ' . $active_tab );
-    back_trace( 'NOTICE', 'Current Page: ' . $_GET['page']);
-    back_trace( 'NOTICE', 'Current Tab: ' . ($_GET['tab'] ?? 'No Tab Set'));
-    back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')));
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_settings_page() - $active_tab: ' . $active_tab );
+    // back_trace( 'NOTICE', 'Current Page: ' . $_GET['page']);
+    // back_trace( 'NOTICE', 'Current Tab: ' . ($_GET['tab'] ?? 'No Tab Set'));
+    // back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')));
 
     ?>
     <div id="chatbot-chatgpt-settings" class="wrap">

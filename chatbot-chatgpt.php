@@ -484,7 +484,7 @@ switch ($chatbot_ai_platform_choice) {
     case 'Local Server':
 
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+        // back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
 
         update_option('chatbot_ai_platform_choice', 'Local Server');
 
@@ -928,7 +928,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.6
-            back_trace( 'NOTICE', 'LINE 931 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 931 - $model: ' . $model);
             break;
 
         default:
@@ -1279,7 +1279,7 @@ function chatbot_chatgpt_send_message() {
         $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
         // DIAG - Diagnostics - Ver 2.2.6
-        back_trace( 'NOTICE', 'LINE - 1281 - $chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+        // back_trace( 'NOTICE', 'LINE - 1281 - $chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
 
         switch ($chatbot_ai_platform_choice) {
 
@@ -1400,7 +1400,7 @@ function chatbot_chatgpt_send_message() {
 
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.2.6
-                back_trace( 'NOTICE', 'Calling Local Model API');
+                // back_trace( 'NOTICE', 'Calling Local Model API');
                 // Send message to Local Model API - Ver 2.2.6
                 $response = chatbot_chatgpt_call_local_model_api($message);
 
