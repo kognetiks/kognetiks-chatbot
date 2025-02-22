@@ -12,8 +12,134 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+// Lexical Context Model (LCM) - Transformer Model - Ver 2.2.6
+function transformer_model_lexical_context_response( $prompt, $max_tokens = null) {
+
+    global $wpdb;
+
+    // Use global stop words list
+    global $stopWords;
+    
+    // Preprocess text (convert to lowercase, remove special characters, stop words)
+    function preprocess_text($text) {
+
+        global $stopWords;
+
+        // Convert to lowercase
+        $text = strtolower(strip_tags($text));
+        // Remove punctuation and special characters
+        $text = preg_replace('/[^a-z0-9 ]/', '', $text);
+        // Remove extra spaces
+        $text = preg_replace('/\s+/', ' ', $text);
+        // Trim leading and trailing spaces
+        $text = trim($text);
+        // Tokenize text
+        $words = explode(' ', $text);
+        // Remove stop words
+        $filtered_words = array_diff($words, $stopWords);
+
+        // Return preprocessed text
+        return implode(' ', $filtered_words);
+
+    }
+    
+    $prompt = preprocess_text($prompt);
+    $highest_score = 0;
+    $best_match = "";
+    $batch_size = 50;
+    $offset = 0;
+    
+    do {
+        // Fetch a batch of posts, pages, and products
+        $query = $wpdb->prepare(
+            "SELECT post_title, post_content FROM {$wpdb->posts} 
+            WHERE post_status = 'publish' 
+            AND (post_type = 'post' OR post_type = 'page' OR post_type = 'product')
+            LIMIT %d OFFSET %d", $batch_size, $offset
+        );
+        $results = $wpdb->get_results($query);
+        
+        if (empty($results)) {
+            break;
+        }
+        
+        foreach ($results as $post) {
+
+            $content = preprocess_text($post->post_content);
+            
+            // Skip if content is empty
+            if (empty($content)) {
+                continue;
+            }
+
+            // Remove punctuation and special characters
+            $content = preg_replace('/[^a-z0-9 ]/', '', $content);
+            // Remove extra spaces
+            $content = preg_replace('/\s+/', ' ', $content);
+            // Trim leading and trailing spaces
+            $content = trim($content);
+            // Remove stop words
+            $content_words = explode(' ', $content);
+            $content_words = array_diff($content_words, $stopWords);
+
+            // Calculate similarity using word intersection
+            $prompt_words = explode(' ', $prompt);
+            $intersection = array_intersect($content_words, $prompt_words);
+            $score = count($intersection) / max(1, count($prompt_words));
+            
+            if ($score > $highest_score) {
+
+                $highest_score = $score;
+            
+                // Get the best match content
+                // $best_match = $post->post_content;
+            
+                // Get 1-3 sentences around the matching words
+                $best_match = "";
+                $match_index = array_search(key($intersection), $content_words);
+            
+                // Split content into sentences
+                $sentences = preg_split('/(?<=[.!?])\s+/', $post->post_content);
+                $sentence_count = count($sentences);
+            
+                // Find the sentence containing the match
+                $sentence_index = 0;
+                foreach ($sentences as $index => $sentence) {
+                    if (strpos($sentence, $content_words[$match_index]) !== false) {
+                        $sentence_index = $index;
+                        break;
+                    }
+                }
+            
+                // Get store number of sentences around the matching sentence
+                $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 3));
+                back_trace('NOTICE', 'Sentence Response Length: ' . $sentence_response_length);
+                $start_index = max(0, $sentence_index - 1);
+                $end_index = min($sentence_count - 1, $sentence_index + $sentence_response_length - 1);
+            
+                // Ensure the number of sentences does not exceed the stored value
+                $actual_response_length = min($sentence_response_length, $end_index - $start_index + 1);
+                $end_index = $start_index + $actual_response_length - 1;
+            
+                for ($i = $start_index; $i <= $end_index; $i++) {
+                    $best_match .= $sentences[$i] . ' ';
+                }
+                
+            }
+
+        }
+        
+        $offset += $batch_size;
+
+    } while (!empty($results));
+    
+    // return $highest_score > 0 ? substr($best_match, 0, $max_tokens) . '...' : "I couldn't find relevant content for your query.";
+    return $highest_score > 0 ? $best_match : "I couldn't find relevant content for your query.";
+
+}
+
 // Main function to generate a response
-function transformer_model_lexical_context_response( $input, $max_tokens = null ) {
+function transformer_model_lexical_context_response_old( $input, $max_tokens = null ) {
 
     $max_tokens = 50;
 
