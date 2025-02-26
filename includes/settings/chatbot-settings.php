@@ -75,10 +75,11 @@ function chatbot_chatgpt_settings_page() {
         chatbot_chatgpt_appearance_restore_default_settings();
     }
 
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_settings_page() - $active_tab: ' . $active_tab );
-    // back_trace( 'NOTICE', 'Current Page: ' . $_GET['page']);
-    // back_trace( 'NOTICE', 'Current Tab: ' . ($_GET['tab'] ?? 'No Tab Set'));
-    // back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')));
+    // DIAG - Diagnostics
+    back_trace( 'NOTICE', 'chatbot_chatgpt_settings_page() - $active_tab: ' . $active_tab );
+    back_trace( 'NOTICE', 'Current Page: ' . $_GET['page']);
+    back_trace( 'NOTICE', 'Current Tab: ' . ($_GET['tab'] ?? 'No Tab Set'));
+    back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')));
 
     ?>
     <div id="chatbot-chatgpt-settings" class="wrap">
@@ -123,13 +124,15 @@ function chatbot_chatgpt_settings_page() {
        <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=general" class="nav-tab <?php echo $active_tab == 'general' ? 'nav-tab-active' : ''; ?>">General</a>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=api_chatgpt" class="nav-tab <?php echo $active_tab == 'api_chatgpt' ? 'nav-tab-active' : ''; ?>">API/ChatGPT</a> <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=gpt_assistants" class="nav-tab <?php echo $active_tab == 'gpt_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>  <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'NVIDIA') { ?><a href="?page=chatbot-chatgpt&tab=api_nvidia" class="nav-tab <?php echo $active_tab == 'api_nvidia' ? 'nav-tab-active' : ''; ?>">API/NVIDIA</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Anthropic') { ?><a href="?page=chatbot-chatgpt&tab=api_anthropic" class="nav-tab <?php echo $active_tab == 'api_anthropic' ? 'nav-tab-active' : ''; ?>">API/Anthropic</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'DeepSeek') { ?><a href="?page=chatbot-chatgpt&tab=api_deepseek" class="nav-tab <?php echo $active_tab == 'api_deepseek' ? 'nav-tab-active' : ''; ?>">API/DeepSeek</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Local Server') { ?><a href="?page=chatbot-chatgpt&tab=api_local" class="nav-tab <?php echo $active_tab == 'api_local' ? 'nav-tab-active' : ''; ?>">API/Local</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Markov Chain') { ?><a href="?page=chatbot-chatgpt&tab=api_markov" class="nav-tab <?php echo $active_tab == 'api_markov' ? 'nav-tab-active' : ''; ?>">API/Markov</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Transformer') { ?><a href="?page=chatbot-chatgpt&tab=api_transformer" class="nav-tab <?php echo $active_tab == 'api_transformer' ? 'nav-tab-active' : ''; ?>">API/Transformer</a> <?php } ?>
-            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=gpt_assistants" class="nav-tab <?php echo $active_tab == 'gpt_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>  <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Azure OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=api_azure_openai" class="nav-tab <?php echo $active_tab == 'api_azure_openai' ? 'nav-tab-active' : ''; ?>">API/Azure OpenAI</a> <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Azure OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=gpt_azure_assistants" class="nav-tab <?php echo $active_tab == 'gpt_azure_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>  <?php } ?>
             <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatars</a>
             <a href="?page=chatbot-chatgpt&tab=appearance" class="nav-tab <?php echo $active_tab == 'appearance' ? 'nav-tab-active' : ''; ?>">Appearance</a>
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
@@ -214,6 +217,74 @@ function chatbot_chatgpt_settings_page() {
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_api_chatgpt_advanced');
                 echo '</div>';
+
+            } elseif ($active_tab == 'gpt_assistants' && $chatbot_ai_platform_choice == 'OpenAI') {
+
+                settings_fields('chatbot_chatgpt_custom_gpts');
+
+                // Manage Assistants - Ver 2.0.4
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_assistant_settings');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_chatgpt_assistants_management');
+                display_chatbot_chatgpt_assistants_table();
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_gpt_assistants_settings');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_additional_assistant_settings');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_remote_widget_settings');
+                echo '</div>';
+
+            } elseif ($active_tab == 'api_azure' && $chatbot_ai_platform_choice == 'Azure OpenAI') {
+
+                settings_fields('chatbot_azure_api_chatgpt');
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_azure_model_settings_general');
+                echo '</div>';
+
+                // API Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_azure_api_chatgpt_general');
+                echo '</div>';
+
+                // ChatGPT API Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_azure_api_chatgpt_chat');
+                echo '</div>';
+
+                // Voice Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_azure_api_chatgpt_voice');
+                echo '</div>';
+
+                // Whisper Settings - Ver 2.0.1
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_azure_api_chatgpt_whisper');
+                echo '</div>';
+
+                // Image Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_azure_api_chatgpt_image');
+                echo '</div>';
+
+                // Advanced Settings - Ver 1.9.5
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_azure_api_chatgpt_advanced');
+                echo '</div>';
+
+            } elseif ($active_tab == 'gpt_azure_assistants' && $chatbot_ai_platform_choice == 'Azure OpenAI') {
+
+                // TBD
 
             } elseif ($active_tab == 'api_nvidia' && $chatbot_ai_platform_choice == 'NVIDIA') {
 
@@ -353,32 +424,6 @@ function chatbot_chatgpt_settings_page() {
                 // Transformer Advanced Settings - Ver 2.2.0
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_transformer_model_advanced_settings');
-                echo '</div>';
-
-            } elseif ($active_tab == 'gpt_assistants' && $chatbot_ai_platform_choice == 'OpenAI') {
-
-                settings_fields('chatbot_chatgpt_custom_gpts');
-
-                // Manage Assistants - Ver 2.0.4
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_chatgpt_assistant_settings');
-                echo '</div>';
-
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                // do_settings_sections('chatbot_chatgpt_assistants_management');
-                display_chatbot_chatgpt_assistants_table();
-                echo '</div>';
-
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_chatgpt_gpt_assistants_settings');
-                echo '</div>';
-
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_chatgpt_additional_assistant_settings');
-                echo '</div>';
-
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_chatgpt_remote_widget_settings');
                 echo '</div>';
 
             } elseif ($active_tab == 'avatar') {

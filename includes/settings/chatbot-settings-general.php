@@ -68,6 +68,7 @@ function chatbot_ai_platform_choice_callback($args) {
             <!-- <option value="Markov Chain" <?php selected( $chatbot_ai_platform_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option> -->
             <option value="Transformer" <?php selected( $chatbot_ai_platform_choice, 'Transformer' ); ?>><?php echo esc_html( 'Transformer' ); ?></option>
         <?php endif; ?>
+        <option value="Azure OpenAI" <?php selected( $chatbot_ai_platform_choice, 'Azure OpenAI' ); ?>><?php echo esc_html( 'Azure OpenAI' ); ?></option>
     </select>
     <?php
 

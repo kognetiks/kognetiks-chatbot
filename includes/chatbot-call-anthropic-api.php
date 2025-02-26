@@ -138,7 +138,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
     );
 
     // https://docs.anthropic.com/en/docs/about-claude/models#model-names
-    // 8192 output tokens is in beta and requires the header anthropic-beta: max-tokens-3-5-sonnet-2024-07-15. If the header is not specified, the limit is 4096 tokens.
+    // 8192 output tokens is in beta and requires the header anthropic-beta: max-tokens-3-5-sonnet-2024-07-15. If the header is not specified, the limit is 10000 tokens.
 
     // Define the request body
     $body = json_encode(array(

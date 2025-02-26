@@ -135,9 +135,9 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     $api_url = 'https://api.openai.com/v1/audio/speech';
 
     // Message size limitation
-    if (strlen($message) > 4096) {
-        // Limit the message to 4096 characters
-        $message = substr($message, 0, 4096);
+    if (strlen($message) > 10000) {
+        // Limit the message to 10000 characters
+        $message = substr($message, 0, 10000);
         $long_message = true;
     } else {
         $long_message = false;

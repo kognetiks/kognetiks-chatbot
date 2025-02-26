@@ -91,11 +91,11 @@ function chatbot_deepseek_max_tokens_setting_callback($args) {
 
     // Get the saved chatbot_deepseek_max_tokens_setting or default to 500
     $max_tokens = esc_attr(get_option('chatbot_deepseek_max_tokens_setting', '500'));
-    // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
+    // Allow for a range of tokens between 100 and 10000 in 100-step increments - Ver 2.0.4
     ?>
     <select id="chatbot_deepseek_max_tokens_setting" name="chatbot_deepseek_max_tokens_setting">
         <?php
-        for ($i=100; $i<=4000; $i+=100) {
+        for ($i=100; $i<=10000; $i+=100) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>

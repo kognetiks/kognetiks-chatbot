@@ -32,7 +32,7 @@ To ensure your **Kognetiks Chatbot** functions optimally, you need to configure 
 
 2. **Maximum Tokens Setting**:
    - **Description**: This setting determines the maximum number of tokens (words and parts of words) the model can use in a single response. This helps control the length and detail of the responses.
-   - **Default Value**: The default is set to 500 tokens, but it can be increased up to 4000 tokens.
+   - **Default Value**: The default is set to 500 tokens, but it can be increased up to 10000 tokens.
    - **How to Set**: Enter the desired number of tokens in the provided field, for example, `1000`.
 
 ## Advanced Settings

@@ -68,7 +68,7 @@ function localize_global_stopwords($language_code, $stopWords) {
 
     $body = array(
         'model' => $model,
-        'max_tokens' => 4000,
+        'max_tokens' => 10000,
         'temperature' => 0.5,
         'messages' => array(
             array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate word-for-word anything sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the list of translated words without the English.'),
