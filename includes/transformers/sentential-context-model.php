@@ -12,7 +12,595 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Main function to get the chatbot's response
+// Sentential Context Model (SCM) - Transformer Model - Ver 2.2.6
+function transformer_model_sentential_context_model_response_lite($prompt, $max_tokens = null) {
+
+    global $wpdb;
+    global $stopWords;
+
+    function preprocess_text($text) {
+
+        global $stopWords;
+
+        $text = strtolower(strip_tags($text));
+        $text = preg_replace('/[^a-z0-9 ]/', '', $text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        $text = trim($text);
+        $words = explode(' ', $text);
+        $filtered_words = array_diff($words, $stopWords);
+        return implode(' ', $filtered_words);
+
+    }
+
+    function get_min_window_length($content_words, $prompt_words) {
+
+        $required = array_count_values($prompt_words);
+        $required_count = count($required);
+        $formed = [];
+        $formed_count = 0;
+        $min_window_length = PHP_INT_MAX;
+        $left = 0;
+        $n = count($content_words);
+    
+        for ($right = 0; $right < $n; $right++) {
+            $word = $content_words[$right];
+            if (isset($required[$word])) {
+                if (!isset($formed[$word])) {
+                    $formed[$word] = 0;
+                }
+                $formed[$word]++;
+                if ($formed[$word] == $required[$word]) {
+                    $formed_count++;
+                }
+            }
+    
+            while ($formed_count === $required_count && $left <= $right) {
+                $current_window_length = $right - $left + 1;
+                if ($current_window_length < $min_window_length) {
+                    $min_window_length = $current_window_length;
+                }
+    
+                $left_word = $content_words[$left];
+                if (isset($required[$left_word])) {
+                    $formed[$left_word]--;
+                    if ($formed[$left_word] < $required[$left_word]) {
+                        $formed_count--;
+                    }
+                }
+                $left++;
+            }
+        }
+    
+        return $min_window_length === PHP_INT_MAX ? null : $min_window_length;
+
+    }
+
+    $prompt = preprocess_text($prompt);
+    // DIAG - Diagnostic - Ver 2.2.6
+    back_trace('NOTICE', 'Prompt: ' . $prompt);
+
+    $highest_score = 0;
+    $best_match = "";
+    $batch_size = 50;
+    $offset = 0;
+
+    do {
+
+        $query = $wpdb->prepare(
+            "SELECT post_title, post_content FROM {$wpdb->posts} 
+             WHERE post_status = 'publish' 
+             AND (post_type = 'post' OR post_type = 'page' OR post_type = 'product')
+             LIMIT %d OFFSET %d", $batch_size, $offset
+        );
+        $results = $wpdb->get_results($query);
+    
+        if (empty($results)) {
+            break;
+        }
+
+        // Find the max frequency in this batch to normalize frequency scores
+        $max_frequency = 1;
+        // Get the similarity threshold for the prompt
+        $similarity_threshold = esc_attr(get_option('chatbot_transformer_model_similarity_threshold', 0.7));
+
+        // Weight adjacency score higher (e.g., 70%) and frequency lower (30%)
+        $adjacency_score_threshold = $similarity_threshold;
+        back_trace( 'NOTICE', 'Adjacency Score Threshold: ' . $adjacency_score_threshold);
+        $normalization_frequency_threshold = 1.0 - $adjacency_score_threshold;
+        back_trace( 'NOTICE', 'Normalization Frequency Threshold: ' . $normalization_frequency_threshold);
+
+        foreach ($results as $post) {
+
+            $content = preprocess_text($post->post_content);
+            if (empty($content)) continue;
+
+            $content_words = explode(' ', $content);
+            $word_frequencies = array_count_values($content_words);
+            $prompt_words = explode(' ', $prompt);
+            $intersection = array_intersect($content_words, $prompt_words);
+            
+            $frequency_score = 0;
+            foreach ($intersection as $word) {
+                $frequency_score += $word_frequencies[$word];
+            }
+
+            if ($frequency_score > $max_frequency) {
+                $max_frequency = $frequency_score;
+            }
+
+        }
+
+        foreach ($results as $post) {
+
+            $content = preprocess_text($post->post_content);
+            if (empty($content)) continue;
+
+            $content_words = explode(' ', $content);
+            $word_frequencies = array_count_values($content_words);
+            $prompt_words = explode(' ', $prompt);
+            $intersection = array_intersect($content_words, $prompt_words);
+            
+            $frequency_score = 0;
+            foreach ($intersection as $word) {
+                $frequency_score += $word_frequencies[$word];
+            }
+
+            // Normalize frequency score (0-100)
+            $normalized_frequency = ($frequency_score / $max_frequency) * 100;
+
+            // Compute adjacency score using the minimum window method
+            $min_window = get_min_window_length($content_words, $prompt_words);
+            if ($min_window !== null) {
+                $best_possible = count($prompt_words);
+                $worst_possible = count($content_words);
+                $normalized_distance = ($min_window - $best_possible) / max(1, ($worst_possible - $best_possible));
+                $adjacency_score = 100 * (1 - $normalized_distance);
+                $adjacency_score = max(0, min(100, $adjacency_score));
+            } else {
+                $adjacency_score = 0;
+            }
+
+            // Weight adjacency score higher (e.g., 70%) and frequency lower (30%)
+            $combined_score = ($adjacency_score_threshold * $adjacency_score) + ($normalization_frequency_threshold * $normalized_frequency);
+
+            if ($combined_score > $highest_score) {
+                $highest_score = $combined_score;
+                $best_match = "";
+
+                if (!empty($intersection)) {
+                    $matched_word = reset($intersection);
+                    $match_index = array_search($matched_word, $content_words);
+                    $sentences = preg_split('/(?<=[.!?])\s+/', $post->post_content);
+                    $sentence_count = count($sentences);
+                    $sentence_index = 0;
+
+                    foreach ($sentences as $index => $sentence) {
+                        if (stripos($sentence, $matched_word) !== false) {
+                            $sentence_index = $index;
+                            break;
+                        }
+                    }
+
+                    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 3));
+                    $leading_sentence_ratio = esc_attr(get_option('chatbot_transformer_model_leading_sentences_ratio', 0.5));
+                    $sentences_before = max(0, $sentence_index - round($leading_sentence_ratio * $sentence_response_length));
+                    $start_index = max(0, $sentences_before);
+                    $end_index = min($sentence_count - 1, $start_index + $sentence_response_length - 1);
+                    $actual_response_length = min($sentence_response_length, $end_index - $start_index + 1);
+                    $end_index = $start_index + $actual_response_length - 1;
+
+                    for ($i = $start_index; $i <= $end_index; $i++) {
+                        $best_match .= $sentences[$i] . ' ';
+                    }
+
+                    back_trace('NOTICE', 'Score: ' . $highest_score);
+                    back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
+                    back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
+
+                }
+            }
+        }
+
+        $offset += $batch_size;
+
+    } while (!empty($results));
+
+    global $no_matching_content_response;
+    
+    return $highest_score > 0 ? $best_match : $no_matching_content_response[array_rand($no_matching_content_response)];
+
+}
+
+// Sentential Context Model (SCM) - Transformer Model - Ver 2.2.6
+function transformer_model_sentential_context_model_response_lite_version_two($prompt, $max_tokens = null) {
+    global $wpdb;
+    global $stopWords;
+
+    // Preprocess text: convert to lowercase, strip HTML tags, remove punctuation/extra spaces, and filter out stop words.
+    function preprocess_text($text) {
+        global $stopWords;
+        $text = strtolower(strip_tags($text));
+        $text = preg_replace('/[^a-z0-9 ]/', '', $text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        $text = trim($text);
+        $words = explode(' ', $text);
+        $filtered_words = array_diff($words, $stopWords);
+        return implode(' ', $filtered_words);
+    }
+
+    // Helper function: find the minimum window length in $content_words that contains all $prompt_words.
+    function get_min_window_length($content_words, $prompt_words) {
+        $required = array_count_values($prompt_words);
+        $required_count = count($required);
+        $formed = [];
+        $formed_count = 0;
+        $min_window_length = PHP_INT_MAX;
+        $left = 0;
+        $n = count($content_words);
+    
+        for ($right = 0; $right < $n; $right++) {
+            $word = $content_words[$right];
+            if (isset($required[$word])) {
+                if (!isset($formed[$word])) {
+                    $formed[$word] = 0;
+                }
+                $formed[$word]++;
+                if ($formed[$word] == $required[$word]) {
+                    $formed_count++;
+                }
+            }
+    
+            while ($formed_count === $required_count && $left <= $right) {
+                $current_window_length = $right - $left + 1;
+                if ($current_window_length < $min_window_length) {
+                    $min_window_length = $current_window_length;
+                }
+    
+                $left_word = $content_words[$left];
+                if (isset($required[$left_word])) {
+                    $formed[$left_word]--;
+                    if ($formed[$left_word] < $required[$left_word]) {
+                        $formed_count--;
+                    }
+                }
+                $left++;
+            }
+        }
+    
+        return $min_window_length === PHP_INT_MAX ? null : $min_window_length;
+    }
+
+    // Preprocess the prompt.
+    $prompt = preprocess_text($prompt);
+    back_trace('NOTICE', 'Prompt: ' . $prompt);
+
+    // Initialize variables.
+    $highest_score = 0;
+    $best_match = "";
+    $batch_size = 50;
+    $offset = 0;
+
+    do {
+        // Fetch a batch of posts, pages, and products.
+        $query = $wpdb->prepare(
+            "SELECT post_title, post_content FROM {$wpdb->posts} 
+             WHERE post_status = 'publish' 
+             AND (post_type = 'post' OR post_type = 'page' OR post_type = 'product')
+             LIMIT %d OFFSET %d", $batch_size, $offset
+        );
+        $results = $wpdb->get_results($query);
+    
+        if (empty($results)) {
+            break;
+        }
+    
+        foreach ($results as $post) {
+            $content = preprocess_text($post->post_content);
+    
+            // Skip if content is empty.
+            if (empty($content)) {
+                continue;
+            }
+    
+            // Tokenize content.
+            $content_words = explode(' ', $content);
+    
+            // Calculate word frequencies in the content.
+            $word_frequencies = array_count_values($content_words);
+    
+            // Calculate similarity using word intersection and frequency.
+            $prompt_words = explode(' ', $prompt);
+            $intersection = array_intersect($content_words, $prompt_words);
+            $frequency_score = 0;
+    
+            foreach ($intersection as $word) {
+                $frequency_score += $word_frequencies[$word];
+            }
+    
+            // Frequency score normalized: fraction of prompt words (scaled to 0-100 later).
+            $score = $frequency_score / max(1, count($prompt_words));
+    
+            // Calculate adjacency score using the minimum window approach.
+            $min_window = get_min_window_length($content_words, $prompt_words);
+    
+            if ($min_window !== null) {
+                // Best-case: window equals count($prompt_words); worst-case: window equals total content words.
+                $best_possible = count($prompt_words);
+                $worst_possible = count($content_words);
+                $normalized_distance = ($min_window - $best_possible) / max(1, ($worst_possible - $best_possible));
+                $adjacency_score = 100 * (1 - $normalized_distance);
+                $adjacency_score = max(0, min(100, $adjacency_score));
+            } else {
+                $adjacency_score = 0;
+            }
+    
+            // Normalize the frequency score to 0-100.
+            $normalized_frequency = $score * 100;
+    
+            // Combine frequency and adjacency scores.
+            $combined_score = ($normalized_frequency + $adjacency_score) / 2;
+    
+            // Update best match if this content has a higher combined score.
+            if ($combined_score > $highest_score) {
+                $highest_score = $combined_score;
+                $best_match = "";
+    
+                if (!empty($intersection)) {
+                    $matched_word = reset($intersection);
+                    $match_index = array_search($matched_word, $content_words);
+    
+                    // Split the original post content into sentences.
+                    $sentences = preg_split('/(?<=[.!?])\s+/', $post->post_content);
+                    $sentence_count = count($sentences);
+    
+                    // Find the sentence containing the matched word.
+                    $sentence_index = 0;
+                    foreach ($sentences as $index => $sentence) {
+                        if (stripos($sentence, $matched_word) !== false) {
+                            $sentence_index = $index;
+                            break;
+                        }
+                    }
+    
+                    // Determine the number of sentences to include in the result.
+                    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 3));
+                    $start_index = max(0, $sentence_index - 1);
+                    $end_index = min($sentence_count - 1, $sentence_index + $sentence_response_length - 1);
+                    $actual_response_length = min($sentence_response_length, $end_index - $start_index + 1);
+                    $end_index = $start_index + $actual_response_length - 1;
+    
+                    for ($i = $start_index; $i <= $end_index; $i++) {
+                        $best_match .= $sentences[$i] . ' ';
+                    }
+    
+                    back_trace('NOTICE', 'Score: ' . $highest_score);
+                    back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
+                    back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
+                }
+            }
+        }
+    
+        $offset += $batch_size;
+    } while (!empty($results));
+    
+    return $highest_score > 0 ? $best_match : "I couldn't find relevant content for your query.";
+
+}
+
+// Sentential Context Model (SCM) - Transformer Model - Ver 2.2.6
+function transformer_model_sentential_context_model_response_lite_version_one($prompt, $max_tokens = null) {
+
+    global $wpdb;
+    global $stopWords;
+
+    // Preprocess text (convert to lowercase, remove special characters, stop words)
+    function preprocess_text($text) {
+
+        global $stopWords;
+        // Convert to lowercase and strip HTML tags
+        $text = strtolower(strip_tags($text));
+        // Remove punctuation and special characters
+        $text = preg_replace('/[^a-z0-9 ]/', '', $text);
+        // Remove extra spaces
+        $text = preg_replace('/\s+/', ' ', $text);
+        // Trim leading and trailing spaces
+        $text = trim($text);
+        // Tokenize text
+        $words = explode(' ', $text);
+        // Remove stop words
+        $filtered_words = array_diff($words, $stopWords);
+        // Return preprocessed text
+        return implode(' ', $filtered_words);
+
+    }
+
+    $prompt = preprocess_text($prompt);
+    back_trace('NOTICE', 'Prompt: ' . $prompt);
+
+    // Reset variables
+    $highest_score = 0;
+    $best_match = "";
+    $batch_size = 50;
+    $offset = 0;
+
+    do {
+
+        // Fetch a batch of posts, pages, and products
+        $query = $wpdb->prepare(
+            "SELECT post_title, post_content FROM {$wpdb->posts} 
+            WHERE post_status = 'publish' 
+            AND (post_type = 'post' OR post_type = 'page' OR post_type = 'product')
+            LIMIT %d OFFSET %d", $batch_size, $offset
+        );
+        $results = $wpdb->get_results($query);
+
+        if (empty($results)) {
+            break;
+        }
+
+        foreach ($results as $post) {
+
+            $content = preprocess_text($post->post_content);
+
+            // Skip if content is empty
+            if (empty($content)) {
+                continue;
+            }
+
+            // Tokenize content
+            $content_words = explode(' ', $content);
+
+            // Calculate word frequencies in the content
+            $word_frequencies = array_count_values($content_words);
+
+            // Calculate similarity using word intersection and frequency
+            $prompt_words = explode(' ', $prompt);
+            $intersection = array_intersect($content_words, $prompt_words);
+            $frequency_score = 0;
+
+            foreach ($intersection as $word) {
+
+                $frequency_score += $word_frequencies[$word];
+
+            }
+
+            $scoring_algorithm = 'pairwise'; // Set to 'average' or 'pairwise'
+            // DIAG - Diagnostics
+            back_trace( 'NOTICE', 'Scoring Algorithm: ' . $scoring_algorithm);
+
+            if ( $scoring_algorithm == 'average' ) { // ORIGINAL
+
+                $score = $frequency_score / max(1, count($prompt_words));
+
+                // Calculate adjacency score
+                $positions = [];
+
+                foreach ($prompt_words as $word) {
+
+                    $pos = array_keys($content_words, $word);
+                    if (!empty($pos)) {
+                        $positions = array_merge($positions, $pos);
+                    }
+
+                }
+
+                if (count($positions) > 1) {
+
+                    sort($positions);
+                    $total_distance = 0;
+                    for ($i = 1; $i < count($positions); $i++) {
+                        $total_distance += $positions[$i] - $positions[$i - 1];
+                    }
+                    $average_distance = $total_distance / (count($positions) - 1);
+                    $max_possible_distance = count($content_words) - 1;
+                    $adjacency_score = 100 * (1 - ($average_distance / $max_possible_distance));
+
+                } else {
+
+                    $adjacency_score = 0;
+
+                }
+
+            } elseif ( $scoring_algorithm == 'pairwise' ) {
+
+                // Calculate frequency score (already computed elsewhere)
+                $score = $frequency_score / max(1, count($prompt_words));
+
+                // Calculate adjacency score using the minimum distance between any two prompt words.
+                $positions = [];
+                foreach ($prompt_words as $word) {
+                    $pos = array_keys($content_words, $word);
+                    if (!empty($pos)) {
+                        $positions = array_merge($positions, $pos);
+                    }
+                }
+
+                if (count($positions) > 1) {
+                    sort($positions);
+                    $min_distance = PHP_INT_MAX;
+                    for ($i = 1; $i < count($positions); $i++) {
+                        $distance = $positions[$i] - $positions[$i - 1];
+                        if ($distance < $min_distance) {
+                            $min_distance = $distance;
+                        }
+                    }
+                    $max_possible_distance = count($content_words) - 1;
+                    $adjacency_score = 100 * (1 - ($min_distance / $max_possible_distance));
+                } else {
+                    $adjacency_score = 0;
+                }
+
+            } else {
+
+                return ("Error: Invalid scoring algorithm: " . $scoring_algorithm);
+
+            }
+
+            // Combine the intersection score and adjacency score
+            $combined_score = ($score + $adjacency_score) / 2;
+
+            // Update highest score and best match
+            if ($combined_score > $highest_score) {
+
+                $highest_score = $combined_score;
+
+                // Get the best match content
+                $best_match = "";
+
+                if (!empty($intersection)) {
+
+                    $match_index = array_search(reset($intersection), $content_words);
+
+                    // Split content into sentences
+                    $sentences = preg_split('/(?<=[.!?])\s+/', $post->post_content);
+                    $sentence_count = count($sentences);
+
+                    // Find the sentence containing the match
+                    $sentence_index = 0;
+                    foreach ($sentences as $index => $sentence) {
+
+                        if (stripos($sentence, reset($intersection)) !== false) {
+                            $sentence_index = $index;
+                            break;
+                        }
+
+                    }
+
+                    // Get store number of sentences around the matching sentence
+                    $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 3));
+                    // DIAG - Diagnostics
+                    // back_trace('NOTICE', 'Sentence Response Length: ' . $sentence_response_length);
+                    $start_index = max(0, $sentence_index - 1);
+                    $end_index = min($sentence_count - 1, $sentence_index + $sentence_response_length - 1);
+
+                    // Ensure the number of sentences does not exceed the stored value
+                    $actual_response_length = min($sentence_response_length, $end_index - $start_index + 1);
+                    $end_index = $start_index + $actual_response_length - 1;
+
+                    for ($i = $start_index; $i <= $end_index; $i++) {
+
+                        $best_match .= $sentences[$i] . ' ';
+
+                    }
+
+                    // DIAG - Diagnostics
+                    back_trace('NOTICE', 'Score: ' . $highest_score);
+                    back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
+                    back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
+
+                }
+            }
+        }
+
+        $offset += $batch_size;
+
+    } while (!empty($results));
+
+    return $highest_score > 0 ? $best_match : "I couldn't find relevant content for your query.";
+
+}
+
+// Sentential Context Model (SCM) - Transformer Model - Ver 2.2.1
 function transformer_model_sentential_context_model_response($input, $responseCount = 500) {
 
     // DIAG - Diagnostic - Ver 2.2.1

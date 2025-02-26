@@ -186,7 +186,8 @@ function chatbot_transformer_model_choice_callback($args) {
 
     ?>
     <select id="chatbot_transformer_model_choice" name="chatbot_transformer_model_choice">
-        <option value="<?php echo esc_attr( 'lexical-context-model' ); ?>" <?php selected( $model_choice, 'lexical-context-model' ); ?>><?php echo esc_html( 'lexical-context-model' ); ?></option>
+        <!-- <option value="<?php echo esc_attr( 'lexical-context-model' ); ?>" <?php selected( $model_choice, 'lexical-context-model' ); ?>><?php echo esc_html( 'lexical-context-model' ); ?></option> -->
+        <option value="<?php echo esc_attr( 'sentential-context-model-lite' ); ?>" <?php selected( $model_choice, 'sentential-context-model-lite' ); ?>><?php echo esc_html( 'sentential-context-model-lite' ); ?></option>
         <option value="<?php echo esc_attr( 'sentential-context-model' ); ?>" <?php selected( $model_choice, 'sentential-context-model' ); ?>><?php echo esc_html( 'sentential-context-model' ); ?></option>
     </select>
     <?php
