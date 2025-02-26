@@ -26,6 +26,12 @@ function get_api_base_url() {
             return esc_attr(get_option('chatbot_chatgpt_base_url', 'https://api.openai.com/v1'));
             break;
 
+        // Base URL for the Azure OpenAI API calls - Ver 2.2.6
+        case 'Azure OpenAI':
+
+            return esc_attr(get_option('chatbot_azure_base_url', 'https://YOUR_RESOURCE_NAME.openai.azure.com/'));
+            break;
+
         // Base URL for the NVIDIA API calls - Ver 2.1.8
         case 'NVIDIA':
 
@@ -82,6 +88,12 @@ function get_chat_completions_api_url() {
 
         // Base URL for the OpenAI API calls - Ver 1.8.1
         case 'OpenAI':
+
+            return get_api_base_url() . "/chat/completions";
+            break;
+
+        // Base URL for the Azure OpenAI API calls - Ver 2.2.6
+        case 'Azure OpenAI':
 
             return get_api_base_url() . "/chat/completions";
             break;

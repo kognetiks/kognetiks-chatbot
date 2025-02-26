@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot - Chatbot Assistants - Ver 2.0.4
+ * Kognetiks Chatbot - Chatbot Assistants - Ver 2.2.6
  *
  * This file contains the code for table actions for managing assistants
  * to display the chatbot conversation on a page on the website.
@@ -14,11 +14,16 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Create the table for the chatbot assistants
-function create_chatbot_chatgpt_assistants_table() {
+function create_chatbot_azure_assistants_table() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+
+    // Check if the table already exists
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
+        return; // Exit if the table already exists
+    }
     
     $charset_collate = $wpdb->get_charset_collate();
 
@@ -65,20 +70,20 @@ function create_chatbot_chatgpt_assistants_table() {
     }
 
     // Call the upgrade function after creating the table
-    upgrade_chatbot_chatgpt_assistants_table();
+    upgrade_chatbot_azure_assistants_table();
 
-    // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
-    update_chatbot_chatgpt_number_of_shortcodes();
+    // Keep the chatbot_azure_number_of_shortcodes option updated - Ver 2.0.6
+    update_chatbot_azure_number_of_shortcodes();
 
 }
-register_activation_hook(__FILE__, 'create_chatbot_chatgpt_assistants_table');
+register_activation_hook(__FILE__, 'create_chatbot_azure_assistants_table');
 
 // Drop the table for the chatbot assistants
-function drop_chatbot_chatgpt_assistants_table() {
+function drop_chatbot_azure_assistants_table() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
     
     $sql = "DROP TABLE IF EXISTS $table_name;";
     $wpdb->query($sql);
@@ -86,11 +91,11 @@ function drop_chatbot_chatgpt_assistants_table() {
 }
 
 // Retrieve a row from the chatbot assistants table using the Common Name
-function get_chatbot_chatgpt_assistant_by_common_name($common_name) {
+function get_chatbot_azure_assistant_by_common_name($common_name) {
 
     global $wpdb;
     
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
 
     $assistant_details = $wpdb->get_row(
         $wpdb->prepare(
@@ -105,13 +110,13 @@ function get_chatbot_chatgpt_assistant_by_common_name($common_name) {
 }
 
 // Retrieve a row from the chatbot assistants table using the id - Ver 2.0.6
-function get_chatbot_chatgpt_assistant_by_key($id) {
+function get_chatbot_azure_assistant_by_key($id) {
 
     global $wpdb;
 
     $assistant_details = array();
     
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
 
     $assistant_details = $wpdb->get_row(
         $wpdb->prepare(
@@ -126,10 +131,10 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
         $assistant_details['chatbot_chatbot_assistant_id'] = $assistant_details['assistant_id'];
         $assistant_details['common_name'] = $assistant_details['common_name'];
         $assistant_details['chatbot_chatbot_display_style'] = $assistant_details['style'];
-        $assistant_details['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
-        $assistant_details['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
-        $assistant_details['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
-        $assistant_details['chatbot_chatgpt_allow_download_transcript'] = $assistant_details['allow_transcript_downloads'];
+        $assistant_details['chatbot_azure_audience_choice'] = $assistant_details['audience'];
+        $assistant_details['chatbot_azure_voice_option'] = $assistant_details['voice'];
+        $assistant_details['chatbot_azure_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
+        $assistant_details['chatbot_azure_allow_download_transcript'] = $assistant_details['allow_transcript_downloads'];
     }
 
     // If the assistant is not found, return an empty array
@@ -141,12 +146,12 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
 
 }
 
-// Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
-function update_chatbot_chatgpt_number_of_shortcodes() {
+// Keep the chatbot_azure_number_of_shortcodes option updated - Ver 2.0.6
+function update_chatbot_azure_number_of_shortcodes() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
 
     // Check if the table exists using a prepared statement
     $table_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) == $table_name;
@@ -164,14 +169,14 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
         $number_of_shortcodes = 0;
     }  
 
-    update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
+    update_option('chatbot_azure_number_of_shortcodes', $number_of_shortcodes);
 
     // Optionally log for debugging
     // error_log('chatbot-assistants - Number of Shortcodes: ' . $number_of_shortcodes);
 }
 
 // Display the chatbot assistants table
-function display_chatbot_chatgpt_assistants_table() {
+function display_chatbot_azure_assistants_table() {
 
     if ( ! current_user_can('manage_options') ) {
         wp_send_json_error( 'Unauthorized user', 403 );
@@ -180,11 +185,11 @@ function display_chatbot_chatgpt_assistants_table() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
     $assistants = $wpdb->get_results("SELECT * FROM $table_name");
 
     // Update the number of shortcodes - Ver 2.0.6
-    update_chatbot_chatgpt_number_of_shortcodes();
+    update_chatbot_azure_number_of_shortcodes();
 
     echo '<style>
         .asst-templates-display {
@@ -342,7 +347,7 @@ function display_chatbot_chatgpt_assistants_table() {
 }
 
 // Scripts for the chatbot assistants table
-function chatbot_chatgpt_assistants_scripts() {
+function chatbot_azure_assistants_scripts() {
 
     if ( current_user_can('manage_options') ) {
 
@@ -356,7 +361,7 @@ function chatbot_chatgpt_assistants_scripts() {
             // Function to update an assistant's details
             function updateAssistant(id) {
                 var data = {
-                    action: 'update_assistant',
+                    action: 'azure_update_assistant',
                     id: id,
                     assistant_id: document.getElementsByName('assistant_id_' + id)[0].value,
                     common_name: document.getElementsByName('common_name_' + id)[0].value,
@@ -384,7 +389,7 @@ function chatbot_chatgpt_assistants_scripts() {
             // Function to delete an assistant
             function deleteAssistant(id) {
                 var data = {
-                    action: 'delete_assistant',
+                    action: 'azure_delete_assistant',
                     id: id
                 };
 
@@ -400,7 +405,7 @@ function chatbot_chatgpt_assistants_scripts() {
             // Function to add a new assistant
             function addNewAssistant() {
                 var data = {
-                    action: 'add_new_assistant',
+                    action: 'azure_add_new_assistant',
                     assistant_id: document.getElementsByName('new_assistant_id')[0].value,
                     common_name: document.getElementsByName('new_common_name')[0].value,
                     style: document.getElementsByName('new_style')[0].value,
@@ -430,10 +435,10 @@ function chatbot_chatgpt_assistants_scripts() {
     }
 
 }
-add_action('admin_footer', 'chatbot_chatgpt_assistants_scripts');
+add_action('admin_footer', 'chatbot_azure_assistants_scripts');
 
 // Update Assistant AJAX action
-function update_assistant() {
+function azure_update_assistant() {
 
     check_ajax_referer('chatbot_nonce_action', '_wpnonce');
 
@@ -444,7 +449,7 @@ function update_assistant() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
 
     $id = intval($_POST['id']);
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
@@ -489,10 +494,10 @@ function update_assistant() {
     wp_die();
 
 }
-add_action('wp_ajax_update_assistant', 'update_assistant');
+add_action('wp_ajax_azure_update_assistant', 'azure_update_assistant');
 
 // Delete Assistant AJAX action
-function delete_assistant() {
+function azure_delete_assistant() {
 
     check_ajax_referer('chatbot_nonce_action', '_wpnonce');
 
@@ -503,7 +508,7 @@ function delete_assistant() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
 
     $id = intval($_POST['id']);
     $wpdb->delete($table_name, array('id' => $id));
@@ -518,9 +523,9 @@ function delete_assistant() {
     wp_die();
 
 }
-add_action('wp_ajax_delete_assistant', 'delete_assistant');
+add_action('wp_ajax_azure_delete_assistant', 'azure_delete_assistant');
 
-function add_new_assistant() {
+function azure_add_new_assistant() {
 
     check_ajax_referer('chatbot_nonce_action', '_wpnonce');
 
@@ -531,12 +536,12 @@ function add_new_assistant() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
 
     // Check that the table exists
     if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
         // Table doesn't exist then add the table
-        create_chatbot_chatgpt_assistants_table();
+        create_chatbot_azure_assistants_table();
     }
 
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
@@ -580,22 +585,22 @@ function add_new_assistant() {
     wp_die();
 
 }
-add_action('wp_ajax_add_new_assistant', 'add_new_assistant');
+add_action('wp_ajax_azure_add_new_assistant', 'azure_add_new_assistant');
 
 // Upgrade the old primary and alternate assistant settings to the new chatbot assistants table
-function upgrade_chatbot_chatgpt_assistants_table() {
+function upgrade_chatbot_azure_assistants_table() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
 
     // Retrieve options from wp_options table
     $assistant_id = esc_attr(get_option('assistant_id'), '');
-    $assistant_id_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'), '');
-    $assistant_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions'), '');
-    $assistant_instructions_alternate = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate'), '');
+    $assistant_id_alternate = esc_attr(get_option('chatbot_azure_assistant_id_alternate'), '');
+    $assistant_instructions = esc_attr(get_option('chatbot_azure_assistant_instructions'), '');
+    $assistant_instructions_alternate = esc_attr(get_option('chatbot_azure_assistant_instructions_alternate'), '');
 
-    // Insert options into chatbot_chatgpt_assistants table
+    // Insert options into chatbot_azure_assistants table
     if ($assistant_id) {
         $wpdb->insert(
             $table_name,
@@ -654,8 +659,8 @@ function upgrade_chatbot_chatgpt_assistants_table() {
 
     // Delete options from wp_options table
     delete_option('assistant_id');
-    delete_option('chatbot_chatgpt_assistant_id_alternate');
-    delete_option('chatbot_chatgpt_assistant_instructions');
-    delete_option('chatbot_chatgpt_assistant_instructions_alternate');
+    delete_option('chatbot_azure_assistant_id_alternate');
+    delete_option('chatbot_azure_assistant_instructions');
+    delete_option('chatbot_azure_assistant_instructions_alternate');
     
 }
