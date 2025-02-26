@@ -44,7 +44,7 @@ function chatbot_ai_platform_choice_callback($args) {
 
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
-    $platforms = ['OpenAI', 'NVIDIA', 'Markov Chain', 'Transformer', 'Anthropic', 'DeepSeek', 'Local Server'];
+    $platforms = ['OpenAI', 'Azure OpenAI', 'NVIDIA', 'Markov Chain', 'Transformer', 'Anthropic', 'DeepSeek', 'Local Server'];
     if (!in_array($chatbot_ai_platform_choice, $platforms)) {
         $chatbot_ai_platform_choice = 'OpenAI';
     }
@@ -58,6 +58,7 @@ function chatbot_ai_platform_choice_callback($args) {
     ?>
     <select id="chatbot_ai_platform_choice" name="chatbot_ai_platform_choice">
         <option value="OpenAI" <?php selected( $chatbot_ai_platform_choice, 'OpenAI' ); ?>><?php echo esc_html( 'OpenAI' ); ?></option>
+        <option value="Azure OpenAI" <?php selected( $chatbot_ai_platform_choice, 'Azure OpenAI' ); ?>><?php echo esc_html( 'Azure OpenAI' ); ?></option>
         <option value="NVIDIA" <?php selected( $chatbot_ai_platform_choice, 'NVIDIA' ); ?>><?php echo esc_html( 'NVIDIA' ); ?></option>
         <option value="Anthropic" <?php selected( $chatbot_ai_platform_choice, 'Anthropic' ); ?>><?php echo esc_html( 'Anthropic' ); ?></option>
         <option value="DeepSeek" <?php selected( $chatbot_ai_platform_choice, 'DeepSeek' ); ?>><?php echo esc_html( 'DeepSeek' ); ?></option>
@@ -68,7 +69,6 @@ function chatbot_ai_platform_choice_callback($args) {
             <!-- <option value="Markov Chain" <?php selected( $chatbot_ai_platform_choice, 'Markov Chain' ); ?>><?php echo esc_html( 'Markov Chain' ); ?></option> -->
             <option value="Transformer" <?php selected( $chatbot_ai_platform_choice, 'Transformer' ); ?>><?php echo esc_html( 'Transformer' ); ?></option>
         <?php endif; ?>
-        <option value="Azure OpenAI" <?php selected( $chatbot_ai_platform_choice, 'Azure OpenAI' ); ?>><?php echo esc_html( 'Azure OpenAI' ); ?></option>
     </select>
     <?php
 

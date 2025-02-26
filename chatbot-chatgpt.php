@@ -127,16 +127,17 @@ require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-mode
 
 // Include necessary files - Settings
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-anthropic.php';            // Anthropic
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';              // OpenAI ChatGPT
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-azure-assistants.php';     // Azure Assistants - Ver 2.2.6
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-azure.php';                // Azure - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-deepseek.php';             // DeepSeek
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';               // NVIDIA
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-local.php';                // Local Server - Ver 2.2.6
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-openai-assistants.php';    // OpenAI ChatGPT
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-openai.php';               // OpenAI ChatGPT
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-avatar.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-buttons.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-custom-gpts.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-diagnostics.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-general.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-links.php';
@@ -223,6 +224,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_chatgpt_api_enabled = 'Yes';
         update_option('chatbot_chatgpt_api_enabled', 'Yes');
     
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+    
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
     
@@ -261,12 +265,63 @@ switch ($chatbot_ai_platform_choice) {
 
         break;
 
+        case 'Azure OpenAI':
+
+            update_option('chatbot_ai_platform_choice', 'Azure OpenAI');
+    
+            $chatbot_chatgpt_api_enabled = 'No';
+            update_option('chatbot_chatgpt_api_enabled', 'No');
+
+            $chatbot_azure_api_enabled = 'Yes';
+            update_option('chatbot_azure_api_enabled', 'Yes');
+        
+            $chatbot_nvidia_api_enabled = 'No';
+            update_option('chatbot_nvidia_api_enabled', 'No');
+        
+            $chatbot_anthropic_api_enabled = 'No';
+            update_option('chatbot_anthropic_api_enabled', 'No');
+    
+            $chatbot_deepseek_api_enabled = 'No';
+            update_option('chatbot_deepseek_api_enabled', 'No');
+    
+            $chatbot_markov_chain_api_enabled = 'No';
+            update_option('chatbot_markov_chain_api_enabled', 'No');
+        
+            $chatbot_transformer_model_api_enabled = 'No';
+            update_option('chatbot_transformer_model_api_enabled', 'No');
+    
+            $chatbot_local_api_enabled = 'No';
+            update_option('chatbot_local_api_enabled', 'No');
+            
+            // Model choice - Ver 1.9.4
+            if (esc_attr(get_option('chatbot_azure_model_choice')) === null) {
+                $model = 'gpt-4-1106-preview';
+                update_option('chatbot_azure_model_choice', $model);
+                // DIAG - Diagnostics
+                // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+            } elseif (empty($model)) {
+                $model = 'gpt-4-1106-preview';
+            }
+        
+            // Voice choice - Ver 1.9.5
+            if (esc_attr(get_option('chatbot_azure_voice_option')) === null) {
+                $voice = 'alloy';
+                update_option('chatbot_azure_voice_option', $voice);
+                // DIAG - Diagnostics
+                // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
+            }
+    
+            break;
+
     case 'NVIDIA':
 
         update_option('chatbot_ai_platform_choice', 'NVIDIA');
         
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
    
         $chatbot_nvidia_api_enabled = 'Yes';
         update_option('chatbot_nvidia_api_enabled', 'Yes');
@@ -312,6 +367,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
 
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
 
@@ -355,6 +413,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
 
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
@@ -400,6 +461,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
 
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
 
@@ -443,6 +507,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
     
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
@@ -490,7 +557,10 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
-    
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
 
@@ -534,6 +604,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_chatgpt_api_enabled = 'Yes';
         update_option('chatbot_chatgpt_api_enabled', 'Yes');
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
 
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');

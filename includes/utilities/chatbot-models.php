@@ -141,6 +141,142 @@ function chatbot_openai_get_models() {
 
 }
 
+// Function to get the Model names from OpenAI API
+function chatbot_azure_get_models() {
+
+    global $session_id;
+    global $user_id;
+    global $page_id;
+    global $thread_id;
+    global $assistant_id;
+    global $kchat_settings;
+    global $additional_instructions;
+    global $model;
+    global $voice;
+
+    global $chatbot_chatgpt_display_style;
+    global $chatbot_chatgpt_assistant_alias;
+    
+    $api_key = '';
+
+    // Retrieve the API key
+    $api_key = esc_attr(get_option('chatbot_azure_api_key'));
+
+    // Default model list
+    $default_model_list = '';
+    $default_model_list = array(
+        array(
+            'id' => 'dall-e-3',
+            'object' => 'model',
+            'created' => 1698785189,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'gpt-3.5-turbo',
+            'object' => 'model',
+            'created' => 1677610602,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'tts-1-hd',
+            'object' => 'model',
+            'created' => 1699053241,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'whisper-1',
+            'object' => 'model',
+            'created' => 1677532384,
+            'owned_by' => 'openai-internal'
+        )
+    );
+
+    // See if the option exists, if not then create it and set the default
+    if (esc_attr(get_option('chatbot_azure_model_choice')) === false) {
+        update_option('chatbot_azure_model_choice', 'gpt-3.5-turbo');
+    }
+    if (esc_attr(get_option('chatbot_azure_image_model_option')) === false) {
+        update_option('chatbot_azure_image_model_option', 'dall-e-3');
+    }
+    if (esc_attr(get_option('chatbot_azure_voice_model_option')) === false) {
+        update_option('chatbot_azure_voice_model_option', 'tts-1-hd');
+    }
+    if (esc_attr(get_option('chatbot_azure_whisper_model_option')) === false) {
+        update_option('chatbot_azure_whisper_model_option', 'whisper-1');
+    }
+
+    // Check if the API key is empty
+    if (empty($api_key)) {
+        return $default_model_list;
+    }
+
+    $azure_models_url = esc_attr(get_option('chatbot_azure_base_url'));
+    // $azure_models_url = rtrim($azure_models_url, '/') . '/openai/models?api-version=2024-02-01';
+    $azure_models_url = rtrim($azure_models_url, '/') . '/openai/models?api-version=2024-10-21';
+
+    // DIAG - Diagnostics - Ver 2.2.6
+    back_trace( 'NOTICE' , 'chatbot_azure_get_models: ' . $azure_models_url);
+
+    // Set HTTP request arguments
+    $args = array(
+        'headers' => array(
+            'Content-Type' => 'application/json',
+            'api-key'      => trim($api_key),
+            'Accept'       => 'application/json',
+        ),
+        'timeout' => 15, // Set a timeout to avoid long waits
+    );
+
+    // Make the request using WP HTTP API
+    $response = wp_remote_get($azure_models_url, $args);
+
+    // Check for errors
+    if (is_wp_error($response)) {
+        prod_trace( 'ERROR' . 'Error fetching Azure OpenAI models: ' . $response->get_error_message());
+        return $default_model_list;
+    }
+
+    // Decode the JSON response
+    $data = json_decode(wp_remote_retrieve_body($response), true);
+
+    // DIAG - Diagnostics - Ver 2.2.6
+    back_trace( 'NOTICE' , 'chatbot_azure_get_models: ' . print_r($data, true));
+
+    // Check for API errors
+    if (isset($data['error'])) {
+        // return "Error: " . $data['error']['message'];
+        // On 1st install needs an API key
+        // So return a short list of the base models until an API key is entered
+        return $default_model_list;
+    }
+
+    // Extract the models from the response
+    if (isset($data['data']) && !is_null($data['data'])) {
+        $models = $data['data'];
+    } else {
+        // Handle the case where 'data' is not set or is null
+        $models = []; // Empty array
+        prod_trace( 'WARNING', 'Data key is not set or is null in the \$data array.');
+    }
+
+    // Ensure $models is an array
+    if (!is_array($models)) {
+        return $default_model_list;
+    } else {
+        // Sort the models by name
+        usort($models, function($a, $b) {
+            return $a['id'] <=> $b['id'];
+        });
+    }
+
+    // DIAG - Diagnostics - Ver 2.0.2.1
+    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
+
+    // Return the list of models
+    return $models;
+
+}
+
 // Function to get the Model names from NVIDIA API
 function chatbot_nvidia_get_models() {
 
