@@ -210,9 +210,11 @@ function chatbot_azure_get_models() {
         return $default_model_list;
     }
 
-    $azure_models_url = esc_attr(get_option('chatbot_azure_base_url'));
-    // $azure_models_url = rtrim($azure_models_url, '/') . '/openai/models?api-version=2024-02-01';
-    $azure_models_url = rtrim($azure_models_url, '/') . '/openai/models?api-version=2024-10-21';
+    // Assemble the URL from resource name and deployment name
+    $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
+    $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
+    $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', 'YYYY-MM-DD'));
+    $azure_models_url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/models?api-version=' . $chatbot_azure_api_version;
 
     // DIAG - Diagnostics - Ver 2.2.6
     back_trace( 'NOTICE' , 'chatbot_azure_get_models: ' . $azure_models_url);

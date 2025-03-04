@@ -84,6 +84,7 @@ ob_end_flush(); // End output buffering and send the buffer to the browser
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-anthropic-api.php';         // ANT API - Ver 2.0.7
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-azure-openai-api.php';      // Azure OpenAI API - Ver 2.2.6
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-azure-api-assistant.php';   // Azure OpenAI Assistants API - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-deepseek-api.php';          // ChatGPT API - Ver 2.2.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-mc.php';      // Kognetiks - Markov Chain API - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-tm.php';      // Kognetiks - Transformer Model API - Ver 2.2.0
@@ -1185,25 +1186,25 @@ function chatbot_chatgpt_send_message() {
         if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_')) {
 
             // DIAG - Diagnostics - 2.0.5
-            // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
+            back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
 
             // Override the $assistant_id with the GPT Assistant ID
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
 
             // DIAG - Diagnostics - Ver 2.0.5
-            // back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
+            back_trace( 'NOTICE' , 'Using $assistant_id ' . $assistant_id);
 
         } else {
 
             // DIAG - Diagnostics - Ver 2.0.5
-            // back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
+            back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
 
             // Override the $use_assistant_id and set it to 'No'
             $use_assistant_id = 'No';
             
             // DIAG - Diagnostics - Ver 1.8.1
-            // back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
+            back_trace( 'NOTICE' , 'Falling back to ChatGPT API');
 
         }
 
@@ -1272,7 +1273,21 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', 'BEFORE CALL TO MODULE $additional_instructions: ' . $additional_instructions);
 
         // Send message to Custom GPT API - Ver 1.6.7
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
+        $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+
+        if ($chatbot_ai_platform_choice == 'OpenAI') {
+            // Send message to Custom GPT API - Ver 1.6.7
+            // DIAG - Diagnostics
+            back_trace( 'NOTICE', 'Using OpenAI');
+            $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
+        } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
+            // Send message to Custom GPT API - Ver 2.2.6
+            // DIAG - Diagnostics
+            back_trace( 'NOTICE', 'Using Azure OpenAI');
+            $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
+        } else {
+            return 'ERROR: Invalid AI Platform';
+        }
 
         // Replace " ." at the end of $response with "."
         $response = str_replace(" .", ".", $response);

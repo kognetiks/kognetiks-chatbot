@@ -695,6 +695,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     if ($use_assistant_name == 'Yes' && !empty($assistant_id) && $assistant_id !== 'original') {
         // FIXME - CAN I AVOID THIS CALL TO OPENAI?
+        // DIAG - Diagnostics - Ver 2.2.6
+        back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+        back_trace( 'NOTICE', '$use_assistant_name: ' . $use_assistant_name);
         $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
         $bot_name = !empty($assistant_name) ? $assistant_name : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     } else {

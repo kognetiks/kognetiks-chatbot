@@ -29,7 +29,7 @@ function get_api_base_url() {
         // Base URL for the Azure OpenAI API calls - Ver 2.2.6
         case 'Azure OpenAI':
 
-            return esc_attr(get_option('chatbot_azure_base_url', 'https://YOUR_RESOURCE_NAME.openai.azure.com/'));
+            return esc_attr(get_option('chatbot_azure_base_url', 'https://YOUR_RESOURCE_NAME.openai.azure.com/DEPLOYMENT_NAME/MODEL/chat/completions?api-version=YYYY-MM-DD'));
             break;
 
         // Base URL for the NVIDIA API calls - Ver 2.1.8
@@ -95,7 +95,12 @@ function get_chat_completions_api_url() {
         // Base URL for the Azure OpenAI API calls - Ver 2.2.6
         case 'Azure OpenAI':
 
-            return get_api_base_url() . "/chat/completions";
+            $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
+            $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
+            $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', 'YYYY-MM-DD'));
+
+            // Assemble the URL
+            return 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/deployments/' . $chatbot_azure_deployment_name . '/chat/completions?api-version=' . $chatbot_azure_api_version;
             break;
 
         // Base URL for the NVIDIA API calls - Ver 2.1.8

@@ -37,12 +37,11 @@ function chatbot_call_azure_openai_api($api_key, $message) {
     back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
-    // The current Azure OpenAI API URL endpoint for gpt-3.5-turbo and gpt-4
-    // $api_url = 'https://YOUR_RESOURCE_NAME.openai.azure.com/chat/completions';
+    // The current Azure OpenAI API URL endpoint
+    // $api_url = 'https://YOUR_RESOURCE_NAME.openai.azure.com/deployments/DEPLOYMENT_NAME/chat/completions?api-version=YYYY-MM-DD';
     $api_url = get_chat_completions_api_url();
 
-    // FIXME - OVERRIDE API URL
-    $api_url = 'https://tesstaifrancecentral.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-03-01-preview';
+    // DIAG - Diagnostics - Ver 2.2.6
     back_trace( 'NOTICE', '$api_url: ' . $api_url);
 
     $headers = array(
@@ -54,9 +53,6 @@ function chatbot_call_azure_openai_api($api_key, $message) {
     // Select the OpenAI Model
     // Get the saved model from the settings or default to "gpt-3.5-turbo"
     $model = esc_attr(get_option('chatbot_azure_model_choice', 'gpt-3.5-turbo'));
-
-    // FIXME - OVERRIDE MODEL
-    $model = 'gpt-4o';
     back_trace( 'NOTICE', '$model: ' . $model);
  
     // Max tokens - Ver 2.2.6
@@ -249,14 +245,14 @@ function chatbot_call_azure_openai_api($api_key, $message) {
 // Call the ChatGPT API without trappings
 function chatbot_call_azure_openai_api_basic($api_key, $message) {
 
-    // The current Azure OpeanAI API URL endpoint for gpt-3.5-turbo and gpt-4
-    // $api_url = 'https://YOUR_RESOURCE_NAME.openai.azure.com/chat/completions';
+    // The current Azure OpeanAI API URL endpoint
+    // $api_url = 'https://YOUR_RESOURCE_NAME.openai.azure.com/DEPLOYMENT_NAME/MODEL/chat/completions?api-version=YYYY-MM-DD';
     $api_url = get_chat_completions_api_url();
 
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
-        'Accept'       => 'application/json',
+        // 'Accept'       => 'application/json',
     );
 
     // Select the OpenAI Model

@@ -40,8 +40,8 @@ function chatbot_azure_api_chat_section_callback($args) {
     <p>Configure the settings for the plugin when using chat models. Depending on the OpenAI model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/reference" target="_blank">https://learn.microsoft.com/en-us/azure/ai-services/openai/reference</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
-        <li><code>&#91;chatbot style="floating" model="gpt-4o 2024-05-13"&#93;</code> - Style is floating, specific model</li>
-        <li><code>&#91;chatbot style="embedded" model="gpt-4o 2024-05-13"&#93;</code> - Style is embedded, default chat model</li>
+        <li><code>&#91;chatbot style="floating" model="gpt-4o-2024-11-20"&#93;</code> - Style is floating, specific model</li>
+        <li><code>&#91;chatbot style="embedded" model="gpt-4o-2024-11-20"&#93;</code> - Style is embedded, default chat model</li>
         <!-- <li><code>&#91;chatbot style=embedded model=chat&#93;</code> - Style is embedded, default chat model</li> -->
     </ul>
     <?php
@@ -93,7 +93,7 @@ function chatbot_azure_api_whisper_section_callback($args) {
 function chatbot_azure_api_advanced_section_callback($args) {
 
     ?>
-    <p><strong>CAUTION</strong>: Configure the advanced settings for the plugin. Enter the base URL for the Azure OpenAI API.  The default is <code>https://YOUR_RESOURCE_NAME.openai.azure.com/</code>.  Be sure to replace YOUR_RESOURCE_NAME with your named resource.</p>
+    <p><strong>CAUTION</strong>: Configure the advanced settings for the plugin. Enter the base URL for the Azure OpenAI API.  The default is <code>https://YOUR_RESOURCE_NAME.openai.azure.com/openai/deployments/DEPLOYMENT_NAME/chat/completions?api-version=YYYY-MM-DD</code>.  Be sure to replace YOUR_RESOURCE_NAME, DEPLOYMENT_NAME and YYYY-MM-DD with your details.</p>
     <?php
 
 }
@@ -224,9 +224,39 @@ function chatbot_azure_top_p_callback($args) {
 // Base URL for the Azure OpenAI API - Ver 2.2.6
 function chatbot_azure_base_url_callback($args) {
 
-    $chatbot_azure_base_url = esc_attr(get_option('chatbot_azure_base_url', 'https://YOUR_RESOURCE_NAME.openai.azure.com/'));
+    $chatbot_azure_base_url = esc_attr(get_option('chatbot_azure_base_url', 'https://YOUR_RESOURCE_NAME.openai.azure.com/deployments/DEPLOYMENT_NAME/chat/completions?api-version=YYYY-MM-DD'));
     ?>
     <input type="text" id="chatbot_azure_base_url" name="chatbot_azure_base_url" value="<?php echo esc_attr( $chatbot_azure_base_url ); ?>" class="regular-text">
+    <?php
+
+}
+
+// API Resource Name for the Azure OpenAI API - Ver 2.2.6
+function chatbot_azure_resource_name_callback($args) {
+
+    $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
+    ?>
+    <input type="text" id="chatbot_azure_resource_name" name="chatbot_azure_resource_name" value="<?php echo esc_attr( $chatbot_azure_resource_name ); ?>" class="regular-text">
+    <?php
+
+}
+
+// API Deployment Name for the Azure OpenAI API - Ver 2.2.6
+function chatbot_azure_deployment_name_callback($args) {
+
+    $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
+    ?>
+    <input type="text" id="chatbot_azure_deployment_name" name="chatbot_azure_deployment_name" value="<?php echo esc_attr( $chatbot_azure_deployment_name ); ?>" class="regular-text">
+    <?php
+
+}
+
+// API Version for the Azure OpenAI API - Ver 2.2.6
+function chatbot_azure_api_version_callback($args) {
+
+    $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-03-01-preview'));
+    ?>
+    <input type="text" id="chatbot_azure_api_version" name="chatbot_azure_api_version" value="<?php echo esc_attr( $chatbot_azure_api_version ); ?>" class="regular-text">
     <?php
 
 }
@@ -571,6 +601,9 @@ function chatbot_azure_api_settings_init() {
 
     // Advanced Model Settings - Ver 2.2.6
     register_setting('chatbot_azure_api_model', 'chatbot_azure_base_url'); // Ver 1.8.1
+    register_setting('chatbot_azure_api_model', 'chatbot_azure_resource_name'); // Ver 2.2.6
+    register_setting('chatbot_azure_api_model', 'chatbot_azure_deployment_name'); // Ver 2.2.6
+    register_setting('chatbot_azure_api_model', 'chatbot_azure_api_version'); // Ver 2.2.6
     register_setting('chatbot_azure_api_model', 'chatbot_azure_timeout_setting'); // Ver 1.8.8
 
     add_settings_section(
@@ -581,10 +614,37 @@ function chatbot_azure_api_settings_init() {
     );
 
     // Set the base URL for the API - Ver 2.2.6
+    // add_settings_field(
+    //     'chatbot_azure_base_url',
+    //     'Base URL for API',
+    //     'chatbot_azure_base_url_callback',
+    //     'chatbot_azure_api_advanced',
+    //     'chatbot_azure_api_advanced_section'
+    // );
+
+    // API Resrouce Name - Ver 2.2.6
     add_settings_field(
-        'chatbot_azure_base_url',
-        'Base URL for API',
-        'chatbot_azure_base_url_callback',
+        'chatbot_azure_resource_name',
+        'API Resource Name',
+        'chatbot_azure_resource_name_callback',
+        'chatbot_azure_api_advanced',
+        'chatbot_azure_api_advanced_section'
+    );
+
+    // API Deployment Name - Ver 2.2.6
+    add_settings_field(
+        'chatbot_azure_deployment_name',
+        'API Deployment Name',
+        'chatbot_azure_deployment_name_callback',
+        'chatbot_azure_api_advanced',
+        'chatbot_azure_api_advanced_section'
+    );
+
+    // API Version - Ver 2.2.6
+    add_settings_field(
+        'chatbot_azure_api_version',
+        'API Version',
+        'chatbot_azure_api_version_callback',
         'chatbot_azure_api_advanced',
         'chatbot_azure_api_advanced_section'
     );
