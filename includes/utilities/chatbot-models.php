@@ -217,7 +217,7 @@ function chatbot_azure_get_models() {
     $azure_models_url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/models?api-version=' . $chatbot_azure_api_version;
 
     // DIAG - Diagnostics - Ver 2.2.6
-    back_trace( 'NOTICE' , 'chatbot_azure_get_models: ' . $azure_models_url);
+    // back_trace( 'NOTICE' , 'chatbot_azure_get_models: ' . $azure_models_url);
 
     // Set HTTP request arguments
     $args = array(
@@ -242,7 +242,7 @@ function chatbot_azure_get_models() {
     $data = json_decode(wp_remote_retrieve_body($response), true);
 
     // DIAG - Diagnostics - Ver 2.2.6
-    back_trace( 'NOTICE' , 'chatbot_azure_get_models: ' . print_r($data, true));
+    // back_trace( 'NOTICE' , 'chatbot_azure_get_models: ' . print_r($data, true));
 
     // Check for API errors
     if (isset($data['error'])) {

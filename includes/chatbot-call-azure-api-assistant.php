@@ -1219,8 +1219,8 @@ function delete_azure_uploaded_file($file_id) {
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', 'YYYY-MM-DD'));
     // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/' . $file_id . '?api-version=2024-03-01-preview';
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/' . $file_id . '?api-version=' . $chatbot_azure_api_version;
+    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/files/' . $file_id . '?api-version=2024-03-01-preview';
+    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files/' . $file_id . '?api-version=' . $chatbot_azure_api_version;
 
     // DIAG - Diagnostics - Ver 2.2.6
     back_trace( 'NOTICE', '$url: ' . $url);

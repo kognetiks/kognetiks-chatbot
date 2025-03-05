@@ -39,6 +39,9 @@ function chatbot_chatgpt_upload_files() {
 
     $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
 
+    // DIAG - Diagnostics - Ver 2.2.6
+    back_trace( 'NOTICE', '$uploads_dir: ' . $uploads_dir );
+
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
         $default_message = 'Oops! File upload failed.';
@@ -61,7 +64,21 @@ function chatbot_chatgpt_upload_files() {
     }
     chmod($uploads_dir, 0700);
 
-    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    // Which API key to use?
+    $ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
+    if ($ai_platform_choice == 'OpenAI') {
+        $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    } elseif ($ai_platform_choice == 'Azure OpenAI') {
+        $api_key = esc_attr(get_option('chatbot_azure_api_key'));
+    } elseif ($ai_platform_choice == 'NVIDIA') {
+        $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
+    } elseif ($ai_platform_choice == 'Anthropic') {
+        $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
+    } elseif ($ai_platform_choice == 'DeepSeek') {
+        $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
+    } elseif ($ai_platform_choice == 'Local Server') {
+        $api_key = esc_attr(get_option('chatbot_local_api_key'));
+    }
     if (empty($api_key)) {
         $default_message = 'Oops! Your API key is missing. Please enter your API key in the Chatbot settings.';
         $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[3]) 
@@ -139,6 +156,9 @@ function chatbot_chatgpt_upload_files() {
 
             // Prepare API request
             $api_url = get_files_api_url();
+
+            // DIAG - Diagnostics - Ver 2.2.6
+            back_trace( 'NOTICE', '$api_url: ' . $api_url );
 
             // Open file in a way that works with WP HTTP API
             $filename = basename($file_path);
@@ -248,6 +268,9 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
 
     // Get the API URL
     $url = get_files_api_url();
+
+    // DIAG - Diagnostics - Ver 2.2.6
+    back_trace( 'NOTICE', '$url: ' . $url );
 
     $chunk_number = 0;
     $total_chunks = ceil($file_size / $chunk_size);

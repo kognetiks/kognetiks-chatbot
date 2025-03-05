@@ -18,7 +18,9 @@ function create_chatbot_azure_assistants_table() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
     // Check if the table already exists
     if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
@@ -83,8 +85,11 @@ function drop_chatbot_azure_assistants_table() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
-    
+
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
+
     $sql = "DROP TABLE IF EXISTS $table_name;";
     $wpdb->query($sql);
 
@@ -95,7 +100,9 @@ function get_chatbot_azure_assistant_by_common_name($common_name) {
 
     global $wpdb;
     
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
     $assistant_details = $wpdb->get_row(
         $wpdb->prepare(
@@ -116,7 +123,9 @@ function get_chatbot_azure_assistant_by_key($id) {
 
     $assistant_details = array();
     
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
     $assistant_details = $wpdb->get_row(
         $wpdb->prepare(
@@ -151,7 +160,9 @@ function update_chatbot_azure_number_of_shortcodes() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
     // Check if the table exists using a prepared statement
     $table_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) == $table_name;
@@ -185,7 +196,10 @@ function display_chatbot_azure_assistants_table() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
+
     $assistants = $wpdb->get_results("SELECT * FROM $table_name");
 
     // Update the number of shortcodes - Ver 2.0.6
@@ -449,7 +463,9 @@ function azure_update_assistant() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
     $id = intval($_POST['id']);
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
@@ -508,7 +524,9 @@ function azure_delete_assistant() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
     $id = intval($_POST['id']);
     $wpdb->delete($table_name, array('id' => $id));
@@ -536,7 +554,9 @@ function azure_add_new_assistant() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
     // Check that the table exists
     if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
@@ -592,7 +612,9 @@ function upgrade_chatbot_azure_assistants_table() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    // FIX ME: Change the table name to chatbot_chatgpt_assistants
+    // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
     // Retrieve options from wp_options table
     $assistant_id = esc_attr(get_option('assistant_id'), '');

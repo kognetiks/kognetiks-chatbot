@@ -772,6 +772,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_mp3_uploads = 'No';
     }
 
+    // FIXME - Allow File Uploads - Ver 2.2.6
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_allow_file_uploads: ' . $chatbot_chatgpt_allow_file_uploads);
+    $chatbot_chatgpt_allow_file_uploads = 'Yes';
+
     // Allow Upload Files - Ver 2.0.4
     $chatbot_chatgpt_allow_file_uploads = !empty($assistant_details['allow_file_uploads']) ? $assistant_details['allow_file_uploads'] : $chatbot_chatgpt_allow_file_uploads;
 

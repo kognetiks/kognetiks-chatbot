@@ -75,7 +75,28 @@ function get_threads_api_url() {
 // Base URL for the ChatGPT API calls - Ver 2.2.2
 function get_files_api_url() {
 
-    return get_api_base_url() . "/files";
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
+
+    if ($chatbot_ai_platform_choice == 'OpenAI') {
+
+        return get_api_base_url() . "/files";
+
+    } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
+
+        $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
+        $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
+        $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', 'YYYY-MM-DD'));
+        // Assemble the URL
+        // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/files/?api-version=2024-03-01-preview';
+        $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files/?api-version=' . $chatbot_azure_api_version;
+
+        // DIAG - Diagnostics
+        back_trace( 'NOTICE', '$url' . $url );
+        return $url;
+
+    }
+
+    return 'ERROR: No file API URL found!';
 
 }
 
