@@ -77,7 +77,7 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
 
     $prompt = preprocess_text($prompt);
     // DIAG - Diagnostic - Ver 2.2.6
-    back_trace('NOTICE', 'Prompt: ' . $prompt);
+    // back_trace('NOTICE', 'Prompt: ' . $prompt);
 
     $highest_score = 0;
     $best_match = "";
@@ -105,9 +105,9 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
 
         // Weight adjacency score higher (e.g., 70%) and frequency lower (30%)
         $adjacency_score_threshold = $similarity_threshold;
-        back_trace( 'NOTICE', 'Adjacency Score Threshold: ' . $adjacency_score_threshold);
+        // back_trace( 'NOTICE', 'Adjacency Score Threshold: ' . $adjacency_score_threshold);
         $normalization_frequency_threshold = 1.0 - $adjacency_score_threshold;
-        back_trace( 'NOTICE', 'Normalization Frequency Threshold: ' . $normalization_frequency_threshold);
+        // back_trace( 'NOTICE', 'Normalization Frequency Threshold: ' . $normalization_frequency_threshold);
 
         foreach ($results as $post) {
 
@@ -193,9 +193,9 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
                         $best_match .= $sentences[$i] . ' ';
                     }
 
-                    back_trace('NOTICE', 'Score: ' . $highest_score);
-                    back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
-                    back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
+                    // back_trace('NOTICE', 'Score: ' . $highest_score);
+                    // back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
+                    // back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
 
                 }
             }
@@ -272,7 +272,7 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
 
     // Preprocess the prompt.
     $prompt = preprocess_text($prompt);
-    back_trace('NOTICE', 'Prompt: ' . $prompt);
+    // back_trace('NOTICE', 'Prompt: ' . $prompt);
 
     // Initialize variables.
     $highest_score = 0;
@@ -373,9 +373,9 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
                         $best_match .= $sentences[$i] . ' ';
                     }
     
-                    back_trace('NOTICE', 'Score: ' . $highest_score);
-                    back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
-                    back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
+                    // back_trace('NOTICE', 'Score: ' . $highest_score);
+                    // back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
+                    // back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
                 }
             }
         }
@@ -415,7 +415,7 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
     }
 
     $prompt = preprocess_text($prompt);
-    back_trace('NOTICE', 'Prompt: ' . $prompt);
+    // back_trace('NOTICE', 'Prompt: ' . $prompt);
 
     // Reset variables
     $highest_score = 0;
@@ -466,7 +466,7 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
 
             $scoring_algorithm = 'pairwise'; // Set to 'average' or 'pairwise'
             // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Scoring Algorithm: ' . $scoring_algorithm);
+            // back_trace( 'NOTICE', 'Scoring Algorithm: ' . $scoring_algorithm);
 
             if ( $scoring_algorithm == 'average' ) { // ORIGINAL
 
@@ -584,9 +584,9 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
                     }
 
                     // DIAG - Diagnostics
-                    back_trace('NOTICE', 'Score: ' . $highest_score);
-                    back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
-                    back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
+                    // back_trace('NOTICE', 'Score: ' . $highest_score);
+                    // back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
+                    // back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
 
                 }
             }

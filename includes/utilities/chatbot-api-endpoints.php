@@ -85,13 +85,13 @@ function get_files_api_url() {
 
         $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
         $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
-        $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', 'YYYY-MM-DD'));
+        $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
         // Assemble the URL
-        // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/files/?api-version=2024-03-01-preview';
-        $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files/?api-version=' . $chatbot_azure_api_version;
+        // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/files?api-version=2024-03-01-preview';
+        $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files?api-version=' . $chatbot_azure_api_version;
 
         // DIAG - Diagnostics
-        back_trace( 'NOTICE', '$url' . $url );
+        // back_trace( 'NOTICE', 'Azure OpenAI endpoint $url is: ' . $url );
         return $url;
 
     }

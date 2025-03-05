@@ -76,10 +76,10 @@ function chatbot_chatgpt_settings_page() {
     }
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', 'chatbot_chatgpt_settings_page() - $active_tab: ' . $active_tab );
-    back_trace( 'NOTICE', 'Current Page: ' . $_GET['page']);
-    back_trace( 'NOTICE', 'Current Tab: ' . ($_GET['tab'] ?? 'No Tab Set'));
-    back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')));
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_settings_page() - $active_tab: ' . $active_tab );
+    // back_trace( 'NOTICE', 'Current Page: ' . $_GET['page']);
+    // back_trace( 'NOTICE', 'Current Tab: ' . ($_GET['tab'] ?? 'No Tab Set'));
+    // back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')));
 
     ?>
     <div id="chatbot-chatgpt-settings" class="wrap">
@@ -131,7 +131,7 @@ function chatbot_chatgpt_settings_page() {
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Local Server') { ?><a href="?page=chatbot-chatgpt&tab=api_local" class="nav-tab <?php echo $active_tab == 'api_local' ? 'nav-tab-active' : ''; ?>">API/Local</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Markov Chain') { ?><a href="?page=chatbot-chatgpt&tab=api_markov" class="nav-tab <?php echo $active_tab == 'api_markov' ? 'nav-tab-active' : ''; ?>">API/Markov</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Transformer') { ?><a href="?page=chatbot-chatgpt&tab=api_transformer" class="nav-tab <?php echo $active_tab == 'api_transformer' ? 'nav-tab-active' : ''; ?>">API/Transformer</a> <?php } ?>
-            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Azure OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=api_azure" class="nav-tab <?php echo $active_tab == 'api_azure_openai' ? 'nav-tab-active' : ''; ?>">API/Azure OpenAI</a> <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Azure OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=api_azure" class="nav-tab <?php echo $active_tab == 'api_azure' ? 'nav-tab-active' : ''; ?>">API/Azure OpenAI</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Azure OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=gpt_azure_assistants" class="nav-tab <?php echo $active_tab == 'gpt_azure_assistants' ? 'nav-tab-active' : ''; ?>">GPT Assistants</a>  <?php } ?>
             <a href="?page=chatbot-chatgpt&tab=avatar" class="nav-tab <?php echo $active_tab == 'avatar' ? 'nav-tab-active' : ''; ?>">Avatars</a>
             <a href="?page=chatbot-chatgpt&tab=appearance" class="nav-tab <?php echo $active_tab == 'appearance' ? 'nav-tab-active' : ''; ?>">Appearance</a>

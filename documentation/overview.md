@@ -1,6 +1,6 @@
 # **Kognetiks Chatbot** Plugin Documentation
 
-**Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate OpenAI’s ChatGPT API or NVIDIA's NIM API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
+**Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate conversational chat from OpenAI, Azure, NVIDIA, Anthropic, DeepSeek, local models using open-source servers into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
 
 Conversational AI platforms - like those from OpenAI, NVIDIA, and others - use natural language processing and machine learning algorithms to interact with users in a human-like manner. They are designed to answer questions, provide suggestions, and engage in conversations with users. This is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, these platforms can be used in various fields such as healthcare, education, finance, and many more.
 
@@ -23,6 +23,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - Obtain API keys here:
 
    - [OpenAI API Keys](https://platform.openai.com/account/api-keys)
+   - [Auzre API Keys](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account?icid=ai-services)
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
    - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
@@ -41,6 +42,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's New in Version 2.2.6
 
+* **Azure OpenAI**: Added support for the Azure OpenAI API to provide advanced conversational capabilities for the chatbot.
 * **Local Server**: Added support for the JAN.AI local server, enabling users to run AI models on their own servers for enhanced control and flexibility.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.5.
 
@@ -63,6 +65,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 - [General](settings/settings.md)
 
 - [API/ChatGPT Settings](api-chatgpt-settings/api-chatgpt-model-settings.md)
+
+- [API/Azure OpenAI Settings](api-azure-openai-settings/api-azure-openai-model-settings.md)
 
 - [API/NVIDIA Settings](api-nvidia-settings/api-nvidia-model-settings.md)
 
@@ -118,7 +122,7 @@ While AI-powered applications strive for accuracy, they can sometimes make mista
 
 ## Disclaimer
 
-WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic or DeepSeek.
+WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Azure and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic or DeepSeek.
 
 ---
 

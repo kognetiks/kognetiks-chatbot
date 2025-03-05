@@ -14,7 +14,13 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Handle non-image attachments
-function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version) {
+function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version = 'assistants=v1') {
+
+    $chatbot_ai_platform_choice = esc_attr( get_option( 'chatbot_ai_platform_choice', 'OpenAI' ) );
+
+    if ( $chatbot_ai_platform_choice == 'Azure OpenAI' ) {
+        $beta_version = 'assistants=v0';
+    }
 
     // Set up the data payload
     $data = [
@@ -29,7 +35,26 @@ function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version) {
 
     // Add the non-images files to the data payload
     if ( !empty($file_id && !empty($file_id[0]) )) {
-        if ( $beta_version == 'assistants=v1' ) {
+        if ( $beta_version == 'assistants=v0') {
+            // assistants=v2 - Ver 1.9.6 - 2024 04 24
+            $data = $data + [
+                "attachments" => [],
+            ];
+            foreach ($file_id as $file_item) {
+                // Skip invalid file_item entries
+                if (substr($file_item, 0, 10) !== 'assistant-') {
+                    continue;
+                }
+                $attachment = [
+                    "file_id" => $file_item,
+                    "tools" => [
+                        ["type" => "file_search"]
+                    ]
+                ];
+                // Add each attachment to the attachments array in the main data structure
+                $data['attachments'][] = $attachment;
+            }
+        } elseif ( $beta_version == 'assistants=v1' ) {
             // assistants=v1 - Ver 1.9.6 - 2024 04 24
             $data['file_ids'] = $file_id;
         } else {
@@ -53,6 +78,10 @@ function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version) {
             }
         }
     }
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE' , '$beta_version: ' . $beta_version );
+    // back_trace( 'NOTICE' , '$data: ' . print_r($data, true) );
 
     return $data;
 

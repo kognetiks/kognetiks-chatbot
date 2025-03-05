@@ -861,7 +861,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $prompt: ' . $prompt);
     // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $content: ' . $context);
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
+    back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
 
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4
     $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));

@@ -21,7 +21,7 @@ function chatbot_azure_model_settings_section_callback($args) {
     <p>Configure the default settings for the Chatbot plugin to use Azure OpenAI for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about Azure OpenAI models and their capability can be found at <a href="https://azure.microsoft.com/en-us/products/ai-model-catalog" target="_blank">https://azure.microsoft.com/en-us/products/ai-model-catalog</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Azure OpenAI Settings and additional documentation please click <a href="?page=chatbot-azure&tab=support&dir=api-azure-settings&file=api-azure-model-settings.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/Azure OpenAI Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-azure-openai-settings&file=api-azure-openai-model-settings.md">here</a>.</b></p>
     <?php
 
 }
@@ -572,28 +572,28 @@ function chatbot_azure_whisper_response_format_callback($args) {
 function chatbot_azure_api_settings_init() {
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', 'chatbot_azure_api_settings_init' );
+    // back_trace( 'NOTICE', 'chatbot_azure_api_settings_init' );
 
     add_settings_section(
         'chatbot_azure_model_settings_section',
-        'API/ChatGPT Settings',
+        'API/Azure OpenAI Settings',
         'chatbot_azure_model_settings_section_callback',
         'chatbot_azure_model_settings_general'
     );
 
-    // API/ChatGPT settings tab - Ver 2.2.6
+    // API/Azure OpenAI settings tab - Ver 2.2.6
     register_setting('chatbot_azure_api_model', 'chatbot_azure_api_key', 'sanitize_api_key');
 
     add_settings_section(
         'chatbot_azure_api_general_section',
-        'ChatGPT API Settings',
+        'Azure OpenAI API Settings',
         'chatbot_azure_api_general_section_callback',
         'chatbot_azure_api_general'
     );
 
     add_settings_field(
         'chatbot_azure_api_key',
-        'ChatGPT API Key',
+        'Azure OpenAI API Key',
         'chatbot_azure_api_key_callback',
         'chatbot_azure_api_general',
         'chatbot_azure_api_general_section'
@@ -675,7 +675,7 @@ function chatbot_azure_api_settings_init() {
 
     add_settings_field(
         'chatbot_azure_model_choice',
-        'ChatGPT Model Default',
+        'Azure OpenAI Model Default',
         'chatbot_azure_model_choice_callback',
         'chatbot_azure_api_chat',
         'chatbot_azure_api_chat_section'

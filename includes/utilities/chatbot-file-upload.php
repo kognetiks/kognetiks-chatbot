@@ -40,7 +40,7 @@ function chatbot_chatgpt_upload_files() {
     $uploads_dir = $chatbot_chatgpt_plugin_dir_path . 'uploads/';
 
     // DIAG - Diagnostics - Ver 2.2.6
-    back_trace( 'NOTICE', '$uploads_dir: ' . $uploads_dir );
+    // back_trace( 'NOTICE', '$uploads_dir: ' . $uploads_dir );
 
     // Ensure the directory exists or attempt to create it
     if (!file_exists($uploads_dir) && !wp_mkdir_p($uploads_dir)) {
@@ -79,6 +79,7 @@ function chatbot_chatgpt_upload_files() {
     } elseif ($ai_platform_choice == 'Local Server') {
         $api_key = esc_attr(get_option('chatbot_local_api_key'));
     }
+
     if (empty($api_key)) {
         $default_message = 'Oops! Your API key is missing. Please enter your API key in the Chatbot settings.';
         $error_message = !empty($chatbot_chatgpt_fixed_literal_messages[3]) 
@@ -158,7 +159,23 @@ function chatbot_chatgpt_upload_files() {
             $api_url = get_files_api_url();
 
             // DIAG - Diagnostics - Ver 2.2.6
-            back_trace( 'NOTICE', '$api_url: ' . $api_url );
+            // back_trace( 'NOTICE', '$api_url for file uploads: ' . $api_url );
+
+            // Which API key to use?
+            $ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
+            if ($ai_platform_choice == 'OpenAI') {
+                $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+            } elseif ($ai_platform_choice == 'Azure OpenAI') {
+                $api_key = esc_attr(get_option('chatbot_azure_api_key'));
+            } elseif ($ai_platform_choice == 'NVIDIA') {
+                $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
+            } elseif ($ai_platform_choice == 'Anthropic') {
+                $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
+            } elseif ($ai_platform_choice == 'DeepSeek') {
+                $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
+            } elseif ($ai_platform_choice == 'Local Server') {
+                $api_key = esc_attr(get_option('chatbot_local_api_key'));
+            }
 
             // Open file in a way that works with WP HTTP API
             $filename = basename($file_path);
@@ -178,15 +195,29 @@ function chatbot_chatgpt_upload_files() {
             $body .= "--{$boundary}--\r\n";
 
             // Set up HTTP request arguments
-            $args = [
-                'method'    => 'POST',
-                'headers'   => [
-                    'Authorization'  => 'Bearer ' . $api_key,
-                    'Content-Type'   => 'multipart/form-data; boundary=' . $boundary
-                ],
-                'body'      => $body,
-                'timeout'   => 30,
-            ];
+            if ($ai_platform_choice == 'OpenAI') {
+                $args = [
+                    'method'    => 'POST',
+                    'headers'   => [
+                        'Authorization'  => 'Bearer ' . trim($api_key),
+                        'Content-Type'   => 'multipart/form-data; boundary=' . $boundary
+                    ],
+                    'body'      => $body,
+                    'timeout'   => 30,
+                ];
+            } elseif ($ai_platform_choice == 'Azure OpenAI') {
+                $args = [
+                    'method'  => 'POST',
+                    'headers' => [
+                        'api-key'      => trim($api_key),
+                        'Content-Type' => 'multipart/form-data; boundary=' . $boundary
+                    ],
+                    'body'    => $body,
+                    'timeout' => 30,
+                ];
+            } else {
+                return 'Error: Unsupported AI platform for file uploads.';
+            }
 
             // Send request using WP HTTP API
             $response = wp_remote_post($api_url, $args);
@@ -206,6 +237,9 @@ function chatbot_chatgpt_upload_files() {
             $response_body = wp_remote_retrieve_body($response);
             $responseData = json_decode($response_body, true);
 
+            // DIAG - Diagnostics - Ver 2.2.6
+            // back_trace( 'NOTICE', 'API response: ' . print_r($responseData, true));
+
             // Handle API errors
             if ($http_status != 200 || isset($responseData['error'])) {
                 $errorMessage = $responseData['error']['message'] ?? 'Unknown error occurred.';
@@ -215,6 +249,8 @@ function chatbot_chatgpt_upload_files() {
                     'message' => $errorMessage
                 ];
                 unlink($file_path); // Cleanup file
+                // DIAG - Diagnostics - Ver 2.2.6
+                // back_trace( 'ERROR', 'API error during file upload: ' . $errorMessage);
                 continue;
             }
 
@@ -233,7 +269,10 @@ function chatbot_chatgpt_upload_files() {
             unlink($file_path);
         }
 
-        
+        // DIAG = Diagnostics - Ver 2.2.6
+        // back_trace( 'NOTICE', 'File Name is: ' . $responseData['id'] . ' uploaded successfully.' );
+        // back_trace( 'NOTICE', 'File Name is: ' . $newFileName . ' uploaded successfully.' );
+
         return $responses;
 
     } else {
@@ -270,7 +309,7 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
     $url = get_files_api_url();
 
     // DIAG - Diagnostics - Ver 2.2.6
-    back_trace( 'NOTICE', '$url: ' . $url );
+    // back_trace( 'NOTICE', '$url: ' . $url );
 
     $chunk_number = 0;
     $total_chunks = ceil($file_size / $chunk_size);
