@@ -45,7 +45,6 @@ function create_an_azure_assistant($api_key) {
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
-        // 'Accept'       => 'application/json',
     );
 
     $response = wp_remote_post($url, [
@@ -99,9 +98,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
     // Set your API key and assistant ID here:
     $api_key = esc_attr(get_option('chatbot_azure_api_key', ''));
 
-    // Base URL for the beta threads endpoints
-    // $url = "https://<resource>.openai.azure.com/openai/threads?api-version=2024-03-01-preview";
-
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
@@ -122,12 +118,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
     }
 
     // Prepare common headers
-    // $headers = [
-    //     "Content-Type"  => "application/json",
-    //     "OpenAI-Beta"   => $beta_version,
-    //     "Authorization" => "Bearer " . $api_key,
-    // ];
-
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
@@ -184,10 +174,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 
     }
 
-    // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'add_an_azure_message() - $headers: ' . print_r($headers, true));
-    // back_trace( 'NOTICE', 'add_an_azure_message() - $data: ' . print_r($data, true));
-
     // POST request using WordPress HTTP API
     $response = wp_remote_post($url, [
         'headers'       => $headers, 
@@ -223,9 +209,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key) {
 
     global $kchat_settings;
     
-    // $url = "https://<resource>.openai.azure.com/openai/threads/" . $thread_id . "/runs?api-version=2024-03-01-preview";
-    $url = get_threads_api_url() . '/' . $thread_id . '/runs';
-
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
@@ -244,23 +227,11 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key) {
     }
 
     // Prepare common headers
-    // $headers = [
-    //     "Content-Type"  => "application/json",
-    //     "OpenAI-Beta"   => $beta_version,
-    //     "Authorization" => "Bearer " . $api_key,
-    // ];
-
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
         // 'Accept'       => 'application/json',
     );
-
-    // Get the max prompt and completion tokens - Ver 2.0.1
-    // https://platform.openai.com/docs/assistants/how-it-works/max-completion-and-max-prompt-tokens
-    
-    // Request body additional features - Ver 2.2.3
-    // https://platform.openai.com/docs/api-reference/runs/createRun
 
     $max_prompt_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_prompt_tokens', 20000));
     $max_completion_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_completion_tokens', 20000));
@@ -325,21 +296,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key) {
     $http_code = wp_remote_retrieve_response_code($response);
     
     // Handle non-200 responses
-    // if ($http_code !== 200) {
-    //     prod_trace('ERROR', "HTTP response code: {$http_code}");
-    //     return "Error: HTTP response code {$http_code}";
-    // }
-    
-    // Check if an error exists in the API response
-    // if (isset($response_data['error'])) {
-    //     $errorMessage = $response_data['error']['message'] ?? 'Unknown error';
-    //     $errorType = $response_data['error']['type'] ?? 'Unknown type';
-    
-    //     prod_trace('ERROR', "OpenAI API Error: {$errorMessage}");
-    //     prod_trace('ERROR', "Error Type: {$errorType}");
-    
-    //     return "Error: {$errorMessage}";
-    // }
     if (isset($response_data['error'])) {
         $errorMessage = $response_data['error']['message'] ?? 'Unknown error';
         // If the error indicates an active run, extract its ID
@@ -363,159 +319,10 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key) {
 // -------------------------------------------------------------------------
 // Step 5: Get the Run's Status
 // -------------------------------------------------------------------------
-function OLD_run_the_azure_run_status($thread_id, $runId, $api_key) {
+function get_the_azure_run_status($thread_id, $runId, $api_key) {
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 5: run_the_azure_run_status()');
-
-    global $sleepTime;
-
-    // Examle https://<resource>.openai.azure.com/openai/threads/<thread_id>/runs/<run_id>
-    // Build the API URL
-    $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId;
-
-    $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
-    $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
-    $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
-    // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai' . $thread_id . '/runs/' . $runId . '?api-version=2024-03-01-preview';
-    // $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/' . $thread_id . '/runs/' . $runId . '?api-version=' . $chatbot_azure_api_version;
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/threads/' . $thread_id . '/runs/' . $runId . '?api-version=' . $chatbot_azure_api_version;
-
-
-    // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
-
-    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    if ( $assistant_beta_version == 'v2' ) {
-        $beta_version = "assistants=v2";
-    } else {
-        $beta_version = "assistants=v1";
-    }
-
-    // Prepare common headers
-    // $headers = [
-    //     "Content-Type"  => "application/json",
-    //     "OpenAI-Beta"   => $beta_version,
-    //     "Authorization" => "Bearer " . $api_key,
-    // ];
-
-    $headers = array(
-        'Content-Type' => 'application/json',
-        'api-key'      => trim($api_key),
-        // 'Accept'       => 'application/json',
-    );
-
-    $status = "";
-
-    // Exponential backoff parameters - Ver 2.2.6
-    $initialSleep = 500000;        // Initial sleep time in microseconds (0.5 seconds)
-    $maxSleep = 20000000;          // Maximum sleep time in microseconds (20 seconds)
-    $sleepTime = $initialSleep;
-    $retryCount = 0;
-    $maxRetriesBeforeReset = 5;    // Number of retries before resetting the sleep time
-    $resetRangeMin = 500000;       // Minimum reset sleep time in microseconds (0.5 seconds)
-    $resetRangeMax = 2000000;      // Maximum reset sleep time in microseconds (2 seconds)
-    $maxTotalRetries = 50;         // Maximum total retries to prevent infinite loops
-    $totalRetryCount = 0;          // Total retry counter
-
-    while ($status != "completed" && $totalRetryCount < $maxTotalRetries) {
-
-        $response = wp_remote_post($url, [
-            "headers"       => $headers,
-            "timeout"       => 30,
-        ]);
-    
-        // ✅ Check if `wp_remote_post()` returned an error
-        if (is_wp_error($response)) {
-            prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
-            return "Error: Failed to communicate with the API.";
-        }
-    
-        // ✅ Extract the body safely
-        $response_body = wp_remote_retrieve_body($response);
-    
-        // ✅ Ensure response body is a string before decoding
-        if (!is_string($response_body) || empty($response_body)) {
-            prod_trace('ERROR', 'Error: API returned an empty or invalid response.');
-            return "Error: Empty API response.";
-        }
-    
-        // ✅ Decode JSON response safely
-        $responseArray = json_decode($response_body, true);
-    
-        // ✅ Handle JSON decoding errors explicitly
-        if ($responseArray === null && json_last_error() !== JSON_ERROR_NONE) {
-            prod_trace('ERROR', 'JSON decode error: ' . json_last_error_msg());
-            return "Error: Failed to parse API response.";
-        }
-    
-        // ✅ Debugging: Log the decoded response
-        // back_trace( 'NOTICE', 'Step 5 - Decoded Response: ' . print_r($responseArray, true));
-    
-        // ✅ Check if 'status' exists in the response
-        if (isset($responseArray["status"])) {
-            $status = $responseArray["status"];
-    
-            // Handle 'failed' status indicating rate limit reached
-            if ($status == "failed") {
-                prod_trace('ERROR', "Error - Step 5: " . $status);
-                prod_trace('ERROR', '$responseArray: ' . print_r($responseArray, true));
-    
-                // ✅ Handle rate limiting
-                if (isset($responseArray['last_error']) && $responseArray['last_error']['code'] === 'rate_limit_exceeded') {
-                    $message = $responseArray['last_error']['message'] ?? '';
-    
-                    if (preg_match('/Please try again in (\d+\.\d+)s/', $message, $matches)) {
-                        $sleepTime = (int) ceil(($matches[1] + 0.5) * 1000000);
-                        prod_trace('ERROR', 'ALERT - RATE LIMIT REACHED - Sleeping for ' . $sleepTime . ' microseconds');
-                        break;
-                    } else {
-                        prod_trace('ERROR', 'Exiting Step 5 - UNABLE TO PARSE RETRY TIME');
-                        break;
-                    }
-                }
-            }
-    
-            // Handle 'incomplete' status
-            if ($status == "incomplete") {
-                if (isset($responseArray["incomplete_details"])) {
-                    prod_trace('ERROR', "Error - Step 5: " . print_r($responseArray["incomplete_details"], true));
-                    break;
-                }
-            }
-    
-        }
-    
-        // ✅ Handle exponential backoff if status is not "completed"
-        if ($status != "completed") {
-            usleep($sleepTime);
-            $retryCount++;
-            $totalRetryCount++;
-    
-            if ($retryCount >= $maxRetriesBeforeReset) {
-                $sleepTime = rand($resetRangeMin, $resetRangeMax);
-                $retryCount = 0;
-            } else {
-                $sleepTime = min($sleepTime * 2, $maxSleep);
-            }
-    
-            if ($totalRetryCount >= $maxTotalRetries) {
-                prod_trace('ERROR', 'Error - GPT Assistant - Step 5: Maximum retries reached. Exiting loop.');
-                break;
-            }
-        }
-    }
-    
-    return $status;
-    
-
-}
-
-function run_the_azure_run_status($thread_id, $runId, $api_key) {
-
-    // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 5: run_the_azure_run_status()');
+    // back_trace( 'NOTICE', 'Step 5: get_the_azure_run_status');
 
     // Examle https://<resource>.openai.azure.com/openai/threads/<thread_id>/runs/<run_id>?api-version=2024-03-01-preview
     // Build the API URL
@@ -537,7 +344,7 @@ function run_the_azure_run_status($thread_id, $runId, $api_key) {
         'api-key'      => trim($api_key),
     ];
 
-    // ✅ **Make a single GET request to check status**
+    // Make a single GET request to check status
     $response = wp_remote_get($url, ["headers" => $headers, "timeout" => 10]);
 
     if (is_wp_error($response)) {
@@ -548,8 +355,9 @@ function run_the_azure_run_status($thread_id, $runId, $api_key) {
     $response_body = wp_remote_retrieve_body($response);
     $responseArray = json_decode($response_body, true);
 
-    // ✅ **Return the response immediately**
+    // Return the response immediately
     return json_encode($responseArray);
+
 }
 
 
@@ -581,49 +389,43 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
     }
 
     // Prepare request headers
-    // $headers = [
-    //     "Content-Type"  => "application/json",
-    //     "OpenAI-Beta"   => $beta_version,
-    //     "Authorization" => "Bearer " . $api_key
-    // ];
-
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
         // 'Accept'       => 'application/json',
     );
 
-    // 🚀 ✅ FIX: Change from `wp_remote_post()` to `wp_remote_get()`
+    // Make the request
     $response = wp_remote_get($url, [
         "headers"       => $headers,
         "timeout"       => 30,
     ]);
 
-    // ✅ Handle request errors
+    // Handle request errors
     if (is_wp_error($response)) {
         prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
         return "Error: Failed to communicate with the API.";
     }
 
-    // ✅ Extract response body safely
+    // Extract response body safely
     $response_body = wp_remote_retrieve_body($response);
 
-    // ✅ Ensure response body is a valid string before decoding
+    // Ensure response body is a valid string before decoding
     if (!is_string($response_body) || empty($response_body)) {
         prod_trace('ERROR', 'Error: API returned an empty or invalid response.');
         return "Error: Empty API response.";
     }
 
-    // ✅ Decode JSON response safely
+    // Decode JSON response safely
     $response_data = json_decode($response_body, true);
 
-    // ✅ Handle JSON decoding errors explicitly
+    // Handle JSON decoding errors explicitly
     if ($response_data === null && json_last_error() !== JSON_ERROR_NONE) {
         prod_trace('ERROR', 'JSON decode error: ' . json_last_error_msg());
         return "Error: Failed to parse API response.";
     }
 
-    // ✅ Debugging: Log the decoded response
+    // DIAG - Diagnostic - Ver 2.2.6
     // back_trace( 'NOTICE', 'Step 6 - Decoded Response: ' . print_r($response_data, true));
 
     return $response_data;
@@ -661,17 +463,10 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key) {
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
 
-    // Prepare request headers
-    // $headers = [
-    //     "Content-Type"  => "application/json",
-    //     "OpenAI-Beta"   => $beta_version,
-    //     "Authorization" => "Bearer " . $api_key
-    // ];
-    
+    // Prepare request headers    
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
-        // 'Accept'       => 'application/json',
     );
 
     // Retry settings
@@ -681,37 +476,37 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key) {
 
     while ($retry_count < $max_retries) {
 
-        // 🚀 ✅ FIX: Changed from `wp_remote_post()` to `wp_remote_get()`
+        // Make the request
         $response = wp_remote_get($url, [
             "headers"       => $headers,
             "timeout"       => 30,
         ]);
 
-        // ✅ Handle request errors
+        // Handle request errors
         if (is_wp_error($response)) {
             prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
             return "Error: Failed to communicate with the API.";
         }
 
-        // ✅ Extract response body safely
+        // Extract response body safely
         $response_body = wp_remote_retrieve_body($response);
 
-        // ✅ Ensure response body is valid before decoding
+        // Ensure response body is valid before decoding
         if (!is_string($response_body) || empty($response_body)) {
             prod_trace('ERROR', 'Error: API returned an empty or invalid response.');
             return "Error: Empty API response.";
         }
 
-        // ✅ Decode JSON response safely
+        // Decode JSON response safely
         $responseArray = json_decode($response_body, true);
 
-        // ✅ Handle JSON decoding errors explicitly
+        // Handle JSON decoding errors explicitly
         if ($responseArray === null && json_last_error() !== JSON_ERROR_NONE) {
             prod_trace('ERROR', 'JSON decode error: ' . json_last_error_msg());
             return "Error: Failed to parse API response.";
         }
 
-        // ✅ Debugging: Log the decoded response
+        // DIAG - Diagnostics - Ver 2.2.6
         // back_trace( 'NOTICE', 'Step 7 - Decoded Response: ' . print_r($responseArray, true));
 
         // ✅ Check for "data" field
@@ -732,7 +527,7 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key) {
         $retry_count++;
     }
 
-    // ✅ Log and return failure if retries exceeded
+    // Log and return failure if retries exceeded
     prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Maximum retries reached.');
     return "Error: Maximum retries reached.";
 
@@ -746,10 +541,6 @@ function get_the_azure_message($thread_id, $api_key) {
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', 'Step 8 - get_the_azure_message()');
     // back_trace( 'NOTICE', 'Step 8 - $thread_id: ' . $thread_id);
-
-    // Example https://<resource>.openai.azure.com/openai/threads/<thread_id>/messages
-    // Build the URL
-    $url = get_threads_api_url() . '/' . $thread_id . '/messages';
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
@@ -770,12 +561,7 @@ function get_the_azure_message($thread_id, $api_key) {
     // DIAG - Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
 
-    // $headers = [
-    //     'Content-Type'  => 'application/json',
-    //     'OpenAI-Beta'   => $beta_version,
-    //     'Authorization' => 'Bearer ' . $api_key
-    // ];
-  
+    // Prepare request headers 
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
@@ -788,16 +574,16 @@ function get_the_azure_message($thread_id, $api_key) {
         "timeout" => 30,
     ]);
 
-    // ✅ Handle request errors
+    // Handle request errors
     if (is_wp_error($response)) {
         prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
         return "Error: Failed to communicate with the API.";
     }
 
-    // ✅ Extract response body
+    // Extract response body
     $response_body = wp_remote_retrieve_body($response);
 
-    // ✅ Ensure the response is a valid JSON string before decoding
+    // Ensure the response is a valid JSON string before decoding
     $response_data = json_decode($response_body, true);
     if ($response_data === null) {
         prod_trace('ERROR', 'JSON Decode Error: ' . json_last_error_msg());
@@ -946,7 +732,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
             // back_trace( 'NOTICE', '$thread_id was empty but found a $thread_id: ' . $thread_id);
         }
     } else {
-        // back_trace( 'NOTICE', '$thread_id was NOT empty');
         // back_trace( 'NOTICE', '$thread_id was NOT empty but passed as $thread_id: ' . $thread_id);
     }
 
@@ -1068,7 +853,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
         // Step 5: Get the Run's Status
         // back_trace( 'NOTICE', 'Step 5 - Get the Run\'s Status');
-        $run_status = run_the_azure_run_status($thread_id, $runId, $api_key);
+        $run_status = get_the_azure_run_status($thread_id, $runId, $api_key);
 
         $retries++;
 
@@ -1091,8 +876,8 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // Step 6: Get the Run's Steps
     // back_trace( 'NOTICE', 'Step 6 - Get the Run\'s Steps');
     $assistants_response = get_the_azure_run_steps($thread_id, $runId, $api_key);
-    // DIAG - Print the response
-    // back_trace( 'NOTICE', $assistants_response);
+    // DIAG - Diagnostic - Ver 2.2.6
+    // back_trace( 'NOTICE', '$assistants_response' . print_r($assistants_response, true));
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
@@ -1210,56 +995,53 @@ function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
 }
 
 // -------------------------------------------------------------------------
-// Cleanup in Aisle 4 on OpenAI - Ver 2.2.3
+// Cleanup in Aisle 4 on OpenAI - Ver 2.2.6
 // -------------------------------------------------------------------------
 function delete_azure_uploaded_file($file_id) {
 
-    // DIAG - Diagnostics - Ver 2.2.3
+    // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', 'delete_azure_uploaded_file(): ' . $file_id);
 
-    // Get the API key
-    $apiKey = esc_attr(get_option('chatbot_azure_api_key'));
+    // Get the Azure API key
+    $api_key = esc_attr(get_option('chatbot_azure_api_key'));
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
-    $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
-    // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/files/' . $file_id . '?api-version=2024-03-01-preview';
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files/' . $file_id . '?api-version=' . $chatbot_azure_api_version;
 
+    // Assemble the URL for deletion
+    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files/' . $file_id . '?api-version=' . $chatbot_azure_api_version;
+    
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
+    // back_trace('NOTICE', '$url: ' . $url);
 
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
-        // 'Accept'       => 'application/json',
     );
     
     // Send DELETE request using WP functions
-    $response = wp_remote_request($url, [
-        'method'    => 'DELETE',
-        'timeout'   => 15,
-        'headers'   => $headers
-    ]);
-
+    $response = wp_remote_request($url, array(
+        'method'  => 'DELETE',
+        'timeout' => 15,
+        'headers' => $headers,
+    ));
+    
     // Handle errors
     if (is_wp_error($response)) {
-        prod_trace( 'ERROR', 'Error deleting file from OpenAI: ' . $response->get_error_message());
+        prod_trace('ERROR', 'Error deleting file from Azure OpenAI: ' . $response->get_error_message());
         return false;
     }
-
+    
     // Get the HTTP status code
     $http_status_code = wp_remote_retrieve_response_code($response);
     
     if ($http_status_code == 200 || $http_status_code == 204) {
-        // DIAG - Diagnostics - Ver 1.7.9
-        // back_trace( 'SUCCESS', "File deleted successfully.\n");
+        // back_trace('NOTICE', 'File deleted successfully.');
+        return true;
     } else {
-        // DIAG - Diagnostics - Ver 1.7.9
-        prod_trace( 'ERROR', "HTTP status code: $http_status_code\n");
-        prod_trace( 'ERROR', "Response: $response\n");
+        prod_trace('ERROR', "HTTP status code: $http_status_code\n");
+        prod_trace('ERROR', "Response: " . print_r($response, true));
+        return false;
     }
-
 }
-add_action( 'delete_azure_uploaded_file', 'delete_azure_uploaded_file' );
+add_action('delete_azure_uploaded_file', 'delete_azure_uploaded_file');

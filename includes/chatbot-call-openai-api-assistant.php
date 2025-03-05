@@ -861,7 +861,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $prompt: ' . $prompt);
     // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to addAMessage - $content: ' . $context);
-    back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
 
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4
     $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
@@ -1071,7 +1071,7 @@ function deleteUploadedFile($file_id) {
     // back_trace( 'NOTICE', 'deleteUploadedFile(): ' . $file_id);
 
     // Get the API key
-    $apiKey = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
 
     // Construct the API URL
     // $url = 'https://api.openai.com/v1/files/' . $file_id;
@@ -1082,7 +1082,7 @@ function deleteUploadedFile($file_id) {
         'method'    => 'DELETE',
         'timeout'   => 15,
         'headers'   => [
-            'Authorization'  => 'Bearer ' . $apiKey,
+            'Authorization'  => 'Bearer ' . $api_key,
             'Content-Type'   => 'application/json',
         ]
     ]);

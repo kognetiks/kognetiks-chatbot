@@ -190,6 +190,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // Fetch the common name of the Assistant Common Name from the Assistant table
         $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
 
+        // DIAG - Diagnostics - Ver 2.2.6
+        // back_trace( 'NOTICE', 'Assistant Key: ' . $assistant_key);
+        // back_trace( 'NOTICE', 'Assistant Details: ' . print_r($assistant_details, true));
+
         // For each key in $assistant_details, set the $atts value
         foreach ($assistant_details as $key => $value) {
             $atts[$key] = $value;
@@ -683,7 +687,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Retrieve the bot name - Ver 2.0.5
-    $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'Yes'));
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+    if ($chatbot_ai_platform_choice == 'OpenAI'){
+        $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'Yes'));
+    } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI'){
+        $use_assistant_name = esc_attr(get_option('chatbot_azure_display_custom_gpt_assistant_name', 'Yes'));  
+    } else {
+        $use_assistant_name = 'No';
+    }
 
     // Assistant's Table Override - Ver 2.0.4
     if (!empty($assistant_details['show_assistant_name'])) {
@@ -692,13 +703,16 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // DIAG - Diagnostics - Ver 2.0.5
     // back_trace( 'NOTICE', '$use_assistant_name: ' . $use_assistant_name);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
+    // FIXME - $assistant_id is empty - Ver 2.2.6
     if ($use_assistant_name == 'Yes' && !empty($assistant_id) && $assistant_id !== 'original') {
-        // FIXME - CAN I AVOID THIS CALL TO OPENAI?
         // DIAG - Diagnostics - Ver 2.2.6
         // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
         // back_trace( 'NOTICE', '$use_assistant_name: ' . $use_assistant_name);
         $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
+        back_trace( 'NOTICE', '$assistant_name: ' . $assistant_name);
         $bot_name = !empty($assistant_name) ? $assistant_name : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     } else {
         $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
@@ -773,7 +787,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // FIXME - Allow File Uploads - Ver 2.2.6
-    back_trace( 'NOTICE', '$chatbot_chatgpt_allow_file_uploads: ' . $chatbot_chatgpt_allow_file_uploads);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_allow_file_uploads: ' . $chatbot_chatgpt_allow_file_uploads);
     // $chatbot_chatgpt_allow_file_uploads = 'Yes';
 
     // Allow Upload Files - Ver 2.0.4
@@ -949,6 +963,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     $assistant_details['allow_file_uploads'] = !empty($assistant_details['allow_file_uploads']) ? $assistant_details['allow_file_uploads'] : esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
     $kchat_settings['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
+    // DIAG - Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$assistant_details[\'allow_file_uploads\']: ' . $assistant_details['allow_file_uploads']);
+    $chatbot_chatgpt_allow_file_uploads = $assistant_details['allow_file_uploads'];
 
     $assistant_details['allow_mp3_uploads'] = !empty($assistant_details['allow_mp3_uploads']) ? $assistant_details['allow_mp3_uploads'] : esc_attr(get_option('chatbot_chatgpt_allow_mp3_uploads', 'No'));
     $kchat_settings['chatbot_chatgpt_allow_mp3_uploads'] = $assistant_details['allow_mp3_uploads'];

@@ -137,13 +137,13 @@ function get_chatbot_azure_assistant_by_key($id) {
 
     // Before returning the $assistant_details, rename certain keys for compatibility with the chatbot shortcode
     if ($assistant_details) {
-        $assistant_details['chatbot_chatbot_assistant_id'] = $assistant_details['assistant_id'];
+        $assistant_details['chatbot_chatgpt_assistant_id'] = $assistant_details['assistant_id'];
         $assistant_details['common_name'] = $assistant_details['common_name'];
-        $assistant_details['chatbot_chatbot_display_style'] = $assistant_details['style'];
-        $assistant_details['chatbot_azure_audience_choice'] = $assistant_details['audience'];
-        $assistant_details['chatbot_azure_voice_option'] = $assistant_details['voice'];
-        $assistant_details['chatbot_azure_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
-        $assistant_details['chatbot_azure_allow_download_transcript'] = $assistant_details['allow_transcript_downloads'];
+        $assistant_details['chatbot_chatgpt_display_style'] = $assistant_details['style'];
+        $assistant_details['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
+        $assistant_details['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
+        $assistant_details['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
+        $assistant_details['chatbot_chatgpt_allow_download_transcript'] = $assistant_details['allow_transcript_downloads'];
     }
 
     // If the assistant is not found, return an empty array
