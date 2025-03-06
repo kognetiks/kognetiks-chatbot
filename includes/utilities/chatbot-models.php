@@ -168,19 +168,37 @@ function chatbot_azure_get_models() {
         array(
             'id' => 'dall-e-3',
             'object' => 'model',
-            'created' => 1698785189,
+            'created' => 1691712000,
             'owned_by' => 'system'
         ),
         array(
             'id' => 'gpt-3.5-turbo',
             'object' => 'model',
-            'created' => 1677610602,
+            'created' => 1707955200,
             'owned_by' => 'system'
         ),
         array(
-            'id' => 'tts-1-hd',
+            'id' => 'gpt-4o',
             'object' => 'model',
-            'created' => 1699053241,
+            'created' => 1715558400,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'gpt-4o-mini',
+            'object' => 'model',
+            'created' => 1721347200,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'gpt-4o-audio-preview',
+            'object' => 'model',
+            'created' => 1731369600,
+            'owned_by' => 'system'
+        ),
+        array(
+            'id' => 'text-embedding-ada-002',
+            'object' => 'model',
+            'created' => 1680480000,
             'owned_by' => 'system'
         ),
         array(
@@ -189,7 +207,7 @@ function chatbot_azure_get_models() {
             'created' => 1677532384,
             'owned_by' => 'openai-internal'
         )
-    );
+    );   
 
     // See if the option exists, if not then create it and set the default
     if (esc_attr(get_option('chatbot_azure_model_choice')) === false) {

@@ -945,7 +945,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', 'Step 6 - Get the Run\'s Steps');
     $assistants_response = getTheRunsSteps($thread_id, $runId, $api_key);
     // DIAG - Print the response
-    // back_trace( 'NOTICE', $assistants_response);
+    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);

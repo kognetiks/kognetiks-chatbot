@@ -435,7 +435,7 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
 // -------------------------------------------------------------------------
 // Step 7: Get the Step's Status
 // -------------------------------------------------------------------------
-function get_the_azure_steps_status($thread_id, $runId, $api_key) {
+function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id) {
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', 'Step 7 - get_the_azure_steps_status()');
@@ -509,17 +509,36 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key) {
         // DIAG - Diagnostics - Ver 2.2.6
         // back_trace( 'NOTICE', 'Step 7 - Decoded Response: ' . print_r($responseArray, true));
 
-        // ✅ Check for "data" field
-        if (isset($responseArray["data"]) && is_array($responseArray["data"])) {
-            foreach ($responseArray["data"] as $item) {
-                if (isset($item["status"]) && $item["status"] === "completed") {
-                    return "completed";
-                }
+        // Updated check for "data" field
+        if (isset($responseArray["data"][0]) && isset($responseArray["data"][0]["status"])) {
+            if ($responseArray["data"][0]["status"] === "completed") {
+                // back_trace( 'NOTICE', 'Step 7 - $responseArray: ' . print_r($responseArray, true));
+                if (isset($responseArray["data"][0]["usage"])) {
+                    $prompt_tokens = $responseArray["data"][0]["usage"]["prompt_tokens"] ?? 0;
+                    $completion_tokens = $responseArray["data"][0]["usage"]["completion_tokens"] ?? 0;
+                    $total_tokens = $responseArray["data"][0]["usage"]["total_tokens"] ?? 0;
+                    // DIAG - Diagnostics - Ver 2.2.6
+                    // back_trace( 'NOTICE' , 'Prompt Tokens: ' . $prompt_tokens );
+                    // back_trace( 'NOTICE' , 'Completion Tokens: ' . $completion_tokens );
+                    // back_trace( 'NOTICE' , 'Total Tokens: ' . $total_tokens );
+                    if ( $total_tokens != 0 ) {
+                        // back_trace( 'NOTICE', 'Step 7 - Logging token usage.');
+                        // back_trace( 'NOTICE', 'Step 7 - $prompt_tokens: ' . $prompt_tokens );
+                        // back_trace( 'NOTICE', 'Step 7 - $completion_tokens: ' . $completion_tokens );
+                        // back_trace( 'NOTICE', 'Step 7 - $total_tokens: ' . $total_tokens );
+                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $prompt_tokens);
+                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $completion_tokens);
+                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $total_tokens);
+                    }
+                }                
+                return "completed";
+            } else {
+                prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Status is not "completed".');
+                return "Error: Step status is " . $responseArray["data"][0]["status"];
             }
         } else {
-            // ✅ Log and return failure if "data" field is missing
-            prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Invalid API response.');
-            return "Error: Missing 'data' in API response.";
+            // prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Invalid API response - missing "data" or "status".');
+            return "Error: Missing 'data' or step 'status' in API response.";
         }
 
         // Sleep before retrying
@@ -876,8 +895,29 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // Step 6: Get the Run's Steps
     // back_trace( 'NOTICE', 'Step 6 - Get the Run\'s Steps');
     $assistants_response = get_the_azure_run_steps($thread_id, $runId, $api_key);
-    // DIAG - Diagnostic - Ver 2.2.6
-    // back_trace( 'NOTICE', '$assistants_response' . print_r($assistants_response, true));
+    // DIAG - Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
+
+    // DIAG - Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $assistants_response["data"][0]["usage"]["completion_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
+
+    // Add the usage to the conversation tracker
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["completion_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["total_tokens"]);
+
+    // Step 7: Get the Step's Status
+    // back_trace( 'NOTICE', 'Step 7 - Get the Step\'s Status');
+    get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id);
+
+    // Step 8: Get the Message
+    // back_trace( 'NOTICE', 'Step 8: Get the Message');
+    $assistants_response = get_the_azure_message($thread_id, $api_key);
+
+    // DIAG - Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
@@ -885,17 +925,9 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["completion_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["total_tokens"]);
-
-    // Step 7: Get the Step's Status
-    // back_trace( 'NOTICE', 'Step 7 - Get the Step\'s Status');
-    get_the_azure_steps_status($thread_id, $runId, $api_key);
-
-    // Step 8: Get the Message
-    // back_trace( 'NOTICE', 'Step 8: Get the Message');
-    $assistants_response = get_the_azure_message($thread_id, $api_key);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["completion_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();
