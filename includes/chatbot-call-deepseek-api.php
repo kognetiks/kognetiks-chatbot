@@ -64,7 +64,7 @@ function chatbot_call_deepseek_api($api_key, $message) {
     $max_tokens = intval(esc_attr(get_option('chatbot_deepseek_max_tokens_setting', '1024')));
 
     // Conversation Context - Ver 1.6.1
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+    $context = esc_attr(get_option('chatbot_deepseek_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
     $raw_context = $context;
  
     // Context History - Ver 1.6.1

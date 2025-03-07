@@ -306,13 +306,16 @@ switch ($chatbot_ai_platform_choice) {
             $model = 'gpt-4-1106-preview';
         }
     
+        // FIXME - TEMPORARILY DISABLED - 2025-03-07
+        // Disable Read Aloud - Ver 2.2.6
+        update_option('chatbot_chatgpt_read_aloud_option', 'no');
         // Voice choice - Ver 1.9.5
-        if (esc_attr(get_option('chatbot_azure_voice_option')) === null) {
-            $voice = 'alloy';
-            update_option('chatbot_azure_voice_option', $voice);
-            // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
-        }
+        // if (esc_attr(get_option('chatbot_azure_voice_option')) === null) {
+        //     $voice = 'alloy';
+        //     update_option('chatbot_azure_voice_option', $voice);
+        //     // DIAG - Diagnostics
+        //     // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
+        // }
 
         break;
 

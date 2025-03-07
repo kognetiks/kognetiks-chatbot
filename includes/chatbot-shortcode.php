@@ -178,6 +178,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // DIAG - Diagnostics - Ver 2.0.8
     // back_trace( 'NOTICE', 'Tag Processing: ' . $tag);
 
+    // Normalize [assistant-#] to [chatbot-#] - Ver 2.2.6 - 2025 03 07
+    if (strpos($tag, 'assistant-') === 0) {
+        $tag = str_replace('assistant-', 'chatbot-', $tag);
+        // DIAG - Diagnostic - Ver 2.2.6
+        // back_trace('NOTICE', 'Transformed assistant shortcode to: ' . $tag);
+    }
+
     // Tag Processing - Ver 2.0.6
     if (strpos($tag, 'chatbot-') !== false) {
         
@@ -1352,10 +1359,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
 }
+
 // FIXME - TEMPORARY - Ver 2.2.1 - 2025 01 09
+// Original Shortcodes - Ver 2.2.1 - 2025 01 09
 add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
 add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
+// Assistant Shortcodes - Ver 2.2.1 - 2025 01 09
 add_shortcode('chatbot-1', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-2', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-3', 'chatbot_chatgpt_shortcode');
@@ -1366,6 +1376,17 @@ add_shortcode('chatbot-7', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-8', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-9', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-10', 'chatbot_chatgpt_shortcode');
+// Assistant Shortcodes - Ver 2.2.6 - 2025 03 07
+add_shortcode('assistant-1', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-2', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-3', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-4', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-5', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-6', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-7', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-8', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-9', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-10', 'chatbot_chatgpt_shortcode');
 
 // Dynamic Shortcode - Ver 2.0.6
 function register_chatbot_shortcodes($number_of_shortcodes = null) {
@@ -1408,10 +1429,16 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
         add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
     }
 
-    // Register numbered shortcodes dynamically
+    // Register numbered shortcodes dynamically using [chatbot-#] syntax
     for ($i = 1; $i <= $number_of_shortcodes; $i++) {
         add_shortcode('chatbot-' . $i, 'chatbot_chatgpt_shortcode');
         // error_log ('Registered shortcodes: ' . 'chatbot-' . $i );
+    }
+
+    // Register numbered shortcodes dynamically using [assistant=#] syntax
+    for ($i = 1; $i <= $number_of_shortcodes; $i++) {
+        add_shortcode('assistant-' . $i, 'chatbot_chatgpt_shortcode');
+        // error_log ('Registered shortcodes: ' . 'assistant-' . $i );
     }
 
     // error_log ('chatbot_chatgpt_number_of_shortcodes: ' . $number_of_shortcodes );

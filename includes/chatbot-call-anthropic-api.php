@@ -140,18 +140,29 @@ function chatbot_call_anthropic_api($api_key, $message) {
     // https://docs.anthropic.com/en/docs/about-claude/models#model-names
     // 8192 output tokens is in beta and requires the header anthropic-beta: max-tokens-3-5-sonnet-2024-07-15. If the header is not specified, the limit is 10000 tokens.
 
+    // Conversation Context - Ver 1.6.1
+    $additional_instructions = esc_attr(get_option('chatbot_anthropic_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+    // DIAG Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+
+    // Revise prompt to include the context, i.e., system instructions
+    $prompt = $additional_instructions . ' ' . $context . ' Human: ' . $message . ' Assistant: ';
+
     // Define the request body
     $body = json_encode(array(
         'model' => $model,
         'max_tokens' => $max_tokens,
-        'system' => $context, // Top-level parameter for system message
+        // 'system' => $context, // Top-level parameter for system message
         'messages' => array(
             array(
                 'role' => 'user',
-                'content' => $message, // User input
+                'content' => $prompt, // User input
             ),
         ),
     ));
+
+    // DIAG Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$body: ' . print_r($body, true));
 
     $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
 

@@ -783,7 +783,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     // Conversation Context - Ver 2.2.3
     $context = "";
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+    $context = esc_attr(get_option('chatbot_azure_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
  
     // Step 3: Add a Message to a Thread
     // back_trace( 'NOTICE', 'Step 3 - Add a Message to a Thread');
