@@ -23,6 +23,8 @@ if ( ! defined( 'WPINC' ) ) {
     if ($chatbot_chatbot_ai_platform_choice == 'OpenAI') {
         update_option('chatbot_chatgpt_api_status', 'API Error Type: Status Unknown');
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', 'NOT SET'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
         // Model and message for testing
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         $updated_status = kchat_fetch_api_status($api_key, $model);
@@ -70,6 +72,8 @@ function kchat_fetch_api_status($api_key, $model) {
 
             update_option('chatbot_chatgpt_api_status', 'API Error Type: Status Unknown');
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', 'NOT SET'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = decrypt_api_key($api_key);
 
             // Model and message for testing
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'chatgpt-4o-latest'));
@@ -475,6 +479,8 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
     // if ($option_name === 'chatbot_chatgpt_model_choice' || $option_name === 'chatbot_chatgpt_api_key' || empty($chatbot_chatgpt_api_status)) {
     if ($option_name === 'chatbot_chatgpt_model_choice' || $option_name === 'chatbot_chatgpt_api_key') {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', 'NOT SET'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
 
         // Call your test function
         $test_result = kchat_test_api_status($api_key);

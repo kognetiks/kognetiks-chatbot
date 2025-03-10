@@ -542,8 +542,10 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
         }
 
         // Sleep before retrying
-        usleep($sleep_time);
-        $retry_count++;
+        // REMOVED - Ver 2.2.6 - 2025-03-10 - DEAD CODE CANNOT BE EXECUTED AFTER RETURN (ABOVE)
+        // usleep($sleep_time);
+        // $retry_count++;
+        
     }
 
     // Log and return failure if retries exceeded

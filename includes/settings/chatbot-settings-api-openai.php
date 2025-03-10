@@ -102,11 +102,26 @@ function chatbot_chatgpt_api_chatgpt_advanced_section_callback($args) {
 function chatbot_chatgpt_api_key_callback($args) {
 
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = decrypt_api_key($api_key);
 
     ?>
     <input type="password" id="chatbot_chatgpt_api_key" name="chatbot_chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
 
+}
+
+// Sanitize the API key - Ver 2.2.6
+function chatbot_chatgpt_api_key_sanitize($input) {
+
+    // Only encrypt if the input is not empty.
+    if (!empty($input)) {
+        // Encrypt the API key.
+        $encrypted_key = encrypt_api_key($input);
+        return $encrypted_key;
+    }
+    return $input;
+    
 }
 
 // OpenAI Models

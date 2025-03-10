@@ -963,6 +963,8 @@ function chatbot_chatgpt_send_message() {
         case 'OpenAI':
 
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-4-1106-preview'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
@@ -1043,6 +1045,8 @@ function chatbot_chatgpt_send_message() {
         default:
 
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;

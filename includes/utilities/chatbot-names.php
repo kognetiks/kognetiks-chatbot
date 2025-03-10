@@ -42,6 +42,8 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
         // Retrieve the API key
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
 
         // Ensure API key is set
         if (empty($api_key)) {

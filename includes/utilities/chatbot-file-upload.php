@@ -68,6 +68,8 @@ function chatbot_chatgpt_upload_files() {
     $ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
     if ($ai_platform_choice == 'OpenAI') {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
     } elseif ($ai_platform_choice == 'Azure OpenAI') {
         $api_key = esc_attr(get_option('chatbot_azure_api_key'));
     } elseif ($ai_platform_choice == 'NVIDIA') {
@@ -165,6 +167,8 @@ function chatbot_chatgpt_upload_files() {
             $ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
             if ($ai_platform_choice == 'OpenAI') {
                 $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+                // Decrypt the API key - Ver 2.2.6
+                $api_key = decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'Azure OpenAI') {
                 $api_key = esc_attr(get_option('chatbot_azure_api_key'));
             } elseif ($ai_platform_choice == 'NVIDIA') {

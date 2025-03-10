@@ -15,6 +15,7 @@ package.json
 Queries.md
 Tests.md
 ToDo.md
+includes/utilities/chatbot-keyguard-key.php
 
 # Ignore all files in the results folder
 results/*
