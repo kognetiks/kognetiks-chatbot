@@ -32,6 +32,8 @@ if ( ! defined( 'WPINC' ) ) {
     } elseif ($chatbot_chatbot_ai_platform_choice == 'NVIDIA') {
         update_option('chatbot_nvidia_api_status', 'API Error Type: Status Unknown');
         $api_key = esc_attr(get_option('chatbot_nvidia_api_key', 'NOT SET'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
         // Model and message for testing
         $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
         $updated_status = kchat_fetch_api_status($api_key, $model);
@@ -39,6 +41,8 @@ if ( ! defined( 'WPINC' ) ) {
     } elseif ($chatbot_chatbot_ai_platform_choice == 'Anthropic') {
         update_option('chatbot_anthropic_api_status', 'API Error Type: Status Unknown');
         $api_key = esc_attr(get_option('chatbot_anthropic_api_key', 'NOT SET'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
         // Model and message for testing
         $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
         $updated_status = kchat_fetch_api_status($api_key, $model);
@@ -159,6 +163,8 @@ function kchat_fetch_api_status($api_key, $model) {
 
             update_option('chatbot_nvidia_api_status', 'API Error Type: Status Unknown');
             $api_key = esc_attr(get_option('chatbot_nvidia_api_key', 'NOT SET'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = decrypt_api_key($api_key);
 
             // Model and message for testing
             $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
@@ -351,6 +357,8 @@ function kchat_fetch_api_status($api_key, $model) {
 
             update_option('chatbot_deepseek_api_status', 'API Error Type: Status Unknown');
             $api_key = esc_attr(get_option('chatbot_deepseek_api_key', 'NOT SET'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = decrypt_api_key($api_key);
             
             // Model and message for testing
             $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));

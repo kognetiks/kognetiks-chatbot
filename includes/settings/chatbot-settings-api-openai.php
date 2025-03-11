@@ -111,19 +111,6 @@ function chatbot_chatgpt_api_key_callback($args) {
 
 }
 
-// Sanitize the API key - Ver 2.2.6
-function chatbot_chatgpt_api_key_sanitize($input) {
-
-    // Only encrypt if the input is not empty.
-    if (!empty($input)) {
-        // Encrypt the API key.
-        $encrypted_key = encrypt_api_key($input);
-        return $encrypted_key;
-    }
-    return $input;
-    
-}
-
 // OpenAI Models
 // https://platform.openai.com/docs/models
 // EXPAND THE LIST OF MODELS STARTING WITH V1.9.4 - 2024 03 24

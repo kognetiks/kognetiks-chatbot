@@ -33,6 +33,8 @@ function chatbot_anthropic_api_model_general_section_callback($args) {
 // API key field callback
 function chatbot_anthropic_api_key_callback($args) {
     $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = decrypt_api_key($api_key);
     ?>
     <input type="password" id="chatbot_anthropic_api_key" name="chatbot_anthropic_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
@@ -194,7 +196,7 @@ function chatbot_anthropic_api_settings_init() {
 
     // API/Anthropic settings tab - Ver 2.1.8
     register_setting('chatbot_anthropic_api_model', 'chatbot_anthropic_api_enabled');
-    register_setting('chatbot_anthropic_api_model', 'chatbot_anthropic_api_key');
+    register_setting('chatbot_anthropic_api_model', 'chatbot_anthropic_api_key', 'keyguard_sanitize_api_key');
     register_setting('chatbot_anthropic_api_model', 'chatbot_anthropic_max_tokens_setting'); // Max Tokens setting options
     register_setting('chatbot_anthropic_api_model', 'chatbot_anthropic_conversation_context'); // Conversation Context
     register_setting('chatbot_anthropic_api_model', 'chatbot_anthropic_temperature'); // Temperature

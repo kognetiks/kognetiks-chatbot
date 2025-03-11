@@ -23,6 +23,8 @@ function create_an_azure_assistant($api_key) {
 
     // Set your API key and assistant ID here:
     $api_key = esc_attr(get_option('chatbot_azure_api_key', ''));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = decrypt_api_key($api_key);
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
@@ -97,6 +99,8 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 
     // Set your API key and assistant ID here:
     $api_key = esc_attr(get_option('chatbot_azure_api_key', ''));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = decrypt_api_key($api_key);
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
@@ -762,6 +766,8 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         // Step 1 - Create an Assistant
         // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
         $api_key = esc_attr(get_option('chatbot_azure_api_key', ''));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
         $assistants_response = create_an_azure_assistant($api_key);
         // DIAG - Diagnostics - Ver 2.2.3
         // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
@@ -1038,6 +1044,8 @@ function delete_azure_uploaded_file($file_id) {
 
     // Get the Azure API key
     $api_key = esc_attr(get_option('chatbot_azure_api_key'));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = decrypt_api_key($api_key);
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));

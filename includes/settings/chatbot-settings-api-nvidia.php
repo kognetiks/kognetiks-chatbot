@@ -33,6 +33,10 @@ function chatbot_nvidia_api_model_general_section_callback($args) {
 // API key field callback
 function chatbot_nvidia_api_key_callback($args) {
     $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
+
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = decrypt_api_key($api_key);
+    
     ?>
     <input type="password" id="chatbot_nvidia_api_key" name="chatbot_nvidia_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
@@ -194,7 +198,7 @@ function chatbot_nvidia_api_settings_init() {
 
     // API/NVIDIA settings tab - Ver 2.1.8
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_enabled');
-    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_key');
+    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_key', 'keyguard_sanitize_api_key');
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_max_tokens_setting'); // Max Tokens setting options
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_conversation_context'); // Conversation Context
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_temperature'); // Temperature

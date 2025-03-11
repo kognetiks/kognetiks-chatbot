@@ -300,7 +300,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$atts: ' . print_r($atts, true));
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
-    // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
     // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
     // Validate and sanitize the style parameter - Ver 1.9.9

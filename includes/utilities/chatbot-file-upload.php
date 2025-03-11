@@ -72,14 +72,24 @@ function chatbot_chatgpt_upload_files() {
         $api_key = decrypt_api_key($api_key);
     } elseif ($ai_platform_choice == 'Azure OpenAI') {
         $api_key = esc_attr(get_option('chatbot_azure_api_key'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
     } elseif ($ai_platform_choice == 'NVIDIA') {
         $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
     } elseif ($ai_platform_choice == 'Anthropic') {
         $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
     } elseif ($ai_platform_choice == 'DeepSeek') {
         $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
     } elseif ($ai_platform_choice == 'Local Server') {
         $api_key = esc_attr(get_option('chatbot_local_api_key'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = decrypt_api_key($api_key);
     }
 
     if (empty($api_key)) {
@@ -171,14 +181,24 @@ function chatbot_chatgpt_upload_files() {
                 $api_key = decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'Azure OpenAI') {
                 $api_key = esc_attr(get_option('chatbot_azure_api_key'));
+                // Decrypt the API key - Ver 2.2.6
+                $api_key = decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'NVIDIA') {
                 $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
+                // Decrypt the API key - Ver 2.2.6
+                $api_key = decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'Anthropic') {
                 $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
+                // Decrypt the API key - Ver 2.2.6
+                $api_key = decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'DeepSeek') {
                 $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
+                // Decrypt the API key - Ver 2.2.6
+                $api_key = decrypt_api_key($api_key);
             } elseif ($ai_platform_choice == 'Local Server') {
                 $api_key = esc_attr(get_option('chatbot_local_api_key'));
+                // Decrypt the API key - Ver 2.2.6
+                $api_key = decrypt_api_key($api_key);
             }
 
             // Open file in a way that works with WP HTTP API

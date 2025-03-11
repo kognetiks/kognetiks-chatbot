@@ -103,6 +103,9 @@ function chatbot_azure_api_key_callback($args) {
 
     $api_key = esc_attr(get_option('chatbot_azure_api_key'));
 
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = decrypt_api_key($api_key);
+
     ?>
     <input type="password" id="chatbot_azure_api_key" name="chatbot_azure_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
@@ -582,7 +585,7 @@ function chatbot_azure_api_settings_init() {
     );
 
     // API/Azure OpenAI settings tab - Ver 2.2.6
-    register_setting('chatbot_azure_api_model', 'chatbot_azure_api_key', 'sanitize_api_key');
+    register_setting('chatbot_azure_api_model', 'chatbot_azure_api_key', 'keyguard_sanitize_api_key');
 
     add_settings_section(
         'chatbot_azure_api_general_section',

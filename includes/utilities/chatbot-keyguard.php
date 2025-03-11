@@ -13,42 +13,9 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-/* Example usage:
-
-// Encrypt a new API key.
-$encrypted = encrypt_api_key('MY_NEW_API_KEY');
-echo "Encrypted API Key: {$encrypted}\n";
-
-// Decrypt the API key.
-$decrypted = decrypt_api_key($encrypted);
-echo "Decrypted API Key: {$decrypted}\n";
-
-// Example callbacks for upgrading stored keys.
-// In practice, these would interact with your database.
-function fetch_stored_api_keys() {
-    // Simulated stored keys; in a real scenario, fetch these from your DB.
-    return [
-        'key1' => '{"iv":"' . base64_encode(openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'))) . '","encrypted":"' . openssl_encrypt('API_KEY_1', 'aes-256-cbc', 'old_secret_key', 0, openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'))) . '"}',
-        // Add additional keys as needed.
-    ];
-}
-
-function update_stored_api_key($key_id, $new_encrypted_key) {
-    // In a real scenario, update the key in your database.
-    echo "Updating key {$key_id} with new encrypted value: {$new_encrypted_key}\n";
-}
-
-// Assuming 'old_secret_key' is the key previously used.
-$old_secret_key = 'old_secret_key';
-
-// Upgrade stored keys.
-upgrade_encrypted_api_keys('fetch_stored_api_keys', 'update_stored_api_key', $old_secret_key);
-
-*/
-
 // Define the secret key file path - Ver 2.2.6
-define('PLUGIN_SECRET_KEY_FILE', __DIR__ . '/chatbot-keyguard-key.php');
-// error_log('chatbot-keyguard.txt is located here: ' . PLUGIN_SECRET_KEY_FILE);
+define('KOGNETIKS_CHATBOT_KEYGUARD_FILE', __DIR__ . '/chatbot-keyguard-key.php');
+// error_log('chatbot-keyguard.txt is located here: ' . KOGNETIKS_CHATBOT_KEYGUARD_FILE);
 
 // One-time upgrade to encrypted keys using the old secret key - Ver 2.2.6
 // upgrade_encrypted_api_keys('fetch_stored_api_keys', 'update_stored_api_key', $old_secret_key);
@@ -60,10 +27,17 @@ function generate_and_store_secret_key() {
     $key = bin2hex(random_bytes(32));
     $content = "<?php\n";
     $content .= "// Auto-generated secret key for plugin encryption. Do not modify.\n";
-    $content .= "if (!defined('PLUGIN_SECRET_KEY')) {\n";
-    $content .= "    define('PLUGIN_SECRET_KEY', '$key');\n";
+    $content .= "if ( ! defined( 'WPINC' ) ) {\n";
+    $content .= "    die();\n";
     $content .= "}\n";
-    file_put_contents(PLUGIN_SECRET_KEY_FILE, $content);
+    $content .= "if (!defined('KOGNETIKS_CHATBOT_KEYGUARD_KEY')) {\n";
+    $content .= "    define('KOGNETIKS_CHATBOT_KEYGUARD_KEY', '$key');\n";
+    $content .= "}\n";
+    file_put_contents(KOGNETIKS_CHATBOT_KEYGUARD_FILE, $content);
+
+    // Set strict file permissions: read and write for the owner only.
+    chmod(KOGNETIKS_CHATBOT_KEYGUARD_FILE, 0600);
+
     return $key;
 
 }
@@ -71,12 +45,12 @@ function generate_and_store_secret_key() {
 // Retrieves the secret key and if it doesn't exist, a new key is generated and stored - Ver 2.2.6
 function get_secret_key() {
 
-    if (!file_exists(PLUGIN_SECRET_KEY_FILE)) {
+    if (!file_exists(KOGNETIKS_CHATBOT_KEYGUARD_FILE)) {
         return generate_and_store_secret_key();
     }
-    include_once PLUGIN_SECRET_KEY_FILE;
-    if (defined('PLUGIN_SECRET_KEY')) {
-        return PLUGIN_SECRET_KEY;
+    include_once KOGNETIKS_CHATBOT_KEYGUARD_FILE;
+    if (defined('KOGNETIKS_CHATBOT_KEYGUARD_KEY')) {
+        return KOGNETIKS_CHATBOT_KEYGUARD_KEY;
     }
     // Fallback: if the file exists but the constant is not defined.
     return generate_and_store_secret_key();
@@ -84,7 +58,9 @@ function get_secret_key() {
 }
 
 // Encrypts the given plaintext using AES-256-CBC with the provided secret key - Ver 2.2.6
-// Returns a JSON string containing the base64-encoded IV and the encrypted data - Ver 2.2.6
+//
+// Returns a JSON string containing the base64-encoded IV and the encrypted data,
+//
 function encrypt_api_key_with_key($plaintext, $secret_key) {
 
     $cipher = 'aes-256-cbc';
@@ -128,12 +104,12 @@ function decrypt_api_key($data) {
 
     // Fix the JSON before decrypting
     $data = html_entity_decode($data);
-    error_log('chatbot-keyguard.php: decrypt_api_key() - $data: ' . print_r($data, true));
+    // error_log('chatbot-keyguard.php: decrypt_api_key() - $data: ' . print_r($data, true));
     $secret_key = get_secret_key();
-    // In production, avoid logging sensitive information such as secret keys.
+    // IMPORTANT: In production, avoid logging sensitive information such as secret keys.
     // error_log('chatbot-keyguard.php: decrypt_api_key() - $secret_key: ' . $secret_key);
     $decrypted_key = decrypt_api_key_with_key($data, $secret_key);
-    error_log('chatbot-keyguard.php: decrypt_api_key() - $decrypted_key: ' . $decrypted_key);
+    // error_log('chatbot-keyguard.php: decrypt_api_key() - $decrypted_key: ' . $decrypted_key);
     return $decrypted_key;
 
 }
@@ -173,31 +149,16 @@ function upgrade_encrypted_api_keys(callable $fetch_keys_callback, callable $upd
 
 }
 
-/* 
-Example usage:
-
-Assume you have functions to interact with your database:
------------------------------------------------------------
-function fetch_stored_api_keys() {
-    // Example: Fetch keys from the database. Replace this with your actual DB call.
-    // Expected format: [ 'key1' => 'plain_text_or_encrypted_value', ... ]
-    return [
-        'key1' => 'UNENCRYPTED_API_KEY_1',
-        'key2' => '{"iv":"...","encrypted":"..."}', // Already encrypted key
-        'key3' => 'UNENCRYPTED_API_KEY_3'
-    ];
-}
-
-function update_stored_api_key($key_id, $new_encrypted_value) {
-    // Example: Update the key in the database. Replace with your actual update logic.
-    echo "Updating key {$key_id} with new value: {$new_encrypted_value}\n";
-}
-
-// Perform the upgrade for unencrypted keys.
-upgrade_unencrypted_api_keys('fetch_stored_api_keys', 'update_stored_api_key');
-*/
-
 // Fetch stored API keys from the database - Ver 2.2.6
+// 
+// Example: Fetch keys from the database. Replace this with your actual DB call.
+// Expected format: [ 'key1' => 'plain_text_or_encrypted_value', ... ]
+//     return [
+//         'key1' => 'UNENCRYPTED_API_KEY_1',
+//         'key2' => '{"iv":"...","encrypted":"..."}', // Already encrypted key
+//         'key3' => 'UNENCRYPTED_API_KEY_3'
+//     ];
+//
 function fetch_stored_api_keys($chatbot_ai_platform_choice = null) {
 
     // Example: Fetch keys from the database. Replace this with your actual DB call.
@@ -217,7 +178,7 @@ function fetch_stored_api_keys($chatbot_ai_platform_choice = null) {
     );
 
     // DIAG - Diagnostics
-    error_log('chatbot-keyguard.php: fetch_stored_api_keys() - $stored_keys: ' . print_r($stored_keys, true));
+    // error_log('chatbot-keyguard.php: fetch_stored_api_keys() - $stored_keys: ' . print_r($stored_keys, true));
 
     return $stored_keys;
 
@@ -242,21 +203,12 @@ function update_stored_api_key($key_id, $new_encrypted_value) {
 
 }
 
-/**
- * Upgrade unencrypted API keys stored in the database.
- *
- * This function fetches stored API keys via the provided callback.
- * It then checks each key—if the key is not already in the encrypted JSON format,
- * it encrypts the key and uses the update callback to save the new encrypted value.
- *
- * @param callable $fetch_keys_callback A callback that returns an associative array
- *                                      where keys are key IDs and values are stored API keys.
- * @param callable $update_key_callback A callback that accepts a key ID and a new encrypted API key,
- *                                      then updates the storage accordingly.
- * @return void
- */
-
 // Upgrade unencrypted API keys stored in the database - Ver 2.2.6
+//
+// This function fetches stored API keys via the provided callback.
+// It then checks each key—if the key is not already in the encrypted JSON format,
+// it encrypts the key and uses the update callback to save the new encrypted value.
+//
 function upgrade_unencrypted_api_keys(callable $fetch_keys_callback, callable $update_key_callback) {
 
     // Retrieve the secret key (auto-generates it if it doesn't exist)
@@ -305,4 +257,20 @@ function run_chatbot_api_key_upgrade() {
         update_option('chatbot_keys_upgraded', 'yes');
     }
 
+}
+
+// Sanitize the API key - Ver 2.2.6
+function keyguard_sanitize_api_key($input) {
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE', 'keyguard_sanitize_api_key()');
+
+    // Only encrypt if the input is not empty.
+    if (!empty($input)) {
+        // Encrypt the API key.
+        $encrypted_key = encrypt_api_key($input);
+        return $encrypted_key;
+    }
+    return $input;
+    
 }

@@ -25,7 +25,7 @@ function chatbot_chatgpt_api_settings_init() {
     );
 
     // API/ChatGPT settings tab - Ver 1.3.0
-    register_setting('chatbot_chatgpt_api_chatgpt', 'chatbot_chatgpt_api_key', 'chatbot_chatgpt_api_key_sanitize');
+    register_setting('chatbot_chatgpt_api_chatgpt', 'chatbot_chatgpt_api_key', 'keyguard_sanitize_api_key');
 
     add_settings_section(
         'chatbot_chatgpt_api_chatgpt_general_section',
