@@ -44,7 +44,7 @@ function localize_global_stopwords($language_code, $stopWords) {
     // Get the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     if (empty($api_key)) {
         $stopWords_string = implode("\n",$stopWords);
         $translated_array = explode("\n", $stopWords_string);
@@ -145,7 +145,7 @@ function localize_global_learningMessages($language_code, $learningMessages) {
     // Get the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     if (empty($api_key)) {
         $learningMessages_string = implode("\n", $learningMessages);
         $translated_array = explode("\n", $learningMessages_string);
@@ -250,7 +250,7 @@ function localize_global_errorResponses($language_code, $errorResponses) {
     // Get the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     if (empty($api_key)) {
         $errorResponses_string = implode("\n", $errorResponses);
         $translated_array = explode("\n", $errorResponses_string);

@@ -36,7 +36,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     if (empty($api_key) || $api_key == '[private]') {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
         // Decrypt the API key - Ver 2.2.6
-        $api_key = decrypt_api_key($api_key);
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
         if (empty($api_key)) {
             // Return an error message if the API key is not set
             $localized_errorResponses = (get_locale() !== "en_US") 

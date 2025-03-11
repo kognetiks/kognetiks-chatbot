@@ -73,7 +73,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
     // API key for the local server - Typically not needed
     $api_key = esc_attr(get_option('chatbot_local_api_key', ''));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,

@@ -49,7 +49,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     if (empty($api_key) or $api_key == '[private]') {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
         // Decrypt the API key - Ver 2.2.6
-        $api_key = decrypt_api_key($api_key);
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
         if (empty($api_key)) {
             // Return an error message if the API key is not set
             if (get_locale() !== "en_US") {
@@ -263,7 +263,7 @@ function chatbot_chatgpt_read_aloud($message) {
     // FIXME - GET THE DEFAULT TEXT-TO-SPEECH API KEY
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     // Get the text to be read aloud
     $message = $_POST['message'];

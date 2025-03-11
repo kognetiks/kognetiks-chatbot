@@ -30,7 +30,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     if (empty($api_key)) {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
         // Decrypt the API key - Ver 2.2.6
-        $api_key = decrypt_api_key($api_key);
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
         if (empty($api_key)) {
             global $chatbot_chatgpt_fixed_literal_messages;
             // Define a default fallback message

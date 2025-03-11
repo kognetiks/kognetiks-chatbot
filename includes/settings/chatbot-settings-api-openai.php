@@ -103,7 +103,7 @@ function chatbot_chatgpt_api_key_callback($args) {
 
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     ?>
     <input type="password" id="chatbot_chatgpt_api_key" name="chatbot_chatgpt_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">

@@ -43,7 +43,7 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
         // Retrieve the API key
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
         // Decrypt the API key - Ver 2.2.6
-        $api_key = decrypt_api_key($api_key);
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
         // Ensure API key is set
         if (empty($api_key)) {
@@ -72,7 +72,7 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
         // Retrieve the API key
         $api_key = esc_attr(get_option('chatbot_azure_api_key'));
         // Decrypt the API key - Ver 2.2.6
-        $api_key = decrypt_api_key($api_key);
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
         // Set the Azure OpenAI API URL
         // https://YOUR_RESOURCE_NAME.openai.azure.com/openai/assistants/{assistant_id}?api-version=2024-08-01-preview

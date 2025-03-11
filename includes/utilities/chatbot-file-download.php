@@ -32,7 +32,7 @@ function download_openai_file($file_id, $filename) {
 
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     if (empty($api_key)) {
         // DIAG - Diagnostics - Ver 2.0.3
         // back_trace( 'ERROR', 'API key is missing.');

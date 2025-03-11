@@ -36,7 +36,7 @@ function chatbot_local_api_model_general_section_callback($args) {
 function chatbot_local_api_key_callback($args) {
     $api_key = esc_attr(get_option('chatbot_local_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     ?>
     <input type="password" id="chatbot_local_api_key" name="chatbot_local_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
@@ -199,7 +199,7 @@ function chatbot_local_api_settings_init() {
 
     // API/Local settings tab - Ver 2.2.6
     register_setting('chatbot_local_api_model', 'chatbot_local_api_enabled');
-    register_setting('chatbot_local_api_model', 'chatbot_local_api_key', 'keyguard_sanitize_api_key'); // API key
+    register_setting('chatbot_local_api_model', 'chatbot_local_api_key', 'chatbot_chatgpt_sanitize_api_key'); // API key
     register_setting('chatbot_local_api_model', 'chatbot_local_max_tokens_setting'); // Max Tokens setting options
     register_setting('chatbot_local_api_model', 'chatbot_local_conversation_context'); // Conversation Context
     register_setting('chatbot_local_api_model', 'chatbot_local_temperature'); // Temperature

@@ -964,7 +964,7 @@ function chatbot_chatgpt_send_message() {
 
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
             // Decrypt the API key - Ver 2.2.6
-            $api_key = decrypt_api_key($api_key);
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-4-1106-preview'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
@@ -976,7 +976,7 @@ function chatbot_chatgpt_send_message() {
 
             $api_key = esc_attr(get_option('chatbot_azure_api_key'));
             // Decrypt the API key - Ver 2.2.6
-            $api_key = decrypt_api_key($api_key);
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_azure_model_choice', 'gpt-4-1106-preview'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
@@ -989,7 +989,7 @@ function chatbot_chatgpt_send_message() {
             $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
             $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
             // Decrypt the API key - Ver 2.2.6
-            $api_key = decrypt_api_key($api_key);
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
@@ -1000,7 +1000,7 @@ function chatbot_chatgpt_send_message() {
 
             $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
             // Decrypt the API key - Ver 2.2.6
-            $api_key = decrypt_api_key($api_key);
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
@@ -1012,7 +1012,7 @@ function chatbot_chatgpt_send_message() {
 
             $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
             // Decrypt the API key - Ver 2.2.6
-            $api_key = decrypt_api_key($api_key);
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
@@ -1044,7 +1044,7 @@ function chatbot_chatgpt_send_message() {
 
             $api_key = esc_attr(get_option('chatbot_local_api_key', 'NOT REQUIRED'));
             // Decrypt the API key - Ver 2.2.6
-            $api_key = decrypt_api_key($api_key);
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
@@ -1056,7 +1056,7 @@ function chatbot_chatgpt_send_message() {
 
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
             // Decrypt the API key - Ver 2.2.6
-            $api_key = decrypt_api_key($api_key);
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;

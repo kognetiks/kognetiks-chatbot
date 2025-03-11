@@ -34,7 +34,7 @@ function chatbot_openai_get_models() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     // Default model list
     $default_model_list = '';
@@ -164,7 +164,7 @@ function chatbot_azure_get_models() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_azure_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     // Default model list
     $default_model_list = '';
@@ -322,7 +322,7 @@ function chatbot_nvidia_get_models() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     // Default model list
     $default_model_list = '';
@@ -502,7 +502,7 @@ function chatbot_deepseek_get_models() {
     // Retrieve the API key
     $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
     // Decrypt the API key - Ver 2.2.6
-    $api_key = decrypt_api_key($api_key);
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     // https://api-docs.deepseek.com/
     // https://api-docs.deepseek.com/quick_start/pricing
