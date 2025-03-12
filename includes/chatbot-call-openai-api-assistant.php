@@ -23,6 +23,8 @@ function createAnAssistant($api_key) {
 
     // Set your API key and assistant ID here:
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', ''));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     // Base URL for the beta threads endpoints
     // $url = "https://api.openai.com/v1/threads";
@@ -95,6 +97,8 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 
     // Set your API key and assistant ID here:
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', ''));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     // Base URL for the beta threads endpoints
     // $url = "https://api.openai.com/v1/threads";
@@ -810,6 +814,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // Step 1 - Create an Assistant
         // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key', ''));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+
         $assistants_response = createAnAssistant($api_key);
         // DIAG - Diagnostics - Ver 2.2.3
         // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
@@ -945,7 +952,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', 'Step 6 - Get the Run\'s Steps');
     $assistants_response = getTheRunsSteps($thread_id, $runId, $api_key);
     // DIAG - Print the response
-    // back_trace( 'NOTICE', $assistants_response);
+    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
@@ -1071,7 +1078,9 @@ function deleteUploadedFile($file_id) {
     // back_trace( 'NOTICE', 'deleteUploadedFile(): ' . $file_id);
 
     // Get the API key
-    $apiKey = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
 
     // Construct the API URL
     // $url = 'https://api.openai.com/v1/files/' . $file_id;
@@ -1082,7 +1091,7 @@ function deleteUploadedFile($file_id) {
         'method'    => 'DELETE',
         'timeout'   => 15,
         'headers'   => [
-            'Authorization'  => 'Bearer ' . $apiKey,
+            'Authorization'  => 'Bearer ' . $api_key,
             'Content-Type'   => 'application/json',
         ]
     ]);

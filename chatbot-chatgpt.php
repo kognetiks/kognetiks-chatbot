@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.2.5
+ * Version:     2.2.6
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -30,7 +30,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.2.5';
+$chatbot_chatgpt_plugin_version = '2.2.6';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -83,9 +83,12 @@ ob_end_flush(); // End output buffering and send the buffer to the browser
 
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-anthropic-api.php';         // ANT API - Ver 2.0.7
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-azure-openai-api.php';      // Azure OpenAI API - Ver 2.2.6
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-azure-api-assistant.php';   // Azure OpenAI Assistants API - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-deepseek-api.php';          // ChatGPT API - Ver 2.2.2
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-mc.php';      // Kognetiks - Markov Chain API - Ver 2.1.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-tm.php';      // Kognetiks - Transformer Model API - Ver 2.2.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-local-api.php';             // Local API - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-nvidia-api.php';            // NVIDIA API - Ver 2.1.8
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-assistant.php';  // GPT Assistants - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-chatgpt.php';    // ChatGPT API - Ver 1.6.9
@@ -125,15 +128,18 @@ require_once plugin_dir_path(__FILE__) . 'includes/transformers/sentential-conte
 require_once plugin_dir_path(__FILE__) . 'includes/transformers/transformer-model-scheduler.php';           // Functions - Ver 2.2.0
 
 // Include necessary files - Settings
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-anthropic.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-chatgpt.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-deepseek.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-anthropic.php';            // Anthropic
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-azure-assistants.php';     // Azure Assistants - Ver 2.2.6
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-azure.php';                // Azure - Ver 2.2.6
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-deepseek.php';             // DeepSeek
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';               // NVIDIA
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-local.php';                // Local Server - Ver 2.2.6
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-openai-assistants.php';    // OpenAI ChatGPT
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-openai.php';               // OpenAI ChatGPT
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-test.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-appearance.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-avatar.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-buttons.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-custom-gpts.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-diagnostics.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-general.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-links.php';
@@ -154,7 +160,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php
 
 // Include necessary files - Utilities - Ver 1.9.0
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-api-endpoints.php';                // API Endpoints - Ver 2.2.2
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants.php';                   // Assistants Management - Ver 2.0.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants.php';                   // Assistants Management for OpenAI - Ver 2.0.4
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants-azure.php';             // Assistants Management for Azure - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php';         // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-content-search.php';               // Functions - Ver 2.2.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php';                // Database Management for Reporting - Ver 1.6.3
@@ -165,6 +172,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-downlo
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper.php';                  // Functions - Ver 2.0.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php';                  // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php';         // Functions - Ver 1.9.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-keyguard.php';                     // Functions - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php';      // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php';                       // Functions - Ver 1.9.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-names.php';                        // Functions - Ver 1.9.4
@@ -220,6 +228,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_chatgpt_api_enabled = 'Yes';
         update_option('chatbot_chatgpt_api_enabled', 'Yes');
     
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+    
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
     
@@ -234,6 +245,9 @@ switch ($chatbot_ai_platform_choice) {
     
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
+
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
         
         // Model choice - Ver 1.9.4
         if (esc_attr(get_option('chatbot_chatgpt_model_choice')) === null) {
@@ -255,12 +269,66 @@ switch ($chatbot_ai_platform_choice) {
 
         break;
 
+    case 'Azure OpenAI':
+
+        update_option('chatbot_ai_platform_choice', 'Azure OpenAI');
+
+        $chatbot_chatgpt_api_enabled = 'No';
+        update_option('chatbot_chatgpt_api_enabled', 'No');
+
+        $chatbot_azure_api_enabled = 'Yes';
+        update_option('chatbot_azure_api_enabled', 'Yes');
+    
+        $chatbot_nvidia_api_enabled = 'No';
+        update_option('chatbot_nvidia_api_enabled', 'No');
+    
+        $chatbot_anthropic_api_enabled = 'No';
+        update_option('chatbot_anthropic_api_enabled', 'No');
+
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
+
+        $chatbot_markov_chain_api_enabled = 'No';
+        update_option('chatbot_markov_chain_api_enabled', 'No');
+    
+        $chatbot_transformer_model_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+        
+        // Model choice - Ver 1.9.4
+        if (esc_attr(get_option('chatbot_azure_model_choice')) === null) {
+            $model = 'gpt-4-1106-preview';
+            update_option('chatbot_azure_model_choice', $model);
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+        } elseif (empty($model)) {
+            $model = 'gpt-4-1106-preview';
+        }
+    
+        // FIXME - TEMPORARILY DISABLED - 2025-03-07
+        // Disable Read Aloud - Ver 2.2.6
+        update_option('chatbot_chatgpt_read_aloud_option', 'no');
+        // Voice choice - Ver 1.9.5
+        // if (esc_attr(get_option('chatbot_azure_voice_option')) === null) {
+        //     $voice = 'alloy';
+        //     update_option('chatbot_azure_voice_option', $voice);
+        //     // DIAG - Diagnostics
+        //     // back_trace( 'NOTICE', 'Voice upgraded: ' . $voice);
+        // }
+
+        break;
+
     case 'NVIDIA':
 
         update_option('chatbot_ai_platform_choice', 'NVIDIA');
         
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
    
         $chatbot_nvidia_api_enabled = 'Yes';
         update_option('chatbot_nvidia_api_enabled', 'Yes');
@@ -276,7 +344,10 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
-    
+
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+
         // Model choice - Ver 2.1.8
         if (esc_attr(get_option('chatbot_nvidia_model_choice')) === null) {
             $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
@@ -303,6 +374,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
 
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
 
@@ -318,6 +392,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
 
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+        
         // Model choice - Ver 2.2.1
         if (esc_attr(get_option('chatbot_anthropic_model_choice')) === null) {
             $model = 'claude-3-5-sonnet-latest';
@@ -344,6 +421,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
 
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
 
@@ -358,7 +438,10 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
-
+        
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+        
         // Model choice - Ver 2.2.1
         if (esc_attr(get_option('chatbot_deepseek_model_choice')) === null) {
             $model = 'deepseek-chat';
@@ -385,6 +468,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
 
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
 
@@ -399,7 +485,10 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_transformer_model_api_enabled = 'No';
         update_option('chatbot_transformer_model_api_enabled', 'No');
-         
+        
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+                 
         // Model choice - Ver 2.1.8
         if (esc_attr(get_option('chatbot_markov_chain_model_choice')) === null) {
             $model = 'markov-chain-flask';
@@ -425,6 +514,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_chatgpt_api_enabled = 'No';
         update_option('chatbot_chatgpt_api_enabled', 'No');
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
     
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
@@ -439,7 +531,10 @@ switch ($chatbot_ai_platform_choice) {
         update_option('chatbot_markov_chain_api_enabled', 'No');
 
         $chatbot_transformer_model_api_enabled = 'Yes';
-        update_option('chatbot_transformer_model_api_enabled', 'Yes');   
+        update_option('chatbot_transformer_model_api_enabled', 'Yes');
+        
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No'); 
     
         // Model choice - Ver 2.2.0
         if (esc_attr(get_option('chatbot_transformer_model_choice')) === null) {
@@ -460,12 +555,65 @@ switch ($chatbot_ai_platform_choice) {
 
         break;
 
+    case 'Local Server':
+
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+
+        update_option('chatbot_ai_platform_choice', 'Local Server');
+
+        $chatbot_chatgpt_api_enabled = 'No';
+        update_option('chatbot_chatgpt_api_enabled', 'No');
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+
+        $chatbot_nvidia_api_enabled = 'No';
+        update_option('chatbot_nvidia_api_enabled', 'No');
+
+        $chatbot_anthropic_api_enabled = 'No';
+        update_option('chatbot_anthropic_api_enabled', 'No');
+
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
+    
+        $chatbot_markov_chain_api_enabled = 'No';
+        update_option('chatbot_markov_chain_api_enabled', 'No');
+
+        $chatbot_transformer_model_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+        
+        $chatbot_local_api_enabled = 'Yes';
+        update_option('chatbot_local_api_enabled', 'Yes'); 
+    
+        // Model choice - Ver 2.2.0
+        if (esc_attr(get_option('chatbot_local_model_choice')) === null) {
+            $model = 'llama3.2-3b-instruct';
+            update_option('chatbot_transformer_model_choice', $model);
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+        } elseif (empty($model)) {
+            $model = 'llama3.2-3b-instruct';
+        }
+
+        // Disable Read Aloud - Ver 2.2.1
+        update_option('chatbot_chatgpt_read_aloud_option', 'no');
+        // Disable File Uploads - Ver 2.2.1
+        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
+        // Disable MP3 Uploads - Ver 2.2.1
+        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
+
+        break;
+
     default:
 
         update_option('chatbot_ai_platform_choice', 'OpenAI');
 
         $chatbot_chatgpt_api_enabled = 'Yes';
         update_option('chatbot_chatgpt_api_enabled', 'Yes');
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
 
         $chatbot_nvidia_api_enabled = 'No';
         update_option('chatbot_nvidia_api_enabled', 'No');
@@ -509,7 +657,23 @@ $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_en
 
 // Allow file uploads on/off setting can be found on the Settings tab - Ver 1.7.6
 global $chatbot_chatgpt_allow_file_uploads;
-$chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+$chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+if ($chatbot_ai_platform_choice == 'OpenAI') {
+    $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+    // DIAG - Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_allow_file_uploads: ' . $chatbot_chatgpt_allow_file_uploads);
+} elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
+    $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_azure_allow_file_uploads', 'No'));
+    // DIAG - Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_allow_file_uploads: ' . $chatbot_chatgpt_allow_file_uploads);
+} else {
+    $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
+    // DIAG - Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_allow_file_uploads: ' . $chatbot_chatgpt_allow_file_uploads);
+}
 
 // Suppress Notices on/off setting can be found on the Settings tab - Ver 1.6.5
 global $chatbot_chatgpt_suppress_notices;
@@ -764,8 +928,11 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
     wp_schedule_event(time(), 'hourly', 'chatbot_chatgpt_cleanup_download_files');
 }
 
-// Add the Assistant table to the database - Ver 2.0.4
+// Add the Opean AI Assistant table to the database - Ver 2.0.4
 create_chatbot_chatgpt_assistants_table();
+
+// Add the Azure Assistants table to the database - Ver 2.2.6
+create_chatbot_azure_assistants_table();
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
@@ -796,41 +963,61 @@ function chatbot_chatgpt_send_message() {
         case 'OpenAI':
 
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-4-1106-preview'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 797 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 949 - $model: ' . $model);
+            break;
+
+        case 'Azure OpenAI':
+
+            $api_key = esc_attr(get_option('chatbot_azure_api_key'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_azure_model_choice', 'gpt-4-1106-preview'));
+            $kchat_settings['chatbot_chatgpt_model'] = $model;
+            $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.2.6
+            // back_trace( 'NOTICE', 'LINE 959 - $model: ' . $model);
             break;
 
         case 'NVIDIA':
 
             $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
             $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 807 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 969 - $model: ' . $model);
             break;
 
         case 'Anthropic':
 
             $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 817 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 970 - $model: ' . $model);
             break;
 
         case 'DeepSeek':
 
             $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.2
-            // back_trace( 'NOTICE', 'LINE 827 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 989 - $model: ' . $model);
             break;
         
         case 'Markov Chain':
@@ -840,7 +1027,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 837 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 999 - $model: ' . $model);
             break;
 
         case 'Transformer':
@@ -850,29 +1037,44 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 847 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 1009 - $model: ' . $model);
+            break;
+
+        case 'Local Server':
+
+            $api_key = esc_attr(get_option('chatbot_local_api_key', 'NOT REQUIRED'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
+            $kchat_settings['chatbot_chatgpt_model'] = $model;
+            $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.2.6
+            // back_trace( 'NOTICE', 'LINE 1019 - $model: ' . $model);
             break;
 
         default:
 
             $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 857 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 1029 - $model: ' . $model);
             break;
 
     }
 
     // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', 'LINE 863 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 1035 - $model: ' . $model);
 
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
 
     // Check for missing API key or message
-    if (!$api_key || !$message) {
+    // if (!$api_key || !$message) {
+    if ( !$message ) {
         // DIAG - Diagnostics
         // back_trace( 'ERROR', 'Invalid API Key or Message.');
         global $chatbot_chatgpt_fixed_literal_messages;
@@ -915,7 +1117,7 @@ function chatbot_chatgpt_send_message() {
     $model = $kchat_settings['chatbot_chatgpt_model'];
 
     // FIXME - TESTING - Ver 2.1.8
-    // back_trace( 'NOTICE', 'LINE 905 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 904 - $model: ' . $model);
     
     $additional_instructions = $kchat_settings['additional_instructions'];
     $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
@@ -1105,7 +1307,21 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', 'BEFORE CALL TO MODULE $additional_instructions: ' . $additional_instructions);
 
         // Send message to Custom GPT API - Ver 1.6.7
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
+        $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+
+        if ($chatbot_ai_platform_choice == 'OpenAI') {
+            // Send message to Custom GPT API - Ver 1.6.7
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Using OpenAI');
+            $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
+        } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
+            // Send message to Custom GPT API - Ver 2.2.6
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Using Azure OpenAI');
+            $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
+        } else {
+            return 'ERROR: Invalid AI Platform';
+        }
 
         // Replace " ." at the end of $response with "."
         $response = str_replace(" .", ".", $response);
@@ -1175,8 +1391,8 @@ function chatbot_chatgpt_send_message() {
         };
 
         // FIXME - TESTING - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 1154 - $model: ' . $model);
-        // back_trace( 'NOTICE', 'LINE 1155 - $kchat_settings[model]: ' . $kchat_settings['model']);
+        // back_trace( 'NOTICE', 'LINE 1254 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 1255 - $kchat_settings[model]: ' . $kchat_settings['model']);
 
         // if (str_starts_with($model,'dall')) {
         //     // back_trace ( 'NOTICE', 'Using Image API');
@@ -1195,101 +1411,158 @@ function chatbot_chatgpt_send_message() {
         $voice = isset($kchat_settings['voice']) ? $kchat_settings['voice'] : null;
 
         // FIXME - TESTING - Ver 2.1.8
-        // back_trace( 'NOTICE', 'LINE 1174 - $model: ' . $model);
+        // back_trace( 'NOTICE', 'LINE 1176 - $model: ' . $model);
 
-        if ($model !== null && str_starts_with($model, 'gpt-4o')) {
+        $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
-            // The string 'gpt-4o' is found in $model
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling ChatGPT Omni API');
-            // Send message to ChatGPT API - Ver 1.6.7
-            $response = chatbot_chatgpt_call_omni($api_key, $message);
+        // DIAG - Diagnostics - Ver 2.2.6
+        // back_trace( 'NOTICE', 'LINE - 1281 - $chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
 
-        } elseif ($model !== null && str_starts_with($model, 'gpt')) {
+        switch ($chatbot_ai_platform_choice) {
 
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling ChatGPT API');
-            // Send message to ChatGPT API - Ver 1.6.7
-            $response = chatbot_chatgpt_call_api($api_key, $message);
+            case 'OpenAI':
 
-        } elseif ($model !== null && str_starts_with($model, 'dall')) {
+                switch ($model) {
 
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling Dall E Image API');
-            // Send message to Image API - Ver 1.9.4
-            $response = chatbot_chatgpt_call_image_api($api_key, $message);
+                    case str_starts_with($model, 'gpt-4o'):
 
-        } elseif ($model !== null && str_starts_with($model, 'tts')) {
+                        // The string 'gpt-4o' is found in $model
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'LINE 1296 - Calling ChatGPT Omni API');
+                        // Send message to ChatGPT API - Ver 1.6.7
+                        $response = chatbot_chatgpt_call_omni($api_key, $message);
 
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            $kchat_settings['voice'] = $voice;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling TTS API');
-            // Send message to TTS API - Text-to-speech - Ver 1.9.5
-            $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
+                        break;
 
-        } elseif ($model !== null && str_starts_with($model,'whisper')) {
+                    case str_starts_with($model, 'gpt'):
+                        
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'LINE 1307 - Calling ChatGPT API');
+                        // Send message to ChatGPT API - Ver 1.6.7
+                        $response = chatbot_chatgpt_call_api($api_key, $message);
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling STT API');
-            // Send message to STT API - Speech-to-text - Ver 1.9.6
-            $response = chatbot_chatgpt_call_stt_api($api_key, $message);
+                        break;
 
-        } elseif ($model !==null && str_starts_with($model,'nvidia')) {
+                    case str_starts_with($model, 'dall'):
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling NVIDIA API');
-            // Send message to NVIDIA API - Ver 2.1.8
-            $response = chatbot_nvidia_call_api($api_key, $message);
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'LINE 1318 - Calling Dall E Image API');
+                        // Send message to Image API - Ver 1.9.4
+                        $response = chatbot_chatgpt_call_image_api($api_key, $message);
 
-        } elseif ($model !==null && str_starts_with($model,'claude')) {
+                        break;
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling Anthropic API');
-            // Send message to Claude API - Ver 2.1.8
-            $response = chatbot_call_anthropic_api($api_key, $message);
+                    case str_starts_with($model, 'tts'):
 
-        } elseif ($model !==null && str_starts_with($model,'deepseek')) {
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        $kchat_settings['voice'] = $voice;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'LINE 1330 - Calling TTS API');
+                        // Send message to TTS API - Text-to-speech - Ver 1.9.5
+                        $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.2.2
-            // back_trace( 'NOTICE', 'Calling DeepSeek API');
-            // Send message to DeepSeek API - Ver 2.2.2
-            $response = chatbot_call_deepseek_api($api_key, $message);
+                        break;
 
-        } elseif ($model !== null && str_starts_with($model,'markov')) {
+                    case str_starts_with($model, 'whisper'):
+                        
+                        // Reload the model - BELT & SUSPENDERS
+                        $kchat_settings['model'] = $model;
+                        // DIAG - Diagnostics - Ver 2.1.8
+                        // back_trace( 'NOTICE', 'LINE 1341 - Calling STT API');
+                        // Send message to STT API - Speech-to-text - Ver 1.9.6
+                        $response = chatbot_chatgpt_call_stt_api($api_key, $message);
 
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'Calling Markov Chain API');
-            // Send message to Markov API - Ver 1.9.7
-            $response = chatbot_chatgpt_call_markov_chain_api($message);
+                        break;
 
-        } elseif ($model !== null && str_contains($model,'context-model')) {
-            $kchat_settings['model'] = $model;
-            // DIAG - Diagnostics - Ver 2.2.0
-            // back_trace( 'NOTICE', 'Calling Transformer Model API');
-            // Send message to Transformer Model API - Ver 2.2.0
-            $response = chatbot_chatgpt_call_transformer_model_api($message);
+                }
 
-        } else {
+                break;
 
-            // Reload the model - BELT & SUSPENDERS
-            $kchat_settings['model'] = $model;
-            // back_trace( 'NOTICE', 'Calling ' .$model . ' Model API');
-            // Send message to ChatGPT API - Ver 1.6.7
-            $response = chatbot_chatgpt_call_api($api_key, $message);
+            case 'Azure OpenAI':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.2.6
+                // back_trace( 'NOTICE', 'LINE 1432 - Calling Azure OpenAI API');
+                // Send message to Azure OpenAI API - Ver 2.2.6
+                $response = chatbot_call_azure_openai_api($api_key, $message);
+
+                break;
+
+            case 'NVIDIA':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.1.8
+                // back_trace( 'NOTICE', 'LINE 1355 - Calling NVIDIA API');
+                // Send message to NVIDIA API - Ver 2.1.8
+                $response = chatbot_nvidia_call_api($api_key, $message);
+
+                break;
+
+            case 'Anthropic':
             
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.1.8
+                // back_trace( 'NOTICE', 'LINE 1365 - Calling Anthropic API');
+                // Send message to Claude API - Ver 2.1.8
+                $response = chatbot_call_anthropic_api($api_key, $message);
+
+                break;
+
+            case 'DeepSeek':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.2.2
+                // back_trace( 'NOTICE', 'LINE 1375 - Calling DeepSeek API');
+                // Send message to DeepSeek API - Ver 2.2.2
+                $response = chatbot_call_deepseek_api($api_key, $message);
+
+                break;
+
+            case 'Markov Chain':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.1.8
+                // back_trace( 'NOTICE', 'LINE 1385 - Calling Markov Chain API');
+                // Send message to Markov API - Ver 1.9.7
+                $response = chatbot_chatgpt_call_markov_chain_api($message);
+
+                break;
+
+            case 'Transformer':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.2.0
+                // back_trace( 'NOTICE', 'LINE 1395 - Calling Transformer Model API');
+                // Send message to Transformer Model API - Ver 2.2.0
+                $response = chatbot_chatgpt_call_transformer_model_api($message);
+
+                break;
+
+            case 'Local Server':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.2.6
+                // back_trace( 'NOTICE', 'LINE 1405 - Calling Local Model API');
+                // Send message to Local Model API - Ver 2.2.6
+                $response = chatbot_chatgpt_call_local_model_api($message);
+
+                break;
+
+            default:
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.2.6
+                // back_trace( 'NOTICE', 'LINE 1415 - Calling default ' .$model . ' model API');
+                // Send message to ChatGPT API - Ver 1.6.7
+                $response = chatbot_chatgpt_call_api($api_key, $message);
+
         }
         
         // DIAG - Diagnostics

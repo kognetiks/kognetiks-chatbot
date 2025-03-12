@@ -50,10 +50,10 @@ function chatbot_chatgpt_content_search( $search_prompt ) {
         $exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $tf_idf_table_name WHERE word LIKE %s", $word));
 
         if ($exists > 0) {
-            // back_trace('NOTICE', 'Word exists: ' . $word);
+            // back_trace( 'NOTICE', 'Word exists: ' . $word);
             $filtered_words[] = $word; // Retain the word
         } else {
-            // back_trace('NOTICE', 'Word does not exist: ' . $word);
+            // back_trace( 'NOTICE', 'Word does not exist: ' . $word);
         }
     }
 
@@ -61,7 +61,7 @@ function chatbot_chatgpt_content_search( $search_prompt ) {
     $cleaned_prompt = implode(' ', $filtered_words);
 
     // DIAG - Diagnostic - Ver 2.2.4
-    // back_trace('NOTICE', '$cleaned_prompt: ' . $cleaned_prompt);
+    // back_trace( 'NOTICE', '$cleaned_prompt: ' . $cleaned_prompt);
 
     $words = preg_split('/\s+/', trim($cleaned_prompt));
     $words = array_filter($words); // remove any empty entries

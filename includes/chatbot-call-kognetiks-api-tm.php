@@ -168,6 +168,10 @@ function chatbot_chatgpt_call_transformer_model_api($message) {
     if ($model == 'lexical-context-model') {
         // Call the transformer model with the user input - transformer-word-based
         $response = transformer_model_lexical_context_response($transformer_model_message, $max_tokens);
+    } elseif ($model == 'sentential-context-model-lite') {
+        // Call the transformer model with the user input - transformer-sentence-based
+        $response = transformer_model_sentential_context_model_response_lite($transformer_model_message, $max_tokens);
+
     } elseif ($model == 'sentential-context-model') {
         // Call the transformer model with the user input - transformer-sentence-based
         $response = transformer_model_sentential_context_model_response($transformer_model_message, $max_tokens);

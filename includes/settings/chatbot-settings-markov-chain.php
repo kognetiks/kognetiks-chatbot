@@ -32,7 +32,7 @@ function chatbot_markov_chain_model_settings_section_callback($args) {
 
 function chatbot_markov_chain_api_model_general_section_callback($args){
     ?>
-    <p>Configure the settings for the plugin when using Markov Chain models.  Depending on the Markov Chain model you choose, the maximum tokens may be as high as 4000.  The default is 500.</p>
+    <p>Configure the settings for the plugin when using Markov Chain models.  Depending on the Markov Chain model you choose, the maximum tokens may be as high as 10000.  The default is 500.</p>
     <?php
 }
 
@@ -137,11 +137,11 @@ function chatbot_markov_chain_max_tokens_setting_callback($args) {
     // Get the saved chatbot_markov_chain_max_tokens or default to 500
     $max_tokens = esc_attr(get_option('chatbot_markov_chain_max_tokens', '500'));
 
-    // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
+    // Allow for a range of tokens between 100 and 10000 in 100-step increments - Ver 2.0.4
     ?>
     <select id="chatbot_markov_chain_max_tokens" name="chatbot_markov_chain_max_tokens">
         <?php
-        for ($i=100; $i<=4000; $i+=100) {
+        for ($i=100; $i<=10000; $i+=100) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot - API Endpoints - Ver 2.2.2
+ * Kognetiks Chatbot - API Endpoints - Ver 2.2.2  - Revised - Ver 2.2.6
  *
  * This file contains the code for managing the API endpoints.
  *
@@ -13,68 +13,145 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Base URL for the OpenAI API calls - Ver 1.8.1
-function get_openai_api_base_url() {
+// Base URL for the API calls - Ver 2.2.6
+function get_api_base_url() {
 
-    return esc_attr(get_option('chatbot_chatgpt_base_url', 'https://api.openai.com/v1'));
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
 
-}
+    switch ($chatbot_ai_platform_choice) {
 
-// Base URL for the NVIDIA API calls - Ver 2.1.8
-function get_nvidia_api_base_url() {
+        // Base URL for the OpenAI API calls - Ver 1.8.1
+        case 'OpenAI':
 
-    return esc_attr(get_option('chatbot_nvidia_base_url', 'https://integrate.api.nvidia.com/v1'));
+            return esc_attr(get_option('chatbot_chatgpt_base_url', 'https://api.openai.com/v1'));
+            break;
 
-}
+        // Base URL for the Azure OpenAI API calls - Ver 2.2.6
+        case 'Azure OpenAI':
 
-// Base URL for the Anthropic API calls - Ver 2.2.1
-function get_anthropic_api_base_url() {
+            return esc_attr(get_option('chatbot_azure_base_url', 'https://YOUR_RESOURCE_NAME.openai.azure.com/DEPLOYMENT_NAME/MODEL/chat/completions?api-version=YYYY-MM-DD'));
+            break;
 
-    return esc_attr(get_option('chatbot_anthropic_base_url', 'https://api.anthropic.com/v1'));
+        // Base URL for the NVIDIA API calls - Ver 2.1.8
+        case 'NVIDIA':
 
-}
+            return esc_attr(get_option('chatbot_nvidia_base_url', 'https://integrate.api.nvidia.com/v1'));
+            break;
 
-// Base URL for the DeepSeek API calls - Ver 2.2.2
-function get_deepseek_api_base_url() {
+        // Base URL for the Anthropic API calls - Ver 2.2.1
+        case 'Anthropic':
 
-    return esc_attr(get_option('chatbot_deepseek_base_url', 'https://api.deepseek.com'));
+            return esc_attr(get_option('chatbot_anthropic_base_url', 'https://api.anthropic.com/v1'));
+            break;
+
+        // Base URL for the DeepSeek API calls - Ver 2.2.2
+        case 'DeepSeek':
+
+            return esc_attr(get_option('chatbot_deepseek_base_url', 'https://api.deepseek.com'));
+            break;
+
+        // Base URL for the Local API calls - Ver 2.2.6
+        case 'Local Server':
+
+            return esc_attr(get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1'));
+            break;
+
+        default:
+
+            return get_api_base_url();
+            break;
+
+    }
 
 }
 
 // Base URL for the ChatGPT API calls - Ver 2.2.2
 function get_threads_api_url() {
 
-    return get_openai_api_base_url() . "/threads";
+    return get_api_base_url() . "/threads";
 
 }
 
 // Base URL for the ChatGPT API calls - Ver 2.2.2
 function get_files_api_url() {
 
-    return get_openai_api_base_url() . "/files";
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
+
+    if ($chatbot_ai_platform_choice == 'OpenAI') {
+
+        return get_api_base_url() . "/files";
+
+    } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
+
+        $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
+        $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
+        $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
+        // Assemble the URL
+        // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/files?api-version=2024-03-01-preview';
+        $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files?api-version=' . $chatbot_azure_api_version;
+
+        // DIAG - Diagnostics
+        // back_trace( 'NOTICE', 'Azure OpenAI endpoint $url is: ' . $url );
+        return $url;
+
+    }
+
+    return 'ERROR: No file API URL found!';
 
 }
 
-// Base URL for the ChatGPT API calls - Ver 2.2.2
+// Base URL for the ChatGPT API calls - Ver 2.2.2 - Revised - Ver 2.2.6
 function get_chat_completions_api_url() {
 
-    // Enable for either ChatGPT or NVIDIA - Ver 2.1.8
-    if (get_option('chatbot_nvidia_api_enabled') == 'Yes' || esc_attr(get_option('chatbot_ai_platform_choice')) == 'NVIDIA') {
-        // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'get_chat_completions_api_url: NVIDIA API' );
-        return get_nvidia_api_base_url() . "/chat/completions";
-    } else if (get_option('chatbot_anthropic_api_enabled') == 'Yes' || esc_attr(get_option('chatbot_ai_platform_choice')) == 'Anthropic') {
-        // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace( 'NOTICE', 'get_chat_completions_api_url: Anthropic API' );
-        return get_anthropic_api_base_url() . "/messages";
-    } else if (get_option('chatbot_deepseek_api_enabled') == 'Yes' || esc_attr(get_option('chatbot_ai_platform_choice')) == 'DeepSeek') {
-        // DIAG - Diagnostics - Ver 2.2.2
-        // back_trace( 'NOTICE', 'get_chat_completions_api_url: DeepSeek API' );
-        return get_deepseek_api_base_url() . "/chat/completions";
-    } else {
-        // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'get_chat_completions_api_url: OpenAI API' );
-        return get_openai_api_base_url() . "/chat/completions";
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
+
+    switch ($chatbot_ai_platform_choice) {
+
+        // Base URL for the OpenAI API calls - Ver 1.8.1
+        case 'OpenAI':
+
+            return get_api_base_url() . "/chat/completions";
+            break;
+
+        // Base URL for the Azure OpenAI API calls - Ver 2.2.6
+        case 'Azure OpenAI':
+
+            $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
+            $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
+            $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', 'YYYY-MM-DD'));
+
+            // Assemble the URL
+            return 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/deployments/' . $chatbot_azure_deployment_name . '/chat/completions?api-version=' . $chatbot_azure_api_version;
+            break;
+
+        // Base URL for the NVIDIA API calls - Ver 2.1.8
+        case 'NVIDIA':
+
+            return get_api_base_url() . "/chat/completions";
+            break;
+
+        // Base URL for the Anthropic API calls - Ver 2.2.1
+        case 'Anthropic':
+
+            return get_api_base_url() . "/messages";
+            break;
+
+        // Base URL for the DeepSeek API calls - Ver 2.2.2
+        case 'DeepSeek':
+
+            return get_api_base_url() . "/chat/completions";
+            break;
+
+        // Base URL for the Local API calls - Ver 2.2.6
+        case 'Local Server':
+
+            return get_api_base_url() . "/chat/completions";
+            break;
+
+        default:
+
+            return get_api_base_url() . "/chat/completions";
+            break;
     }
 
 }

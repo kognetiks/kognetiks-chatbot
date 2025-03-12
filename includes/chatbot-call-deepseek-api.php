@@ -64,7 +64,7 @@ function chatbot_call_deepseek_api($api_key, $message) {
     $max_tokens = intval(esc_attr(get_option('chatbot_deepseek_max_tokens_setting', '1024')));
 
     // Conversation Context - Ver 1.6.1
-    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+    $context = esc_attr(get_option('chatbot_deepseek_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
     $raw_context = $context;
  
     // Context History - Ver 1.6.1
@@ -126,6 +126,26 @@ function chatbot_call_deepseek_api($api_key, $message) {
     if ($chatbot_chatgpt_conversation_continuation == 'On') {
         $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
         $context = $conversation_history . ' ' . $context;
+    }
+
+    // Check the length of the context and truncate if necessary - Ver 2.2.6
+    $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
+    // back_trace('NOTICE', '$context_length: ' . $context_length);
+    // FIXME - Define max context length (adjust based on model requirements)
+    $max_context_length = 65536; // Example: 65536 characters ≈ 16384 tokens
+    if ($context_length > $max_context_length) {
+        // Truncate to the max length
+        $truncated_context = substr($context, 0, $max_context_length);
+        // Ensure truncation happens at the last complete word
+        $truncated_context = preg_replace('/\s+[^\s]*$/', '', $truncated_context);
+        // Fallback if regex fails (e.g., no spaces in the string)
+        if (empty($truncated_context)) {
+            $truncated_context = substr($context, 0, $max_context_length);
+        }
+        $context = $truncated_context;
+        // back_trace('NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
+    } else {
+        // back_trace('NOTICE', 'Context length is within limits.');
     }
 
     // FIXME - Set $context to null - Ver 2.2.2 - 2025-01-16
@@ -228,13 +248,6 @@ function chatbot_call_deepseek_api($api_key, $message) {
     // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
-
-    // Add the usage to the conversation tracker
-
     // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens
@@ -242,7 +255,13 @@ function chatbot_call_deepseek_api($api_key, $message) {
     $output_tokens = $response_body->usage->completion_tokens ?? 0;
     $total_tokens = $input_tokens + $output_tokens;
 
-    if ($response_body->response->code == 200) { // Ensure response code logic matches your API
+    // DIAG - Diagnostics - Ver 1.8.1
+    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $input_tokens);
+    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $output_tokens);
+    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $total_tokens);
+
+    // Check if the response content is not empty
+    if (!empty($response_body->choices[0]->message->content)) {
         if ($input_tokens > 0) {
             append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $input_tokens);
         }

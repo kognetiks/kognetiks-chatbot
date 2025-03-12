@@ -53,7 +53,7 @@ To ensure your Kognetiks Chatbot functions optimally, you need to configure the 
 
 1. Navigate to the Chat Settings section of the Kognetiks Chatbot plugin in your WordPress dashboard.
 
-2. Select the default ChatGPT model from the dropdown menu.
+2. Select the default chat model from the dropdown menu.
 
 3. Enter the maximum tokens setting appropriate for your needs.
 

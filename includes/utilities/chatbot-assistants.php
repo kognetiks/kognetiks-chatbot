@@ -19,11 +19,6 @@ function create_chatbot_chatgpt_assistants_table() {
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
-
-    // Check if the table already exists
-    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
-        return; // Exit if the table already exists
-    }
     
     $charset_collate = $wpdb->get_charset_collate();
 
@@ -128,9 +123,9 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
 
     // Before returning the $assistant_details, rename certain keys for compatibility with the chatbot shortcode
     if ($assistant_details) {
-        $assistant_details['chatbot_chatbot_assistant_id'] = $assistant_details['assistant_id'];
+        $assistant_details['chatbot_chatgpt_assistant_id'] = $assistant_details['assistant_id'];
         $assistant_details['common_name'] = $assistant_details['common_name'];
-        $assistant_details['chatbot_chatbot_display_style'] = $assistant_details['style'];
+        $assistant_details['chatbot_chatgpt_display_style'] = $assistant_details['style'];
         $assistant_details['chatbot_chatgpt_audience_choice'] = $assistant_details['audience'];
         $assistant_details['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
         $assistant_details['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
@@ -220,7 +215,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<thead>';
     echo '<tr>';
     echo '<th>Actions</th>';  // Column header for actions
-    echo '<th>&#91;Shortcode&#93;</th>';
+    echo '<th style="min-width:100px;">&#91;Shortcode&#93;</th>';
     echo '<th>Assistant ID</th>';
     echo '<th>Common Name</th>';
     echo '<th>Style</th>';
@@ -537,6 +532,12 @@ function add_new_assistant() {
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+
+    // Check that the table exists
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
+        // Table doesn't exist then add the table
+        create_chatbot_chatgpt_assistants_table();
+    }
 
     $assistant_id = sanitize_text_field($_POST['assistant_id']);
     $common_name = sanitize_text_field($_POST['common_name']);

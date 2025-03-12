@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // API/DeepSeek settings section callback - Ver 2.1.8
 function chatbot_deepseek_model_settings_section_callback($args) {
     ?>
-    <p>Configure the default settings for the plugin DeepSeek for chat generation.  Start by adding your API key then selecting your choices below.</p>
+    <p>Configure the default settings for the Chatbot plugin to use DeepSeek for chat generation.  Start by adding your API key then selecting your choices below.</p>
     <p>More information about DeepSeek models and their capability can be found at <a href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank">https://api-docs.deepseek.com/quick_start/pricing</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/DeepSeek settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-deepseek-settings&file=api-deepseek-model-settings.md">here</a>.</b></p>
@@ -33,6 +33,8 @@ function chatbot_deepseek_api_model_general_section_callback($args) {
 // API key field callback
 function chatbot_deepseek_api_key_callback($args) {
     $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     ?>
     <input type="password" id="chatbot_deepseek_api_key" name="chatbot_deepseek_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
@@ -91,11 +93,11 @@ function chatbot_deepseek_max_tokens_setting_callback($args) {
 
     // Get the saved chatbot_deepseek_max_tokens_setting or default to 500
     $max_tokens = esc_attr(get_option('chatbot_deepseek_max_tokens_setting', '500'));
-    // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
+    // Allow for a range of tokens between 100 and 10000 in 100-step increments - Ver 2.0.4
     ?>
     <select id="chatbot_deepseek_max_tokens_setting" name="chatbot_deepseek_max_tokens_setting">
         <?php
-        for ($i=100; $i<=4000; $i+=100) {
+        for ($i=100; $i<=10000; $i+=100) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>
@@ -160,7 +162,7 @@ function chatbot_deepseek_top_p_callback($args) {
 function chatbot_deepseek_api_model_advanced_section_callback($args) {
 
     ?>
-    <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the DeepSeek API.  The default is <code>https://api.deepseek.com</code>.</p>
+    <p><strong>CAUTION</strong>: Configure the advanced settings for the plugin. Enter the base URL for the DeepSeek API.  The default is <code>https://api.deepseek.com</code>.</p>
     <?php
 
 }
@@ -206,7 +208,7 @@ function chatbot_deepseek_api_settings_init() {
 
     // API/DeepSeek settings tab - Ver 2.1.8
     register_setting('chatbot_deepseek_api_model', 'chatbot_deepseek_api_enabled');
-    register_setting('chatbot_deepseek_api_model', 'chatbot_deepseek_api_key');
+    register_setting('chatbot_deepseek_api_model', 'chatbot_deepseek_api_key', 'chatbot_chatgpt_sanitize_api_key');
     register_setting('chatbot_deepseek_api_model', 'chatbot_deepseek_max_tokens_setting'); // Max Tokens setting options
     register_setting('chatbot_deepseek_api_model', 'chatbot_deepseek_conversation_context'); // Conversation Context
     register_setting('chatbot_deepseek_api_model', 'chatbot_deepseek_temperature'); // Temperature

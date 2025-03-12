@@ -178,6 +178,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // DIAG - Diagnostics - Ver 2.0.8
     // back_trace( 'NOTICE', 'Tag Processing: ' . $tag);
 
+    // Normalize [assistant-#] to [chatbot-#] - Ver 2.2.6 - 2025 03 07
+    if (strpos($tag, 'assistant-') === 0) {
+        $tag = str_replace('assistant-', 'chatbot-', $tag);
+        // DIAG - Diagnostic - Ver 2.2.6
+        // back_trace('NOTICE', 'Transformed assistant shortcode to: ' . $tag);
+    }
+
     // Tag Processing - Ver 2.0.6
     if (strpos($tag, 'chatbot-') !== false) {
         
@@ -189,6 +196,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
         // Fetch the common name of the Assistant Common Name from the Assistant table
         $assistant_details = get_chatbot_chatgpt_assistant_by_key($assistant_key);
+
+        // DIAG - Diagnostics - Ver 2.2.6
+        // back_trace( 'NOTICE', 'Assistant Key: ' . $assistant_key);
+        // back_trace( 'NOTICE', 'Assistant Details: ' . print_r($assistant_details, true));
 
         // For each key in $assistant_details, set the $atts value
         foreach ($assistant_details as $key => $value) {
@@ -288,7 +299,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$atts: ' . print_r($atts, true));
-    // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
     // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
@@ -411,6 +421,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                 break;
             case 'Transformer':
                 $model = esc_attr(get_option('chatbot_transformer_model_choice', 'lexical-context-model'));
+                break;
+            case 'Local Server':
+                $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
                 break;
             default:
                 $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
@@ -680,7 +693,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Retrieve the bot name - Ver 2.0.5
-    $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'Yes'));
+    $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
+    if ($chatbot_ai_platform_choice == 'OpenAI'){
+        $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'Yes'));
+    } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI'){
+        $use_assistant_name = esc_attr(get_option('chatbot_azure_display_custom_gpt_assistant_name', 'Yes'));  
+    } else {
+        $use_assistant_name = 'No';
+    }
 
     // Assistant's Table Override - Ver 2.0.4
     if (!empty($assistant_details['show_assistant_name'])) {
@@ -689,10 +709,16 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // DIAG - Diagnostics - Ver 2.0.5
     // back_trace( 'NOTICE', '$use_assistant_name: ' . $use_assistant_name);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$assistant_details: ' . print_r($assistant_details, true));
 
+    // FIXME - $assistant_id is empty - Ver 2.2.6
     if ($use_assistant_name == 'Yes' && !empty($assistant_id) && $assistant_id !== 'original') {
-        // FIXME - CAN I AVOID THIS CALL TO OPENAI?
+        // DIAG - Diagnostics - Ver 2.2.6
+        // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+        // back_trace( 'NOTICE', '$use_assistant_name: ' . $use_assistant_name);
         $assistant_name = esc_attr(get_chatbot_chatgpt_assistant_name($assistant_id));
+        // back_trace( 'NOTICE', '$assistant_name: ' . $assistant_name);
         $bot_name = !empty($assistant_name) ? $assistant_name : esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
     } else {
         $bot_name = esc_attr(get_option('chatbot_chatgpt_bot_name', 'Kognetiks Chatbot'));
@@ -765,6 +791,10 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $chatbot_chatgpt_allow_file_uploads = esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
         $chatbot_chatgpt_allow_mp3_uploads = 'No';
     }
+
+    // FIXME - Allow File Uploads - Ver 2.2.6
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_allow_file_uploads: ' . $chatbot_chatgpt_allow_file_uploads);
+    // $chatbot_chatgpt_allow_file_uploads = 'Yes';
 
     // Allow Upload Files - Ver 2.0.4
     $chatbot_chatgpt_allow_file_uploads = !empty($assistant_details['allow_file_uploads']) ? $assistant_details['allow_file_uploads'] : $chatbot_chatgpt_allow_file_uploads;
@@ -939,6 +969,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     $assistant_details['allow_file_uploads'] = !empty($assistant_details['allow_file_uploads']) ? $assistant_details['allow_file_uploads'] : esc_attr(get_option('chatbot_chatgpt_allow_file_uploads', 'No'));
     $kchat_settings['chatbot_chatgpt_allow_file_uploads'] = $assistant_details['allow_file_uploads'];
+    // DIAG - Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$assistant_details[\'allow_file_uploads\']: ' . $assistant_details['allow_file_uploads']);
+    $chatbot_chatgpt_allow_file_uploads = $assistant_details['allow_file_uploads'];
 
     $assistant_details['allow_mp3_uploads'] = !empty($assistant_details['allow_mp3_uploads']) ? $assistant_details['allow_mp3_uploads'] : esc_attr(get_option('chatbot_chatgpt_allow_mp3_uploads', 'No'));
     $kchat_settings['chatbot_chatgpt_allow_mp3_uploads'] = $assistant_details['allow_mp3_uploads'];
@@ -1325,10 +1358,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
 }
+
 // FIXME - TEMPORARY - Ver 2.2.1 - 2025 01 09
+// Original Shortcodes - Ver 2.2.1 - 2025 01 09
 add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
 add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
+// Assistant Shortcodes - Ver 2.2.1 - 2025 01 09
 add_shortcode('chatbot-1', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-2', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-3', 'chatbot_chatgpt_shortcode');
@@ -1339,6 +1375,17 @@ add_shortcode('chatbot-7', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-8', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-9', 'chatbot_chatgpt_shortcode');
 add_shortcode('chatbot-10', 'chatbot_chatgpt_shortcode');
+// Assistant Shortcodes - Ver 2.2.6 - 2025 03 07
+add_shortcode('assistant-1', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-2', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-3', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-4', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-5', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-6', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-7', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-8', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-9', 'chatbot_chatgpt_shortcode');
+add_shortcode('assistant-10', 'chatbot_chatgpt_shortcode');
 
 // Dynamic Shortcode - Ver 2.0.6
 function register_chatbot_shortcodes($number_of_shortcodes = null) {
@@ -1381,10 +1428,16 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
         add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
     }
 
-    // Register numbered shortcodes dynamically
+    // Register numbered shortcodes dynamically using [chatbot-#] syntax
     for ($i = 1; $i <= $number_of_shortcodes; $i++) {
         add_shortcode('chatbot-' . $i, 'chatbot_chatgpt_shortcode');
         // error_log ('Registered shortcodes: ' . 'chatbot-' . $i );
+    }
+
+    // Register numbered shortcodes dynamically using [assistant=#] syntax
+    for ($i = 1; $i <= $number_of_shortcodes; $i++) {
+        add_shortcode('assistant-' . $i, 'chatbot_chatgpt_shortcode');
+        // error_log ('Registered shortcodes: ' . 'assistant-' . $i );
     }
 
     // error_log ('chatbot_chatgpt_number_of_shortcodes: ' . $number_of_shortcodes );

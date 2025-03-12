@@ -72,8 +72,11 @@ $chatbot_prompt = isset($_GET['chatbot_prompt']) ? sanitize_text_field($_GET['ch
 $chatbot_prompt = preg_replace("/^\\\\'|\\\\'$/", '', $chatbot_prompt);
 // back_trace( 'NOTICE', 'Widget Endpoint - $chatbot_prompt: ' . $chatbot_prompt);
 
-// Retrieve the allowed domains and assistants from the WordPress options
+// Retrieve the allowed domains and assistants from the OpenAI Assistants options
 $allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
+
+// Add the allowed domains and assistants from the Azure OpenAI Assistant Settings - Ver 2.2.6 - 2025-03-12
+$allowed_domains_string .= "\n" . esc_attr(get_option('chatbot_azure_allowed_remote_domains', ''));
 
 // Convert the string to an array of domain-assistant pairs, assuming they are newline-separated
 $allowed_pairs = array_map('trim', explode("\n", $allowed_domains_string));
@@ -89,8 +92,14 @@ if (empty($allowed_pairs)) {
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 
     // Normalize referer to get the base domain
-    $normalized_referer = preg_replace('/^www\./', '', parse_url($referer, PHP_URL_HOST));
+    // $normalized_referer = preg_replace('/^www\./', '', parse_url($referer, PHP_URL_HOST));
+    $host = parse_url($referer, PHP_URL_HOST) ?? '';
+    $normalized_referer = preg_replace('/^www\./', '', $host);
     $base_referer = implode('.', array_slice(explode('.', $normalized_referer), -2));
+
+    chatbot_chatgpt_widget_logging('$host: ' . $host);
+    chatbot_chatgpt_widget_logging('$normalized_referer: ' . $normalized_referer);
+    chatbot_chatgpt_widget_logging('$base_referer: ' . $base_referer);
 
     $is_allowed = false;
 

@@ -307,7 +307,7 @@ function chatbot_kn_run_phase_1() {
     foreach ($results as $result) {
         // DIAG - Diagnostics - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        //     back_trace( 'NOTICE', 'Key: ' . $key . ' Value: ' . $value);
         // }        
 
         // Directly use the post content
@@ -423,7 +423,7 @@ function chatbot_kn_run_phase_3() {
 
         // DIAG - Diagnostics - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', "Key: $key, Value: $value");
+        //     back_trace( 'NOTICE', 'Key: ' . $key . ' Value: ' . $value);
         // }        
 
         // Directly use the post content
@@ -628,7 +628,7 @@ function chatbot_kn_run_phase_6() {
     foreach ($results as $result) {
         // DIAG - Diagnostics - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', 'Key: $key, Value: $value');
+        //     back_trace( 'NOTICE', 'Key: ' . $key . ' Value: ' . $value);
         // }        
 
         // Directly use the post content

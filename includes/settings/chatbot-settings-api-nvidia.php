@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 // API/NVIDIA settings section callback - Ver 2.1.8
 function chatbot_nvidia_model_settings_section_callback($args) {
     ?>
-    <p>Configure the default settings for the Chatbot plugin for chat, voice, and image generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
+    <p>Configure the default settings for the Chatbot plugin to use NVIDIA for chat generation.  Start by adding your API key then selecting your choices below.  Don't forget to click "Save Settings" at the very bottom of this page.</p>
     <p>More information about NVIDIA models and their capability can be found at <a href="https://build.nvidia.com/explore/discover" target="_blank">https://build.nvidia.com/explore/discover</a>.</p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the API/NVIDIA settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=api-nvidia-settings&file=api-nvidia-model-settings.md">here</a>.</b></p>                                                                                 
@@ -33,6 +33,10 @@ function chatbot_nvidia_api_model_general_section_callback($args) {
 // API key field callback
 function chatbot_nvidia_api_key_callback($args) {
     $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
+
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+    
     ?>
     <input type="password" id="chatbot_nvidia_api_key" name="chatbot_nvidia_api_key" value="<?php echo esc_attr( $api_key ); ?>" class="regular-text"  autocomplete="off">
     <?php
@@ -90,11 +94,11 @@ function chatbot_nvidia_chat_model_choice_callback($args) {
 function chatgpt_nvidia_max_tokens_setting_callback($args) {
     // Get the saved chatbot_nvidia_max_tokens_setting or default to 500
     $max_tokens = esc_attr(get_option('chatbot_nvidia_max_tokens_setting', '500'));
-    // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
+    // Allow for a range of tokens between 100 and 10000 in 100-step increments - Ver 2.0.4
     ?>
     <select id="chatbot_nvidia_max_tokens_setting" name="chatbot_nvidia_max_tokens_setting">
         <?php
-        for ($i=100; $i<=4000; $i+=100) {
+        for ($i=100; $i<=10000; $i+=100) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
         ?>
@@ -151,7 +155,7 @@ function chatbot_nvidia_top_p_callback($args) {
 // API Advanced settings section callback
 function chatbot_nvidia_api_model_advanced_section_callback($args) {
     ?>
-    <p>CAUTION: Configure the advanced settings for the plugin. Enter the base URL for the NVIDIA API.  The default is <code>https://integrate.api.nvidia.com/v1</code>.</p>
+    <p><strong>CAUTION</strong>: Configure the advanced settings for the plugin. Enter the base URL for the NVIDIA API.  The default is <code>https://integrate.api.nvidia.com/v1</code>.</p>
     <?php
 }
 
@@ -194,7 +198,7 @@ function chatbot_nvidia_api_settings_init() {
 
     // API/NVIDIA settings tab - Ver 2.1.8
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_enabled');
-    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_key');
+    register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_api_key', 'chatbot_chatgpt_sanitize_api_key');
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_max_tokens_setting'); // Max Tokens setting options
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_conversation_context'); // Conversation Context
     register_setting('chatbot_nvidia_api_model', 'chatbot_nvidia_temperature'); // Temperature

@@ -125,6 +125,26 @@ function chatbot_call_anthropic_api($api_key, $message) {
         $context = $conversation_history . ' ' . $context;
     }
 
+    // Check the length of the context and truncate if necessary - Ver 2.2.6
+    $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
+    // back_trace('NOTICE', '$context_length: ' . $context_length);
+    // FIXME - Define max context length (adjust based on model requirements)
+    $max_context_length = 100000; // Estimate at 65536 characters ≈ 16384 tokens
+    if ($context_length > $max_context_length) {
+        // Truncate to the max length
+        $truncated_context = substr($context, 0, $max_context_length);
+        // Ensure truncation happens at the last complete word
+        $truncated_context = preg_replace('/\s+[^\s]*$/', '', $truncated_context);
+        // Fallback if regex fails (e.g., no spaces in the string)
+        if (empty($truncated_context)) {
+            $truncated_context = substr($context, 0, $max_context_length);
+        }
+        $context = $truncated_context;
+        // back_trace('NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
+    } else {
+        // back_trace('NOTICE', 'Context length is within limits.');
+    }
+
     // DIAG Diagnostics - Ver 2.1.8
     // back_trace( 'NOTICE', '$context: ' . $context);
 
@@ -138,20 +158,31 @@ function chatbot_call_anthropic_api($api_key, $message) {
     );
 
     // https://docs.anthropic.com/en/docs/about-claude/models#model-names
-    // 8192 output tokens is in beta and requires the header anthropic-beta: max-tokens-3-5-sonnet-2024-07-15. If the header is not specified, the limit is 4096 tokens.
+    // 8192 output tokens is in beta and requires the header anthropic-beta: max-tokens-3-5-sonnet-2024-07-15. If the header is not specified, the limit is 10000 tokens.
+
+    // Conversation Context - Ver 1.6.1
+    $additional_instructions = esc_attr(get_option('chatbot_anthropic_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+    // DIAG Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+
+    // Revise prompt to include the context, i.e., system instructions
+    $prompt = $additional_instructions . ' ' . $context . ' Human: ' . $message . ' Assistant: ';
 
     // Define the request body
     $body = json_encode(array(
         'model' => $model,
         'max_tokens' => $max_tokens,
-        'system' => $context, // Top-level parameter for system message
+        // 'system' => $context, // Top-level parameter for system message
         'messages' => array(
             array(
                 'role' => 'user',
-                'content' => $message, // User input
+                'content' => $prompt, // User input
             ),
         ),
     ));
+
+    // DIAG Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', '$body: ' . print_r($body, true));
 
     $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
 

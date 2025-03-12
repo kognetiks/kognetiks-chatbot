@@ -29,6 +29,8 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     // Ensure API key is set
     if (empty($api_key)) {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
         if (empty($api_key)) {
             global $chatbot_chatgpt_fixed_literal_messages;
             // Define a default fallback message
@@ -57,8 +59,8 @@ function chatbot_chatgpt_call_image_api($api_key, $message) {
     // Enforce message length constraints based on model
     if ($model === 'dall-e-2' && strlen($message) > 1000) {
         $message = substr($message, 0, 1000);
-    } elseif ($model === 'dall-e-3' && strlen($message) > 4000) {
-        $message = substr($message, 0, 4000);
+    } elseif ($model === 'dall-e-3' && strlen($message) > 10000) {
+        $message = substr($message, 0, 10000);
     }
 
     // Set number of images to generate

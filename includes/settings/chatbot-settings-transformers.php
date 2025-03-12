@@ -41,7 +41,7 @@ function chatbot_transformer_model_settings_section_callback($args) {
 
 function chatbot_transformer_model_api_model_general_section_callback($args){
     ?>
-    <p>Configure the settings for the plugin when using transformer models.  Depending on the transformer model you choose, the maximum tokens may be as high as 4000.  The default is 500.</p>
+    <p>Configure the settings for the plugin when using transformer models.  Depending on the transformer model you choose, the maximum tokens may be as high as 10000.  The default is 500.</p>
     <?php
 }
 
@@ -187,6 +187,7 @@ function chatbot_transformer_model_choice_callback($args) {
     ?>
     <select id="chatbot_transformer_model_choice" name="chatbot_transformer_model_choice">
         <!-- <option value="<?php echo esc_attr( 'lexical-context-model' ); ?>" <?php selected( $model_choice, 'lexical-context-model' ); ?>><?php echo esc_html( 'lexical-context-model' ); ?></option> -->
+        <option value="<?php echo esc_attr( 'sentential-context-model-lite' ); ?>" <?php selected( $model_choice, 'sentential-context-model-lite' ); ?>><?php echo esc_html( 'sentential-context-model-lite' ); ?></option>
         <option value="<?php echo esc_attr( 'sentential-context-model' ); ?>" <?php selected( $model_choice, 'sentential-context-model' ); ?>><?php echo esc_html( 'sentential-context-model' ); ?></option>
     </select>
     <?php
@@ -199,7 +200,7 @@ function chatbot_transformer_model_max_tokens_setting_callback($args) {
     // Get the saved chatbot_transformer_model_max_tokens or default to 10000
     $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', '10000'));
 
-    // Allow for a range of tokens between 100 and 4096 in 100-step increments - Ver 2.0.4
+    // Allow for a range of tokens between 100 and 10000 in 100-step increments - Ver 2.0.4
     ?>
     <select id="chatbot_transformer_model_max_tokens" name="chatbot_transformer_model_max_tokens">
         <?php

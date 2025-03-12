@@ -34,6 +34,14 @@ chatbot_chatgpt_load_globals($chatbot_chatgpt_installed_language_code);
 function chatbot_chatgpt_load_globals($language_code) {
 
     global $chatbot_chatgpt_language_code;
+    global $chatbot_chatgpt_globals_loaded;
+
+    // If the globals have already been loaded, return
+    if ( $chatbot_chatgpt_globals_loaded ) {
+        // DIAG - Diagnotics
+        // error_log('Globals already loaded for language: ' . $language_code);
+        return;
+    }
 
     // Set the global language code
     $chatbot_chatgpt_language_code = $language_code;
@@ -48,12 +56,20 @@ function chatbot_chatgpt_load_globals($language_code) {
     if ( file_exists($file_path) ) {
         require_once $file_path;
         // error_log('Loaded translation file: ' . $file_path);
+        $chatbot_chatgpt_globals_loaded = true;
     } else {
         // Fall back to English if the file does not exist
         $chatbot_chatgpt_language_code = "en_US";
         $fallback_file = plugin_dir_path(__FILE__) . 'translations/chatbot-globals-en.php';
         require_once $fallback_file;
         // error_log('Translation file not found for ' . $language_code . '. Falling back to English: ' . $fallback_file);
+        $chatbot_chatgpt_globals_loaded = true;
+    }
+
+    // Log a warning if the file could not be loaded
+    if ( ! $chatbot_chatgpt_globals_loaded ) {
+        error_log ('Could not load translation file: ' . $file_path);
+        $chatbot_chatgtp_globals_loaded = false;
     }
 
 }

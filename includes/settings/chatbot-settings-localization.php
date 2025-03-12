@@ -43,6 +43,8 @@ function localize_global_stopwords($language_code, $stopWords) {
 
     // Get the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     if (empty($api_key)) {
         $stopWords_string = implode("\n",$stopWords);
         $translated_array = explode("\n", $stopWords_string);
@@ -68,7 +70,7 @@ function localize_global_stopwords($language_code, $stopWords) {
 
     $body = array(
         'model' => $model,
-        'max_tokens' => 4000,
+        'max_tokens' => 10000,
         'temperature' => 0.5,
         'messages' => array(
             array('role' => 'system', 'content' => 'You are a master translator whose job it is to translate word-for-word anything sent to you.  The language code will be provided in the format of [language code]_[COUNTRY CODE], where the language code is a two-letter code based on the ISO 639-1 standard.  Return only the list of translated words without the English.'),
@@ -142,6 +144,8 @@ function localize_global_learningMessages($language_code, $learningMessages) {
 
     // Get the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     if (empty($api_key)) {
         $learningMessages_string = implode("\n", $learningMessages);
         $translated_array = explode("\n", $learningMessages_string);
@@ -245,6 +249,8 @@ function localize_global_errorResponses($language_code, $errorResponses) {
 
     // Get the API key
     $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     if (empty($api_key)) {
         $errorResponses_string = implode("\n", $errorResponses);
         $translated_array = explode("\n", $errorResponses_string);
