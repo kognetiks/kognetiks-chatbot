@@ -38,7 +38,7 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
 
 ### Using WPCode to embedded Remote Server Access
 
-The screen capture below shows how to configure Remote Server Access using WPCode to embedded the iframe in a website's site-wide footer.
+The screen capture below shows how to configure Remote Server Access using WPCode to embedded the iframe in a website's site-wide footer.  As illustrated, this will place a floating chatbot on a remote website for interaction with an Assistant.  **TIP**: This works best with a floating chatbot.
 
 ![WPCode Remote Widget](wpcode-snippet.png)
 
