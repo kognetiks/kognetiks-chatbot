@@ -207,6 +207,7 @@ function chatbot_azure_assistant_settings_section_callback($args) {
     <p>Tailor each Assistant to meet the unique needs of your audience, ensuring an engaging and personalized experience for all.</p>
     <p>If you have developed an Assistant in Azure, you will need the id of the assistant - it usually starts with "asst_".</p>
     <p>When you're ready to use an Assistant, simply add a shortcode such as <code>[assistant-1]</code>, <code>[assistant-2]</code>, etc. to your page.</p>
+    <p><b>NOTE</b>: You can also use <code>[chatbot-1]</code>, <code>[chatbot-2]</code>, etc. to reference an Assistant.</p>
     <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
     <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
