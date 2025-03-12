@@ -215,7 +215,7 @@ function display_chatbot_chatgpt_assistants_table() {
     echo '<thead>';
     echo '<tr>';
     echo '<th>Actions</th>';  // Column header for actions
-    echo '<th>&#91;Shortcode&#93;</th>';
+    echo '<th style="min-width:100px;">&#91;Shortcode&#93;</th>';
     echo '<th>Assistant ID</th>';
     echo '<th>Common Name</th>';
     echo '<th>Style</th>';
