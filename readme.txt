@@ -209,7 +209,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Azure and 
 
 == Changelog ==
 
-= 2.2.6 - Released TBD =
+= 2.2.6 - Released 2025-03-12 =
 
 * **Azure OpenAI**: Added support for the Azure OpenAI API to provide advanced conversational capabilities for the chatbot.
 * **Local Server**: Added support for the JAN.AI local server, enabling users to run AI models on their own servers for enhanced control and flexibility.
