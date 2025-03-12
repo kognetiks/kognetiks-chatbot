@@ -31,6 +31,26 @@ The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI, Azu
 
 * **Local Server**: Run AI models on your own server with JAN.AI's local server support for enhanced control and flexibility.
 
+
+🚀 **Exciting News: Local AI Support for Kognetiks Chatbot!**:
+
+Kognetiks Chatbot now offers seamless integration with local AI servers like JAN.AI, an open-source LLM solution, bringing powerful AI capabilities to your WordPress site—without the need for costly API subscriptions. This new feature allows you to deploy AI-driven conversations while keeping full control over your data and infrastructure.
+
+
+🔑 **Why Go Local?**
+
+* **Cost-Effective**: No ongoing API fees, reducing operational expenses.
+
+* **Privacy-Focused**: Your data stays on your own servers, ensuring security and compliance.
+
+* **Customizable**: Choose from various open-source models tailored to your needs.
+
+* **Fast & Responsive**: Local processing means quicker interactions and reduced latency.
+
+* **Full Control**: Manage your AI infrastructure independently for maximum flexibility.
+
+With Kognetiks Chatbot and JAN.AI, you can create dynamic conversational experiences while maintaining data sovereignty. Ideal for business websites, educational platforms, e-commerce sites, community forums, and knowledge bases, this integration empowers you to harness AI on your terms!
+
 🌟 Introducing the Sentential Context Model - **BETA FEATURE OFFERING**:
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.

@@ -2,6 +2,19 @@
 
 The **Kognetiks Chatbot** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI, Azure, NVIDIA, Anthropic, DeepSeek and local servers running open source AI models. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
+**🚀 Exciting News: Local AI Support for Kognetiks Chatbot!**:
+
+Kognetiks Chatbot now offers seamless integration with local AI servers like JAN.AI, an open-source LLM solution, bringing powerful AI capabilities to your WordPress site—without the need for costly API subscriptions. This new feature allows you to deploy AI-driven conversations while keeping full control over your data and infrastructure.
+
+**🔑 Why Go Local?**
+* **Cost-Effective** – No ongoing API fees, reducing operational expenses.
+* **Privacy-Focused** – Your data stays on your own servers, ensuring security and compliance.
+* **Customizable** – Choose from various open-source models tailored to your needs.
+* **Fast & Responsive** – Local processing means quicker interactions and reduced latency.
+* **Full Control** – Manage your AI infrastructure independently for maximum flexibility.
+
+With Kognetiks Chatbot and JAN.AI, you can create dynamic conversational experiences while maintaining data sovereignty. Ideal for business websites, educational platforms, e-commerce sites, community forums, and knowledge bases, this integration empowers you to harness AI on your terms!
+
 **🌟 Introducing the Sentential Context Model - BETA FEATURE OFFERING**:
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
