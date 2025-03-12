@@ -40,11 +40,9 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's New in Version 2.2.6
+## What's new in Version 2.2.7
 
-* **Azure OpenAI**: Added support for the Azure OpenAI API to provide advanced conversational capabilities for the chatbot.
-* **Local Server**: Added support for the JAN.AI local server, enabling users to run AI models on their own servers for enhanced control and flexibility.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.5.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.6.
 
 ## Past Updates
 
