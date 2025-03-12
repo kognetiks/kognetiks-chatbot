@@ -36,6 +36,14 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
 
 ---
 
+### Using WPCode to embedded Remote Server Access
+
+The screen capture below shows how to configure Remote Server Access using WPCode to embedded the iframe in a website's site-wide footer.
+
+![WPCode Remote Widget](wpcode-snippet.png)
+
+---
+
 ### Key Security Features:
 
 1. **Domain-Assistant Pair Whitelisting**:

@@ -273,7 +273,8 @@ function display_chatbot_azure_assistants_table() {
         // Delete button to trigger the deleteAssistant function
         echo '<button type="button" class="button-primary" onclick="deleteAssistant(' . $assistant->id . ')">Delete</button>';
         echo '</td>';
-        echo '<td onclick="copyToClipboard(\'[assistant-' . $assistant->id . ']\')"><b>' . '&#91;assistant-' . $assistant->id . '&#93;' . '</b></br>or</br>[chatbot-' . $assistant->id . ']</td>';
+        // echo '<td onclick="copyToClipboard(\'[assistant-' . $assistant->id . ']\')"><b>' . '&#91;assistant-' . $assistant->id . '&#93;' . '</b></br>or</br>[chatbot-' . $assistant->id . ']</td>';
+        echo '<td onclick="copyToClipboard(\'[assistant-' . $assistant->id . ']\')"><b>' . '&#91;assistant-' . $assistant->id . '&#93;' . '</b></td>';
         echo '<td><input type="text" name="assistant_id_' . $assistant->id . '" value="' . $assistant->assistant_id . '"></td>';
         echo '<td><input type="text" name="common_name_' . $assistant->id . '" value="' . $assistant->common_name . '"></td>';
         echo '<td><select name="style_' . $assistant->id . '">';

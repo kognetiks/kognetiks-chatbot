@@ -206,7 +206,7 @@ function chatbot_azure_assistant_settings_section_callback($args) {
     <p>You will no longer need to remember all the Assistant options, as they are all available here for you to view and edit.</p>
     <p>Tailor each Assistant to meet the unique needs of your audience, ensuring an engaging and personalized experience for all.</p>
     <p>If you have developed an Assistant in Azure, you will need the id of the assistant - it usually starts with "asst_".</p>
-    <p>When you're ready to use an Assistant, simply add a shortcode such as <code>[chatbot-1]</code>, <code>[chatbot-2]</code>, etc. to your page.</p>
+    <p>When you're ready to use an Assistant, simply add a shortcode such as <code>[assistant-1]</code>, <code>[assistant-2]</code>, etc. to your page.</p>
     <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
     <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>
@@ -378,6 +378,7 @@ function chatbot_azure_max_completion_tokens_callback($args) {
 function chatbot_azure_remote_widget_settings_section_callback($args) {
     ?>
     <p>Configure the Remote Widget settings to allow access from specific domains to specific assistants. Please each pair, seperated with a comma, on their own line.</p>
+    <p>For example the Allowed Remote Domain might be <code>www.example.com,assistant-1</code>.</p>
     <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation of the Remote Widget Settings and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=assistants&file=remote-widget-settings.md">here</a>.</b></p>
     <?php
 }
