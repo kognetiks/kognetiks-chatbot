@@ -125,13 +125,15 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
-        // 'Accept'       => 'application/json',
     );
 
     // *********************************************************************************
     // FILE ID IS NULL
     // *********************************************************************************
     if ( empty($file_id) ) {
+
+        // DIAG - Diagnostics - Ver 2.2.6
+        // back_trace( 'NOTICE', 'No files attached, just send the prompt');
 
         // No files attached, just send the prompt
         $data = [
@@ -157,8 +159,8 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
         $file_type = $file_type ? $file_type : 'unknown';
     
         // DIAG - Diagnostics - Ver 2.0.3
-        // back_trace( 'NOTICE', '========================================');
-        // back_trace( 'NOTICE', '$file_type: ' . $file_type);
+        // back_trace( 'NOTICE', 'Files attached, $file_id[0]: ' . $file_id[0]);
+        // back_trace( 'NOTICE', 'Files attached, $file_type: ' . $file_type);
 
         // *********************************************************************************
         // NON-IMAGE ATTACHMENTS - Ver 2.0.3
@@ -166,6 +168,8 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 
         if ( $file_type == 'assistants' ) {
             $data = chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version);
+            // DIAG - Diagnostics - Ver 2.2.6
+            // back_trace( 'NOTICE', 'Text Attachment - $data: ' . print_r($data, true));
         }
 
         // *********************************************************************************
@@ -174,6 +178,8 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 
         if ( $file_type == 'vision' ) {
             $data = chatbot_chatgpt_image_attachment($prompt, $file_id, $beta_version);
+            // DIAG - Diagnostics - Ver 2.2.6
+            // back_trace( 'NOTICE', 'Image Attachment - $data: ' . print_r($data, true));
         }
 
     }
@@ -234,7 +240,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key) {
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
-        // 'Accept'       => 'application/json',
     );
 
     $max_prompt_tokens = (int) esc_attr(get_option('chatbot_chatgpt_max_prompt_tokens', 20000));
@@ -396,7 +401,6 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
-        // 'Accept'       => 'application/json',
     );
 
     // Make the request
@@ -590,7 +594,6 @@ function get_the_azure_message($thread_id, $api_key) {
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
-        // 'Accept'       => 'application/json',
     );
 
     // Fetch the response
@@ -987,8 +990,8 @@ function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
     $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $file_id);
 
     // DIAG - Diagnostics - Ver 2.0.3
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_types, true));
+    // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
+    // back_trace( 'NOTICE', '$file_types: ' . print_r($file_types, true));
 
     while (!empty($file_id)) {
         // Delete the transient

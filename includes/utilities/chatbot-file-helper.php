@@ -22,16 +22,24 @@ function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version = 'ass
         $beta_version = 'assistants=v0';
     }
 
-    // Set up the data payload
-    $data = [
-        'role' => 'user',
-        'content' => [
-            [
-                'type' => 'text',
-                'text' => $prompt,
-            ]
-        ],
-    ];
+    if ( $chatbot_ai_platform_choice == 'OpenAI') {
+        // Set up the data payload
+        $data = [
+            'role' => 'user',
+            'content' => [
+                [
+                    'type' => 'text',
+                    'text' => $prompt,
+                ]
+            ],
+        ];
+    } elseif ( $chatbot_ai_platform_choice == 'Azure OpenAI') {
+        // Setup the data payload
+        $data = [
+            'role' => 'user',
+            'content' => $prompt,
+        ];
+    }
 
     // Add the non-images files to the data payload
     if ( !empty($file_id && !empty($file_id[0]) )) {

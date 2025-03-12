@@ -47,7 +47,6 @@ function chatbot_call_azure_openai_api($api_key, $message) {
     $headers = array(
         'Content-Type' => 'application/json',
         'api-key'      => trim($api_key),
-        // 'Accept'       => 'application/json',
     );
 
     // Select the OpenAI Model
