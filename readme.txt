@@ -231,6 +231,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Azure and 
 
 = 2.2.7 - Released TBD =
 
+* **Performance Improvements**: Minimized unnecessary calls to the database to improve performance.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.6.
 
 = 2.2.6 - Released 2025-03-12 =

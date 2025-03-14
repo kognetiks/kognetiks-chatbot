@@ -42,6 +42,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.2.7
 
+* **Performance Improvements**: Minimized unnecessary calls to the database to improve performance.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.6.
 
 ## Past Updates
