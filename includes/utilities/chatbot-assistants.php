@@ -16,6 +16,9 @@ if ( ! defined( 'WPINC' ) ) {
 // Create the table for the chatbot assistants
 function create_chatbot_chatgpt_assistants_table() {
 
+    // DIAG - Diagnostics - Ver 2.2.7
+    back_trace( 'NOTCE', 'create_chatbot_chatgpt_assistants_table - START' );
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -68,10 +71,15 @@ function create_chatbot_chatgpt_assistants_table() {
     upgrade_chatbot_chatgpt_assistants_table();
 
     // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
-    update_chatbot_chatgpt_number_of_shortcodes();
+    // REMOVED - Ver 2.2.7
+    // update_chatbot_chatgpt_number_of_shortcodes();
+
+    // DIAG - Diagnostics - Ver 2.2.7
+    back_trace( 'NOTCE', 'create_chatbot_chatgpt_assistants_table - END' );
 
 }
-register_activation_hook(__FILE__, 'create_chatbot_chatgpt_assistants_table');
+// REMVOED - Ver 2.2.7
+// register_activation_hook(__FILE__, 'create_chatbot_chatgpt_assistants_table');
 
 // Drop the table for the chatbot assistants
 function drop_chatbot_chatgpt_assistants_table() {
@@ -144,6 +152,9 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
 // Keep the chatbot_chatgpt_number_of_shortcodes option updated - Ver 2.0.6
 function update_chatbot_chatgpt_number_of_shortcodes() {
 
+    // DIAG - Diagnostics - Ver 2.2.7
+    back_trace( 'NOTCE', 'update_chatbot_chatgpt_number_of_shortcodes - START' );
+
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
@@ -168,6 +179,10 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
 
     // Optionally log for debugging
     // error_log('chatbot-assistants - Number of Shortcodes: ' . $number_of_shortcodes);
+
+    // DIAG - Diagnostics - Ver 2.2.7
+    back_trace( 'NOTCE', 'update_chatbot_chatgpt_number_of_shortcodes - END' );
+    
 }
 
 // Display the chatbot assistants table

@@ -702,6 +702,8 @@ add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
 
 // Activation, deactivation, and uninstall functions
 register_activation_hook(__FILE__, 'chatbot_chatgpt_activate');
+register_activation_hook(__FILE__, 'create_chatbot_chatbot_assistants_table');
+register_activation_hook(__FILE__, 'create_chatbot_azure_assistants_table');
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_deactivate');
 register_uninstall_hook(__FILE__, 'chatbot_chatgpt_uninstall');
 add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10, 2);
@@ -929,10 +931,12 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
 }
 
 // Add the Opean AI Assistant table to the database - Ver 2.0.4
-create_chatbot_chatgpt_assistants_table();
+// REMOVED Ver 2.2.7 and MOVED to the activation hook
+// create_chatbot_chatgpt_assistants_table();
 
 // Add the Azure Assistants table to the database - Ver 2.2.6
-create_chatbot_azure_assistants_table();
+// REMOVED Ver 2.2.7 and MOVED to the activation hook
+// create_chatbot_azure_assistants_table();
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {

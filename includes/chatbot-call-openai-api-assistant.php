@@ -1110,8 +1110,8 @@ function deleteUploadedFile($file_id) {
         // back_trace( 'SUCCESS', "File deleted successfully.\n");
     } else {
         // DIAG - Diagnostics - Ver 1.7.9
-        prod_trace( 'ERROR', "HTTP status code: $http_status_code\n");
-        prod_trace( 'ERROR', "Response: $response\n");
+        prod_trace( 'ERROR', 'HTTP status code: ' . $http_status_code );
+        prod_trace( 'ERROR', 'Response: ' . print_r($response, true) );
     }
 
 }

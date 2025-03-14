@@ -1084,8 +1084,8 @@ function delete_azure_uploaded_file($file_id) {
         // back_trace('NOTICE', 'File deleted successfully.');
         return true;
     } else {
-        prod_trace('ERROR', "HTTP status code: $http_status_code\n");
-        prod_trace('ERROR', "Response: " . print_r($response, true));
+        prod_trace('ERROR', 'HTTP status code: ' . $http_status_code );
+        prod_trace('ERROR', 'Response: ' . print_r($response, true));        
         return false;
     }
 }
