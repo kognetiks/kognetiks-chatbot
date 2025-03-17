@@ -250,7 +250,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
     }
 
     // Get the $assistant_name from the transient - REMOVED - LET'S AVOID AN ADDITIONAL CALL TO THE DB HERE - Ver 2.2.7
-    // $assistant_name = get_chatbot_chatgpt_transients('assistant_name', $user_id, $page_id, $session_id);
+    $assistant_name = get_chatbot_chatgpt_transients('assistant_name', $user_id, $page_id, $session_id);
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
