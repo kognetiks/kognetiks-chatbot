@@ -1281,7 +1281,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$message: ' . $message);
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
         // BELT & SUSPENDERS
         $thread_id = '';
@@ -1304,7 +1304,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$message ' . $message);
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
         // DIAG - Diagnostics - Ver 2.0.9
         // back_trace( 'NOTICE', '========================================');
@@ -1340,7 +1340,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, null, $response);
 
         // Clean (erase) the output buffer - Ver 1.6.8
         // Check if output buffering is active before attempting to clean it
@@ -1406,7 +1406,7 @@ function chatbot_chatgpt_send_message() {
 
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
         
         // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
         // TRY NOT TO FETCH MODEL AGAIN
@@ -1584,7 +1584,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, null, $response);
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'Check for links and images in response before returning');

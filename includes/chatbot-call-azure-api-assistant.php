@@ -534,9 +534,9 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
                         // back_trace( 'NOTICE', 'Step 7 - $prompt_tokens: ' . $prompt_tokens );
                         // back_trace( 'NOTICE', 'Step 7 - $completion_tokens: ' . $completion_tokens );
                         // back_trace( 'NOTICE', 'Step 7 - $total_tokens: ' . $total_tokens );
-                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $prompt_tokens);
-                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $completion_tokens);
-                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $total_tokens);
+                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $assistant_name, $prompt_tokens);
+                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $assistant_name, $completion_tokens);
+                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $assistant_name, $total_tokens);
                     }
                 }                
                 return "completed";
@@ -915,9 +915,9 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
-    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
-    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["completion_tokens"]);
-    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["total_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["completion_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Step 7: Get the Step's Status
     // back_trace( 'NOTICE', 'Step 7 - Get the Step\'s Status');
@@ -936,9 +936,9 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
-    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
-    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["completion_tokens"]);
-    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $assistants_response["data"][0]["usage"]["total_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["completion_tokens"]);
+    // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();

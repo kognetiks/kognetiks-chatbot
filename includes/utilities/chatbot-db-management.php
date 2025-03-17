@@ -230,7 +230,7 @@ function create_conversation_logging_table() {
 }
 
 // Append message to conversation log in the database - Ver 1.7.6
-function append_message_to_conversation_log($session_id, $user_id, $page_id, $user_type, $thread_id, $assistant_id, $message) {
+function append_message_to_conversation_log($session_id, $user_id, $page_id, $user_type, $thread_id, $assistant_id, $assistant_name, $message) {
 
     global $wpdb;
 
@@ -249,8 +249,8 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
         $user_id = 0;
     }
 
-    // Get the $assistant_name from the transient
-    $assistant_name = get_chatbot_chatgpt_transients('assistant_name', $user_id, $page_id, $session_id);
+    // Get the $assistant_name from the transient - REMOVED - LET'S AVOID AN ADDITIONAL CALL TO THE DB HERE - Ver 2.2.7
+    // $assistant_name = get_chatbot_chatgpt_transients('assistant_name', $user_id, $page_id, $session_id);
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 

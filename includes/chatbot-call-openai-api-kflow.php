@@ -106,9 +106,9 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     $response_body["usage"]["total_tokens"] = 0;
 
     // Add the usage to the conversation tracker
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $response_body["usage"]["prompt_tokens"]);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $response_body["usage"]["completion_tokens"]);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $response_body["usage"]["total_tokens"]);
     
     // Context History
     addEntry('chatbot_chatgpt_context_history', $message);
@@ -118,7 +118,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     // back_trace( 'NOTICE', '$message: ' . $message);
     $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
     // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $message);
+    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, null, $message);
 
     // Get the user ID and page ID
     if (empty($user_id)) {

@@ -263,15 +263,15 @@ function chatbot_call_deepseek_api($api_key, $message) {
     // Check if the response content is not empty
     if (!empty($response_body->choices[0]->message->content)) {
         if ($input_tokens > 0) {
-            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $input_tokens);
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $input_tokens);
         }
 
         if ($output_tokens > 0) {
-            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $output_tokens);
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $output_tokens);
         }
 
         if ($total_tokens > 0) {
-            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $total_tokens);
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $total_tokens);
         }
     }
 
