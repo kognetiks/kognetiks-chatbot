@@ -571,3 +571,81 @@
     max-height: 400px; /* Adjust the percentage as needed */
     }
 }
+
+/* Added in Version 2.2.7 - 2025 03 17 */
+#chatbot-chatgpt-header {
+    position: relative;
+}
+
+/* Added in Version 2.2.7 - 2025 03 17 */
+.chatbot-resize-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #f1f1f1;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    /* Adjusted padding - Ver 1.8.6 */
+    padding: 1px;
+    border-radius: 1px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    margin-top: 0;
+}
+
+.chatbot-resize-btn:hover {
+    background-color: #dcdcdc;    
+}
+
+/* Added in Version 2.2.7 - 2025 03 17 */
+.chatbot-resize-up-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #f1f1f1;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    /* Adjusted padding - Ver 1.8.6 */
+    padding: 1px;
+    border-radius: 1px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    margin-top: 0;
+}
+
+.chatbot-resize-up-btn:hover {
+    background-color: #dcdcdc;    
+}
+
+
+/* Added in Version 2.2.7 - 2025 03 17 */
+.chatbot-resize-down-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #f1f1f1;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    /* Adjusted padding - Ver 1.8.6 */
+    padding: 1px;
+    border-radius: 1px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    margin-top: 0;
+}
+
+.chatbot-resize-down-btn:hover {
+    background-color: #dcdcdc;    
+}
+
+/* Added in Version 2.2.7 - 2025 03 17 */
+.chatbot-header-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}

@@ -534,9 +534,9 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
                         // back_trace( 'NOTICE', 'Step 7 - $prompt_tokens: ' . $prompt_tokens );
                         // back_trace( 'NOTICE', 'Step 7 - $completion_tokens: ' . $completion_tokens );
                         // back_trace( 'NOTICE', 'Step 7 - $total_tokens: ' . $total_tokens );
-                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, $assistant_name, $prompt_tokens);
-                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, $assistant_name, $completion_tokens);
-                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, $assistant_name, $total_tokens);
+                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $prompt_tokens);
+                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $completion_tokens);
+                        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, null, $total_tokens);
                     }
                 }                
                 return "completed";
@@ -921,7 +921,25 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     // Step 7: Get the Step's Status
     // back_trace( 'NOTICE', 'Step 7 - Get the Step\'s Status');
-    get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id);
+    // get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id);
+
+    $max_retries = 10; // Max retries before giving up
+    $retry_count = 0;
+    $sleep_time = 500000; // 0.5 seconds
+
+    while (($retry_count < $max_retries) && (($step_status = get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id)) !== "completed")) {
+        $retry_count++;
+        usleep($sleep_time); 
+        back_trace('NOTICE', 'Step 7: retry ' . $retry_count . ' - get_the_azure_steps_status() returned: ' . step_status);
+    }
+
+    if ($retry_count!=0) {
+        if ($retry_count==$max_retries) {
+            back_trace('NOTICE', 'Failure after retry ' . $retry_count . ' - get_the_azure_steps_status()'. $step_status);
+        } else  {
+            back_trace('NOTICE', 'Done after retry ' . $retry_count . ' - get_the_azure_steps_status()');
+        }
+    }
 
     // Step 8: Get the Message
     // back_trace( 'NOTICE', 'Step 8: Get the Message');
