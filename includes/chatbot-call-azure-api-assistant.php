@@ -29,19 +29,16 @@ function create_an_azure_assistant($api_key) {
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
+
     // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/threads?api-version=2024-03-01-preview';
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/threads?api-version=' . $chatbot_azure_api_version;
+    $url = sprintf(
+        'https://%s.openai.azure.com/openai/threads?api-version=%s',
+        $chatbot_azure_resource_name,
+        $chatbot_azure_api_version
+    );
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', '$url: ' . $url);
-
-    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    if ( $assistant_beta_version == 'v2' ) {
-        $beta_version = "assistants=v2";
-    } else {
-        $beta_version = "assistants=v1";
-    }
 
     // Prepare common headers
     $headers = array(
@@ -105,21 +102,17 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
+    
     // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/threads/' . $thread_id . '/messages?api-version=2024-03-01-preview';
-    //              https://YOUR_RESOURCE_NAME.openai.azure.com/openai/threads/    {thread_id}   /messages?api-version=2024-08-01-preview
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/threads/' . $thread_id . '/messages?api-version=' . $chatbot_azure_api_version;
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/threads/' . $thread_id . '/messages?api-version=' . $chatbot_azure_api_version;
+    $url = sprintf(
+        'https://%s.openai.azure.com/openai/threads/%s/messages?api-version=%s',
+        $chatbot_azure_resource_name,
+        $thread_id,
+        $chatbot_azure_api_version
+    );
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '$url: ' . $url);
-
-    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    if ( $assistant_beta_version == 'v2' ) {
-        $beta_version = "assistants=v2";
-    } else {
-        $beta_version = "assistants=v1";
-    }
 
     // Prepare common headers
     $headers = array(
@@ -150,6 +143,13 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 
     if ( !empty($file_id) ) {
 
+        $assistant_beta_version = esc_attr(get_option('chatbot_azure_assistant_beta_version', 'v2'));
+        if ( $assistant_beta_version == 'v2' ) {
+            $beta_version = "assistants=v2";
+        } else {
+            $beta_version = "assistants=v1";
+        }
+    
         // *********************************************************************************
         // Decide which helper to use
         // *********************************************************************************
@@ -222,19 +222,17 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key) {
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
+    
     // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/threads?' . $thread_id . '/runs?api-version=2024-03-01-preview';
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/threads/' . $thread_id . '/runs?api-version=' . $chatbot_azure_api_version;
+    $url = sprintf(
+        'https://%s.openai.azure.com/openai/threads/%s/runs?api-version=%s',
+        $chatbot_azure_resource_name,
+        $thread_id,
+        $chatbot_azure_api_version
+    );
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', '$url: ' . $url);
-
-    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    if ( $assistant_beta_version == 'v2' ) {
-        $beta_version = "assistants=v2";
-    } else {
-        $beta_version = "assistants=v1";
-    }
 
     // Prepare common headers
     $headers = array(
@@ -333,16 +331,18 @@ function get_the_azure_run_status($thread_id, $runId, $api_key) {
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', 'Step 5: get_the_azure_run_status');
 
-    // Examle https://<resource>.openai.azure.com/openai/threads/<thread_id>/runs/<run_id>?api-version=2024-03-01-preview
-    // Build the API URL
-    $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId;
-
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
+
     // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai' . $thread_id . '/runs/' . $runId . '?api-version=2024-03-01-preview';
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/' . $thread_id . '/runs/' . $runId . '?api-version=' . $chatbot_azure_api_version;
+    $url = sprintf(
+        'https://%s.openai.azure.com/openai/threads/%s/runs/%s?api-version=%s',
+        $chatbot_azure_resource_name,
+        $thread_id,
+        $runId,
+        $chatbot_azure_api_version
+    );
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', '$url: ' . $url);
@@ -369,7 +369,6 @@ function get_the_azure_run_status($thread_id, $runId, $api_key) {
 
 }
 
-
 // -------------------------------------------------------------------------
 // Step 6: Get the Run's Steps
 // -------------------------------------------------------------------------
@@ -382,20 +381,18 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
+    
     // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai/' . $thread_id . '/runs/' . $runId . '/steps?api-version=2024-03-01-preview';
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/threads/' . $thread_id . '/runs/' . $runId . '/steps?api-version=' . $chatbot_azure_api_version;
+    $url = sprintf(
+        'https://%s.openai.azure.com/openai/threads/%s/runs/%s/steps?api-version=%s',
+        $chatbot_azure_resource_name,
+        $thread_id,
+        $runId,
+        $chatbot_azure_api_version
+    );
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', '$url: ' . $url);
-
-    // Determine API version
-    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    if ( $assistant_beta_version == 'v2' ) {
-        $beta_version = "assistants=v2";
-    } else {
-        $beta_version = "assistants=v1";
-    }
 
     // Prepare request headers
     $headers = array(
@@ -449,27 +446,21 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
     // back_trace( 'NOTICE', 'Step 7 - get_the_azure_steps_status()');
     // back_trace( 'NOTICE', 'Step 7 - $thread_id: ' . $thread_id);
 
-    // $url = "https://api.openai.com/v1/threads/" . $thread_id . "/runs/" . $runId . "/steps";
-    $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $runId . '/steps';
-
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
-    // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai' . $thread_id . '/runs/' . $runId . '/steps?api-version=2024-03-01-preview';
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/threads/' . $thread_id . '/runs/' . $runId . '/steps?api-version=' . $chatbot_azure_api_version;
 
+    // Construct API URL
+    $url = sprintf(
+        'https://%s.openai.azure.com/openai/threads/%s/runs/%s/steps?api-version=%s',
+        $chatbot_azure_resource_name,
+        $thread_id,
+        $runId,
+        $chatbot_azure_api_version
+    );
+    
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
-
-    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    if ( $assistant_beta_version == 'v2' ) {
-        $beta_version = "assistants=v2";
-    } else {
-        $beta_version = "assistants=v1";
-    }
-    // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
+    back_trace( 'NOTICE', '$url: ' . $url);
 
     // Prepare request headers    
     $headers = array(
@@ -542,6 +533,7 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
                 return "completed";
             } else {
                 prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Status is not "completed".');
+                prod_trace('ERROR', 'Step 7 - $responseArray: ' . print_r($responseArray, true));
                 return "Error: Step status is " . $responseArray["data"][0]["status"];
             }
         } else {
@@ -574,21 +566,17 @@ function get_the_azure_message($thread_id, $api_key) {
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
+
     // Assemble the URL
-    // $url = 'https://RESOURCE_NAME_GOES_HERE.openai.azure.com/openai' . $thread_id . '/messages?api-version=2024-03-01-preview';
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/threads/' . $thread_id . '/messages?api-version=' . $chatbot_azure_api_version;
+    $url = sprintf(
+        'https://%s.openai.azure.com/openai/threads/%s/messages?api-version=%s',
+        $chatbot_azure_resource_name,
+        $thread_id,
+        $chatbot_azure_api_version
+    );
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', '$url: ' . $url);
-
-    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
-    if ( $assistant_beta_version == 'v2' ) {
-        $beta_version = "assistants=v2";
-    } else {
-        $beta_version = "assistants=v1";
-    }
-    // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$beta_version: ' . $beta_version);
 
     // Prepare request headers 
     $headers = array(
@@ -1072,7 +1060,12 @@ function delete_azure_uploaded_file($file_id) {
     $chatbot_azure_api_version = esc_attr(get_option('chatbot_azure_api_version', '2024-08-01-preview'));
 
     // Assemble the URL for deletion
-    $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files/' . $file_id . '?api-version=' . $chatbot_azure_api_version;
+    $url = sprintf(
+        'https://%s.openai.azure.com/openai/files/%s?api-version=%s',
+        $chatbot_azure_resource_name,
+        $file_id,
+        $chatbot_azure_api_version
+    );
     
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace('NOTICE', '$url: ' . $url);
