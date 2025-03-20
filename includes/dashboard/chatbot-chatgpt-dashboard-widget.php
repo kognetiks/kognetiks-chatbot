@@ -15,16 +15,19 @@ if (!defined('WPINC')) {
 
 // Add the dashboard widget
 function chatbot_chatgpt_add_dashboard_widget() {
+
     wp_add_dashboard_widget(
         'chatbot_chatgpt_dashboard_widget',
         'Kognetiks Chatbot Statistics',
         'chatbot_chatgpt_dashboard_widget_content'
     );
+
 }
 add_action('wp_dashboard_setup', 'chatbot_chatgpt_add_dashboard_widget');
 
 // Format duration in seconds to human readable format
 function format_duration($seconds) {
+
     if ($seconds < 60) {
         return round($seconds) . ' seconds';
     } elseif ($seconds < 3600) {
@@ -34,10 +37,12 @@ function format_duration($seconds) {
     } else {
         return round($seconds / 86400, 1) . ' days';
     }
+
 }
 
 // Widget content function
 function chatbot_chatgpt_dashboard_widget_content() {
+
     global $wpdb;
     
     // Get the current period setting
@@ -98,10 +103,10 @@ function chatbot_chatgpt_dashboard_widget_content() {
         current_time('mysql')
     ));
     
-    // Debug output
+    // DIAG - Diagnotics - Ver 2.2.7
     if (empty($daily_chats)) {
-        error_log('Chatbot Dashboard - No data in daily_chats. Period: ' . $period . ', Start date: ' . $start_date);
-        error_log('Chatbot Dashboard - Total chats count: ' . $chat_count);
+        prod_trace( 'NOTCIE', 'No data in daily_chats. Period: ' . $period . ', Start date: ' . $start_date);
+        prod_trace( 'NOTICE', 'Total chats count: ' . $chat_count);
     }
     
     // Get token usage
@@ -372,4 +377,5 @@ function chatbot_chatgpt_dashboard_widget_content() {
         </div>
     </div>
     <?php
+    
 } 
