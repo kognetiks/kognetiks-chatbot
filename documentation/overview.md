@@ -8,7 +8,7 @@ The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI pl
 
 ## External Services
 
-The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
+The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service's terms of service and privacy policy:
 
 - **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
@@ -31,10 +31,10 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
    - Consent to sending user queries and related data to the selected AI provider for processing and response generation.
-   - Agree to abide by the provider’s terms of service, pricing, and privacy policy.
+   - Agree to abide by the provider's terms of service, pricing, and privacy policy.
    - Acknowledge that your data, including text submitted by users, may be transferred to and processed by the AI platform in accordance with its privacy policy.
 
-**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider’s pricing and usage policies before proceeding.
+**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
 ## Introducing the Sentential Context Model - BETA FEATURE OFFERING
 
@@ -83,6 +83,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 - [Appearance](appearance/appearance.md)
 
 - [Buttons](buttons/buttons.md)
+
+- [Dashboard](dashboard/dashboard.md)
 
 - [Knowledge Navigator](knowledge-navigator/knowledge-navigator.md)
 
