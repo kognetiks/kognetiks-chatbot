@@ -456,15 +456,14 @@ jQuery(document).ready(function ($) {
 
     }
 
-    var originalWidth;
-    var originalHeight;
-    var enlarged = false;
+    let originalWidth;
+    let originalHeight;
+    let enlarged = false;
+    let resizeTimeout;
 
     function resizeChatbot() {
-
-        let chatEl = document.getElementById('chatbot-chatgpt'); // Define chatEl
-    
-        console.log('Chatbot: NOTICE: Resizing the chatbot.');
+        
+        let chatEl = document.getElementById('chatbot-chatgpt');
     
         if (!chatEl) {
             console.warn('Chatbot: WARNING: Chatbot element not found.');
@@ -482,14 +481,8 @@ jQuery(document).ready(function ($) {
         let margin = 20; // Safety margin
     
         if (!enlarged) {
-
-            console.log('Chatbot: NOTICE: Enlarging the chatbot.');
-
             let newWidth = Math.min(originalWidth * 2, viewportWidth - margin);
             let newHeight = Math.min(originalHeight * 2, viewportHeight - margin);
-
-            console.log('Chatbot: NOTICE: Enlarging the chatbot to ' + newWidth + 'x' + newHeight);
-            console.log('Chatbot: NOTICE: Original size: ' + originalWidth + 'x' + originalHeight);
 
             // Update the height and width of the chatbot with the newWidth and newHeight
             chatEl.style.setProperty('width', newWidth + 'px', 'important');
@@ -497,12 +490,13 @@ jQuery(document).ready(function ($) {
 
             $('#chatbot-chatgpt-conversation')[0].style.setProperty('max-height', '90%', 'important');
 
-            // updateChatbotConversationMaxHeight();
-
-            // Update on window resize
-            $(window).on('resize', function() {
-                updateChatbotConversationMaxHeight();
-                updateChatContainerDimensions();
+            // Remove any existing resize listeners before adding new ones
+            $(window).off('resize').on('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    updateChatbotConversationMaxHeight();
+                    updateChatContainerDimensions();
+                }, 250); // Debounce resize events
             });
 
             $('#chatbot-resize-icon')
@@ -510,28 +504,29 @@ jQuery(document).ready(function ($) {
                 .attr('alt', 'Reduce Chat');
 
             enlarged = true;
-
-            console.log( chatbotresizedowniconSrc );
+            localStorage.setItem('chatbot_enlarged', 'true');
 
         } else {
-
-            console.log('Chatbot: NOTICE: Reducing the chatbot.');
-
             chatEl.style.setProperty('width', originalWidth + 'px', 'important');
             chatEl.style.setProperty('height', originalHeight + 'px', 'important');
 
-            $('#chatbot-chatgpt-conversation').css('100%', '400px');
+            $('#chatbot-chatgpt-conversation').css('max-height', '400px');
 
             $('#chatbot-resize-icon')
                 .attr('src', chatbotresizeupiconSrc)
                 .attr('alt', 'Enlarge Chat');
 
             enlarged = false;
-
-            console.log( chatbotresizeupiconSrc );
-
+            localStorage.setItem('chatbot_enlarged', 'false');
+            
+            // Remove resize listener when reducing
+            $(window).off('resize');
         }
+    }
 
+    // Initialize enlarged state from localStorage
+    if (localStorage.getItem('chatbot_enlarged') === 'true') {
+        enlarged = true;
     }
 
     // Function to update the chatbot styles based on the viewport size
