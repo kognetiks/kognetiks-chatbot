@@ -26,6 +26,8 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
 1. **Remote Server Script**:
     - **Description**: The code block below illustrates how to configure the remote server call to your chatbot.  It consists of a ```<script></script>``` and ```<iframe></iframe >```.  In the iframe is the call to your endpoint and a specific assistant.  In this example, the endpoint is located on the kognetiks.com domain, nestled deep within the subdirectories where the Kognetiks Chatbot resides.  To get started, you can copy this code and substitute ```kognetiks.com``` and ```chatbot-4``` for your domain and one of your assistants.
 
+    For example, if you're using the **OpenAI** platform:
+
     ```
     <script>
     <iframe src="https://www.kognetiks.com/wp-content/plugins/chatbot-chatgpt/widgets/chatbot-chatgpt-widget-endpoint.php?assistant=chatbot-4"
@@ -33,6 +35,18 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
         allowtransparency="true"></iframe>
     </script>
     ```
+
+    For example, if you're using the **Azure OpenAI** platform:
+
+    ```
+    <script>
+    <iframe src="https://www.kognetiks.com/wp-content/plugins/chatbot-chatgpt/widgets/chatbot-azure-widget-endpoint.php?assistant=chatbot-4"
+        style="width: 1000px; height: 1000px; border: none; position: fixed; bottom: 10px; right: 10px; background: transparent;"
+        allowtransparency="true"></iframe>
+    </script>
+    ```
+
+    **NOTE**: Be sure to substitute your ```domain name``` for ```kognetiks.com``` in the above examples.
 
 ---
 
