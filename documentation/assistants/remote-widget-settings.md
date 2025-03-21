@@ -26,27 +26,40 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
 1. **Remote Server Script**:
     - **Description**: The code block below illustrates how to configure the remote server call to your chatbot.  It consists of a ```<script></script>``` and ```<iframe></iframe >```.  In the iframe is the call to your endpoint and a specific assistant.  In this example, the endpoint is located on the kognetiks.com domain, nestled deep within the subdirectories where the Kognetiks Chatbot resides.  To get started, you can copy this code and substitute ```kognetiks.com``` and ```chatbot-4``` for your domain and one of your assistants.
 
-    For example, if you're using the **OpenAI** platform:
+    For example:
 
     ```
+    <iframe
+        id="chatbot-widget-iframe"
+        src="https://localhost/wpdev/wp-content/plugins/chatbot-chatgpt/widgets/chatbot-widget-endpoint.php?assistant=assistant-21"
+        style="width: 100%; max-width: 600px; height: 100%; max-height: 600px; border: none; position: fixed; bottom: 20px; right: 20px; background: transparent; z-index: 999999 !important; outline: none; box-shadow: none;"
+        allowtransparency="true"
+        scrolling="no"
+        frameborder="0">
+    </iframe>
+
     <script>
-    <iframe src="https://www.kognetiks.com/wp-content/plugins/chatbot-chatgpt/widgets/chatbot-chatgpt-widget-endpoint.php?assistant=chatbot-4"
-        style="width: 1000px; height: 1000px; border: none; position: fixed; bottom: 10px; right: 10px; background: transparent;"
-        allowtransparency="true"></iframe>
+    function rightsizeChatbot(event) {
+        if (event.origin !== "http://localhost") return; // Change this to match your domain
+
+            const iframe = document.getElementById("chatbot-widget-iframe");
+            if (event.data.height) {
+                let newHeight = Math.min(event.data.height, window.innerHeight - 40); // Prevent overflow
+                iframe.style.height = newHeight + "px";
+            }
+        }
+
+        // Ensure the iframe resizes dynamically
+        window.addEventListener("message", rightsizeChatbot, false);
+        window.addEventListener("resize", () => {
+            document.getElementById("chatbot-widget-iframe").contentWindow.postMessage("resize", "*");
+        });
     </script>
     ```
 
-    For example, if you're using the **Azure OpenAI** platform:
+    **NOTE**: Be sure to substitute your ```domain name``` for ```localhost``` in the above examples.
 
-    ```
-    <script>
-    <iframe src="https://www.kognetiks.com/wp-content/plugins/chatbot-chatgpt/widgets/chatbot-azure-widget-endpoint.php?assistant=chatbot-4"
-        style="width: 1000px; height: 1000px; border: none; position: fixed; bottom: 10px; right: 10px; background: transparent;"
-        allowtransparency="true"></iframe>
-    </script>
-    ```
-
-    **NOTE**: Be sure to substitute your ```domain name``` for ```kognetiks.com``` in the above examples.
+    **TIP**: You can use either chatbot-nn (OpenAI) or assistant-nn (Azure OpenAI), either will work.
 
 ---
 

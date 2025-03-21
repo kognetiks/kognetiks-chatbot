@@ -29,21 +29,21 @@ if (file_exists($path . '/wp-load.php')) {
 require_once plugin_dir_path( __FILE__ ) . 'chatbot-widget-logging.php';
 
 // If remote access is not allowed, abort.
-$chatbot_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
+if ($chatbot_ai_platform_choice === 'Azure OpenAI') {
+    $chatbot_enable_remote_widget = esc_attr(get_option('chatbot_azure_enable_remote_widget', 'No'));
+} else {
+    $chatbot_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
+}
 
 if ($chatbot_enable_remote_widget !== 'Yes') {
-
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     chatbot_widget_logging('Remote access is not allowed', $referer );
     die();
-
 } else {
-
     // Log the referer for accounting, monitoring, and debugging purposes
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     $request_ip = getUserIP();
     chatbot_widget_logging('Remote access is allowed' , $referer , $request_ip);
-
 }
 
 // Allowed domain, shortcode examples - Ver 2.1.3
@@ -72,8 +72,14 @@ $chatbot_prompt = isset($_GET['chatbot_prompt']) ? sanitize_text_field($_GET['ch
 $chatbot_prompt = preg_replace("/^\\\\'|\\\\'$/", '', $chatbot_prompt);
 // back_trace( 'NOTICE', 'Widget Endpoint - $chatbot_prompt: ' . $chatbot_prompt);
 
-// Retrieve the allowed domains and assistants from the OpenAI Assistants options
-$allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
+// Retrieve the allowed pairs based on the ai platform choice
+if ($chatbot_ai_platform_choice === 'Azure OpenAI') {
+    // Add the allowed domains and assistants from the Azure OpenAI Assistant Settings - Ver 2.2.6 - 2025-03-12
+    $allowed_domains_string = esc_attr(get_option('chatbot_azure_allowed_remote_domains', ''));
+} else {
+    // Retrieve the allowed domains and assistants from the OpenAI Assistants options
+    $allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
+}
 
 // Convert the string to an array of domain-assistant pairs, assuming they are newline-separated
 $allowed_pairs = array_map('trim', explode("\n", $allowed_domains_string));
@@ -221,7 +227,7 @@ $chatbot_widget_height = ($iframe_height - 20) . 'px';
             position: fixed;
             bottom: 10px;
             right: 10px;
-            padding: 20px;
+            padding: 25px;
             background: transparent;
             z-index: 9999;
             }

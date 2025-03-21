@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 function create_chatbot_chatgpt_assistants_table() {
 
     // DIAG - Diagnostics - Ver 2.2.7
-    back_trace( 'NOTCE', 'create_chatbot_chatgpt_assistants_table - START' );
+    // back_trace( 'NOTCE', 'create_chatbot_chatgpt_assistants_table - START' );
 
     global $wpdb;
 
@@ -75,7 +75,7 @@ function create_chatbot_chatgpt_assistants_table() {
     // update_chatbot_chatgpt_number_of_shortcodes();
 
     // DIAG - Diagnostics - Ver 2.2.7
-    back_trace( 'NOTCE', 'create_chatbot_chatgpt_assistants_table - END' );
+    // back_trace( 'NOTCE', 'create_chatbot_chatgpt_assistants_table - END' );
 
 }
 // REMVOED - Ver 2.2.7
@@ -153,7 +153,7 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
 function update_chatbot_chatgpt_number_of_shortcodes() {
 
     // DIAG - Diagnostics - Ver 2.2.7
-    back_trace( 'NOTCE', 'update_chatbot_chatgpt_number_of_shortcodes - START' );
+    // back_trace( 'NOTCE', 'update_chatbot_chatgpt_number_of_shortcodes - START' );
 
     global $wpdb;
 
@@ -181,7 +181,7 @@ function update_chatbot_chatgpt_number_of_shortcodes() {
     // error_log('chatbot-assistants - Number of Shortcodes: ' . $number_of_shortcodes);
 
     // DIAG - Diagnostics - Ver 2.2.7
-    back_trace( 'NOTCE', 'update_chatbot_chatgpt_number_of_shortcodes - END' );
+    // back_trace( 'NOTCE', 'update_chatbot_chatgpt_number_of_shortcodes - END' );
     
 }
 

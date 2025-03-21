@@ -649,3 +649,23 @@
     display: flex;
     gap: 5px;
 }
+
+#chatbot-widget-iframe {
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+iframe {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+html, body {
+    overflow-x: hidden; /* Prevents unwanted horizontal scrolling */
+}
+

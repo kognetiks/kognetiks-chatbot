@@ -461,7 +461,7 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
     );
     
     // DIAG - Diagnostics - Ver 2.2.6
-    back_trace( 'NOTICE', '$url: ' . $url);
+    // back_trace( 'NOTICE', '$url: ' . $url);
 
     // Prepare request headers    
     $headers = array(
@@ -923,14 +923,14 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     while (($retry_count < $max_retries) && (($step_status = get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id)) !== "completed")) {
         $retry_count++;
         usleep($sleep_time); 
-        back_trace('NOTICE', 'Step 7: retry ' . $retry_count . ' - get_the_azure_steps_status() returned: ' . step_status);
+        // back_trace('NOTICE', 'Step 7: retry ' . $retry_count . ' - get_the_azure_steps_status() returned: ' . step_status);
     }
 
     if ($retry_count!=0) {
         if ($retry_count==$max_retries) {
-            back_trace('NOTICE', 'Failure after retry ' . $retry_count . ' - get_the_azure_steps_status()'. $step_status);
+            prod_trace('NOTICE', 'Failure after retry ' . $retry_count . ' - get_the_azure_steps_status()'. $step_status);
         } else  {
-            back_trace('NOTICE', 'Done after retry ' . $retry_count . ' - get_the_azure_steps_status()');
+            prod_trace('NOTICE', 'Done after retry ' . $retry_count . ' - get_the_azure_steps_status()');
         }
     }
 
