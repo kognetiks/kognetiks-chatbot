@@ -309,6 +309,7 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key) {
         if (strpos($errorMessage, 'already has an active run') !== false) {
             if (preg_match('/active run (\S+)\.?/', $errorMessage, $matches)) {
                 $existingRunId = $matches[1];
+                $existingRunId = rtrim($existingRunId, '.');
                 // back_trace('NOTICE', "Using existing active run: {$existingRunId}");
                 // Return a structure with the run id so the polling logic can use it
                 return ['id' => $existingRunId, 'active' => true];
@@ -531,10 +532,14 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
                     }
                 }                
                 return "completed";
+            } else if ($status === "in_progress" || $status === "pending") {
+                // Status is still in progress: sleep and retry
+                usleep($sleep_time);
+                $retry_count++;
+                continue;
             } else {
-                prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Status is not "completed".');
-                prod_trace('ERROR', 'Step 7 - $responseArray: ' . print_r($responseArray, true));
-                return "Error: Step status is " . $responseArray["data"][0]["status"];
+                prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Unexpected status - ' . $status);
+                return "Error: Unexpected step status: " . $status;
             }
         } else {
             // prod_trace('ERROR', 'Error - GPT Assistant - Step 7: Invalid API response - missing "data" or "status".');
@@ -962,13 +967,44 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // DIAG - Diagnostics - Ver 2.2.1
     // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
-    // Return the response text, checking for the fallback content[1][text] if available
-    if (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {
-        return $assistants_response["data"][0]["content"][1]["text"]["value"];
-    } elseif (isset($assistants_response["data"][0]["content"][0]["text"]["value"])) {
-        return $assistants_response["data"][0]["content"][0]["text"]["value"];
+    // Verify that "data" exists and is an array.
+    if (!isset($assistants_response["data"]) || !is_array($assistants_response["data"])) {
+        prod_trace('ERROR', 'Error: "data" key is missing or not an array.');
+        return '';
+    }
+
+    // Initialize variables to track the latest assistant message.
+    $max_created_at = 0;
+    $latest_index = -1;
+
+    // Loop through all messages to find the assistant message with the highest created_at.
+    foreach ($assistants_response["data"] as $index => $msg) {
+        if (isset($msg["role"]) && $msg["role"] === "assistant") {
+            if (isset($msg["created_at"]) && $msg["created_at"] > $max_created_at) {
+                $max_created_at = $msg["created_at"];
+                $latest_index = $index;
+            }
+        }
+    }
+
+    if ($latest_index === -1) {
+        prod_trace('ERROR', 'Error: No assistant messages found.');
+        return '';
+    }
+
+    prod_trace('ERROR', 'DEBUG: Latest assistant message found at index ' . $latest_index . ' with created_at: ' . $max_created_at);
+
+    // Extract the text from the selected message. 
+    if (isset($assistants_response["data"][$latest_index]["content"][1]["text"]["value"])) {
+        $latest_response = $assistants_response["data"][$latest_index]["content"][1]["text"]["value"];
+        prod_trace('ERROR', 'DEBUG: Extracted response from content[1]: ' . $latest_response);
+        return $latest_response;
+    } elseif (isset($assistants_response["data"][$latest_index]["content"][0]["text"]["value"])) {
+        $latest_response = $assistants_response["data"][$latest_index]["content"][0]["text"]["value"];
+        prod_trace('ERROR', 'DEBUG: Extracted response from content[0]: ' . $latest_response);
+        return $latest_response;
     } else {
-        // Return a default value or an empty string if none exist
+        prod_trace('ERROR', 'Error: No text value found in the latest assistant message.');
         return '';
     }
 

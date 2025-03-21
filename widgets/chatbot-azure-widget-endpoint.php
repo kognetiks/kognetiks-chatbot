@@ -1,8 +1,8 @@
 <?php
 /**
- * Kognetiks Chatbot - Chatbot WIDGET ENDPOINT - Ver 2.1.3 - Updated Ver 2.2.7 - 2025-03-21
+ * Kognetiks Chatbot - Chatbot Azure OpenAI WIDGET ENDPOINT - Ver 2.1.3
  *
- * This file contains the code accessing the Chatbot ChatGPT endpoint.
+ * This file contains the code accessing the Chatbot Widget endpoint.
  * 
  *
  * @package chatbot-chatgpt
@@ -29,7 +29,7 @@ if (file_exists($path . '/wp-load.php')) {
 require_once plugin_dir_path( __FILE__ ) . 'chatbot-widget-logging.php';
 
 // If remote access is not allowed, abort.
-$chatbot_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
+$chatbot_enable_remote_widget = esc_attr(get_option('chatbot_azure_enable_remote_widget', 'No'));
 
 if ($chatbot_enable_remote_widget !== 'Yes') {
 
@@ -72,8 +72,8 @@ $chatbot_prompt = isset($_GET['chatbot_prompt']) ? sanitize_text_field($_GET['ch
 $chatbot_prompt = preg_replace("/^\\\\'|\\\\'$/", '', $chatbot_prompt);
 // back_trace( 'NOTICE', 'Widget Endpoint - $chatbot_prompt: ' . $chatbot_prompt);
 
-// Retrieve the allowed domains and assistants from the OpenAI Assistants options
-$allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
+// Add the allowed domains and assistants from the Azure OpenAI Assistant Settings - Ver 2.2.6 - 2025-03-12
+$allowed_domains_string = esc_attr(get_option('chatbot_azure_allowed_remote_domains', ''));
 
 // Convert the string to an array of domain-assistant pairs, assuming they are newline-separated
 $allowed_pairs = array_map('trim', explode("\n", $allowed_domains_string));

@@ -62,10 +62,10 @@ function chatbot_chatgpt_tools_settings_init() {
 
     // Manage Widget Logs
     add_settings_section(
-        'chatbot_chatgpt_manage_widget_logs_section',
+        'chatbot_manage_widget_logs_section',
         'Manage Widget Access Logs',
-        'chatbot_chatgpt_manage_widget_logs_section_callback',
-        'chatbot_chatgpt_manage_widget_logs'
+        'chatbot_manage_widget_logs_section_callback',
+        'chatbot_manage_widget_logs'
     );
     
     // Shortcode Tester Overview
