@@ -47,11 +47,17 @@ function chatbot_chatgpt_dashboard_widget_content() {
     
     // Get the current period setting
     $period = get_option('chatbot_chatgpt_dashboard_period', '24h');
+    $view_type = get_option('chatbot_chatgpt_dashboard_view', 'sessions');
     
     // Handle form submission
     if (isset($_POST['chatbot_chatgpt_dashboard_period'])) {
         $period = sanitize_text_field($_POST['chatbot_chatgpt_dashboard_period']);
         update_option('chatbot_chatgpt_dashboard_period', $period);
+    }
+    
+    if (isset($_POST['chatbot_chatgpt_dashboard_view'])) {
+        $view_type = sanitize_text_field($_POST['chatbot_chatgpt_dashboard_view']);
+        update_option('chatbot_chatgpt_dashboard_view', $view_type);
     }
     
     // Calculate the start date based on the period
@@ -76,32 +82,68 @@ function chatbot_chatgpt_dashboard_widget_content() {
     
     // Get chat statistics
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
-    $chat_count = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(DISTINCT session_id) FROM $table_name WHERE interaction_time >= %s",
-        $start_date
-    ));
     
-    // Get daily chat counts for the graph
-    $daily_chats = $wpdb->get_results($wpdb->prepare(
-        "WITH RECURSIVE date_series AS (
-            SELECT DATE(%s) as date
-            UNION ALL
-            SELECT DATE_ADD(date, INTERVAL 1 " . ($period === '24h' ? 'HOUR' : 'DAY') . ")
-            FROM date_series
-            WHERE date < DATE(%s)
-        )
-        SELECT 
-            ds.date,
-            COALESCE(COUNT(DISTINCT cl.session_id), 0) as count
-        FROM date_series ds
-        LEFT JOIN $table_name cl ON " . ($period === '24h' ? 
-            "DATE_FORMAT(cl.interaction_time, '%Y-%m-%d %H:00:00') = ds.date" : 
-            "DATE(cl.interaction_time) = ds.date") . "
-        GROUP BY ds.date
-        ORDER BY ds.date ASC",
-        $start_date,
-        current_time('mysql')
-    ));
+    if ($view_type === 'sessions') {
+        $chat_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT session_id) FROM $table_name WHERE interaction_time >= %s",
+            $start_date
+        ));
+        
+        // Get daily chat counts for the graph
+        $daily_chats = $wpdb->get_results($wpdb->prepare(
+            "WITH RECURSIVE date_series AS (
+                SELECT DATE(%s) as date
+                UNION ALL
+                SELECT DATE_ADD(date, INTERVAL 1 " . ($period === '24h' ? 'HOUR' : 'DAY') . ")
+                FROM date_series
+                WHERE date < DATE(%s)
+            )
+            SELECT 
+                ds.date,
+                COALESCE(COUNT(DISTINCT cl.session_id), 0) as count
+            FROM date_series ds
+            LEFT JOIN $table_name cl ON " . ($period === '24h' ? 
+                "DATE_FORMAT(cl.interaction_time, '%Y-%m-%d %H:00:00') = ds.date" : 
+                "DATE(cl.interaction_time) = ds.date") . "
+            GROUP BY ds.date
+            ORDER BY ds.date ASC",
+            $start_date,
+            current_time('mysql')
+        ));
+    } else {
+        $chat_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) / 2 FROM $table_name 
+            WHERE interaction_time >= %s 
+            AND user_type IN ('Chatbot', 'Visitor')",
+            $start_date
+        ));
+        
+        // Get daily interaction counts for the graph
+        $daily_chats = $wpdb->get_results($wpdb->prepare(
+            "WITH RECURSIVE date_series AS (
+                SELECT DATE(%s) as date
+                UNION ALL
+                SELECT DATE_ADD(date, INTERVAL 1 " . ($period === '24h' ? 'HOUR' : 'DAY') . ")
+                FROM date_series
+                WHERE date < DATE(%s)
+            )
+            SELECT 
+                ds.date,
+                COALESCE(
+                    (SELECT COUNT(*) / 2 
+                     FROM $table_name 
+                     WHERE " . ($period === '24h' ? 
+                        "DATE_FORMAT(interaction_time, '%Y-%m-%d %H:00:00') = ds.date" : 
+                        "DATE(interaction_time) = ds.date") . "
+                     AND user_type IN ('Chatbot', 'Visitor')),
+                    0
+                ) as count
+            FROM date_series ds
+            ORDER BY ds.date ASC",
+            $start_date,
+            current_time('mysql')
+        ));
+    }
     
     // DIAG - Diagnotics - Ver 2.2.7
     if (empty($daily_chats)) {
@@ -296,6 +338,54 @@ function chatbot_chatgpt_dashboard_widget_content() {
                 white-space: nowrap;
                 text-transform: <?php echo $period === '7d' ? 'uppercase' : 'none'; ?>;
             }
+            .chatbot-view-selector {
+                margin-bottom: 20px;
+                padding: 10px;
+                background: #f0f0f1;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .chatbot-view-selector label {
+                font-weight: 600;
+                color: #1d2327;
+            }
+            .chatbot-view-select {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #8c8f94;
+                border-radius: 4px;
+                background-color: #fff;
+                color: #2c3338;
+                font-size: 14px;
+                line-height: 1.4;
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                position: relative;
+                padding-right: 30px;
+                background-image: none;
+            }
+            .chatbot-view-select:focus {
+                border-color: #2271b1;
+                box-shadow: 0 0 0 1px #2271b1;
+                outline: none;
+            }
+            .chatbot-view-select-wrapper {
+                position: relative;
+                flex: 1;
+            }
+            .chatbot-view-select-wrapper::after {
+                font-family: dashicons;
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                color: #2c3338;
+                font-size: 16px;
+            }
         </style>
         
         <form method="post" class="chatbot-period-selector">
@@ -307,6 +397,16 @@ function chatbot_chatgpt_dashboard_widget_content() {
                     <option value="30d" <?php selected($period, '30d'); ?>>Last 30 Days</option>
                     <option value="90d" <?php selected($period, '90d'); ?>>Last 90 Days</option>
                     <option value="365d" <?php selected($period, '365d'); ?>>Last 365 Days</option>
+                </select>
+            </div>
+        </form>
+        
+        <form method="post" class="chatbot-view-selector">
+            <label for="chatbot_chatgpt_dashboard_view">View Type:</label>
+            <div class="chatbot-view-select-wrapper">
+                <select name="chatbot_chatgpt_dashboard_view" id="chatbot_chatgpt_dashboard_view" onchange="this.form.submit()" class="chatbot-view-select">
+                    <option value="sessions" <?php selected($view_type, 'sessions'); ?>>Sessions</option>
+                    <option value="interactions" <?php selected($view_type, 'interactions'); ?>>Interactions</option>
                 </select>
             </div>
         </form>
@@ -331,10 +431,10 @@ function chatbot_chatgpt_dashboard_widget_content() {
                 if (!empty($daily_chats)) {
                     $max_count = max(array_column($daily_chats, 'count'));
                     foreach ($daily_chats as $day) {
-                        $height = $max_count > 0 ? ($day->count / $max_count * 100) : 0;
+                        $height = $max_count > 0 ? (round($day->count) / $max_count * 100) : 0;
                         ?>
                         <div class="chatbot-graph-bar" style="height: <?php echo $height; ?>%">
-                            <div class="chatbot-graph-value"><?php echo $day->count; ?></div>
+                            <div class="chatbot-graph-value"><?php echo round($day->count); ?></div>
                             <div class="chatbot-graph-label"><?php echo date('m/d', strtotime($day->date)); ?></div>
                         </div>
                         <?php
@@ -346,10 +446,25 @@ function chatbot_chatgpt_dashboard_widget_content() {
             </div>
         </div>
         
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const graphContainer = document.querySelector('.chatbot-graph-container');
+                if (graphContainer) {
+                    // Scroll to the right
+                    graphContainer.scrollLeft = graphContainer.scrollWidth;
+                    
+                    // Add a small delay to ensure the scroll happens after all content is loaded
+                    setTimeout(() => {
+                        graphContainer.scrollLeft = graphContainer.scrollWidth;
+                    }, 100);
+                }
+            });
+        </script>
+        
         <div class="chatbot-stat-box">
-            <div class="chatbot-stat-title">Total Chats</div>
+            <div class="chatbot-stat-title">Total <?php echo $view_type === 'sessions' ? 'Sessions' : 'Interactions'; ?></div>
             <div class="chatbot-stat-value"><?php echo number_format($chat_count); ?></div>
-            <div class="chatbot-stat-label">Unique conversations in the selected period</div>
+            <div class="chatbot-stat-label"><?php echo $view_type === 'sessions' ? 'Unique conversations in the selected period' : 'Total interactions (messages exchanged) in the selected period'; ?></div>
         </div>
         
         <div class="chatbot-stat-box">

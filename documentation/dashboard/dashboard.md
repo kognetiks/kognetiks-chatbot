@@ -28,17 +28,20 @@ You can view statistics for different time periods:
 - Last 90 Days
 - Last 365 Days
 
+### View Type
+You can view statistics for either Sessions or Interactions per Time Period
+
 ### Statistics Display
 
 #### Chat Activity Graph
 - Visual representation of chat activity over time
 - Bar chart showing the number of conversations per day/hour
-- Hover over bars to see exact numbers
 - Scroll horizontally to view all data points
 
-#### Total Chats
-- Shows the total number of unique conversations in the selected time period
-- Each conversation is counted only once, regardless of the number of messages
+#### Total Sessions or Interactions
+- Shows the total number of unique sessions, i.e., converations, or interactions (prompts and completions) in the selected time period
+- Each session is counted only once, regardless of the number of messages
+- Prompts and Completions are totaled then divided by two
 
 #### Average Conversation Duration
 - Displays the average time users spend in conversations
