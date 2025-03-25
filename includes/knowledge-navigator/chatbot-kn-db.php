@@ -53,11 +53,11 @@ function dbKNStore() {
         return true;  // Table created successfully
     } else {
         // Log the error
-        error_log('Failed to create table: ' . $table_name);
-        error_log('SQL: ' . $sql);
+        prod_trace( 'ERROR', 'Failed to create table: ' . $table_name);
+        prod_trace( 'ERROR', 'SQL: ' . $sql);
         // Log the specific reason for the failure
         if($wpdb->last_error !== '') {
-            error_log('Error details: ' . $wpdb->last_error);
+            prod_trace( 'ERROR', 'Details: ' . $wpdb->last_error);
         }
         return false;  // Table creation failed
     }
@@ -100,11 +100,11 @@ function dbKNStoreTFIDF() {
         return true;  // Table created successfully
     } else {
         // Log the error
-        error_log('Failed to create table: ' . $table_name);
-        error_log('SQL: ' . $sql);
+        prod_trace( 'ERROR', 'Failed to create table: ' . $table_name);
+        prod_trace( 'ERROR', 'SQL: ' . $sql);
         // Log the specific reason for the failure
         if($wpdb->last_error !== '') {
-            error_log('Error details: ' . $wpdb->last_error);
+            prod_trace( 'ERROR', 'Details: ' . $wpdb->last_error);
         }
         return false;  // Table creation failed
     }
@@ -148,11 +148,11 @@ function dbKNStoreWordCount() {
         return true;  // Table created successfully
     } else {
         // Log the error
-        error_log('Failed to create table: ' . $table_name);
-        error_log('SQL: ' . $sql);
+        prod_trace( 'ERROR', 'Failed to create table: ' . $table_name);
+        prod_trace( 'ERROR', 'SQL: ' . $sql);
         // Log the specific reason for the failure
         if($wpdb->last_error !== '') {
-            error_log('Error details: ' . $wpdb->last_error);
+            prod_trace( 'ERROR', 'Details: ' . $wpdb->last_error);
         }
         return false;  // Table creation failed
         

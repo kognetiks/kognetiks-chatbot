@@ -266,7 +266,7 @@ function chatbot_kn_run_phase_1() {
     }
 
     // List the post types
-    back_trace( 'NOTICE', 'Post types: ' . print_r($post_types, true) );
+    // back_trace( 'NOTICE', 'Post types: ' . print_r($post_types, true) );
 
     // If no post types are selected, move to phase 2
     if (empty($post_types)) {
@@ -448,66 +448,67 @@ function chatbot_kn_run_phase_3() {
 
 // Phase 4 - Compute the TF-IDF
 function chatbot_kn_run_phase_4() {
-
     global $wpdb;
 
     // Maximum number of top words
-    $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 100)); // Default to 100
+    $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 100));
+    
+    // Get total document count and word count
+    $totalDocumentCount = esc_attr(get_option('chatbot_chatgpt_kn_document_count', 0));
+    $totalWordCount = esc_attr(get_option('chatbot_chatgpt_kn_total_word_count', 0));
+
+    // Debug log the values
+    // back_trace( 'NOTICE', 'TF-IDF Calculation - Total Documents: ' . $totalDocumentCount . ', Total Words: ' . $totalWordCount);
+
+    if ($totalDocumentCount == 0 || $totalWordCount == 0) {
+       // back_trace( 'ERROR', 'Zero total documents or words found');
+        return;
+    }
     
     // SQL query to fetch top words based on their document count
     $results = $wpdb->get_results(
         "SELECT word, word_count, document_count FROM {$wpdb->prefix}chatbot_chatgpt_knowledge_base_word_count 
         ORDER BY document_count DESC LIMIT $max_top_words"
     );
-    
-    // Total number of documents in the corpus
-    $totalDocumentCount = esc_attr(get_option('chatbot_chatgpt_kn_document_count', 0)); // Total documents in the corpus
-    
-    // Total number of words in the corpus
-    $totalWordCount = esc_attr( get_option('chatbot_chatgpt_kn_total_word_count', 0)); // Total words across documents
 
+    // Debug log the first few results
+    // back_trace( 'NOTICE', 'First few words found: ' . print_r(array_slice($results, 0, 5), true));
+    
     foreach ($results as $result) {
-
         $word = $result->word;
-    
-        $wordCount = $result->word_count;  // Using 'count' directly from the query
-    
-        $documentCount = $result->document_count;  // Using 'document_count' directly from the query
-    
         $wordCount = $result->word_count;
-    
-        // Calculate the Term Frequency (TF) for the $word
-        // This should be the total occurrences of the word divided by the total number of words, if available
+        $documentCount = $result->document_count;
+
+        // Calculate Term Frequency (TF)
+        // TF = number of times term appears in document / total number of terms in document
         $tf = $wordCount / $totalWordCount;
-    
+
         // Calculate Inverse Document Frequency (IDF)
+        // IDF = log(total number of documents / number of documents containing term)
         $idf = log($totalDocumentCount / $documentCount);
-    
-        // Calculate the TF-IDF
+
+        // Calculate TF-IDF
         $tfidf = $tf * $idf;
-    
+
+        // Debug log the calculations
+        // back_trace( 'NOTICE', "Word: $word, TF: $tf, IDF: $idf, TF-IDF: $tfidf");
+
         // Store the TF-IDF in the chatbot_chatgpt_knowledge_base_tfidf table
         $wpdb->insert(
             $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf',
             array(
                 'word' => $word,
                 'score' => $tfidf
-            )
+            ),
+            array('%s', '%f')
         );
     }
     
     // Unset large variables to free memory
     unset($results);
 
-    // chatbot_kn_schedule_batch_acquisition();
-    update_option( 'chatbot_chatgpt_kn_action', 'phase 5' );
-
-    // Schedule the next action
-    wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
-
-    // Unset large variables to free memory
-    unset($results);
-
+    update_option('chatbot_chatgpt_kn_action', 'phase 5');
+    wp_schedule_single_event(time() + 2, 'chatbot_kn_acquire_controller');
 }
 
 // Phase 5 - Reinitialize the batch acquisition for pages, posts, and products

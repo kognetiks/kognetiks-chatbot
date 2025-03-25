@@ -182,7 +182,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if (strpos($tag, 'assistant-') === 0) {
         $tag = str_replace('assistant-', 'chatbot-', $tag);
         // DIAG - Diagnostic - Ver 2.2.6
-        // back_trace('NOTICE', 'Transformed assistant shortcode to: ' . $tag);
+        // back_trace( 'NOTICE', 'Transformed assistant shortcode to: ' . $tag);
     }
 
     // Tag Processing - Ver 2.0.6

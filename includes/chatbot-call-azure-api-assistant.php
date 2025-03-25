@@ -310,7 +310,7 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key) {
             if (preg_match('/active run (\S+)\.?/', $errorMessage, $matches)) {
                 $existingRunId = $matches[1];
                 $existingRunId = rtrim($existingRunId, '.');
-                // back_trace('NOTICE', "Using existing active run: {$existingRunId}");
+                // back_trace( 'NOTICE', "Using existing active run: {$existingRunId}");
                 // Return a structure with the run id so the polling logic can use it
                 return ['id' => $existingRunId, 'active' => true];
             }
@@ -923,7 +923,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     while (($retry_count < $max_retries) && (($step_status = get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id)) !== "completed")) {
         $retry_count++;
         usleep($sleep_time); 
-        // back_trace('NOTICE', 'Step 7: retry ' . $retry_count . ' - get_the_azure_steps_status() returned: ' . step_status);
+        // back_trace( 'NOTICE', 'Step 7: retry ' . $retry_count . ' - get_the_azure_steps_status() returned: ' . step_status);
     }
 
     if ($retry_count!=0) {
@@ -1104,7 +1104,7 @@ function delete_azure_uploaded_file($file_id) {
     );
     
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace('NOTICE', '$url: ' . $url);
+    // back_trace( 'NOTICE', '$url: ' . $url);
 
     $headers = array(
         'Content-Type' => 'application/json',
@@ -1128,7 +1128,7 @@ function delete_azure_uploaded_file($file_id) {
     $http_status_code = wp_remote_retrieve_response_code($response);
     
     if ($http_status_code == 200 || $http_status_code == 204) {
-        // back_trace('NOTICE', 'File deleted successfully.');
+        // back_trace( 'NOTICE', 'File deleted successfully.');
         return true;
     } else {
         prod_trace('ERROR', 'HTTP status code: ' . $http_status_code );
