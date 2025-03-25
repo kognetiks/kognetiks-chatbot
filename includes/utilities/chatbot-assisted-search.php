@@ -25,20 +25,27 @@ add_action('rest_api_init', function () {
 
 // Handle the assistant search request
 function assistant_search_handler($request) {
+
     global $wpdb;
 
     $search_query = sanitize_text_field($request->get_param('q'));
     $assistant_id = sanitize_text_field($request->get_param('assistant_id'));
 
+    // DIAG - Diagnostics - Ver 2.2.7
+    back_trace( 'NOTICE', 'Assistant ID: ' . $assistant_id);
+    back_trace( 'NOTICE', 'Search Query: ' . $search_query);
+
     // Validate the assistant_id
     $assistant_exists = $wpdb->get_var(
         $wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}chatbot_chatgpt_assistants WHERE id = %s",
+            "SELECT COUNT(*) FROM {$wpdb->prefix}chatbot_chatgpt_assistants WHERE assistant_id = %s",
             $assistant_id
         )
     );
 
     if (!$assistant_exists) {
+        // DIAG - Diagnostics - Ver 2.2.7
+        back_trace( 'ERROR', 'Invalid Assistant ID: ' . $assistant_id);
         return new WP_Error('invalid_assistant', 'Invalid Assistant ID', array('status' => 403));
     }
 
@@ -54,14 +61,17 @@ function assistant_search_handler($request) {
         while ($query->have_posts()) {
             $query->the_post();
             $results[] = [
-                'ID'    => get_the_ID(),
-                'title' => get_the_title(),
-                'url'   => get_permalink(),
-                'excerpt' => get_the_excerpt(),
+                'ID'      => get_the_ID(),
+                'title'   => get_the_title(),
+                'url'     => get_permalink(),
+                'content' => apply_filters('the_content', get_the_content()),
             ];
         }
         wp_reset_postdata();
     }
+
+    // DIAG - Diagnostics - Ver 2.2.7
+    back_trace( 'NOTICE', 'Results: ' . print_r($results, true));
 
     // Return JSON response
     return [
