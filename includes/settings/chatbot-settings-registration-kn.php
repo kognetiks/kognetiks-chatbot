@@ -72,11 +72,7 @@ function chatbot_chatgpt_kn_settings_init() {
     );
 
     // Knowledge Navigator Inclusion/Exclusion Settings - Ver 2.0.0
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_include_posts');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_include_pages');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_include_products');
-    register_setting('chatbot_chatgpt_knowledge_navigator', 'chatbot_chatgpt_kn_include_comments');
-
+    // Register settings for dynamic post types
     add_settings_section(
         'chatbot_chatgpt_kn_include_exclude_section',
         'Knowledge Navigator Include/Exclude Settings',
@@ -84,30 +80,41 @@ function chatbot_chatgpt_kn_settings_init() {
         'chatbot_chatgpt_kn_include_exclude'
     );
 
-    add_settings_field(
-        'chatbot_chatgpt_kn_include_posts',
-        'Include Published Posts',
-        'chatbot_chatgpt_kn_include_posts_callback',
-        'chatbot_chatgpt_kn_include_exclude',
-        'chatbot_chatgpt_kn_include_exclude_section'
+    // Register settings for comments separately since it's not a post type
+    register_setting(
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_include_comments',
+        [
+            'type' => 'string',
+            'default' => 'No',
+            'sanitize_callback' => 'sanitize_text_field'
+        ]
     );
 
-    add_settings_field(
-        'chatbot_chatgpt_kn_include_pages',
-        'Include Published Pages',
-        'chatbot_chatgpt_kn_include_pages_callback',
-        'chatbot_chatgpt_kn_include_exclude',
-        'chatbot_chatgpt_kn_include_exclude_section'
-    );
+    // Register dynamic post type settings and fields
+    $published_types = chatbot_chatgpt_kn_get_published_post_types();
+    foreach ($published_types as $post_type => $label) {
+        // Register the setting
+        $plural_type = $post_type === 'reference' ? 'references' : $post_type . 's';
+        $option_name = 'chatbot_chatgpt_kn_include_' . $plural_type;
+        
+        register_setting(
+            'chatbot_chatgpt_knowledge_navigator',
+            $option_name
+        );
 
-    add_settings_field(
-        'chatbot_chatgpt_kn_include_products',
-        'Include Published Products',
-        'chatbot_chatgpt_kn_include_products_callback',
-        'chatbot_chatgpt_kn_include_exclude',
-        'chatbot_chatgpt_kn_include_exclude_section'
-    );
+        // Add the settings field
+        add_settings_field(
+            'chatbot_chatgpt_kn_include_' . $plural_type,
+            'Include ' . ucfirst($post_type) . 's',
+            'chatbot_chatgpt_kn_include_post_type_callback',
+            'chatbot_chatgpt_kn_include_exclude',
+            'chatbot_chatgpt_kn_include_exclude_section',
+            ['option_name' => $option_name]
+        );
+    }
 
+    // Add comments field
     add_settings_field(
         'chatbot_chatgpt_kn_include_comments',
         'Include Approved Comments',

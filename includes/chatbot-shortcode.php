@@ -1406,7 +1406,7 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
         $shortcode = 'chatbot-' . $i;
         if (!shortcode_exists($shortcode)) {
             add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
-            error_log('Registered shortcode: ' . $shortcode);
+            // error_log('Registered shortcode: ' . $shortcode);
         }
     }
 
@@ -1416,7 +1416,7 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
         $shortcode = 'assistant-' . $i;
         if (!shortcode_exists($shortcode)) {
             add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
-            error_log('Registered shortcode: ' . $shortcode);
+            // error_log('Registered shortcode: ' . $shortcode);
         }
     }
 }
