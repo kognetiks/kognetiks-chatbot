@@ -232,6 +232,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Azure and 
 = 2.2.7 - Released TBD =
 
 * **Dashboard Widget**: Added a dashboard widget to display chatbot statistics and token usage in the WordPress admin dashboard.
+* **Custom Post Types**: Added support for custom post types to the Knowledge Navigator.
 * **Performance Improvements**: Minimized unnecessary calls to the database to improve performance.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.6.
 
