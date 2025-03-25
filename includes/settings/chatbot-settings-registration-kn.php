@@ -94,10 +94,11 @@ function chatbot_chatgpt_kn_settings_init() {
     // Register dynamic post type settings and fields
     $published_types = chatbot_chatgpt_kn_get_published_post_types();
     foreach ($published_types as $post_type => $label) {
+
         // Register the setting
         $plural_type = $post_type === 'reference' ? 'references' : $post_type . 's';
         $option_name = 'chatbot_chatgpt_kn_include_' . $plural_type;
-        
+
         register_setting(
             'chatbot_chatgpt_knowledge_navigator',
             $option_name
@@ -105,13 +106,15 @@ function chatbot_chatgpt_kn_settings_init() {
 
         // Add the settings field
         add_settings_field(
-            'chatbot_chatgpt_kn_include_' . $plural_type,
-            'Include ' . ucfirst($post_type) . 's',
+            // 'chatbot_chatgpt_kn_include_' . $plural_type,
+            $option_name,
+            'Include ' . ucfirst($label),
             'chatbot_chatgpt_kn_include_post_type_callback',
             'chatbot_chatgpt_kn_include_exclude',
             'chatbot_chatgpt_kn_include_exclude_section',
             ['option_name' => $option_name]
         );
+
     }
 
     // Add comments field

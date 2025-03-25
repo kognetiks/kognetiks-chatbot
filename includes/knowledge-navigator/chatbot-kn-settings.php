@@ -178,14 +178,15 @@ function chatbot_chatgpt_kn_settings_section_callback($args) {
 
 // Dynamic post type inclusion settings - Ver 2.3.0
 function chatbot_chatgpt_kn_get_published_post_types() {
+
     global $wpdb;
     $published_types = [];
     
     // Get all post types that actually exist in the posts table
-    $db_types = $wpdb->get_col("SELECT DISTINCT post_type FROM {$wpdb->posts} WHERE post_type NOT LIKE 'wp_%' AND post_type NOT IN ('revision', 'nav_menu_item', 'custom_css', 'customize_changeset')");
+    $db_types = $wpdb->get_col("SELECT DISTINCT post_type FROM {$wpdb->posts} WHERE post_type NOT LIKE 'wp_%' AND post_type NOT IN ('attachment', 'revision', 'nav_menu_item', 'custom_css', 'customize_changeset')");
     
     // Make sure we always have our core types first
-    $core_types = ['post' => 'Post', 'page' => 'Page', 'reference' => 'Reference'];
+    $core_types = ['post' => 'Post', 'page' => 'Page', 'product' => 'Product'];
     foreach ($core_types as $type => $label) {
         $published_types[$type] = $label;
     }
@@ -198,10 +199,11 @@ function chatbot_chatgpt_kn_get_published_post_types() {
         }
     }
     
-    // Debug log final results
+    // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', 'Final post types array: ' . print_r($published_types, true));
     
     return $published_types;
+
 }
 
 // Register settings on init
