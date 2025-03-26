@@ -589,7 +589,7 @@ function chatbot_kn_run_phase_6() {
     }
 
     // DIAG - Diagnostics - Ver 2.2.6
-    back_trace( 'NOTICE', 'Post types: ' . print_r($post_types, true));
+    // back_trace( 'NOTICE', 'Post types: ' . print_r($post_types, true));
 
     // If no post types are selected, move to phase 7
     if (empty($post_types)) {

@@ -990,7 +990,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // Add a check here to see if the response [data][0][content][0][text][value] contains the string "[conversation_transcript]"
     if (strpos($assistants_response["data"][0]["content"][0]["text"]["value"], "[conversation_transcript]") !== false) {
-        back_trace( 'NOTICE', 'The response contains the string "[conversation_transcript]"');
+        // back_trace( 'NOTICE', 'The response contains the string "[conversation_transcript]"');
         
         // Build the conversation transcript by gathering all messages in reverse order
         $conversation_transcript = '';
@@ -1008,7 +1008,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         }
         
         // DIAG - Diagnostics - Ver 2.2.7
-        back_trace( 'NOTICE', '$conversation_transcript: ' . $conversation_transcript);
+        // back_trace( 'NOTICE', '$conversation_transcript: ' . $conversation_transcript);
         
         // Now send the $conversation_transcript via email to the email address specified in the option
         $email_address = esc_attr(get_option('chatbot_chatgpt_conversation_transcript_email', ''));
@@ -1019,7 +1019,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // Then remove the "[conversation_transcript]" from the response
         $assistants_response["data"][0]["content"][0]["text"]["value"] = str_replace("[conversation_transcript]", '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
     } else {
-        back_trace( 'NOTICE', 'The response does not contain the string "[conversation_transcript]"');
+        // back_trace( 'NOTICE', 'The response does not contain the string "[conversation_transcript]"');
     }
 
     // Return the response text, checking for the fallback content[1][text] if available
