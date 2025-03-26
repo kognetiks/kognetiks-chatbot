@@ -988,6 +988,40 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // DIAG - Diagnostics - Ver 2.2.1
     // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
+    // Add a check here to see if the response [data][0][content][0][text][value] contains the string "[conversation_transcript]"
+    if (strpos($assistants_response["data"][0]["content"][0]["text"]["value"], "[conversation_transcript]") !== false) {
+        back_trace( 'NOTICE', 'The response contains the string "[conversation_transcript]"');
+        
+        // Build the conversation transcript by gathering all messages in reverse order
+        $conversation_transcript = '';
+        if (isset($assistants_response['data']) && is_array($assistants_response['data'])) {
+            // Reverse the array to get messages in chronological order (oldest to newest)
+            $messages = array_reverse($assistants_response['data']);
+            
+            foreach ($messages as $message) {
+                if (isset($message['content'][0]['text']['value'])) {
+                    $role = isset($message['role']) ? ucfirst($message['role']) : 'Unknown';
+                    $content = $message['content'][0]['text']['value'];
+                    $conversation_transcript .= "[{$role}]: {$content}\n\n";
+                }
+            }
+        }
+        
+        // DIAG - Diagnostics - Ver 2.2.7
+        back_trace( 'NOTICE', '$conversation_transcript: ' . $conversation_transcript);
+        
+        // Now send the $conversation_transcript via email to the email address specified in the option
+        $email_address = esc_attr(get_option('chatbot_chatgpt_conversation_transcript_email', ''));
+        if (!empty($email_address)) {
+            wp_mail($email_address, 'Conversation Transcript', $conversation_transcript);
+        }
+        
+        // Then remove the "[conversation_transcript]" from the response
+        $assistants_response["data"][0]["content"][0]["text"]["value"] = str_replace("[conversation_transcript]", '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
+    } else {
+        back_trace( 'NOTICE', 'The response does not contain the string "[conversation_transcript]"');
+    }
+
     // Return the response text, checking for the fallback content[1][text] if available
     if (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {
         return $assistants_response["data"][0]["content"][1]["text"]["value"];

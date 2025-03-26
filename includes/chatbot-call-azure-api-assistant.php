@@ -512,6 +512,7 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
         // Updated check for "data" field
         if (isset($responseArray["data"][0]) && isset($responseArray["data"][0]["status"])) {
             if ($responseArray["data"][0]["status"] === "completed") {
+                // DIAG - Diagnostics - Ver 2.2.7
                 // back_trace( 'NOTICE', 'Step 7 - $responseArray: ' . print_r($responseArray, true));
                 if (isset($responseArray["data"][0]["usage"])) {
                     $prompt_tokens = $responseArray["data"][0]["usage"]["prompt_tokens"] ?? 0;

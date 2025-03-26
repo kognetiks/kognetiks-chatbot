@@ -29,6 +29,7 @@ function chatbot_chatgpt_assistant_settings_init() {
     // register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7 - REMOVED in Ver 2.0.5
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allow_file_uploads'); // Ver 1.7.6
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_display_custom_gpt_assistant_name'); // Ver 1.9.4
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_conversation_transcript_email'); // Ver 2.2.7
     register_setting('chatbot_chatgpt_custom_gpts', 'assistant_id'); // Ver 1.6.7
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions'); // Ver 1.9.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
@@ -72,6 +73,15 @@ function chatbot_chatgpt_assistant_settings_init() {
         'chatbot_chatgpt_display_custom_gpt_assistant_name',
         'Display GPT Assistant Name',
         'chatbot_chatgpt_use_gpt_assistant_name_callback',
+        'chatbot_chatgpt_gpt_assistants_settings',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    // Conversation Transcript Email - Ver 2.2.7
+    add_settings_field(
+        'chatbot_chatgpt_conversation_transcript_email',
+        'Transcript Email',
+        'chatbot_chatgpt_conversation_transcript_email_callback',
         'chatbot_chatgpt_gpt_assistants_settings',
         'chatbot_chatgpt_custom_gpts_section'
     );
@@ -318,6 +328,15 @@ function chatbot_chatgpt_use_gpt_assistant_name_callback($args) {
         <option value="Yes" <?php selected( $use_assistant_name, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
         <option value="No" <?php selected( $use_assistant_name, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
     </select>
+    <?php
+}
+
+// Conversation Transcript Email field callback - Ver 2.2.7
+function chatbot_chatgpt_conversation_transcript_email_callback($args) {
+    $transcript_email = esc_attr(get_option('chatbot_chatgpt_conversation_transcript_email', ''));
+    ?>
+    <input type="email" id="chatbot_chatgpt_conversation_transcript_email" name="chatbot_chatgpt_conversation_transcript_email" value="<?php echo esc_attr( $transcript_email ); ?>" class="regular-text" placeholder="Enter email address for conversation transcripts">
+    <p class="description">Email address where conversation transcripts will be sent when an assistant response contains the string "[conversation_transcript]".</p>
     <?php
 }
 

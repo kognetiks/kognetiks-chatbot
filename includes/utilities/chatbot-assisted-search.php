@@ -13,27 +13,24 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Add the REST API route for the assistant search
-add_action('rest_api_init', function () {
-
-    register_rest_route('assistant/v1', '/search', [
-        'methods'  => 'GET',
-        'callback' => 'assistant_search_handler',
-    ]);
-
-});
-
 // Handle the assistant search request
 function assistant_search_handler($request) {
-
+    
+    back_trace('NOTICE', 'Starting assistant_search_handler');
+    
     global $wpdb;
+
+    // Validate required parameters
+    if (!$request->get_param('q') || !$request->get_param('assistant_id')) {
+        back_trace('ERROR', 'Missing required parameters');
+        return new WP_Error('missing_params', 'Missing required parameters', array('status' => 400));
+    }
 
     $search_query = sanitize_text_field($request->get_param('q'));
     $assistant_id = sanitize_text_field($request->get_param('assistant_id'));
 
-    // DIAG - Diagnostics - Ver 2.2.7
-    back_trace( 'NOTICE', 'Assistant ID: ' . $assistant_id);
-    back_trace( 'NOTICE', 'Search Query: ' . $search_query);
+    back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
+    back_trace('NOTICE', 'Search Query: ' . $search_query);
 
     // Validate the assistant_id
     $assistant_exists = $wpdb->get_var(
@@ -44,8 +41,7 @@ function assistant_search_handler($request) {
     );
 
     if (!$assistant_exists) {
-        // DIAG - Diagnostics - Ver 2.2.7
-        back_trace( 'ERROR', 'Invalid Assistant ID: ' . $assistant_id);
+        back_trace('ERROR', 'Invalid Assistant ID: ' . $assistant_id);
         return new WP_Error('invalid_assistant', 'Invalid Assistant ID', array('status' => 403));
     }
 
@@ -64,18 +60,17 @@ function assistant_search_handler($request) {
                 'ID'      => get_the_ID(),
                 'title'   => get_the_title(),
                 'url'     => get_permalink(),
-                'content' => apply_filters('the_content', get_the_content()),
+                'excerpt' => get_the_excerpt(),
             ];
         }
         wp_reset_postdata();
     }
 
-    // DIAG - Diagnostics - Ver 2.2.7
-    back_trace( 'NOTICE', 'Results: ' . print_r($results, true));
+    if (empty($results)) {
+        return new WP_Error('no_results', 'No results found.', array('status' => 200));
+    }
 
-    // Return JSON response
-    return [
-        'results' => $results,
-    ];
+    back_trace('NOTICE', 'Results: ' . print_r($results, true));
+    return ['results' => $results];
 }
 
