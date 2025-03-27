@@ -13,64 +13,127 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Handle the assistant search request
-function assistant_search_handler($request) {
+// Add the REST API route for the assistant search
+add_action('rest_api_init', function () {
     
-    back_trace('NOTICE', 'Starting assistant_search_handler');
+    // DIAG - Diagnostics - Ver 2.2.7
+    back_trace('NOTICE', 'Registering assistant search endpoint');
+    
+    register_rest_route('assistant/v1', '/search', [
+        'methods'  => 'GET',
+        'callback' => 'chatbot_assistant_search_handler',
+        'permission_callback' => '__return_true',
+        'args' => [
+            'endpoint' => [
+                'required' => true,
+                'type' => 'string',
+            ],
+            'query' => [
+                'required' => true,
+                'type' => 'string',
+            ],
+            'include_excerpt' => [
+                'required' => true,
+                'type' => 'boolean',
+            ],
+            'page' => [
+                'required' => true,
+                'type' => 'integer',
+                'default' => 1,
+            ],
+            'per_page' => [
+                'required' => true,
+                'type' => 'integer',
+                'default' => 5,
+            ],
+        ],
+    ]);
+});
+
+// Handle the assistant search request
+function chatbot_assistant_search_handler($request) {
+
+    // Log the incoming request
+    back_trace('NOTICE', 'Received search request');
+    back_trace('NOTICE', 'Request parameters: ' . print_r($request->get_params(), true));
     
     global $wpdb;
 
-    // Validate required parameters
-    if (!$request->get_param('q') || !$request->get_param('assistant_id')) {
-        back_trace('ERROR', 'Missing required parameters');
-        return new WP_Error('missing_params', 'Missing required parameters', array('status' => 400));
-    }
+    try {
+        // Get and validate parameters
+        $endpoint = sanitize_text_field($request->get_param('endpoint'));
+        $query = sanitize_text_field($request->get_param('query'));
+        $include_excerpt = (bool) $request->get_param('include_excerpt');
+        $page = (int) $request->get_param('page');
+        $per_page = (int) $request->get_param('per_page');
 
-    $search_query = sanitize_text_field($request->get_param('q'));
-    $assistant_id = sanitize_text_field($request->get_param('assistant_id'));
+        back_trace('NOTICE', 'Validated parameters:');
+        back_trace('NOTICE', '- Endpoint: ' . $endpoint);
+        back_trace('NOTICE', '- Query: ' . $query);
+        back_trace('NOTICE', '- Include Excerpt: ' . ($include_excerpt ? 'true' : 'false'));
+        back_trace('NOTICE', '- Page: ' . $page);
+        back_trace('NOTICE', '- Per Page: ' . $per_page);
 
-    back_trace('NOTICE', 'Assistant ID: ' . $assistant_id);
-    back_trace('NOTICE', 'Search Query: ' . $search_query);
+        // Use WP_Query to search posts or pages
+        $args = [
+            's' => $query,
+            'post_type' => ['post', 'page'],
+            'posts_per_page' => $per_page,
+            'paged' => $page,
+            'orderby' => 'relevance',
+            'order' => 'DESC',
+        ];
 
-    // Validate the assistant_id
-    $assistant_exists = $wpdb->get_var(
-        $wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}chatbot_chatgpt_assistants WHERE assistant_id = %s",
-            $assistant_id
-        )
-    );
+        back_trace('NOTICE', 'WP_Query arguments: ' . print_r($args, true));
 
-    if (!$assistant_exists) {
-        back_trace('ERROR', 'Invalid Assistant ID: ' . $assistant_id);
-        return new WP_Error('invalid_assistant', 'Invalid Assistant ID', array('status' => 403));
-    }
+        $query = new WP_Query($args);
 
-    // Use WP_Query to search posts or pages
-    $query = new WP_Query([
-        's' => $search_query,
-        'post_type' => ['post', 'page'],
-        'posts_per_page' => 5,
-    ]);
-
-    $results = [];
-    if ($query->have_posts()) {
-        while ($query->have_posts()) {
-            $query->the_post();
-            $results[] = [
-                'ID'      => get_the_ID(),
-                'title'   => get_the_title(),
-                'url'     => get_permalink(),
-                'excerpt' => get_the_excerpt(),
-            ];
+        if (is_wp_error($query)) {
+            back_trace('ERROR', 'WP_Query error: ' . $query->get_error_message());
+            return new WP_Error('query_error', $query->get_error_message(), ['status' => 500]);
         }
-        wp_reset_postdata();
-    }
 
-    if (empty($results)) {
-        return new WP_Error('no_results', 'No results found.', array('status' => 200));
-    }
+        $results = [];
+        if ($query->have_posts()) {
+            while ($query->have_posts()) {
+                $query->the_post();
+                $result = [
+                    'ID' => get_the_ID(),
+                    'title' => get_the_title(),
+                    'url' => get_permalink(),
+                    'date' => get_the_date(),
+                    'author' => get_the_author(),
+                ];
 
-    back_trace('NOTICE', 'Results: ' . print_r($results, true));
-    return ['results' => $results];
+                if ($include_excerpt) {
+                    $result['excerpt'] = get_the_excerpt();
+                }
+
+                $results[] = $result;
+            }
+            wp_reset_postdata();
+        }
+
+        $response = [
+            'success' => true,
+            'total_posts' => $query->found_posts,
+            'total_pages' => $query->max_num_pages,
+            'current_page' => $page,
+            'results' => $results,
+        ];
+
+        if (empty($results)) {
+            $response['message'] = 'No results found.';
+        }
+
+        back_trace('NOTICE', 'Search completed successfully');
+        back_trace('NOTICE', 'Results count: ' . count($results));
+        return new WP_REST_Response($response, 200);
+
+    } catch (Exception $e) {
+        back_trace('ERROR', 'Exception caught: ' . $e->getMessage());
+        back_trace('ERROR', 'Stack trace: ' . $e->getTraceAsString());
+        return new WP_Error('search_error', $e->getMessage(), ['status' => 500]);
+    }
 }
 

@@ -143,7 +143,7 @@ function chatbot_kn_initialization() {
     chatbot_kn_count_documents();
 
     // Schedule the next action
-    wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+    wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
 
 }
 
@@ -163,7 +163,7 @@ function chatbot_kn_reinitialization() {
     update_option('chatbot_chatgpt_kn_action', 'phase 3');
 
     // Schedule the next action
-    wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+    wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
 
 }
 
@@ -271,7 +271,7 @@ function chatbot_kn_run_phase_1() {
     // If no post types are selected, move to phase 2
     if (empty($post_types)) {
         update_option('chatbot_chatgpt_kn_action', 'phase 2');
-        wp_schedule_single_event(time() + 2, 'chatbot_kn_acquire_controller');
+        wp_schedule_single_event(time() + 30, 'chatbot_kn_acquire_controller');
         return;
     }
 
@@ -296,7 +296,7 @@ function chatbot_kn_run_phase_1() {
     // If no more results, move to phase 2
     if (empty($results)) {
         update_option('chatbot_chatgpt_kn_action', 'phase 2');
-        wp_schedule_single_event(time() + 2, 'chatbot_kn_acquire_controller');
+        wp_schedule_single_event(time() + 30, 'chatbot_kn_acquire_controller');
         return;
     }
 
@@ -317,7 +317,7 @@ function chatbot_kn_run_phase_1() {
     update_option('chatbot_chatgpt_kn_action', 'phase 1');
 
     // Schedule the next action
-    wp_schedule_single_event(time() + 2, 'chatbot_kn_acquire_controller');
+    wp_schedule_single_event(time() + 30, 'chatbot_kn_acquire_controller');
 
     // Unset large variables to free memory
     unset($results);
@@ -373,7 +373,7 @@ function chatbot_kn_run_phase_3() {
 
         update_option( 'chatbot_chatgpt_kn_action', 'phase 4' );
         // Schedule the next action
-        wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+        wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
 
         return;
     }
@@ -384,7 +384,7 @@ function chatbot_kn_run_phase_3() {
         // back_trace( 'NOTICE', 'No more items to process' );
         update_option( 'chatbot_chatgpt_kn_action', 'phase 4' );
         // Schedule the next action
-        wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+        wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
         return;
     }
 
@@ -439,7 +439,7 @@ function chatbot_kn_run_phase_3() {
     update_option( 'chatbot_chatgpt_kn_action', 'phase 3' );
 
     // Schedule the next action
-    wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+    wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
 
     // Unset large variables to free memory
     unset($results);
@@ -508,7 +508,7 @@ function chatbot_kn_run_phase_4() {
     unset($results);
 
     update_option('chatbot_chatgpt_kn_action', 'phase 5');
-    wp_schedule_single_event(time() + 2, 'chatbot_kn_acquire_controller');
+    wp_schedule_single_event(time() + 30, 'chatbot_kn_acquire_controller');
 }
 
 // Phase 5 - Reinitialize the batch acquisition for pages, posts, and products
@@ -530,7 +530,7 @@ function chatbot_kn_run_phase_5() {
     update_option( 'chatbot_chatgpt_kn_action', 'phase 6' );
 
     // Schedule the next action
-    wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+    wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
 
 }
 
@@ -594,7 +594,7 @@ function chatbot_kn_run_phase_6() {
     // If no post types are selected, move to phase 7
     if (empty($post_types)) {
         update_option('chatbot_chatgpt_kn_action', 'phase 7');
-        wp_schedule_single_event(time() + 2, 'chatbot_kn_acquire_controller');
+        wp_schedule_single_event(time() + 30, 'chatbot_kn_acquire_controller');
         return;
     }
 
@@ -620,7 +620,7 @@ function chatbot_kn_run_phase_6() {
         update_option( 'chatbot_chatgpt_kn_action', 'phase 7' );
 
         // Schedule the next action
-        wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+        wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
         return;
     }
 
@@ -718,7 +718,7 @@ function chatbot_kn_run_phase_6() {
     update_option( 'chatbot_chatgpt_kn_action', 'phase 6' );
 
     // Schedule the next action
-    wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+    wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
 
     // Unset large variables to free memory
     unset($results);
@@ -860,7 +860,7 @@ function chatbot_kn_output_the_results() {
     update_option( 'chatbot_chatgpt_kn_action', 'phase 8' );
 
     // Schedule the next action
-    wp_schedule_single_event( time() + 2, 'chatbot_kn_acquire_controller' );
+    wp_schedule_single_event( time() + 30, 'chatbot_kn_acquire_controller' );
 
 }
 

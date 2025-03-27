@@ -775,6 +775,62 @@ function getTheMessage($thread_id, $api_key) {
 
 }
 
+// Add this new function before chatbot_chatgpt_custom_gpt_call_api
+function cancel_active_run($thread_id, $api_key) {
+    back_trace('NOTICE', 'Checking for active runs on thread: ' . $thread_id);
+    
+    $url = get_threads_api_url() . '/' . $thread_id . '/runs';
+    $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+    $beta_version = ($assistant_beta_version == 'v2') ? "assistants=v2" : "assistants=v1";
+    
+    $headers = [
+        "Content-Type"  => "application/json",
+        "OpenAI-Beta"   => $beta_version,
+        "Authorization" => "Bearer " . $api_key
+    ];
+
+    // Get all runs for the thread
+    $response = wp_remote_get($url, [
+        "headers" => $headers,
+        "timeout" => 30,
+    ]);
+
+    if (is_wp_error($response)) {
+        back_trace('ERROR', 'Failed to get runs: ' . $response->get_error_message());
+        return false;
+    }
+
+    $response_data = json_decode(wp_remote_retrieve_body($response), true);
+    
+    if (!isset($response_data['data']) || !is_array($response_data['data'])) {
+        back_trace('NOTICE', 'No runs found for thread');
+        return true;
+    }
+
+    // Find and cancel any active runs
+    foreach ($response_data['data'] as $run) {
+        if (isset($run['status']) && in_array($run['status'], ['in_progress', 'queued'])) {
+            back_trace('NOTICE', 'Found active run: ' . $run['id']);
+            
+            // Cancel the run
+            $cancel_url = $url . '/' . $run['id'] . '/cancel';
+            $cancel_response = wp_remote_post($cancel_url, [
+                "headers" => $headers,
+                "timeout" => 30,
+            ]);
+
+            if (is_wp_error($cancel_response)) {
+                back_trace('ERROR', 'Failed to cancel run: ' . $cancel_response->get_error_message());
+                return false;
+            }
+
+            back_trace('NOTICE', 'Successfully cancelled run: ' . $run['id']);
+        }
+    }
+
+    return true;
+}
+
 // CustomGPT - Assistants - Ver 1.7.2
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id) {
 
@@ -906,12 +962,22 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         $run_status = '';
 
         // Step 4: Run the Assistant
-        // back_trace( 'NOTICE', 'Step 4 - Run the Assistant');
+        back_trace('NOTICE', 'Step 4 - Run the Assistant');
+        
+        // First, check and cancel any active runs
+        if (!cancel_active_run($thread_id, $api_key)) {
+            back_trace('ERROR', 'Failed to cancel active runs');
+            return "Error: Failed to cancel active runs";
+        }
+        
+        // Wait a moment for the cancellation to take effect
+        usleep(1000000); // 1 second
+        
         $assistants_response = runTheAssistant($thread_id, $assistant_id, $context, $api_key);
 
         // Check if the response is not an array or is a string indicating an error
         if (!is_array($assistants_response) || is_string($assistants_response)) {
-            // back_trace( 'ERROR', 'Invalid response format or error occurred');
+            back_trace('ERROR', 'Invalid response format or error occurred');
             return "Error: Invalid response format or error occurred.";
         }
 
@@ -919,7 +985,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         if (isset($assistants_response["id"])) {
             $runId = $assistants_response["id"];
         } else {
-            // back_trace( 'ERROR', 'runId key not found in response');
+            back_trace('ERROR', 'runId key not found in response');
             return "Error: 'id' key not found in response.";
         }
 
@@ -927,16 +993,14 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'NOTICE', $assistants_response);
 
         // Step 5: Get the Run's Status
-        // back_trace( 'NOTICE', 'Step 5 - Get the Run\'s Status');
+        back_trace('NOTICE', 'Step 5 - Get the Run\'s Status');
         $run_status = getTheRunsStatus($thread_id, $runId, $api_key);
 
         $retries++;
 
         if ($run_status == "failed" || $run_status == "incomplete") {
-            // back_trace( 'ERROR', 'Error - INSIDE DO WHILE LOOP - GPT Assistant - Step 5: ' . $run_status);
-            // return "Error: Step 5 - " . $run_status;
-            // back_trace( 'NOTICE', 'ALERT INSIDE DO LOOP - Sleeping for ' . $sleepTime . ' microseconds');
-            // back_trace( 'NOTICE', 'ALERT INSIDE DO LOOP - Retries: ' . $retries);
+            back_trace('NOTICE', 'Run not completed. Status: ' . $run_status);
+            back_trace('NOTICE', 'Retry ' . $retries . ' of ' . $maxRetries);
             usleep($sleepTime);
         }
 
@@ -944,20 +1008,64 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     // Failed after multiple retries
     if ($run_status == "failed" || $run_status == "incomplete") {
-        // back_trace( 'ERROR', 'Error - FAILED AFTER MULTIPLE RETRIES - GPT Assistant - Step 5: ' . $run_status);
-        return "Error: Step 5 - " . $run_status;
+        back_trace('ERROR', 'Run failed after ' . $maxRetries . ' retries. Status: ' . $run_status);
+        return "Error: Run failed after maximum retries. Status: " . $run_status;
     }
 
     // Step 6: Get the Run's Steps
-    // back_trace( 'NOTICE', 'Step 6 - Get the Run\'s Steps');
+    back_trace('NOTICE', 'Step 6 - Get the Run\'s Steps');
     $assistants_response = getTheRunsSteps($thread_id, $runId, $api_key);
-    // DIAG - Print the response
-    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
+    
+    // Add detailed logging before tool usage check
+    back_trace('NOTICE', 'About to check for tool usage');
+    back_trace('NOTICE', 'Current response data: ' . print_r($assistants_response, true));
 
-    // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $assistants_response["data"][0]["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
+    // Check for tool usage - Ver 2.2.7
+    try {
+        back_trace('NOTICE', 'Starting tool usage check with parameters:');
+        back_trace('NOTICE', '- Assistant ID: ' . $assistant_id);
+        back_trace('NOTICE', '- Thread ID: ' . $thread_id);
+        back_trace('NOTICE', '- Run ID: ' . $runId);
+        
+        $tool_used = check_assistant_tool_usage($assistant_id, $thread_id, $runId, $api_key);
+        
+        back_trace('NOTICE', 'Tool usage check completed. Result: ' . ($tool_used ? 'true' : 'false'));
+        
+        if ($tool_used) {
+            // Log that a tool was used
+            back_trace('NOTICE', 'Assistant used a tool during this interaction');
+            
+            // After tool execution, we need to continue the run
+            back_trace('NOTICE', 'Continuing the run after tool execution');
+            
+            // Get the run status again
+            $run_status = getTheRunsStatus($thread_id, $runId, $api_key);
+            
+            // If the run is not completed, we need to wait for it
+            if ($run_status !== "completed") {
+                back_trace('NOTICE', 'Run not completed after tool execution. Status: ' . $run_status);
+                
+                // Wait for the run to complete
+                $retries = 0;
+                $maxRetries = 5;
+                
+                while ($run_status !== "completed" && $retries < $maxRetries) {
+                    usleep($sleepTime);
+                    $run_status = getTheRunsStatus($thread_id, $runId, $api_key);
+                    $retries++;
+                    back_trace('NOTICE', 'Waiting for run completion. Attempt ' . $retries . '. Status: ' . $run_status);
+                }
+                
+                if ($run_status !== "completed") {
+                    back_trace('ERROR', 'Run did not complete after tool execution');
+                    return "Error: Run did not complete after tool execution";
+                }
+            }
+        }
+    } catch (Exception $e) {
+        back_trace('ERROR', 'Exception during tool usage check: ' . $e->getMessage());
+        back_trace('ERROR', 'Stack trace: ' . $e->getTraceAsString());
+    }
 
     // Add the usage to the conversation tracker
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
@@ -965,11 +1073,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Step 7: Get the Step's Status
-    // back_trace( 'NOTICE', 'Step 7 - Get the Step\'s Status');
+    back_trace('NOTICE', 'Step 7 - Get the Step\'s Status');
     getTheStepsStatus($thread_id, $runId, $api_key);
 
     // Step 8: Get the Message
-    // back_trace( 'NOTICE', 'Step 8: Get the Message');
+    back_trace('NOTICE', 'Step 8: Get the Message');
     $assistants_response = getTheMessage($thread_id, $api_key);
 
     // Interaction Tracking - Ver 1.6.3
@@ -1150,3 +1258,136 @@ function deleteUploadedFile($file_id) {
 
 }
 add_action( 'delete_uploaded_file', 'deleteUploadedFile' );
+
+// Check for Tool Usage by OpenAI Assistant - Ver 2.2.7
+function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key) {
+    
+    back_trace('NOTICE', 'Starting tool usage check');
+    back_trace('NOTICE', 'Parameters:');
+    back_trace('NOTICE', '- Assistant ID: ' . $assistant_id);
+    back_trace('NOTICE', '- Thread ID: ' . $thread_id);
+    back_trace('NOTICE', '- Run ID: ' . $run_id);
+
+    try {
+        // Construct the API URL for run steps
+        $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $run_id . '/steps';
+        back_trace('NOTICE', 'Requesting run steps from: ' . $url);
+
+        // Determine API version
+        $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+        if ($assistant_beta_version == 'v2') {
+            $beta_version = "assistants=v2";
+        } else {
+            $beta_version = "assistants=v1";
+        }
+
+        // Prepare request headers
+        $headers = [
+            "Content-Type"  => "application/json",
+            "OpenAI-Beta"   => $beta_version,
+            "Authorization" => "Bearer " . $api_key
+        ];
+
+        // Get the run steps
+        $response = wp_remote_get($url, [
+            "headers" => $headers,
+            "timeout" => 30,
+        ]);
+
+        // Handle request errors
+        if (is_wp_error($response)) {
+            back_trace('ERROR', 'Failed to get run steps: ' . $response->get_error_message());
+            return false;
+        }
+
+        // Extract response body
+        $response_body = wp_remote_retrieve_body($response);
+        $response_data = json_decode($response_body, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            back_trace('ERROR', 'JSON decode error: ' . json_last_error_msg());
+            return false;
+        }
+
+        back_trace('NOTICE', 'Run steps response: ' . print_r($response_data, true));
+
+        // Check for tool usage in the steps
+        if (isset($response_data['data']) && is_array($response_data['data'])) {
+            foreach ($response_data['data'] as $step) {
+                if (isset($step['type']) && $step['type'] === 'tool_calls') {
+                    back_trace('NOTICE', 'Found tool calls in step: ' . print_r($step['tool_calls'], true));
+                    
+                    // Check if this is a WordPress search tool call
+                    foreach ($step['tool_calls'] as $tool_call) {
+                        if (isset($tool_call['function']['name']) && $tool_call['function']['name'] === 'query_wordpress_api') {
+                            back_trace('NOTICE', 'Found WordPress search tool call');
+                            
+                            // Parse the function arguments
+                            $args = json_decode($tool_call['function']['arguments'], true);
+                            back_trace('NOTICE', 'Tool call arguments: ' . print_r($args, true));
+                            
+                            // Make the WordPress API call
+                            $search_url = rest_url('assistant/v1/search');
+                            $search_params = [
+                                'endpoint' => $search_url,
+                                'query' => $args['query'],
+                                'include_excerpt' => $args['include_excerpt'],
+                                'page' => $args['page'],
+                                'per_page' => $args['per_page']
+                            ];
+                            
+                            back_trace('NOTICE', 'Making WordPress API call to: ' . add_query_arg($search_params, $search_url));
+                            
+                            $search_response = wp_remote_get(add_query_arg($search_params, $search_url));
+                            
+                            if (is_wp_error($search_response)) {
+                                back_trace('ERROR', 'WordPress API call failed: ' . $search_response->get_error_message());
+                                continue;
+                            }
+
+                            $search_results = json_decode(wp_remote_retrieve_body($search_response), true);
+                            back_trace('NOTICE', 'WordPress Search Results: ' . print_r($search_results, true));
+                            
+                            // Store the results in a transient for later use
+                            $transient_key = 'chatbot_chatgpt_search_results_' . $thread_id;
+                            set_transient($transient_key, $search_results, HOUR_IN_SECONDS);
+                            back_trace('NOTICE', 'Stored results in transient: ' . $transient_key);
+
+                            // Add the tool result to the thread
+                            $tool_result_url = get_threads_api_url() . '/' . $thread_id . '/messages';
+                            $tool_result_data = [
+                                'role' => 'tool',
+                                'tool_call_id' => $tool_call['id'],
+                                'content' => json_encode($search_results)
+                            ];
+
+                            back_trace('NOTICE', 'Adding tool result to thread: ' . print_r($tool_result_data, true));
+
+                            $tool_result_response = wp_remote_post($tool_result_url, [
+                                'headers' => $headers,
+                                'body' => json_encode($tool_result_data),
+                                'timeout' => 30
+                            ]);
+
+                            if (is_wp_error($tool_result_response)) {
+                                back_trace('ERROR', 'Failed to add tool result to thread: ' . $tool_result_response->get_error_message());
+                            } else {
+                                back_trace('NOTICE', 'Successfully added tool result to thread');
+                            }
+                        }
+                    }
+                    
+                    return true;
+                }
+            }
+        }
+
+        back_trace('NOTICE', 'No tool calls found in steps');
+        return false;
+
+    } catch (Exception $e) {
+        back_trace('ERROR', 'Exception caught: ' . $e->getMessage());
+        back_trace('ERROR', 'Stack trace: ' . $e->getTraceAsString());
+        return false;
+    }
+}
