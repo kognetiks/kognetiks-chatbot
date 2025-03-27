@@ -53,9 +53,11 @@ add_action('rest_api_init', function () {
 // Handle the assistant search request
 function chatbot_assistant_search_handler($request) {
 
-    // Log the incoming request
-    back_trace('NOTICE', 'Received search request');
+    // Log the incoming request more extensively
+    back_trace('NOTICE', '====== SEARCH REQUEST RECEIVED ======');
     back_trace('NOTICE', 'Request parameters: ' . print_r($request->get_params(), true));
+    back_trace('NOTICE', 'Request URL: ' . $request->get_route());
+    back_trace('NOTICE', 'Request method: ' . $request->get_method());
     
     global $wpdb;
 
