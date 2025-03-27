@@ -1429,6 +1429,7 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                                 'timeout' => 30,
                                 'headers' => [
                                     'Content-Type' => 'application/json',
+                                    'X-Assistant-ID' => $assistant_id, // Added header for endpoint security
                                 ],
                             ];
                             

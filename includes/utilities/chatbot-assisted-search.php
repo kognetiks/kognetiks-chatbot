@@ -22,7 +22,7 @@ add_action('rest_api_init', function () {
     register_rest_route('assistant/v1', '/search', [
         'methods'  => 'GET',
         'callback' => 'chatbot_assistant_search_handler',
-        'permission_callback' => '__return_true',
+        'permission_callback' => 'assistant_permission_callback',
         'args' => [
             'endpoint' => [
                 'required' => true,
@@ -50,6 +50,42 @@ add_action('rest_api_init', function () {
     ]);
 
 });
+
+// Secure the endpoint with a permission callback
+function assistant_permission_callback( $request ) {
+
+    // Retrieve the assistant ID from a custom header
+    $assistant_id = $request->get_header('x-assistant-id');
+    
+    if ( empty( $assistant_id ) ) {
+        // return new WP_Error( 'missing_assistant_id', __('Missing Assistant ID'), array( 'status' => 403 ) );
+        return new WP_Error( 'unauthorized', __('Unauthorized'), array( 'status' => 403 ) );
+    }
+    
+    // Sanitize the assistant ID
+    $assistant_id = sanitize_text_field( $assistant_id );
+    
+    global $wpdb;
+    // Use your table name (including the prefix)
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+    
+    // Check if the assistant ID exists in the table
+    $exists = $wpdb->get_var( 
+        $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE assistant_id = %s", $assistant_id)
+    );
+    
+    if ( ! $exists ) {
+        // DIAG - Diagnostics - Ver 2.2.7
+        back_trace( 'ERROR', 'Invalid Assistant ID: ' . $assistant_id);
+        // return new WP_Error( 'invalid_assistant_id', __('Invalid Assistant ID'), array( 'status' => 403 ) );
+        return new WP_Error( 'unauthorized', __('Unauthorized'), array( 'status' => 403 ) );
+    }
+    
+    // DIAG - Diagnostics - Ver 2.2.7
+    back_trace( 'NOTICE', 'Assistant ID is valid: ' . $assistant_id);
+
+    return true;
+}
 
 // Handle the assistant search request
 function chatbot_assistant_search_handler($request) {
