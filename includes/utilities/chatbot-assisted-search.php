@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 add_action('rest_api_init', function () {
     
     // DIAG - Diagnostics - Ver 2.2.7
-    back_trace('NOTICE', 'Registering assistant search endpoint');
+    // back_trace('NOTICE', 'Registering assistant search endpoint');
     
     register_rest_route('assistant/v1', '/search', [
         'methods'  => 'GET',
@@ -48,12 +48,13 @@ add_action('rest_api_init', function () {
             ],
         ],
     ]);
+
 });
 
 // Handle the assistant search request
 function chatbot_assistant_search_handler($request) {
 
-    // Log the incoming request more extensively
+    // DIAG - Diagnostics - Ver 2.2.7
     back_trace('NOTICE', '====== SEARCH REQUEST RECEIVED ======');
     back_trace('NOTICE', 'Request parameters: ' . print_r($request->get_params(), true));
     back_trace('NOTICE', 'Request URL: ' . $request->get_route());
@@ -69,6 +70,7 @@ function chatbot_assistant_search_handler($request) {
         $page = (int) $request->get_param('page');
         $per_page = (int) $request->get_param('per_page');
 
+        // DIAG - Diagnostics - Ver 2.2.7
         back_trace('NOTICE', 'Validated parameters:');
         back_trace('NOTICE', '- Endpoint: ' . $endpoint);
         back_trace('NOTICE', '- Query: ' . $query);
@@ -86,11 +88,13 @@ function chatbot_assistant_search_handler($request) {
             'order' => 'DESC',
         ];
 
+        // DIAG - Diagnostics - Ver 2.2.7
         back_trace('NOTICE', 'WP_Query arguments: ' . print_r($args, true));
 
         $query = new WP_Query($args);
 
         if (is_wp_error($query)) {
+            // DIAG - Diagnostics - Ver 2.2.7
             back_trace('ERROR', 'WP_Query error: ' . $query->get_error_message());
             return new WP_Error('query_error', $query->get_error_message(), ['status' => 500]);
         }
@@ -108,7 +112,8 @@ function chatbot_assistant_search_handler($request) {
                 ];
 
                 if ($include_excerpt) {
-                    $result['excerpt'] = get_the_excerpt();
+                    // $result['excerpt'] = get_the_excerpt();
+                    $result['excerpt'] = strip_tags(get_the_content());
                 }
 
                 $results[] = $result;
@@ -128,14 +133,18 @@ function chatbot_assistant_search_handler($request) {
             $response['message'] = 'No results found.';
         }
 
+        // DIAG - Diagnostics - Ver 2.2.7
         back_trace('NOTICE', 'Search completed successfully');
         back_trace('NOTICE', 'Results count: ' . count($results));
         return new WP_REST_Response($response, 200);
 
     } catch (Exception $e) {
+
+        // DIAG - Diagnostics - Ver 2.2.7
         back_trace('ERROR', 'Exception caught: ' . $e->getMessage());
         back_trace('ERROR', 'Stack trace: ' . $e->getTraceAsString());
         return new WP_Error('search_error', $e->getMessage(), ['status' => 500]);
-    }
-}
 
+    }
+    
+}

@@ -1319,6 +1319,7 @@ add_action( 'delete_uploaded_file', 'deleteUploadedFile' );
 // Check for Tool Usage by OpenAI Assistant - Ver 2.2.7
 function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key) {
     
+    // DIAG - Diagnostics - Ver 2.2.7
     back_trace('NOTICE', 'Starting tool usage check');
     back_trace('NOTICE', 'Parameters:');
     back_trace('NOTICE', '- Assistant ID: ' . $assistant_id);
@@ -1326,8 +1327,11 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
     back_trace('NOTICE', '- Run ID: ' . $run_id);
 
     try {
+
         // Construct the API URL for run steps
         $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $run_id;
+
+        // DIAG - Diagnostics - Ver 2.2.7
         back_trace('NOTICE', 'Checking run status from: ' . $url);
 
         // Determine API version
@@ -1349,8 +1353,11 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
 
         // Handle request errors
         if (is_wp_error($response)) {
+
+            // DIAG - Diagnostics - Ver 2.2.7
             back_trace('ERROR', 'Failed to get run status: ' . $response->get_error_message());
             return false;
+
         }
 
         // Extract response body
@@ -1358,14 +1365,20 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
         $run_data = json_decode($response_body, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
+
+            // DIAG - Diagnostics - Ver 2.2.7
             back_trace('ERROR', 'JSON decode error: ' . json_last_error_msg());
             return false;
+
         }
 
+        // DIAG - Diagnostics - Ver 2.2.7
         back_trace('NOTICE', 'Run status: ' . ($run_data['status'] ?? 'unknown'));
 
         // Check if the run requires action
         if (isset($run_data['status']) && $run_data['status'] === 'requires_action') {
+
+            // DIAG - Diagnostics - Ver 2.2.7
             back_trace('NOTICE', 'Run requires action - processing tool calls');
             
             if (isset($run_data['required_action']) && 
@@ -1375,8 +1388,11 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                 $tool_calls = $run_data['required_action']['submit_tool_outputs']['tool_calls'] ?? [];
                 
                 if (empty($tool_calls)) {
+
+                    // DIAG - Diagnostics - Ver 2.2.7
                     back_trace('NOTICE', 'No tool calls found in required action');
                     return false;
+
                 }
                 
                 // Process each tool call
@@ -1384,6 +1400,8 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                 
                 foreach ($tool_calls as $tool_call) {
                     if (isset($tool_call['function']['name']) && $tool_call['function']['name'] === 'query_wordpress_api') {
+
+                        // DIAG - Diagnostics - Ver 2.2.7
                         back_trace('NOTICE', 'Found WordPress search tool call with ID: ' . $tool_call['id']);
                         
                         try {
@@ -1394,6 +1412,7 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                                 continue;
                             }
                             
+                            // DIAG - Diagnostics - Ver 2.2.7
                             back_trace('NOTICE', 'Tool arguments parsed successfully');
                             back_trace('NOTICE', 'Query: ' . ($args['query'] ?? 'None provided'));
                             
@@ -1422,34 +1441,42 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                                 'per_page' => $per_page
                             ], $request_url);
                             
+                            // DIAG - Diagnostics - Ver 2.2.7
                             back_trace('NOTICE', 'Making search request to: ' . $request_url);
                             
                             // Execute the request
                             $search_response = wp_remote_get($request_url, $request_args);
                             
                             if (is_wp_error($search_response)) {
+
+                                // DIAG - Diagnostics - Ver 2.2.7
                                 back_trace('ERROR', 'Search request failed: ' . $search_response->get_error_message());
                                 $tool_outputs[] = [
                                     'tool_call_id' => $tool_call['id'],
                                     'output' => json_encode(['error' => 'Search request failed', 'message' => $search_response->get_error_message()])
                                 ];
                                 continue;
+
                             }
                             
                             $search_body = wp_remote_retrieve_body($search_response);
                             $search_results = json_decode($search_body, true);
                             
                             if (json_last_error() !== JSON_ERROR_NONE) {
+
+                                // DIAG - Diagnostics - Ver 2.2.7
                                 back_trace('ERROR', 'Failed to parse search results: ' . json_last_error_msg());
+
                                 $tool_outputs[] = [
                                     'tool_call_id' => $tool_call['id'],
                                     'output' => json_encode(['error' => 'Failed to parse search results'])
                                 ];
                                 continue;
+
                             }
-                            
-                            back_trace('NOTICE', 'Search returned ' . 
-                                (isset($search_results['total_posts']) ? $search_results['total_posts'] : '0') . ' results');
+
+                            // DIAG - Diagnostics - Ver 2.2.7
+                            back_trace('NOTICE', 'Search returned ' . (isset($search_results['total_posts']) ? $search_results['total_posts'] : '0') . ' results');
                             
                             // Add this tool output to our collection
                             $tool_outputs[] = [
@@ -1458,19 +1485,27 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                             ];
                             
                         } catch (Exception $e) {
+
+                            // DIAG - Diagnostics - Ver 2.2.7
                             back_trace('ERROR', 'Exception processing tool call: ' . $e->getMessage());
                             $tool_outputs[] = [
                                 'tool_call_id' => $tool_call['id'],
                                 'output' => json_encode(['error' => 'Exception processing tool call', 'message' => $e->getMessage()])
                             ];
+
                         }
+
                     } else {
+
+                        // DIAG - Diagnostics - Ver 2.2.7
                         back_trace('NOTICE', 'Unknown tool type: ' . ($tool_call['function']['name'] ?? 'undefined'));
+
                         $tool_outputs[] = [
                             'tool_call_id' => $tool_call['id'],
                             'output' => json_encode(['error' => 'Unknown tool type'])
                         ];
                     }
+
                 }
                 
                 // Submit all tool outputs at once
@@ -1480,6 +1515,7 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                         'tool_outputs' => $tool_outputs
                     ];
                     
+                    // DIAG - Diagnostics - Ver 2.2.7
                     back_trace('NOTICE', 'Submitting tool outputs to: ' . $submit_url);
                     back_trace('NOTICE', 'Tool outputs: ' . json_encode($submit_data));
                     
@@ -1490,34 +1526,49 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                     ]);
                     
                     if (is_wp_error($submit_response)) {
+
+                        // DIAG - Diagnostics - Ver 2.2.7
                         back_trace('ERROR', 'Failed to submit tool outputs: ' . $submit_response->get_error_message());
                         return false;
+
                     }
                     
                     $submit_body = wp_remote_retrieve_body($submit_response);
                     $submit_data = json_decode($submit_body, true);
                     $submit_status = wp_remote_retrieve_response_code($submit_response);
                     
+                    // DIAG - Diagnostics - Ver 2.2.7
                     back_trace('NOTICE', 'Tool output submission status: ' . $submit_status);
                     back_trace('NOTICE', 'Tool output submission response: ' . print_r($submit_data, true));
                     
                     if ($submit_status >= 400) {
+
+                        // DIAG - Diagnostics - Ver 2.2.7
                         back_trace('ERROR', 'Tool output submission error: ' . $submit_body);
                         return false;
+
                     } else {
+
+                        // DIAG - Diagnostics - Ver 2.2.7
                         back_trace('NOTICE', 'Tool output submitted successfully');
                         return true;
+
                     }
                 }
             }
         }
 
+        // DIAG - Diagnostics - Ver 2.2.7
         back_trace('NOTICE', 'No action required for this run');
         return false;
 
     } catch (Exception $e) {
+
+        // DIAG - Diagnostics - Ver 2.2.7
         back_trace('ERROR', 'Exception caught: ' . $e->getMessage());
         back_trace('ERROR', 'Stack trace: ' . $e->getTraceAsString());
         return false;
+        
     }
+
 }
