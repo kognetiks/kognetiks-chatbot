@@ -40,13 +40,9 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's new in Version 2.2.7
+## What's new in Version 2.2.8
 
-* **Conversation Transcript**: Added a new feature to send the conversation transcript to site admins when OpenAI Assistants are instructed to do so (see Support tab in Settings).
-* **Dashboard Widget**: Added a dashboard widget to display chatbot statistics and token usage in the WordPress admin dashboard.
-* **Custom Post Types**: Added support for custom post types to the Knowledge Navigator.
-* **Performance Improvements**: Minimized unnecessary calls to the database to improve performance.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.6.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.7.
 
 ## Past Updates
 
