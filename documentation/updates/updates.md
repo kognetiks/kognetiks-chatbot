@@ -1,5 +1,11 @@
 # Past Update
 
+## What's new in Version 2.2.6
+
+* **Azure OpenAI**: Added support for the Azure OpenAI API to provide advanced conversational capabilities for the chatbot.
+* **Local Server**: Added support for the JAN.AI local server, enabling users to run AI models on their own servers for enhanced control and flexibility.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.5.
+
 ## What's New in Version 2.2.5
 
 * **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site’s existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.

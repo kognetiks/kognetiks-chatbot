@@ -182,7 +182,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if (strpos($tag, 'assistant-') === 0) {
         $tag = str_replace('assistant-', 'chatbot-', $tag);
         // DIAG - Diagnostic - Ver 2.2.6
-        // back_trace('NOTICE', 'Transformed assistant shortcode to: ' . $tag);
+        // back_trace( 'NOTICE', 'Transformed assistant shortcode to: ' . $tag);
     }
 
     // Tag Processing - Ver 2.0.6
@@ -1359,34 +1359,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
 }
 
-// FIXME - TEMPORARY - Ver 2.2.1 - 2025 01 09
-// Original Shortcodes - Ver 2.2.1 - 2025 01 09
-add_shortcode('chatbot', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot_chatgpt', 'chatbot_chatgpt_shortcode');
-add_shortcode('kognetiks_chatbot', 'chatbot_chatgpt_shortcode');
-// Assistant Shortcodes - Ver 2.2.1 - 2025 01 09
-add_shortcode('chatbot-1', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot-2', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot-3', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot-4', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot-5', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot-6', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot-7', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot-8', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot-9', 'chatbot_chatgpt_shortcode');
-add_shortcode('chatbot-10', 'chatbot_chatgpt_shortcode');
-// Assistant Shortcodes - Ver 2.2.6 - 2025 03 07
-add_shortcode('assistant-1', 'chatbot_chatgpt_shortcode');
-add_shortcode('assistant-2', 'chatbot_chatgpt_shortcode');
-add_shortcode('assistant-3', 'chatbot_chatgpt_shortcode');
-add_shortcode('assistant-4', 'chatbot_chatgpt_shortcode');
-add_shortcode('assistant-5', 'chatbot_chatgpt_shortcode');
-add_shortcode('assistant-6', 'chatbot_chatgpt_shortcode');
-add_shortcode('assistant-7', 'chatbot_chatgpt_shortcode');
-add_shortcode('assistant-8', 'chatbot_chatgpt_shortcode');
-add_shortcode('assistant-9', 'chatbot_chatgpt_shortcode');
-add_shortcode('assistant-10', 'chatbot_chatgpt_shortcode');
-
 // Dynamic Shortcode - Ver 2.0.6
 function register_chatbot_shortcodes($number_of_shortcodes = null) {
 
@@ -1411,37 +1383,42 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
         $number_of_shortcodes = 0;
     }
 
+    // Update the option with the number of shortcodes
     update_option('chatbot_chatgpt_number_of_shortcodes', $number_of_shortcodes);
 
-    // Fetch the number of shortcodes to 
-    $number_of_shortcodes = $number_of_shortcodes ?? esc_attr(get_option('chatbot_chatgpt_number_of_shortcodes', 1));
-
-    // Base shortcode names
+    // Base shortcode names - only register if not already registered
     $base_shortcodes = [
         'chatbot',
         'chatbot_chatgpt',
         'kognetiks_chatbot'
     ];
 
-    // Register base shortcodes
+    // Register base shortcodes only if not already registered
     foreach ($base_shortcodes as $shortcode) {
-        add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
+        if (!shortcode_exists($shortcode)) {
+            add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
+        }
     }
 
     // Register numbered shortcodes dynamically using [chatbot-#] syntax
+    // Only register if not already registered and within the valid range
     for ($i = 1; $i <= $number_of_shortcodes; $i++) {
-        add_shortcode('chatbot-' . $i, 'chatbot_chatgpt_shortcode');
-        // error_log ('Registered shortcodes: ' . 'chatbot-' . $i );
+        $shortcode = 'chatbot-' . $i;
+        if (!shortcode_exists($shortcode)) {
+            add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
+            // error_log('Registered shortcode: ' . $shortcode);
+        }
     }
 
-    // Register numbered shortcodes dynamically using [assistant=#] syntax
+    // Register numbered shortcodes dynamically using [assistant-#] syntax
+    // Only register if not already registered and within the valid range
     for ($i = 1; $i <= $number_of_shortcodes; $i++) {
-        add_shortcode('assistant-' . $i, 'chatbot_chatgpt_shortcode');
-        // error_log ('Registered shortcodes: ' . 'assistant-' . $i );
+        $shortcode = 'assistant-' . $i;
+        if (!shortcode_exists($shortcode)) {
+            add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
+            // error_log('Registered shortcode: ' . $shortcode);
+        }
     }
-
-    // error_log ('chatbot_chatgpt_number_of_shortcodes: ' . $number_of_shortcodes );
-    
 }
 // Try to register the shortcodes on init - Ver 2.0.6 - 2024 07 11
 add_action('init', 'register_chatbot_shortcodes');

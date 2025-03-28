@@ -83,6 +83,50 @@ jQuery(document).ready(function ($) {
     .attr('width', '24')
     .attr('height', '24');
 
+    // // Get an the resize up button icon for the chatbot - Ver 2.2.7
+    // // chatbotresizeupicon = plugins_url + 'assets/icons/' + 'bottom_panel_open_FILL0_wght400_GRAD0_opsz24.png';
+    // chatbotresizeupicon = kchat_settings.chatbot_chatgpt_appearance_resize_up_icon || plugins_url + 'assets/icons/' + 'bottom_panel_open_FILL0_wght400_GRAD0_opsz24.png';
+    // chatbotresizeupicon = $('<img>')
+    // .attr('id', 'chatbot-resize-up-icon')
+    // .attr('class', 'chatbot-resize-up-icon')
+    // .attr('src', chatbotresizeupicon)
+    // .attr('decoding', 'async')
+    // .attr('width', '24')
+    // .attr('height', '24');
+
+    // // Get an the resize down button icon for the chatbot - Ver 2.2.7
+    // // chatbotresizedownicon = plugins_url + 'assets/icons/' + 'bottom_panel_open_FILL0_wght400_GRAD0_opsz24.png';
+    // chatbotresizedownicon = kchat_settings.chatbot_chatgpt_appearance_resize_down_icon || plugins_url + 'assets/icons/' + 'bottom_panel_close_FILL0_wght400_GRAD0_opsz24.png';
+    // chatbotresizedownicon = $('<img>')
+    // .attr('id', 'chatbot-resize-down-icon')
+    // .attr('class', 'chatbot-resize-down-icon')
+    // .attr('src', chatbotresizedownicon)
+    // .attr('decoding', 'async')
+    // .attr('width', '24')
+    // .attr('height', '24');
+
+    // // chatbot-resize-icon
+    // chatbotresizeicon = kchat_settings.chatbot_chatgpt_appearance_resize_down_icon || plugins_url + 'assets/icons/' + 'bottom_panel_close_FILL0_wght400_GRAD0_opsz24.png';
+    // chatbotresizeicon = $('<img>')
+    // .attr('id', 'chatbot-resize-icon')
+    // .attr('class', 'chatbot-resize-icon')
+    // .attr('src', chatbotresizeicon)
+    // .attr('decoding', 'async')
+    // .attr('width', '24')
+    // .attr('height', '24');
+
+    let chatbotresizeupiconSrc = kchat_settings.chatbot_chatgpt_appearance_resize_up_icon 
+        || plugins_url + 'assets/icons/bottom_panel_open_FILL0_wght400_GRAD0_opsz24.png';
+
+    let chatbotresizedowniconSrc = kchat_settings.chatbot_chatgpt_appearance_resize_down_icon 
+        || plugins_url + 'assets/icons/bottom_panel_close_FILL0_wght400_GRAD0_opsz24.png';
+
+    let chatbotresizeicon = $('<img>')
+        .attr('id', 'chatbot-resize-icon')
+        .attr('src', chatbotresizeupiconSrc)
+        .attr('width', '24')
+        .attr('height', '24');
+
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status: ' + chatbot_chatgpt_start_status);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_start_status_new_visitor: ' + chatbot_chatgpt_start_status_new_visitor);
     // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_style: ' + chatbot_chatgpt_display_style);
@@ -212,11 +256,23 @@ jQuery(document).ready(function ($) {
 
     chatbotContainer = $('<div></div>').addClass('chatbot-container');
 
+    // Add the resize icon - Ver 2.2.7
+    chatbotResizeBtn = $('<button></button>').addClass('chatbot-resize-btn').append(chatbotresizeicon); // Add a resize button
+
     // Changed this out for an image - Ver 1.8.6
     // chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').addClass('dashicons dashicons-format-chat'); // Add a collapse button
     chatbotCollapseBtn = $('<button></button>').addClass('chatbot-collapse-btn').append(chatbotcollapseicon); // Add a collapse button
 
     chatbotCollapsed = $('<div></div>').addClass('chatbot-collapsed'); // Add a collapsed chatbot icon dashicons-format-chat f125
+
+    // Create a container for the header buttons
+    let headerActions = $('<div></div>').addClass('chatbot-header-actions');
+
+    // Append the collapse and resize buttons into the container
+    headerActions.append(chatbotResizeBtn, chatbotCollapseBtn);
+
+    // Append the container to the chatbot header
+    $('#chatbot-chatgpt-header').append(headerActions);
 
     // Avatar and Custom Message - Ver 1.5.0 - Upgraded - Ver 2.0.3 - 2024 05 28
     let selectedAvatar = kchat_settings.chatbot_chatgpt_avatar_icon_setting || '';
@@ -289,8 +345,12 @@ jQuery(document).ready(function ($) {
     }
     
     // Append the collapse button and collapsed chatbot icon to the chatbot container
-    $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
-    chatbotContainer.append(chatbotCollapsed);
+    // $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
+    // chatbotContainer.append(chatbotCollapsed);
+
+    // Append the resize button to the chatbot container - Ver 2.2.7
+    // $('#chatbot-chatgpt-header').append(chatbotResizeBtn);
+    // chatbotContainer.append(chatbotResizeBtn);
 
     // Add initial greeting to the chatbot
     conversation.append(chatbotContainer);
@@ -372,13 +432,22 @@ jQuery(document).ready(function ($) {
         chatbot_chatgpt_Elements.append(chatbotHeader);
 
         // Add the chatbot button to the header
-        $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
-        chatbotHeader.append(chatbotCollapsed);
+        // $('#chatbot-chatgpt-header').append(chatbotCollapseBtn);
+        // chatbotHeader.append(chatbotCollapsed);
+
+        // Add the chatbot resize button to the header - Ver 2.2.7
+        // $('#chatbot-chatgpt-header').append(chatbotResizeBtn);
+        // chatbotHeader.append(chatbotResizeBtn);
 
         // Attach the click event listeners for the collapse button and collapsed chatbot icon
         chatbotCollapseBtn.on('click', toggleChatbot);
         chatbotCollapsed.on('click', toggleChatbot);
         chatGptOpenButton.on('click', toggleChatbot);
+        chatbotResizeBtn.on('click', resizeChatbot);
+
+        // Attached the click event listeners for the resize up and down buttons - Ver 2.2.7
+        // $('#chatbot-resize-up-icon').on('click', resizeChatbot);
+        // $('#chatbot-resize-down-icon').on('click', resizeChatbot);
 
     } else {
 
@@ -387,6 +456,110 @@ jQuery(document).ready(function ($) {
 
     }
 
+    let originalWidth;
+    let originalHeight;
+    let enlarged = false;
+    let resizeTimeout;
+
+    function resizeChatbot() {
+        
+        let chatEl = document.getElementById('chatbot-chatgpt');
+    
+        if (!chatEl) {
+            console.warn('Chatbot: WARNING: Chatbot element not found.');
+            return;
+        }
+    
+        // Ensure original dimensions are set when first resizing
+        if (typeof originalWidth === 'undefined' || typeof originalHeight === 'undefined') {
+            originalWidth = chatEl.offsetWidth;
+            originalHeight = chatEl.offsetHeight;
+        }
+    
+        let viewportWidth = window.innerWidth;
+        let viewportHeight = window.innerHeight;
+        let margin = 20; // Safety margin
+    
+        if (!enlarged) {
+            let newWidth = Math.min(originalWidth * 2, viewportWidth - margin);
+            let newHeight = Math.min(originalHeight * 2, viewportHeight - margin);
+
+            // Update the height and width of the chatbot with the newWidth and newHeight
+            chatEl.style.setProperty('width', newWidth + 'px', 'important');
+            chatEl.style.setProperty('height', newHeight + 'px', 'important');
+
+            $('#chatbot-chatgpt-conversation')[0].style.setProperty('max-height', '90%', 'important');
+
+            // Remove any existing resize listeners before adding new ones
+            $(window).off('resize').on('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    updateChatbotConversationMaxHeight();
+                    updateChatContainerDimensions();
+                }, 250); // Debounce resize events
+            });
+
+            $('#chatbot-resize-icon')
+                .attr('src', chatbotresizedowniconSrc)
+                .attr('alt', 'Reduce Chat');
+
+            enlarged = true;
+            localStorage.setItem('chatbot_enlarged', 'true');
+
+        } else {
+            chatEl.style.setProperty('width', originalWidth + 'px', 'important');
+            chatEl.style.setProperty('height', originalHeight + 'px', 'important');
+
+            $('#chatbot-chatgpt-conversation').css('max-height', '400px');
+
+            $('#chatbot-resize-icon')
+                .attr('src', chatbotresizeupiconSrc)
+                .attr('alt', 'Enlarge Chat');
+
+            enlarged = false;
+            localStorage.setItem('chatbot_enlarged', 'false');
+            
+            // Remove resize listener when reducing
+            $(window).off('resize');
+        }
+    }
+
+    // Initialize enlarged state from localStorage
+    if (localStorage.getItem('chatbot_enlarged') === 'true') {
+        enlarged = true;
+    }
+
+    // Function to update the chatbot styles based on the viewport size
+    function updateChatbotConversationMaxHeight() {
+
+        if (! enlarged) { return; }
+
+        let newMaxHeight = window.innerHeight * 0.9 + 'px';
+        document.getElementById('chatbot-chatgpt-conversation')
+                .style.setProperty('max-height', newMaxHeight, 'important');
+    }
+
+    // Function to update the chatbot styles based on the viewport size
+    function updateChatContainerDimensions() {
+
+        if (! enlarged) { return; }
+        
+        let chatEl = document.getElementById('chatbot-chatgpt');
+        if (!chatEl) return;
+        
+        let viewportWidth = window.innerWidth;
+        let viewportHeight = window.innerHeight;
+        let margin = 20; // Safety margin
+    
+        // Calculate new dimensions based on the original dimensions and viewport size.
+        let newWidth = Math.min(originalWidth * 2, viewportWidth - margin);
+        let newHeight = Math.min(originalHeight * 2, viewportHeight - margin);
+    
+        chatEl.style.setProperty('width', newWidth + 'px', 'important');
+        chatEl.style.setProperty('height', newHeight + 'px', 'important');
+    }
+
+    // Function to append message to the conversation
     function appendMessage(message, sender, cssClass) {
 
         let user_id = kchat_settings.user_id;

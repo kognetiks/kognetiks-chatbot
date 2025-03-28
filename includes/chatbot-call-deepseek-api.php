@@ -130,7 +130,7 @@ function chatbot_call_deepseek_api($api_key, $message) {
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
-    // back_trace('NOTICE', '$context_length: ' . $context_length);
+    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
     // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 65536; // Example: 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
@@ -143,9 +143,9 @@ function chatbot_call_deepseek_api($api_key, $message) {
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        // back_trace('NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
+        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
-        // back_trace('NOTICE', 'Context length is within limits.');
+        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // FIXME - Set $context to null - Ver 2.2.2 - 2025-01-16
@@ -263,15 +263,15 @@ function chatbot_call_deepseek_api($api_key, $message) {
     // Check if the response content is not empty
     if (!empty($response_body->choices[0]->message->content)) {
         if ($input_tokens > 0) {
-            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $input_tokens);
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $input_tokens);
         }
 
         if ($output_tokens > 0) {
-            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $output_tokens);
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $output_tokens);
         }
 
         if ($total_tokens > 0) {
-            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $total_tokens);
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $total_tokens);
         }
     }
 

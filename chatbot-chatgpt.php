@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.2.6
+ * Version:     2.2.7
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -30,7 +30,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.2.6';
+$chatbot_chatgpt_plugin_version = '2.2.7';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -162,8 +162,10 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-api-endpoints.php';                // API Endpoints - Ver 2.2.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants.php';                   // Assistants Management for OpenAI - Ver 2.0.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants-azure.php';             // Assistants Management for Azure - Ver 2.2.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assisted-search.php';              // Assisted Search - Ver 2.2.7 - 2025-03-26
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php';         // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-content-search.php';               // Functions - Ver 2.2.4
+require_once plugin_dir_path(__FILE__) . 'includes/dashboard/chatbot-chatgpt-dashboard-widget.php';      // Dashboard Widget - Ver 2.2.7
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php';                // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php';                   // Deactivation - Ver 1.9.9
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-download-transcript.php';          // Functions - Ver 1.9.9
@@ -702,6 +704,8 @@ add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
 
 // Activation, deactivation, and uninstall functions
 register_activation_hook(__FILE__, 'chatbot_chatgpt_activate');
+register_activation_hook(__FILE__, 'create_chatbot_chatbot_assistants_table');
+register_activation_hook(__FILE__, 'create_chatbot_azure_assistants_table');
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_deactivate');
 register_uninstall_hook(__FILE__, 'chatbot_chatgpt_uninstall');
 add_action('upgrader_process_complete', 'chatbot_chatgpt_upgrade_completed', 10, 2);
@@ -929,10 +933,12 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
 }
 
 // Add the Opean AI Assistant table to the database - Ver 2.0.4
-create_chatbot_chatgpt_assistants_table();
+// REMOVED Ver 2.2.7 and MOVED to the activation hook
+// create_chatbot_chatgpt_assistants_table();
 
 // Add the Azure Assistants table to the database - Ver 2.2.6
-create_chatbot_azure_assistants_table();
+// REMOVED Ver 2.2.7 and MOVED to the activation hook
+// create_chatbot_azure_assistants_table();
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
@@ -1277,7 +1283,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$message: ' . $message);
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
         // BELT & SUSPENDERS
         $thread_id = '';
@@ -1300,7 +1306,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$message ' . $message);
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
         // DIAG - Diagnostics - Ver 2.0.9
         // back_trace( 'NOTICE', '========================================');
@@ -1336,7 +1342,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, null, $response);
 
         // Clean (erase) the output buffer - Ver 1.6.8
         // Check if output buffering is active before attempting to clean it
@@ -1402,7 +1408,7 @@ function chatbot_chatgpt_send_message() {
 
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, $message);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
         
         // If $model starts with 'gpt' then the chatbot_chatgpt_call_api or 'dall' then chatbot_chatgpt_call_image_api
         // TRY NOT TO FETCH MODEL AGAIN
@@ -1580,7 +1586,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE', '$response ' . print_r($response,true));
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, $response);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, null, $response);
 
         // DIAG - Diagnostics
         // back_trace( 'NOTICE', 'Check for links and images in response before returning');

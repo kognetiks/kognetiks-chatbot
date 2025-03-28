@@ -176,11 +176,113 @@ function chatbot_chatgpt_kn_settings_section_callback($args) {
     <?php
 }
 
+// Dynamic post type inclusion settings - Ver 2.3.0
+function chatbot_chatgpt_kn_get_published_post_types() {
+
+    global $wpdb;
+    $published_types = [];
+    
+    // Get all post types that actually exist in the posts table
+    $db_types = $wpdb->get_col("SELECT DISTINCT post_type FROM {$wpdb->posts} WHERE post_type NOT LIKE 'wp_%' AND post_type NOT IN ('attachment', 'revision', 'nav_menu_item', 'custom_css', 'customize_changeset')");
+    
+    // Make sure we always have our core types first
+    $core_types = ['post' => 'Post', 'page' => 'Page', 'product' => 'Product'];
+    foreach ($core_types as $type => $label) {
+        $published_types[$type] = $label;
+    }
+    
+    // Add any additional types from the database
+    foreach ($db_types as $type) {
+        if (!isset($published_types[$type])) {
+            $label = ucfirst(str_replace(['_', '-'], ' ', $type));
+            $published_types[$type] = $label;
+        }
+    }
+    
+    // DIAG - Diagnostics - Ver 2.2.6
+    // back_trace( 'NOTICE', 'Final post types array: ' . print_r($published_types, true));
+    
+    return $published_types;
+
+}
+
+// Register settings on init
+add_action('admin_init', 'chatbot_chatgpt_kn_register_settings');
+
+function chatbot_chatgpt_kn_register_settings() {
+    // Register the section first
+    add_settings_section(
+        'chatbot_chatgpt_kn_include_exclude_section',
+        'Knowledge Navigator Include/Exclude Settings',
+        'chatbot_chatgpt_kn_include_exclude_section_callback',
+        'chatbot-chatgpt'
+    );
+
+    // Get all post types - do this only once
+    $published_types = chatbot_chatgpt_kn_get_published_post_types();
+    
+    // Register settings and fields for each post type
+    foreach ($published_types as $type => $label) {
+        // Always use plural form for option names
+        $plural_type = $type === 'reference' ? 'references' : $type . 's';
+        $option_name = 'chatbot_chatgpt_kn_include_' . $plural_type;
+        
+        // Register the setting
+        register_setting(
+            'chatbot_chatgpt_knowledge_navigator',
+            $option_name
+        );
+        
+        // Add the settings field
+        add_settings_field(
+            'chatbot_chatgpt_kn_include_' . $plural_type, // Use plural for field ID to match option_name
+            'Include ' . ucfirst($label) . 's',    // Display plural in label
+            'chatbot_chatgpt_kn_include_post_type_callback',
+            'chatbot-chatgpt',
+            'chatbot_chatgpt_kn_include_exclude_section',
+            [
+                'post_type' => $type,              // Pass singular post_type
+                'option_name' => $option_name      // Pass plural option_name
+            ]
+        );
+    }
+
+    // Register comments setting
+    register_setting(
+        'chatbot_chatgpt_knowledge_navigator',
+        'chatbot_chatgpt_kn_include_comments'
+    );
+    
+    add_settings_field(
+        'chatbot_chatgpt_kn_include_comments',
+        'Include Approved Comments',
+        'chatbot_chatgpt_kn_include_comments_callback',
+        'chatbot-chatgpt',
+        'chatbot_chatgpt_kn_include_exclude_section'
+    );
+}
+
 function chatbot_chatgpt_kn_include_exclude_section_callback($args) {
     ?>
-    <p>Choose the content types you want to include in the Knowledge Navigator's indexing process: pages, posts, products, and/or comments.  Only published/approved content will be indexed.</p>
-    <p>Then click 'Save Settings' at the bottom of the page.</p>
-<?php
+    <p>Choose the content types you want to include in the Knowledge Navigator's indexing process. Only published content will be indexed.</p>
+    <?php
+}
+
+function chatbot_chatgpt_kn_include_post_type_callback($args) {
+    if (empty($args['option_name'])) {
+        // back_trace( 'ERROR', 'Missing option_name: ' . print_r($args, true));
+        return;
+    }
+
+    $option_name = $args['option_name'];
+    $value = get_option($option_name, 'No');
+
+    ?>
+    <select id="<?php echo esc_attr($option_name); ?>" name="<?php echo esc_attr($option_name); ?>">
+        <option value="No" <?php selected($value, 'No'); ?>>No</option>
+        <option value="Yes" <?php selected($value, 'Yes'); ?>>Yes</option>
+    </select>
+    <?php
 }
 
 function chatbot_chatgpt_kn_enhanced_response_section_callback($args) {
@@ -220,38 +322,8 @@ function chatbot_chatgpt_kn_maximum_top_words_callback($args) {
     <?php
 }
 
-function chatbot_chatgpt_kn_include_posts_callback($args) {
-    $chatbot_chatgpt_kn_include_posts = esc_attr(get_option('chatbot_chatgpt_kn_include_posts', 'Yes'));
-    ?>
-    <select id="chatbot_chatgpt_kn_include_posts" name="chatbot_chatgpt_kn_include_posts">
-        <option value="No" <?php selected($chatbot_chatgpt_kn_include_posts, 'No'); ?>><?php echo esc_html('No'); ?></option>
-        <option value="Yes" <?php selected($chatbot_chatgpt_kn_include_posts, 'Yes'); ?>><?php echo esc_html('Yes'); ?></option>
-    </select>
-    <?php
-}
-
-function chatbot_chatgpt_kn_include_pages_callback($args) {
-    $chatbot_chatgpt_kn_include_pages = esc_attr(get_option('chatbot_chatgpt_kn_include_pages', 'Yes'));
-    ?>
-    <select id="chatbot_chatgpt_kn_include_pages" name="chatbot_chatgpt_kn_include_pages">
-        <option value="No" <?php selected($chatbot_chatgpt_kn_include_pages, 'No'); ?>><?php echo esc_html('No'); ?></option>
-        <option value="Yes" <?php selected($chatbot_chatgpt_kn_include_pages, 'Yes'); ?>><?php echo esc_html('Yes'); ?></option>
-    </select>
-    <?php
-}
-
-function chatbot_chatgpt_kn_include_products_callback($args) {
-    $chatbot_chatgpt_kn_include_products = esc_attr(get_option('chatbot_chatgpt_kn_include_products', 'Yes'));
-    ?>
-    <select id="chatbot_chatgpt_kn_include_products" name="chatbot_chatgpt_kn_include_products">
-        <option value="No" <?php selected($chatbot_chatgpt_kn_include_products, 'No'); ?>><?php echo esc_html('No'); ?></option>
-        <option value="Yes" <?php selected($chatbot_chatgpt_kn_include_products, 'Yes'); ?>><?php echo esc_html('Yes'); ?></option>
-    </select>
-    <?php
-}
-
 function chatbot_chatgpt_kn_include_comments_callback($args) {
-    $chatbot_chatgpt_kn_include_comments = esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'Yes'));
+    $chatbot_chatgpt_kn_include_comments = esc_attr(get_option('chatbot_chatgpt_kn_include_comments', 'No'));
     ?>
     <select id="chatbot_chatgpt_kn_include_comments" name="chatbot_chatgpt_kn_include_comments">
         <option value="No" <?php selected($chatbot_chatgpt_kn_include_comments, 'No'); ?>><?php echo esc_html('No'); ?></option>

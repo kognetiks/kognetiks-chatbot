@@ -8,7 +8,7 @@ The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI pl
 
 ## External Services
 
-The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
+The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service's terms of service and privacy policy:
 
 - **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
@@ -31,20 +31,22 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
    - Consent to sending user queries and related data to the selected AI provider for processing and response generation.
-   - Agree to abide by the provider’s terms of service, pricing, and privacy policy.
+   - Agree to abide by the provider's terms of service, pricing, and privacy policy.
    - Acknowledge that your data, including text submitted by users, may be transferred to and processed by the AI platform in accordance with its privacy policy.
 
-**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider’s pricing and usage policies before proceeding.
+**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
 ## Introducing the Sentential Context Model - BETA FEATURE OFFERING
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's New in Version 2.2.6
+## What's new in Version 2.2.7
 
-* **Azure OpenAI**: Added support for the Azure OpenAI API to provide advanced conversational capabilities for the chatbot.
-* **Local Server**: Added support for the JAN.AI local server, enabling users to run AI models on their own servers for enhanced control and flexibility.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.5.
+* **Conversation Transcript**: Added a new feature to send the conversation transcript to site admins when OpenAI Assistants are instructed to do so (see Support tab in Settings).
+* **Dashboard Widget**: Added a dashboard widget to display chatbot statistics and token usage in the WordPress admin dashboard.
+* **Custom Post Types**: Added support for custom post types to the Knowledge Navigator.
+* **Performance Improvements**: Minimized unnecessary calls to the database to improve performance.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.6.
 
 ## Past Updates
 
@@ -83,6 +85,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 - [Appearance](appearance/appearance.md)
 
 - [Buttons](buttons/buttons.md)
+
+- [Dashboard](dashboard/dashboard.md)
 
 - [Knowledge Navigator](knowledge-navigator/knowledge-navigator.md)
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot - Chatbot ChatGPT WIDGET ENDPOINT - Ver 2.1.3
+ * Kognetiks Chatbot - Chatbot WIDGET ENDPOINT - Ver 2.1.3 - Updated Ver 2.2.7 - 2025-03-21
  *
  * This file contains the code accessing the Chatbot ChatGPT endpoint.
  * 
@@ -26,24 +26,24 @@ if (file_exists($path . '/wp-load.php')) {
 }
 
 // Include necessary files - Widgets - Ver 2.1.3
-require_once plugin_dir_path( __FILE__ ) . 'chatbot-chatgpt-widget-logging.php';
+require_once plugin_dir_path( __FILE__ ) . 'chatbot-widget-logging.php';
 
 // If remote access is not allowed, abort.
-$chatbot_chatgpt_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
-
-if ($chatbot_chatgpt_enable_remote_widget !== 'Yes') {
-
-    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-    chatbot_chatgpt_widget_logging('Remote access is not allowed', $referer );
-    die();
-
+if ($chatbot_ai_platform_choice === 'Azure OpenAI') {
+    $chatbot_enable_remote_widget = esc_attr(get_option('chatbot_azure_enable_remote_widget', 'No'));
 } else {
+    $chatbot_enable_remote_widget = esc_attr(get_option('chatbot_chatgpt_enable_remote_widget', 'No'));
+}
 
+if ($chatbot_enable_remote_widget !== 'Yes') {
+    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+    chatbot_widget_logging('Remote access is not allowed', $referer );
+    die();
+} else {
     // Log the referer for accounting, monitoring, and debugging purposes
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     $request_ip = getUserIP();
-    chatbot_chatgpt_widget_logging('Remote access is allowed' , $referer , $request_ip);
-
+    chatbot_widget_logging('Remote access is allowed' , $referer , $request_ip);
 }
 
 // Allowed domain, shortcode examples - Ver 2.1.3
@@ -62,7 +62,7 @@ global $shortcode_tags;
 $shortcode_names = array_keys($shortcode_tags);
 // Output the registered shortcodes for debugging purposes
 // foreach ($shortcode_names as $shortcode_name) {
-//     chatbot_chatgpt_widget_logging('Registered Shortcode', $shortcode_name);
+//     chatbot_widget_logging('Registered Shortcode', $shortcode_name);
 // }
 
 // Get the shortcode parameter from the URL and sanitize it
@@ -72,17 +72,20 @@ $chatbot_prompt = isset($_GET['chatbot_prompt']) ? sanitize_text_field($_GET['ch
 $chatbot_prompt = preg_replace("/^\\\\'|\\\\'$/", '', $chatbot_prompt);
 // back_trace( 'NOTICE', 'Widget Endpoint - $chatbot_prompt: ' . $chatbot_prompt);
 
-// Retrieve the allowed domains and assistants from the OpenAI Assistants options
-$allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
-
-// Add the allowed domains and assistants from the Azure OpenAI Assistant Settings - Ver 2.2.6 - 2025-03-12
-$allowed_domains_string .= "\n" . esc_attr(get_option('chatbot_azure_allowed_remote_domains', ''));
+// Retrieve the allowed pairs based on the ai platform choice
+if ($chatbot_ai_platform_choice === 'Azure OpenAI') {
+    // Add the allowed domains and assistants from the Azure OpenAI Assistant Settings - Ver 2.2.6 - 2025-03-12
+    $allowed_domains_string = esc_attr(get_option('chatbot_azure_allowed_remote_domains', ''));
+} else {
+    // Retrieve the allowed domains and assistants from the OpenAI Assistants options
+    $allowed_domains_string = esc_attr(get_option('chatbot_chatgpt_allowed_remote_domains', ''));
+}
 
 // Convert the string to an array of domain-assistant pairs, assuming they are newline-separated
 $allowed_pairs = array_map('trim', explode("\n", $allowed_domains_string));
 
 // Log the allowed pairs for debugging purposes
-chatbot_chatgpt_widget_logging('Allowed Domain-Assistant Pairs: ' . $allowed_domains_string );
+chatbot_widget_logging('Allowed Domain-Assistant Pairs: ' . $allowed_domains_string );
 
 // Check if allowed pairs list is empty
 if (empty($allowed_pairs)) {
@@ -97,9 +100,9 @@ if (empty($allowed_pairs)) {
     $normalized_referer = preg_replace('/^www\./', '', $host);
     $base_referer = implode('.', array_slice(explode('.', $normalized_referer), -2));
 
-    chatbot_chatgpt_widget_logging('$host: ' . $host);
-    chatbot_chatgpt_widget_logging('$normalized_referer: ' . $normalized_referer);
-    chatbot_chatgpt_widget_logging('$base_referer: ' . $base_referer);
+    chatbot_widget_logging('$host: ' . $host);
+    chatbot_widget_logging('$normalized_referer: ' . $normalized_referer);
+    chatbot_widget_logging('$base_referer: ' . $base_referer);
 
     $is_allowed = false;
 
@@ -116,12 +119,12 @@ if (empty($allowed_pairs)) {
             $base_domain = implode('.', array_slice(explode('.', $normalized_domain), -2));
 
             // Debugging: Log the normalized referer and domain for comparison
-            chatbot_chatgpt_widget_logging('Checking Pair', $base_referer, $base_domain);
+            chatbot_widget_logging('Checking Pair', $base_referer, $base_domain);
 
             if (!empty($base_domain) && $base_referer === $base_domain && $allowed_shortcode === $shortcode_param) {
                 $is_allowed = true;
                 // Log the valid referer and shortcode pair
-                chatbot_chatgpt_widget_logging('Allowed Pair', $referer, $shortcode_param);
+                chatbot_widget_logging('Allowed Pair', $referer, $shortcode_param);
                 break;
             }
         }
@@ -130,16 +133,16 @@ if (empty($allowed_pairs)) {
 
 if (!$is_allowed) {
     // Log the unauthorized access attempt
-    chatbot_chatgpt_widget_logging('Unauthorized Access', $referer, $shortcode_param);
+    chatbot_widget_logging('Unauthorized Access', $referer, $shortcode_param);
     die();
 }
 
 // Check if the sanitized shortcode exists in the list of registered shortcodes
 if (!array_key_exists($shortcode_param, $shortcode_tags)) {
-    chatbot_chatgpt_widget_logging('Invalid shortcode: ' . $shortcode_param, $referer, $request_ip);
+    chatbot_widget_logging('Invalid shortcode: ' . $shortcode_param, $referer, $request_ip);
     die();
 } else {
-    chatbot_chatgpt_widget_logging('Valid shortcode: ' . $shortcode_param, $referer, $request_ip);
+    chatbot_widget_logging('Valid shortcode: ' . $shortcode_param, $referer, $request_ip);
 }
 
 // Since we're confident that $shortcode_param is a valid registered shortcode,
@@ -200,8 +203,8 @@ $iframe_width = isset($_GET['width']) ? intval($_GET['width']) : 500;  // Defaul
 $iframe_height = isset($_GET['height']) ? intval($_GET['height']) : 600;  // Default to 600 if not set
 
 // Widget Sizing Controls
-$chatbot_chatgpt_widget_width = ($iframe_width - 20) . 'px';
-$chatbot_chatgpt_widget_height = ($iframe_height - 20) . 'px';
+$chatbot_widget_width = ($iframe_width - 20) . 'px';
+$chatbot_widget_height = ($iframe_height - 20) . 'px';
 
 // Output the HTML and necessary scripts
 ?>
@@ -215,16 +218,16 @@ $chatbot_chatgpt_widget_height = ($iframe_height - 20) . 'px';
             background: transparent !important;
         }
         .chatbot-wrapper {
-            width: <?php echo $chatbot_chatgpt_widget_width; ?>;
+            width: <?php echo $chatbot_widget_width; ?>;
             max-width: 1000px;
             margin: 0 auto;
-            height: <?php echo $chatbot_chatgpt_widget_height; ?>;
+            height: <?php echo $chatbot_widget_height; ?>;
             max-height: 1000px;
             overflow: hidden;
             position: fixed;
             bottom: 10px;
             right: 10px;
-            padding: 20px;
+            padding: 25px;
             background: transparent;
             z-index: 9999;
             }

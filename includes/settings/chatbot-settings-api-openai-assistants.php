@@ -29,6 +29,7 @@ function chatbot_chatgpt_assistant_settings_init() {
     // register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_use_custom_gpt_assistant_id'); // Ver 1.6.7 - REMOVED in Ver 2.0.5
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allow_file_uploads'); // Ver 1.7.6
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_display_custom_gpt_assistant_name'); // Ver 1.9.4
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_conversation_transcript_email'); // Ver 2.2.7
     register_setting('chatbot_chatgpt_custom_gpts', 'assistant_id'); // Ver 1.6.7
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_instructions'); // Ver 1.9.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_assistant_id_alternate'); // Alternate Assistant - Ver 1.7.2
@@ -39,7 +40,7 @@ function chatbot_chatgpt_assistant_settings_init() {
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_max_completion_tokens'); // Max Response Tokens - Ver 2.0.1
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_enable_remote_widget'); // Enable Remote Widget - Ver 2.1.3
     register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_allowed_remote_domains'); // Allowed Remote Domains - Ver 2.1.3
-    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_chatgpt_widget_logging'); // Widget Logging - Ver 2.1.3
+    register_setting('chatbot_chatgpt_custom_gpts', 'chatbot_widget_logging'); // Widget Logging - Ver 2.1.3
 
     // General Settings for Assistants
     add_settings_section(
@@ -72,6 +73,15 @@ function chatbot_chatgpt_assistant_settings_init() {
         'chatbot_chatgpt_display_custom_gpt_assistant_name',
         'Display GPT Assistant Name',
         'chatbot_chatgpt_use_gpt_assistant_name_callback',
+        'chatbot_chatgpt_gpt_assistants_settings',
+        'chatbot_chatgpt_custom_gpts_section'
+    );
+
+    // Conversation Transcript Email - Ver 2.2.7
+    add_settings_field(
+        'chatbot_chatgpt_conversation_transcript_email',
+        'Transcript Email',
+        'chatbot_chatgpt_conversation_transcript_email_callback',
         'chatbot_chatgpt_gpt_assistants_settings',
         'chatbot_chatgpt_custom_gpts_section'
     );
@@ -189,9 +199,9 @@ function chatbot_chatgpt_assistant_settings_init() {
 
     // Widget Logging - Ver 2.1.3
     add_settings_field(
-        'chatbot_chatgpt_widget_logging',
+        'chatbot_widget_logging',
         'Widget Logging',
-        'chatbot_chatgpt_widget_logging_callback',
+        'chatbot_widget_logging_callback',
         'chatbot_chatgpt_remote_widget_settings',
         'chatbot_chatgpt_remote_widget_settings_section'
     );
@@ -321,6 +331,15 @@ function chatbot_chatgpt_use_gpt_assistant_name_callback($args) {
     <?php
 }
 
+// Conversation Transcript Email field callback - Ver 2.2.7
+function chatbot_chatgpt_conversation_transcript_email_callback($args) {
+    $transcript_email = esc_attr(get_option('chatbot_chatgpt_conversation_transcript_email', ''));
+    ?>
+    <input type="email" id="chatbot_chatgpt_conversation_transcript_email" name="chatbot_chatgpt_conversation_transcript_email" value="<?php echo esc_attr( $transcript_email ); ?>" class="regular-text" placeholder="Enter email address for conversation transcripts">
+    <p class="description">Email address where conversation transcripts will be sent when an assistant response contains the string "[conversation_transcript]".</p>
+    <?php
+}
+
 // Set Assistant Beta Version - Ver 1.9.6
 function chatbot_chatgpt_assistant_beta_version_callback($args) {
     $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
@@ -405,10 +424,10 @@ function chatbot_chatgpt_allowed_remote_domains_callback($args) {
 }
 
 // Widget logging field callback - Ver 2.1.3
-function chatbot_chatgpt_widget_logging_callback($args) {
-    $widget_logging = esc_attr(get_option('chatbot_chatgpt_widget_logging', 'No'));
+function chatbot_widget_logging_callback($args) {
+    $widget_logging = esc_attr(get_option('chatbot_widget_logging', 'No'));
     ?>
-    <select id="chatbot_chatgpt_widget_logging" name="chatbot_chatgpt_widget_logging">
+    <select id="chatbot_widget_logging" name="chatbot_widget_logging">
         <option value="Yes" <?php selected( $widget_logging, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
         <option value="No" <?php selected( $widget_logging, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
     </select>
@@ -416,7 +435,7 @@ function chatbot_chatgpt_widget_logging_callback($args) {
 }
 
 // Manage Error Logs
-function chatbot_chatgpt_manage_widget_logs_section_callback() {
+function chatbot_manage_widget_logs_section_callback() {
 
     ?>
     <div>
@@ -426,6 +445,6 @@ function chatbot_chatgpt_manage_widget_logs_section_callback() {
     <?php
 
     // Call the capability tester
-    chatbot_chatgpt_manage_widget_logs();
+    chatbot_manage_widget_logs();
 
 }

@@ -97,6 +97,11 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Selection**: Choose `Yes` to display the assistant's name for a more personalized user experience.## Advanced Additional Settings
    - **Tip**: This is a global setting that will be overridden by assistant specific settings.
 
+3. **Transcript Email**:
+    - **Description**: Email address where conversation transcripts will be sent when an assistant response contains the string "[conversation_transcript]".
+    - **Input**: Enter a valid email address.
+    - **Usage**: When an assistant's response includes "[conversation_transcript]", the system will automatically send a formatted transcript of the conversation to this email address.
+
 ## Advanced Additional Settings
 
 ![Advanced Additional Settings](advanced-additional-settings.png)

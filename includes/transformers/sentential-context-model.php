@@ -77,7 +77,7 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
 
     $prompt = preprocess_text($prompt);
     // DIAG - Diagnostic - Ver 2.2.6
-    // back_trace('NOTICE', 'Prompt: ' . $prompt);
+    // back_trace( 'NOTICE', 'Prompt: ' . $prompt);
 
     $highest_score = 0;
     $best_match = "";
@@ -193,9 +193,9 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
                         $best_match .= $sentences[$i] . ' ';
                     }
 
-                    // back_trace('NOTICE', 'Score: ' . $highest_score);
-                    // back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
-                    // back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
+                    // back_trace( 'NOTICE', 'Score: ' . $highest_score);
+                    // back_trace( 'NOTICE', 'Adjacency Score: ' . $adjacency_score);
+                    // back_trace( 'NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
 
                 }
             }
@@ -272,7 +272,7 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
 
     // Preprocess the prompt.
     $prompt = preprocess_text($prompt);
-    // back_trace('NOTICE', 'Prompt: ' . $prompt);
+    // back_trace( 'NOTICE', 'Prompt: ' . $prompt);
 
     // Initialize variables.
     $highest_score = 0;
@@ -373,9 +373,9 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
                         $best_match .= $sentences[$i] . ' ';
                     }
     
-                    // back_trace('NOTICE', 'Score: ' . $highest_score);
-                    // back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
-                    // back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
+                    // back_trace( 'NOTICE', 'Score: ' . $highest_score);
+                    // back_trace( 'NOTICE', 'Adjacency Score: ' . $adjacency_score);
+                    // back_trace( 'NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
                 }
             }
         }
@@ -415,7 +415,7 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
     }
 
     $prompt = preprocess_text($prompt);
-    // back_trace('NOTICE', 'Prompt: ' . $prompt);
+    // back_trace( 'NOTICE', 'Prompt: ' . $prompt);
 
     // Reset variables
     $highest_score = 0;
@@ -569,7 +569,7 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
                     // Get store number of sentences around the matching sentence
                     $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 3));
                     // DIAG - Diagnostics
-                    // back_trace('NOTICE', 'Sentence Response Length: ' . $sentence_response_length);
+                    // back_trace( 'NOTICE', 'Sentence Response Length: ' . $sentence_response_length);
                     $start_index = max(0, $sentence_index - 1);
                     $end_index = min($sentence_count - 1, $sentence_index + $sentence_response_length - 1);
 
@@ -584,9 +584,9 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
                     }
 
                     // DIAG - Diagnostics
-                    // back_trace('NOTICE', 'Score: ' . $highest_score);
-                    // back_trace('NOTICE', 'Adjacency Score: ' . $adjacency_score);
-                    // back_trace('NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
+                    // back_trace( 'NOTICE', 'Score: ' . $highest_score);
+                    // back_trace( 'NOTICE', 'Adjacency Score: ' . $adjacency_score);
+                    // back_trace( 'NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
 
                 }
             }

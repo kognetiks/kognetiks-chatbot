@@ -129,7 +129,7 @@ function chatbot_call_azure_openai_api($api_key, $message) {
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
-    // back_trace('NOTICE', '$context_length: ' . $context_length);
+    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
     // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 100000; // Estimate at 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
@@ -142,9 +142,9 @@ function chatbot_call_azure_openai_api($api_key, $message) {
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        // back_trace('NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
+        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
-        // back_trace('NOTICE', 'Context length is within limits.');
+        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // DIAG Diagnostics - Ver 2.2.6
@@ -238,9 +238,9 @@ function chatbot_call_azure_openai_api($api_key, $message) {
 
     // Add the usage to the conversation tracker
     if ($response['response']['code'] == 200) {
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, $response_body["usage"]["prompt_tokens"]);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, $response_body["usage"]["completion_tokens"]);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, $response_body["usage"]["total_tokens"]);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $response_body["usage"]["prompt_tokens"]);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $response_body["usage"]["completion_tokens"]);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $response_body["usage"]["total_tokens"]);
     }
     
     if (!empty($response_body['choices'])) {
