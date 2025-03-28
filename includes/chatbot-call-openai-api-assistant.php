@@ -1431,6 +1431,8 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
                                     'Content-Type' => 'application/json',
                                     'X-Assistant-ID' => $assistant_id, // Added header for endpoint security
                                 ],
+                                // FIXME - REMOVE THIS FOR PRODUCTION
+                                'sslverify' => false,
                             ];
                             
                             // Add the query parameters
