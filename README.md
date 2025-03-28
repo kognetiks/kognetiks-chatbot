@@ -23,6 +23,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.2.7
 
+* **Conversation Transcript**: Added a new feature to send the conversation transcript to site admins when OpenAI Assistants are instructed to do so (see Support tab in Settings).
 * **Dashboard Widget**: Added a dashboard widget to display chatbot statistics and token usage in the WordPress admin dashboard.
 * **Custom Post Types**: Added support for custom post types to the Knowledge Navigator.
 * **Performance Improvements**: Minimized unnecessary calls to the database to improve performance.
@@ -192,7 +193,7 @@ With the Kognetiks Chatbot installed, you're now equipped to offer a more dynami
 
 **How do I obtain an API key for the API?**
 
-To obtain an API key, sign up for an account at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), or [Anthropic API Keys](https://www.anthropic.com/). Once registered, you may create your API key(s).
+To obtain an API key, sign up for an account at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), [Anthropic API Keys](https://www.anthropic.com/) or [DeepSeek API Keys](https://platform.deepseek.com/sign_in). Once registered, you may create your API key(s).
 
 **Can I customize the appearance of the chatbot?**
 
@@ -210,18 +211,15 @@ The plugin supports the gpt-3.5-turbo, gpt-4, gpt-4-1106-preview models from Ope
 
 The plugin now supports the latest OpenAI model **gpt-4-turbo (i.e., 'gpt-4-1106-preview')** featuring improved instruction following based on training data up to April 2023.  New models will be added as the become available.
 
-**More FAQs**
-
-You can find more frequently asked questions at [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
-
 ## API Key Safety and Security
 
 Your API key serves as the confidential password providing access to your OpenAI account and the resources associated with it. If this key falls into the wrong hands, it can be misused in a variety of detrimental ways, including unauthorized usage, potential data leaks, and the improper application of AI models. It's crucial, therefore, to implement the following protective measures:
 
 1. Secure key storage: Ensure your API keys are stored in a safe and secure manner.
-2. Monitor and review usage: Frequently scrutinize and evaluate the usage of your API key. OpenAI provides handy usage data and records that can assist in detecting unusual activity. For insightful usage statistics, visit [https://platform.openai.com/account/usage](https://platform.openai.com/account/usage).
-3. Establish usage limits: Initially, implement a low hard limit to ensure that if the limit is reached at any point during the month, any further requests will be denied. You can set up both hard and soft limits at [https://platform.openai.com/account/billing/limits](https://platform.openai.com/account/billing/limits).
-4. Regular key rotation: Frequently changing your API keys can reduce the risk of misuse. If you observe any unexpected activity, it's important to immediately revoke your API keys. As a preventative measure, you might want to regularly revoke them to avert misuse. Manage your API keys at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys).
+2. Monitor and review usage: Frequently scrutinize and evaluate the usage of your API key.
+3. Establish usage limits: Initially, implement a low hard limit to ensure that if the limit is reached at any point during the month, any further requests will be denied.
+4. Regular key rotation: Frequently changing your API keys can reduce the risk of misuse. If you observe any unexpected activity, it's important to immediately revoke your API keys.
+5. As a preventative measure, you might want to regularly revoke them to avert misuse.
 
 Remember, wielding AI power requires immense responsibility — it's incumbent upon us all to ensure its careful and secure use.
 
@@ -233,8 +231,6 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 ## Support
 
 💬 Looking for **plugin support**, please visit [https://kognetiks.com/plugin-support/](https://kognetiks.com/plugin-support/).
-
-📜 For **frequently asked questions**, please visit [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
 
 ## Disclaimer
 

@@ -150,7 +150,7 @@ Embark on a journey to elevate your website's interactivity with the Chatbot plu
 3. **API Key Configuration**
    - After activation, head to 'Settings > General' in your dashboard.
    - Choose the AI Platform you wish to use (OpenAI, NVIDIA, Anthropic or DeepSeek).
-   - Obtain an API key from [OpenAI API Keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), or [Anthropic API Keys](https://www.anthropic.com/).
+   - Obtain an API key from [OpenAI API Keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), [Anthropic API Keys](https://www.anthropic.com/) or [DeepSeek API Keys](https://platform.deepseek.com/sign_in).
 
 4. **Customizing Your Chatbot**
    - In the same settings area, tailor the chatbot's appearance and functionality to match your site's style and your specific needs.
@@ -174,15 +174,15 @@ Embark on a journey to elevate your website's interactivity with the Chatbot plu
 
 Please visit [https://kognetiks.com/plugin-support/](https://kognetiks.com/plugin-support/).
 
-For **frequently asked questions**, please visit [https://kognetiks.com/wordpress-plugins/frequently-asked-questions/](https://kognetiks.com/wordpress-plugins/frequently-asked-questions/).
-
 **How do I get an API key?**
 
-Sign up at [OpenAI API Keys]((https://platform.openai.com/account/api-keys)), [NVIDIA API Keys](https://developer.nvidia.com/nim), or [Anthropic API Keys](https://www.anthropic.com/) to obtain your API key. This key is necessary to use the plugin.
+Sign up at [OpenAI API Keys]((https://platform.openai.com/account/api-keys)), [NVIDIA API Keys](https://developer.nvidia.com/nim), [Anthropic API Keys](https://www.anthropic.com/) or [DeepSeek API Keys](https://platform.deepseek.com/sign_in) to obtain your API key. This key is necessary to use the plugin.
+
+If you are using the JAN.AI local server, see [JAN.AI](https://jan.ai/) for more information and an API key may not be required for open-source models.
 
 **Can I customize the chatbot's appearance?**
 
-Yes, the chatbot’s appearance can be fully customized through CSS or via the plugin’s settings page. You can also personalize the chatbot’s name, greetings, and even choose from different avatars.
+Yes, the chatbot’s appearance can be fully customized through CSS or via the plugin’s settings page. You can also personalize the chatbot’s name, greetings, and even choose from different avatars or supply your own avatar image.
 
 **Does the chatbot support multiple languages?**
 
@@ -190,7 +190,7 @@ Yes, the Kognetiks Chatbot supports multiple languages, allowing you to cater to
 
 **What models does the plugin support?**
 
-The plugin supports OpenAI’s latest models, including the GPT series for text, DALL-E for image generation, and TTS for speech. For a detailed list, check the plugin settings or visit OpenAI's Model Overview.
+The plugin supports AI API access to leading AI platforms, including OpenAI, Azure, Anthropic, DeepSeek and local AI server like JAN.AI.
 
 == Your Journey Towards an Interactive Website Begins! ==
 
@@ -229,8 +229,9 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Azure and 
 
 == Changelog ==
 
-= 2.2.7 - Released TBD =
+= 2.2.7 - Released 2025-03-28 =
 
+* **Conversation Transcript**: Added a new feature to send the conversation transcript to site admins when OpenAI Assistants are instructed to do so (see Support tab in Settings).
 * **Dashboard Widget**: Added a dashboard widget to display chatbot statistics and token usage in the WordPress admin dashboard.
 * **Custom Post Types**: Added support for custom post types to the Knowledge Navigator.
 * **Performance Improvements**: Minimized unnecessary calls to the database to improve performance.
