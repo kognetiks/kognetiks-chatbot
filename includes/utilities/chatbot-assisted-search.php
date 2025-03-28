@@ -76,13 +76,13 @@ function assistant_permission_callback( $request ) {
     
     if ( ! $exists ) {
         // DIAG - Diagnostics - Ver 2.2.7
-        back_trace( 'ERROR', 'Invalid Assistant ID: ' . $assistant_id);
+        // back_trace( 'ERROR', 'Invalid Assistant ID: ' . $assistant_id);
         // return new WP_Error( 'invalid_assistant_id', __('Invalid Assistant ID'), array( 'status' => 403 ) );
         return new WP_Error( 'unauthorized', __('Unauthorized'), array( 'status' => 403 ) );
     }
     
     // DIAG - Diagnostics - Ver 2.2.7
-    back_trace( 'NOTICE', 'Assistant ID is valid: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'Assistant ID is valid: ' . $assistant_id);
 
     return true;
 }
@@ -91,10 +91,10 @@ function assistant_permission_callback( $request ) {
 function chatbot_assistant_search_handler($request) {
 
     // DIAG - Diagnostics - Ver 2.2.7
-    back_trace( 'NOTICE', '====== SEARCH REQUEST RECEIVED ======');
-    back_trace( 'NOTICE', 'Request parameters: ' . print_r($request->get_params(), true));
-    back_trace( 'NOTICE', 'Request URL: ' . $request->get_route());
-    back_trace( 'NOTICE', 'Request method: ' . $request->get_method());
+    // back_trace( 'NOTICE', '====== SEARCH REQUEST RECEIVED ======');
+    // back_trace( 'NOTICE', 'Request parameters: ' . print_r($request->get_params(), true));
+    // back_trace( 'NOTICE', 'Request URL: ' . $request->get_route());
+    // back_trace( 'NOTICE', 'Request method: ' . $request->get_method());
     
     global $wpdb;
 
@@ -107,12 +107,12 @@ function chatbot_assistant_search_handler($request) {
         $per_page = (int) $request->get_param('per_page');
 
         // DIAG - Diagnostics - Ver 2.2.7
-        back_trace( 'NOTICE', 'Validated parameters:');
-        back_trace( 'NOTICE', '- Endpoint: ' . $endpoint);
-        back_trace( 'NOTICE', '- Query: ' . $query);
-        back_trace( 'NOTICE', '- Include Excerpt: ' . ($include_excerpt ? 'true' : 'false'));
-        back_trace( 'NOTICE', '- Page: ' . $page);
-        back_trace( 'NOTICE', '- Per Page: ' . $per_page);
+        // back_trace( 'NOTICE', 'Validated parameters:');
+        // back_trace( 'NOTICE', '- Endpoint: ' . $endpoint);
+        // back_trace( 'NOTICE', '- Query: ' . $query);
+        // back_trace( 'NOTICE', '- Include Excerpt: ' . ($include_excerpt ? 'true' : 'false'));
+        // back_trace( 'NOTICE', '- Page: ' . $page);
+        // back_trace( 'NOTICE', '- Per Page: ' . $per_page);
 
         // Use WP_Query to search posts or pages
         $args = [
@@ -125,13 +125,13 @@ function chatbot_assistant_search_handler($request) {
         ];
 
         // DIAG - Diagnostics - Ver 2.2.7
-        back_trace( 'NOTICE', 'WP_Query arguments: ' . print_r($args, true));
+        // back_trace( 'NOTICE', 'WP_Query arguments: ' . print_r($args, true));
 
         $query = new WP_Query($args);
 
         if (is_wp_error($query)) {
             // DIAG - Diagnostics - Ver 2.2.7
-            back_trace( 'ERROR', 'WP_Query error: ' . $query->get_error_message());
+            // back_trace( 'ERROR', 'WP_Query error: ' . $query->get_error_message());
             return new WP_Error('query_error', $query->get_error_message(), ['status' => 500]);
         }
 
@@ -170,15 +170,15 @@ function chatbot_assistant_search_handler($request) {
         }
 
         // DIAG - Diagnostics - Ver 2.2.7
-        back_trace( 'NOTICE', 'Search completed successfully');
-        back_trace( 'NOTICE', 'Results count: ' . count($results));
+        // back_trace( 'NOTICE', 'Search completed successfully');
+        // back_trace( 'NOTICE', 'Results count: ' . count($results));
         return new WP_REST_Response($response, 200);
 
     } catch (Exception $e) {
 
         // DIAG - Diagnostics - Ver 2.2.7
-        back_trace( 'ERROR', 'Exception caught: ' . $e->getMessage());
-        back_trace( 'ERROR', 'Stack trace: ' . $e->getTraceAsString());
+        // back_trace( 'ERROR', 'Exception caught: ' . $e->getMessage());
+        // back_trace( 'ERROR', 'Stack trace: ' . $e->getTraceAsString());
         return new WP_Error('search_error', $e->getMessage(), ['status' => 500]);
 
     }
