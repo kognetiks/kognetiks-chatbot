@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.2.7
+ * Version:     2.2.8
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -30,7 +30,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.2.7';
+$chatbot_chatgpt_plugin_version = '2.2.8';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -704,7 +704,7 @@ add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
 
 // Activation, deactivation, and uninstall functions
 register_activation_hook(__FILE__, 'chatbot_chatgpt_activate');
-register_activation_hook(__FILE__, 'create_chatbot_chatbot_assistants_table');
+register_activation_hook(__FILE__, 'create_chatbot_chatgpt_assistants_table');
 register_activation_hook(__FILE__, 'create_chatbot_azure_assistants_table');
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_deactivate');
 register_uninstall_hook(__FILE__, 'chatbot_chatgpt_uninstall');
