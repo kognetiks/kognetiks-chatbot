@@ -704,7 +704,7 @@ add_action('admin_enqueue_scripts', 'chatbot_chatgpt_enqueue_admin_scripts');
 
 // Activation, deactivation, and uninstall functions
 register_activation_hook(__FILE__, 'chatbot_chatgpt_activate');
-register_activation_hook(__FILE__, 'create_chatbot_chatbot_assistants_table');
+register_activation_hook(__FILE__, 'create_chatbot_chatgpt_assistants_table');
 register_activation_hook(__FILE__, 'create_chatbot_azure_assistants_table');
 register_deactivation_hook(__FILE__, 'chatbot_chatgpt_deactivate');
 register_uninstall_hook(__FILE__, 'chatbot_chatgpt_uninstall');
