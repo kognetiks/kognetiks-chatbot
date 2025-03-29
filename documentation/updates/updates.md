@@ -1,5 +1,9 @@
 # Past Update
 
+## What's new in Version 2.2.8
+
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.7.
+
 ## What's new in Version 2.2.7
 
 * **Conversation Transcript**: Added a new feature to send the conversation transcript to site admins when OpenAI Assistants are instructed to do so (see Support tab in Settings).
