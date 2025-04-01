@@ -114,10 +114,41 @@ function chatbot_assistant_search_handler($request) {
         // back_trace( 'NOTICE', '- Page: ' . $page);
         // back_trace( 'NOTICE', '- Per Page: ' . $per_page);
 
+        // Get all registered public post types
+        $registered_types = get_post_types(['public' => true], 'objects');
+
+        // Initialize post_types array
+        $post_types = [];
+
+        // First, process registered types
+        foreach ($registered_types as $type) {
+            $plural_type = $type->name === 'reference' ? 'references' : $type->name . 's';
+            $option_name = 'chatbot_chatgpt_kn_include_' . $plural_type;
+            if (esc_attr(get_option($option_name, 'No')) === 'Yes') {
+                $post_types[] = $type->name;
+            }
+        }
+
+        // Then, process any additional types found in the database
+        $db_post_types = $wpdb->get_col("SELECT DISTINCT post_type FROM {$wpdb->posts}");
+
+        foreach ($db_post_types as $type) {
+            if (!in_array($type, $post_types)) { // Only process if not already included
+                $plural_type = $type === 'reference' ? 'references' : $type . 's';
+                $option_name = 'chatbot_chatgpt_kn_include_' . $plural_type;
+                if (esc_attr(get_option($option_name, 'No')) === 'Yes') {
+                    $post_types[] = $type;
+                }
+            }
+        }
+
+        // DIAG - Diagnostics - Ver 2.2.8
+        back_trace('NOTICE', 'Post types: ' . print_r($post_types, true));
+        
         // Use WP_Query to search posts or pages
         $args = [
             's' => $query,
-            'post_type' => ['post', 'page'],
+            'post_type' => $post_types,
             'posts_per_page' => $per_page,
             'paged' => $page,
             'orderby' => 'relevance',
