@@ -591,7 +591,7 @@ switch ($chatbot_ai_platform_choice) {
         // Model choice - Ver 2.2.0
         if (esc_attr(get_option('chatbot_local_model_choice')) === null) {
             $model = 'llama3.2-3b-instruct';
-            update_option('chatbot_transformer_model_choice', $model);
+            update_option('chatbot_local_model_choice', $model);
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
         } elseif (empty($model)) {
@@ -1572,7 +1572,19 @@ function chatbot_chatgpt_send_message() {
         }
         
         // DIAG - Diagnostics
-        // back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
+        // back_trace( 'NOTICE', '$message: ' . $message);
+        // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+
+        // Defensive programming - Ver 2.2.9
+        if (is_array($response)) {
+            if (isset($response['response'])) {
+                // Likely nested from a mistake — pull the actual content out
+                $response = $response['response'];
+            } else {
+                // Fallback: flatten it all into a string just to be safe
+                $response = print_r($response, true);
+            }
+        }
         
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
@@ -1593,7 +1605,7 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
         // DIAG - Diagnostics - Ver 2.0.5
-        // back_trace( 'NOTICE', '$response: ' . $response);
+        // back_trace( 'NOTICE', 'LINE 1596 - $response: ' . print_r($response, true));
 
         // FIXME - Append extra message - Ver 2.1.1.1.1
         // Danger Will Robinson! Danger!
@@ -1601,7 +1613,7 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', '$response: ' . $response);
+        back_trace('NOTICE', 'LINE 1604 - $response: ' . print_r($response, true));
 
         // Return response
         wp_send_json_success($response);

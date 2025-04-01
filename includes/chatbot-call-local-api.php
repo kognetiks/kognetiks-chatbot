@@ -90,6 +90,106 @@ function chatbot_chatgpt_call_local_model_api($message) {
     $context = esc_attr(get_option('chatbot_local_conversation_context', 'You are a versatile, friendly, and helpful assistant that responds using Markdown syntax.'));
     $timeout = intval(get_option('chatbot_local_timeout_setting', 360));
 
+
+    // Conversation Context - Ver 1.6.1
+    $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
+ 
+    // Context History - Ver 1.6.1
+    $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
+    // DIAG Diagnostics - Ver 1.6.1
+    // Back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
+    
+    // IDEA Strip any href links and text from the $chatgpt_last_response
+    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
+
+    // IDEA Strip any $learningMessages from the $chatgpt_last_response
+    if (get_locale() !== "en_US") {
+        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
+    } else {
+        $localized_learningMessages = $learningMessages;
+    }
+    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
+
+    // IDEA Strip any $errorResponses from the $chatgpt_last_response
+    if (get_locale() !== "en_US") {
+        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+    } else {
+        $localized_errorResponses = $errorResponses;
+    }
+    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+
+    // DIAG Diagnostics - Ver 2.2.9
+    // Back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
+    
+    // Knowledge Navigator keyword append for context
+    $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', 'Yes'));
+
+    $sys_message = 'We previously have been talking about the following things: ';
+
+    // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4
+    $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
+
+    if ($use_enhanced_content_search == 'Yes') {
+
+        $search_results = chatbot_chatgpt_content_search($message);
+        If ( !empty ($search_results) ) {
+            // Extract relevant content from search results array
+            $content_texts = [];
+            foreach ($search_results['results'] as $result) {
+                if (!empty($result['excerpt'])) {
+                    $content_texts[] = $result['excerpt'];
+                }
+            }
+            // Join the content texts and append to context
+            if (!empty($content_texts)) {
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+            }
+        }
+        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
+      // Back_trace( 'NOTICE', '$context: ' . $context);
+
+    } else {
+
+        // Original Context Instructions - No Enhanced Context
+        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+
+    }
+
+    // Conversation Continuity - Ver 2.1.8
+    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
+
+    // DIAG Diagnostics - Ver 2.1.8
+    // Back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // Back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
+
+    if ($chatbot_chatgpt_conversation_continuation == 'On') {
+        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
+        $context = $conversation_history . ' ' . $context;
+    }
+
+    // Check the length of the context and truncate if necessary - Ver 2.2.6
+    $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
+    // Back_trace( 'NOTICE', '$context_length: ' . $context_length);
+    // FIXME - Define max context length (adjust based on model requirements)
+    $max_context_length = 100000; // Estimate at 65536 characters ≈ 16384 tokens
+    if ($context_length > $max_context_length) {
+        // Truncate to the max length
+        $truncated_context = substr($context, 0, $max_context_length);
+        // Ensure truncation happens at the last complete word
+        $truncated_context = preg_replace('/\s+[^\s]*$/', '', $truncated_context);
+        // Fallback if regex fails (e.g., no spaces in the string)
+        if (empty($truncated_context)) {
+            $truncated_context = substr($context, 0, $max_context_length);
+        }
+        $context = $truncated_context;
+        // Back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
+    } else {
+        // Back_trace( 'NOTICE', 'Context length is within limits.');
+    }
+
+    // DIAG Diagnostics - Ver 2.1.8
+    // Back_trace( 'NOTICE', '$context: ' . $context);
+
     // Construct request body to match the expected schema
     $body = array(
         'model' => $model,

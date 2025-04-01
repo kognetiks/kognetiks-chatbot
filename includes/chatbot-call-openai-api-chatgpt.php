@@ -96,14 +96,22 @@ function chatbot_chatgpt_call_api($api_key, $message) {
 
     if ($use_enhanced_content_search == 'Yes') {
 
-        // $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
-        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_assistant_search_handler($message);
+        $search_results = chatbot_chatgpt_content_search($message);
         If ( !empty ($search_results) ) {
-            // Append the transformer context to the prompt
-            $context = $search_results;
+            // Extract relevant content from search results array
+            $content_texts = [];
+            foreach ($search_results['results'] as $result) {
+                if (!empty($result['excerpt'])) {
+                    $content_texts[] = $result['excerpt'];
+                }
+            }
+            // Join the content texts and append to context
+            if (!empty($content_texts)) {
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+            }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        // back_trace( 'NOTICE', '$context: ' . $context);
+        back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 

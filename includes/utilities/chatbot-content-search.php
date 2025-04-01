@@ -12,8 +12,126 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Search
-function chatbot_chatgpt_content_search( $search_prompt ) {
+// Handle the assistant search request
+function chatbot_chatgpt_content_search($search_prompt) {
+    back_trace('NOTICE', 'chatbot_chatgpt_content_search');
+    back_trace('NOTICE', '====== SEARCH REQUEST RECEIVED ======');
+    back_trace('NOTICE', 'Request parameters: ' . $search_prompt);
+
+    global $wpdb;
+
+    // Settings
+    $include_excerpt = true;
+    $page = 1;
+    $per_page = 5;
+    $offset = ($page - 1) * $per_page;
+
+    back_trace('NOTICE', '- Include Excerpt: ' . ($include_excerpt ? 'true' : 'false'));
+    back_trace('NOTICE', '- Page: ' . $page);
+    back_trace('NOTICE', '- Per Page: ' . $per_page);
+
+    // Get all registered public post types
+    $registered_types = get_post_types(['public' => true], 'objects');
+    $post_types = [];
+
+    foreach ($registered_types as $type) {
+        $plural_type = $type->name === 'reference' ? 'references' : $type->name . 's';
+        $option_name = 'chatbot_chatgpt_kn_include_' . $plural_type;
+        if (esc_attr(get_option($option_name, 'No')) === 'Yes') {
+            $post_types[] = $type->name;
+        }
+    }
+
+    // Add any extra post types from DB
+    $db_post_types = $wpdb->get_col("SELECT DISTINCT post_type FROM {$wpdb->posts}");
+    foreach ($db_post_types as $type) {
+        if (!in_array($type, $post_types)) {
+            $plural_type = $type === 'reference' ? 'references' : $type . 's';
+            $option_name = 'chatbot_chatgpt_kn_include_' . $plural_type;
+            if (esc_attr(get_option($option_name, 'No')) === 'Yes') {
+                $post_types[] = $type;
+            }
+        }
+    }
+
+    // Escape and build IN clause
+    $in_clause = implode(',', array_map(fn($type) => "'" . esc_sql($type) . "'", $post_types));
+    $search_term = '%' . $wpdb->esc_like($search_prompt) . '%';
+
+    // Use manually interpolated query for dev debug ONLY
+    $raw_query = "
+        SELECT ID, post_title, post_content, post_excerpt, post_author, post_date, guid 
+        FROM {$wpdb->posts} 
+        WHERE post_type IN ($in_clause)
+        AND post_status = 'publish'
+        AND (post_title LIKE '$search_term' OR post_content LIKE '$search_term')
+        ORDER BY post_date DESC
+        LIMIT $per_page OFFSET $offset
+    ";
+
+    back_trace('NOTICE', 'RAW SQL (DEV ONLY): ' . $raw_query);
+
+    // Use raw query for testing — safe because $in_clause and $search_term are escaped
+    $results = $wpdb->get_results($raw_query);
+
+    back_trace('NOTICE', 'Actual result count: ' . count($results));
+
+    if (!$results) {
+        back_trace('NOTICE', 'No results found or query error');
+        return [
+            'success' => true,
+            'total_posts' => 0,
+            'total_pages' => 0,
+            'current_page' => $page,
+            'results' => [],
+            'message' => 'No results found.'
+        ];
+    }
+
+    $formatted_results = [];
+    foreach ($results as $post) {
+        $formatted_results[] = [
+            'ID' => $post->ID,
+            'title' => $post->post_title,
+            'url' => $post->guid,
+            'date' => $post->post_date,
+            'author' => get_the_author_meta('display_name', $post->post_author),
+            'excerpt' => $include_excerpt ? strip_tags($post->post_content) : null
+        ];
+    }
+
+    // Count query
+    $count_query = "
+        SELECT COUNT(*) 
+        FROM {$wpdb->posts} 
+        WHERE post_type IN ($in_clause)
+        AND post_status = 'publish'
+        AND (post_title LIKE '$search_term' OR post_content LIKE '$search_term')
+    ";
+
+    $total_posts = (int) $wpdb->get_var($count_query);
+
+    $response = [
+        'success' => true,
+        'total_posts' => $total_posts,
+        'total_pages' => ceil($total_posts / $per_page),
+        'current_page' => $page,
+        'results' => $formatted_results,
+    ];
+
+    if (empty($formatted_results)) {
+        $response['message'] = 'No results found.';
+    }
+
+    back_trace('NOTICE', 'Search completed successfully');
+    back_trace('NOTICE', 'Results count: ' . count($formatted_results));
+
+    return $response;
+}
+
+
+// Search - Deprecated - Ver 2.2.9 - 2025-04-01
+function chatbot_chatgpt_content_search_deprecated( $search_prompt ) {
 
     // DIAG - Diagnostic - Ver 2.2.4
     // back_trace( 'NOTICE', 'chatbot_chatgpt_content_search' );

@@ -824,11 +824,10 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     if ($use_enhanced_content_search == 'Yes') {
 
-        // $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
-        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_assistant_search_handler($message);
+        $search_results = chatbot_chatgpt_content_search($message);
         if ( !empty ($search_results) ) {
             // Append the transformer context to the prompt
-            $prompt = $prompt . ' ' . $search_results;
+            $prompt = $prompt . ' When answering the prompt, please consider the following information: ' . $search_results;
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
         // back_trace( 'NOTICE', '$prompt: ' . $prompt);

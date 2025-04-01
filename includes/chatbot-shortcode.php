@@ -85,37 +85,43 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // BELT & SUSPENDERS - Ver 1.9.4 - Updated Ver 2.1.8 - 2024 10 26
     if (esc_attr(get_option('chatbot_nvidia_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'NVIDIA chatbot is enabled');
+        back_trace( 'NOTICE', 'NVIDIA chatbot is enabled');
         $model_choice = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_nvidia_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_anthropic_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'Anthropic chatbot is enabled');
+        back_trace( 'NOTICE', 'Anthropic chatbot is enabled');
         $model_choice = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_anthropic_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_deepseek_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'DeepSeek chatbot is enabled');
+        back_trace( 'NOTICE', 'DeepSeek chatbot is enabled');
         $model_choice = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_deepseek_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
+        back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
         $model_choice = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_markov_chain_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_transformer_model_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.2.0
-        // back_trace( 'NOTICE', 'Transformer chatbot is enabled');
+        back_trace( 'NOTICE', 'Transformer chatbot is enabled');
         $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_transformer_model_voice_option', 'none'));
+    } elseif (esc_attr(get_option('chatbot_local_api_enabled', 'No')) == 'Yes') {
+        // DIAG - Diagnostics - Ver 2.2.0
+        back_trace( 'NOTICE', 'Local API chatbot is enabled');
+        $model_choice = esc_attr(get_option('chatbot_local_model_choice', ''));
+        $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
+        $voice_choice = esc_attr(get_option('chatbot_local_voice_option', 'none'));
     } else {
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', 'OpenAI chatbot is enabled');
+        back_trace( 'NOTICE', 'OpenAI chatbot is enabled');
         $model_choice = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));    
@@ -697,7 +703,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if ($chatbot_ai_platform_choice == 'OpenAI'){
         $use_assistant_name = esc_attr(get_option('chatbot_chatgpt_display_custom_gpt_assistant_name', 'Yes'));
     } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI'){
-        $use_assistant_name = esc_attr(get_option('chatbot_azure_display_custom_gpt_assistant_name', 'Yes'));  
+        $use_assistant_name = esc_attr(get_option('chatbot_azure_display_custom_gpt_assistant_name', 'Yes'));
+    } elseif ($chatbot_ai_platform_choice == 'Claude'){
     } else {
         $use_assistant_name = 'No';
     }
@@ -1081,15 +1088,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         </script>
         <!-- REMOVED FOR EMBEDDED -->
         <?php
-        if ( $use_assistant_name == 'Yes' ) {
+        // if ( $use_assistant_name == 'Yes' ) {
+        //     echo '<div id="chatbot-chatgpt-header-embedded">';
+        //     echo '<div id="chatbot-chatgpt-title" class="title">' . strip_tags($bot_name) . '</div>';
+        //     echo '</div>';
+        // } else {
             echo '<div id="chatbot-chatgpt-header-embedded">';
             echo '<div id="chatbot-chatgpt-title" class="title">' . strip_tags($bot_name) . '</div>';
             echo '</div>';
-        } else {
-            echo '<div id="chatbot-chatgpt-header-embedded">';
-            // DO NOTHING
-            echo '</div>';
-        }
+        // }
         ?>
         <div id="chatbot-chatgpt-conversation"></div>
         <div id="chatbot-chatgpt-input">
