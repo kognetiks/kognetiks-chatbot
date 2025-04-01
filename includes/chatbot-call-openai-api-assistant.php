@@ -960,7 +960,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     if ($use_enhanced_content_search == 'Yes') {
 
-        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
+        // $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
+        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_assistant_search_handler($message);
         If ( !empty ($search_results) ) {
             // Append the transformer context to the prompt
             $prompt = $prompt . ' ' . $search_results;

@@ -143,7 +143,7 @@ function chatbot_assistant_search_handler($request) {
         }
 
         // DIAG - Diagnostics - Ver 2.2.8
-        back_trace('NOTICE', 'Post types: ' . print_r($post_types, true));
+        // back_trace('NOTICE', 'Post types: ' . print_r($post_types, true));
         
         // Use WP_Query to search posts or pages
         $args = [

@@ -101,7 +101,8 @@ function chatbot_call_deepseek_api($api_key, $message) {
 
     if ($use_enhanced_content_search == 'Yes') {
 
-        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
+        // $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
+        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_assistant_search_handler($message);
         If ( !empty ($search_results) ) {
             // Append the transformer context to the prompt
             $context = $search_results;

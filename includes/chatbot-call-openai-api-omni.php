@@ -99,20 +99,39 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
     // DIAG Diagnostics - Ver 1.9.6
     // back_trace( 'NOTICE', '$use_enhanced_content_search: ' . $use_enhanced_content_search);
 
+    // REPLACED WITH chatbot_assistant_search_handler() - Ver 2.2.9 - 2025-04-01
+    // if ($use_enhanced_content_search == 'Yes') {
+
+    //     // DIAG Diagnostics - Ver 1.9.6
+    //     // back_trace( 'NOTICE', '$enhancedContext: ' . $enhancedContext);
+
+    //     // Focus the content based on the message from the user
+    //     $enhancedContext = kn_enhance_context($message);
+
+    //     // Addt Context Instructions
+    //     $contextInstructions = ' Use this information to help guide your response. ';
+    //     $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+
+    //     // DIAG Diagnostics - Ver 1.9.6
+    //     // back_trace( 'NOTICE', '$chatbot_chatgpt_kn_conversation_context: ' . $chatbot_chatgpt_kn_conversation_context);
+
+    // } else {
+
+    //     // Original Context Instructions - No Enhanced Context
+    //     $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+
+    // }
+
     if ($use_enhanced_content_search == 'Yes') {
 
-        // DIAG Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', '$enhancedContext: ' . $enhancedContext);
-
-        // Focus the content based on the message from the user
-        $enhancedContext = kn_enhance_context($message);
-
-        // Addt Context Instructions
-        $contextInstructions = ' Use this information to help guide your response. ';
-        $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // DIAG Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', '$chatbot_chatgpt_kn_conversation_context: ' . $chatbot_chatgpt_kn_conversation_context);
+        // $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
+        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_assistant_search_handler($message);
+        If ( !empty ($search_results) ) {
+            // Append the transformer context to the prompt
+            $context = $search_results;
+        }
+        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
+        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -120,7 +139,6 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     }
-
     
     // Conversation Continuity - Ver 2.1.8
     $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
