@@ -293,8 +293,13 @@ function get_searchable_post_types() {
 // Helper function to prepare search terms
 function prepare_search_terms($search_prompt) {
 
-    // Use the global stop words array
     global $stopWords;
+    
+    // Ensure globals are loaded
+    if (!isset($stopWords)) {
+        // Load the globals if not already loaded
+        require_once(plugin_dir_path(__FILE__) . '../chatbot-globals.php');
+    }
     
     // Convert to lowercase
     $search_prompt = strtolower($search_prompt);
@@ -317,13 +322,17 @@ function prepare_search_terms($search_prompt) {
     back_trace('NOTICE', 'Final search terms: ' . implode(', ', $terms));
     
     return $terms;
-
 }
 
 // Helper function to get the object of a search prompt
 function get_object_of_search_prompt($search_prompt) {
-
     global $stopWords;
+    
+    // Ensure globals are loaded
+    if (!isset($stopWords)) {
+        // Load the globals if not already loaded
+        require_once(plugin_dir_path(__FILE__) . '../chatbot-globals.php');
+    }
     
     // Convert to lowercase for consistent matching
     $prompt = strtolower(trim($search_prompt));
@@ -415,9 +424,10 @@ function get_object_of_search_prompt($search_prompt) {
         $words = explode(' ', $prompt);
         
         // Remove common stop words, prepositions, and filter verbs
-        $words = array_filter($words, function($word) use ($prepositions, $filter_verbs) {
-            // $stop_words = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to'];
-            return !in_array($word, array_merge($stop_words, $prepositions, $filter_verbs));
+        $words = array_filter($words, function($word) use ($stopWords, $prepositions, $filter_verbs) {
+            return !in_array($word, $stopWords) && 
+                   !in_array($word, $prepositions) && 
+                   !in_array($word, $filter_verbs);
         });
         
         // Take the remaining words as the object
@@ -632,6 +642,12 @@ function chatbot_chatgpt_content_search_deprecated( $search_prompt ) {
 
     global $wpdb;
     global $stopWords;
+    
+    // Ensure globals are loaded
+    if (!isset($stopWords)) {
+        // Load the globals if not already loaded
+        require_once(plugin_dir_path(__FILE__) . '../chatbot-globals.php');
+    }
 
     // Empty prompt - shouldn't happen
     if ( ! isset( $search_prompt ) ) {
