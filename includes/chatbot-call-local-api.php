@@ -49,7 +49,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
     // https://jan.ai/docs/quickstart
 
     // The current DeepSeek API URL endpoint for deepseek-chat
-    // $api_url = 'https://127.0.0.1:1337/chat/completions';
+    // $api_url = 'https://127.0.0.1:1337/v1/chat/completions';
     $api_url = get_chat_completions_api_url();
 
     // DIAG - Diagnostics - Ver 2.2.2

@@ -65,7 +65,7 @@ function chatbot_local_chat_model_choice_callback($args) {
 
     // Remove the models not owned by Local
     // $models = array_filter($models, function($model) {
-    //     return $model['owned_by'] === 'anthropic';
+    //     return $model['owned_by'] === 'local';
     // });
 
     // Check for errors
