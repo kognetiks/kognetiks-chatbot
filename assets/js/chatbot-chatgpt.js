@@ -466,7 +466,7 @@ jQuery(document).ready(function ($) {
         let chatEl = document.getElementById('chatbot-chatgpt');
     
         if (!chatEl) {
-            console.warn('Chatbot: WARNING: Chatbot element not found.');
+            // console.warn('Chatbot: WARNING: Chatbot element not found.');
             return;
         }
     
@@ -1401,7 +1401,7 @@ jQuery(document).ready(function ($) {
         if (hasDisallowedFile) {
             return;
         }
-        console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
+        // console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_files');
         formData.append('user_id', user_id); // Add user_id to FormData
         formData.append('page_id', page_id); // Add page_id to FormData
@@ -1436,7 +1436,7 @@ jQuery(document).ready(function ($) {
             },
             complete: function (response) {
                 removeTypingIndicator();
-                console.log('Chatbot: NOTICE: Response from server', response);
+                // console.log('Chatbot: NOTICE: Response from server', response);
                 if (response) {
                     // appendMessage(response, 'bot');
                     // Append custom JS to the bot's response - Ver 2.0.9
