@@ -107,7 +107,7 @@ function chatbot_call_deepseek_api($api_key, $message) {
             $context = ' When answering the prompt, please consider the following information: ' . $search_results;
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        back_trace( 'NOTICE', '$context: ' . $context);
+        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 

@@ -111,7 +111,7 @@ function chatbot_chatgpt_call_api($api_key, $message) {
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        back_trace( 'NOTICE', '$context: ' . $context);
+        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 

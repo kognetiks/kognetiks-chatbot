@@ -16,15 +16,15 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_content_search($search_prompt) {
 
     // DIAG - Diagnostic - Ver 2.2.9
-    back_trace('NOTICE', 'chatbot_chatgpt_content_search');
-    back_trace('NOTICE', '====== SEARCH REQUEST RECEIVED ======');
-    back_trace('NOTICE', 'Request parameters: ' . $search_prompt);
+    // back_trace('NOTICE', 'chatbot_chatgpt_content_search');
+    // back_trace('NOTICE', '====== SEARCH REQUEST RECEIVED ======');
+    // back_trace('NOTICE', 'Request parameters: ' . $search_prompt);
 
     global $wpdb;
 
     // Let's find the object of the $search_prompt
     $object = get_object_of_search_prompt($search_prompt);
-    back_trace('NOTICE', 'Object: ' . $object);
+    // back_trace('NOTICE', 'Object: ' . $object);
 
     // Settings
     $include_excerpt = true;
@@ -36,24 +36,24 @@ function chatbot_chatgpt_content_search($search_prompt) {
     $post_types = get_searchable_post_types();
 
     // DIAG - Diagnostic - Ver 2.2.9
-    back_trace('NOTICE', 'Searchable post types: ' . implode(', ', $post_types));
+    // back_trace('NOTICE', 'Searchable post types: ' . implode(', ', $post_types));
 
     // Clean and prepare search terms from the object instead of original prompt
     $search_terms = prepare_search_terms($object);
 
     // Is $search_terms an array?
     if (!is_array($search_terms)) {
-        back_trace('ERROR', 'Search terms are not an array');
+        // back_trace('ERROR', 'Search terms are not an array');
     } else {
-        back_trace('NOTICE', 'Search terms are an array');
+        // back_trace('NOTICE', 'Search terms are an array');
     }
 
     // DIAG - Diagnostic - Ver 2.2.9
-    back_trace('NOTICE', 'Prepared search terms: ' . implode(', ', $search_terms));
+    // back_trace('NOTICE', 'Prepared search terms: ' . implode(', ', $search_terms));
 
     // How many search terms?
     $num_terms = count($search_terms);
-    back_trace('NOTICE', 'Number of search terms: ' . $num_terms);
+    // back_trace('NOTICE', 'Number of search terms: ' . $num_terms);
 
     // Build search conditions
     $search_conditions = [];
@@ -79,9 +79,9 @@ function chatbot_chatgpt_content_search($search_prompt) {
         ];
     }
 
-    back_trace('NOTICE', '===========================');
-    back_trace('NOTICE', 'Build the main query - AND');
-    back_trace('NOTICE', '===========================');
+    // back_trace('NOTICE', '===========================');
+    // back_trace('NOTICE', 'Build the main query - AND');
+    // back_trace('NOTICE', '===========================');
 
     // Escape and build IN clause for post types
     $in_clause = implode(',', array_map(fn($type) => "'" . esc_sql($type) . "'", $post_types));
@@ -103,7 +103,7 @@ function chatbot_chatgpt_content_search($search_prompt) {
 
     // DIAG - Diagnostic - Ver 2.2.9
     // back_trace('NOTICE', 'Query template: ' . $query);
-    back_trace('NOTICE', 'Placeholders: ' . print_r($placeholders, true));
+    // back_trace('NOTICE', 'Placeholders: ' . print_r($placeholders, true));
 
     try {
         // Prepare and execute the query
@@ -114,12 +114,12 @@ function chatbot_chatgpt_content_search($search_prompt) {
         $results = $wpdb->get_results($prepared_query);
         
         if ($wpdb->last_error) {
-            back_trace('ERROR', 'Database error: ' . $wpdb->last_error);
+            // back_trace('ERROR', 'Database error: ' . $wpdb->last_error);
         }   
         
     } catch (Exception $e) {
         // DIAG - Diagnostic - Ver 2.2.9
-        back_trace('ERROR', 'Exception in query preparation: ' . $e->getMessage());
+        // back_trace('ERROR', 'Exception in query preparation: ' . $e->getMessage());
         return [
             'success' => false,
             'message' => 'Search query failed.',
@@ -129,11 +129,11 @@ function chatbot_chatgpt_content_search($search_prompt) {
     }
 
     // DIAG - Diagnostic - Ver 2.2.9
-    back_trace('NOTICE', 'Actual result count: ' . count($results));
+    // back_trace('NOTICE', 'Actual result count: ' . count($results));
 
     if (!$results) {
         // DIAG - Diagnostic - Ver 2.2.9
-        back_trace('NOTICE', 'No results found or query error');
+        // back_trace('NOTICE', 'No results found or query error');
     } else {
         $formatted_results = [];
         foreach ($results as $post) {
@@ -146,8 +146,8 @@ function chatbot_chatgpt_content_search($search_prompt) {
                 'excerpt' => $include_excerpt ? strip_tags($post->post_content) : null
             ];
             // DIAG - Diagnostic - Ver 2.2.9
-            back_trace('NOTICE', 'URL: ' . $post->guid );
-            back_trace('NOTICE', ' - Title: ' . $post->post_title);
+            // back_trace('NOTICE', 'URL: ' . $post->guid );
+            // back_trace('NOTICE', ' - Title: ' . $post->post_title);
         }
 
         return [
@@ -159,9 +159,9 @@ function chatbot_chatgpt_content_search($search_prompt) {
         ];
     }
 
-    back_trace('NOTICE', '===========================');
-    back_trace('NOTICE', 'Build the main query - OR');
-    back_trace('NOTICE', '===========================');
+    // back_trace('NOTICE', '===========================');
+    // back_trace('NOTICE', 'Build the main query - OR');
+    // back_trace('NOTICE', '===========================');
 
     // Escape and build IN clause for post types
     $in_clause = implode(',', array_map(fn($type) => "'" . esc_sql($type) . "'", $post_types));
@@ -183,7 +183,7 @@ function chatbot_chatgpt_content_search($search_prompt) {
 
     // DIAG - Diagnostic - Ver 2.2.9
     // back_trace('NOTICE', 'Query template: ' . $query);
-    back_trace('NOTICE', 'Placeholders: ' . print_r($placeholders, true));
+    // back_trace('NOTICE', 'Placeholders: ' . print_r($placeholders, true));
 
     try {
         // Prepare and execute the query
@@ -194,12 +194,12 @@ function chatbot_chatgpt_content_search($search_prompt) {
         $results = $wpdb->get_results($prepared_query);
         
         if ($wpdb->last_error) {
-            back_trace('ERROR', 'Database error: ' . $wpdb->last_error);
+            // back_trace('ERROR', 'Database error: ' . $wpdb->last_error);
         }   
         
     } catch (Exception $e) {
         // DIAG - Diagnostic - Ver 2.2.9
-        back_trace('ERROR', 'Exception in query preparation: ' . $e->getMessage());
+        // back_trace('ERROR', 'Exception in query preparation: ' . $e->getMessage());
         return [
             'success' => false,
             'message' => 'Search query failed.',
@@ -209,11 +209,11 @@ function chatbot_chatgpt_content_search($search_prompt) {
     }
 
     // DIAG - Diagnostic - Ver 2.2.9
-    back_trace('NOTICE', 'Actual result count: ' . count($results));
+    // back_trace('NOTICE', 'Actual result count: ' . count($results));
 
     if (!$results) {
         // DIAG - Diagnostic - Ver 2.2.9
-        back_trace('NOTICE', 'No results found or query error');
+        // back_trace('NOTICE', 'No results found or query error');
     } else {
         $formatted_results = [];
         foreach ($results as $post) {
@@ -226,8 +226,8 @@ function chatbot_chatgpt_content_search($search_prompt) {
                 'excerpt' => $include_excerpt ? strip_tags($post->post_content) : null
             ];
             // DIAG - Diagnostic - Ver 2.2.9
-            back_trace('NOTICE', 'URL: ' . $post->guid );
-            back_trace('NOTICE', ' - Title: ' . $post->post_title);
+            // back_trace('NOTICE', 'URL: ' . $post->guid );
+            // back_trace('NOTICE', ' - Title: ' . $post->post_title);
         }
 
         return [
@@ -284,7 +284,7 @@ function get_searchable_post_types() {
     }
 
     // DIAG - Diagnostic - Ver 2.2.9
-    back_trace('NOTICE', 'Searchable post types: ' . implode(', ', $post_types));
+    // back_trace('NOTICE', 'Searchable post types: ' . implode(', ', $post_types));
 
     return $post_types;
     
@@ -319,7 +319,7 @@ function prepare_search_terms($search_prompt) {
     $terms = array_values(array_unique($words));
     
     // DIAG - Diagnostic - Ver 2.2.9
-    back_trace('NOTICE', 'Final search terms: ' . implode(', ', $terms));
+    // back_trace('NOTICE', 'Final search terms: ' . implode(', ', $terms));
     
     return $terms;
 }
@@ -443,8 +443,8 @@ function get_object_of_search_prompt($search_prompt) {
     }
 
     // DIAG - Diagnostic
-    back_trace('NOTICE', 'Original prompt: ' . $prompt);
-    back_trace('NOTICE', 'Extracted object: ' . $object);
+    // back_trace('NOTICE', 'Original prompt: ' . $prompt);
+    // back_trace('NOTICE', 'Extracted object: ' . $object);
 
     return $object;
 }
