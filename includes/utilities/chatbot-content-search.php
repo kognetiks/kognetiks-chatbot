@@ -23,7 +23,7 @@ function chatbot_chatgpt_content_search($search_prompt) {
     global $wpdb;
 
     // Let's find the object of the $search_prompt
-    $object = get_object_of_search_prompt($search_prompt);
+    $object = chatbot_chatgpt_get_object_of_search_prompt($search_prompt);
     // back_trace('NOTICE', 'Object: ' . $object);
 
     // Settings
@@ -33,13 +33,13 @@ function chatbot_chatgpt_content_search($search_prompt) {
     $offset = ($page - 1) * $per_page;
 
     // Get post types to search
-    $post_types = get_searchable_post_types();
+    $post_types = chatbot_chatgpt_get_searchable_post_types();
 
     // DIAG - Diagnostic - Ver 2.2.9
     // back_trace('NOTICE', 'Searchable post types: ' . implode(', ', $post_types));
 
     // Clean and prepare search terms from the object instead of original prompt
-    $search_terms = prepare_search_terms($object);
+    $search_terms = chatbot_chatgpt_prepare_search_terms($object);
 
     // Is $search_terms an array?
     if (!is_array($search_terms)) {
@@ -255,7 +255,7 @@ function chatbot_chatgpt_content_search($search_prompt) {
 }
 
 // Helper function to get searchable post types
-function get_searchable_post_types() {
+function chatbot_chatgpt_get_searchable_post_types() {
 
     global $wpdb;
 
@@ -291,7 +291,7 @@ function get_searchable_post_types() {
 }
 
 // Helper function to prepare search terms
-function prepare_search_terms($search_prompt) {
+function chatbot_chatgpt_prepare_search_terms($search_prompt) {
 
     global $stopWords;
     
@@ -325,7 +325,7 @@ function prepare_search_terms($search_prompt) {
 }
 
 // Helper function to get the object of a search prompt
-function get_object_of_search_prompt($search_prompt) {
+function chatbot_chatgpt_get_object_of_search_prompt($search_prompt) {
     global $stopWords;
     
     // Ensure globals are loaded

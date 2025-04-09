@@ -108,13 +108,13 @@ function chatbot_assistant_search_handler($request) {
         $offset = ($page - 1) * $per_page;
 
         // Get the object of the search query
-        $object = get_object_of_search_prompt($query);
+        $object = chatbot_chatgpt_get_object_of_search_prompt($query);
         
         // Prepare search terms
-        $search_terms = prepare_search_terms($object);
+        $search_terms = chatbot_chatgpt_prepare_search_terms($object);
 
         // Get post types to search
-        $post_types = get_searchable_post_types();
+        $post_types = chatbot_chatgpt_get_searchable_post_types();
 
         // Build search conditions
         $search_conditions = [];
