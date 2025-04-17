@@ -219,7 +219,7 @@ global $voice;
 $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
 // DIAG - Diagnostics
-// back_trace( 'NOTICE', 'AI Platform: ' . $chatbot_ai_platform_choice);
+// ( 'NOTICE', 'AI Platform: ' . $chatbot_ai_platform_choice);
 
 switch ($chatbot_ai_platform_choice) {
 
@@ -792,10 +792,12 @@ function chatbot_chatgpt_enqueue_scripts() {
         // back_trace( 'NOTICE', 'User is logged in');
         $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
         $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
+        $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
     } else {
         // back_trace( 'NOTICE', 'User is NOT logged in');
         $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
         $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
+        $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
     }
 
     // Localize the data for the chatbot - Ver 2.1.1.1

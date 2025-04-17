@@ -30,12 +30,12 @@ function chatbot_call_anthropic_api($api_key, $message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
-  // Back_trace( 'NOTICE', 'chatbot_call_anthropic_api()');
-  // Back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-  // Back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-  // Back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-  // Back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-  // Back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+  // back_trace( 'NOTICE', 'chatbot_call_anthropic_api()');
+  // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+  // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+  // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+  // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+  // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Anthropic.com API Documentation
     // https://docs.anthropic.com/en/api/messages
@@ -61,8 +61,8 @@ function chatbot_call_anthropic_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // Back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
-    // Back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
+    // back_trace( 'NOTICE', '$model: ' . $model);
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_anthropic_max_tokens_setting', '1024')));
@@ -73,7 +73,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
     // DIAG Diagnostics - Ver 1.6.1
-    // Back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
+    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
     
     // IDEA Strip any href links and text from the $chatgpt_last_response
     $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
@@ -95,7 +95,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
     $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
 
     // DIAG Diagnostics - Ver 2.2.9
-    // Back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
+    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', 'Yes'));
@@ -122,7 +122,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-      // Back_trace( 'NOTICE', '$context: ' . $context);
+        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -135,8 +135,8 @@ function chatbot_call_anthropic_api($api_key, $message) {
     $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
 
     // DIAG Diagnostics - Ver 2.1.8
-    // Back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // Back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
 
     if ($chatbot_chatgpt_conversation_continuation == 'On') {
         $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
@@ -145,7 +145,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
-    // Back_trace( 'NOTICE', '$context_length: ' . $context_length);
+    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
     // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 100000; // Estimate at 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
@@ -158,13 +158,13 @@ function chatbot_call_anthropic_api($api_key, $message) {
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        // Back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
+        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
-        // Back_trace( 'NOTICE', 'Context length is within limits.');
+        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // DIAG Diagnostics - Ver 2.1.8
-    // Back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$context: ' . $context);
 
     // Build the Anthropic API request body
 
@@ -181,7 +181,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
     // Conversation Context - Ver 1.6.1
     $additional_instructions = esc_attr(get_option('chatbot_anthropic_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
     // DIAG Diagnostics - Ver 2.2.6
-    // Back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
 
     // Revise prompt to include the context, i.e., system instructions
     $prompt = $additional_instructions . ' ' . $context . ' Human: ' . $message . ' Assistant: ';
@@ -200,7 +200,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
     ));
 
     // DIAG Diagnostics - Ver 2.2.6
-    // Back_trace( 'NOTICE', '$body: ' . print_r($body, true));
+    // back_trace( 'NOTICE', '$body: ' . print_r($body, true));
 
     $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
 
@@ -212,8 +212,8 @@ function chatbot_call_anthropic_api($api_key, $message) {
 
     // DIAG Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
-    // Back_trace( 'NOTICE', '$context: ' . $context);
-    // Back_trace( 'NOTICE', '$message: ' . $message);  
+    // back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$message: ' . $message);  
 
     // API Call
     $response = wp_remote_post($api_url, array(
@@ -248,7 +248,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // Back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -264,14 +264,14 @@ function chatbot_call_anthropic_api($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // Back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    // Back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    // Back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    // Back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    // Back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
+    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // Add the usage to the conversation tracker
-    // Back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens
     $input_tokens = $response_body['usage']['input_tokens'] ?? 0;

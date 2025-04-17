@@ -916,6 +916,22 @@ jQuery(document).ready(function ($) {
                 }
                 // markdownToHtml - Ver 1.9.2
                 // console.log('Chatbot: NOTICE: botResponse: ' + botResponse);
+
+                // Retrieve the current message count and message limit
+                // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_message_count: ' + localStorage.getItem('chatbot_chatgpt_display_message_count'));
+                // console.log('Chatbot: NOTICE: chatbot_chatgpt_message_count: ' + localStorage.getItem('chatbot_chatgpt_message_count'));
+                // console.log('Chatbot: NOTICE: chatbot_chatgpt_message_limit_setting: ' + localStorage.getItem('chatbot_chatgpt_message_limit_setting'));
+                // console.log('Chatbot: NOTICE: chatbot_chatgpt_visitor_message_limit_setting: ' + localStorage.getItem('chatbot_chatgpt_message_visitor_limit_setting'));
+
+                if (localStorage.getItem('chatbot_chatgpt_display_message_count') === 'Yes') {
+                    let messageCount = localStorage.getItem('chatbot_chatgpt_message_count') || 0;
+                    let messageLimit = localStorage.getItem('chatbot_chatgpt_message_limit_setting') || 999;
+                    let chatbot_chatgpt_visitor_message_limit_setting = localStorage.getItem('chatbot_chatgpt_message_visitor_limit_setting') || 999;
+
+                    // Append the message count and limit to the message
+                    let messageInfo = ` (${messageCount} / ${messageLimit})`;
+                    botResponse += messageInfo;
+                }
                 botResponse = markdownToHtml(botResponse);
             },
             error: function (jqXHR, status, error) {

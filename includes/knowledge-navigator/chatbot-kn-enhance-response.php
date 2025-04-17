@@ -223,7 +223,7 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
 
     // DIAG - Diagnostics - Ver 2.2.1
     // foreach ($results as $result) {
-    //     back_trace( 'NOTICE', 'Final result: PID=' . $result['pid'] . ', URL=' . $result['url'] . ', Title=' . $result['title'] . ', Score=' . $result['score'] . ', Word Matches=' . $result['word_match_count']);
+    //     // back_trace( 'NOTICE', 'Final result: PID=' . $result['pid'] . ', URL=' . $result['url'] . ', Title=' . $result['title'] . ', Score=' . $result['score'] . ', Word Matches=' . $result['word_match_count']);
     // }
 
     // Convert results to indexed array

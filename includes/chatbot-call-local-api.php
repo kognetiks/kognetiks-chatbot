@@ -97,7 +97,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
     // DIAG Diagnostics - Ver 1.6.1
-    // Back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
+    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
     
     // IDEA Strip any href links and text from the $chatgpt_last_response
     $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
@@ -119,7 +119,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
     $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
 
     // DIAG Diagnostics - Ver 2.2.9
-    // Back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
+    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', 'Yes'));
@@ -146,7 +146,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-      // Back_trace( 'NOTICE', '$context: ' . $context);
+      // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -159,8 +159,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
     $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
 
     // DIAG Diagnostics - Ver 2.1.8
-    // Back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // Back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
 
     if ($chatbot_chatgpt_conversation_continuation == 'On') {
         $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
@@ -169,7 +169,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
-    // Back_trace( 'NOTICE', '$context_length: ' . $context_length);
+    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
     // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 100000; // Estimate at 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
@@ -182,13 +182,13 @@ function chatbot_chatgpt_call_local_model_api($message) {
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        // Back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
+        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
-        // Back_trace( 'NOTICE', 'Context length is within limits.');
+        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // DIAG Diagnostics - Ver 2.1.8
-    // Back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$context: ' . $context);
 
     // Construct request body to match the expected schema
     $body = array(

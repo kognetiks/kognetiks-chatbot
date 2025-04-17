@@ -9,6 +9,7 @@ jQuery(document).ready(function ($) {
         const includeKeys = [
             'chatbot_chatgpt_last_reset',
             'chatbot_chatgpt_message_count',
+            'chatbot_chatgpt_display_message_count',
             'chatbot_chatgpt_message_limit_setting',
             'chatbot_chatgpt_message_limit_period_setting',
             'chatbot_chatgpt_start_status',
