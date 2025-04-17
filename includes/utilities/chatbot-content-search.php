@@ -12,63 +12,20 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Handle the assistant search request
 function chatbot_chatgpt_content_search($search_prompt) {
-
-    // DIAG - Diagnostic - Ver 2.2.9
-    // back_trace('NOTICE', 'chatbot_chatgpt_content_search');
-    // back_trace('NOTICE', '====== SEARCH REQUEST RECEIVED ======');
-    // back_trace('NOTICE', 'Request parameters: ' . $search_prompt);
-
     global $wpdb;
 
-    // Let's find the object of the $search_prompt
     $object = chatbot_chatgpt_get_object_of_search_prompt($search_prompt);
-    // back_trace('NOTICE', 'Object: ' . $object);
 
-    // Settings
     $include_excerpt = true;
     $page = 1;
     $per_page = 5;
     $offset = ($page - 1) * $per_page;
 
-    // Get post types to search
     $post_types = chatbot_chatgpt_get_searchable_post_types();
-
-    // DIAG - Diagnostic - Ver 2.2.9
-    // back_trace('NOTICE', 'Searchable post types: ' . implode(', ', $post_types));
-
-    // Clean and prepare search terms from the object instead of original prompt
     $search_terms = chatbot_chatgpt_prepare_search_terms($object);
 
-    // Is $search_terms an array?
-    if (!is_array($search_terms)) {
-        // back_trace('ERROR', 'Search terms are not an array');
-    } else {
-        // back_trace('NOTICE', 'Search terms are an array');
-    }
-
-    // DIAG - Diagnostic - Ver 2.2.9
-    // back_trace('NOTICE', 'Prepared search terms: ' . implode(', ', $search_terms));
-
-    // How many search terms?
-    $num_terms = count($search_terms);
-    // back_trace('NOTICE', 'Number of search terms: ' . $num_terms);
-
-    // Build search conditions
-    $search_conditions = [];
-    $placeholders = [];
-
-    // Add search conditions for each term
-    foreach ($search_terms as $term) {
-        $like_term = '%' . $wpdb->esc_like($term) . '%';
-        $search_conditions[] = "(post_title LIKE %s OR post_content LIKE %s)";
-        $placeholders[] = $like_term;  // For post_title
-        $placeholders[] = $like_term;  // For post_content
-    }
-
-    // If no search conditions, return empty result
-    if (empty($search_conditions)) {
+    if (!is_array($search_terms) || empty($search_terms)) {
         return [
             'success' => true,
             'total_posts' => 0,
@@ -79,169 +36,73 @@ function chatbot_chatgpt_content_search($search_prompt) {
         ];
     }
 
-    // back_trace('NOTICE', '===========================');
-    // back_trace('NOTICE', 'Build the main query - AND');
-    // back_trace('NOTICE', '===========================');
+    $search_conditions = [];
+    $search_values = [];
 
-    // Escape and build IN clause for post types
+    foreach ($search_terms as $term) {
+        $like_term = '%' . $wpdb->esc_like($term) . '%';
+        $search_conditions[] = "(post_title LIKE %s OR post_content LIKE %s)";
+        $search_values[] = $like_term;
+        $search_values[] = $like_term;
+    }
+
     $in_clause = implode(',', array_map(fn($type) => "'" . esc_sql($type) . "'", $post_types));
 
-    // Build the main query - Try first with AND
-    $query = "
+    // === TRY: AND query ===
+    $and_query = "
         SELECT ID, post_title, post_content, post_excerpt, post_author, post_date, guid
-        FROM {$wpdb->posts} 
+        FROM {$wpdb->posts}
         WHERE post_type IN ($in_clause)
         AND post_status = 'publish'
-        AND (". implode(' AND ', $search_conditions) .")
+        AND (" . implode(' AND ', $search_conditions) . ")
         ORDER BY post_date DESC
         LIMIT %d OFFSET %d
     ";
 
-    // Add the LIMIT parameters
-    $placeholders[] = $per_page;
-    $placeholders[] = $offset;
-
-    // DIAG - Diagnostic - Ver 2.2.9
-    // back_trace('NOTICE', 'Query template: ' . $query);
-    // back_trace('NOTICE', 'Placeholders: ' . print_r($placeholders, true));
+    $and_placeholders = array_merge($search_values, [$per_page, $offset]);
 
     try {
-        // Prepare and execute the query
-        $prepared_query = $wpdb->prepare($query, ...$placeholders);
-        // DIAG - Diagnostic - Ver 2.2.9
-        // back_trace('NOTICE', 'RAW SQL (DEV ONLY): ' . $prepared_query);
-        
+        $prepared_query = $wpdb->prepare($and_query, ...$and_placeholders);
         $results = $wpdb->get_results($prepared_query);
-        
-        if ($wpdb->last_error) {
-            // back_trace('ERROR', 'Database error: ' . $wpdb->last_error);
-        }   
-        
     } catch (Exception $e) {
-        // DIAG - Diagnostic - Ver 2.2.9
-        // back_trace('ERROR', 'Exception in query preparation: ' . $e->getMessage());
         return [
             'success' => false,
             'message' => 'Search query failed.',
             'error' => $e->getMessage()
         ];
-
     }
 
-    // DIAG - Diagnostic - Ver 2.2.9
-    // back_trace('NOTICE', 'Actual result count: ' . count($results));
-
-    if (!$results) {
-        // DIAG - Diagnostic - Ver 2.2.9
-        // back_trace('NOTICE', 'No results found or query error');
-    } else {
-        $formatted_results = [];
-        foreach ($results as $post) {
-            $formatted_results[] = [
-                'ID' => $post->ID,
-                'title' => $post->post_title,
-                'url' => $post->guid,
-                'date' => $post->post_date,
-                'author' => get_the_author_meta('display_name', $post->post_author),
-                'excerpt' => $include_excerpt ? strip_tags($post->post_content) : null
-            ];
-            // DIAG - Diagnostic - Ver 2.2.9
-            // back_trace('NOTICE', 'URL: ' . $post->guid );
-            // back_trace('NOTICE', ' - Title: ' . $post->post_title);
-        }
-
-        return [
-            'success' => true,
-            'total_posts' => count($formatted_results),
-            'total_pages' => ceil(count($formatted_results) / $per_page),
-            'current_page' => $page,
-            'results' => $formatted_results
-        ];
+    if (!empty($results)) {
+        return chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page);
     }
 
-    // back_trace('NOTICE', '===========================');
-    // back_trace('NOTICE', 'Build the main query - OR');
-    // back_trace('NOTICE', '===========================');
-
-    // Escape and build IN clause for post types
-    $in_clause = implode(',', array_map(fn($type) => "'" . esc_sql($type) . "'", $post_types));
-
-    // Build the main query - Try first with AND
-    $query = "
+    // === FALLBACK: OR query ===
+    $or_query = "
         SELECT ID, post_title, post_content, post_excerpt, post_author, post_date, guid
-        FROM {$wpdb->posts} 
+        FROM {$wpdb->posts}
         WHERE post_type IN ($in_clause)
         AND post_status = 'publish'
-        AND (". implode(' OR ', $search_conditions) .")
+        AND (" . implode(' OR ', $search_conditions) . ")
         ORDER BY post_date DESC
         LIMIT %d OFFSET %d
     ";
 
-    // Add the LIMIT parameters
-    $placeholders[] = $per_page;
-    $placeholders[] = $offset;
-
-    // DIAG - Diagnostic - Ver 2.2.9
-    // back_trace('NOTICE', 'Query template: ' . $query);
-    // back_trace('NOTICE', 'Placeholders: ' . print_r($placeholders, true));
+    $or_placeholders = array_merge($search_values, [$per_page, $offset]);
 
     try {
-        // Prepare and execute the query
-        $prepared_query = $wpdb->prepare($query, ...$placeholders);
-        // DIAG - Diagnostic - Ver 2.2.9
-        // back_trace('NOTICE', 'RAW SQL (DEV ONLY): ' . $prepared_query);
-        
+        $prepared_query = $wpdb->prepare($or_query, ...$or_placeholders);
         $results = $wpdb->get_results($prepared_query);
-        
-        if ($wpdb->last_error) {
-            // back_trace('ERROR', 'Database error: ' . $wpdb->last_error);
-        }   
-        
     } catch (Exception $e) {
-        // DIAG - Diagnostic - Ver 2.2.9
-        // back_trace('ERROR', 'Exception in query preparation: ' . $e->getMessage());
         return [
             'success' => false,
             'message' => 'Search query failed.',
             'error' => $e->getMessage()
         ];
-
     }
 
-    // DIAG - Diagnostic - Ver 2.2.9
-    // back_trace('NOTICE', 'Actual result count: ' . count($results));
-
-    if (!$results) {
-        // DIAG - Diagnostic - Ver 2.2.9
-        // back_trace('NOTICE', 'No results found or query error');
-    } else {
-        $formatted_results = [];
-        foreach ($results as $post) {
-            $formatted_results[] = [
-                'ID' => $post->ID,
-                'title' => $post->post_title,
-                'url' => $post->guid,
-                'date' => $post->post_date,
-                'author' => get_the_author_meta('display_name', $post->post_author),
-                'excerpt' => $include_excerpt ? strip_tags($post->post_content) : null
-            ];
-            // DIAG - Diagnostic - Ver 2.2.9
-            // back_trace('NOTICE', 'URL: ' . $post->guid );
-            // back_trace('NOTICE', ' - Title: ' . $post->post_title);
-        }
-
-        return [
-            'success' => true,
-            'total_posts' => count($formatted_results),
-            'total_pages' => ceil(count($formatted_results) / $per_page),
-            'current_page' => $page,
-            'results' => $formatted_results
-        ];
+    if (!empty($results)) {
+        return chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page);
     }
-
-    // ===================================================================================
-    // No results found
-    // ===================================================================================
 
     return [
         'success' => true,
@@ -251,7 +112,27 @@ function chatbot_chatgpt_content_search($search_prompt) {
         'results' => [],
         'message' => 'No results found.'
     ];
+}
 
+function chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page) {
+    $formatted_results = array_map(function ($post) use ($include_excerpt) {
+        return [
+            'ID' => $post->ID,
+            'title' => $post->post_title,
+            'url' => $post->guid,
+            'date' => $post->post_date,
+            'author' => get_the_author_meta('display_name', $post->post_author),
+            'excerpt' => $include_excerpt ? strip_tags($post->post_content) : null
+        ];
+    }, $results);
+
+    return [
+        'success' => true,
+        'total_posts' => count($formatted_results),
+        'total_pages' => ceil(count($formatted_results) / $per_page),
+        'current_page' => $page,
+        'results' => $formatted_results
+    ];
 }
 
 // Helper function to get searchable post types

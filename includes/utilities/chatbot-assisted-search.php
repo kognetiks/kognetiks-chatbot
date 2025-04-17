@@ -70,6 +70,7 @@ function assistant_permission_callback( $request ) {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
     
     // Check if the assistant ID exists in the table
+
     $exists = $wpdb->get_var( 
         $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE assistant_id = %s", $assistant_id)
     );
@@ -160,6 +161,7 @@ function chatbot_assistant_search_handler($request) {
 
         try {
             // Prepare and execute the query
+
             $prepared_query = $wpdb->prepare($query, ...$placeholders);
             $results = $wpdb->get_results($prepared_query);
             

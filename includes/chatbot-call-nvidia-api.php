@@ -100,6 +100,10 @@ function chatbot_nvidia_call_api($api_key, $message) {
     if ($use_enhanced_content_search == 'Yes') {
 
         $search_results = chatbot_chatgpt_content_search($message);
+        // Check if $search_results is an array and convert it to a string
+        if (is_array($search_results)) {
+            $search_results = implode(', ', $search_results); // Convert array to a comma-separated string
+        }
         If ( !empty ($search_results) ) {
             // Append the transformer context to the prompt
             $context = ' When answering the prompt, please consider the following information: ' . $search_results;
