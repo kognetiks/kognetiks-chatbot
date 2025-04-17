@@ -39,6 +39,11 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ![Message Limit Settings](message-limit-settings.png)
 
+1. **Display Message Count**:
+   - **Description**: This setting determines if the message count is displayed in the chatbot's response, such as `(29/50)`, i.e., 29 prompts out of 50 limited, to help visitors and logged-in users understand how many exchanges they have had with the chatbot.
+   - **Default Value**: The default value is `No`, i.e., don't display the count.
+   - **Selection**: Choose `Yes` to display the message count.  Or choose `No` to exclude the message count from the response.
+
 1. **User Message Limit per Period**:
    - **Description**: This setting limits the number of messages logged-in users can send to the chatbot per day. It helps manage API usage and costs.
    - **Default Value**: The default limit is set to 999 messages per day.

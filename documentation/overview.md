@@ -42,6 +42,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.2.9
 
+* **Display Message Count**: Added a setting to display the message count in the chatbot's response, such as `(29/50)`, i.e., 29 prompts out of 50 limited, to help visitors and logged-in users understand how many exchanges they have had with the chatbot.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.8.
 
 ## Past Updates
