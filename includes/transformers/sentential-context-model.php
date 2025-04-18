@@ -696,7 +696,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
 
     // DIAG - Diagnostic - Ver 2.2.1 - Print the words and scores
     // for ($i = 0; $i < count($results); $i++) {
-    //     back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
+    //     // back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
     // }
 
     // Ensure results meet the limit
@@ -717,7 +717,7 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
 
     // DIAG - Diagnostic - Ver 2.2.1 - Print the words and scores
     // for ($i = 0; $i < count($results); $i++) {
-    //     back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
+    //     // back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
     // }
 
     // Define the window size

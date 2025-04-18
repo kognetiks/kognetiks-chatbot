@@ -2,8 +2,8 @@
 Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
-Tested up to: 6.7.2
-Stable tag: 2.2.8
+Tested up to: 6.8
+Stable tag: 2.2.9
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -228,6 +228,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Azure and 
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.2.9 - Released 2025-04-18 =
+
+* **Display Message Count**: Added a setting to display the message count in the chatbot's response, such as `(29/50)`, i.e., 29 prompts out of 50 limited, to help visitors and logged-in users understand how many exchanges they have had with the chatbot.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.8.
 
 = 2.2.8 - Released 2025-03-29 =
 

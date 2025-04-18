@@ -105,6 +105,17 @@ function chatbot_chatgpt_greetings_section_callback($args) {
 
 }
 
+// Display Message Count - Ver 2.2.4
+function chatbot_chatgpt_display_message_count_callback($args) {
+    $chatbot_chatgpt_display_message_count = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
+    ?>
+    <select id="chatbot_chatgpt_display_message_count" name="chatbot_chatgpt_display_message_count">
+        <option value="Yes" <?php selected( $chatbot_chatgpt_display_message_count, 'Yes' ); ?>><?php echo esc_html( 'Yes' ); ?></option>
+        <option value="No" <?php selected( $chatbot_chatgpt_display_message_count, 'No' ); ?>><?php echo esc_html( 'No' ); ?></option>
+    </select>
+    <?php
+}
+
 // Logged-in User Message Limit - Ver 1.9.6
 function chatbot_chatgpt_user_message_limit_setting_callback($args) {
     // Get the saved chatbot_chatgpt_user_message_limit_setting value or default to 999
@@ -364,6 +375,7 @@ function chatbot_chatgpt_settings_setup_init() {
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_audience_choice');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_input_rows');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_speech_recognition');
+    register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_display_message_count');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_user_message_limit_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_user_message_limit_period_setting');
     register_setting('chatbot_chatgpt_settings', 'chatbot_chatgpt_visitor_message_limit_setting');
@@ -425,6 +437,14 @@ function chatbot_chatgpt_settings_setup_init() {
         'Message Limit Settings',
         'chatbot_chatgpt_message_limits_section_callback',
         'chatbot_chatgpt_message_limits_settings'
+    );
+
+    add_settings_field(
+        'chatbot_chatgpt_display_message_count',
+        'Display Message Count',
+        'chatbot_chatgpt_display_message_count_callback',
+        'chatbot_chatgpt_message_limits_settings',
+        'chatbot_chatgpt_message_limits_section'
     );
 
     add_settings_field(

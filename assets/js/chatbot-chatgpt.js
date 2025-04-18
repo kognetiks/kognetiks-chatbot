@@ -466,7 +466,7 @@ jQuery(document).ready(function ($) {
         let chatEl = document.getElementById('chatbot-chatgpt');
     
         if (!chatEl) {
-            console.warn('Chatbot: WARNING: Chatbot element not found.');
+            // console.warn('Chatbot: WARNING: Chatbot element not found.');
             return;
         }
     
@@ -916,6 +916,22 @@ jQuery(document).ready(function ($) {
                 }
                 // markdownToHtml - Ver 1.9.2
                 // console.log('Chatbot: NOTICE: botResponse: ' + botResponse);
+
+                // Retrieve the current message count and message limit
+                // console.log('Chatbot: NOTICE: chatbot_chatgpt_display_message_count: ' + localStorage.getItem('chatbot_chatgpt_display_message_count'));
+                // console.log('Chatbot: NOTICE: chatbot_chatgpt_message_count: ' + localStorage.getItem('chatbot_chatgpt_message_count'));
+                // console.log('Chatbot: NOTICE: chatbot_chatgpt_message_limit_setting: ' + localStorage.getItem('chatbot_chatgpt_message_limit_setting'));
+                // console.log('Chatbot: NOTICE: chatbot_chatgpt_visitor_message_limit_setting: ' + localStorage.getItem('chatbot_chatgpt_message_visitor_limit_setting'));
+
+                if (localStorage.getItem('chatbot_chatgpt_display_message_count') === 'Yes') {
+                    let messageCount = localStorage.getItem('chatbot_chatgpt_message_count') || 0;
+                    let messageLimit = localStorage.getItem('chatbot_chatgpt_message_limit_setting') || 999;
+                    let chatbot_chatgpt_visitor_message_limit_setting = localStorage.getItem('chatbot_chatgpt_message_visitor_limit_setting') || 999;
+
+                    // Append the message count and limit to the message
+                    let messageInfo = ` (${messageCount} / ${messageLimit})`;
+                    botResponse += messageInfo;
+                }
                 botResponse = markdownToHtml(botResponse);
             },
             error: function (jqXHR, status, error) {
@@ -1401,7 +1417,7 @@ jQuery(document).ready(function ($) {
         if (hasDisallowedFile) {
             return;
         }
-        console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
+        // console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_files');
         formData.append('user_id', user_id); // Add user_id to FormData
         formData.append('page_id', page_id); // Add page_id to FormData
@@ -1436,7 +1452,7 @@ jQuery(document).ready(function ($) {
             },
             complete: function (response) {
                 removeTypingIndicator();
-                console.log('Chatbot: NOTICE: Response from server', response);
+                // console.log('Chatbot: NOTICE: Response from server', response);
                 if (response) {
                     // appendMessage(response, 'bot');
                     // Append custom JS to the bot's response - Ver 2.0.9

@@ -70,6 +70,7 @@ function assistant_permission_callback( $request ) {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
     
     // Check if the assistant ID exists in the table
+
     $exists = $wpdb->get_var( 
         $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE assistant_id = %s", $assistant_id)
     );
@@ -105,82 +106,122 @@ function chatbot_assistant_search_handler($request) {
         $include_excerpt = (bool) $request->get_param('include_excerpt');
         $page = (int) $request->get_param('page');
         $per_page = (int) $request->get_param('per_page');
+        $offset = ($page - 1) * $per_page;
 
-        // DIAG - Diagnostics - Ver 2.2.7
-        // back_trace( 'NOTICE', 'Validated parameters:');
-        // back_trace( 'NOTICE', '- Endpoint: ' . $endpoint);
-        // back_trace( 'NOTICE', '- Query: ' . $query);
-        // back_trace( 'NOTICE', '- Include Excerpt: ' . ($include_excerpt ? 'true' : 'false'));
-        // back_trace( 'NOTICE', '- Page: ' . $page);
-        // back_trace( 'NOTICE', '- Per Page: ' . $per_page);
+        // Get the object of the search query
+        $object = chatbot_chatgpt_get_object_of_search_prompt($query);
+        
+        // Prepare search terms
+        $search_terms = chatbot_chatgpt_prepare_search_terms($object);
 
-        // Use WP_Query to search posts or pages
-        $args = [
-            's' => $query,
-            'post_type' => ['post', 'page'],
-            'posts_per_page' => $per_page,
-            'paged' => $page,
-            'orderby' => 'relevance',
-            'order' => 'DESC',
-        ];
+        // Get post types to search
+        $post_types = chatbot_chatgpt_get_searchable_post_types();
 
-        // DIAG - Diagnostics - Ver 2.2.7
-        // back_trace( 'NOTICE', 'WP_Query arguments: ' . print_r($args, true));
+        // Build search conditions
+        $search_conditions = [];
+        $placeholders = [];
 
-        $query = new WP_Query($args);
-
-        if (is_wp_error($query)) {
-            // DIAG - Diagnostics - Ver 2.2.7
-            // back_trace( 'ERROR', 'WP_Query error: ' . $query->get_error_message());
-            return new WP_Error('query_error', $query->get_error_message(), ['status' => 500]);
+        // Add search conditions for each term
+        foreach ($search_terms as $term) {
+            $like_term = '%' . $wpdb->esc_like($term) . '%';
+            $search_conditions[] = "(post_title LIKE %s OR post_content LIKE %s)";
+            $placeholders[] = $like_term;  // For post_title
+            $placeholders[] = $like_term;  // For post_content
         }
 
-        $results = [];
-        if ($query->have_posts()) {
-            while ($query->have_posts()) {
-                $query->the_post();
+        // If no search conditions, return empty result
+        if (empty($search_conditions)) {
+            return new WP_REST_Response([
+                'success' => true,
+                'total_posts' => 0,
+                'total_pages' => 0,
+                'current_page' => $page,
+                'results' => [],
+                'message' => 'No valid search terms.'
+            ], 200);
+        }
+
+        // Escape and build IN clause for post types
+        $in_clause = implode(',', array_map(fn($type) => "'" . esc_sql($type) . "'", $post_types));
+
+        // Build the main query - Try first with AND
+        $query = "
+            SELECT ID, post_title, post_content, post_excerpt, post_author, post_date, guid
+            FROM {$wpdb->posts} 
+            WHERE post_type IN ($in_clause)
+            AND post_status = 'publish'
+            AND (". implode(' AND ', $search_conditions) .")
+            ORDER BY post_date DESC
+            LIMIT %d OFFSET %d
+        ";
+
+        // Add the LIMIT parameters
+        $placeholders[] = $per_page;
+        $placeholders[] = $offset;
+
+        try {
+            // Prepare and execute the query
+
+            $prepared_query = $wpdb->prepare($query, ...$placeholders);
+            $results = $wpdb->get_results($prepared_query);
+            
+            if ($wpdb->last_error) {
+                throw new Exception('Database error: ' . $wpdb->last_error);
+            }
+        } catch (Exception $e) {
+            // If AND search fails or returns no results, try OR search
+            $query = "
+                SELECT ID, post_title, post_content, post_excerpt, post_author, post_date, guid
+                FROM {$wpdb->posts} 
+                WHERE post_type IN ($in_clause)
+                AND post_status = 'publish'
+                AND (". implode(' OR ', $search_conditions) .")
+                ORDER BY post_date DESC
+                LIMIT %d OFFSET %d
+            ";
+
+            $prepared_query = $wpdb->prepare($query, ...$placeholders);
+            $results = $wpdb->get_results($prepared_query);
+            
+            if ($wpdb->last_error) {
+                throw new Exception('Database error: ' . $wpdb->last_error);
+            }
+        }
+
+        $formatted_results = [];
+        if ($results) {
+            foreach ($results as $post) {
                 $result = [
-                    'ID' => get_the_ID(),
-                    'title' => get_the_title(),
-                    'url' => get_permalink(),
-                    'date' => get_the_date(),
-                    'author' => get_the_author(),
+                    'ID' => $post->ID,
+                    'title' => $post->post_title,
+                    'url' => $post->guid,
+                    'date' => $post->post_date,
+                    'author' => get_the_author_meta('display_name', $post->post_author),
                 ];
 
                 if ($include_excerpt) {
-                    // $result['excerpt'] = get_the_excerpt();
-                    $result['excerpt'] = strip_tags(get_the_content());
+                    $result['excerpt'] = strip_tags($post->post_content);
                 }
 
-                $results[] = $result;
+                $formatted_results[] = $result;
             }
-            wp_reset_postdata();
         }
 
         $response = [
             'success' => true,
-            'total_posts' => $query->found_posts,
-            'total_pages' => $query->max_num_pages,
+            'total_posts' => count($formatted_results),
+            'total_pages' => ceil(count($formatted_results) / $per_page),
             'current_page' => $page,
-            'results' => $results,
+            'results' => $formatted_results,
         ];
 
-        if (empty($results)) {
+        if (empty($formatted_results)) {
             $response['message'] = 'No results found.';
         }
 
-        // DIAG - Diagnostics - Ver 2.2.7
-        // back_trace( 'NOTICE', 'Search completed successfully');
-        // back_trace( 'NOTICE', 'Results count: ' . count($results));
         return new WP_REST_Response($response, 200);
 
     } catch (Exception $e) {
-
-        // DIAG - Diagnostics - Ver 2.2.7
-        // back_trace( 'ERROR', 'Exception caught: ' . $e->getMessage());
-        // back_trace( 'ERROR', 'Stack trace: ' . $e->getTraceAsString());
         return new WP_Error('search_error', $e->getMessage(), ['status' => 500]);
-
     }
-
 }

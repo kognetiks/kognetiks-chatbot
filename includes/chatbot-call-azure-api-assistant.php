@@ -819,21 +819,27 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to add_an_azure_message - $content: ' . $context);
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
 
-    // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4
-    $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
-
+    // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4 - Updated Ver 2.2.9
     if ($use_enhanced_content_search == 'Yes') {
 
-        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
-        if ( !empty ($search_results) ) {
-            // Append the transformer context to the prompt
-            $prompt = $prompt . ' ' . $search_results;
+        $search_results = chatbot_chatgpt_content_search($message);
+        if (!empty($search_results) && isset($search_results['results'])) {
+            // Format the search results into a readable string
+            $formatted_results = '';
+            foreach ($search_results['results'] as $result) {
+                $formatted_results .= "\nTitle: " . $result['title'] . "\n";
+                if (isset($result['excerpt'])) {
+                    $formatted_results .= "Content: " . $result['excerpt'] . "\n";
+                }
+                $formatted_results .= "URL: " . $result['url'] . "\n";
+            }
+            // Append the formatted search results to the prompt
+            $prompt = $prompt . ' When answering the prompt, please consider the following information: ' . $formatted_results;
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
         // back_trace( 'NOTICE', '$prompt: ' . $prompt);
 
     }
-
     if (empty($file_id)) {
         // back_trace( 'NOTICE', 'No file to retrieve');
         $assistants_response = add_an_azure_message($thread_id, $prompt, $context, $api_key, '');

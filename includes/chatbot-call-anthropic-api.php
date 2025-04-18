@@ -30,12 +30,12 @@ function chatbot_call_anthropic_api($api_key, $message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_call_api()');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+  // back_trace( 'NOTICE', 'chatbot_call_anthropic_api()');
+  // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+  // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+  // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+  // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+  // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Anthropic.com API Documentation
     // https://docs.anthropic.com/en/api/messages
@@ -54,9 +54,15 @@ function chatbot_call_anthropic_api($api_key, $message) {
     //
 
     // Get the saved model from the settings or default to "claude-3-5-sonnet-latest"
-    $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
-    // FIXME - THIS SHOULD BE USING THE $kchat_settings['model'] - Ver 2.2.1
-    // $model = $kchat_settings['model'];
+    if (!isset($kchat_settings['model'])) { 
+        $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+    } else {
+        $model = $kchat_settings['model'];
+    }
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
+    // back_trace( 'NOTICE', '$model: ' . $model);
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_anthropic_max_tokens_setting', '1024')));
@@ -87,6 +93,9 @@ function chatbot_call_anthropic_api($api_key, $message) {
         $localized_errorResponses = $errorResponses;
     }
     $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+
+    // DIAG Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', 'Yes'));
@@ -98,10 +107,19 @@ function chatbot_call_anthropic_api($api_key, $message) {
 
     if ($use_enhanced_content_search == 'Yes') {
 
-        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_chatgpt_content_search($message);
+        $search_results = chatbot_chatgpt_content_search($message);
         If ( !empty ($search_results) ) {
-            // Append the transformer context to the prompt
-            $context = $search_results;
+            // Extract relevant content from search results array
+            $content_texts = [];
+            foreach ($search_results['results'] as $result) {
+                if (!empty($result['excerpt'])) {
+                    $content_texts[] = $result['excerpt'];
+                }
+            }
+            // Join the content texts and append to context
+            if (!empty($content_texts)) {
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+            }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
         // back_trace( 'NOTICE', '$context: ' . $context);
@@ -252,14 +270,7 @@ function chatbot_call_anthropic_api($api_key, $message) {
     // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
-    // DIAG - Diagnostics - Ver 1.8.1
-    // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
-
     // Add the usage to the conversation tracker
-
     // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens
@@ -267,36 +278,30 @@ function chatbot_call_anthropic_api($api_key, $message) {
     $output_tokens = $response_body['usage']['output_tokens'] ?? 0;
     $total_tokens = $input_tokens + $output_tokens;
 
+    // DIAG - Diagnostics - Ver 1.8.1
+    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $input_tokens);
+    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $output_tokens);
+    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $total_tokens);
+
     if ($response['response']['code'] == 200) {
-
-        if ($input_tokens > 0) {
-            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $input_tokens);
-        }
-
-        if ($output_tokens > 0) {
-            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $output_tokens);
-        }
-
-        if ($total_tokens > 0) {
-            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $total_tokens);
-        }
-
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $input_tokens);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $output_tokens);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $total_tokens);
     }
 
     if (isset($response_body['content'][0]['text']) && !empty($response_body['content'][0]['text'])) {
-
-        $response_text = $response_body['content'][0]['text'];
-        addEntry('chatbot_chatgpt_context_history', $response_text);
-        return $response_text;
-
+        // Handle the response from the chat engine
+        // Context History - Ver 1.6.1
+        addEntry('chatbot_chatgpt_context_history', $response_body['content'][0]['text']);
+        return $response_body['content'][0]['text'];
     } else {
-
-        prod_trace( 'WARNING', 'No valid response text found in API response.');
-
-        $localized_errorResponses = (get_locale() !== "en_US") 
-            ? get_localized_errorResponses(get_locale(), $errorResponses) 
-            : $errorResponses;
-
+        // FIXME - Decide what to return here - it's an error
+        if (get_locale() !== "en_US") {
+            $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+        } else {
+            $localized_errorResponses = $errorResponses;
+        }
+        // Return a random error message
         return $localized_errorResponses[array_rand($localized_errorResponses)];
     }
     

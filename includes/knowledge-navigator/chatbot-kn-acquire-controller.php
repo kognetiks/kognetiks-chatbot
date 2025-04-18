@@ -395,7 +395,7 @@ function chatbot_kn_run_phase_3() {
 
         // DIAG - Diagnostics - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', 'Key: ' . $key . ' Value: ' . $value);
+        //     // back_trace( 'NOTICE', 'Key: ' . $key . ' Value: ' . $value);
         // }        
 
         // Directly use the post content
@@ -630,7 +630,7 @@ function chatbot_kn_run_phase_6() {
     foreach ($results as $result) {
         // DIAG - Diagnostics - Ver 1.6.3
         // foreach($result as $key => $value) {
-        //     back_trace( 'NOTICE', 'Key: ' . $key . ' Value: ' . $value);
+        //     // back_trace( 'NOTICE', 'Key: ' . $key . ' Value: ' . $value);
         // }        
 
         // Directly use the post content
@@ -847,7 +847,7 @@ function chatbot_kn_output_the_results() {
     //         $f->fputcsv([$result->id, $result->url, $result->title, $result->word, $result->score]);
     //     }
     // } catch (RuntimeException $e) {
-    //     back_trace( 'ERROR', 'Failed to open log file for writing: ' . $e->getMessage());
+    //     // back_trace( 'ERROR', 'Failed to open log file for writing: ' . $e->getMessage());
     // }
 
     // // Close the file

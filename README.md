@@ -21,13 +21,10 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## Documentation
 
-## What's new in Version 2.2.7
+** What's new in Version 2.2.9
 
-* **Conversation Transcript**: Added a new feature to send the conversation transcript to site admins when OpenAI Assistants are instructed to do so (see Support tab in Settings).
-* **Dashboard Widget**: Added a dashboard widget to display chatbot statistics and token usage in the WordPress admin dashboard.
-* **Custom Post Types**: Added support for custom post types to the Knowledge Navigator.
-* **Performance Improvements**: Minimized unnecessary calls to the database to improve performance.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.6.
+* **Display Message Count**: Added a setting to display the message count in the chatbot's response, such as `(29/50)`, i.e., 29 prompts out of 50 limited, to help visitors and logged-in users understand how many exchanges they have had with the chatbot.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.8.
 
 ## Features
 

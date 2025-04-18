@@ -135,6 +135,7 @@ function get_chatbot_azure_assistant_by_key($id) {
     // $table_name = $wpdb->prefix . 'chatbot_azure_assistants';
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
+
     $assistant_details = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT * FROM $table_name WHERE id = %s",
@@ -176,6 +177,7 @@ function update_chatbot_azure_number_of_shortcodes() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants'; // Ver 2.2.6
 
     // Check if the table exists using a prepared statement
+
     $table_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) == $table_name;
 
     if ($table_exists) {

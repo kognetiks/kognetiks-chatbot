@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Search - Ver 2.2.4
+ * Kognetiks Chatbot for WordPress - Search - Ver 2.2.4 - Updated in Ver 2.2.9
  *
  * This file contains the code for implementing pre-processor before engaging with an LLM.
  *
@@ -12,177 +12,349 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Search
-function chatbot_chatgpt_content_search( $search_prompt ) {
+function chatbot_chatgpt_content_search($search_prompt) {
 
-    // DIAG - Diagnostic - Ver 2.2.4
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_content_search' );
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_content_search');
 
     global $wpdb;
-    global $stopWords;
 
-    // Empty prompt - shouldn't happen
-    if ( ! isset( $search_prompt ) ) {
-        return;
+    $object = chatbot_chatgpt_get_object_of_search_prompt($search_prompt);
+
+    $include_excerpt = true;
+    $page = 1;
+    $per_page = 5;
+    $offset = ($page - 1) * $per_page;
+
+    $post_types = chatbot_chatgpt_get_searchable_post_types();
+    $search_terms = chatbot_chatgpt_prepare_search_terms($object);
+
+    if (!is_array($search_terms) || empty($search_terms)) {
+        return [
+            'success' => true,
+            'total_posts' => 0,
+            'total_pages' => 0,
+            'current_page' => $page,
+            'results' => [],
+            'message' => 'No valid search terms.'
+        ];
     }
 
-    $tf_idf_table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'search_terms: ' . print_r($search_terms, true));
 
-    // Remove stopwords and punctuation, then normalize whitespace
-    $search_prompt = preg_replace(
-        [
-            '/\b(' . implode('|', $stopWords) . ')\b/i', // Remove stopwords
-            '/[^\w\s\'-]/', // Remove unwanted punctuation except apostrophes and hyphens
-            '/\s+/' // Normalize whitespace (replace multiple spaces with a single space)
-        ],
-        [' ', '', ' '], 
-        trim($search_prompt)
-    );
+    $search_conditions = [];
+    $search_values = [];
 
-    // Convert the cleaned search prompt into an array of words
-    $words = array_filter(preg_split('/\s+/', $search_prompt)); // Removes empty values
-
-    // Initialize an array to store valid words
-    $filtered_words = [];
-
-    foreach ($words as $word) {
-        // Check if the word exists in the TF-IDF database table
-        $exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $tf_idf_table_name WHERE word LIKE %s", $word));
-
-        if ($exists > 0) {
-            // back_trace( 'NOTICE', 'Word exists: ' . $word);
-            $filtered_words[] = $word; // Retain the word
-        } else {
-            // back_trace( 'NOTICE', 'Word does not exist: ' . $word);
-        }
+    foreach ($search_terms as $term) {
+        $like_term = '%' . $wpdb->esc_like($term) . '%';
+        $search_conditions[] = "(post_title LIKE %s OR post_content LIKE %s)";
+        $search_values[] = $like_term;
+        $search_values[] = $like_term;
     }
 
-    // Reconstruct the final cleaned search prompt
-    $cleaned_prompt = implode(' ', $filtered_words);
+    $in_clause = implode(',', array_map(fn($type) => "'" . esc_sql($type) . "'", $post_types));
 
-    // DIAG - Diagnostic - Ver 2.2.4
-    // back_trace( 'NOTICE', '$cleaned_prompt: ' . $cleaned_prompt);
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'in_clause: ' . $in_clause);
 
-    $words = preg_split('/\s+/', trim($cleaned_prompt));
-    $words = array_filter($words); // remove any empty entries
+    // === TRY: AND query ===
+    $and_query = "
+        SELECT ID, post_title, post_content, post_excerpt, post_author, post_date, guid
+        FROM {$wpdb->posts}
+        WHERE post_type IN ($in_clause)
+        AND post_status = 'publish'
+        AND (" . implode(' AND ', $search_conditions) . ")
+        ORDER BY post_date DESC
+        LIMIT %d OFFSET %d
+    ";
 
-    // If somehow no words, bail
-    if ( empty( $words ) ) {
-        return '';
-    }
-    
-    // Build the SUM(...) expression. For each word, we do:
-    // (post_title LIKE '%...%' OR post_content LIKE '%...%')
-    // Then sum all of them.
-    $score_parts = array();
-    $placeholders = array();
+    $and_placeholders = array_merge($search_values, [$per_page, $offset]);
 
-    foreach ( $words as $word ) {
-
-        // Clean up the word for safe LIKE usage
-        $like = '%' . $wpdb->esc_like( $word ) . '%';
-
-        // Each piece is (post_title LIKE %s OR post_content LIKE %s)
-        // We'll add placeholders for these.
-        $score_parts[] = "(post_title LIKE %s OR post_content LIKE %s)";
-
-        // We'll push the same $like param twice (once for title, once for content)
-        $placeholders[] = $like;
-        $placeholders[] = $like;
-
+    try {
+        $prepared_query = $wpdb->prepare($and_query, ...$and_placeholders);
+        $results = $wpdb->get_results($prepared_query);
+    } catch (Exception $e) {
+        return [
+            'success' => false,
+            'message' => 'Search query failed.',
+            'error' => $e->getMessage()
+        ];
     }
 
-    // Join them with a plus sign so MySQL sums each match
-    // e.g. (title LIKE %s OR content LIKE %s) + (title LIKE %s OR content LIKE %s) + ...
-    $score_expression = implode(' + ', $score_parts);
-    
-    $table_name = $wpdb->prefix . 'posts';
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'results: ' . print_r($results, true));
 
-    // Construct the query with a "HAVING score >= x" condition
-    // then require a minimum number of word-matches.
-    // For example, at least 1 word: HAVING score >= 1
-    // $min_score = 3;
-    $min_score = esc_attr( get_option( 'chatbot_chatgpt_search_min_score', 3 ) );
-
-    // Set the minimum possible score
-    $min_score_limit = 1;
-
-    // Or at least half the words: HAVING score >= floor(count($words)/2), etc.
-    // $min_score = floor( count( $words ) / 2 );
-
-    // Limit the number of results
-    // $limit = 3;
-    $limit = esc_attr( get_option( 'chatbot_chatgpt_search_limit', 3 ) );
-
-    // Search for a match
-    do {
-        // Construct the query
-        $query = "SELECT 
-                    ID,
-                    post_title,
-                    post_content,
-                    ($score_expression) AS score
-                FROM $table_name
-                WHERE post_type IN ('post', 'page', 'product')
-                AND post_status = 'publish'
-                HAVING score >= $min_score
-                ORDER BY score DESC
-                LIMIT $limit";
-    
-        // Prepare and execute
-        $prepared_query = $wpdb->prepare( $query, $placeholders );
-        $results = $wpdb->get_results( $prepared_query );
-    
-        // If results are found, exit the loop
-        if ( ! empty( $results ) ) {
-            break;
-        }
-    
-        // Decrease the minimum score for the next iteration
-        $min_score--;
-    
-    } while ( $min_score >= $min_score_limit ); // Stop when $min_score reaches 1
-
-    // If you just want to return an array of the concatenated post_content:
-    $contents = array();
-    if ( ! empty( $results ) ) {
-        foreach ( $results as $row ) {
-            $contents[] = $row->post_content;
-        }
+    if (!empty($results)) {
+        return chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page);
     }
 
-    $content_string = ''; // Will hold the combined text
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'FALLBACK: OR query');
 
-    if ( ! empty( $results ) ) {
-        foreach ( $results as $row ) {
-            // Each $row is an object with post_content property
-            $content_string .= $row->post_content . ' ';
-        }
+    // === FALLBACK: OR query ===
+    $or_query = "
+        SELECT ID, post_title, post_content, post_excerpt, post_author, post_date, guid
+        FROM {$wpdb->posts}
+        WHERE post_type IN ($in_clause)
+        AND post_status = 'publish'
+        AND (" . implode(' OR ', $search_conditions) . ")
+        ORDER BY post_date DESC
+        LIMIT %d OFFSET %d
+    ";
+
+    $or_placeholders = array_merge($search_values, [$per_page, $offset]);
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'or_placeholders: ' . print_r($or_placeholders, true));
+
+    try {
+        $prepared_query = $wpdb->prepare($or_query, ...$or_placeholders);
+        $results = $wpdb->get_results($prepared_query);
+    } catch (Exception $e) {
+        return [
+            'success' => false,
+            'message' => 'Search query failed.',
+            'error' => $e->getMessage()
+        ];
     }
 
-    // Remove any HTML tags
-    $content_string = strip_tags( $content_string );
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'results: ' . print_r($results, true));
 
-    // Remove nbsp and other HTML entities
-    $content_string = html_entity_decode( $content_string );
+    if (!empty($results)) {
+        return chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page);
+    }
 
-    // Remove any non-alphanumeric characters
-    // $content_string = preg_replace( '/[^a-zA-Z0-9\s]/', '', $content_string );
-
-    // Remove any extra whitespace
-    $content_string = preg_replace( '/\s+/', ' ', $content_string );
-
-    // Convert to lowercase
-    // $content_string = strtolower( $content_string );
-
-    // Remove EOL, CR/LF and tabs
-    $content_string = str_replace( array( "\n", "\r", "\t", "\u{200B}" ), ' ', $content_string );
-
-    // DIAG - Diagnostic - Ver 2.2.4
-    // back_trace( 'NOTICE', '$content_string: ' . $content_string);
-    // back_trace( 'NOTICE', 'Character count: ' . strlen( $content_string ) );
-    // back_trace( 'NOTICE', 'Word count: ' . str_word_count( $content_string ) );
-
-    return $content_string;
+    return [
+        'success' => true,
+        'total_posts' => 0,
+        'total_pages' => 0,
+        'current_page' => $page,
+        'results' => [],
+        'message' => 'No results found.'
+    ];
 
 }
+
+function chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page) {
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_format_search_results');
+
+    $formatted_results = array_map(function ($post) use ($include_excerpt) {
+        return [
+            'ID' => $post->ID,
+            'title' => $post->post_title,
+            'url' => $post->guid,
+            'date' => $post->post_date,
+            'author' => get_the_author_meta('display_name', $post->post_author),
+            'excerpt' => $include_excerpt ? strip_tags($post->post_content) : null
+        ];
+    }, $results);
+
+    return [
+        'success' => true,
+        'total_posts' => count($formatted_results),
+        'total_pages' => ceil(count($formatted_results) / $per_page),
+        'current_page' => $page,
+        'results' => $formatted_results
+    ];
+
+}
+
+// Helper function to get searchable post types
+function chatbot_chatgpt_get_searchable_post_types() {
+
+    global $wpdb;
+
+    $registered_types = get_post_types(['public' => true], 'objects');
+    $post_types = [];
+
+    // First, handle registered post types
+    foreach ($registered_types as $type) {
+        $plural_type = $type->name === 'reference' ? 'references' : $type->name . 's';
+        $option_name = 'chatbot_chatgpt_kn_include_' . $plural_type;
+        if (esc_attr(get_option($option_name, 'No')) === 'Yes') {
+            $post_types[] = $type->name;
+        }
+    }
+
+    // Add any extra post types from DB
+    $db_post_types = $wpdb->get_col("SELECT DISTINCT post_type FROM {$wpdb->posts}");
+    foreach ($db_post_types as $type) {
+        if (!in_array($type, $post_types)) {
+            $plural_type = $type === 'reference' ? 'references' : $type . 's';
+            $option_name = 'chatbot_chatgpt_kn_include_' . $plural_type;
+            if (esc_attr(get_option($option_name, 'No')) === 'Yes') {
+                $post_types[] = $type;
+            }
+        }
+    }
+
+    // DIAG - Diagnostic - Ver 2.2.9
+    // back_trace('NOTICE', 'Searchable post types: ' . implode(', ', $post_types));
+
+    return $post_types;
+    
+}
+
+// Helper function to prepare search terms
+function chatbot_chatgpt_prepare_search_terms($search_prompt) {
+
+    global $stopWords;
+    
+    // Ensure globals are loaded
+    if (!isset($stopWords)) {
+        // Load the globals if not already loaded
+        require_once(plugin_dir_path(__FILE__) . '../chatbot-globals.php');
+    }
+    
+    // Convert to lowercase
+    $search_prompt = strtolower($search_prompt);
+    
+    // Remove punctuation but keep spaces
+    $search_prompt = preg_replace('/[^\w\s]/', ' ', $search_prompt);
+    
+    // Split into words
+    $words = preg_split('/\s+/', trim($search_prompt));
+    
+    // Remove stop words and empty strings
+    $words = array_filter($words, function($word) use ($stopWords) {
+        return !empty($word) && !in_array($word, $stopWords) && strlen($word) > 2;
+    });
+    
+    // Convert filtered words to terms
+    $terms = array_values(array_unique($words));
+    
+    // DIAG - Diagnostic - Ver 2.2.9
+    // back_trace('NOTICE', 'Final search terms: ' . implode(', ', $terms));
+    
+    return $terms;
+}
+
+// Helper function to get the object of a search prompt
+function chatbot_chatgpt_get_object_of_search_prompt($search_prompt) {
+    global $stopWords;
+    
+    // Ensure globals are loaded
+    if (!isset($stopWords)) {
+        // Load the globals if not already loaded
+        require_once(plugin_dir_path(__FILE__) . '../chatbot-globals.php');
+    }
+    
+    // Convert to lowercase for consistent matching
+    $prompt = strtolower(trim($search_prompt));
+    
+    // Common question words and their typical positions relative to the object
+    $question_markers = [
+        'what' => 'after',
+        'where' => 'after',
+        'who' => 'after',
+        'when' => 'after',
+        'how' => 'after',
+        'why' => 'after',
+        'which' => 'after',
+        'can you' => 'after',
+        'could you' => 'after',
+        'tell me about' => 'after',
+        'find' => 'after',
+        'search for' => 'after',
+        'look for' => 'after',
+        'show me' => 'after',
+        'get' => 'after',
+        'is there' => 'after'
+    ];
+
+    // Common prepositions that might come before the object
+    $prepositions = [
+        'about',
+        'for',
+        'to',
+        'regarding',
+        'concerning',
+        'on',
+        'in',
+        'at',
+        'by'
+    ];
+
+    // Common verbs to filter out that aren't part of the search object
+    $filter_verbs = [
+        'know',
+        'tell',
+        'want',
+        'need',
+        'like',
+        'think',
+        'believe',
+        'understand',
+        'explain',
+        'describe',
+        'say',
+        'mean',
+        'help',
+        'see',
+        'find',
+        'search',
+        'look',
+        'give',
+        'show'
+    ];
+
+    // First, try to identify if this is a question or command
+    $object = '';
+    foreach ($question_markers as $marker => $position) {
+        if (strpos($prompt, $marker) === 0) {
+            // Split the prompt into words
+            $words = explode(' ', $prompt);
+            
+            // Remove the question word
+            $marker_words = explode(' ', $marker);
+            $words = array_slice($words, count($marker_words));
+            
+            // Remove prepositions and filter verbs
+            $words = array_filter($words, function($word) use ($prepositions, $filter_verbs) {
+                return !in_array($word, $prepositions) && !in_array($word, $filter_verbs);
+            });
+            
+            // Rejoin the remaining words
+            $object = implode(' ', $words);
+            break;
+        }
+    }
+
+    // If no question structure was found, try to find noun phrases
+    if (empty($object)) {
+        // Remove punctuation
+        $prompt = preg_replace('/[^\w\s]/', ' ', $prompt);
+        
+        // Split into words
+        $words = explode(' ', $prompt);
+        
+        // Remove common stop words, prepositions, and filter verbs
+        $words = array_filter($words, function($word) use ($stopWords, $prepositions, $filter_verbs) {
+            return !in_array($word, $stopWords) && 
+                   !in_array($word, $prepositions) && 
+                   !in_array($word, $filter_verbs);
+        });
+        
+        // Take the remaining words as the object
+        $object = implode(' ', $words);
+    }
+
+    // Clean up any extra whitespace
+    $object = trim(preg_replace('/\s+/', ' ', $object));
+
+    // If still empty, return the original prompt minus punctuation
+    if (empty($object)) {
+        $object = trim(preg_replace('/[^\w\s]/', ' ', $prompt));
+    }
+
+    // DIAG - Diagnostic
+    // back_trace('NOTICE', 'Original prompt: ' . $prompt);
+    // back_trace('NOTICE', 'Extracted object: ' . $object);
+
+    return $object;
+}
+

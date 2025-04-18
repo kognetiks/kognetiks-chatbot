@@ -101,18 +101,22 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
 
     if ($use_enhanced_content_search == 'Yes') {
 
-        // DIAG Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', '$enhancedContext: ' . $enhancedContext);
-
-        // Focus the content based on the message from the user
-        $enhancedContext = kn_enhance_context($message);
-
-        // Addt Context Instructions
-        $contextInstructions = ' Use this information to help guide your response. ';
-        $context = $contextInstructions . ' ' . $enhancedContext . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
-        // DIAG Diagnostics - Ver 1.9.6
-        // back_trace( 'NOTICE', '$chatbot_chatgpt_kn_conversation_context: ' . $chatbot_chatgpt_kn_conversation_context);
+        $search_results = chatbot_chatgpt_content_search($message);
+        If ( !empty ($search_results) ) {
+            // Extract relevant content from search results array
+            $content_texts = [];
+            foreach ($search_results['results'] as $result) {
+                if (!empty($result['excerpt'])) {
+                    $content_texts[] = $result['excerpt'];
+                }
+            }
+            // Join the content texts and append to context
+            if (!empty($content_texts)) {
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+            }
+        }
+        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
+        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -120,7 +124,6 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     }
-
     
     // Conversation Continuity - Ver 2.1.8
     $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
@@ -147,8 +150,8 @@ function chatbot_chatgpt_call_omni($api_key, $message) {
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
-        'temperature' => (float)$temperature,
-        'top_p' => (float)$top_p,
+        // 'temperature' => (float)$temperature,
+        // 'top_p' => (float)$top_p,
         'messages' => array(
             array('role' => 'system', 'content' => $context),
             array('role' => 'user', 'content' => $message),

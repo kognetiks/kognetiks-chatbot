@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot - Knowledge Navigator - Enhance Response - Ver 1.6.9
+ * Kognetiks Chatbot - Knowledge Navigator - Enhance Response - Ver 1.6.9 - Updated in Ver 2.2.9
  * 
  * Updates
  * 
@@ -19,8 +19,118 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Enhance the response with TF-IDF - Ver 1.6.9
 function chatbot_chatgpt_enhance_with_tfidf($message) {
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_enhance_with_tfidf');
+
+    global $wpdb;
+    global $learningMessages;
+    global $stopWords;
+
+    $enhanced_response = "";
+    $results = array();
+    $limit = esc_attr(get_option('chatbot_chatgpt_enhanced_response_limit', 3));
+
+    $search_results = chatbot_chatgpt_content_search($message);
+
+    // Access the 'results' key from the returned array
+    $results = isset($search_results['results']) ? $search_results['results'] : [];
+
+    // Convert results to indexed array
+    $results = array_values($results);
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', '=====================================');
+    // back_trace( 'NOTICE', '$results: ' . print_r($results, true));
+    // back_trace( 'NOTICE', '=====================================');
+
+    // Select top three results
+    $results = array_slice($results, 0, $limit);
+    $links = [];
+
+    // Option - Include Title in Enhanced Response
+    $include_title = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_title', 'yes'));
+
+    // Decide if the links to site content and exceprts should be included in the response
+    $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
+
+    // Debugging output to verify the structure of the results
+    // back_trace('NOTICE', 'Debugging $results: ' . print_r($results, true));
+
+    foreach ($results as $result) {
+        // Debugging output for each result
+        // back_trace('NOTICE', 'Processing result: ' . print_r($result, true));
+
+        if (is_array($result) && isset($result['title'], $result['url'], $result['ID'])) {
+            if ('yes' == $include_title) {
+                $links[] = "<li>[" . $result['title'] . "](" . $result['url'] . ")</li>";
+            } else {
+                $links[] = "[here](" . $result['url'] . ")";
+            }
+
+            if ($include_post_or_page_excerpt == 'Yes') {
+                $post_excerpt = get_the_excerpt($result['ID']);
+                if (!empty($post_excerpt)) {
+                    $links[] = "<li>" . $post_excerpt . "</li>";
+                }
+            }
+        }
+    }
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'links: ' . print_r($links, true));
+
+    if (!empty($links)) {
+
+        if ('no' == $include_title) {
+            // Formatting: here, here, and here.
+            $links_string = implode(", ", $links);
+            $links_string = ltrim($links_string, ',');
+            $links_string = $links_string . ".";
+        } else {
+            // Formatting: bullet list
+            $links_string = implode("", $links);
+        }
+
+        // Determine the pre-message based on the settings
+        if (get_locale() !== "en_US") {
+            $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
+        } else {
+            $localized_learningMessages = $learningMessages;
+        }
+
+        $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
+        $chatbot_chatgpt_custom_learnings_message = esc_attr(get_option('chatbot_chatgpt_custom_learnings_message', 'More information may be found here ...'));
+
+        if ('Random' == $chatbot_chatgpt_suppress_learnings) {
+            $enhanced_response .= "\n\n" . $localized_learningMessages[array_rand($localized_learningMessages)] . " ";
+        } elseif ('Custom' == $chatbot_chatgpt_suppress_learnings) {
+            $enhanced_response .= "\n\n" . $chatbot_chatgpt_custom_learnings_message . " ";
+        }
+
+        // Append the links to the enhanced response
+        if ('yes' == $include_title) {
+            $enhanced_response .= '<ul>' . $links_string . '</ul>';
+        } else {
+            $enhanced_response .= $links_string;
+        }
+
+    }
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // if (!empty($enhanced_response)) {
+    //     back_trace( 'NOTICE', '$enhanced_response: ' . print_r($enhanced_response, true));
+    // } else {
+    //     back_trace( 'NOTICE', 'No enhanced response found');
+    // }
+
+    return !empty($enhanced_response) ? $enhanced_response : null;
+
+}
+
+// Enhance the response with TF-IDF - Ver 1.6.9
+function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
     
     global $wpdb;
     global $learningMessages;
@@ -133,7 +243,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     // DIAG - Diagnostics - Ver 2.2.1
     // foreach ($results as $result) {
-    //     back_trace( 'NOTICE', 'Final result: PID=' . $result['pid'] . ', URL=' . $result['url'] . ', Title=' . $result['title'] . ', Score=' . $result['score'] . ', Word Matches=' . $result['word_match_count']);
+    //     // back_trace( 'NOTICE', 'Final result: PID=' . $result['pid'] . ', URL=' . $result['url'] . ', Title=' . $result['title'] . ', Score=' . $result['score'] . ', Word Matches=' . $result['word_match_count']);
     // }
 
     // Convert results to indexed array
@@ -149,43 +259,30 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     // Decide if the links to site content and exceprts should be included in the response
     $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
 
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace('NOTICE', 'Debugging $results: ' . print_r($results, true));
+
+
     foreach ($results as $result) {
 
-        if ('yes' == $include_title) {
+        // DIAG - Diagnostics - Ver 2.2.9
+        // back_trace('NOTICE', 'Processing result: ' . print_r($result, true));
 
-            $links[] = "<li>[" . $result['title'] . "](" . $result['url'] . ")</li>";
-
-        } else {
-
-            $links[] = "[here](" . $result['url'] . ")";
-
-        }
-
-        // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace( 'NOTICE', '$include_post_or_page_excerpt: ' . $include_post_or_page_excerpt );
-
-        if ($include_post_or_page_excerpt == 'Yes') {
-
-            // DIAG - Diagnostics - Ver 2.2.1
-            // back_trace( 'NOTICE', 'Generating AI summary for $result[pid]: ' . $result['pid'] );
-
-            // $ai_summary = ksum_generate_ai_summary($result['pid']);
-            // if (!empty($ai_summary)) {
-            //     $links[] = "<li>" . $ai_summary . "</li>";
-            // }
-
-            // Fetch the post or page excerpt
-            $post_excerpt = get_the_excerpt($result['pid']);
-
-            if (!empty($post_excerpt)) {
-                $links[] = "<li>" . $post_excerpt . "</li>";
+        if (is_object($result) && isset($result->post_title, $result->url, $result->ID)) {
+            if ('yes' == $include_title) {
+                $links[] = "<li>[" . $result->post_title . "](" . $result->url . ")</li>";
+            } else {
+                $links[] = "[here](" . $result->url . ")";
             }
 
-            // DIAG - Diagnostics - Ver 2.2.1
-            // back_trace( 'NOTICE', '$ai_summary: ' . $ai_summary );
-
+            if ($include_post_or_page_excerpt == 'Yes') {
+                $post_excerpt = get_the_excerpt($result->ID);
+                if (!empty($post_excerpt)) {
+                    $links[] = "<li>" . $post_excerpt . "</li>";
+                }
+            }
+        
         }
-
     }
 
     if (!empty($links)) {

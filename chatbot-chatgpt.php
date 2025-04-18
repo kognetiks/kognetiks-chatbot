@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.2.8
+ * Version:     2.2.9
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -30,7 +30,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.2.8';
+$chatbot_chatgpt_plugin_version = '2.2.9';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -219,7 +219,7 @@ global $voice;
 $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
 // DIAG - Diagnostics
-// back_trace( 'NOTICE', 'AI Platform: ' . $chatbot_ai_platform_choice);
+// ( 'NOTICE', 'AI Platform: ' . $chatbot_ai_platform_choice);
 
 switch ($chatbot_ai_platform_choice) {
 
@@ -591,7 +591,7 @@ switch ($chatbot_ai_platform_choice) {
         // Model choice - Ver 2.2.0
         if (esc_attr(get_option('chatbot_local_model_choice')) === null) {
             $model = 'llama3.2-3b-instruct';
-            update_option('chatbot_transformer_model_choice', $model);
+            update_option('chatbot_local_model_choice', $model);
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
         } elseif (empty($model)) {
@@ -792,10 +792,12 @@ function chatbot_chatgpt_enqueue_scripts() {
         // back_trace( 'NOTICE', 'User is logged in');
         $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_setting', '999'));
         $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_user_message_limit_period_setting', 'Lifetime'));
+        $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
     } else {
         // back_trace( 'NOTICE', 'User is NOT logged in');
         $kchat_settings['chatbot_chatgpt_message_limit_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_setting', '999'));
         $kchat_settings['chatbot_chatgpt_message_limit_period_setting'] = esc_attr(get_option('chatbot_chatgpt_visitor_message_limit_period_setting', 'Lifetime'));
+        $kchat_settings['chatbot_chatgpt_display_message_count'] = esc_attr(get_option('chatbot_chatgpt_display_message_count', 'No'));
     }
 
     // Localize the data for the chatbot - Ver 2.1.1.1
@@ -975,7 +977,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 949 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 980 - $model: ' . $model);
             break;
 
         case 'Azure OpenAI':
@@ -987,7 +989,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.6
-            // back_trace( 'NOTICE', 'LINE 959 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 992 - $model: ' . $model);
             break;
 
         case 'NVIDIA':
@@ -999,7 +1001,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 969 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 1004 - $model: ' . $model);
             break;
 
         case 'Anthropic':
@@ -1011,7 +1013,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 970 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 1016 - $model: ' . $model);
             break;
 
         case 'DeepSeek':
@@ -1023,7 +1025,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.2
-            // back_trace( 'NOTICE', 'LINE 989 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 1028 - $model: ' . $model);
             break;
         
         case 'Markov Chain':
@@ -1033,7 +1035,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 999 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 1038 - $model: ' . $model);
             break;
 
         case 'Transformer':
@@ -1043,7 +1045,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 1009 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 1048 - $model: ' . $model);
             break;
 
         case 'Local Server':
@@ -1055,7 +1057,7 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.2.6
-            // back_trace( 'NOTICE', 'LINE 1019 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 1060 - $model: ' . $model);
             break;
 
         default:
@@ -1067,13 +1069,13 @@ function chatbot_chatgpt_send_message() {
             $kchat_settings['chatbot_chatgpt_model'] = $model;
             $kchat_settings['model'] = $model;
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'LINE 1029 - $model: ' . $model);
+            // back_trace( 'NOTICE', 'LINE 1072 - $model: ' . $model);
             break;
 
     }
 
     // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', 'LINE 1035 - $model: ' . $model);
+    // back_trace( 'NOTICE', 'LINE 1078 - $model: ' . $model);
 
     // Send only clean text via the API
     $message = sanitize_text_field($_POST['message']);
@@ -1436,7 +1438,7 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        // back_trace( 'NOTICE', 'LINE 1296 - Calling ChatGPT Omni API');
+                        // back_trace( 'NOTICE', 'LINE 1441 - Calling ChatGPT Omni API');
                         // Send message to ChatGPT API - Ver 1.6.7
                         $response = chatbot_chatgpt_call_omni($api_key, $message);
 
@@ -1447,7 +1449,7 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        // back_trace( 'NOTICE', 'LINE 1307 - Calling ChatGPT API');
+                        // back_trace( 'NOTICE', 'LINE 1452 - Calling ChatGPT API');
                         // Send message to ChatGPT API - Ver 1.6.7
                         $response = chatbot_chatgpt_call_api($api_key, $message);
 
@@ -1458,7 +1460,7 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        // back_trace( 'NOTICE', 'LINE 1318 - Calling Dall E Image API');
+                        // back_trace( 'NOTICE', 'LINE 1463 - Calling Dall E Image API');
                         // Send message to Image API - Ver 1.9.4
                         $response = chatbot_chatgpt_call_image_api($api_key, $message);
 
@@ -1470,7 +1472,7 @@ function chatbot_chatgpt_send_message() {
                         $kchat_settings['model'] = $model;
                         $kchat_settings['voice'] = $voice;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        // back_trace( 'NOTICE', 'LINE 1330 - Calling TTS API');
+                        // back_trace( 'NOTICE', 'LINE 1475 - Calling TTS API');
                         // Send message to TTS API - Text-to-speech - Ver 1.9.5
                         $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
 
@@ -1481,7 +1483,7 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        // back_trace( 'NOTICE', 'LINE 1341 - Calling STT API');
+                        // back_trace( 'NOTICE', 'LINE 1486 - Calling STT API');
                         // Send message to STT API - Speech-to-text - Ver 1.9.6
                         $response = chatbot_chatgpt_call_stt_api($api_key, $message);
 
@@ -1495,7 +1497,7 @@ function chatbot_chatgpt_send_message() {
 
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.2.6
-                // back_trace( 'NOTICE', 'LINE 1432 - Calling Azure OpenAI API');
+                // back_trace( 'NOTICE', 'LINE 1500 - Calling Azure OpenAI API');
                 // Send message to Azure OpenAI API - Ver 2.2.6
                 $response = chatbot_call_azure_openai_api($api_key, $message);
 
@@ -1505,7 +1507,7 @@ function chatbot_chatgpt_send_message() {
 
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.1.8
-                // back_trace( 'NOTICE', 'LINE 1355 - Calling NVIDIA API');
+                // back_trace( 'NOTICE', 'LINE 1510 - Calling NVIDIA API');
                 // Send message to NVIDIA API - Ver 2.1.8
                 $response = chatbot_nvidia_call_api($api_key, $message);
 
@@ -1515,7 +1517,7 @@ function chatbot_chatgpt_send_message() {
             
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.1.8
-                // back_trace( 'NOTICE', 'LINE 1365 - Calling Anthropic API');
+                // back_trace( 'NOTICE', 'LINE 1520 - Calling Anthropic API');
                 // Send message to Claude API - Ver 2.1.8
                 $response = chatbot_call_anthropic_api($api_key, $message);
 
@@ -1525,7 +1527,7 @@ function chatbot_chatgpt_send_message() {
 
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.2.2
-                // back_trace( 'NOTICE', 'LINE 1375 - Calling DeepSeek API');
+                // back_trace( 'NOTICE', 'LINE 1530 - Calling DeepSeek API');
                 // Send message to DeepSeek API - Ver 2.2.2
                 $response = chatbot_call_deepseek_api($api_key, $message);
 
@@ -1535,7 +1537,7 @@ function chatbot_chatgpt_send_message() {
 
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.1.8
-                // back_trace( 'NOTICE', 'LINE 1385 - Calling Markov Chain API');
+                // back_trace( 'NOTICE', 'LINE 1540 - Calling Markov Chain API');
                 // Send message to Markov API - Ver 1.9.7
                 $response = chatbot_chatgpt_call_markov_chain_api($message);
 
@@ -1545,7 +1547,7 @@ function chatbot_chatgpt_send_message() {
 
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.2.0
-                // back_trace( 'NOTICE', 'LINE 1395 - Calling Transformer Model API');
+                // back_trace( 'NOTICE', 'LINE 1550 - Calling Transformer Model API');
                 // Send message to Transformer Model API - Ver 2.2.0
                 $response = chatbot_chatgpt_call_transformer_model_api($message);
 
@@ -1555,7 +1557,7 @@ function chatbot_chatgpt_send_message() {
 
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.2.6
-                // back_trace( 'NOTICE', 'LINE 1405 - Calling Local Model API');
+                // back_trace( 'NOTICE', 'LINE 1560 - Calling Local Model API');
                 // Send message to Local Model API - Ver 2.2.6
                 $response = chatbot_chatgpt_call_local_model_api($message);
 
@@ -1565,14 +1567,26 @@ function chatbot_chatgpt_send_message() {
 
                 $kchat_settings['model'] = $model;
                 // DIAG - Diagnostics - Ver 2.2.6
-                // back_trace( 'NOTICE', 'LINE 1415 - Calling default ' .$model . ' model API');
+                // back_trace( 'NOTICE', 'LINE 1570 - Calling default ' .$model . ' model API');
                 // Send message to ChatGPT API - Ver 1.6.7
                 $response = chatbot_chatgpt_call_api($api_key, $message);
 
         }
         
         // DIAG - Diagnostics
-        // back_trace( 'NOTICE', ['message' => 'BEFORE CALL TO ENHANCE TFIDF', 'response' => $response]);
+        // back_trace( 'NOTICE', '$message: ' . $message);
+        // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+
+        // Defensive programming - Ver 2.2.9
+        if (is_array($response)) {
+            if (isset($response['response'])) {
+                // Likely nested from a mistake — pull the actual content out
+                $response = $response['response'];
+            } else {
+                // Fallback: flatten it all into a string just to be safe
+                $response = print_r($response, true);
+            }
+        }
         
         // Use TF-IDF to enhance response
         $chatbot_chatgpt_suppress_learnings = esc_attr(get_option('chatbot_chatgpt_suppress_learnings', 'Random'));
@@ -1593,7 +1607,7 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_check_for_links_and_images($response);
 
         // DIAG - Diagnostics - Ver 2.0.5
-        // back_trace( 'NOTICE', '$response: ' . $response);
+        // back_trace( 'NOTICE', 'LINE 1596 - $response: ' . print_r($response, true));
 
         // FIXME - Append extra message - Ver 2.1.1.1.1
         // Danger Will Robinson! Danger!
@@ -1601,7 +1615,7 @@ function chatbot_chatgpt_send_message() {
         $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
 
         // DIAG - Diagnostics - Ver 2.1.8
-        // back_trace( 'NOTICE', '$response: ' . $response);
+        // back_trace('NOTICE', 'LINE 1604 - $response: ' . print_r($response, true));
 
         // Return response
         wp_send_json_success($response);

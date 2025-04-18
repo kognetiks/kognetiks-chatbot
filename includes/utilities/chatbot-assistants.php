@@ -100,6 +100,7 @@ function get_chatbot_chatgpt_assistant_by_common_name($common_name) {
     
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
+
     $assistant_details = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT * FROM $table_name WHERE common_name = %s",
@@ -121,6 +122,7 @@ function get_chatbot_chatgpt_assistant_by_key($id) {
     
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
 
+ 
     $assistant_details = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT * FROM $table_name WHERE id = %s",
