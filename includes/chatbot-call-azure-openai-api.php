@@ -198,7 +198,7 @@ function chatbot_call_azure_openai_api($api_key, $message) {
     $response = wp_remote_post($api_url, $args);
  
     // DIAG - Diagnostics - Ver 2.2.6
-    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
