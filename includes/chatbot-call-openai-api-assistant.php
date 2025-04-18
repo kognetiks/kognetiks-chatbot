@@ -958,24 +958,50 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
 
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4 - Updated Ver 2.2.9
+    // if ($use_enhanced_content_search == 'Yes') {
+
+    //     $search_results = chatbot_chatgpt_content_search($message);
+    //     if (!empty($search_results) && isset($search_results['results'])) {
+    //         // Format the search results into a readable string
+    //         $formatted_results = '';
+    //         foreach ($search_results['results'] as $result) {
+    //             $formatted_results .= "\nTitle: " . $result['title'] . "\n";
+    //             if (isset($result['excerpt'])) {
+    //                 $formatted_results .= "Content: " . $result['excerpt'] . "\n";
+    //             }
+    //             $formatted_results .= "URL: " . $result['url'] . "\n";
+    //         }
+    //         // Append the formatted search results to the prompt
+    //         $prompt = $prompt . ' When answering the prompt, please consider the following information: ' . $formatted_results;
+    //     }
+    //     // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
+    //     // back_trace( 'NOTICE', '$prompt: ' . $prompt);
+
+    // }
+
     if ($use_enhanced_content_search == 'Yes') {
 
         $search_results = chatbot_chatgpt_content_search($message);
-        if (!empty($search_results) && isset($search_results['results'])) {
-            // Format the search results into a readable string
-            $formatted_results = '';
+        If ( !empty ($search_results) ) {
+            // Extract relevant content from search results array
+            $content_texts = [];
             foreach ($search_results['results'] as $result) {
-                $formatted_results .= "\nTitle: " . $result['title'] . "\n";
-                if (isset($result['excerpt'])) {
-                    $formatted_results .= "Content: " . $result['excerpt'] . "\n";
+                if (!empty($result['excerpt'])) {
+                    $content_texts[] = $result['excerpt'];
                 }
-                $formatted_results .= "URL: " . $result['url'] . "\n";
             }
-            // Append the formatted search results to the prompt
-            $prompt = $prompt . ' When answering the prompt, please consider the following information: ' . $formatted_results;
+            // Join the content texts and append to context
+            if (!empty($content_texts)) {
+                $prompt = $prompt . ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+            }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        // back_trace( 'NOTICE', '$prompt: ' . $prompt);
+        // back_trace( 'NOTICE', '$context: ' . $context);
+
+    } else {
+
+        // Original Context Instructions - No Enhanced Context
+        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     }
 

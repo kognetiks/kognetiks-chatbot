@@ -100,18 +100,27 @@ function chatbot_call_azure_openai_api($api_key, $message) {
 
     if ($use_enhanced_content_search == 'Yes') {
 
-        $search_results = ' When answering the prompt, please consider the following information: ' . chatbot_azure_content_search($message);
+        $search_results = chatbot_chatgpt_content_search($message);
         If ( !empty ($search_results) ) {
-            // Append the transformer context to the prompt
-            $context = $search_results;
+            // Extract relevant content from search results array
+            $content_texts = [];
+            foreach ($search_results['results'] as $result) {
+                if (!empty($result['excerpt'])) {
+                    $content_texts[] = $result['excerpt'];
+                }
+            }
+            // Join the content texts and append to context
+            if (!empty($content_texts)) {
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+            }
         }
-        // DIAG Diagnostics - Ver 2.2.6
+        // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
         // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
         // Original Context Instructions - No Enhanced Context
-        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_azure_kn_conversation_context;
+        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     }
 
@@ -189,7 +198,7 @@ function chatbot_call_azure_openai_api($api_key, $message) {
     $response = wp_remote_post($api_url, $args);
  
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {

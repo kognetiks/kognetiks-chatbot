@@ -102,13 +102,18 @@ function chatbot_call_deepseek_api($api_key, $message) {
     if ($use_enhanced_content_search == 'Yes') {
 
         $search_results = chatbot_chatgpt_content_search($message);
-        // Check if $search_results is an array and convert it to a string
-        if (is_array($search_results)) {
-            $search_results = implode(', ', $search_results); // Convert array to a comma-separated string
-        }
         If ( !empty ($search_results) ) {
-            // Append the transformer context to the prompt
-            $context = ' When answering the prompt, please consider the following information: ' . $search_results;
+            // Extract relevant content from search results array
+            $content_texts = [];
+            foreach ($search_results['results'] as $result) {
+                if (!empty($result['excerpt'])) {
+                    $content_texts[] = $result['excerpt'];
+                }
+            }
+            // Join the content texts and append to context
+            if (!empty($content_texts)) {
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+            }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
         // back_trace( 'NOTICE', '$context: ' . $context);

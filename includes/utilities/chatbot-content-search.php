@@ -1,6 +1,6 @@
 <?php
 /**
- * Kognetiks Chatbot for WordPress - Search - Ver 2.2.4
+ * Kognetiks Chatbot for WordPress - Search - Ver 2.2.4 - Updated in Ver 2.2.9
  *
  * This file contains the code for implementing pre-processor before engaging with an LLM.
  *
@@ -13,6 +13,10 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 function chatbot_chatgpt_content_search($search_prompt) {
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_content_search');
+
     global $wpdb;
 
     $object = chatbot_chatgpt_get_object_of_search_prompt($search_prompt);
@@ -36,6 +40,9 @@ function chatbot_chatgpt_content_search($search_prompt) {
         ];
     }
 
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'search_terms: ' . print_r($search_terms, true));
+
     $search_conditions = [];
     $search_values = [];
 
@@ -47,6 +54,9 @@ function chatbot_chatgpt_content_search($search_prompt) {
     }
 
     $in_clause = implode(',', array_map(fn($type) => "'" . esc_sql($type) . "'", $post_types));
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'in_clause: ' . $in_clause);
 
     // === TRY: AND query ===
     $and_query = "
@@ -72,9 +82,15 @@ function chatbot_chatgpt_content_search($search_prompt) {
         ];
     }
 
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'results: ' . print_r($results, true));
+
     if (!empty($results)) {
         return chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page);
     }
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'FALLBACK: OR query');
 
     // === FALLBACK: OR query ===
     $or_query = "
@@ -89,6 +105,9 @@ function chatbot_chatgpt_content_search($search_prompt) {
 
     $or_placeholders = array_merge($search_values, [$per_page, $offset]);
 
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'or_placeholders: ' . print_r($or_placeholders, true));
+
     try {
         $prepared_query = $wpdb->prepare($or_query, ...$or_placeholders);
         $results = $wpdb->get_results($prepared_query);
@@ -99,6 +118,9 @@ function chatbot_chatgpt_content_search($search_prompt) {
             'error' => $e->getMessage()
         ];
     }
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'results: ' . print_r($results, true));
 
     if (!empty($results)) {
         return chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page);
@@ -112,9 +134,14 @@ function chatbot_chatgpt_content_search($search_prompt) {
         'results' => [],
         'message' => 'No results found.'
     ];
+
 }
 
 function chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page) {
+
+    // DIAG - Diagnostics - Ver 2.2.9
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_format_search_results');
+
     $formatted_results = array_map(function ($post) use ($include_excerpt) {
         return [
             'ID' => $post->ID,
@@ -133,6 +160,7 @@ function chatbot_chatgpt_format_search_results($results, $include_excerpt, $page
         'current_page' => $page,
         'results' => $formatted_results
     ];
+
 }
 
 // Helper function to get searchable post types
