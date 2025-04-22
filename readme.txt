@@ -29,6 +29,8 @@ The **Kognetiks Chatbot** is a feature-rich AI plugin that leverages OpenAI, Azu
 
 * **DeepSeek's API**: Enhance your chatbot with DeepSeek's API for advanced conversational features.
 
+* **Mistral's API**: Leverage Mistral's audacious approach to artifical intelligence with cutting-edge technology available for all.
+
 * **Local Server**: Run AI models on your own server with JAN.AI's local server support for enhanced control and flexibility.
 
 
@@ -109,6 +111,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
 - **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
+- **Mistral**: [Terms of Service](https://mistral.ai/terms#terms-of-service) | [Privacy Policy](https://mistral.ai/terms#privacy-policy)
 - **JAN.AI**: [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy)
 
 **IMPORTANT**:
@@ -122,6 +125,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
    - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
+   - [Mistral API Keys](https://console.mistral.ai/api-keys)
 
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
@@ -149,8 +153,8 @@ Embark on a journey to elevate your website's interactivity with the Chatbot plu
 
 3. **API Key Configuration**
    - After activation, head to 'Settings > General' in your dashboard.
-   - Choose the AI Platform you wish to use (OpenAI, NVIDIA, Anthropic or DeepSeek).
-   - Obtain an API key from [OpenAI API Keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), [Anthropic API Keys](https://www.anthropic.com/) or [DeepSeek API Keys](https://platform.deepseek.com/sign_in).
+   - Choose the AI Platform you wish to use (OpenAI, NVIDIA, Anthropic, DeepSeek, or Mistral).
+   - Obtain an API key from [OpenAI API Keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), [Anthropic API Keys](https://www.anthropic.com/), [DeepSeek API Keys](https://platform.deepseek.com/sign_in), or [Mistral API Keys](https://console.mistral.ai/api-keys).
 
 4. **Customizing Your Chatbot**
    - In the same settings area, tailor the chatbot's appearance and functionality to match your site's style and your specific needs.
@@ -176,7 +180,7 @@ Please visit [https://kognetiks.com/plugin-support/](https://kognetiks.com/plugi
 
 **How do I get an API key?**
 
-Sign up at [OpenAI API Keys]((https://platform.openai.com/account/api-keys)), [NVIDIA API Keys](https://developer.nvidia.com/nim), [Anthropic API Keys](https://www.anthropic.com/) or [DeepSeek API Keys](https://platform.deepseek.com/sign_in) to obtain your API key. This key is necessary to use the plugin.
+Sign up at [OpenAI API Keys]((https://platform.openai.com/account/api-keys)), [NVIDIA API Keys](https://developer.nvidia.com/nim), [Anthropic API Keys](https://www.anthropic.com/), [DeepSeek API Keys](https://platform.deepseek.com/sign_in), or [Mistral API Keys](https://console.mistral.ai/api-keys) to obtain your API key. This key is necessary to use the plugin.
 
 If you are using the JAN.AI local server, see [JAN.AI](https://jan.ai/) for more information and an API key may not be required for open-source models.
 
@@ -190,7 +194,7 @@ Yes, the Kognetiks Chatbot supports multiple languages, allowing you to cater to
 
 **What models does the plugin support?**
 
-The plugin supports AI API access to leading AI platforms, including OpenAI, Azure, Anthropic, DeepSeek and local AI server like JAN.AI.
+The plugin supports AI API access to leading AI platforms, including OpenAI, Azure, Anthropic, DeepSeek, Mistral and local AI server like JAN.AI.
 
 == Your Journey Towards an Interactive Website Begins! ==
 
@@ -198,7 +202,7 @@ With the Kognetiks Chatbot installed, you're now equipped to offer a more dynami
 
 == Disclaimer ==
 
-WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Azure and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic or DeepSeek.
+WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, Azure and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek, or Mistral.
 
 == Screenshots ==
 
@@ -231,6 +235,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Azure and 
 
 = 2.3.0 - Released TBD =
 
+* **Mistral API**: Added Settings and API for Mistral's API.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.9.
 
 = 2.2.9 - Released 2025-04-18 =

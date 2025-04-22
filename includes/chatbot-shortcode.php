@@ -101,6 +101,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $model_choice = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_deepseek_voice_option', 'none'));
+    } elseif (esc_attr(get_option('chatbot_mistral_api_enabled', 'No')) == 'Yes') {
+        // DIAG - Diagnostics - Ver 2.1.8
+        // back_trace( 'NOTICE', 'Mistral chatbot is enabled');
+        $model_choice = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
+        $voice_choice = esc_attr(get_option('chatbot_mistral_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
         // back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
@@ -422,6 +428,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             case 'DeepSeek':
                 $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
                 break;
+            case 'Mistral':
+                $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
+                break;
             case 'Markov Chain':
                 $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
                 break;
@@ -441,7 +450,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'LINE 425 - Model (defaulting): ' . $model);
+        // back_trace( 'NOTICE', 'Model (defaulting): ' . $model);
 
     } else {
 
@@ -452,7 +461,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'LINE 436 Model (paramater): ' . $model);
+        // back_trace( 'NOTICE', 'Model (paramater): ' . $model);
 
     }
 
@@ -640,7 +649,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null);
 
-    // back_trace( 'NOTICE', 'LINE 528 - $chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
     // Set visitor and logged in user limits - Ver 2.0.1
     if (is_user_logged_in()) {

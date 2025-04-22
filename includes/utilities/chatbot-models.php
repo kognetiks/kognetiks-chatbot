@@ -576,3 +576,86 @@ function chatbot_deepseek_get_models() {
     return $default_model_list;
 
 }
+
+// Function to get the Model names from Mistral API
+function chatbot_mistral_get_models() {
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE' , 'chatbot_mistral_get_models');
+
+    $api_key = '';
+
+    // Retrieve the API key
+    $api_key = esc_attr(get_option('chatbot_mistral_api_key'));
+    // Decrypt the API key - Ver 2.2.6
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+
+    // Default model list
+    $default_model_list = '';
+    $default_model_list = array(
+        array(
+            'id' => 'mistral-small-latest',
+            'object' => 'model',
+            'created' => null,
+            'owned_by' => 'mistral'
+        ),
+    );
+
+    // Check if the API key is empty
+    if (empty($api_key)) {
+        return $default_model_list;
+    }
+
+    // Set the API endpoint
+    $mistral_models_url = esc_attr(get_option('chatbot_mistral_base_url'));
+    $mistral_models_url = rtrim($mistral_models_url, '/') . '/models';
+
+    // Set headers
+    $args = array(
+        'headers' => array(
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $api_key,
+        ),
+    );
+
+    // Perform the request
+    $response = wp_remote_get($mistral_models_url, $args);
+
+    // Check for errors in the response
+    if (is_wp_error($response)) {
+        return $default_model_list;
+    }
+
+    // Decode the JSON response
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE', '$data: ' . print_r($data, true));
+
+    // Check if the response is valid and contains data
+    if (isset($data['data']) && is_array($data['data'])) {
+        $default_model_list = array_map(function($model) {
+            return array(
+                'id' => $model['id'],
+                'object' => $model['object'],
+                'created' => null,
+                'owned_by' => $model['owned_by']
+            );
+        }, $data['data']);
+    } else {
+        // Handle the case where the response is not valid
+        $default_model_list = array(
+            array(
+                'id' => 'mistral-small-latest',
+                'object' => 'model',
+                'created' => null,
+                'owned_by' => 'mistral'
+            ),
+        );
+    }
+
+    // Mistral API does not have an endpoint for models
+    return $default_model_list;
+
+}

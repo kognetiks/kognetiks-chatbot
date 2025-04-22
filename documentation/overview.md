@@ -14,11 +14,12 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
 - **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
+- **Mistral**: [Terms of Service](https://mistral.ai/terms#terms-of-service) | [Privacy Policy](https://mistral.ai/terms#privacy-policy)
 - **JAN.AI**: [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy)
 
 **IMPORTANT**:
 
-- This plugin requires an API key from OpenAI, NVIDIA, Anthropic or DeepSeek to function. Without an API key, the chatbot cannot process user queries.
+- This plugin requires an API key from OpenAI, NVIDIA, Anthropic, DeepSeek, Mistral to function. Without an API key, the chatbot cannot process user queries.
 
 - Obtain API keys here:
 
@@ -27,7 +28,8 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
    - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
-
+   - [Mistral API Keys](https://console.mistral.ai/api-keys)
+   
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
    - Consent to sending user queries and related data to the selected AI provider for processing and response generation.
@@ -71,6 +73,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 - [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
 
 - [API/DeepSeek Settings](api-deepseek-settings/api-deepseek-model-settings.md)
+
+- [API/Mistral Settings](api-mistral-settings/api-mistral-model-settings.md)
 
 - [API/Local Server Settings](api-local-settings/api-local-model-settings.md)
 
@@ -122,7 +126,7 @@ While AI-powered applications strive for accuracy, they can sometimes make mista
 
 ## Disclaimer
 
-WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Azure and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic or DeepSeek.
+WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, Azure and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek or Mistral.
 
 ---
 

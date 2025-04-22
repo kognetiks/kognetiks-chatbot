@@ -128,6 +128,7 @@ function chatbot_chatgpt_settings_page() {
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'NVIDIA') { ?><a href="?page=chatbot-chatgpt&tab=api_nvidia" class="nav-tab <?php echo $active_tab == 'api_nvidia' ? 'nav-tab-active' : ''; ?>">API/NVIDIA</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Anthropic') { ?><a href="?page=chatbot-chatgpt&tab=api_anthropic" class="nav-tab <?php echo $active_tab == 'api_anthropic' ? 'nav-tab-active' : ''; ?>">API/Anthropic</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'DeepSeek') { ?><a href="?page=chatbot-chatgpt&tab=api_deepseek" class="nav-tab <?php echo $active_tab == 'api_deepseek' ? 'nav-tab-active' : ''; ?>">API/DeepSeek</a> <?php } ?>
+            <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Mistral') { ?><a href="?page=chatbot-chatgpt&tab=api_mistral" class="nav-tab <?php echo $active_tab == 'api_mistral' ? 'nav-tab-active' : ''; ?>">API/Mistral</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Local Server') { ?><a href="?page=chatbot-chatgpt&tab=api_local" class="nav-tab <?php echo $active_tab == 'api_local' ? 'nav-tab-active' : ''; ?>">API/Local</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Markov Chain') { ?><a href="?page=chatbot-chatgpt&tab=api_markov" class="nav-tab <?php echo $active_tab == 'api_markov' ? 'nav-tab-active' : ''; ?>">API/Markov</a> <?php } ?>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'Transformer') { ?><a href="?page=chatbot-chatgpt&tab=api_transformer" class="nav-tab <?php echo $active_tab == 'api_transformer' ? 'nav-tab-active' : ''; ?>">API/Transformer</a> <?php } ?>
@@ -375,6 +376,29 @@ function chatbot_chatgpt_settings_page() {
                 // Advanced Settings
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_deepseek_api_model_advanced');
+                echo '</div>';
+
+            } elseif ($active_tab == 'api_mistral' && $chatbot_ai_platform_choice == 'Mistral') {
+
+                settings_fields('chatbot_mistral_api_model');
+
+                // Mistral API Settings
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_mistral_model_settings_general');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_mistral_api_model_general');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_mistral_api_model_chat_settings');
+                echo '</div>';
+
+                // Advanced Settings
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_mistral_api_model_advanced');
                 echo '</div>';
 
             } elseif ($active_tab == 'api_local' && $chatbot_ai_platform_choice == 'Local Server') {
