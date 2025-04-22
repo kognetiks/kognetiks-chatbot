@@ -235,7 +235,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 = 2.3.0 - Released TBD =
 
-* **Mistral API**: Added Settings and API for Mistral's API.
+* **Mistral API**: Added Settings and API for Mistral's API for chat completions and agents.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.9.
 
 = 2.2.9 - Released 2025-04-18 =

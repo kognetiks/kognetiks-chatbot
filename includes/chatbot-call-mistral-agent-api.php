@@ -151,7 +151,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
 
     // Prepare the request body for Mistral agent API
     $request_body = array(
-        'model' => $model,
+        // 'model' => $model,
         'messages' => array(
             array(
                 'role' => 'system',
@@ -163,14 +163,14 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
             )
         ),
         'max_tokens' => $max_tokens,
-        'temperature' => 0.7,
+        // 'temperature' => 0.7,
         'agent_id' => $assistant_id
     );
 
-    // Add thread_id if available
-    if (!empty($thread_id)) {
-        $request_body['thread_id'] = $thread_id;
-    }
+    // // Add thread_id if available
+    // if (!empty($thread_id)) {
+    //     $request_body['thread_id'] = $thread_id;
+    // }
 
     // Set up the API request
     $args = array(
@@ -200,6 +200,9 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         back_trace( 'ERROR', 'Mistral API Error: ' . $data['error']['message']);
         return 'Error: ' . $data['error']['message'];
     }
+
+    // DIAG - Diagnostics - Ver 2.3.0
+    // back_trace( 'NOTICE', '$data: ' . print_r($data, true));
 
     // Extract the response text
     if (isset($data['choices'][0]['message']['content'])) {
