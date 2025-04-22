@@ -197,6 +197,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // back_trace( 'NOTICE', 'Transformed assistant shortcode to: ' . $tag);
     }
 
+    // Normalize [agent-#] to [chatbot-#] - Ver 2.2.6 - 2025 03 07
+    if (strpos($tag, 'agent-') === 0) {
+        $tag = str_replace('agent-', 'chatbot-', $tag);
+        // DIAG - Diagnostic - Ver 2.2.6
+        back_trace( 'NOTICE', 'Transformed agent shortcode to: ' . $tag);
+    }
+
     // Tag Processing - Ver 2.0.6
     if (strpos($tag, 'chatbot-') !== false) {
         
@@ -249,7 +256,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // If the assistant is not set to 'original', 'primary', or 'alternate' then try to fetch the Assistant details
-    if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false ) {
+    if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false && strpos($atts['assistant'], 'ag:') === false ) {
 
         // Initialize the Assistant details
         $assistant_details = [];
@@ -291,7 +298,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
         }
 
-    } elseif ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') !== false ) {
+    } elseif ( !empty($atts['assistant']) && (strpos($atts['assistant'], 'asst_') !== false || strpos($atts['assistant'], 'ag:') !== false) ) {
 
         // Set the assistant_id
         $chatbot_chatgpt_assistant_alias = $atts['assistant'];

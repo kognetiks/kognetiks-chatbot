@@ -90,6 +90,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-mc
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-kognetiks-api-tm.php';      // Kognetiks - Transformer Model API - Ver 2.2.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-local-api.php';             // Local API - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-mistral-api.php';           // Mistral API - Ver 2.3.0
+require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-mistral-agent-api.php';     // Mistral Agent API - Ver 2.3.0
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-nvidia-api.php';            // NVIDIA API - Ver 2.1.8
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-assistant.php';  // GPT Assistants - Ver 1.6.9
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-openai-api-chatgpt.php';    // ChatGPT API - Ver 1.6.9
@@ -135,6 +136,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-deepseek.php';             // DeepSeek
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-nvidia.php';               // NVIDIA
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-local.php';                // Local Server - Ver 2.2.6
+require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-mistral-agents.php';       // Mistral Agents - Ver 2.3.0
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-mistral.php';              // Mistral
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-openai-assistants.php';    // OpenAI ChatGPT
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-api-openai.php';               // OpenAI ChatGPT
@@ -161,6 +163,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-tra
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings.php';
 
 // Include necessary files - Utilities - Ver 1.9.0
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-agents-mistral.php';               // Mistral Agents - Ver 2.3.0
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-api-endpoints.php';                // API Endpoints - Ver 2.2.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants.php';                   // Assistants Management for OpenAI - Ver 2.0.4
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants-azure.php';             // Assistants Management for Azure - Ver 2.2.6
@@ -1235,6 +1238,7 @@ function chatbot_chatgpt_send_message() {
 
     // FIXME - TESTING - Ver 2.1.8
     // back_trace( 'NOTICE', '$model: ' . $model);
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
@@ -1259,6 +1263,7 @@ function chatbot_chatgpt_send_message() {
     // $chatbot_chatgpt_assistant_alias == 'primary';
     // $chatbot_chatgpt_assistant_alias == 'alternate';
     // $chatbot_chatgpt_assistant_alias == 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'; // GPT Assistant Id
+    // $chatbot_chatgpt_assistant_alias == 'ag:xxxxxxxxxxxxxxxxxxxxxxxx'; // Agent Id
   
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
@@ -1277,7 +1282,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE' , 'Using Primary Assistant - $assistant_id: ' .  $assistant_id);
         
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
+        if (empty($assistant_id) || $assistant_id == "Please provide the Assistant Id.") {
         
             // Primary assistant_id not set
             $chatbot_chatgpt_assistant_alias = 'original';
@@ -1297,7 +1302,7 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE' , 'Using Alternate Assistant - $assistant_id: ' .  $assistant_id);
 
         // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
-        if (empty($assistant_id) || $assistant_id == "Please provide the GPT Assistant Id.") {
+        if (empty($assistant_id) || $assistant_id == "Please provide the Assistant Id.") {
 
             /// Alternate assistant_id not set
             $chatbot_chatgpt_assistant_alias = 'original';
@@ -1316,10 +1321,18 @@ function chatbot_chatgpt_send_message() {
         // DIAG - Diagnostics - Ver 2.0.5
         // back_trace( 'NOTICE' ,'Assistant ID pass as a parameter - $assistant_id: ' . $assistant_id );
 
+    } elseif (str_starts_with($assistant_id, 'ag:')) {
+
+        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
+        $use_assistant_id = 'Yes';
+
+        // DIAG - Diagnostics - Ver 2.0.5
+        back_trace( 'NOTICE' ,'Agent ID pass as a parameter - $assistant_id: ' . $assistant_id );
+
     } else {
 
         // Reference GPT Assistant IDs directly - Ver 1.7.3
-        if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_')) {
+        if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_') || str_starts_with($chatbot_chatgpt_assistant_alias, 'ag:')) {
 
             // DIAG - Diagnostics - 2.0.5
             // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
@@ -1392,10 +1405,10 @@ function chatbot_chatgpt_send_message() {
     } elseif ($use_assistant_id == 'Yes') {
 
         // DIAG - Diagnostics - Ver 2.1.1.1
-        // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $use_assistant_id);
-        // back_trace( 'NOTICE', '$user_id ' . $user_id);
-        // back_trace( 'NOTICE', '$page_id ' . $page_id);
-        // back_trace( 'NOTICE', '$message ' . $message);
+        back_trace( 'NOTICE', 'Using Assistant ID: ' . $use_assistant_id);
+        back_trace( 'NOTICE', '$user_id ' . $user_id);
+        back_trace( 'NOTICE', '$page_id ' . $page_id);
+        back_trace( 'NOTICE', '$message ' . $message);
 
 
         // DIAG - Diagnostics
@@ -1421,6 +1434,11 @@ function chatbot_chatgpt_send_message() {
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Using Azure OpenAI');
             $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
+        } elseif ($chatbot_ai_platform_choice == 'Mistral') {
+            // Send message to Custom GPT API - Ver 2.2.6
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Using Mistral');
+            $response = chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id);
         } else {
             return 'ERROR: Invalid AI Platform';
         }

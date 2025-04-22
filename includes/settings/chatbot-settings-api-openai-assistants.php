@@ -212,7 +212,7 @@ add_action('admin_init', 'chatbot_chatgpt_assistant_settings_init');
 // GPT Assistants settings section callback - Ver 1.7.2 - Updated Ver 2.0.4
 function chatbot_chatgpt_assistant_settings_section_callback($args) {
     ?>
-    <p>Effortlessly manage you chatbot Assistants all in one place using the intuitive interface below.</p>
+    <p>Effortlessly manage your chatbot Assistants all in one place using the intuitive interface below.</p>
     <p>You will no longer need to remember all the Assistant options, as they are all available here for you to view and edit.</p>
     <p>Tailor each Assistant to meet the unique needs of your audience, ensuring an engaging and personalized experience for all.</p>
     <p>If you have developed an Assistant in the OpenAI Playground, you will need the id of the assistant - it usually starts with "asst_".</p>
