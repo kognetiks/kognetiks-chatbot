@@ -1,4 +1,4 @@
-## Managing Assistants
+## Managing Assistants and Agents
 
 Effortlessly manage you chatbot Assistants all in one place using an intuitive interface.
 
@@ -8,9 +8,13 @@ Tailor each Assistant to meet the unique needs of your audience, ensuring an eng
 
 If you have developed an Assistant in the OpenAI Playground, you will need the id of the assistant - it usually starts with ```asst_```.
 
-More information can be found here https://platform.openai.com/playground?mode=assistant.
+More information can be found here:
 
-When you're ready to use an Assistant, simply add a shortcode such as ```[chatbot-1]```, ```[chatbot-2]```, etc. to your page.
+   - [OpenAI Assistants](https://platform.openai.com/playground?mode=assistant)
+   - [AzureAI Assistants](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/assistant)
+   - [Mistral Agents](https://docs.mistral.ai/capabilities/agents/)
+
+When you're ready to use an Assistant, simply add a shortcode such as ```[chatbot-1]```, ```[chatbot-2]```, etc. to your page.  You can also use if you prefer ```[assistant-1]```, ```[assistant-2]```, etc, and ```[agent-1]```, ```[agent-2]```, etc.
 
 TIP: For best results ensure that the shortcode appears only once on the page.
 

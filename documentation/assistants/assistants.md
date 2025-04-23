@@ -1,36 +1,34 @@
-# Configuring the Assistant Settings
+# Configuring the Assistant/Agent Settings
 
-Configure settings for your Assistants by adding your below.
+Configure settings for your Assistants or Agents by adding your below.
 
-If you have developed an Assistant, you will need the id of the assistant - is usually starts with "asst_".
+If you have developed an Assistant or Agent you will need the id:
 
-Enter your Assistant ID instead of ChatGPT. Set the 'Use Assistant ID' to 'Yes'.
+   - OpenAI Assistants usually starts with "asst_"
+   - Azure OpenAI Assistants also usually start with with "asst_"
+   - Mistral Agents often start with "ag:"
 
-Otherwise, you can leave the Assistant ID field blank and set the usage to 'No'.
+More information can be found here:
 
-More information can be found here https://platform.openai.com/playground?mode=assistant.
+   - [OpeanAI Assistants](https://platform.openai.com/playground?mode=assistant)
+
+   - [Mistral Agents](https://console.mistral.ai/build/agents)
 
 ## Using Multiple Assistants
 
-You can integrate Assistants into your platform using one of shortcode configurations below.
-
-Each configuration requires either 'primary', 'alternate' or an Assistant ID, denoted as 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'.
+You can integrate Assistants and Agents into your platform using one of shortcode configurations such as ```[chatbot-1]```, ```[assistant-1]``` or ```[agent-1]```.
 
 Assistants work with both 'floating' and 'embedded' styles.
 
-**NOTE:** The 'primary' and 'alternate' assistants are set in the ChatGPT settings page.
-
-**NOTE:** For best results ensure that the shortcode appears only once on the page.
+**PRO TIP:** For best results ensure that the shortcode appears only once on the page.
 
 ## Configuring the Assistant General Settings
 
 These settings allow you to configure the behavior and capabilities of the Assistant in your Kognetiks Chatbot. Follow these steps to set up these options:
 
-## Assistant IDs and Additional Instructions
+![Managing Assistants](managing-assistants.png)
 
-![Assistant IDs and Additional Instructions](assistant-ids-and-additional-instructions.png)
-
-1. **Assistant ID**:
+1. **Assistant ID or Agent ID**:
    - **Description**: This field is for specifying the primary Assistant ID.
    - **Input**: Enter the Assistant ID provided by OpenAI or your specific setup.
 
@@ -53,11 +51,15 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Selection**: Pick a voice that aligns with the desired personality and tone of your chatbot.
    - **Tip**: Choose `None` to disable Read Aloud functionality or choose a voice to enable it.  This setting override the global setting.
 
+   - **NOTE**: Voices are currently with OpenAI Assistants only.
+
 6. **Allow File Uploads**:
    - **Description**: This setting allows users to upload files through the chatbot interface.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` if you want to enable file uploads, facilitating richer interactions.
    - **Tip**: This setting override the global setting.
+
+   - **NOTE**: File Uploads only work with OpenAI Assistants and Azure OpenAI Assistants.
 
 7. **Allow Transcript Downloads**:
    - **Description**: This setting allows users to download a transcript of their interaction with the chatbot.
@@ -91,7 +93,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Selection**: Choose `Yes` if you want to enable file uploads, facilitating richer interactions.
    - **Tip**: This is a global setting that will be overridden by assistant specific settings.
 
-2. **Display GPT Assistant Name**:
+2. **Display Assistant Name**:
    - **Description**: This toggle controls whether the Assistant's name is displayed in interactions.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` to display the assistant's name for a more personalized user experience.## Advanced Additional Settings
@@ -103,6 +105,8 @@ These settings allow you to configure the behavior and capabilities of the Assis
     - **Usage**: When an assistant's response includes "[conversation_transcript]", the system will automatically send a formatted transcript of the conversation to this email address.
 
 ## Advanced Additional Settings
+
+**NOTE**: Applies only to OpenAI and OpenAI Azure Assistants.
 
 ![Advanced Additional Settings](advanced-additional-settings.png)
 
@@ -196,7 +200,7 @@ Use the following format to invoke the primary or alternate assistant:
 *-* `[chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]` - Embedded style, Assistant as set in Assistant ID setting
 Mix and match the style and assistant attributes to suit your needs.
 
-**NOTE:** When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.
+**NOTE**: When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.
 
 ## Tips
 

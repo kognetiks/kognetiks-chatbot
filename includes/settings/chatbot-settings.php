@@ -419,12 +419,13 @@ function chatbot_chatgpt_settings_page() {
                 do_settings_sections('chatbot_mistral_agents_settings');
                 echo '</div>';
 
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_mistral_agents_settings');
-                echo '</div>';
+                // NO ADVANCED SETTINGS FOR MISTRAL AGENTS = Ver 2.3.0
+                // echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                // do_settings_sections('chatbot_mistral_additional_assistant_settings');
+                // echo '</div>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_mistral_agents_settings');
+                do_settings_sections('chatbot_mistral_remote_widget_settings');
                 echo '</div>';
 
             } elseif ($active_tab == 'api_local' && $chatbot_ai_platform_choice == 'Local Server') {

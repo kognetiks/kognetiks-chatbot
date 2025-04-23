@@ -244,22 +244,22 @@ function display_chatbot_mistral_assistants_table() {
     </style>';
 
     echo '<div class="wrap asst-templates-display">';
-    echo '<h1>Manage Assistants</h1>';
-    echo '<p>Click the <code>Update</code> button to save changes to an Assistant, or the <code>Delete</code> button to remove an Assistant.</p>';
-    echo '<p>Click the <code>Add New Assistant</code> button to create a new Assistant.</p>';
+    echo '<h1>Manage Agents</h1>';
+    echo '<p>Click the <code>Update</code> button to save changes to an Agents, or the <code>Delete</code> button to remove an Agents.</p>';
+    echo '<p>Click the <code>Add New Agent</code> button to create a new Agents.</p>';
     echo '<table>';
     echo '<thead>';
     echo '<tr>';
     echo '<th>Actions</th>';  // Column header for actions
     echo '<th style="min-width:100px;">&#91;Shortcode&#93;</th>';
-    echo '<th>Assistant ID</th>';
+    echo '<th>Agent ID</th>';
     echo '<th>Common Name</th>';
     echo '<th>Style</th>';
     echo '<th>Audience</th>';
     echo '<th>Voice</th>';
     echo '<th>Allow File Uploads</th>';
     echo '<th>Allow Transcript Downloads</th>';
-    echo '<th>Show Assistant Name</th>';
+    echo '<th>Show Agent Name</th>';
     echo '<th>Initial Greeting</th>';
     echo '<th>Subsequent Greeting</th>';
     echo '<th>Placeholder Prompt</th>';
@@ -291,7 +291,7 @@ function display_chatbot_mistral_assistants_table() {
         echo '<button type="button" class="button-primary" onclick="deleteAssistant(' . $assistant->id . ')">Delete</button>';
         echo '</td>';
         // echo '<td onclick="copyToClipboard(\'[assistant-' . $assistant->id . ']\')"><b>' . '&#91;assistant-' . $assistant->id . '&#93;' . '</b></br>or</br>[chatbot-' . $assistant->id . ']</td>';
-        echo '<td onclick="copyToClipboard(\'[assistant-' . $assistant->id . ']\')"><b>' . '&#91;assistant-' . $assistant->id . '&#93;' . '</b></td>';
+        echo '<td onclick="copyToClipboard(\'[agent-' . $assistant->id . ']\')"><b>' . '&#91;agent-' . $assistant->id . '&#93;' . '</b></td>';
         echo '<td><input type="text" name="assistant_id_' . $assistant->id . '" value="' . $assistant->assistant_id . '"></td>';
         echo '<td><input type="text" name="common_name_' . $assistant->id . '" value="' . $assistant->common_name . '"></td>';
         echo '<td><select name="style_' . $assistant->id . '">';
@@ -333,9 +333,9 @@ function display_chatbot_mistral_assistants_table() {
 
     // Row for adding a new assistant
     echo '<tr>';
-    echo '<td><button type="button" class="button-primary" onclick="addNewAssistant()">Add New Assistant</button></td>';  // Actions column for adding new assistant
+    echo '<td><button type="button" class="button-primary" onclick="addNewAssistant()">Add Your New Agent</button></td>';  // Actions column for adding new assistant
     echo '<td>New</td>';
-    echo '<td><input type="text" name="new_assistant_id" placeholder="Please provide the GPT Assistant Id."></td>';
+    echo '<td><input type="text" name="new_assistant_id" placeholder="Please provide the Agent Id."></td>';
     echo '<td><input type="text" name="new_common_name" placeholder="Common Name"></td>';
     echo '<td><select name="new_style">';
     echo '<option value="Embedded">Embedded</option>';
@@ -347,16 +347,16 @@ function display_chatbot_mistral_assistants_table() {
     echo '<option value="Logged-in">Logged-in</option>';
     echo '</select></td>';
     echo '<td><select name="new_voice">';
-    echo '<option value="alloy">Alloy</option>';
-    echo '<option value="echo">Echo</option>';
-    echo '<option value="fable">Fable</option>';
-    echo '<option value="onyx">Onyx</option>';
-    echo '<option value="nova">Nova</option>';
-    echo '<option value="shimmer">Shimmer</option>';
+    // echo '<option value="alloy">Alloy</option>';
+    // echo '<option value="echo">Echo</option>';
+    // echo '<option value="fable">Fable</option>';
+    // echo '<option value="onyx">Onyx</option>';
+    // echo '<option value="nova">Nova</option>';
+    // echo '<option value="shimmer">Shimmer</option>';
     echo '<option value="none">None</option>';
     echo '</select></td>';
     echo '<td><select name="new_allow_file_uploads">';
-    echo '<option value="Yes">Yes</option>';
+    // echo '<option value="Yes">Yes</option>';
     echo '<option value="No">No</option>';
     echo '</select></td>';
     echo '<td><select name="new_allow_transcript_downloads">';

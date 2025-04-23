@@ -184,9 +184,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     }
 
-    // If (strpos($atts['assistant'], 'asst_') === false && $atts['assistant'] != 'original' && $atts['assistant'] != 'primary' && $atts['assistant'] != 'alternate') {
-    // If (strpos($atts['assistant'], 'asst_') === false ) {
-
     // DIAG - Diagnostics - Ver 2.0.8
     // back_trace( 'NOTICE', 'Tag Processing: ' . $tag);
 
@@ -201,7 +198,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if (strpos($tag, 'agent-') === 0) {
         $tag = str_replace('agent-', 'chatbot-', $tag);
         // DIAG - Diagnostic - Ver 2.2.6
-        back_trace( 'NOTICE', 'Transformed agent shortcode to: ' . $tag);
+        // back_trace( 'NOTICE', 'Transformed agent shortcode to: ' . $tag);
     }
 
     // Tag Processing - Ver 2.0.6
@@ -1382,7 +1379,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
 }
 
-// Dynamic Shortcode - Ver 2.0.6
+// Dynamic Shortcode - Ver 2.0.6 - - Ver 2.3.0 Update 2025 04 23
 function register_chatbot_shortcodes($number_of_shortcodes = null) {
 
     // Make sure the number of shortcodes is set
@@ -1442,6 +1439,17 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
             // error_log('Registered shortcode: ' . $shortcode);
         }
     }
+
+    // Register numbered shortcodes dynamically using [agent-#] syntax
+    // Only register if not already registered and within the valid range
+    for ($i = 1; $i <= $number_of_shortcodes; $i++) {
+        $shortcode = 'agent-' . $i;
+        if (!shortcode_exists($shortcode)) {
+            add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
+            // error_log('Registered shortcode: ' . $shortcode);
+        }
+    }
+    
 }
 // Try to register the shortcodes on init - Ver 2.0.6 - 2024 07 11
 add_action('init', 'register_chatbot_shortcodes');

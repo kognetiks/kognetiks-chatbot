@@ -1238,7 +1238,7 @@ function chatbot_chatgpt_send_message() {
 
     // FIXME - TESTING - Ver 2.1.8
     // back_trace( 'NOTICE', '$model: ' . $model);
-    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
 
@@ -1327,7 +1327,7 @@ function chatbot_chatgpt_send_message() {
         $use_assistant_id = 'Yes';
 
         // DIAG - Diagnostics - Ver 2.0.5
-        back_trace( 'NOTICE' ,'Agent ID pass as a parameter - $assistant_id: ' . $assistant_id );
+        // back_trace( 'NOTICE' ,'Agent ID pass as a parameter - $assistant_id: ' . $assistant_id );
 
     } else {
 
@@ -1405,10 +1405,10 @@ function chatbot_chatgpt_send_message() {
     } elseif ($use_assistant_id == 'Yes') {
 
         // DIAG - Diagnostics - Ver 2.1.1.1
-        back_trace( 'NOTICE', 'Using Assistant ID: ' . $use_assistant_id);
-        back_trace( 'NOTICE', '$user_id ' . $user_id);
-        back_trace( 'NOTICE', '$page_id ' . $page_id);
-        back_trace( 'NOTICE', '$message ' . $message);
+        // back_trace( 'NOTICE', 'Using Assistant ID: ' . $use_assistant_id);
+        // back_trace( 'NOTICE', '$user_id ' . $user_id);
+        // back_trace( 'NOTICE', '$page_id ' . $page_id);
+        // back_trace( 'NOTICE', '$message ' . $message);
 
 
         // DIAG - Diagnostics
