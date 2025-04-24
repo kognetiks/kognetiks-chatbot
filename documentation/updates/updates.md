@@ -1,4 +1,9 @@
-# Past Update
+# Past Updates
+
+## What's new in Version 2.3.0
+
+* **Mistral API**: Added Settings and API for Mistral's API for chat completions and agents.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.9.
 
 ## What's new in Version 2.2.9
 
