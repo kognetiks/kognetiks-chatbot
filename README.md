@@ -1,6 +1,6 @@
 # Kognetiks Chatbot
 
-The **Kognetiks Chatbot** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI, Azure, NVIDIA, Anthropic, DeepSeek and local servers running open source AI models. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
+The **Kognetiks Chatbot** plugin project is centered around revolutionizing digital interactions on WordPress websites looking to incorporate Artificial Intelligent products such as those powered by OpenAI, Azure, NVIDIA, Anthropic, Mistral and local servers running open source AI models. The plugin is designed to enhance visitor engagement through intelligent and interactive conversational experiences, leveraging advanced AI technology for customer support and other conversational applications on WordPress sites. This project aims to make cutting-edge AI accessible and functional within the WordPress ecosystem.
 
 **🚀 Exciting News: Local AI Support for Kognetiks Chatbot!**:
 
@@ -21,10 +21,10 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## Documentation
 
-** What's new in Version 2.2.9
+**What's new in Version 2.3.0**
 
-* **Display Message Count**: Added a setting to display the message count in the chatbot's response, such as `(29/50)`, i.e., 29 prompts out of 50 limited, to help visitors and logged-in users understand how many exchanges they have had with the chatbot.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.8.
+* **Mistral API**: Added Settings and API for Mistral's API for chat completions and agents.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.9.
 
 ## Features
 
@@ -77,7 +77,7 @@ With the integration of Text-to-Speech (TTS) models, the chatbot can now convert
 ▪ **Always Available:** Provide round-the-clock assistance in various domains, from healthcare to education.
 ▪ **Seamless Integration:** Effortlessly bring your WordPress site to life with an easy-to-use plugin.
 
-**✨ Supported Models from OpenAI, NVIDIA, Anthropic, and DeepSeek**
+**✨ Supported Models from OpenAI, NVIDIA, Anthropic, DeepSeek, and Mistral**
 
 For a full list of models see:
 
@@ -85,6 +85,7 @@ For a full list of models see:
 - [NVIDIA's Model Overview](https://docs.nvidia.com/nim/large-language-models/latest/models.html)
 - [Anthropic's Model Overview](https://docs.anthropic.com/en/docs/about-claude/models)
 - [DeepSeek's Model Overview](https://api-docs.deepseek.com/quick_start/pricing)
+- [Mistral's Model Overview](https://docs.mistral.ai/getting-started/models/models_overview/)
 - [JAN.AI's Model Overview](https://jan.ai/docs/models/manage-models#add-models)
 
 For a full list of Deep
@@ -103,11 +104,12 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **NVIDIA**: [Terms of Use](https://www.nvidia.com/en-us/about-nvidia/nv-accounts/) | [Privacy Policy](https://www.nvidia.com/en-us/about-nvidia/privacy-policy/)
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
 - **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
+- **Mistral**: [Terms of Service](https://mistral.ai/terms#terms-of-service) | [Privacy Policy](https://mistral.ai/terms#privacy-policy)
 - **JAN.AI**: [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy)
 
 **IMPORTANT**:
 
-- This plugin requires an API key from OpenAI, NVIDIA, Anthropic or DeepSeek to function. Without an API key, the chatbot cannot process user queries.
+- This plugin requires an API key from OpenAI, NVIDIA, Anthropic, DeepSeek or Mistral to function. Without an API key, the chatbot cannot process user queries.
 
 - Obtain API keys here:
 
@@ -116,6 +118,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
    - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
+   - [Mistral API Keys](https://console.mistral.ai/api-keys)
 
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
@@ -190,7 +193,7 @@ With the Kognetiks Chatbot installed, you're now equipped to offer a more dynami
 
 **How do I obtain an API key for the API?**
 
-To obtain an API key, sign up for an account at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), [Anthropic API Keys](https://www.anthropic.com/) or [DeepSeek API Keys](https://platform.deepseek.com/sign_in). Once registered, you may create your API key(s).
+To obtain an API key, sign up for an account at [https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys), [NVIDIA API Keys](https://developer.nvidia.com/nim), [Anthropic API Keys](https://www.anthropic.com/), [DeepSeek API Keys](https://platform.deepseek.com/sign_in), or [Mistral API Keys](https://console.mistral.ai/api-keys). Once registered, you may create your API key(s).
 
 **Can I customize the appearance of the chatbot?**
 
@@ -231,7 +234,7 @@ Remember, wielding AI power requires immense responsibility — it's incumbent u
 
 ## Disclaimer
 
-WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic or DeepSeek.
+WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. DeepSeek and related trademarks are the property of DeepSeek. Mistral and related trademarks are the property of Mistral. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek or Mistral.
 
 ## Thank you for using Kognetiks Chatbot
 

@@ -343,7 +343,8 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     }
 
     $backtrace = debug_backtrace();
-    $caller = isset($backtrace[1]) ? $backtrace[1] : null; // Get the second element from the backtrace array
+    // $caller = isset($backtrace[1]) ? $backtrace[1] : null; // Get the second element from the backtrace array
+    $caller = isset($backtrace[0]) ? $backtrace[0] : null; // Get the first element from the backtrace array
 
     if ($caller) {
         $file = isset($caller['file']) ? basename($caller['file']) : 'unknown';

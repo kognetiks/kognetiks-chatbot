@@ -101,6 +101,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $model_choice = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
         $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
         $voice_choice = esc_attr(get_option('chatbot_deepseek_voice_option', 'none'));
+    } elseif (esc_attr(get_option('chatbot_mistral_api_enabled', 'No')) == 'Yes') {
+        // DIAG - Diagnostics - Ver 2.1.8
+        // back_trace( 'NOTICE', 'Mistral chatbot is enabled');
+        $model_choice = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
+        $kchat_settings['chatbot_chatgpt_model'] = $model_choice;
+        $voice_choice = esc_attr(get_option('chatbot_mistral_voice_option', 'none'));
     } elseif (esc_attr(get_option('chatbot_markov_chain_api_enabled', 'No')) == 'Yes') {
         // DIAG - Diagnostics - Ver 2.1.8
         // back_trace( 'NOTICE', 'Markov Chain chatbot is enabled');
@@ -178,9 +184,6 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         // back_trace( 'NOTICE', '$atts - Key: ' . $key . ' Value: ' . $value);
     }
 
-    // If (strpos($atts['assistant'], 'asst_') === false && $atts['assistant'] != 'original' && $atts['assistant'] != 'primary' && $atts['assistant'] != 'alternate') {
-    // If (strpos($atts['assistant'], 'asst_') === false ) {
-
     // DIAG - Diagnostics - Ver 2.0.8
     // back_trace( 'NOTICE', 'Tag Processing: ' . $tag);
 
@@ -189,6 +192,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $tag = str_replace('assistant-', 'chatbot-', $tag);
         // DIAG - Diagnostic - Ver 2.2.6
         // back_trace( 'NOTICE', 'Transformed assistant shortcode to: ' . $tag);
+    }
+
+    // Normalize [agent-#] to [chatbot-#] - Ver 2.2.6 - 2025 03 07
+    if (strpos($tag, 'agent-') === 0) {
+        $tag = str_replace('agent-', 'chatbot-', $tag);
+        // DIAG - Diagnostic - Ver 2.2.6
+        // back_trace( 'NOTICE', 'Transformed agent shortcode to: ' . $tag);
     }
 
     // Tag Processing - Ver 2.0.6
@@ -243,7 +253,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // If the assistant is not set to 'original', 'primary', or 'alternate' then try to fetch the Assistant details
-    if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false ) {
+    if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false && strpos($atts['assistant'], 'ag:') === false ) {
 
         // Initialize the Assistant details
         $assistant_details = [];
@@ -285,7 +295,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
         }
 
-    } elseif ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') !== false ) {
+    } elseif ( !empty($atts['assistant']) && (strpos($atts['assistant'], 'asst_') !== false || strpos($atts['assistant'], 'ag:') !== false) ) {
 
         // Set the assistant_id
         $chatbot_chatgpt_assistant_alias = $atts['assistant'];
@@ -354,7 +364,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_chatgpt_assistant_alias = 'original'; // default value
     if (array_key_exists('assistant', $atts)) {
         $sanitized_assistant = sanitize_text_field($atts['assistant']);
-        if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0) {
+        if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0 || strpos($sanitized_assistant, 'ag:') === 0) {
             $chatbot_chatgpt_assistant_alias = $sanitized_assistant;
             // back_trace( 'NOTICE', '$assistant_id: ' . $chatbot_chatgpt_assistant_alias);
         } else {
@@ -422,6 +432,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             case 'DeepSeek':
                 $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
                 break;
+            case 'Mistral':
+                $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
+                break;
             case 'Markov Chain':
                 $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
                 break;
@@ -441,7 +454,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'LINE 425 - Model (defaulting): ' . $model);
+        // back_trace( 'NOTICE', 'Model (defaulting): ' . $model);
 
     } else {
 
@@ -452,7 +465,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         $assistant_details['chatbot_chatgpt_model_choice'] = $model;
         $kchat_settings['model'] = $model;
         $kchat_settings['chatbot_chatgpt_model_choice'] = $model;
-        // back_trace( 'NOTICE', 'LINE 436 Model (paramater): ' . $model);
+        // back_trace( 'NOTICE', 'Model (paramater): ' . $model);
 
     }
 
@@ -640,7 +653,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null);
 
-    // back_trace( 'NOTICE', 'LINE 528 - $chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
     // Set visitor and logged in user limits - Ver 2.0.1
     if (is_user_logged_in()) {
@@ -1366,7 +1379,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
 }
 
-// Dynamic Shortcode - Ver 2.0.6
+// Dynamic Shortcode - Ver 2.0.6 - - Ver 2.3.0 Update 2025 04 23
 function register_chatbot_shortcodes($number_of_shortcodes = null) {
 
     // Make sure the number of shortcodes is set
@@ -1426,6 +1439,17 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
             // error_log('Registered shortcode: ' . $shortcode);
         }
     }
+
+    // Register numbered shortcodes dynamically using [agent-#] syntax
+    // Only register if not already registered and within the valid range
+    for ($i = 1; $i <= $number_of_shortcodes; $i++) {
+        $shortcode = 'agent-' . $i;
+        if (!shortcode_exists($shortcode)) {
+            add_shortcode($shortcode, 'chatbot_chatgpt_shortcode');
+            // error_log('Registered shortcode: ' . $shortcode);
+        }
+    }
+    
 }
 // Try to register the shortcodes on init - Ver 2.0.6 - 2024 07 11
 add_action('init', 'register_chatbot_shortcodes');

@@ -91,7 +91,31 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
                 'api-key'      => trim($api_key),
             ),
             'timeout' => 15, // Avoid long waits
-        );        
+        );
+
+    } elseif ( $chatbot_ai_platform_choice == 'Mistral' ) {
+
+        // Look up the Agent's name in the Assistants table
+        // DIAG - Diagnostics - Ver 2.3.0
+        // back_trace( 'NOTICE', '$assistant_id_lookup: ' . $assistant_id_lookup);
+        
+        // Prepare the query of the database
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'chatbot_chatgpt_assistants';
+        $query = $wpdb->prepare("SELECT * FROM $table_name WHERE assistant_id = %s", $assistant_id_lookup);
+        
+        // DIAG - Diagnostics - Ver 2.3.0
+        // back_trace( 'NOTICE', 'Query: ' . $query);
+        // back_trace( 'NOTICE', 'Assistant ID Lookup: ' . $assistant_id_lookup);
+        
+        $result = $wpdb->get_results($query);
+        
+        // DIAG - Diagnostics - Ver 2.3.0
+        // back_trace( 'NOTICE', 'Result: ' . print_r($result, true));
+        // back_trace( 'NOTICE', 'Number of rows returned: ' . count($result));
+
+        // Return the Agent's name
+        return $result[0]->common_name;
 
     } else {
 

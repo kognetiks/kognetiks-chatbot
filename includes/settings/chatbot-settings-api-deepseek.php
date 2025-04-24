@@ -42,7 +42,7 @@ function chatbot_deepseek_api_key_callback($args) {
 
 function chatbot_deepseek_api_model_chat_settings_section_callback($args) {
     ?>
-    <p>Configure the settings for the plugin when using chat models. Depending on the DeepSeek model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank">hhttps://api-docs.deepseek.com/quick_start/pricing</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
+    <p>Configure the settings for the plugin when using chat models. Depending on the DeepSeek model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank">https://api-docs.deepseek.com/quick_start/pricing</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
         <li><code>&#91;chatbot style="floating" model="deepseek-chat"&#93;</code> - Style is floating, specific model</li>

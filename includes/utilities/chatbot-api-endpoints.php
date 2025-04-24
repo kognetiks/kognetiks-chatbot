@@ -50,6 +50,12 @@ function get_api_base_url() {
             return esc_attr(get_option('chatbot_deepseek_base_url', 'https://api.deepseek.com'));
             break;
 
+        // Base URL for the Mistral API calls - Ver 2.3.0
+        case 'Mistral':
+
+            return esc_attr(get_option('chatbot_mistral_base_url', 'https://api.mistral.ai/v1'));
+            break;
+
         // Base URL for the Local API calls - Ver 2.2.6
         case 'Local Server':
 
@@ -138,6 +144,12 @@ function get_chat_completions_api_url() {
 
         // Base URL for the DeepSeek API calls - Ver 2.2.2
         case 'DeepSeek':
+
+            return get_api_base_url() . "/chat/completions";
+            break;
+
+        // Base URL for the Mistral API calls - Ver 2.3.0
+        case 'Mistral':
 
             return get_api_base_url() . "/chat/completions";
             break;
