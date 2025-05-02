@@ -134,6 +134,19 @@ function create_conversation_logging_table() {
                 // back_trace( 'SUCCESS', 'Successfully altered chatbot_chatgpt_conversation_log table');
             }
         }
+
+        if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) === 'sentiment_score') {
+            // DIAG - Diagnostics
+            back_trace( 'NOTICE', 'Column sentiment_score already exists in table: ' . $table_name);
+        } else {
+            // Directly execute the ALTER TABLE command without prepare()
+            $sql = "ALTER TABLE $table_name ADD COLUMN sentiment_score FLOAT AFTER message_text";
+            $result = $wpdb->query($sql);
+            if ($result === false) {
+                // If there was an error, log it
+                back_trace( 'ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+            }
+        }
     }
 
     // Check if the table already exists
@@ -206,6 +219,7 @@ function create_conversation_logging_table() {
             thread_id VARCHAR(255),
             assistant_id VARCHAR(255),
             message_text text NOT NULL,
+            sentiment_score INT,
             PRIMARY KEY  (id),
             INDEX session_id_index (session_id),
             INDEX user_id_index (user_id)
@@ -254,6 +268,9 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
+    // FIXME - Set the sentiment score to 0 for now - Ver 2.3.1
+    $sentiment_score = 0;
+
     // Prepare and execute the SQL statement
     $insert_result = $wpdb->insert(
         $table_name,
@@ -266,10 +283,11 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
             'assistant_id' => $assistant_id,
             'assistant_name' => $assistant_name,
             'interaction_time' => current_time('mysql'),
-            'message_text' => $message
+            'message_text' => $message,
+            'sentiment_score' => $sentiment_score
         ),
         array(
-            '%s', '%d', '%d', '%s', '%s', '%s', '%s'
+            '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'
         )
     );
 
@@ -357,3 +375,33 @@ function chatbot_chatgpt_conversation_log_cleanup() {
     return true;
 
 }
+
+// Register activation and deactivation hooks
+register_activation_hook(plugin_dir_path(dirname(__FILE__)) . 'chatbot-chatgpt.php', 'chatbot_chatgpt_activate_db');
+register_deactivation_hook(plugin_dir_path(dirname(__FILE__)) . 'chatbot-chatgpt.php', 'chatbot_chatgpt_deactivate_db');
+
+// Function to handle database setup on activation
+function chatbot_chatgpt_activate_db() {
+    // Create the interaction tracking table
+    create_chatbot_chatgpt_interactions_table();
+    
+    // Create the conversation logging table
+    create_conversation_logging_table();
+    
+    // Schedule the cleanup cron job
+    if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
+        wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_conversation_log_cleanup_event');
+    }
+}
+
+// Function to handle cleanup on deactivation
+function chatbot_chatgpt_deactivate_db() {
+    // Clear the scheduled cleanup event
+    wp_clear_scheduled_hook('chatbot_chatgpt_conversation_log_cleanup_event');
+    
+    // Clean up any expired transients
+    clean_specific_expired_transients();
+}
+
+// Hook for the cleanup event
+add_action('chatbot_chatgpt_conversation_log_cleanup_event', 'chatbot_chatgpt_conversation_log_cleanup');
