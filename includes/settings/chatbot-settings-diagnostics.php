@@ -412,6 +412,8 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 // Log Chatbot Errors to the Server - Ver 2.0.9
 function chatbot_error_log($message) {
 
+    global $wp_filesystem;
+
     global $chatbot_chatgpt_plugin_dir_path;
 
     $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
@@ -425,7 +427,10 @@ function chatbot_error_log($message) {
     $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
     // Append the error message to the log file
-    file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+    if (function_exists('WP_Filesystem')) {
+        global $wp_filesystem;
+        $wp_filesystem->put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+    }
 
 }
 
