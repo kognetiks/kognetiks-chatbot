@@ -363,9 +363,9 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
         $message_type = "NOTICE";
     }
 
-    // Convert the message to a string if it's an array
-    if (is_array($message)) {
-        $message = print_r($message, true); // Return the output as a string
+    // Convert array or object messages to JSON strings
+    if (is_array($message) || is_object($message)) {
+        $message = wp_json_encode($message, JSON_PRETTY_PRINT);
     }
 
     // Upper case the message type

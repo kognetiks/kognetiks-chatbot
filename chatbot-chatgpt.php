@@ -49,6 +49,7 @@ global $user_id;
 
 // Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
 function kognetiks_assign_unique_id() {
+
     if (!isset($_COOKIE['kognetiks_unique_id'])) {
         $unique_id = uniqid('kognetiks_', true);
         
@@ -58,17 +59,20 @@ function kognetiks_assign_unique_id() {
         // Ensure the cookie is set for the current request
         $_COOKIE['kognetiks_unique_id'] = $unique_id;
     }
+
 }
 add_action('init', 'kognetiks_assign_unique_id', 1); // Set higher priority
 
 // Get the unique ID of the visitor or logged-in user - Ver 2.0.4
 function kognetiks_get_unique_id() {
+
     if (isset($_COOKIE['kognetiks_unique_id'])) {
         // error_log('Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
         return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
     }
     // error_log('Unique ID not found');
     return null;
+
 }
 
 // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
@@ -199,6 +203,45 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-manage-error-logs.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
+
+// FIXME - Analytics - Ver 1.0.0
+function fs_active_addon( $addon_slug ) {
+    return true;
+}
+
+// Include Analytics library
+if ( function_exists( 'fs_active_addon' ) && fs_active_addon( 'kognetiks-analytics' ) ) {
+    require_once plugin_dir_path(__FILE__) . 'includes/analytics/analytics-settings.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/analytics/chatbot-analytics.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/analytics/languages/en_US.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/analytics/scoring-models/sentiment-analysis.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/analytics/utilities.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/analytics/globals.php';
+
+    add_action('admin_init', function() {
+        if (
+            isset($_POST['chatbot_chatgpt_analytics_action']) &&
+            $_POST['chatbot_chatgpt_analytics_action'] === 'period_filter' &&
+            isset($_POST['chatbot_chatgpt_analytics_period_filter_nonce']) &&
+            wp_verify_nonce(
+                sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter_nonce'])),
+                'chatbot_chatgpt_analytics_period_filter_action'
+            )
+        ) {
+            // Handle the period filter logic here
+            // e.g., set a transient, update an option, or set a global variable
+            // Then redirect back to the settings page to prevent resubmission
+            $selected_period = isset($_POST['chatbot_chatgpt_analytics_period_filter'])
+                ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter']))
+                : 'Today';
+            // Store in a transient or option, or pass as needed
+            set_transient('chatbot_chatgpt_selected_period', $selected_period, 60*5);
+            wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=analytics'));
+            exit;
+        }
+    });
+    
+}
 
 // Include necessary files - Widgets - Ver 2.1.3
 require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-manage-widget-logs.php';

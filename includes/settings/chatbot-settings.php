@@ -48,7 +48,7 @@ function chatbot_chatgpt_settings_page() {
     // Localize the settings - Added back in for Ver 1.8.5
     chatbot_chatgpt_localize();
 
-    $active_tab = $_GET['tab'] ?? 'general';
+    $active_tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : 'general';
    
     if (isset($_GET['settings-updated']) && $_GET['settings-updated']) {
         add_settings_error('chatbot_chatgpt_messages', 'chatbot_chatgpt_message', 'Settings Saved', 'updated');
@@ -140,6 +140,7 @@ function chatbot_chatgpt_settings_page() {
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
             <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
             <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
+            <a href="?page=chatbot-chatgpt&tab=analytics" class="nav-tab <?php echo $active_tab == 'analytics' ? 'nav-tab-active' : ''; ?>">Analytics</a>
             <a href="?page=chatbot-chatgpt&tab=tools" class="nav-tab <?php echo $active_tab == 'tools' ? 'nav-tab-active' : ''; ?>">Tools</a>
             <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Messages</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
@@ -624,6 +625,13 @@ function chatbot_chatgpt_settings_page() {
             //     settings_fields('chatbot_chatgpt_premium');
             //     do_settings_sections('chatbot_chatgpt_premium');
 
+            } elseif ($active_tab == 'analytics') {
+                // Call the analytics settings page function directly
+                if (function_exists('kognetiks_analytics_settings_page')) {
+                    kognetiks_analytics_settings_page();
+                } else {
+                    echo '<div class="notice notice-error"><p>Analytics functionality is not available. Please ensure the analytics addon is activated.</p></div>';
+                }
             } elseif ($active_tab == 'tools') {
 
                 settings_fields('chatbot_chatgpt_tools');

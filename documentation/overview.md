@@ -86,11 +86,13 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Buttons](buttons/buttons.md)
 
-- [Dashboard](dashboard/dashboard.md)
-
 - [Knowledge Navigator](knowledge-navigator/knowledge-navigator.md)
 
-- [Analysis](analysis/analysis.md)
+- [Knowledge Navigator Analysis](knowledge-navigator/knowledge-navigator-analysis.md)
+
+- [Dashboard Widget](dashboard/dashboard.md)
+
+- [Analytics Package](analytics-package/analytics-package.md) ⚠️ **Note:** This is a premium feature.
 
 - [Reporting](reporting/reporting.md)
 

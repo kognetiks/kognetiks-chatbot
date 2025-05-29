@@ -93,6 +93,10 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting Transformer options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_transformer_model%'");
 
+        // Delete Analytics options
+        // back_trace( 'NOTICE', 'Deleting Analytics options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'kognetiks_analytics%'");
+
         // Delete ChatGPT tables
         // back_trace( 'NOTICE', 'Deleting tables');
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}chatbot_chatgpt_assistants");

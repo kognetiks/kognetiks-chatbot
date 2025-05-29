@@ -18,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_kn_analysis_section_callback($args) {
     ?>
     <p>Use the 'Download Data' button to retrieve the Knowledge Navigator results.</p>
-    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Knowledge Navigator Analysis and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=analysis&file=analysis.md">here</a>.</b></p>
+    <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Knowledge Navigator Analysis and additional documentation please click <a href="?page=chatbot-chatgpt&tab=support&dir=knowledge-navigator&file=knowledge-navigator-analysis.md">here</a>.</b></p>
     <?php
     if (is_admin()) {
         $header = " ";

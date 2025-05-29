@@ -17,6 +17,7 @@ TESTS.md
 TODO.md
 GIT-COMMANDS.md
 includes/utilities/chatbot-keyguard-key.php
+includes/analytics/DEFINITIONS.md
 
 # Ignore all files in the results folder
 results/*
