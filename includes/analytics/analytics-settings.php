@@ -1,0 +1,911 @@
+<?php
+/**
+ * Kognetiks Analytics - Analytics Settings - Ver 1.0.0
+ *
+ * This file contains the code for the Kognetiks Analytics settings page.
+ * 
+ * 
+ * 
+ * @package kognetiks-analytics
+ */
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+    die;
+}
+
+// Settings Page
+function kognetiks_analytics_settings_page() {
+    
+    // DIAG - Diagnostics
+    back_trace('NOTICE', 'Kognetiks Analytics Settings Page Loaded');
+
+    // Determine active tab
+    $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'analytics';
+
+    // Tab navigation UI and page wrapper
+    echo '<div class="wrap" id="kognetiks-analytics">';
+    echo '<h1><span class="dashicons dashicons-chart-bar" style="font-size: 25px;"></span> Kognetiks Analytics</h1>';
+
+    
+    // Determine if the last scoring date/time is earlier than the current date/time, if so, then start the scoring process, else exit
+    $last_scoring_date = get_option('kognetiks_analytics_last_scoring_date');
+    $last_scoring_timestamp = strtotime($last_scoring_date);
+    $current_timestamp = time();
+
+    if ($last_scoring_timestamp !== false && ($current_timestamp - $last_scoring_timestamp) <= 3600) {
+        // Last scoring was within the last hour, skip warning
+        back_trace('NOTICE', 'Last scoring was within the last hour, skipping warning');
+    } else {
+        // Last scoring was more than an hour ago (or never)
+        ?>
+        <div class="notice notice-warning" style="padding: 10px; margin: 8px 0;">
+            <h2 style="margin: 0;">⚠️ Please start the scoring process to update the sentiment scores before proceeding.</h2>
+        </div>
+        <?php
+    }
+
+    // Tab content
+    if ($active_tab === 'analytics') {
+        // Handle scoring control actions
+        if (isset($_POST['kap_scoring_action'])) {
+            $action = $_POST['kap_scoring_action'];
+            if ($action === 'start' && isset($_POST['kognetiks_analytics_scoring_start_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_start_nonce'])), 'kognetiks_analytics_scoring_start')) {
+                back_trace('NOTICE', 'Starting scoring process');
+                kognetiks_analytics_start_scoring();
+                kognetiks_analytics_score_conversations_without_sentiment_score();
+            } elseif ($action === 'stop' && isset($_POST['kognetiks_analytics_scoring_stop_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_stop_nonce'])), 'kognetiks_analytics_scoring_stop')) {
+                back_trace('NOTICE', 'Stopping scoring process');
+                kognetiks_analytics_stop_scoring();
+            } elseif ($action === 'restart' && isset($_POST['kognetiks_analytics_scoring_restart_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_restart_nonce'])), 'kognetiks_analytics_scoring_restart')) {
+                back_trace('NOTICE', 'Restarting scoring process');
+                kognetiks_analytics_restart_scoring();
+                kognetiks_analytics_score_conversations_without_sentiment_score();
+            } elseif ($action === 'reset' && isset($_POST['kognetiks_analytics_scoring_reset_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_reset_nonce'])), 'kognetiks_analytics_scoring_reset')) {
+                back_trace('NOTICE', 'Resetting scoring process');
+                kognetiks_analytics_reset_scoring();
+            }
+            echo '<script>location.reload();</script>';
+            exit;
+        }
+
+        // Check if conversation logging is enabled and table exists
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+        $logging_enabled = get_option('chatbot_chatgpt_enable_conversation_logging', 'Off');
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+
+        if (!$table_exists || $logging_enabled !== 'On') {
+            ?>
+            <div class="notice notice-warning" style="padding: 20px; margin: 20px 0;">
+                <h2 style="margin-top: 0;">⚠️ Conversation Logging Required</h2>
+                <p>To use Kognetiks Analytics, you need to enable conversation logging in the Kognetiks Chatbot settings.</p>
+                <p>Please follow these steps:</p>
+                <ol>
+                    <li>Go to <a href="<?php echo esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=reporting')); ?>">Kognetiks Chatbot Settings</a></li>
+                    <li>Navigate to the "Reporting" tab and scroll down to the "Reporting Settings" section</li>
+                    <li>Set the "Enable Conversation Logging" option to "On"</li>
+                    <li>Choose the "Conversation Log Days to Keep" option to the number of days you want to keep the conversation logs (default is 30 days)</li>
+                    <li>Save your changes by scrolling to the bottom of the page and clicking the "Save Changes" button</li>
+                </ol>
+                <p>Once conversation logging is enabled, you'll be able to view analytics data here.</p>
+            </div>
+            <?php
+            return;
+        }
+
+        // Verify nonce for period filter form submission
+        if (
+            isset($_POST['chatbot_chatgpt_analytics_period_filter_nonce']) &&
+            wp_verify_nonce(
+                sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter_nonce'])),
+                'chatbot_chatgpt_analytics_period_filter_action'
+            )
+        ) {
+            $selected_period = isset($_POST['chatbot_chatgpt_analytics_period_filter'])
+                ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter']))
+                : 'Today';
+        } else {
+            $selected_period = get_transient('chatbot_chatgpt_selected_period');
+            if (!$selected_period) {
+                $selected_period = 'Today';
+            }
+        }
+
+        // Verify nonce for user type filter form submission
+        if (isset($_POST['kognetiks_analytics_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_nonce'])), 'kognetiks_analytics_user_type_filter')) {
+            // Get the selected user type from the form submission
+            $selected_user_type = isset($_POST['kognetiks_analytics_user_type_filter']) ? sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_user_type_filter'])) : 'All';
+        } else {
+            $selected_user_type = 'All';
+        }
+
+        // Verify nonce for scoring control form submission
+        if (isset($_POST['kognetiks_analytics_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_nonce'])), 'kognetiks_analytics_scoring_control')) {
+            // Get the selected scoring control from the form submission
+            $selected_scoring_control = isset($_POST['kognetiks_analytics_scoring_control']) ? sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_control'])) : 'Manual';
+        } else {
+            $selected_scoring_control = 'Manual';
+        }
+
+        // Get all statistics
+        $time_based_counts = kognetiks_analytics_get_time_based_conversation_counts($selected_period, $selected_user_type);
+        $message_stats = kognetiks_analytics_get_message_statistics($selected_period, $selected_user_type);
+        $visitor_stats = kognetiks_analytics_get_visitor_statistics($selected_period, $selected_user_type);
+        $session_stats = kognetiks_analytics_get_session_statistics($selected_period, $selected_user_type);
+        $token_stats = kognetiks_analytics_get_token_statistics($selected_period, $selected_user_type);
+        $engagement_stats = kognetiks_analytics_get_engagement_statistics($selected_period, $selected_user_type);
+        $sentiment_stats = kognetiks_analytics_get_sentiment_statistics($selected_period, $selected_user_type);
+
+        ?>
+        <div class="analytics-container">
+            <!-- Period Filter and Scoring Controls -->
+            <div class="analytics-header-grid" style="display: grid; grid-template-columns: 220px 140px 140px 320px; gap: 16px; align-items: end; margin-bottom: 2px;">
+                <span style="font-weight: bold; color: #1d2327;">Period</span>
+                <span style="font-weight: bold; color: #1d2327;">Type</span>
+                <span style="font-weight: bold; color: #1d2327;">Scoring</span>
+                <span style="font-weight: bold; color: #1d2327;">Manual Controls</span>
+            </div>
+            <div class="analytics-controls-grid" style="display: grid; grid-template-columns: 220px 140px 140px 320px; gap: 16px; align-items: center; height: 50px; margin-bottom: 16px;">
+                <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=chatbot-chatgpt')); ?>" class="period-filter-form" style="margin-bottom: 0; min-width: 220px;">
+                    <?php wp_nonce_field('chatbot_chatgpt_analytics_period_filter_action', 'chatbot_chatgpt_analytics_period_filter_nonce'); ?>
+                    <input type="hidden" name="chatbot_chatgpt_analytics_action" value="period_filter" />
+                    <select name="chatbot_chatgpt_analytics_period_filter" id="chatbot_chatgpt_analytics_period_filter" onchange="this.form.submit()" style="width: 100%;">
+                        <option value="Today" <?php selected($selected_period, 'Today'); ?>>Today vs Yesterday</option>
+                        <option value="Week" <?php selected($selected_period, 'Week'); ?>>This Week vs Last Week</option>
+                        <option value="Month" <?php selected($selected_period, 'Month'); ?>>This Month vs Last Month</option>
+                        <option value="Quarter" <?php selected($selected_period, 'Quarter'); ?>>This Quarter vs Last Quarter</option>
+                        <option value="Year" <?php selected($selected_period, 'Year'); ?>>This Year vs Last Year</option>
+                    </select>
+                </form>
+                <form method="post" action="" class="user-type-filter-form" style="margin-bottom: 20; min-width: 120px;">
+                    <?php wp_nonce_field('kognetiks_analytics_user_type_filter', 'kognetiks_analytics_nonce'); ?>
+                    <select name="kognetiks_analytics_user_type_filter" id="kognetiks_analytics_user_type_filter" onchange="this.form.submit()" style="width: 100%;">
+                        <option value="All" <?php selected($selected_user_type, 'All'); ?>>All</option>
+                        <option value="Visitor" <?php selected($selected_user_type, 'Visitor'); ?>>Visitor</option>
+                        <option value="Chatbot" <?php selected($selected_user_type, 'Chatbot'); ?>>Chatbot</option>
+                    </select>
+                </form>
+                <form method="post" action="" class="scoring-control-form" style="margin-bottom: 20; min-width: 120px;">
+                    <?php wp_nonce_field('kognetiks_analytics_scoring_control', 'kognetiks_analytics_nonce'); ?>
+                    <select name="kognetiks_analytics_scoring_control" id="kognetiks_analytics_scoring_control" onchange="this.form.submit()" style="width: 100%;">
+                        <option value="Manual" <?php selected($selected_scoring_control, 'Manual'); ?>>Manual</option>
+                        <option value="Automated" <?php selected($selected_scoring_control, 'Automated'); ?>>Automated</option>
+                    </select>
+                </form>
+                <div style="display: flex; gap: 8px; min-width: 320px;">
+                    <form method="post" style="display:inline; margin-bottom: 0;">
+                        <?php wp_nonce_field('kognetiks_analytics_scoring_start', 'kognetiks_analytics_scoring_start_nonce'); ?>
+                        <button type="submit" name="kap_scoring_action" value="start" class="button button-primary">Start</button>
+                    </form>
+                    <form method="post" style="display:inline; margin-bottom: 0;">
+                        <?php wp_nonce_field('kognetiks_analytics_scoring_stop', 'kognetiks_analytics_scoring_stop_nonce'); ?>
+                        <button type="submit" name="kap_scoring_action" value="stop" class="button">Stop</button>
+                    </form>
+                    <form method="post" style="display:inline; margin-bottom: 0;">
+                        <?php wp_nonce_field('kognetiks_analytics_scoring_restart', 'kognetiks_analytics_scoring_restart_nonce'); ?>
+                        <button type="submit" name="kap_scoring_action" value="restart" class="button">Restart</button>
+                    </form>
+                    <form method="post" style="display:inline; margin-bottom: 0;">
+                        <?php wp_nonce_field('kognetiks_analytics_scoring_reset', 'kognetiks_analytics_scoring_reset_nonce'); ?>
+                        <button type="submit" name="kap_scoring_action" value="reset" class="button">Reset</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="analytics-container">
+                <!-- Section Header -->
+                <div class="section-header">
+                    <h2>📊 Conversation Statistics</h2>
+                    <p class="section-description">Key metrics about your chatbot's conversations and user interactions.</p>
+                </div>
+
+                <!-- Conversation Statistics -->
+                <div class="analytics-section">
+                    <h3>Overview</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <h3>Total Conversations</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($time_based_counts['current_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($time_based_counts['current']['total'] ?? 0); ?></p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $time_based_counts['current']['total'] ?? 0;
+                                    $previous = $time_based_counts['previous']['total'] ?? 0;
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($time_based_counts['previous_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($time_based_counts['previous']['total'] ?? 0); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <h3>Unique Visitors</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($time_based_counts['current_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($time_based_counts['current']['unique_visitors'] ?? 0); ?></p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $time_based_counts['current']['unique_visitors'] ?? 0;
+                                    $previous = $time_based_counts['previous']['unique_visitors'] ?? 0;
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($time_based_counts['previous_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($time_based_counts['previous']['unique_visitors'] ?? 0); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversation Quality Analysis -->
+                <div class="section-header">
+                    <h2>🧠 Conversation Quality Analysis</h2>
+                    <p class="section-description">Insights into the effectiveness and sentiment of chatbot interactions.</p>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>Sentiment Analysis</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <h3>Average Sentiment Score</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($sentiment_stats['current_period_label'] ?? 'Current Period'); ?></span>
+                                    <p class="stat-value"><?php echo number_format($sentiment_stats['current']['avg_score'] ?? 0, 2); ?></p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $sentiment_stats['current']['avg_score'] ?? 0;
+                                    $previous = $sentiment_stats['previous']['avg_score'] ?? 0;
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($sentiment_stats['previous_period_label'] ?? 'Previous Period'); ?></span>
+                                    <p class="stat-value"><?php echo number_format($sentiment_stats['previous']['avg_score'] ?? 0, 2); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <h3>Positive Conversations</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($sentiment_stats['current_period_label'] ?? 'Current Period'); ?></span>
+                                    <p class="stat-value"><?php echo number_format($sentiment_stats['current']['positive_percent'] ?? 0, 1); ?>%</p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $sentiment_stats['current']['positive_percent'] ?? 0;
+                                    $previous = $sentiment_stats['previous']['positive_percent'] ?? 0;
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($sentiment_stats['previous_period_label'] ?? 'Previous Period'); ?></span>
+                                    <p class="stat-value"><?php echo number_format($sentiment_stats['previous']['positive_percent'] ?? 0, 1); ?>%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>Engagement Analysis</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <h3>High Engagement Rate</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($engagement_stats['current_period_label'] ?? 'Current Period'); ?></span>
+                                    <p class="stat-value"><?php echo number_format($engagement_stats['current']['high_engagement_rate'] ?? 0, 1); ?>%</p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $engagement_stats['current']['high_engagement_rate'] ?? 0;
+                                    $previous = $engagement_stats['previous']['high_engagement_rate'] ?? 0;
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($engagement_stats['previous_period_label'] ?? 'Previous Period'); ?></span>
+                                    <p class="stat-value"><?php echo number_format($engagement_stats['previous']['high_engagement_rate'] ?? 0, 1); ?>%</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <h3>Average Messages Before Drop-off</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($engagement_stats['current_period_label'] ?? 'Current Period'); ?></span>
+                                    <p class="stat-value"><?php echo number_format($engagement_stats['current']['avg_messages_before_dropoff'] ?? 0, 1); ?></p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $engagement_stats['current']['avg_messages_before_dropoff'] ?? 0;
+                                    $previous = $engagement_stats['previous']['avg_messages_before_dropoff'] ?? 0;
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($engagement_stats['previous_period_label'] ?? 'Previous Period'); ?></span>
+                                    <p class="stat-value"><?php echo number_format($engagement_stats['previous']['avg_messages_before_dropoff'] ?? 0, 1); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Statistics -->
+                <div class="analytics-section">
+                    <h2>Message Statistics</h2>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <h3>Total Messages</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($message_stats['current_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($message_stats['current']['total_messages']); ?></p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $message_stats['current']['total_messages'];
+                                    $previous = $message_stats['previous']['total_messages'];
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($message_stats['previous_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($message_stats['previous']['total_messages']); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <h3>Visitor Messages</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($message_stats['current_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($message_stats['current']['visitor_messages']); ?></p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $message_stats['current']['visitor_messages'];
+                                    $previous = $message_stats['previous']['visitor_messages'];
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($message_stats['previous_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($message_stats['previous']['visitor_messages']); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <h3>Chatbot Messages</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($message_stats['current_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($message_stats['current']['chatbot_messages']); ?></p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $message_stats['current']['chatbot_messages'];
+                                    $previous = $message_stats['previous']['chatbot_messages'];
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($message_stats['previous_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($message_stats['previous']['chatbot_messages']); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Statistics -->
+                <div class="analytics-section">
+                    <h2>Session Statistics</h2>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <h3>Avg Session Duration</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($session_stats['current_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($session_stats['current']['avg_duration'], 1); ?> min</p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $session_stats['current']['avg_duration'];
+                                    $previous = $session_stats['previous']['avg_duration'];
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($session_stats['previous_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($session_stats['previous']['avg_duration'], 1); ?> min</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Token Usage Statistics -->
+                <div class="analytics-section">
+                    <h2>Token Usage Statistics</h2>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <h3>Total Tokens Used</h3>
+                            <div class="comparison-row">
+                                <div class="current-period">
+                                    <span class="period-label"><?php echo esc_html($token_stats['current_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($token_stats['current']['total_tokens'] ?? 0); ?></p>
+                                </div>
+                                <div class="trend-indicator">
+                                    <?php 
+                                    $current = $token_stats['current']['total_tokens'] ?? 0;
+                                    $previous = $token_stats['previous']['total_tokens'] ?? 0;
+                                    if ($current > $previous) {
+                                        $percent_change = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0;
+                                        echo '<span class="trend-up">⬆</span><span class="percent-change">+' . number_format($percent_change, 1) . '%</span>';
+                                    } elseif ($current < $previous) {
+                                        $percent_change = $previous > 0 ? (($previous - $current) / $previous) * 100 : 0;
+                                        echo '<span class="trend-down">⬇</span><span class="percent-change">-' . number_format($percent_change, 1) . '%</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="previous-period">
+                                    <span class="period-label"><?php echo esc_html($token_stats['previous_period_label']); ?></span>
+                                    <p class="stat-value"><?php echo number_format($token_stats['previous']['total_tokens'] ?? 0); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                .analytics-container {
+                    max-width: 1200px;
+                    margin: 20px 0;
+                }
+                .period-filter-form {
+                    margin: 20px 0;
+                }
+                .period-filter-form select,
+                .button {
+                    vertical-align: middle;
+                    box-sizing: border-box;
+                    font-size: 15px;
+                    padding: 0 14px;
+                    line-height: 1.2;
+                }
+                .period-filter-form select {
+                    position: relative;
+                    top: 0px; /* Adjust this value as needed for perfect alignment */
+                }
+                .user-type-filter-form {
+                    margin: 20px 0;
+                }
+                .user-type-filter-form select {
+                    vertical-align: middle;
+                    box-sizing: border-box;
+                    font-size: 15px;
+                    padding: 0 14px;
+                    line-height: 1.2;
+                }
+                .user-type-filter-form select {
+                    vertical-align: middle;
+                    box-sizing: border-box;
+                    font-size: 15px;
+                    padding: 0 14px;
+                    line-height: 1.2;
+                }
+                .scoring-control-form {
+                    margin: 20px 0;
+                }
+                .scoring-control-form select {
+                    vertical-align: middle;
+                }
+                .analytics-section {
+                    background: #fff;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                }
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 20px;
+                    margin-top: 15px;
+                }
+                .stat-box {
+                    background: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 4px;
+                }
+                .stat-box h3 {
+                    margin: 0 0 10px 0;
+                    font-size: 14px;
+                    color: #666;
+                }
+                .comparison-row {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 20px;
+                    align-items: center;
+                }
+                .current-period, .previous-period {
+                    flex: 1;
+                    text-align: center;
+                }
+                .trend-indicator {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 32px;
+                    font-weight: bold;
+                    min-width: 40px;
+                    margin: 0 10px;
+                    flex-direction: column;
+                }
+                .trend-up {
+                    color: #28a745;
+                    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                    margin-bottom: 4px;
+                }
+                .trend-down {
+                    color: #dc3545;
+                    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                    margin-bottom: 4px;
+                }
+                .percent-change {
+                    font-size: 14px;
+                    font-weight: normal;
+                    margin-top: 2px;
+                }
+                .trend-up + .percent-change {
+                    color: #28a745;
+                }
+                .trend-down + .percent-change {
+                    color: #dc3545;
+                }
+                .period-label {
+                    display: block;
+                    font-size: 12px;
+                    color: #666;
+                    margin-bottom: 5px;
+                }
+                .stat-value {
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin: 0;
+                    color: #2271b1;
+                }
+                h2 {
+                    margin-top: 0;
+                    color: #1d2327;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 10px;
+                }
+                .section-header {
+                    margin-bottom: 20px;
+                    border-bottom: 2px solid #e5e5e5;
+                    padding-bottom: 10px;
+                }
+                .section-header h2 {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin: 0;
+                    padding: 0;
+                    color: #1d2327;
+                    font-size: 1.5em;
+                }
+                .section-description {
+                    color: #646970;
+                    margin: 5px 0 0;
+                    font-size: 14px;
+                }
+                .nav-tab-wrapper {
+                    border-bottom: 1px solid #ccc;
+                    padding-bottom: 0;
+                    margin-bottom: 20px;
+                    background: #f1f1f1;
+                }
+                .nav-tab, .nav-tab:focus, .nav-tab:active {
+                    font-weight: normal !important;
+                    background: #e5e5e5 !important;
+                    color: #555 !important;
+                    border: 1px solid #ccc !important;
+                    border-bottom: none !important;
+                    box-shadow: none !important;
+                    outline: none !important;
+                }
+                .nav-tab-active, .nav-tab-active:focus, .nav-tab-active:active {
+                    background: #fff !important;
+                    color: #222 !important;
+                    border-bottom: 1px solid #fff !important;
+                    z-index: 2;
+                    font-weight: bold !important;
+                }
+            </style>
+        </div>
+        <?php
+    } elseif ($active_tab === 'options') {
+        // Options tab content (settings)
+        echo '<div class="wrap"><h2>Plugin Options</h2>';
+        echo '<p>Settings and configuration options will appear here.</p>';
+        // You can include your settings form or require a settings file here
+        echo '</div>';
+    } elseif ($active_tab === 'support') {
+        // Support tab content (render documentation)
+        echo '<div class="wrap"><h2>Support & Documentation</h2>';
+        if (!class_exists('Parsedown')) {
+            // Try to include Parsedown if not already loaded
+            $parsedown_path = dirname(__FILE__) . '/includes/utilities/parsedown.php';
+            if (file_exists($parsedown_path)) {
+                require_once $parsedown_path;
+            } else {
+                echo '<p style="color:red;">Parsedown.php not found. Please add Parsedown.php to the includes directory.</p>';
+            }
+        }
+        if (class_exists('Parsedown')) {
+            require_once dirname(__FILE__) . '/includes/support.php';
+            kognetiks_analytics_support_section_callback();
+        }
+        echo '</div>';
+    }
+    echo '</div>'; // Close .wrap
+}
+
+// Function to delete the files
+function kognetiks_analytics_delete_file() {
+
+    // DIAG - Diagnostics
+    back_trace( 'NOTICE', 'Kognetiks Analytics Delete File Function Loaded');
+
+    // Verify nonce
+    if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'kognetiks_analytics_delete_file')) {
+        wp_die('Security check failed');
+    }
+
+    if (isset($_GET['file'])) {
+
+        $file = basename($_GET['file']); // Prevent directory traversal attacks
+        $file_path = plugin_dir_path(__FILE__) . 'results/' . $file;
+
+        if (file_exists($file_path)) {
+
+            unlink($file_path);
+            wp_redirect(admin_url('admin.php?page=kognetiks-analytics&deleted=' . urlencode($file)));
+
+            exit;
+
+        } else {
+
+            wp_redirect(admin_url('admin.php?page=kognetiks-analytics&error=notfound'));
+
+            exit;
+
+        }
+
+    }
+
+    wp_die(); // Ensure the script ends here if no file is provided
+
+}
+add_action('wp_ajax_delete_file', 'kognetiks_analytics_delete_file');
+
+// Function to serve the file for download
+function kognetiks_analytics_serve_file_for_download($filepath) {
+
+    // DIAG - Diagnostics
+    back_trace( 'NOTICE', 'Kognetiks Analytics Serve File For Download Function Loaded');
+
+    // Verify nonce
+    if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'kognetiks_analytics_download_file')) {
+        wp_die('Security check failed');
+    }
+
+    // Validate filepath
+    if (!is_string($filepath) || empty($filepath)) {
+        header("HTTP/1.0 400 Bad Request");
+        echo esc_html("Invalid file path.");
+        exit;
+    }
+
+    // Ensure the file exists and is within the allowed directory
+    $allowed_dir = plugin_dir_path(__FILE__) . 'results/';
+    $real_filepath = realpath($filepath);
+    $real_allowed_dir = realpath($allowed_dir);
+
+    if (!$real_filepath || !$real_allowed_dir || strpos($real_filepath, $real_allowed_dir) !== 0) {
+        header("HTTP/1.0 403 Forbidden");
+        echo esc_html("Access denied.");
+        exit;
+    }
+
+    if (file_exists($filepath)) {
+        // Send headers to prompt the browser to download the file
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . esc_attr(basename($filepath)) . '"');
+        header('Content-Length: ' . filesize($filepath));
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+
+        // Serve the file in chunks to handle larger files efficiently
+        $chunk_size = 1024 * 1024; // 1MB per chunk
+        $handle = fopen($filepath, 'rb');
+
+        if ($handle) {
+            while (!feof($handle)) {
+                $buffer = fread($handle, $chunk_size);
+                if ($buffer !== false) {
+                    echo wp_kses_post($buffer);
+                    flush(); // Ensure the data is sent to the client in real-time
+                }
+            }
+            fclose($handle);
+        } else {
+            header("HTTP/1.0 500 Internal Server Error");
+            echo esc_html("Error reading file.");
+        }
+
+        exit;
+    } else {
+        // Return a 404 Not Found response if the file does not exist
+        header("HTTP/1.0 404 Not Found");
+        echo esc_html("File not found.");
+    }
+}
+
+// Add this function to generate file links with nonces
+function kognetiks_analytics_get_file_links($file) {
+    $delete_url = wp_nonce_url(admin_url('admin-ajax.php?action=delete_file&file=' . urlencode($file)), 'kognetiks_analytics_delete_file');
+    $download_url = wp_nonce_url(admin_url('admin-ajax.php?action=serve_file&file=' . urlencode($file)), 'kognetiks_analytics_download_file');
+    
+    return array(
+        'delete' => $delete_url,
+        'download' => $download_url
+    );
+}
+
+// Function to display the file list
+function kognetiks_analytics_display_file_list() {
+
+    $results_dir = plugin_dir_path(__FILE__) . 'results/';
+    
+    if (!is_dir($results_dir)) {
+        return;
+    }
+    
+    $files = scandir($results_dir);
+    if ($files === false) {
+        return;
+    }
+    
+    echo '<div class="file-list-section">';
+    echo '<h2>📁 Generated Reports</h2>';
+    echo '<table class="wp-list-table widefat fixed striped">';
+    echo '<thead><tr>';
+    echo '<th>File Name</th>';
+    echo '<th>Size</th>';
+    echo '<th>Last Modified</th>';
+    echo '<th>Actions</th>';
+    echo '</tr></thead><tbody>';
+    
+    foreach ($files as $file) {
+        if ($file === '.' || $file === '..' || $file === 'index.php') {
+            continue;
+        }
+        
+        $file_path = $results_dir . $file;
+        if (!is_file($file_path)) {
+            continue;
+        }
+        
+        $file_info = array(
+            'size' => size_format(filesize($file_path)),
+            'modified' => date('Y-m-d H:i:s', filemtime($file_path))
+        );
+        
+        $links = kognetiks_analytics_get_file_links($file);
+        
+        echo '<tr>';
+        echo '<td>' . esc_html($file) . '</td>';
+        echo '<td>' . esc_html($file_info['size']) . '</td>';
+        echo '<td>' . esc_html($file_info['modified']) . '</td>';
+        echo '<td>';
+        echo '<a href="' . esc_url($links['delete']) . '" class="button" onclick="return confirm(\'Are you sure you want to delete this file?\');">Delete</a> ';
+        echo '<a href="' . esc_url($links['download']) . '" class="button">Download</a>';
+        echo '</td>';
+        echo '</tr>';
+    }
+    
+    echo '</tbody></table>';
+    echo '</div>';
+
+}
+
+// Add this function if not present
+if (!function_exists('kognetiks_analytics_start_scoring')) {
+    
+    function kognetiks_analytics_start_scoring() {
+
+        kognetiks_analytics_set_scoring_status('running');
+        back_trace('NOTICE', 'Sentiment scoring process started');
+    }
+
+}
+
