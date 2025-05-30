@@ -79,6 +79,13 @@ function kognetiks_analytics_score_conversations_without_sentiment_score() {
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     $batch_size = 100; // Process 100 records at a time
 
+    // Get the last scoring date
+    $last_scoring_date = get_option('kognetiks_analytics_last_scoring_date');
+    $date_condition = '';
+    if (!empty($last_scoring_date)) {
+        $date_condition = $wpdb->prepare(" AND c.interaction_time >= %s", $last_scoring_date);
+    }
+
     // Prevent concurrent runs
     if (kognetiks_analytics_is_scoring_locked()) {
         back_trace('NOTICE', 'Scoring is already running. Exiting.');
@@ -116,6 +123,7 @@ function kognetiks_analytics_score_conversations_without_sentiment_score() {
                 WHERE t.id IS NULL 
                 AND (c.sentiment_score IS NULL OR c.sentiment_score = '' OR c.sentiment_score = 0)
                 AND (c.user_type = 'Visitor' OR c.user_type = 'Chatbot')
+                $date_condition
                 ORDER BY c.id ASC 
                 LIMIT %d",
                 $batch_size
@@ -189,6 +197,13 @@ function kognetiks_analytics_score_conversations_without_sentiment_score_ai_base
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     $batch_size = 100; // Process 100 records at a time
 
+    // Get the last scoring date
+    $last_scoring_date = get_option('kognetiks_analytics_last_scoring_date');
+    $date_condition = '';
+    if (!empty($last_scoring_date)) {
+        $date_condition = $wpdb->prepare(" AND interaction_time >= %s", $last_scoring_date);
+    }
+
     // Prevent concurrent runs
     if (kognetiks_analytics_is_scoring_locked()) {
         back_trace('NOTICE', 'Scoring is already running. Exiting.');
@@ -203,13 +218,13 @@ function kognetiks_analytics_score_conversations_without_sentiment_score_ai_base
         return;
     }
 
-    // Check if any of Today's conversations have not been scored
-    $Today = date('Y-m-d');
+    // Check if any conversations have not been scored
     $conversations = $wpdb->get_results(
         $wpdb->prepare(
             "SELECT * FROM $table_name 
             WHERE (sentiment_score IS NULL OR sentiment_score = '' OR sentiment_score = 0)
             AND (user_type = 'Visitor' OR user_type = 'Chatbot')
+            $date_condition
             ORDER BY id ASC
             LIMIT %d",
             $batch_size
@@ -243,6 +258,7 @@ function kognetiks_analytics_score_conversations_without_sentiment_score_ai_base
                 "SELECT * FROM $table_name 
                 WHERE (sentiment_score IS NULL OR sentiment_score = '' OR sentiment_score = 0) 
                 AND (user_type = 'Visitor' OR user_type = 'Chatbot')
+                $date_condition
                 ORDER BY id ASC
                 LIMIT %d",
                 $batch_size
@@ -290,6 +306,82 @@ function kognetiks_analytics_score_conversations_without_sentiment_score_ai_base
 
 }
 
+// Get the scoring control mode (Manual/Automated)
+function kognetiks_analytics_get_scoring_control_mode() {
+    
+    return get_option('kognetiks_analytics_scoring_control', 'Manual');
+
+}
+
+// Schedule the automated scoring cron job
+function kognetiks_analytics_schedule_scoring_cron() {
+
+    if (!wp_next_scheduled('kognetiks_analytics_automated_scoring')) {
+        wp_schedule_event(time(), 'hourly', 'kognetiks_analytics_automated_scoring');
+        back_trace('NOTICE', 'Automated scoring cron job scheduled');
+    }
+
+}
+
+// Unschedule the automated scoring cron job
+function kognetiks_analytics_unschedule_scoring_cron() {
+
+    $timestamp = wp_next_scheduled('kognetiks_analytics_automated_scoring');
+    if ($timestamp) {
+        wp_unschedule_event($timestamp, 'kognetiks_analytics_automated_scoring');
+        back_trace('NOTICE', 'Automated scoring cron job unscheduled');
+    }
+
+}
+
+// Cron job callback function
+function kognetiks_analytics_automated_scoring_callback() {
+
+    // Only run if scoring control is set to Automated
+    if (kognetiks_analytics_get_scoring_control_mode() === 'Automated') {
+        back_trace('NOTICE', 'Running automated scoring cron job');
+        kognetiks_analytics_score_conversations_without_sentiment_score();
+    } else {
+        // If somehow the cron job is still running but mode is Manual, unschedule it
+        kognetiks_analytics_unschedule_scoring_cron();
+    }
+
+}
+add_action('kognetiks_analytics_automated_scoring', 'kognetiks_analytics_automated_scoring_callback');
+
+// Set the scoring control mode (Manual/Automated)
+function kognetiks_analytics_set_scoring_control_mode($mode) {
+
+    if (!in_array($mode, ['Manual', 'Automated'])) {
+        return false;
+    }
+
+    $current_mode = kognetiks_analytics_get_scoring_control_mode();
+    
+    // Update the option in the database
+    update_option('kognetiks_analytics_scoring_control', $mode);
+
+    // Handle cron job based on mode change
+    if ($mode === 'Automated' && $current_mode !== 'Automated') {
+        // Switching to Automated - schedule the cron job
+        kognetiks_analytics_schedule_scoring_cron();
+    } elseif ($mode === 'Manual' && $current_mode !== 'Manual') {
+        // Switching to Manual - unschedule the cron job
+        kognetiks_analytics_unschedule_scoring_cron();
+    }
+
+    return true;
+
+}
+
+// Cleanup function to unschedule cron job on plugin deactivation
+function kognetiks_analytics_deactivate() {
+
+    kognetiks_analytics_unschedule_scoring_cron();
+
+}
+register_deactivation_hook(__FILE__, 'kognetiks_analytics_deactivate');
+
 // Wrapper function to compute sentiment score using either simple or AI-based method
 function kognetiks_analytics_compute_sentiment_score($message_text) {
 
@@ -305,6 +397,7 @@ function kognetiks_analytics_compute_sentiment_score($message_text) {
     
     // Format score to one decimal place using standard rounding
     return round($score, 1);
+    
 }
 
 // Compute the sentiment score for a message using a simple algorithm

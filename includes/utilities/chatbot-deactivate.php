@@ -169,6 +169,23 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting cron event: knowledge_navigator_scan_hook');
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook');
 
+        // Delete any analytics options
+        // back_trace( 'NOTICE', 'Deleting analytics options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'kognetiks_analytics%'");
+
+        // Delete any scheduled analytics cron events
+        // back_trace( 'NOTICE', 'Deleting analytics cron events');
+        $crons = _get_cron_array();
+        foreach ($crons as $timestamp => $cron) {
+            foreach ($cron as $hook => $events) {
+                if (strpos($hook, 'kognetiks_analytics') !== false) {
+                    foreach ($events as $event) {
+                        wp_unschedule_event($timestamp, $hook, $event['args']);
+                    }
+                }
+            }
+        }
+        
     }
 
     // DIAG - Log the uninstall

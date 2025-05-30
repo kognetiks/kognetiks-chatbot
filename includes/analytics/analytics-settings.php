@@ -124,8 +124,13 @@ function kognetiks_analytics_settings_page() {
         if (isset($_POST['kognetiks_analytics_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_nonce'])), 'kognetiks_analytics_scoring_control')) {
             // Get the selected scoring control from the form submission
             $selected_scoring_control = isset($_POST['kognetiks_analytics_scoring_control']) ? sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_control'])) : 'Manual';
+            // Update the option in the database
+            kognetiks_analytics_set_scoring_control_mode($selected_scoring_control);
+            // DIAG - Diagnostics
+            back_trace('NOTICE', 'Scoring control mode updated to: ' . $selected_scoring_control);
         } else {
-            $selected_scoring_control = 'Manual';
+            // Get the current scoring control mode from the database
+            $selected_scoring_control = kognetiks_analytics_get_scoring_control_mode();
         }
 
         // Get all statistics
@@ -727,6 +732,7 @@ function kognetiks_analytics_settings_page() {
         echo '</div>';
     }
     echo '</div>'; // Close .wrap
+    
 }
 
 // Function to delete the files

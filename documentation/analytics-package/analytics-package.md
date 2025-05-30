@@ -16,19 +16,19 @@ The analytics package summarizes data for sentiment analysis, engagement analysi
 
 ## 📅 Period & Filter Controls
 
-At the top of the Analytics tab, you’ll find controls that allow you to filter results:
+At the top of the Analytics tab, you'll find controls that allow you to:
 
-- **Period Selector** – Choose comparison windows like “Today vs Yesterday,” “This Week vs Last Week,” etc.
-- **Type Filter** – Filter results by conversation type (e.g., All, Knowledge Navigator, Assistant, Custom).
-- **Scoring** – View results using manual or automatic scoring (if configured).
-- **Manual Controls** – Use **Start**, **Stop**, **Restart**, or **Reset** to control manual tracking behavior.
+- **Period Selector** – Choose the comparison windows like ```Today vs Yesterday```, ```This Week vs Last Week```, etc.
+- **Type Filter** – Filter results by conversation type, e.g., ```All```, ```Visitor```, ```Chatbot```).
+- **Scoring** – Switch between sentiment scoring that is ```Manual``` or ```Automated```.  If automated sentiment scores will be computed hourly.
+- **Manual Controls** – Use ```Start```, ```Stop```, ```Restart```, or ```Reset`` to control manual sentiment scoring.
 
 ---
 
 ## 🧠 Conversation Statistics
 
 ### Overview
-This section shows high-level metrics comparing today’s activity to the previous day:
+This section shows high-level metrics comparing today's activity to the previous day:
 
 - **Total Conversations** – Number of unique chatbot conversations initiated.
 - **Unique Visitors** – Number of individual visitors who interacted with the chatbot.
@@ -80,6 +80,52 @@ Monitor your OpenAI (or other LLM provider) usage:
 
 ---
 
+## 📈 Best Practices
+
+- **Monitor daily trends** – Watch for sudden drops or spikes in user activity.
+- **Track engagement** – Low engagement could signal that users aren't getting helpful responses.
+- **Analyze sentiment** – Negative sentiment may indicate confusion or frustration in the user journey.
+- **Filter Prompts and Responses** - Explore visitors/users sentiment seperately from chatbot sentiment.
+- **Manage token usage** – Keep an eye on token counts if you're billed per token by your AI engine.
+
+---
+
+## 🔍 Understanding Filter Prompts and Responses
+
+The ability to filter and analyze visitor/user sentiment separately from chatbot sentiment is crucial for several reasons:
+
+1. **Deeper Understanding of User Experience**
+   - By separating visitor/user sentiment from chatbot sentiment, you can identify if negative sentiment is coming from frustrated users or if it's the chatbot's responses that are causing issues
+   - This helps pinpoint exactly where in the conversation flow problems might be occurring
+
+2. **Better Chatbot Optimization**
+   - If visitor sentiment is consistently negative while chatbot sentiment is positive, it might indicate that the chatbot's responses, while technically correct, aren't effectively addressing user needs
+   - Conversely, if chatbot sentiment is negative but visitor sentiment is positive, it could suggest the chatbot is being too formal or technical when users want more casual interaction
+
+3. **Targeted Improvements**
+   - You can make more informed decisions about what to improve:
+     - If visitor sentiment is low, you might need to improve the chatbot's understanding of user intent
+     - If chatbot sentiment is low, you might need to adjust the tone or style of responses
+   - This separation allows for more precise tuning of the chatbot's personality and response patterns
+
+4. **Quality Control**
+   - It helps identify if the chatbot is maintaining appropriate emotional intelligence
+   - You can ensure the chatbot's responses align with your desired brand voice and customer service standards
+   - It provides a way to validate that the chatbot's sentiment analysis is working correctly
+
+5. **Business Impact**
+   - Understanding the sentiment dynamics helps improve customer satisfaction
+   - It can lead to better conversion rates as you optimize the chatbot's interaction style
+   - It helps maintain a positive brand image by ensuring the chatbot's tone matches your company's values
+
+---
+
+## 🧩 Compatibility
+
+- Works seamlessly with conversation continuation, Assistant-based interactions, and all AI Platform APIs supported by the plugin when Conversation Logging is enabled.
+
+---
+
 ## 🔐 Premium Activation
 
 To unlock this tab:
@@ -89,21 +135,6 @@ To unlock this tab:
 3. Save settings and refresh the Analytics tab.
 
 Need help? Visit our support site or email [support@kognetiks.com](mailto:support@kognetiks.com).
-
----
-
-## 📈 Best Practices
-
-- **Monitor daily trends** – Watch for sudden drops or spikes in user activity.
-- **Track engagement** – Low engagement could signal that users aren’t getting helpful responses.
-- **Analyze sentiment** – Negative sentiment may indicate confusion or frustration in the user journey.
-- **Manage token usage** – Keep an eye on token counts if you’re billed per token by your AI engine.
-
----
-
-## 🧩 Compatibility
-
-- Works seamlessly with conversation continuation, Assistant-based interactions, and all AI Platform APIs.
 
 ---
 
