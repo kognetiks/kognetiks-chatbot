@@ -626,11 +626,48 @@ function chatbot_chatgpt_settings_page() {
             //     do_settings_sections('chatbot_chatgpt_premium');
 
             } elseif ($active_tab == 'analytics') {
-                // Call the analytics settings page function directly
-                if (function_exists('kognetiks_analytics_settings_page')) {
-                    kognetiks_analytics_settings_page();
+                if ( chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
+                    if ( chatbot_chatgpt_freemius()->is_plan( 'analytics' ) ) {
+                        if (function_exists('kognetiks_analytics_settings_page')) {
+                            kognetiks_analytics_settings_page();
+                        } else {
+                            echo '<div class="notice notice-error"><p>Analytics functionality is not available. Please ensure the analytics addon is activated.</p></div>';
+                        }
+                    }
                 } else {
-                    echo '<div class="notice notice-error"><p>Analytics functionality is not available. Please ensure the analytics addon is activated.</p></div>';
+                    echo '<div class="kchat-analytics-upgrade-notice" style="border: 1px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';
+                    echo '<h2 style="margin-top: 0;">🚀 Unlock Powerful Insights with Analytics <span style="color: #d54e21;">(Premium Feature)</span></h2>';
+                    
+                    echo '<p>Curious how visitors <em>really</em> interact with your chatbot?</p>';
+                    
+                    echo '<ul style="margin-left: 20px;">';
+                    echo '<li>📊 Track total conversations, engagement rates, and drop-off points</li>';
+                    echo '<li>😊 Understand visitor <strong>sentiment</strong>—who’s happy, who’s frustrated, and why</li>';
+                    echo '<li>🔍 Filter by visitor or chatbot to see both sides of every interaction</li>';
+                    echo '<li>💡 Discover what’s working (and what’s not) so you can improve outcomes</li>';
+                    echo '</ul>';
+                    
+                    echo '<hr style="margin: 20px 0;">';
+                    
+                    echo '<h3>🔒 Premium Feature</h3>';
+                    echo '<p>This feature is part of the <strong>Kognetiks Premium</strong> plan. Activate your license key to:</p>';
+                    
+                    echo '<ul style="margin-left: 20px;">';
+                    echo '<li>Enable automated and manual sentiment scoring</li>';
+                    echo '<li>Monitor real-time engagement trends</li>';
+                    echo '<li>Track token usage to manage OpenAI (and other LLM) costs</li>';
+                    echo '<li>Make data-driven improvements to your chatbot experience</li>';
+                    echo '</ul>';
+                    
+                    echo '<hr style="margin: 20px 0;">';
+                    
+                    echo '<h3>✅ Ready to Upgrade?</h3>';
+                    echo '<p>';
+                    echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">Upgrade Now</a>';
+                    echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=analytics-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
+                    echo '<a href="mailto:support@kognetiks.com">Contact Support</a>';
+                    echo '</p>';
+                    echo '</div>';
                 }
             } elseif ($active_tab == 'tools') {
 
