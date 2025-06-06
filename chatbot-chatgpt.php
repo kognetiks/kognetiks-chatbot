@@ -55,6 +55,7 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
                     'has_premium_version' => true,
                     'has_addons'          => false,
                     'has_paid_plans'      => true,
+                    'is_debug'            => false, // Disable debug mode in production
                     'trial'               => array(
                         'days'               => 7,
                         'is_require_payment' => false,
