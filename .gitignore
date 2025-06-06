@@ -10,7 +10,7 @@
 /dataSources/
 /dataSources.local.xml
 .idea/
-debug/
+/debug/
 package.json
 QUERIES.md
 TESTS.md
