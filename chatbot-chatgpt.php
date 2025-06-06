@@ -266,8 +266,8 @@ function fs_active_addon( $addon_slug ) {
     return true;
 }
 
-// Include Analytics library
-if ( function_exists( 'fs_active_addon' ) && fs_active_addon( 'kognetiks-analytics' ) ) {
+// Include Analytics library - Premium Only
+if ( function_exists( 'chatbot_chatgpt_freemius' ) && chatbot_chatgpt_freemius()->is_premium() ) {
     require_once plugin_dir_path(__FILE__) . 'includes/analytics/analytics-settings.php';
     require_once plugin_dir_path(__FILE__) . 'includes/analytics/chatbot-analytics.php';
     require_once plugin_dir_path(__FILE__) . 'includes/analytics/languages/en_US.php';
