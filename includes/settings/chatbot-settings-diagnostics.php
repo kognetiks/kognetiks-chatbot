@@ -411,9 +411,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 
 // Log Chatbot Errors to the Server - Ver 2.0.9
 function chatbot_error_log($message) {
-
     global $wp_filesystem;
-
     global $chatbot_chatgpt_plugin_dir_path;
 
     $chatbot_logs_dir = $chatbot_chatgpt_plugin_dir_path . 'chatbot-logs/';
@@ -426,12 +424,37 @@ function chatbot_error_log($message) {
     
     $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
-    // Append the error message to the log file
-    if (function_exists('WP_Filesystem')) {
-        global $wp_filesystem;
-        $wp_filesystem->put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+    // Initialize the WordPress filesystem if not already initialized
+    if (!function_exists('WP_Filesystem')) {
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+    }
+    
+    // Initialize the filesystem if not already done
+    if (!$wp_filesystem) {
+        $access_type = get_filesystem_method();
+        if ($access_type === 'direct') {
+            $creds = request_filesystem_credentials(site_url() . '/wp-admin/', '', false, false, array());
+            if (WP_Filesystem($creds)) {
+                // Filesystem initialized successfully
+            } else {
+                // Fallback to file_put_contents if filesystem initialization fails
+                file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+                return;
+            }
+        } else {
+            // Fallback to file_put_contents if direct access is not available
+            file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+            return;
+        }
     }
 
+    // Append the error message to the log file
+    if ($wp_filesystem) {
+        $wp_filesystem->put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+    } else {
+        // Fallback to file_put_contents if $wp_filesystem is still not available
+        file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+    }
 }
 
 // Log Chatbot Errors to the Server - Ver 2.0.3

@@ -49,8 +49,8 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
                     'slug'                => 'chatbot-chatgpt',
                     'type'                => 'plugin',
                     'public_key'          => 'pk_ea667ce516b3acd5d3756a0c2530b',
-                    'is_premium'          => true,
-                    'premium_suffix'      => 'Kognetiks Analytics',
+                    'is_premium'          => false,  // This is the free version
+                    'premium_suffix'      => 'pro',
                     // If your plugin is a serviceware, set this option to false.
                     'has_premium_version' => true,
                     'has_addons'          => false,
