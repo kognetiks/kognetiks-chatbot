@@ -105,31 +105,31 @@ global $session_id;
 global $user_id;
 
 // Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
-function kognetiks_assign_unique_id() {
-
-    if (!isset($_COOKIE['kognetiks_unique_id'])) {
-        $unique_id = uniqid('kognetiks_', true);
-        
-        // Set a cookie using the built-in setcookie function
-        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
-                
-        // Ensure the cookie is set for the current request
-        $_COOKIE['kognetiks_unique_id'] = $unique_id;
+if (!function_exists('kognetiks_assign_unique_id')) {
+    function kognetiks_assign_unique_id() {
+        if (!isset($_COOKIE['kognetiks_unique_id'])) {
+            $unique_id = uniqid('kognetiks_', true);
+            
+            // Set a cookie using the built-in setcookie function
+            setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
+                    
+            // Ensure the cookie is set for the current request
+            $_COOKIE['kognetiks_unique_id'] = $unique_id;
+        }
     }
-
+    add_action('init', 'kognetiks_assign_unique_id', 1); // Set higher priority
 }
-add_action('init', 'kognetiks_assign_unique_id', 1); // Set higher priority
 
 // Get the unique ID of the visitor or logged-in user - Ver 2.0.4
-function kognetiks_get_unique_id() {
-
-    if (isset($_COOKIE['kognetiks_unique_id'])) {
-        // error_log('Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
-        return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
+if (!function_exists('kognetiks_get_unique_id')) {
+    function kognetiks_get_unique_id() {
+        if (isset($_COOKIE['kognetiks_unique_id'])) {
+            // error_log('Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
+            return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
+        }
+        // error_log('Unique ID not found');
+        return null;
     }
-    // error_log('Unique ID not found');
-    return null;
-
 }
 
 // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
@@ -267,7 +267,9 @@ function fs_active_addon( $addon_slug ) {
 }
 
 // Include Analytics library - Premium Only
-if ( function_exists( 'chatbot_chatgpt_freemius' ) && chatbot_chatgpt_freemius()->is_premium() ) {
+if ( function_exists( 'chatbot_chatgpt_freemius' ) && 
+     chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() && 
+     chatbot_chatgpt_freemius()->is_plan( 'analytics' ) ) {
     require_once plugin_dir_path(__FILE__) . 'includes/analytics/analytics-settings.php';
     require_once plugin_dir_path(__FILE__) . 'includes/analytics/chatbot-analytics.php';
     require_once plugin_dir_path(__FILE__) . 'includes/analytics/languages/en_US.php';
