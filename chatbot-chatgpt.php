@@ -50,7 +50,7 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
                     'type'                => 'plugin',
                     'public_key'          => 'pk_ea667ce516b3acd5d3756a0c2530b',
                     'is_premium'          => false,  // This is the free version
-                    'premium_suffix'      => 'pro',
+                    'premium_suffix'      => 'premium',
                     // If your plugin is a serviceware, set this option to false.
                     'has_premium_version' => true,
                     'has_addons'          => false,
@@ -2158,3 +2158,44 @@ function kchat_get_plugin_version() {
     return $plugin_version;
 
 }
+
+// Handle the upgrade process from free to premium
+function chatbot_chatgpt_handle_upgrade() {
+
+    // Only run this when upgrading to premium
+    if (!chatbot_chatgpt_freemius()->is_paying()) {
+        return;
+    }
+
+    // Get the premium plugin file path
+    $premium_plugin_file = WP_PLUGIN_DIR . '/chatbot-chatgpt-premium/chatbot-chatgpt.php';
+    
+    // Check if premium version exists
+    if (!file_exists($premium_plugin_file)) {
+        return;
+    }
+
+    // Deactivate the free version
+    deactivate_plugins(plugin_basename(__FILE__));
+    
+    // Activate the premium version
+    activate_plugin($premium_plugin_file);
+    
+    // Store a transient to show a success message after redirect
+    set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
+    
+}
+add_action('fs_after_license_activated', 'chatbot_chatgpt_handle_upgrade');
+
+// Show upgrade success message
+function chatbot_chatgpt_upgrade_notice() {
+    if (get_transient('chatbot_chatgpt_upgrade_complete')) {
+        delete_transient('chatbot_chatgpt_upgrade_complete');
+        ?>
+        <div class="notice notice-success is-dismissible">
+            <p><?php _e('Successfully upgraded to Chatbot ChatGPT Premium! The free version has been deactivated.', 'chatbot-chatgpt'); ?></p>
+        </div>
+        <?php
+    }
+}
+add_action('admin_notices', 'chatbot_chatgpt_upgrade_notice');
