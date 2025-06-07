@@ -1,6 +1,6 @@
 <?php
-/*
- * Plugin Name: Kognetiks Chatbot
+/**
+ * Plugin Name: ChatGPT AI Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
  * Version:     2.3.1
@@ -23,6 +23,8 @@
  * 
  * @fs_premium_only /includes/analytics/
  */
+
+namespace Kognetiks\ChatbotChatGPT;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -261,9 +263,14 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
-// FIXME - Analytics - Ver 1.0.0
-function fs_active_addon( $addon_slug ) {
-    return true;
+// Add namespace to prevent function conflicts
+namespace Kognetiks\ChatbotChatGPT;
+
+// Only declare the function if it doesn't exist
+if (!function_exists('Kognetiks\ChatbotChatGPT\fs_active_addon')) {
+    function fs_active_addon( $addon_slug ) {
+        return true;
+    }
 }
 
 // Include Analytics library - Premium Only
@@ -2178,10 +2185,24 @@ function chatbot_chatgpt_handle_upgrade() {
     // Get the free version's directory path
     $free_plugin_dir = plugin_dir_path(__FILE__);
 
-    // Deactivate the free version
-    deactivate_plugins(plugin_basename(__FILE__));
+    // Store the current plugin state
+    $current_plugin = plugin_basename(__FILE__);
     
-    // Activate the premium version
+    // Deactivate the free version first
+    deactivate_plugins($current_plugin, true);
+    
+    // Clear any cached plugin data
+    wp_cache_delete('plugins', 'plugins');
+    
+    // Force WordPress to reload the plugin list
+    $active_plugins = get_option('active_plugins');
+    $key = array_search($current_plugin, $active_plugins);
+    if ($key !== false) {
+        unset($active_plugins[$key]);
+        update_option('active_plugins', $active_plugins);
+    }
+    
+    // Now activate the premium version
     $activation_result = activate_plugin($premium_plugin_file);
     
     // Only proceed with cleanup if premium activation was successful
@@ -2192,8 +2213,12 @@ function chatbot_chatgpt_handle_upgrade() {
         // Schedule the cleanup of the free version's directory
         // We use a small delay to ensure the premium version is fully activated
         wp_schedule_single_event(time() + 5, 'chatbot_chatgpt_cleanup_free_version', array($free_plugin_dir));
+    } else {
+        // If premium activation failed, reactivate the free version
+        activate_plugin($current_plugin);
+        // Log the error
+        error_log('Premium upgrade failed: ' . $activation_result->get_error_message());
     }
-
 }
 add_action('fs_after_license_activated', 'chatbot_chatgpt_handle_upgrade');
 
