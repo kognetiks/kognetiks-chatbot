@@ -34,6 +34,11 @@ if (get_option('chatbot_chatgpt_premium_active') === true) {
     // DIAG - Diagnostics - Ver 2.3.1
     error_log('[Chatbot] [chatbot-chatgpt.php] Premium version is active, skipping free plugin');
 
+    // Notify the user that the premium version is active
+    add_action('admin_notices', function () {
+        echo '<div class="notice notice-warning"><p>The premium version of Kognetiks Chatbot is active. The free version has been disabled to prevent conflicts.</p></div>';
+    });
+
     return;
 
 }
