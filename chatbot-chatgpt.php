@@ -24,8 +24,6 @@
  * @fs_premium_only /includes/analytics/
  */
 
-namespace Kognetiks\ChatbotChatGPT;
-
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
@@ -126,10 +124,8 @@ if (!function_exists('kognetiks_assign_unique_id')) {
 if (!function_exists('kognetiks_get_unique_id')) {
     function kognetiks_get_unique_id() {
         if (isset($_COOKIE['kognetiks_unique_id'])) {
-            // error_log('Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
             return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
         }
-        // error_log('Unique ID not found');
         return null;
     }
 }
@@ -263,12 +259,9 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
-// Add namespace to prevent function conflicts
-namespace Kognetiks\ChatbotChatGPT;
-
-// Only declare the function if it doesn't exist
-if (!function_exists('kognetiks_fs_active_addon')) {
-    function kognetiks_fs_active_addon( $addon_slug ) {
+// Remove namespace and use global namespace for all functions
+if (!function_exists('fs_active_addon')) {
+    function fs_active_addon($addon_slug) {
         return true;
     }
 }
