@@ -2179,7 +2179,6 @@ function kchat_get_plugin_version() {
 
 // Handle the upgrade process from free to premium
 function chatbot_chatgpt_handle_upgrade() {
-
     // DIAG - Diagnostics - Ver 2.3.1
     back_trace('NOTICE', 'Starting chatbot_chatgpt_handle_upgrade');
     back_trace('NOTICE', 'Freemius is_paying: ' . (chatbot_chatgpt_freemius()->is_paying() ? 'true' : 'false'));
@@ -2216,51 +2215,55 @@ function chatbot_chatgpt_handle_upgrade() {
         deactivate_plugins($current_plugin, true);
         return;
     }
-    
-    // Set the premium active flag before deactivating free version
+
+    // Set the premium active flag
     update_option('chatbot_chatgpt_premium_active', true);
     back_trace('NOTICE', 'Set premium active flag to true');
-    
-    // Deactivate the free version first
+
+    // Deactivate the free version
     back_trace('NOTICE', 'Attempting to deactivate free version');
     deactivate_plugins($current_plugin, true);
-    
+
     // Clear any cached plugin data
     wp_cache_delete('plugins', 'plugins');
     back_trace('NOTICE', 'Cleared plugin cache');
-    
+
     // Force WordPress to reload the plugin list
     $active_plugins = get_option('active_plugins');
     $key = array_search($current_plugin, $active_plugins);
     if ($key !== false) {
         unset($active_plugins[$key]);
         update_option('active_plugins', $active_plugins);
-        back_trace('NOTICE', 'Removed free version from active plugins list');
-    }
-    
-    // Now activate the premium version
-    back_trace('NOTICE', 'Attempting to activate premium version');
-    $activation_result = activate_plugin($premium_plugin_file);
-    
-    // Only proceed with cleanup if premium activation was successful
-    if (!is_wp_error($activation_result)) {
-        back_trace('NOTICE', 'Premium version activated successfully');
-        // Store a transient to show a success message after redirect
-        set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
-        
-        // Schedule the cleanup of the free version's directory
-        // We use a small delay to ensure the premium version is fully activated
-        wp_schedule_single_event(time() + 5, 'chatbot_chatgpt_cleanup_free_version', array($free_plugin_dir));
-        back_trace('NOTICE', 'Scheduled cleanup of free version directory');
-    } else {
-        back_trace('ERROR', 'Premium activation failed: ' . $activation_result->get_error_message());
-        // If premium activation failed, reactivate the free version and clear the premium flag
-        update_option('chatbot_chatgpt_premium_active', false);
-        activate_plugin($current_plugin);
-        error_log('Premium upgrade failed: ' . $activation_result->get_error_message());
+        back_trace('NOTICE', 'Removed free version from active plugins');
     }
 
+    // Store a transient to show a success message after redirect
+    set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
+    back_trace('NOTICE', 'Set upgrade complete transient');
+
+    // Schedule the cleanup of the free version's directory
+    // We use a small delay to ensure the premium version is fully activated
+    wp_schedule_single_event(time() + 5, 'chatbot_chatgpt_cleanup_free_version', array($free_plugin_dir));
+    back_trace('NOTICE', 'Scheduled cleanup of free version directory');
+
 }
+
+// Hook into Freemius's after_install event
+function chatbot_chatgpt_after_install($new_plugin_basename, $plugin_data) {
+
+    // DIAG - Diagnostics - Ver 2.3.1
+    back_trace('NOTICE', 'Starting chatbot_chatgpt_after_install');
+    back_trace('NOTICE', 'New plugin basename: ' . $new_plugin_basename);
+    back_trace('NOTICE', 'Plugin data: ' . print_r($plugin_data, true));
+
+    // Only proceed if this is the premium version being installed
+    if (strpos($new_plugin_basename, 'chatbot-chatgpt-premium') !== false) {
+        back_trace('NOTICE', 'Premium version installed, handling upgrade');
+        chatbot_chatgpt_handle_upgrade();
+    }
+    
+}
+add_action('fs_after_install', 'chatbot_chatgpt_after_install', 10, 2);
 
 // Add deactivation hook to clear the premium flag when premium version is deactivated
 function chatbot_chatgpt_clear_premium_flag() {
