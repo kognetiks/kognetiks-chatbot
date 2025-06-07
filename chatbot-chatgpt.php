@@ -317,21 +317,21 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
     
 }
 
-// Which version of the plugin is this
-function chatbot_chatgpt_log_version() {
-
-    global $chatbot_chatgpt_plugin_version;
-    error_log('[Chatbot] [chatbot-chatgpt] [Version] [' . $chatbot_chatgpt_plugin_version . ']');
- 
-    // Log whether this is the free or premium version
-    if (esc_attr(get_option('chatbot_chatgpt_premium_active')) === 'true') {
-        error_log('[Chatbot] [chatbot-chatgpt-premium] [Version] [This is the PREMIUM version]');
-    } else {
-        error_log('[Chatbot] [chatbot-chatgpt] [Version] [This is the FREE version]');
-    }
-    
-}
-add_action('init', 'chatbot_chatgpt_log_version');
+// // Which version of the plugin is this - Free Version
+// if (!function_exists('chatbot_chatgpt_free_log_version')) {
+//     function chatbot_chatgpt_free_log_version() {
+//         global $chatbot_chatgpt_plugin_version;
+//         error_log('[Chatbot] [chatbot-chatgpt] [Version] [' . $chatbot_chatgpt_plugin_version . ']');
+     
+//         // Log whether this is the free or premium version
+//         if (esc_attr(get_option('chatbot_chatgpt_premium_active')) === 'true') {
+//             error_log('[Chatbot] [chatbot-chatgpt-premium] [Version] [This is the PREMIUM version]');
+//         } else {
+//             error_log('[Chatbot] [chatbot-chatgpt] [Version] [This is the FREE version]');
+//         }
+//     }
+//     add_action('init', 'chatbot_chatgpt_free_log_version');
+// }
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
