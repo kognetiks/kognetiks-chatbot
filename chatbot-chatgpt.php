@@ -2219,49 +2219,77 @@ function chatbot_chatgpt_handle_upgrade() {
     // Delete the free version's directory immediately
     if (is_dir($free_plugin_dir)) {
         back_trace('NOTICE', 'Attempting to remove free version directory immediately');
-        require_once(ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php');
-        require_once(ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php');
         
-        $filesystem = new WP_Filesystem_Direct(null);
-        $result = $filesystem->rmdir($free_plugin_dir, true);
+        // Initialize the filesystem
+        if (!function_exists('WP_Filesystem')) {
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
+        }
+        
+        // Get credentials for the filesystem
+        $access_type = get_filesystem_method();
+        if ($access_type === 'direct') {
+            $creds = request_filesystem_credentials(site_url() . '/wp-admin/', '', false, false, array());
+            if (!WP_Filesystem($creds)) {
+                back_trace('ERROR', 'Failed to initialize filesystem');
+                return false;
+            }
+        } else {
+            back_trace('ERROR', 'Filesystem access type not direct: ' . $access_type);
+            return false;
+        }
+
+        global $wp_filesystem;
+        if (!$wp_filesystem) {
+            back_trace('ERROR', 'Filesystem not initialized');
+            return false;
+        }
+
+        // Attempt to delete the directory
+        $result = $wp_filesystem->rmdir($free_plugin_dir, true);
         
         if ($result) {
             back_trace('NOTICE', 'Successfully removed free version directory');
             // Set the premium active flag after successful deletion
             update_option('chatbot_chatgpt_premium_active', true);
             back_trace('NOTICE', 'Set premium active flag to true');
-            
-            // Store a transient to show a success message after redirect
-            set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
-            back_trace('NOTICE', 'Set upgrade complete transient');
+            return true;
         } else {
             back_trace('ERROR', 'Failed to remove free version directory');
             // If deletion fails, reactivate the free version
             activate_plugin($current_plugin);
             update_option('chatbot_chatgpt_premium_active', false);
             back_trace('NOTICE', 'Reactivated free version due to cleanup failure');
+            return false;
         }
     } else {
         back_trace('NOTICE', 'Free version directory does not exist');
+        return true;
     }
 }
 
-// Hook into Freemius's before_install event to prepare for upgrade
-function chatbot_chatgpt_before_install($plugin_data) {
+// Hook into Freemius's before_download_and_install event
+function chatbot_chatgpt_before_download_and_install($plugin_data) {
     // DIAG - Diagnostics - Ver 2.3.1
-    back_trace('NOTICE', 'Starting chatbot_chatgpt_before_install');
+    back_trace('NOTICE', 'Starting chatbot_chatgpt_before_download_and_install');
     back_trace('NOTICE', 'Plugin data: ' . print_r($plugin_data, true));
 
     // Only proceed if this is the premium version being installed
     if (isset($plugin_data['slug']) && $plugin_data['slug'] === 'chatbot-chatgpt-premium') {
-        back_trace('NOTICE', 'Premium version installation detected, preparing upgrade');
-        // Deactivate and remove free version before premium installation
-        chatbot_chatgpt_handle_upgrade();
+        back_trace('NOTICE', 'Premium version download detected, preparing upgrade');
+        // Deactivate and remove free version before premium download
+        $result = chatbot_chatgpt_handle_upgrade();
+        if (!$result) {
+            // If upgrade handling failed, prevent the download
+            back_trace('ERROR', 'Upgrade handling failed, preventing premium download');
+            return false;
+        }
     }
+    return true;
 }
-add_action('fs_before_install', 'chatbot_chatgpt_before_install', 10, 1);
+add_filter('fs_before_download_and_install', 'chatbot_chatgpt_before_download_and_install', 10, 1);
 
-// Remove the after_install hook since we're handling it before installation
+// Remove other upgrade hooks since we're handling it before download
+remove_action('fs_before_install', 'chatbot_chatgpt_before_install', 10);
 remove_action('fs_after_install', 'chatbot_chatgpt_after_install', 10);
 
 // Add deactivation hook to clear the premium flag when premium version is deactivated
