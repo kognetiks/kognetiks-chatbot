@@ -2175,17 +2175,52 @@ function chatbot_chatgpt_handle_upgrade() {
         return;
     }
 
+    // Get the free version's directory path
+    $free_plugin_dir = plugin_dir_path(__FILE__);
+
     // Deactivate the free version
     deactivate_plugins(plugin_basename(__FILE__));
     
     // Activate the premium version
-    activate_plugin($premium_plugin_file);
+    $activation_result = activate_plugin($premium_plugin_file);
     
-    // Store a transient to show a success message after redirect
-    set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
-    
+    // Only proceed with cleanup if premium activation was successful
+    if (!is_wp_error($activation_result)) {
+        // Store a transient to show a success message after redirect
+        set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
+        
+        // Schedule the cleanup of the free version's directory
+        // We use a small delay to ensure the premium version is fully activated
+        wp_schedule_single_event(time() + 5, 'chatbot_chatgpt_cleanup_free_version', array($free_plugin_dir));
+    }
+
 }
 add_action('fs_after_license_activated', 'chatbot_chatgpt_handle_upgrade');
+
+// Add the cleanup action
+function chatbot_chatgpt_cleanup_free_version($free_plugin_dir) {
+
+    // Verify we're in the correct directory to prevent accidental deletion
+    if (basename($free_plugin_dir) !== 'chatbot-chatgpt') {
+        return;
+    }
+    
+    // Verify the premium version is active
+    if (!is_plugin_active('chatbot-chatgpt-premium/chatbot-chatgpt.php')) {
+        return;
+    }
+    
+    // Remove the free version's directory
+    if (is_dir($free_plugin_dir)) {
+        require_once(ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php');
+        require_once(ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php');
+        
+        $filesystem = new WP_Filesystem_Direct(null);
+        $filesystem->rmdir($free_plugin_dir, true);
+    }
+    
+}
+add_action('chatbot_chatgpt_cleanup_free_version', 'chatbot_chatgpt_cleanup_free_version');
 
 // Show upgrade success message
 function chatbot_chatgpt_upgrade_notice() {
