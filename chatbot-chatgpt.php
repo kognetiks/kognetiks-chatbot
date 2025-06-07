@@ -29,17 +29,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // If the premium version is active, do not load the free plugin
-if (get_option('chatbot_chatgpt_premium_active') === true) {
+if (function_exists('is_plugin_active')) {
 
-    // DIAG - Diagnostics - Ver 2.3.1
-    error_log('[Chatbot] [chatbot-chatgpt.php] Premium version is active, skipping free plugin');
+    if (is_plugin_active('chatbot-chatgpt-premium/chatbot-chatgpt.php')) {
 
-    // Notify the user that the premium version is active
-    add_action('admin_notices', function () {
-        echo '<div class="notice notice-warning"><p>The premium version of Kognetiks Chatbot is active. The free version has been disabled to prevent conflicts.</p></div>';
-    });
+        // DIAG - Diagnostics - Ver 2.3.1
+        error_log('[Chatbot] [chatbot-chatgpt.php] Premium version is active, skipping free plugin');
 
-    return;
+        // Notify the user that the premium version is active
+        add_action('admin_notices', function () {
+            echo '<div class="notice notice-warning"><p>The premium version of Kognetiks Chatbot is active. The free version has been disabled to prevent conflicts.</p></div>';
+        });
+
+        return;
+
+    }
+} else {
+    include_once(ABSPATH . 'wp-admin/includes/plugin.php');
+    if (is_plugin_active('chatbot-chatgpt-premium/chatbot-chatgpt.php')) {
+
+        // DIAG - Diagnostics - Ver 2.3.1
+        error_log('[Chatbot] [chatbot-chatgpt.php] Premium version is active, skipping free plugin');
+
+        // Notify the user that the premium version is active
+        add_action('admin_notices', function () {
+            echo '<div class="notice notice-warning"><p>The premium version of Kognetiks Chatbot is active. The free version has been disabled to prevent conflicts.</p></div>';
+        });
+
+        return;
+    }
 
 }
 
@@ -2384,3 +2402,20 @@ function chatbot_chatgpt_after_license_change($license) {
     // Handle the upgrade
     chatbot_chatgpt_handle_upgrade();
 }
+
+function chatbot_chatgpt_premium_activate() {
+    if (is_plugin_active('chatbot-chatgpt/chatbot-chatgpt.php')) {
+
+        // DIAG - Diagnostics - Ver 2.3.1
+        back_trace('NOTICE', 'Deactivating the free version in chatbot_chatgpt_premium_activate');
+
+        deactivate_plugins('chatbot-chatgpt/chatbot-chatgpt.php', true);
+        update_option('chatbot_chatgpt_premium_active', 'true');
+
+        // Notify the user that the premium version is active
+        add_action('admin_notices', function () {
+            echo '<div class="notice notice-warning"><p>The premium version of Kognetiks Chatbot is active. The free version has been disabled to prevent conflicts.</p></div>';
+        });
+    }
+}
+register_activation_hook(__FILE__, 'chatbot_chatgpt_premium_activate');
