@@ -267,8 +267,8 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.ph
 namespace Kognetiks\ChatbotChatGPT;
 
 // Only declare the function if it doesn't exist
-if (!function_exists('Kognetiks\ChatbotChatGPT\fs_active_addon')) {
-    function fs_active_addon( $addon_slug ) {
+if (!function_exists('kognetiks_fs_active_addon')) {
+    function kognetiks_fs_active_addon( $addon_slug ) {
         return true;
     }
 }
@@ -2168,7 +2168,6 @@ function kchat_get_plugin_version() {
 
 // Handle the upgrade process from free to premium
 function chatbot_chatgpt_handle_upgrade() {
-
     // Only run this when upgrading to premium
     if (!chatbot_chatgpt_freemius()->is_paying()) {
         return;
@@ -2187,6 +2186,16 @@ function chatbot_chatgpt_handle_upgrade() {
 
     // Store the current plugin state
     $current_plugin = plugin_basename(__FILE__);
+    
+    // Check if premium version is already active using option
+    if (get_option('chatbot_chatgpt_premium_active', false)) {
+        // Premium version is already active, just deactivate free version
+        deactivate_plugins($current_plugin, true);
+        return;
+    }
+    
+    // Set the premium active flag before deactivating free version
+    update_option('chatbot_chatgpt_premium_active', true);
     
     // Deactivate the free version first
     deactivate_plugins($current_plugin, true);
@@ -2214,13 +2223,19 @@ function chatbot_chatgpt_handle_upgrade() {
         // We use a small delay to ensure the premium version is fully activated
         wp_schedule_single_event(time() + 5, 'chatbot_chatgpt_cleanup_free_version', array($free_plugin_dir));
     } else {
-        // If premium activation failed, reactivate the free version
+        // If premium activation failed, reactivate the free version and clear the premium flag
+        update_option('chatbot_chatgpt_premium_active', false);
         activate_plugin($current_plugin);
         // Log the error
         error_log('Premium upgrade failed: ' . $activation_result->get_error_message());
     }
 }
-add_action('fs_after_license_activated', 'chatbot_chatgpt_handle_upgrade');
+
+// Add deactivation hook to clear the premium flag when premium version is deactivated
+function chatbot_chatgpt_clear_premium_flag() {
+    delete_option('chatbot_chatgpt_premium_active');
+}
+add_action('deactivate_chatbot-chatgpt-premium/chatbot-chatgpt.php', 'chatbot_chatgpt_clear_premium_flag');
 
 // Add the cleanup action
 function chatbot_chatgpt_cleanup_free_version($free_plugin_dir) {
@@ -2259,3 +2274,9 @@ function chatbot_chatgpt_upgrade_notice() {
     }
 }
 add_action('admin_notices', 'chatbot_chatgpt_upgrade_notice');
+
+// Ensure premium flag is false when free version is activated
+function chatbot_chatgpt_set_premium_flag_false() {
+    update_option('chatbot_chatgpt_premium_active', false);
+}
+add_action('activate_chatbot-chatgpt/chatbot-chatgpt.php', 'chatbot_chatgpt_set_premium_flag_false');
