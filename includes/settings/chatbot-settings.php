@@ -631,41 +631,45 @@ function chatbot_chatgpt_settings_page() {
                     }
                 } else {
                     echo '<div class="kchat-analytics-upgrade-notice" style="border: 1px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';
+
+                    echo '<div class="kchat-analytics-upgrade-notice" style="border: 2px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';
                     echo '<h2 style="margin-top: 0;">🚀 Unlock Powerful Insights with Analytics <span style="color: #d54e21;">(Premium Feature)</span></h2>';
                     
                     echo '<p>Curious how visitors <em>really</em> interact with your chatbot?</p>';
                     
                     echo '<ul style="margin-left: 20px;">';
                     echo '<li>📊 Track total conversations, engagement rates, and drop-off points</li>';
-                    echo '<li>😊 Understand visitor <strong>sentiment</strong>—who’s happy, who’s frustrated, and why</li>';
+                    echo '<li>😊 Understand visitor <strong>sentiment</strong>—who\'s happy, who\'s frustrated, and why</li>';
                     echo '<li>🔍 Filter by visitor or chatbot to see both sides of every interaction</li>';
-                    echo '<li>💡 Discover what’s working (and what’s not) so you can improve outcomes</li>';
+                    echo '<li>💡 Discover what\'s working (and what\'s not) so you can improve outcomes</li>';
                     echo '</ul>';
                     
                     echo '<hr style="margin: 20px 0;">';
                     
-                    echo '<h3>🔒 Premium Feature</h3>';
+                    echo '<h3>🔒 Premium Features</h3>';
                     echo '<p>This feature is part of the <strong>Kognetiks Premium</strong> plan. Activate your license key to:</p>';
                     
                     echo '<ul style="margin-left: 20px;">';
-                    echo '<li>Enable automated and manual sentiment scoring</li>';
-                    echo '<li>Monitor real-time engagement trends</li>';
-                    echo '<li>Track token usage to manage OpenAI (and other LLM) costs</li>';
-                    echo '<li>Make data-driven improvements to your chatbot experience</li>';
+                    echo '<li>- Enable automated and manual sentiment scoring</li>';
+                    echo '<li>- Monitor real-time engagement trends</li>';
+                    echo '<li>- Track token usage to manage OpenAI (and other LLM) costs</li>';
+                    echo '<li>- Make data-driven improvements to your chatbot experience</li>';
                     echo '</ul>';
 
-                    echo '<h3>🛑 BEFORE YOU UPLOAD AND ACTIVATE THE PREMIUM VERSION</h3>';
-                    echo '<p>Please ensure you have the following:</p>';
+                    echo '</div>';
+
+                    echo '<div style="border: 2px solid #d54e21; background-color: #fff8f6; padding: 15px; margin: 15px 0; border-radius: 5px;">';
+                    echo '<h3>🛑 BEFORE ACTIVATING THE PREMIUM VERSION</h3>';
+                    echo '<p>You will need to follow these steps:</p>';
                     echo '<ul style="margin-left: 20px;">';
-                    echo '<li>DEACTIVATE the free version of the plugin.</li>';
-                    echo '<li>Click on Installed Plugins</li>';
-                    echo '<li>Click on the Kognetiks Chatbot</li>';
-                    echo '<li>Click on Deactivate</li>';
-                    echo '<li>Then upgrade to the premium version.</li>';
-                    echo '<li>After you have activated your account, you can download the premium version of the plugin.</li>';
-                    echo '<li>Then upload and activate the premium version of the plugin.</li>';
+                    echo '<li>1. DEACTIVATE the free version of the Kognetiks Chatbot plugin.</li>';
+                    echo '<li>2. From your WordPress Dashboard, click on Plugins > Installed Plugins > Kognetiks Chatbot > Deactivate</li>';
+                    echo '<li>3. Then return here, click the Upgrade Now button to select the premium subscription.</li>';
+                    echo '<li>4. After purchase, you will recieve an email with instructions to activated your account, you can download then download the premium version of the plugin.</li>';
+                    echo '<li>5. From your WordPress Dashboard, click Plugins > Add Plugin > Upload Plugin > Choose File > Install Now > Activate</li>';
                     echo '<li>NOTE: You can choose to delete the free version of the plugin after you have upgraded to the premium version.</li>';
                     echo '</ul>';
+                    echo '</div>';
 
                     echo '<hr style="margin: 20px 0;">';
                     
