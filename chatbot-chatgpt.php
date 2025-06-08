@@ -2154,57 +2154,6 @@ function kchat_get_plugin_version() {
 
 }
 
-// // Handle the upgrade process from free to premium
-// function chatbot_chatgpt_handle_upgrade() {
-
-//     // DIAG - Diagnostics - Ver 2.3.1
-//     error_log('chatbot_chatgpt_handle_upgrade');
-
-//     // Only run this when upgrading to premium
-//     if (!chatbot_chatgpt_freemius()->is_paying()) {
-//         // DIAG - Diagnostics - Ver 2.3.1
-//         error_log('Not paying');
-//         return;
-//     } else {
-//         // DIAG - Diagnostics - Ver 2.3.1
-//         error_log('Paying');
-//     }
-
-//     // Get the plugin file paths
-//     $free_plugin_file = plugin_basename(WP_PLUGIN_DIR . '/chatbot-chatgpt/chatbot-chatgpt.php');
-//     $premium_plugin_file = plugin_basename(WP_PLUGIN_DIR . '/chatbot-chatgpt-premium/chatbot-chatgpt.php');
-    
-//     // Check if premium version exists
-//     if (!file_exists(WP_PLUGIN_DIR . '/chatbot-chatgpt-premium/chatbot-chatgpt.php')) {
-//         // DIAG - Diagnostics - Ver 2.3.1
-//         error_log('Premium plugin not found');
-//         return;
-//     }
-
-//     // Only deactivate if the free version is active
-//     if (is_plugin_active($free_plugin_file)) {
-//         // DIAG - Diagnostics - Ver 2.3.1
-//         error_log('Deactivating free plugin');
-//         deactivate_plugins($free_plugin_file);
-//     } else {
-//         // DIAG - Diagnostics - Ver 2.3.1
-//         error_log('Free plugin not active');
-//     }
-    
-//     // Activate the premium version and check for errors
-//     $activation_result = activate_plugin($premium_plugin_file);
-//     if (is_wp_error($activation_result)) {
-//         // DIAG - Diagnostics - Ver 2.3.1
-//         error_log('Failed to activate premium version: ' . $activation_result->get_error_message());
-//         return;
-//     }
-    
-//     // Only set the success transient if activation was successful
-//     set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
-    
-// }
-// add_action('fs_after_license_activated', 'chatbot_chatgpt_handle_upgrade');
-
 // Handle the upgrade process from free to premium
 function chatbot_chatgpt_handle_upgrade() {
 
