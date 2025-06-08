@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
@@ -28,39 +28,6 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// If the premium version is active, do not load the free plugin
-if (function_exists('is_plugin_active')) {
-
-    if (is_plugin_active('chatbot-chatgpt-premium/chatbot-chatgpt.php')) {
-
-        // DIAG - Diagnostics - Ver 2.3.1
-        error_log('[Chatbot] [chatbot-chatgpt.php] Premium version is active, skipping free plugin');
-
-        // Notify the user that the premium version is active
-        add_action('admin_notices', function () {
-            echo '<div class="notice notice-warning"><p>The premium version of Kognetiks Chatbot is active. The free version has been disabled to prevent conflicts.</p></div>';
-        });
-
-        return;
-
-    }
-} else {
-    include_once(ABSPATH . 'wp-admin/includes/plugin.php');
-    if (is_plugin_active('chatbot-chatgpt-premium/chatbot-chatgpt.php')) {
-
-        // DIAG - Diagnostics - Ver 2.3.1
-        error_log('[Chatbot] [chatbot-chatgpt.php] Premium version is active, skipping free plugin');
-
-        // Notify the user that the premium version is active
-        add_action('admin_notices', function () {
-            echo '<div class="notice notice-warning"><p>The premium version of Kognetiks Chatbot is active. The free version has been disabled to prevent conflicts.</p></div>';
-        });
-
-        return;
-    }
-
-}
-
 if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
     chatbot_chatgpt_freemius()->set_basename( true, __FILE__ );
 } else {
@@ -82,13 +49,12 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
                     'slug'                => 'chatbot-chatgpt',
                     'type'                => 'plugin',
                     'public_key'          => 'pk_ea667ce516b3acd5d3756a0c2530b',
-                    'is_premium'          => false,  // This is the free version
+                    'is_premium'          => false,         // This is the free version
                     'premium_suffix'      => 'premium',
-                    // If your plugin is a serviceware, set this option to false.
-                    'has_premium_version' => true,
+                    'has_premium_version' => true,          // If your plugin is a serviceware, set this option to false.
                     'has_addons'          => false,
                     'has_paid_plans'      => true,
-                    'is_debug'            => false, // Disable debug mode in production
+                    'is_debug'            => false,         // Disable debug mode in production
                     'trial'               => array(
                         'days'               => 7,
                         'is_require_payment' => false,
@@ -138,29 +104,27 @@ global $session_id;
 global $user_id;
 
 // Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
-if (!function_exists('kognetiks_assign_unique_id')) {
-    function kognetiks_assign_unique_id() {
-        if (!isset($_COOKIE['kognetiks_unique_id'])) {
-            $unique_id = uniqid('kognetiks_', true);
-            
-            // Set a cookie using the built-in setcookie function
-            setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
-                    
-            // Ensure the cookie is set for the current request
-            $_COOKIE['kognetiks_unique_id'] = $unique_id;
-        }
+function kognetiks_assign_unique_id() {
+    if (!isset($_COOKIE['kognetiks_unique_id'])) {
+        $unique_id = uniqid('kognetiks_', true);
+        
+        // Set a cookie using the built-in setcookie function
+        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
+                
+        // Ensure the cookie is set for the current request
+        $_COOKIE['kognetiks_unique_id'] = $unique_id;
     }
-    add_action('init', 'kognetiks_assign_unique_id', 1); // Set higher priority
 }
+add_action('init', 'kognetiks_assign_unique_id', 1); // Set higher priority
 
 // Get the unique ID of the visitor or logged-in user - Ver 2.0.4
-if (!function_exists('kognetiks_get_unique_id')) {
-    function kognetiks_get_unique_id() {
-        if (isset($_COOKIE['kognetiks_unique_id'])) {
-            return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
-        }
-        return null;
+function kognetiks_get_unique_id() {
+    if (isset($_COOKIE['kognetiks_unique_id'])) {
+        // error_log('Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
+        return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
     }
+    // error_log('Unique ID not found');
+    return null;
 }
 
 // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
@@ -292,11 +256,9 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
-// Remove namespace and use global namespace for all functions
-if (!function_exists('fs_active_addon')) {
-    function fs_active_addon($addon_slug) {
-        return true;
-    }
+// FIXME - Analytics - Ver 1.0.0
+function fs_active_addon( $addon_slug ) {
+    return true;
 }
 
 // Include Analytics library - Premium Only
@@ -344,10 +306,8 @@ require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-manage-widget-logs.php
 
 // Check for Upgrades - Ver 1.7.7
 if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
-
     chatbot_chatgpt_upgrade();
     update_option('chatbot_chatgpt_upgraded', 'Yes');
-    
 }
 
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
@@ -2197,95 +2157,32 @@ function kchat_get_plugin_version() {
 // Handle the upgrade process from free to premium
 function chatbot_chatgpt_handle_upgrade() {
 
-    // DIAG - Diagnostics - Ver 2.3.1
-    back_trace('NOTICE', 'Starting chatbot_chatgpt_handle_upgrade');
-    back_trace('NOTICE', 'Freemius is_paying: ' . (chatbot_chatgpt_freemius()->is_paying() ? true : false));
-    back_trace('NOTICE', 'Current plugin: ' . plugin_basename(__FILE__));
-    back_trace('NOTICE', 'Premium active flag: ' . (get_option('chatbot_chatgpt_premium_active') ? true : false));
-
-    try {
-        // Only run this when upgrading to premium
-        if (!chatbot_chatgpt_freemius()->is_paying()) {
-            back_trace('NOTICE', 'Not a paying user, skipping upgrade');
-            return;
-        }
-
-        // Store the current plugin state
-        $current_plugin = plugin_basename(__FILE__);
-        back_trace('NOTICE', 'Current plugin basename: ' . $current_plugin);
-
-        // Check if premium version is already active
-        if (get_option('chatbot_chatgpt_premium_active', false)) {
-            back_trace('NOTICE', 'Premium version already active');
-            return;
-        }
-
-        // Set the premium active flag first to prevent race conditions
-        update_option('chatbot_chatgpt_premium_active', true);
-        back_trace('NOTICE', 'Set premium active flag to true');
-
-        // Store a transient to show a success message after redirect
-        set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
-        back_trace('NOTICE', 'Set upgrade complete transient');
-
-        // Clear any cached plugin data
-        wp_cache_delete('plugins', 'plugins');
-        back_trace('NOTICE', 'Cleared plugin cache');
-
-        // Force WordPress to reload the plugin list
-        $active_plugins = get_option('active_plugins');
-        $key = array_search($current_plugin, $active_plugins);
-        if ($key !== false) {
-            unset($active_plugins[$key]);
-            update_option('active_plugins', $active_plugins);
-            back_trace('NOTICE', 'Removed free version from active plugins');
-        }
-
-        // Deactivate the free version last to prevent any race conditions
-        back_trace('NOTICE', 'Attempting to deactivate free version');
-        deactivate_plugins($current_plugin, true);
-
-    } catch (Exception $e) {
-        // Log the error
-        back_trace('ERROR', 'Upgrade process failed: ' . $e->getMessage());
-        
-        // Reset the premium flag if something went wrong
-        update_option('chatbot_chatgpt_premium_active', false);
-        
-        // Show an error message to the user
-        set_transient('chatbot_chatgpt_upgrade_error', $e->getMessage(), 60);
-    }
-}
-
-// Single entry point for all Freemius upgrade events
-function chatbot_chatgpt_handle_freemius_upgrade($data = null) {
-    // DIAG - Diagnostics - Ver 2.3.1
-    back_trace('NOTICE', 'Starting chatbot_chatgpt_handle_freemius_upgrade');
-    if ($data) {
-        back_trace('NOTICE', 'Upgrade data: ' . print_r($data, true));
-    }
-
-    // Only proceed if this is a premium upgrade
+    // Only run this when upgrading to premium
     if (!chatbot_chatgpt_freemius()->is_paying()) {
-        back_trace('NOTICE', 'Not a paying user, skipping Freemius upgrade');
         return;
     }
 
-    // Handle the upgrade
-    chatbot_chatgpt_handle_upgrade();
+    // Get the premium plugin file path
+    $premium_plugin_file = WP_PLUGIN_DIR . '/chatbot-chatgpt-premium/chatbot-chatgpt.php';
+    
+    // Check if premium version exists
+    if (!file_exists($premium_plugin_file)) {
+        return;
+    }
+
+    // Deactivate the free version
+    deactivate_plugins(plugin_basename(__FILE__));
+    
+    // Activate the premium version
+    activate_plugin($premium_plugin_file);
+    
+    // Store a transient to show a success message after redirect
+    set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
+    
 }
+add_action('fs_after_license_activated', 'chatbot_chatgpt_handle_upgrade');
 
-// Remove all existing upgrade hooks to prevent multiple triggers
-remove_action('fs_after_install_chatbot-chatgpt', 'chatbot_chatgpt_after_install');
-remove_action('fs_after_license_change_chatbot-chatgpt', 'chatbot_chatgpt_after_license_change');
-remove_action('fs_before_install', 'chatbot_chatgpt_before_install');
-remove_action('activate_chatbot-chatgpt/chatbot-chatgpt.php', 'chatbot_chatgpt_set_premium_flag_false');
-
-// Add single consolidated hook for all Freemius upgrade events
-add_action('fs_after_install_chatbot-chatgpt', 'chatbot_chatgpt_handle_freemius_upgrade');
-add_action('fs_after_license_change_chatbot-chatgpt', 'chatbot_chatgpt_handle_freemius_upgrade');
-
-// Show upgrade success or error message
+// Show upgrade success message
 function chatbot_chatgpt_upgrade_notice() {
     if (get_transient('chatbot_chatgpt_upgrade_complete')) {
         delete_transient('chatbot_chatgpt_upgrade_complete');
@@ -2295,127 +2192,5 @@ function chatbot_chatgpt_upgrade_notice() {
         </div>
         <?php
     }
-
-    if (get_transient('chatbot_chatgpt_upgrade_error')) {
-        $error_message = get_transient('chatbot_chatgpt_upgrade_error');
-        delete_transient('chatbot_chatgpt_upgrade_error');
-        ?>
-        <div class="notice notice-error is-dismissible">
-            <p><?php printf(__('Error during upgrade: %s. Please try deactivating and reactivating the plugin.', 'chatbot-chatgpt'), esc_html($error_message)); ?></p>
-        </div>
-        <?php
-    }
 }
 add_action('admin_notices', 'chatbot_chatgpt_upgrade_notice');
-
-// Add deactivation hook to clear the premium flag when premium version is deactivated
-function chatbot_chatgpt_clear_premium_flag() {
-
-    // DIAG - Diagnostics - Ver 2.3.1
-    back_trace( 'NOTICE', 'Clearing the premium flag in chatbot_chatgpt_clear_premium_flag');
-
-    delete_option('chatbot_chatgpt_premium_active');
-
-}
-add_action('deactivate_chatbot-chatgpt-premium/chatbot-chatgpt.php', 'chatbot_chatgpt_clear_premium_flag');
-
-// Add the cleanup action
-function chatbot_chatgpt_cleanup_free_version($free_plugin_dir) {
-
-    // DIAG - Diagnostics - Ver 2.3.1
-    back_trace('NOTICE', 'Starting chatbot_chatgpt_cleanup_free_version');
-    back_trace('NOTICE', 'Free plugin directory: ' . $free_plugin_dir);
-    back_trace('NOTICE', 'Premium active flag: ' . (get_option('chatbot_chatgpt_premium_active') ? true : false));
-
-    // Verify we're in the correct directory to prevent accidental deletion
-    if (basename($free_plugin_dir) !== 'chatbot-chatgpt') {
-        back_trace('ERROR', 'Invalid directory for cleanup: ' . basename($free_plugin_dir));
-        return;
-    }
-    
-    // Verify the premium version is active
-    if (!is_plugin_active('chatbot-chatgpt-premium/chatbot-chatgpt.php')) {
-        back_trace('ERROR', 'Premium version is not active, skipping cleanup');
-        return;
-    }
-    
-    // Remove the free version's directory
-    if (is_dir($free_plugin_dir)) {
-        back_trace('NOTICE', 'Attempting to remove free version directory');
-        require_once(ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php');
-        require_once(ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php');
-        
-        $filesystem = new WP_Filesystem_Direct(null);
-        $result = $filesystem->rmdir($free_plugin_dir, true);
-        
-        if ($result) {
-            back_trace('NOTICE', 'Successfully removed free version directory');
-        } else {
-            back_trace('ERROR', 'Failed to remove free version directory');
-        }
-    } else {
-        back_trace('NOTICE', 'Free version directory does not exist');
-    }
-    
-}
-add_action('chatbot_chatgpt_cleanup_free_version', 'chatbot_chatgpt_cleanup_free_version');
-
-// Ensure premium flag is false when free version is activated
-function chatbot_chatgpt_set_premium_flag_false() {
-
-    // DIAG - Diagnostics - Ver 2.3.1
-    back_trace( 'NOTICE', 'Setting the premium flag to false in chatbot_chatgpt_set_premium_flag_false');
-
-    update_option('chatbot_chatgpt_premium_active', false);
-
-}
-add_action('activate_chatbot-chatgpt/chatbot-chatgpt.php', 'chatbot_chatgpt_set_premium_flag_false');
-
-// Hook into Freemius's after_install event
-function chatbot_chatgpt_after_install($plugin_data) {
-    // DIAG - Diagnostics - Ver 2.3.1
-    back_trace('NOTICE', 'Starting chatbot_chatgpt_after_install');
-    back_trace('NOTICE', 'Plugin data: ' . print_r($plugin_data, true));
-
-    // Only proceed if this is a premium upgrade
-    if (!chatbot_chatgpt_freemius()->is_paying()) {
-        back_trace('NOTICE', 'Not a paying user, skipping after_install');
-        return;
-    }
-
-    // Handle the upgrade
-    chatbot_chatgpt_handle_upgrade();
-}
-
-// Hook into Freemius's after_license_change event
-function chatbot_chatgpt_after_license_change($license) {
-    // DIAG - Diagnostics - Ver 2.3.1
-    back_trace('NOTICE', 'Starting chatbot_chatgpt_after_license_change');
-    back_trace('NOTICE', 'License: ' . print_r($license, true));
-
-    // Only proceed if this is a premium upgrade
-    if (!chatbot_chatgpt_freemius()->is_paying()) {
-        back_trace('NOTICE', 'Not a paying user, skipping license change');
-        return;
-    }
-
-    // Handle the upgrade
-    chatbot_chatgpt_handle_upgrade();
-}
-
-function chatbot_chatgpt_premium_activate() {
-    if (is_plugin_active('chatbot-chatgpt/chatbot-chatgpt.php')) {
-
-        // DIAG - Diagnostics - Ver 2.3.1
-        back_trace('NOTICE', 'Deactivating the free version in chatbot_chatgpt_premium_activate');
-
-        deactivate_plugins('chatbot-chatgpt/chatbot-chatgpt.php', true);
-        update_option('chatbot_chatgpt_premium_active', 'true');
-
-        // Notify the user that the premium version is active
-        add_action('admin_notices', function () {
-            echo '<div class="notice notice-warning"><p>The premium version of Kognetiks Chatbot is active. The free version has been disabled to prevent conflicts.</p></div>';
-        });
-    }
-}
-register_activation_hook(__FILE__, 'chatbot_chatgpt_premium_activate');
