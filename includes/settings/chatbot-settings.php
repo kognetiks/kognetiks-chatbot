@@ -620,11 +620,6 @@ function chatbot_chatgpt_settings_page() {
                 do_settings_sections('chatbot_chatgpt_appearance_icons');
                 echo '</div>';
 
-            // IDEA Coming Soon in Ver 3.0.0
-            // } elseif ($active_tab == 'premium') {
-            //     settings_fields('chatbot_chatgpt_premium');
-            //     do_settings_sections('chatbot_chatgpt_premium');
-
             } elseif ($active_tab == 'analytics') {
                 if ( chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
                     if ( chatbot_chatgpt_freemius()->is_plan( 'analytics' ) ) {
@@ -658,7 +653,20 @@ function chatbot_chatgpt_settings_page() {
                     echo '<li>Track token usage to manage OpenAI (and other LLM) costs</li>';
                     echo '<li>Make data-driven improvements to your chatbot experience</li>';
                     echo '</ul>';
-                    
+
+                    echo '<h3>🛑 BEFORE YOU UPLOAD AND ACTIVATE THE PREMIUM VERSION</h3>';
+                    echo '<p>Please ensure you have the following:</p>';
+                    echo '<ul style="margin-left: 20px;">';
+                    echo '<li>DEACTIVATE the free version of the plugin.</li>';
+                    echo '<li>Click on Installed Plugins</li>';
+                    echo '<li>Click on the Kognetiks Chatbot</li>';
+                    echo '<li>Click on Deactivate</li>';
+                    echo '<li>Then upgrade to the premium version.</li>';
+                    echo '<li>After you have activated your account, you can download the premium version of the plugin.</li>';
+                    echo '<li>Then upload and activate the premium version of the plugin.</li>';
+                    echo '<li>NOTE: You can choose to delete the free version of the plugin after you have upgraded to the premium version.</li>';
+                    echo '</ul>';
+
                     echo '<hr style="margin: 20px 0;">';
                     
                     echo '<h3>✅ Ready to Upgrade?</h3>';
