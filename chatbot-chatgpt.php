@@ -2162,21 +2162,29 @@ function chatbot_chatgpt_handle_upgrade() {
         return;
     }
 
-    // Get the premium plugin file path
-    $premium_plugin_file = WP_PLUGIN_DIR . '/chatbot-chatgpt-premium/chatbot-chatgpt.php';
+    // Get the plugin file paths
+    $free_plugin_file = plugin_basename(WP_PLUGIN_DIR . '/chatbot-chatgpt/chatbot-chatgpt.php');
+    $premium_plugin_file = plugin_basename(WP_PLUGIN_DIR . '/chatbot-chatgpt-premium/chatbot-chatgpt.php');
     
     // Check if premium version exists
-    if (!file_exists($premium_plugin_file)) {
+    if (!file_exists(WP_PLUGIN_DIR . '/chatbot-chatgpt-premium/chatbot-chatgpt.php')) {
         return;
     }
 
-    // Deactivate the free version
-    deactivate_plugins(plugin_basename(__FILE__));
+    // Only deactivate if the free version is active
+    if (is_plugin_active($free_plugin_file)) {
+        deactivate_plugins($free_plugin_file);
+    }
     
-    // Activate the premium version
-    activate_plugin($premium_plugin_file);
+    // Activate the premium version and check for errors
+    $activation_result = activate_plugin($premium_plugin_file);
+    if (is_wp_error($activation_result)) {
+        // Log the error or handle it appropriately
+        error_log('Failed to activate premium version: ' . $activation_result->get_error_message());
+        return;
+    }
     
-    // Store a transient to show a success message after redirect
+    // Only set the success transient if activation was successful
     set_transient('chatbot_chatgpt_upgrade_complete', true, 60);
     
 }
@@ -2184,6 +2192,7 @@ add_action('fs_after_license_activated', 'chatbot_chatgpt_handle_upgrade');
 
 // Show upgrade success message
 function chatbot_chatgpt_upgrade_notice() {
+
     if (get_transient('chatbot_chatgpt_upgrade_complete')) {
         delete_transient('chatbot_chatgpt_upgrade_complete');
         ?>
@@ -2192,5 +2201,6 @@ function chatbot_chatgpt_upgrade_notice() {
         </div>
         <?php
     }
+    
 }
 add_action('admin_notices', 'chatbot_chatgpt_upgrade_notice');
