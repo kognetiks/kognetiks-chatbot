@@ -28,46 +28,53 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
+if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
+    chatbot_chatgpt_freemius()->set_basename( true, __FILE__ );
+} else {
+    /**
+     * DO NOT REMOVE THIS IF, IT IS ESSENTIAL FOR THE
+     * `function_exists` CALL ABOVE TO PROPERLY WORK.
+     */
+    if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
 
-    function chatbot_chatgpt_freemius() {
+        function chatbot_chatgpt_freemius() {
 
-        global $chatbot_chatgpt_freemius;
+            global $chatbot_chatgpt_freemius;
 
-        if ( ! isset( $chatbot_chatgpt_freemius ) ) {
-            // Include Freemius SDK
-            require_once dirname(__FILE__) . '/vendor/freemius/start.php';
+            if ( ! isset( $chatbot_chatgpt_freemius ) ) {
+                // Include Freemius SDK
+                require_once dirname(__FILE__) . '/vendor/freemius/start.php';
 
-            $chatbot_chatgpt_freemius = fs_dynamic_init( array(
-                'id'                  => '18850',
-                'slug'                => 'chatbot-chatgpt',
-                'type'                => 'plugin',
-                'public_key'          => 'pk_ea667ce516b3acd5d3756a0c2530b',
-                'is_premium'          => false,
-                'has_premium_version' => true,
-                'premium_suffix'      => 'Premium',
-                'has_paid_plans'      => true,
-                'trial'               => array(
-                    'days'               => 7,
-                    'is_require_payment' => false,
-                ),
-                'menu' => array(
-                    'slug'       => 'chatbot-chatgpt',
-                    'first-path' => 'admin.php?page=chatbot-chatgpt&tab=support',
-                    'network'    => true,
-                ),
-            ) );
+                $chatbot_chatgpt_freemius = fs_dynamic_init( array(
+                    'id'                  => '18850',
+                    'slug'                => 'chatbot-chatgpt',
+                    'type'                => 'plugin',
+                    'public_key'          => 'pk_ea667ce516b3acd5d3756a0c2530b',
+                    'is_premium'          => false,
+                    'has_premium_version' => true,
+                    'premium_suffix'      => 'Premium',
+                    'has_paid_plans'      => true,
+                    'trial'               => array(
+                        'days'               => 7,
+                        'is_require_payment' => false,
+                    ),
+                    'menu' => array(
+                        'slug'       => 'chatbot-chatgpt',
+                        'first-path' => 'admin.php?page=chatbot-chatgpt&tab=support',
+                        'network'    => true,
+                    ),
+                ) );
+            }
+
+            return $chatbot_chatgpt_freemius;
+
         }
 
-        return $chatbot_chatgpt_freemius;
+        // Initialize Freemius
+        chatbot_chatgpt_freemius();
+        do_action( 'chatbot_chatgpt_freemius_loaded' );
 
     }
-
-    // Initialize Freemius
-    chatbot_chatgpt_freemius();
-    do_action( 'chatbot_chatgpt_freemius_loaded' );
-
-}
 
 // Start output buffering earlier to prevent "headers already sent" issues - Ver 2.1.8
 ob_start();
@@ -2140,4 +2147,7 @@ function kchat_get_plugin_version() {
 
     return $plugin_version;
 
+}
+
+// DO NOT REMOVE THIS IF, IT IS ESSENTIAL FOR THE AUTOMATIC DEACTIVATION OF THE PLUGIN
 }
