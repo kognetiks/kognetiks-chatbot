@@ -658,18 +658,18 @@ function chatbot_chatgpt_settings_page() {
 
                     echo '</div>';
 
-                    echo '<div style="border: 2px solid #d54e21; background-color: #fff8f6; padding: 15px; margin: 15px 0; border-radius: 5px;">';
-                    echo '<h3>🛑 BEFORE ACTIVATING THE PREMIUM VERSION</h3>';
-                    echo '<p>You will need to follow these steps:</p>';
-                    echo '<ul style="margin-left: 20px;">';
-                    echo '<li>1. DEACTIVATE the free version of the Kognetiks Chatbot plugin.</li>';
-                    echo '<li>2. From your WordPress Dashboard, click on Plugins > Installed Plugins > Kognetiks Chatbot > Deactivate</li>';
-                    echo '<li>3. Then return here, click the Upgrade Now button to select the premium subscription.</li>';
-                    echo '<li>4. After purchase, you will recieve an email with instructions to activated your account, you can download then download the premium version of the plugin.</li>';
-                    echo '<li>5. From your WordPress Dashboard, click Plugins > Add Plugin > Upload Plugin > Choose File > Install Now > Activate</li>';
-                    echo '<li>NOTE: You can choose to delete the free version of the plugin after you have upgraded to the premium version.</li>';
-                    echo '</ul>';
-                    echo '</div>';
+                    // echo '<div style="border: 2px solid #d54e21; background-color: #fff8f6; padding: 15px; margin: 15px 0; border-radius: 5px;">';
+                    // echo '<h3>🛑 BEFORE ACTIVATING THE PREMIUM VERSION</h3>';
+                    // echo '<p>You will need to follow these steps:</p>';
+                    // echo '<ul style="margin-left: 20px;">';
+                    // echo '<li>1. DEACTIVATE the free version of the Kognetiks Chatbot plugin.</li>';
+                    // echo '<li>2. From your WordPress Dashboard, click on Plugins > Installed Plugins > Kognetiks Chatbot > Deactivate</li>';
+                    // echo '<li>3. Then return here, click the Upgrade Now button to select the premium subscription.</li>';
+                    // echo '<li>4. After purchase, you will recieve an email with instructions to activated your account, you can download then download the premium version of the plugin.</li>';
+                    // echo '<li>5. From your WordPress Dashboard, click Plugins > Add Plugin > Upload Plugin > Choose File > Install Now > Activate</li>';
+                    // echo '<li>NOTE: You can choose to delete the free version of the plugin after you have upgraded to the premium version.</li>';
+                    // echo '</ul>';
+                    // echo '</div>';
 
                     echo '<hr style="margin: 20px 0;">';
                     

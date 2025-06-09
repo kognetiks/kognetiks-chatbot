@@ -76,7 +76,8 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
 
     }
 
-}
+// ADD THIS TO THE END OF THE FILE - NOT HERE
+// }
 
 // Start output buffering earlier to prevent "headers already sent" issues - Ver 2.1.8
 ob_start();
@@ -2152,4 +2153,4 @@ function kchat_get_plugin_version() {
 }
 
 // DO NOT REMOVE THIS IF, IT IS ESSENTIAL FOR THE AUTOMATIC DEACTIVATION OF THE PLUGIN
-// }
+}

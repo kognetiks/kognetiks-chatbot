@@ -477,15 +477,15 @@ function chatbot_chatgpt_dashboard_widget_content() {
             <div class="chatbot-stat-title">Token Usage</div>
             <div class="chatbot-token-stats">
                 <div class="chatbot-token-stat">
-                    <div class="chatbot-stat-value"><?php echo number_format($token_stats[0]->prompt_tokens ?? 0); ?></div>
+                    <div class="chatbot-stat-value"><?php echo number_format(!empty($token_stats) && isset($token_stats[0]) ? ($token_stats[0]->prompt_tokens ?? 0) : 0); ?></div>
                     <div class="chatbot-stat-label">Prompt Tokens</div>
                 </div>
                 <div class="chatbot-token-stat">
-                    <div class="chatbot-stat-value"><?php echo number_format($token_stats[0]->completion_tokens ?? 0); ?></div>
+                    <div class="chatbot-stat-value"><?php echo number_format(!empty($token_stats) && isset($token_stats[0]) ? ($token_stats[0]->completion_tokens ?? 0) : 0); ?></div>
                     <div class="chatbot-stat-label">Completion Tokens</div>
                 </div>
                 <div class="chatbot-token-stat">
-                    <div class="chatbot-stat-value"><?php echo number_format($token_stats[0]->total_tokens ?? 0); ?></div>
+                    <div class="chatbot-stat-value"><?php echo number_format(!empty($token_stats) && isset($token_stats[0]) ? ($token_stats[0]->total_tokens ?? 0) : 0); ?></div>
                     <div class="chatbot-stat-label">Total Tokens</div>
                 </div>
             </div>
