@@ -76,6 +76,8 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
 
     }
 
+}
+
 // Start output buffering earlier to prevent "headers already sent" issues - Ver 2.1.8
 ob_start();
 
@@ -259,7 +261,7 @@ function fs_active_addon( $addon_slug ) {
 // Include Analytics library - Premium Only
 if ( function_exists( 'chatbot_chatgpt_freemius' ) && 
      chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() && 
-     chatbot_chatgpt_freemius()->is_plan( 'premium' ) ) {
+     chatbot_chatgpt_freemius()->is_plan( 'Premium' ) ) {
     require_once plugin_dir_path(__FILE__) . 'includes/analytics/analytics-settings.php';
     require_once plugin_dir_path(__FILE__) . 'includes/analytics/chatbot-analytics.php';
     require_once plugin_dir_path(__FILE__) . 'includes/analytics/languages/en_US.php';
@@ -2150,4 +2152,4 @@ function kchat_get_plugin_version() {
 }
 
 // DO NOT REMOVE THIS IF, IT IS ESSENTIAL FOR THE AUTOMATIC DEACTIVATION OF THE PLUGIN
-}
+// }
