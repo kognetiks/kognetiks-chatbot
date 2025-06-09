@@ -331,6 +331,11 @@ function chatbot_chatgpt_upgrade() {
     // DIAG - Log the table creation
     // back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log table created');
 
+    // Ensure sentiment_score column exists for existing installations
+    add_sentiment_score_column_to_existing_table();
+    // DIAG - Log the column addition
+    // back_trace( 'NOTICE', 'sentiment_score column ensured');
+
     // DIAG - Log the upgrade complete
     // back_trace( 'NOTICE', 'Plugin upgrade completed');
 

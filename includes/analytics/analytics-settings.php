@@ -94,6 +94,11 @@ function kognetiks_analytics_settings_page() {
             return;
         }
 
+        // Ensure sentiment_score column exists for existing installations
+        if ($table_exists) {
+            add_sentiment_score_column_to_existing_table();
+        }
+
         // Verify nonce for period filter form submission
         if (
             isset($_POST['chatbot_chatgpt_analytics_period_filter_nonce']) &&

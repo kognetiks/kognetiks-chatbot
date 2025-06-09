@@ -135,24 +135,23 @@ function create_conversation_logging_table() {
             }
         }
 
+        // Check and add sentiment_score column if it doesn't exist
         if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) === 'sentiment_score') {
             // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Column sentiment_score already exists in table: ' . $table_name);
+            // back_trace( 'NOTICE', 'Column sentiment_score already exists in table: ' . $table_name);
         } else {
             // Directly execute the ALTER TABLE command without prepare()
             $sql = "ALTER TABLE $table_name ADD COLUMN sentiment_score FLOAT AFTER message_text";
             $result = $wpdb->query($sql);
             if ($result === false) {
                 // If there was an error, log it
-                back_trace( 'ERROR', 'Error altering chatbot_chatgpt_conversation_log table: ' . $wpdb->last_error);
+                // back_trace( 'ERROR', 'Error adding sentiment_score column: ' . $wpdb->last_error);
+            } else {
+                // If the operation was successful, log the success
+                // back_trace( 'SUCCESS', 'Successfully added sentiment_score column');
             }
         }
-    }
 
-    // Check if the table already exists
-    if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name) {
-        // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'Table already exists: ' . $table_name);
         // Directly execute the ALTER TABLE command without prepare()
         $sql = "ALTER TABLE $table_name MODIFY COLUMN user_type ENUM('Chatbot', 'Visitor', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens')";
         $result = $wpdb->query($sql);
@@ -218,23 +217,24 @@ function create_conversation_logging_table() {
             user_type ENUM('Chatbot', 'Visitor', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens') NOT NULL,
             thread_id VARCHAR(255),
             assistant_id VARCHAR(255),
+            assistant_name VARCHAR(255),
             message_text text NOT NULL,
-            sentiment_score INT,
+            sentiment_score FLOAT,
             PRIMARY KEY  (id),
             INDEX session_id_index (session_id),
             INDEX user_id_index (user_id)
         ) $charset_collate;";
-    }
-    
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
 
-    // Check for errors after dbDelta
-    if ($wpdb->last_error) {
-        error_log('Failed to create table: ' . $table_name);
-        error_log('SQL: ' . $sql);
-        error_log('Error details: ' . $wpdb->last_error);
-        return false;  // Table creation failed
+        // Check for errors after dbDelta
+        if ($wpdb->last_error) {
+            error_log('Failed to create table: ' . $table_name);
+            error_log('SQL: ' . $sql);
+            error_log('Error details: ' . $wpdb->last_error);
+            return false;  // Table creation failed
+        }
     }
 
     // back_trace( 'SUCCESS', 'Successfully created/updated chatbot_chatgpt_conversation_log table');
@@ -374,6 +374,37 @@ function chatbot_chatgpt_conversation_log_cleanup() {
 
     return true;
 
+}
+
+// Function to manually add sentiment_score column to existing installations
+function add_sentiment_score_column_to_existing_table() {
+    
+    global $wpdb;
+    
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    
+    // Check if the table exists
+    if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
+        // Table doesn't exist, nothing to do
+        return false;
+    }
+    
+    // Check if sentiment_score column already exists
+    if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) === 'sentiment_score') {
+        // Column already exists
+        return true;
+    }
+    
+    // Add the sentiment_score column
+    $sql = "ALTER TABLE $table_name ADD COLUMN sentiment_score FLOAT AFTER message_text";
+    $result = $wpdb->query($sql);
+    
+    if ($result === false) {
+        error_log('Error adding sentiment_score column: ' . $wpdb->last_error);
+        return false;
+    }
+    
+    return true;
 }
 
 // Register activation and deactivation hooks

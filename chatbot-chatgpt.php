@@ -308,6 +308,73 @@ if (!esc_attr(get_option('chatbot_chatgpt_upgraded'))) {
     update_option('chatbot_chatgpt_upgraded', 'Yes');
 }
 
+// Add sentiment_score column if missing - Ver 2.3.1
+function chatbot_chatgpt_add_sentiment_score_admin_notice() {
+    global $wpdb;
+    
+    // Only show on admin pages
+    if (!is_admin()) {
+        return;
+    }
+    
+    // Check if we've already shown this notice
+    if (get_option('chatbot_chatgpt_sentiment_score_notice_shown')) {
+        return;
+    }
+    
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    
+    // Check if table exists and sentiment_score column is missing
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
+        if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) !== 'sentiment_score') {
+            ?>
+            <div class="notice notice-warning is-dismissible">
+                <p><strong>Kognetiks Chatbot:</strong> The sentiment_score column is missing from your conversation log table. 
+                <a href="<?php echo esc_url(admin_url('admin.php?page=chatbot-chatgpt&action=add_sentiment_score_column')); ?>" class="button button-primary">Add Missing Column</a></p>
+            </div>
+            <?php
+        }
+    }
+}
+
+// Handle the action to add the sentiment_score column
+function chatbot_chatgpt_handle_add_sentiment_score_column() {
+    if (isset($_GET['page']) && $_GET['page'] === 'chatbot-chatgpt' && 
+        isset($_GET['action']) && $_GET['action'] === 'add_sentiment_score_column') {
+        
+        $result = add_sentiment_score_column_to_existing_table();
+        
+        if ($result) {
+            add_action('admin_notices', function() {
+                ?>
+                <div class="notice notice-success is-dismissible">
+                    <p><strong>Success:</strong> The sentiment_score column has been added to your conversation log table.</p>
+                </div>
+                <?php
+            });
+        } else {
+            add_action('admin_notices', function() {
+                ?>
+                <div class="notice notice-error is-dismissible">
+                    <p><strong>Error:</strong> Failed to add the sentiment_score column. Please check your database permissions.</p>
+                </div>
+                <?php
+            });
+        }
+        
+        // Mark the notice as shown
+        update_option('chatbot_chatgpt_sentiment_score_notice_shown', true);
+        
+        // Redirect back to the main page
+        wp_redirect(admin_url('admin.php?page=chatbot-chatgpt'));
+        exit;
+    }
+}
+
+// Hook the admin notice and action handler
+add_action('admin_notices', 'chatbot_chatgpt_add_sentiment_score_admin_notice');
+add_action('admin_init', 'chatbot_chatgpt_handle_add_sentiment_score_column');
+
 // Diagnotics on/off setting can be found on the Settings tab - Ver 1.5.0
 $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Off'));
 
