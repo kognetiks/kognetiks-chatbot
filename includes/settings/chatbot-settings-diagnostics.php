@@ -155,8 +155,9 @@ function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
 
     // Get WordPress version
     global $wp_version;
+    global $chatbot_chatgpt_plugin_version;
 
-    echo '<p>Chatbot Version: <b>' . kchat_get_plugin_version() . '</b><br>';
+    echo '<p>Chatbot Version: <b>' . $chatbot_chatgpt_plugin_version . '</b><br>';
     echo 'PHP Version: <b>' . $php_version . '</b><br>';
     echo 'PHP Memory Limit: <b>' . ini_get('memory_limit') . '</b><br>';
     echo 'WordPress Version: <b>' . $wp_version . '</b><br>';

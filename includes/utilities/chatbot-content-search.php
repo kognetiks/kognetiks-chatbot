@@ -192,6 +192,11 @@ function chatbot_chatgpt_get_searchable_post_types() {
         }
     }
 
+    // FALLBACK: If no post types are selected, include basic types to prevent SQL error
+    if (empty($post_types)) {
+        $post_types = ['post', 'page']; // Default to posts and pages
+    }
+
     // DIAG - Diagnostic - Ver 2.2.9
     // back_trace('NOTICE', 'Searchable post types: ' . implode(', ', $post_types));
 

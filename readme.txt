@@ -236,6 +236,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 = 2.3.1 - Released TBD =
 
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.0.
+* **LocalServer**: JAN.AI requires an API key for local models which is set when server is started.
 
 = 2.3.0 - Released 2025-04-24 =
 

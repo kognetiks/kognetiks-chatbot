@@ -621,8 +621,14 @@ function chatbot_chatgpt_settings_page() {
                 echo '</div>';
 
             } elseif ($active_tab == 'analytics') {
+
+                // DIAG - Diagnostics - Ver 3.2.1.1
+                back_trace('NOTICE', 'Analytics Tab');
+                back_trace('NOTICE', chatbot_chatgpt_freemius()->is_plan( 'premium' ));
+                back_trace('NOTICE', chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+
                 if ( chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
-                    if ( chatbot_chatgpt_freemius()->is_plan( 'Premium' ) ) {
+                    if ( chatbot_chatgpt_freemius()->is_plan( 'premium' ) ) {
                         if (function_exists('kognetiks_analytics_settings_page')) {
                             kognetiks_analytics_settings_page();
                         } else {
