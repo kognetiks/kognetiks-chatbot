@@ -218,6 +218,7 @@ function chatbot_mistral_agent_settings_section_callback($args) {
     <p>If you have developed an Agent in the Mistral Playground, you will need the id of the agent - it usually starts with "ag:".</p>
     <p>More information can be found here <a href="https://console.mistral.ai/build/agents" target="_blank">https://console.mistral.ai/build/agents</a>.</p>
     <p>When you're ready to use an Agent, simply add a shortcode such as <code>[agent-1]</code>, <code>[agent-2]</code>, etc. to your page.</p>
+    <p><b>TIP:</b> To deploy a search assistant, enter the assistant id as ```websearch```.</p>
     <p><b>TIP:</b> For best results ensure that the shortcode appears only once on the page.</p>
     <p><b>TIP:</b> When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.</b></p>
     <p><b><i>Don't forget to click </i><code>Save Settings</code><i> to save any changes your might make.</i></b></p>

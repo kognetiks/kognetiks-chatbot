@@ -15,14 +15,27 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Create a Mistral agent with web search capabilities
 function create_mistral_websearch_agent($api_key) {
-    
+
+    // Mistral API Documentation
+    // https://docs.mistral.ai/agents/connectors/websearch/
+
+    // DIAG - Diagnostics - Ver 3.2.1
+    back_trace( 'NOTICE', 'create_mistral_websearch_agent - start');
+
+    // $api_url = 'https://api.mistral.ai/v1/agents/completions';
     $api_url = 'https://api.mistral.ai/v1/agents';
+
+    // DIAG - Diagnostics - Ver 3.2.1
+    back_trace( 'NOTICE', '$api_url: ' . $api_url);
+    
+    // Get the model from settings or use default
+    $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
     
     $agent_data = array(
-        'model' => 'mistral-medium-2505',
         'name' => 'Websearch Agent',
         'description' => 'Agent able to search information over the web, such as news, weather, sport results...',
         'instructions' => 'You have the ability to perform web searches with `web_search` to find up-to-date information.',
+        'model' => $model,
         'tools' => array(
             array(
                 'type' => 'web_search'
@@ -47,7 +60,7 @@ function create_mistral_websearch_agent($api_key) {
     $response = wp_remote_post($api_url, $args);
     
     if (is_wp_error($response)) {
-        back_trace('ERROR', 'Failed to create Mistral agent: ' . $response->get_error_message());
+        prod_trace('ERROR', 'Failed to create Mistral agent: ' . $response->get_error_message());
         return false;
     }
     
@@ -66,6 +79,7 @@ function create_mistral_websearch_agent($api_key) {
     
     back_trace('ERROR', 'Failed to get agent ID from response: ' . print_r($data, true));
     return false;
+
 }
 
 // Call the Mistral API
@@ -86,7 +100,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
 
     // DIAG - Diagnostics - Ver 2.2.2
     back_trace( 'NOTICE', 'chatbot_call_mistral_api - start');
-    back_trace( 'NOTICE', 'chatbot_call_mistral_api - $api_key: ' . $api_key);
     back_trace( 'NOTICE', 'chatbot_call_mistral_api - $message: ' . $message);
     back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
@@ -114,7 +127,8 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     // https://api.mistral.ai/v1/agents/completions
 
     // The current Mistral API URL endpoint for agents
-    $api_url = 'https://api.mistral.ai/v1/agents/completions';
+    // $api_url = 'https://api.mistral.ai/v1/agents/completions';
+    $api_url = 'https://api.mistral.ai/v1/agents';
 
     // DIAG - Diagnostics - Ver 2.2.2
     back_trace( 'NOTICE', '$api_url: ' . $api_url);
@@ -222,23 +236,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
 
     // Regular LLM
     // Prepare the request body for Mistral agent API
-    // $request_body = array(
-    //     'messages' => array(
-    //         array(
-    //             'role' => 'system',
-    //             'content' => $context
-    //         ),
-    //         array(
-    //             'role' => 'user',
-    //             'content' => $message
-    //         )
-    //     ),
-    //     'max_tokens' => $max_tokens,
-    //     'agent_id' => $assistant_id
-    // );
-    
-    // Search Tool with Regular LLM - Ver 2.3.1
-    // Prepare the request body for Mistral agent API
     $request_body = array(
         'messages' => array(
             array(
@@ -251,13 +248,30 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
             )
         ),
         'max_tokens' => $max_tokens,
-        'agent_id' => $assistant_id,
-        'tools' => array(
-            array(
-                'type' => 'web_search'
-            )
-        )
+        'agent_id' => $assistant_id
     );
+    
+    // Search Tool with Regular LLM - Ver 2.3.1
+    // Prepare the request body for Mistral agent API
+    // $request_body = array(
+    //     'messages' => array(
+    //         array(
+    //             'role' => 'system',
+    //             'content' => $context
+    //         ),
+    //         array(
+    //             'role' => 'user',
+    //             'content' => $message
+    //         )
+    //     ),
+    //     'max_tokens' => $max_tokens,
+    //     'agent_id' => $assistant_id,
+    //     'tools' => array(
+    //         array(
+    //             'type' => 'web_search'
+    //         )
+    //     )
+    // );
 
     // // Add thread_id if available
     // if (!empty($thread_id)) {

@@ -253,7 +253,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // If the assistant is not set to 'original', 'primary', or 'alternate' then try to fetch the Assistant details
-    if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false && strpos($atts['assistant'], 'ag:') === false ) {
+    if ( !empty($atts['assistant']) && strpos($atts['assistant'], 'asst_') === false && strpos($atts['assistant'], 'ag:') === false && strpos($atts['assistant'], 'websearch') === false) {
 
         // Initialize the Assistant details
         $assistant_details = [];
@@ -295,7 +295,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
         }
 
-    } elseif ( !empty($atts['assistant']) && (strpos($atts['assistant'], 'asst_') !== false || strpos($atts['assistant'], 'ag:') !== false) ) {
+    } elseif ( !empty($atts['assistant']) && (strpos($atts['assistant'], 'asst_') !== false || strpos($atts['assistant'], 'ag:') !== false || strpos($atts['assistant'], 'websearch') !== false) ) {
 
         // Set the assistant_id
         $chatbot_chatgpt_assistant_alias = $atts['assistant'];
@@ -364,7 +364,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_chatgpt_assistant_alias = 'original'; // default value
     if (array_key_exists('assistant', $atts)) {
         $sanitized_assistant = sanitize_text_field($atts['assistant']);
-        if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0 || strpos($sanitized_assistant, 'ag:') === 0) {
+        if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0 || strpos($sanitized_assistant, 'websearch') === 0 ) {
             $chatbot_chatgpt_assistant_alias = $sanitized_assistant;
             // back_trace( 'NOTICE', '$assistant_id: ' . $chatbot_chatgpt_assistant_alias);
         } else {

@@ -1406,13 +1406,13 @@ function chatbot_chatgpt_send_message() {
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
-    // back_trace( 'NOTICE', '3 - $model: ' . $model);
+    back_trace( 'NOTICE', '$user_id: ' . $user_id);
+    back_trace( 'NOTICE', '$page_id: ' . $page_id);
+    back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', '$chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+    back_trace( 'NOTICE', '3 - $model: ' . $model);
     // back_trace( 'NOTICE', '$voice: ' . $voice);
     // DIAG - Diagnostics - Ver 2.0.9
     // back_trace( 'NOTICE', '========================================');
@@ -1425,7 +1425,8 @@ function chatbot_chatgpt_send_message() {
     // $chatbot_chatgpt_assistant_alias == 'primary';
     // $chatbot_chatgpt_assistant_alias == 'alternate';
     // $chatbot_chatgpt_assistant_alias == 'asst_xxxxxxxxxxxxxxxxxxxxxxxx'; // GPT Assistant Id
-    // $chatbot_chatgpt_assistant_alias == 'ag:xxxxxxxxxxxxxxxxxxxxxxxx'; // Agent Id
+    // $chatbot_chatgpt_assistant_alias == 'ag:xxxxxxxxxxxxxxxxxxxxxxxx'; // MistralAgent Id
+    // $chatbot_chatgpt_assistant_alias == 'websearch'; // Mistral Websearch Id
   
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
@@ -1491,10 +1492,18 @@ function chatbot_chatgpt_send_message() {
         // DIAG - Diagnostics - Ver 2.0.5
         // back_trace( 'NOTICE' ,'Agent ID pass as a parameter - $assistant_id: ' . $assistant_id );
 
+    } elseif (str_starts_with($assistant_id, 'websearch')) {
+
+        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
+        $use_assistant_id = 'Yes';
+
+        // DIAG - Diagnostics - Ver 3.2.1
+        back_trace( 'NOTICE' ,'Websearch ID pass as a parameter - $assistant_id: ' . $assistant_id );
+
     } else {
 
         // Reference GPT Assistant IDs directly - Ver 1.7.3
-        if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_') || str_starts_with($chatbot_chatgpt_assistant_alias, 'ag:')) {
+        if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_') || str_starts_with($chatbot_chatgpt_assistant_alias, 'ag:') || str_starts_with($chatbot_chatgpt_assistant_alias, 'websearch')) {
 
             // DIAG - Diagnostics - 2.0.5
             // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
@@ -1567,10 +1576,10 @@ function chatbot_chatgpt_send_message() {
     } elseif ($use_assistant_id == 'Yes') {
 
         // DIAG - Diagnostics - Ver 2.1.1.1
-        // back_trace( 'NOTICE', 'Using Assistant ID: ' . $use_assistant_id);
-        // back_trace( 'NOTICE', '$user_id ' . $user_id);
-        // back_trace( 'NOTICE', '$page_id ' . $page_id);
-        // back_trace( 'NOTICE', '$message ' . $message);
+        back_trace( 'NOTICE', 'Using Assistant ID: ' . $use_assistant_id);
+        back_trace( 'NOTICE', '$user_id ' . $user_id);
+        back_trace( 'NOTICE', '$page_id ' . $page_id);
+        back_trace( 'NOTICE', '$message ' . $message);
 
 
         // DIAG - Diagnostics
