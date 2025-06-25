@@ -364,7 +364,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $chatbot_chatgpt_assistant_alias = 'original'; // default value
     if (array_key_exists('assistant', $atts)) {
         $sanitized_assistant = sanitize_text_field($atts['assistant']);
-        if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0 || strpos($sanitized_assistant, 'websearch') === 0 ) {
+        if (in_array($sanitized_assistant, $valid_ids) || strpos($sanitized_assistant, 'asst_') === 0 || strpos($sanitized_assistant, 'ag:') === 0 ||strpos($sanitized_assistant, 'websearch') === 0 ) {
             $chatbot_chatgpt_assistant_alias = $sanitized_assistant;
             // back_trace( 'NOTICE', '$assistant_id: ' . $chatbot_chatgpt_assistant_alias);
         } else {

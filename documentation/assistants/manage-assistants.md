@@ -38,6 +38,8 @@ TIP: When using the ```embedded``` style, it's best to put the shortcode in a pa
    - **Input**: Enter the OpenAI Assistant ID.
    - **Required**: This is a required field.
 
+   - **TIP**: If you want a realtime webserach assistant, use ```websearach``` (all lowercase) as the Assistant ID.  This will enable the tool.
+
 4. **Common Name**:
    - **Description**: A user-friendly name for the assistant.
    - **Input**: Enter a name that easily identifies the assistant.

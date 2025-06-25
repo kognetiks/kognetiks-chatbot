@@ -47,6 +47,24 @@ if ( ! defined( 'WPINC' ) ) {
         $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
         $updated_status = kchat_fetch_api_status($api_key, $model);
         update_option('chatbot_anthropic_api_status', $updated_status);
+    } elseif ($chatbot_chatbot_ai_platform_choice == 'Mistral') {
+        update_option('chatbot_mistral_api_status', 'API Error Type: Status Unknown');
+        $api_key = esc_attr(get_option('chatbot_mistral_api_key', 'NOT SET'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+        // Model and message for testing
+        $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
+        $updated_status = kchat_fetch_api_status($api_key, $model);
+        update_option('chatbot_mistral_api_status', $updated_status);
+    } elseif ($chatbot_chatbot_ai_platform_choice == 'DeepSeek') {
+        update_option('chatbot_deepseek_api_status', 'API Error Type: Status Unknown');
+        $api_key = esc_attr(get_option('chatbot_deepseek_api_key', 'NOT SET'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+        // Model and message for testing
+        $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
+        $updated_status = kchat_fetch_api_status($api_key, $model);
+        update_option('chatbot_deepseek_api_status', $updated_status);
     } elseif ($chatbot_chatbot_ai_platform_choice == 'Markov Chain') {
         $updated_status = 'API Testing Not Required';
         update_option('chatbot_markov_chain_api_status', 'API Error Type: Status Unknown');
@@ -437,7 +455,7 @@ function kchat_fetch_api_status($api_key, $model) {
 
             }
             
-            update_option('chatbot_anthropic_api_status', $updated_status);
+            update_option('chatbot_deepseek_api_status', $updated_status);
 
             return $updated_status;
 
@@ -527,7 +545,7 @@ function kchat_fetch_api_status($api_key, $model) {
 
             }
             
-            update_option('chatbot_anthropic_api_status', $updated_status);
+            update_option('chatbot_mistral_api_status', $updated_status);
 
             return $updated_status;
 

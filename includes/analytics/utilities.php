@@ -146,11 +146,11 @@ function kognetiks_analytics_get_time_based_conversation_counts($period = 'Today
     
     // First, let's check if we have any data at all
     $total_records = $wpdb->get_var("SELECT COUNT(*) FROM `$table_name`");
-    back_trace('NOTICE', "Total records in table: " . $total_records);
+    back_trace( 'NOTICE', "Total records in table: " . $total_records);
     
     // Check the timestamp format
     $sample_timestamp = $wpdb->get_var("SELECT interaction_time FROM `$table_name` LIMIT 1");
-    back_trace('NOTICE', "Sample timestamp: " . $sample_timestamp);
+    back_trace( 'NOTICE', "Sample timestamp: " . $sample_timestamp);
     
     // Define period ranges
     $periods = array(
@@ -209,8 +209,8 @@ function kognetiks_analytics_get_time_based_conversation_counts($period = 'Today
     $previous_unique = $wpdb->get_var($previous_unique_query);
     
     // DIAG - Diagnostics - V1.0.0
-    back_trace('NOTICE', "Current period query: " . $current_query);
-    back_trace('NOTICE', "Previous period query: " . $previous_query);
+    back_trace( 'NOTICE', "Current period query: " . $current_query);
+    back_trace( 'NOTICE', "Previous period query: " . $previous_query);
     
     $current_data = array(
         'total' => $current_total,
@@ -222,8 +222,8 @@ function kognetiks_analytics_get_time_based_conversation_counts($period = 'Today
         'unique_visitors' => $previous_unique
     );
     
-    back_trace('NOTICE', "Current period results: " . json_encode($current_data));
-    back_trace('NOTICE', "Previous period results: " . json_encode($previous_data));
+    back_trace( 'NOTICE', "Current period results: " . json_encode($current_data));
+    back_trace( 'NOTICE', "Previous period results: " . json_encode($previous_data));
     
     return array(
         'current' => $current_data,
@@ -242,11 +242,11 @@ function kognetiks_analytics_get_message_statistics($period = 'Today', $user_typ
     
     // First, let's check if we have any data at all
     $total_records = $wpdb->get_var("SELECT COUNT(*) FROM `$table_name`");
-    back_trace('NOTICE', "Total records in table: " . $total_records);
+    back_trace( 'NOTICE', "Total records in table: " . $total_records);
     
     // Check the timestamp format
     $sample_timestamp = $wpdb->get_var("SELECT interaction_time FROM `$table_name` LIMIT 1");
-    back_trace('NOTICE', "Sample timestamp: " . $sample_timestamp);
+    back_trace( 'NOTICE', "Sample timestamp: " . $sample_timestamp);
     
     // Define period ranges (same as above)
     $periods = array(
@@ -299,7 +299,7 @@ function kognetiks_analytics_get_message_statistics($period = 'Today', $user_typ
         WHERE " . $period_info['current'] . $user_type_condition;
 
     // DIAG - Diagnostics - V1.0.0
-    back_trace('NOTICE', "Current period query: " . $current_query);
+    back_trace( 'NOTICE', "Current period query: " . $current_query);
     
     $previous_query = "
         SELECT 
@@ -310,7 +310,7 @@ function kognetiks_analytics_get_message_statistics($period = 'Today', $user_typ
         WHERE " . $period_info['previous'] . $user_type_condition;
 
     // DIAG - Diagnostics - V1.0.0
-    back_trace('NOTICE', "Previous period query: " . $previous_query);
+    back_trace( 'NOTICE', "Previous period query: " . $previous_query);
     
     // Get current period data
     $current_data = $wpdb->get_row($current_query);

@@ -56,11 +56,11 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
 
     // Debugging output to verify the structure of the results
-    // back_trace('NOTICE', 'Debugging $results: ' . print_r($results, true));
+    // back_trace( 'NOTICE', 'Debugging $results: ' . print_r($results, true));
 
     foreach ($results as $result) {
         // Debugging output for each result
-        // back_trace('NOTICE', 'Processing result: ' . print_r($result, true));
+        // back_trace( 'NOTICE', 'Processing result: ' . print_r($result, true));
 
         if (is_array($result) && isset($result['title'], $result['url'], $result['ID'])) {
             if ('yes' == $include_title) {
@@ -260,13 +260,13 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
     $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace('NOTICE', 'Debugging $results: ' . print_r($results, true));
+    // back_trace( 'NOTICE', 'Debugging $results: ' . print_r($results, true));
 
 
     foreach ($results as $result) {
 
         // DIAG - Diagnostics - Ver 2.2.9
-        // back_trace('NOTICE', 'Processing result: ' . print_r($result, true));
+        // back_trace( 'NOTICE', 'Processing result: ' . print_r($result, true));
 
         if (is_object($result) && isset($result->post_title, $result->url, $result->ID)) {
             if ('yes' == $include_title) {

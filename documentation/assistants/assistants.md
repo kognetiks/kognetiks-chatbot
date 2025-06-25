@@ -32,6 +32,8 @@ These settings allow you to configure the behavior and capabilities of the Assis
    - **Description**: This field is for specifying the primary Assistant ID.
    - **Input**: Enter the Assistant ID provided by OpenAI or your specific setup.
 
+   - **TIP**: If you want a realtime webserach assistant, use ```websearach`` (all lowercase) as the Assistant ID.  This will enable the tool.
+
 2. **Common Name**:
    - **Description**: This field is for specifying the common name that you will refer to the assistant in the shortcode.
    - **Input**: Enter name you want to use in the shortcode.
