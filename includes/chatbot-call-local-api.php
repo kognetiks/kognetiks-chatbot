@@ -30,14 +30,14 @@ function chatbot_chatgpt_call_local_model_api($message) {
     global $errorResponses;
 
     // DIAG - Diagnostics - Ver 2.2.2
-    back_trace( 'NOTICE', 'chatbot_call_local_api - start');
-    back_trace( 'NOTICE', 'chatbot_call_local_api - $api_key: ' . $api_key);
-    back_trace( 'NOTICE', 'chatbot_call_local_api - $message: ' . $message);
-    back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'chatbot_call_local_api - start');
+    // back_trace( 'NOTICE', 'chatbot_call_local_api - $api_key: ' . $api_key);
+    // back_trace( 'NOTICE', 'chatbot_call_local_api - $message: ' . $message);
+    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Jan.ai Download
     // https://jan.ai/download
@@ -53,7 +53,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
     $api_url = get_chat_completions_api_url();
 
     // DIAG - Diagnostics - Ver 2.2.2
-    back_trace( 'NOTICE', '$api_url: ' . $api_url);
+    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
 
     // 
     // Select an Open-source Model
@@ -83,7 +83,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
     // Retrieve model settings
     $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$model: ' . $model);
     $max_tokens = intval(get_option('chatbot_local_max_tokens_setting', 10000));
     $temperature = floatval(get_option('chatbot_local_temperature', 0.8));
     $top_p = floatval(get_option('chatbot_local_top_p', 0.95));
@@ -97,7 +97,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
     // Context History - Ver 1.6.1
     $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
     // DIAG Diagnostics - Ver 1.6.1
-    back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
+    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
     
     // IDEA Strip any href links and text from the $chatgpt_last_response
     $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
@@ -119,7 +119,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
     $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
 
     // DIAG Diagnostics - Ver 2.2.9
-    back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
+    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', 'Yes'));
@@ -146,7 +146,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        back_trace( 'NOTICE', '$context: ' . $context);
+        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -159,8 +159,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
     $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
 
     // DIAG Diagnostics - Ver 2.1.8
-    back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
+    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
 
     if ($chatbot_chatgpt_conversation_continuation == 'On') {
         $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
@@ -169,7 +169,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
-    back_trace( 'NOTICE', '$context_length: ' . $context_length);
+    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
     // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 100000; // Estimate at 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
@@ -182,13 +182,13 @@ function chatbot_chatgpt_call_local_model_api($message) {
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
+        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
-        back_trace( 'NOTICE', 'Context length is within limits.');
+        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // DIAG Diagnostics - Ver 2.1.8
-    back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', '$context: ' . $context);
 
     // Construct request body to match the expected schema
     $body = array(
@@ -246,14 +246,14 @@ function chatbot_chatgpt_call_local_model_api($message) {
     );
 
     // Log message for debugging
-    back_trace( 'NOTICE', '$api_url: ' . $api_url);
-    back_trace( 'NOTICE', '$args: ' . print_r($args, true));
+    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
+    // back_trace( 'NOTICE', '$args: ' . print_r($args, true));
 
     // Send request
     $response = wp_remote_post($api_url, $args);
     
     // Log response for debugging
-    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle request errors
     if (is_wp_error($response)) {
@@ -312,20 +312,20 @@ function chatbot_chatgpt_call_local_model_api($message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
+    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // DIAG - Diagnostics - Ver 1.8.1
-    back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
+    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
 
-    back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens
     $input_tokens = $response_body['usage']['prompt_tokens'] ?? 0;
@@ -369,7 +369,7 @@ function chatbot_chatgpt_call_local_model_api($message) {
 function chatbot_local_start_model() {
 
     // DiAG - Diagnostics
-    back_trace( 'NOTICE', 'chatbot_local_start_model');
+    // back_trace( 'NOTICE', 'chatbot_local_start_model');
 
     global $chatbot_local_model_status;
 
@@ -377,7 +377,7 @@ function chatbot_local_start_model() {
     $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
 
     // DiAG - Diagnostics
-    back_trace( 'NOTICE', '$model: ' . $model);
+    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Set the API URL
     $api_url = esc_attr(get_option('chatbot_local_base_url','http://127.0.0.1:1337/v1')) . '/models/start';
@@ -420,7 +420,7 @@ function chatbot_local_start_model() {
     $response_body = wp_remote_retrieve_body($response);
 
     // DiAG - Diagnostics
-    back_trace( 'NOTICE', '$response_body: ' . $response_body);
+    // back_trace( 'NOTICE', '$response_body: ' . $response_body);
 
     // Set the model status
     $chatbot_local_model_status = 'started';
@@ -433,7 +433,7 @@ function chatbot_local_start_model() {
 function chatbot_local_get_models() {
     
     // DiAG - Diagnostics
-    back_trace( 'NOTICE', 'chatbot_local_get_models');
+    // back_trace( 'NOTICE', 'chatbot_local_get_models');
 
     // Set the API URL
     $api_url = esc_attr(get_option('chatbot_local_base_url','http://127.0.0.1:1337/v1')) . '/models';
@@ -470,7 +470,7 @@ function chatbot_local_get_models() {
     $raw_response = wp_remote_retrieve_body($response);
 
     // DiAG - Diagnostics
-    back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
+    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // For each model in the $response_body, add the model to return array
     $models = array();

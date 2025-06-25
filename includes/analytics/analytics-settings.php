@@ -18,7 +18,7 @@ if ( ! defined( 'WPINC' ) ) {
 function kognetiks_analytics_settings_page() {
     
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', 'Kognetiks Analytics Settings Page Loaded');
+    // back_trace( 'NOTICE', 'Kognetiks Analytics Settings Page Loaded');
 
     // Determine active tab
     $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'analytics';
@@ -35,7 +35,7 @@ function kognetiks_analytics_settings_page() {
 
     if ($last_scoring_timestamp !== false && ($current_timestamp - $last_scoring_timestamp) <= 3600) {
         // Last scoring was within the last hour, skip warning
-        back_trace( 'NOTICE', 'Last scoring was within the last hour, skipping warning');
+        // back_trace( 'NOTICE', 'Last scoring was within the last hour, skipping warning');
     } else {
         // Last scoring was more than an hour ago (or never)
         ?>
@@ -51,18 +51,18 @@ function kognetiks_analytics_settings_page() {
         if (isset($_POST['kap_scoring_action'])) {
             $action = $_POST['kap_scoring_action'];
             if ($action === 'start' && isset($_POST['kognetiks_analytics_scoring_start_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_start_nonce'])), 'kognetiks_analytics_scoring_start')) {
-                back_trace( 'NOTICE', 'Starting scoring process');
+                // back_trace( 'NOTICE', 'Starting scoring process');
                 kognetiks_analytics_start_scoring();
                 kognetiks_analytics_score_conversations_without_sentiment_score();
             } elseif ($action === 'stop' && isset($_POST['kognetiks_analytics_scoring_stop_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_stop_nonce'])), 'kognetiks_analytics_scoring_stop')) {
-                back_trace( 'NOTICE', 'Stopping scoring process');
+                // back_trace( 'NOTICE', 'Stopping scoring process');
                 kognetiks_analytics_stop_scoring();
             } elseif ($action === 'restart' && isset($_POST['kognetiks_analytics_scoring_restart_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_restart_nonce'])), 'kognetiks_analytics_scoring_restart')) {
-                back_trace( 'NOTICE', 'Restarting scoring process');
+                // back_trace( 'NOTICE', 'Restarting scoring process');
                 kognetiks_analytics_restart_scoring();
                 kognetiks_analytics_score_conversations_without_sentiment_score();
             } elseif ($action === 'reset' && isset($_POST['kognetiks_analytics_scoring_reset_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_reset_nonce'])), 'kognetiks_analytics_scoring_reset')) {
-                back_trace( 'NOTICE', 'Resetting scoring process');
+                // back_trace( 'NOTICE', 'Resetting scoring process');
                 kognetiks_analytics_reset_scoring();
             }
             echo '<script>location.reload();</script>';
@@ -132,7 +132,7 @@ function kognetiks_analytics_settings_page() {
             // Update the option in the database
             kognetiks_analytics_set_scoring_control_mode($selected_scoring_control);
             // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Scoring control mode updated to: ' . $selected_scoring_control);
+            // back_trace( 'NOTICE', 'Scoring control mode updated to: ' . $selected_scoring_control);
         } else {
             // Get the current scoring control mode from the database
             $selected_scoring_control = kognetiks_analytics_get_scoring_control_mode();
@@ -721,9 +721,9 @@ function kognetiks_analytics_settings_page() {
 function kognetiks_analytics_start_scoring() {
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', 'Kognetiks Analytics Start Scoring Function Loaded');
+    // back_trace( 'NOTICE', 'Kognetiks Analytics Start Scoring Function Loaded');
 
     kognetiks_analytics_set_scoring_status('running');
-    back_trace( 'NOTICE', 'Sentiment scoring process started');
+    // back_trace( 'NOTICE', 'Sentiment scoring process started');
 
 }

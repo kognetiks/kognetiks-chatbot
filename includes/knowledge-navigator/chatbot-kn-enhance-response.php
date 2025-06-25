@@ -120,9 +120,9 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     // DIAG - Diagnostics - Ver 2.2.9
     // if (!empty($enhanced_response)) {
-    //     back_trace( 'NOTICE', '$enhanced_response: ' . print_r($enhanced_response, true));
+    //     // back_trace( 'NOTICE', '$enhanced_response: ' . print_r($enhanced_response, true));
     // } else {
-    //     back_trace( 'NOTICE', 'No enhanced response found');
+    //     // back_trace( 'NOTICE', 'No enhanced response found');
     // }
 
     return !empty($enhanced_response) ? $enhanced_response : null;
