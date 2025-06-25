@@ -143,7 +143,8 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     // $api_url = 'https://api.mistral.ai/v1/agents/completions';
 
     if (strpos($assistant_id, 'ag:') === 0) {
-        $api_url = 'https://api.mistral.ai/v1/agents/' . $assistant_id;
+        $api_url = 'https://api.mistral.ai/v1/agents/completions';
+        // $api_url = 'https://api.mistral.ai/v1/agents/' . $assistant_id;
         back_trace( 'NOTICE', '$api_url: ' . $api_url);
     } else {
         $api_url = 'https://api.mistral.ai/v1/conversations';
@@ -362,10 +363,10 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         $request_body = array(
             // 'model' => $model,
             'messages' => array(
-                array(
-                    'role' => 'system',
-                    'content' => $context
-                ),
+                // array(
+                //     'role' => 'system',
+                //     'content' => $context
+                // ),
                 array(
                     'role' => 'user',
                     'content' => $message
@@ -373,7 +374,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
             ),
             // 'max_tokens' => $max_tokens,
             // 'temperature' => 0.7,
-            // 'agent_id' => $assistant_id
+            'agent_id' => $assistant_id
         );
     } else {
         // Mistral Websearch API
@@ -419,33 +420,67 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     // DIAG - Diagnostics - Ver 2.3.0
     back_trace( 'NOTICE', '$data: ' . print_r($data, true));
 
-    if (!isset($data['outputs']) || !is_array($data['outputs'])) {
-        back_trace( 'ERROR', 'Mistral API response missing outputs array');
-        return 'Error: Invalid response structure from Mistral API - missing outputs';
-    }
-    
+    // Empty response text
     $response_text = '';
-    foreach ($data['outputs'] as $output) {
-        if (isset($output['type']) && $output['type'] === 'message.output' && isset($output['content'])) {
-            if (is_string($output['content'])) {
-                $response_text .= $output['content'];
-            } elseif (is_array($output['content'])) {
-                foreach ($output['content'] as $segment) {
-                    if (
-                        isset($segment['type']) &&
-                        $segment['type'] === 'text' &&
-                        isset($segment['text']) &&
-                        is_string($segment['text'])
-                    ) {
-                        $response_text .= $segment['text'];
+
+    // Handle both standard Mistral Chat API format and Agent API format
+    if (strpos($assistant_id, 'ag:') === 0) {
+        // Check for standard chat completion format first (choices array)
+        if (isset($data['choices']) && is_array($data['choices']) && !empty($data['choices'])) {
+            if (isset($data['choices'][0]['message']['content']) && !empty($data['choices'][0]['message']['content'])) {
+                $response_text = $data['choices'][0]['message']['content'];
+                back_trace( 'NOTICE', 'Extracted response from choices array');
+            }
+        }
+        // Check for Mistral Agent API format (outputs array)
+        elseif (isset($data['outputs']) && is_array($data['outputs'])) {
+            foreach ($data['outputs'] as $output) {
+                if (isset($output['type']) && $output['type'] === 'message.output' && isset($output['content'])) {
+                    if (is_string($output['content'])) {
+                        $response_text .= $output['content'];
+                    } elseif (is_array($output['content'])) {
+                        foreach ($output['content'] as $segment) {
+                            if (
+                                isset($segment['type']) &&
+                                $segment['type'] === 'text' &&
+                                isset($segment['text']) &&
+                                is_string($segment['text'])
+                            ) {
+                                $response_text .= $segment['text'];
+                            }
+                        }
                     }
                 }
             }
+            back_trace( 'NOTICE', 'Extracted response from outputs array');
+        }
+    } else {
+        // Websearch Agent Response handling (ag_ format)
+        if (isset($data['outputs']) && is_array($data['outputs'])) {
+            foreach ($data['outputs'] as $output) {
+                if (isset($output['type']) && $output['type'] === 'message.output' && isset($output['content'])) {
+                    if (is_string($output['content'])) {
+                        $response_text .= $output['content'];
+                    } elseif (is_array($output['content'])) {
+                        foreach ($output['content'] as $segment) {
+                            if (
+                                isset($segment['type']) &&
+                                $segment['type'] === 'text' &&
+                                isset($segment['text']) &&
+                                is_string($segment['text'])
+                            ) {
+                                $response_text .= $segment['text'];
+                            }
+                        }
+                    }
+                }
+            }
+            back_trace( 'NOTICE', 'Extracted response from websearch outputs array');
         }
     }
-    
+
     if (empty($response_text)) {
-        back_trace( 'ERROR', 'Mistral response found but content is empty or malformed.');
+        back_trace( 'ERROR', 'Mistral response found but content is empty or malformed. Response structure: ' . print_r($data, true));
         return 'Error: Assistant responded with no text.';
     }
     
