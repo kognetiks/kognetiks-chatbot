@@ -13,11 +13,36 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+// Mistral API Documentation
+//
+// Agent Creation
+// https://docs.mistral.ai/agents/agents_basics/#agent-creation
+// 
+// Update an Agent
+//https://docs.mistral.ai/agents/agents_basics/#updating-an-agent
+//
+
+// Mistral API Documentation
+//
+// Start a Conversation
+// https://docs.mistral.ai/agents/agents_basics/#continue-a-conversation
+//
+// Continue a Conversation
+// https://docs.mistral.ai/agents/agents_basics/#continue-a-conversation
+//
+// Retrieve a Conversation
+// https://docs.mistral.ai/agents/agents_basics/#retrieve-a-conversation
+//
+// Restart a Conversation
+// https://docs.mistral.ai/agents/agents_basics/#restart-conversation
+//
+// Stream the Output
+// https://docs.mistral.ai/agents/agents_basics/#streaming-output
+//
+
+
 // Create a Mistral agent with web search capabilities
 function create_mistral_websearch_agent($api_key) {
-
-    // Mistral API Documentation
-    // https://docs.mistral.ai/agents/connectors/websearch/
 
     // DIAG - Diagnostics - Ver 3.2.1
     // back_trace( 'NOTICE', 'create_mistral_websearch_agent - start');
@@ -28,7 +53,6 @@ function create_mistral_websearch_agent($api_key) {
     // DIAG - Diagnostics - Ver 3.2.1
     // back_trace( 'NOTICE', '$api_url: ' . $api_url);
 
-        
     // Get the model from settings or use default
     $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-medium-latest'));
 
