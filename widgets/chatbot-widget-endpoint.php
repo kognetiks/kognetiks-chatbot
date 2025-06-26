@@ -170,7 +170,7 @@ if (is_user_logged_in()) {
 // Get the tail number from the session id and assign it to page id - Ver 2.1.4
 // $session_id_parts = explode('.', $session_id);
 // $page_id = $session_id_parts[1];
-// error_log('Widget Endpoint - $page_id: ' . $page_id);
+// error_log('[Chatbot] [chatbot-widget-endpoint.php] Widget Endpoint - $page_id: ' . $page_id);
 $page_id = '999999';
 
 // Localize the data for the chatbot - Ver 2.1.1.1

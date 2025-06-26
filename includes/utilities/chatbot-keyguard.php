@@ -128,14 +128,14 @@ function chatbot_chatgpt_decrypt_api_key($data, $option_name = null) {
 
     // Fix the JSON before decrypting.
     $data = html_entity_decode($data);
-    // error_log('chatbot-keyguard.php: chatbot_chatgpt_decrypt_api_key() - $data: ' . print_r($data, true));
+    // error_log('[Chatbot] [chatbot-keyguard.php] chatbot_chatgpt_decrypt_api_key() - $data: ' . print_r($data, true));
     
     // Attempt to decode the data as JSON.
     $decoded = json_decode($data, true);
     
     // If not in the expected JSON format, assume it's plain text.
     if (!is_array($decoded) || !isset($decoded['iv']) || !isset($decoded['encrypted'])) {
-        // error_log('chatbot-keyguard.php: Plaintext detected.');
+        // error_log('[Chatbot] [chatbot-keyguard.php] Plaintext detected.');
 
         $chatbot_ai_platform_choice = esc_attr( get_option('chatbot_ai_platform_choice') );
         switch ($chatbot_ai_platform_choice) {
@@ -168,7 +168,8 @@ function chatbot_chatgpt_decrypt_api_key($data, $option_name = null) {
         if (!empty($option_name)) {
             $encrypted_value = chatbot_chatgpt_encrypt_api_key($data);
             update_option($option_name, $encrypted_value);
-            // error_log('chatbot-keyguard.php: Updated option ' . $option_name . ' with encrypted value.');
+            // error_log('[Chatbot] [chatbot-keyguard.php] Failed to insert row into table: ' . $table_name);
+            // error_log('[Chatbot] [chatbot-keyguard.php] Updated option ' . $option_name . ' with encrypted value.');
         }
         // Return the plain text.
         return $data;
@@ -176,9 +177,9 @@ function chatbot_chatgpt_decrypt_api_key($data, $option_name = null) {
     
     // Otherwise, use the stored keyguard to decrypt.
     $keyguard = chatbot_chatgpt_generate_and_store_keyguard();
-    // error_log('chatbot-keyguard.php: chatbot_chatgpt_decrypt_api_key() - $keyguard: ' . $keyguard);
+    // error_log('[Chatbot] [chatbot-keyguard.php] chatbot_chatgpt_decrypt_api_key() - $keyguard: ' . $keyguard);
     $decrypted_key = chatbot_chatgpt_decrypt_api_key_with_key($data, $keyguard);
-    // error_log('chatbot-keyguard.php: chatbot_chatgpt_decrypt_api_key() - $decrypted_key: ' . $decrypted_key);
+    // error_log('[Chatbot] [chatbot-keyguard.php] chatbot_chatgpt_decrypt_api_key() - $decrypted_key: ' . $decrypted_key);
     return $decrypted_key;
 
 }

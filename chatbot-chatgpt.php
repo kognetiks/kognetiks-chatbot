@@ -118,10 +118,10 @@ add_action('init', 'kognetiks_assign_unique_id', 1); // Set higher priority
 // Get the unique ID of the visitor or logged-in user - Ver 2.0.4
 function kognetiks_get_unique_id() {
     if (isset($_COOKIE['kognetiks_unique_id'])) {
-        // error_log('Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
+        // error_log('[Chatbot] [chatbot-chatgpt.php] Unique ID found: ' . $_COOKIE['kognetiks_unique_id']);
         return sanitize_text_field($_COOKIE['kognetiks_unique_id']);
     }
-    // error_log('Unique ID not found');
+    // error_log('[Chatbot] [chatbot-chatgpt.php] Unique ID not found');
     return null;
 }
 

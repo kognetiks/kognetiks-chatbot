@@ -68,9 +68,9 @@ function create_chatbot_mistral_assistants_table() {
         // logErrorToServer('Failed to create table: ' . $table_name);
         // logErrorToServer('SQL: ' . $sql);
         // logErrorToServer('Error details: ' . $wpdb->last_error);
-        error_log('Failed to create table: ' . $table_name);
-        error_log('SQL: ' . $sql);
-        error_log('Error details: ' . $wpdb->last_error);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] Failed to create table: ' . $table_name);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] SQL: ' . $sql);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
     }
 
@@ -196,7 +196,7 @@ function update_chatbot_mistral_number_of_shortcodes() {
     update_option('chatbot_mistral_number_of_shortcodes', $number_of_shortcodes);
 
     // Optionally log for debugging
-    // error_log('chatbot-assistants - Number of Shortcodes: ' . $number_of_shortcodes);
+    // back_trace( 'NOTCE', 'chatbot-assistants - Number of Shortcodes: ' . $number_of_shortcodes);
 
     // DIAG - Diagnostics - Ver 2.2.7
     // back_trace( 'NOTCE', 'update_chatbot_mistral_number_of_shortcodes - END' );
@@ -520,8 +520,8 @@ function mistral_update_assistant() {
 
     // Check for errors after update
     if ($wpdb->last_error) {
-        error_log('Failed to update row in table: ' . $table_name);
-        error_log('Error details: ' . $wpdb->last_error);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] Failed to update row in table: ' . $table_name);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] Error details: ' . $wpdb->last_error);
         return false;  // Row update failed
     }
 
@@ -551,8 +551,8 @@ function mistral_delete_assistant() {
 
     // Check for errors after delete
     if ($wpdb->last_error) {
-        error_log('Failed to delete row from table: ' . $table_name);
-        error_log('Error details: ' . $wpdb->last_error);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] Failed to delete row from table: ' . $table_name);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] Error details: ' . $wpdb->last_error);
         return false;  // Row deletion failed
     }
 
@@ -615,8 +615,9 @@ function mistral_add_new_assistant() {
 
     // Check for errors after insert
     if ($wpdb->last_error) {
-        error_log('Failed to insert row into table: ' . $table_name);
-        error_log('Error details: ' . $wpdb->last_error);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] Failed to delete row from table: ' . $table_name);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] Failed to insert row into table: ' . $table_name);
+        error_log('[Chatbot] [chatbot-agents-mistral.php] Error details: ' . $wpdb->last_error);
         return false;  // Row insertion failed
     }
 
@@ -662,8 +663,8 @@ function upgrade_chatbot_mistral_assistants_table() {
 
         // Check for errors after insert
         if ($wpdb->last_error) {
-            error_log('Failed to insert row into table: ' . $table_name);
-            error_log('Error details: ' . $wpdb->last_error);
+            error_log('[Chatbot] [chatbot-agents-mistral.php] Failed to insert row into table: ' . $table_name);
+            error_log('[Chatbot] [chatbot-agents-mistral.php] Error details: ' . $wpdb->last_error);
             return false;  // Row insertion failed
         }
 
@@ -690,8 +691,8 @@ function upgrade_chatbot_mistral_assistants_table() {
 
         // Check for errors after insert
         if ($wpdb->last_error) {
-            error_log('Failed to insert row into table: ' . $table_name);
-            error_log('Error details: ' . $wpdb->last_error);
+            error_log('[Chatbot] [chatbot-agents-mistral.php] Failed to insert row into table: ' . $table_name);
+            error_log('[Chatbot] [chatbot-agents-mistral.php] Error details: ' . $wpdb->last_error);
             return false;  // Row insertion failed
         }
         

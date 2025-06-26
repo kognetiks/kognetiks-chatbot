@@ -43,9 +43,10 @@ function create_chatbot_chatgpt_interactions_table() {
         // logErrorToServer('Failed to create table: ' . $table_name);
         // logErrorToServer('SQL: ' . $sql);
         // logErrorToServer('Error details: ' . $wpdb->last_error);
-        error_log('Failed to create table: ' . $table_name);
-        error_log('SQL: ' . $sql);
-        error_log('Error details: ' . $wpdb->last_error);
+        error_log('[Chatbot] [chatbot-db-management.php] Failed to insert row into table: ' . $table_name);
+        error_log('[Chatbot] [chatbot-db-management.php] Failed to create table: ' . $table_name);
+        error_log('[Chatbot] [chatbot-db-management.php] SQL: ' . $sql);
+        error_log('[Chatbot] [chatbot-db-management.php] Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
     }
 
@@ -230,9 +231,9 @@ function create_conversation_logging_table() {
 
         // Check for errors after dbDelta
         if ($wpdb->last_error) {
-            error_log('Failed to create table: ' . $table_name);
-            error_log('SQL: ' . $sql);
-            error_log('Error details: ' . $wpdb->last_error);
+            error_log('[Chatbot] [chatbot-db-management.php] Failed to create table: ' . $table_name);
+            error_log('[Chatbot] [chatbot-db-management.php] SQL: ' . $sql);
+            error_log('[Chatbot] [chatbot-db-management.php] Error details: ' . $wpdb->last_error);
             return false;  // Table creation failed
         }
     }
@@ -400,7 +401,7 @@ function add_sentiment_score_column_to_existing_table() {
     $result = $wpdb->query($sql);
     
     if ($result === false) {
-        error_log('Error adding sentiment_score column: ' . $wpdb->last_error);
+        error_log('[Chatbot] [chatbot-db-management.php] Error adding sentiment_score column: ' . $wpdb->last_error);
         return false;
     }
     

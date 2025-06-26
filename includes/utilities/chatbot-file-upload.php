@@ -603,7 +603,7 @@ function create_index_file($directory) {
     if (!is_dir($directory)) {
         if (!mkdir($directory, 0755, true)) {
             // If the directory could not be created, log an error and exit the function
-            error_log("Chatbot-Chatgpt - Failed to create directory: " . $directory);
+            error_log("[Chatbot] [chatbot-file-upload.php] Failed to create directory: " . $directory);
             return;
         }
     }
@@ -622,7 +622,7 @@ function create_index_file($directory) {
             fclose($file);
         } else {
             // Handle the error
-            error_log("Chatbot-Chatgpt - Failed to create index.php file in directory: " . $directory);
+            error_log("[Chatbot] [chatbot-file-upload.php] Failed to create index.php file in directory: " . $directory);
         }
     }
 }

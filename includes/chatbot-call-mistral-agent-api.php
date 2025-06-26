@@ -418,7 +418,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
 
     if (empty($response_text)) {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'ERROR', 'Mistral response found but content is empty or malformed. Response structure: ' . print_r($data, true));
+        prod_trace( 'ERROR', 'Mistral response found but content is empty or malformed. Response structure: ' . print_r($data, true));
         return 'Error: Assistant responded with no text.';
     }
     

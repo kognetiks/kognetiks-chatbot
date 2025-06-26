@@ -26,7 +26,7 @@ function chatbot_chatgpt_activate() {
     $unexpected_output = ob_get_clean();
     if (!empty($unexpected_output)) {
         // Log or handle unexpected output
-        error_log('Unexpected output during plugin activation: ' . $unexpected_output);
+        error_log('[Chatbot] [chatbot-upgrade.php] Unexpected output during plugin activation: ' . $unexpected_output);
     }
 
     // DIAG - Log the activation

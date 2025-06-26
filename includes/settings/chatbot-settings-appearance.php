@@ -647,7 +647,7 @@ function chatbot_chatgpt_appearance_icon_path($icon_common_name) {
             $icon_path = esc_attr(get_option('chatbot_chatgpt_appearance_send_icon', ''));
             if ( $icon_path == '') {
                 $icon_path = plugins_url('../../assets/icons/send_FILL0_wght400_GRAD0_opsz24.png', __FILE__);
-                // error_log ('send_icon: ' . $icon_path);
+                // error_log ('[Chatbot] [chatbot-settings-appearance.php] send_icon: ' . $icon_path);
             }   
             break;
         case 'attach_icon':

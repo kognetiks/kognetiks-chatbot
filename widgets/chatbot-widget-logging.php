@@ -44,7 +44,7 @@ function chatbot_widget_logging( $message, $referer = null, $request_ip = null )
 
         // Ensure the directory and index file exist
         if (!create_directory_and_index_file($chatbot_widget_logs_dir)) {
-            error_log('Failed to create or verify widget logs directory');
+            error_log('[Chatbot] [chatbot-widget-logging.php] Failed to create or verify widget logs directory');
             return false;
         }
 
@@ -61,13 +61,13 @@ function chatbot_widget_logging( $message, $referer = null, $request_ip = null )
 
         // Append the error message to the log file with error handling
         if (file_put_contents($log_file, $log_entry . PHP_EOL, FILE_APPEND | LOCK_EX) === false) {
-            error_log('Failed to write to widget log file: ' . $log_file);
+            error_log('[Chatbot] [chatbot-widget-logging.php] Failed to write to widget log file: ' . $log_file);
             return false;
         }
 
         return true;
     } catch (Exception $e) {
-        error_log('Error in chatbot_widget_logging: ' . $e->getMessage());
+        error_log('[Chatbot] [chatbot-widget-logging.php] Error in chatbot_widget_logging: ' . $e->getMessage());
         return false;
     }
 }
