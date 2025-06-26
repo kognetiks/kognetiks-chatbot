@@ -233,10 +233,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.3.1 - Released TBD =
+= 2.3.1 - Released 2025-06-26 =
 
 * **Mistral API Websearch**: Added support for realtime websearch using a Mistral Assistant.
 * **LocalServer**: JAN.AI requires an API key for local models which is set when server is started.
+* **Error Logging**: For developers improved error logging for troubleshooting and debugging.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.0.
 
 = 2.3.0 - Released 2025-04-24 =
