@@ -412,6 +412,7 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
 
 // Log Chatbot Errors to the Server - Ver 2.0.9
 function chatbot_error_log($message) {
+
     global $wp_filesystem;
     global $chatbot_chatgpt_plugin_dir_path;
 
@@ -425,6 +426,23 @@ function chatbot_error_log($message) {
     
     $log_file = $chatbot_logs_dir . 'chatbot-error-log-' . $current_date . '.log';
 
+    // Debug: Log the file path and method being used
+    // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Writing to log file: ' . $log_file);
+
+    // Check and fix file permissions if needed
+    if (file_exists($log_file)) {
+        $current_perms = fileperms($log_file);
+        if (($current_perms & 0x0080) === 0) { // Check if writable by owner
+            chmod($log_file, 0644);
+            error_log('[Chatbot] [chatbot-settings-diagnotics.php] Fixed file permissions for: ' . $log_file);
+        }
+        
+        // Check if file is currently being used by another process
+        if (is_file_in_use($log_file)) {
+            error_log('[Chatbot] [chatbot-settings-diagnotics.php] File appears to be in use by another process: ' . $log_file);
+        }
+    }
+
     // Initialize the WordPress filesystem if not already initialized
     if (!function_exists('WP_Filesystem')) {
         require_once(ABSPATH . 'wp-admin/includes/file.php');
@@ -437,13 +455,16 @@ function chatbot_error_log($message) {
             $creds = request_filesystem_credentials(site_url() . '/wp-admin/', '', false, false, array());
             if (WP_Filesystem($creds)) {
                 // Filesystem initialized successfully
+                error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem initialized successfully');
             } else {
                 // Fallback to file_put_contents if filesystem initialization fails
+                error_log('[Chatbot] [chatbot-settings-diagnotics.php] Falling back to native file_put_contents');
                 file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
                 return;
             }
         } else {
             // Fallback to file_put_contents if direct access is not available
+            error_log('[Chatbot] [chatbot-settings-diagnotics.php] Direct access not available, using native file_put_contents');
             file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
             return;
         }
@@ -451,11 +472,103 @@ function chatbot_error_log($message) {
 
     // Append the error message to the log file
     if ($wp_filesystem) {
-        $wp_filesystem->put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+
+        // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Using WordPress filesystem to write log');
+        // WordPress filesystem doesn't support FILE_APPEND flag, so we need to read existing content first
+        $existing_content = '';
+        if ($wp_filesystem->exists($log_file)) {
+            $existing_content = $wp_filesystem->get_contents($log_file);
+            //error_log('[Chatbot] [chatbot-settings-diagnotics.php] Existing content length: ' . strlen($existing_content));
+        } else {
+            //error_log('[Chatbot] [chatbot-settings-diagnotics.php] Log file does not exist, creating new file');
+        }
+        
+        // Append the new message to existing content
+        $new_content = $existing_content . $message . PHP_EOL;
+        
+        // Write the combined content back to the file with proper locking
+        $result = $wp_filesystem->put_contents($log_file, $new_content, 0644);
+        if ($result === false) {
+            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem write failed, falling back to native method');
+            // Try to fix file permissions before attempting to write
+            if (file_exists($log_file)) {
+                chmod($log_file, 0644);
+            }
+            // Use fopen with proper error handling
+            $handle = @fopen($log_file, 'a');
+            if ($handle) {
+                if (flock($handle, LOCK_EX)) { // Exclusive lock
+                    fwrite($handle, $message . PHP_EOL);
+                    flock($handle, LOCK_UN); // Release lock
+                    fclose($handle);
+                    // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Native fopen write successful');
+                } else {
+                    fclose($handle);
+                    // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Failed to acquire file lock');
+                    // Try alternative method without locking
+                    @file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND);
+                }
+            } else {
+                // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Failed to open file for writing: ' . $log_file);
+                // Try to create the file with proper permissions
+                $dir = dirname($log_file);
+                if (!is_dir($dir)) {
+                    mkdir($dir, 0755, true);
+                }
+                if (touch($log_file)) {
+                    chmod($log_file, 0644);
+                    @file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+                } else {
+                    // Last resort: try to write to a temporary file and then move it
+                    $temp_file = $log_file . '.tmp';
+                    if (@file_put_contents($temp_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX)) {
+                        if (file_exists($log_file)) {
+                            $existing_content = @file_get_contents($log_file);
+                            if ($existing_content !== false) {
+                                @file_put_contents($temp_file, $existing_content . $message . PHP_EOL, LOCK_EX);
+                            }
+                        }
+                        @rename($temp_file, $log_file);
+                    }
+                }
+            }
+        
+        } else {
+
+            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem write successful, bytes written: ' . $result);
+        
+        }
+
     } else {
+
         // Fallback to file_put_contents if $wp_filesystem is still not available
-        file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+        // error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem not available, using native file_put_contents');
+        // Use exclusive lock to prevent race conditions
+        $handle = @fopen($log_file, 'a');
+        if ($handle) {
+            if (flock($handle, LOCK_EX)) { // Exclusive lock
+                fwrite($handle, $message . PHP_EOL);
+                flock($handle, LOCK_UN); // Release lock
+                fclose($handle);
+            } else {
+                fclose($handle);
+                // If locking fails, try without lock
+                file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND);
+            }
+        } else {
+            // If fopen fails, try to create the file
+            $dir = dirname($log_file);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            if (touch($log_file)) {
+                chmod($log_file, 0644);
+                @file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+            }
+        }
+    
     }
+    
 }
 
 // Log Chatbot Errors to the Server - Ver 2.0.3
@@ -499,8 +612,44 @@ function log_chatbot_error() {
     }
     
     wp_die(); // this is required to terminate immediately and return a proper response
+    
 }
-
 // Register AJAX actions
 add_action('wp_ajax_log_chatbot_error', 'log_chatbot_error');
 add_action('wp_ajax_nopriv_log_chatbot_error', 'log_chatbot_error');
+
+// Test function to verify logging functionality
+function test_chatbot_logging() {
+
+    $test_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [chatbot-settings-diagnotics.php] This is a test log message to verify logging functionality.';
+    chatbot_error_log($test_message);
+    return 'Test log message written. Check the log file to verify.';
+
+}
+
+// Function to check if a file is currently being used by another process
+function is_file_in_use($file_path) {
+
+    if (!file_exists($file_path)) {
+        return false;
+    }
+    
+    $handle = @fopen($file_path, 'r');
+    if ($handle) {
+        fclose($handle);
+        return false; // File is not in use
+    }
+    
+    return true; // File might be in use
+
+}
+
+// Add a simple way to test logging (for debugging purposes)
+if (isset($_GET['test_logging']) && current_user_can('manage_options')) {
+
+    add_action('admin_notices', function() {
+        $result = test_chatbot_logging();
+        echo '<div class="notice notice-info"><p>' . esc_html($result) . '</p></div>';
+    });
+
+}
