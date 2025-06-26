@@ -26,7 +26,7 @@ function kognetiks_analytics_settings_page() {
     // Tab navigation UI and page wrapper
     echo '<div class="wrap" id="kognetiks-analytics">';
     echo '<h1><span class="dashicons dashicons-chart-bar" style="font-size: 25px;"></span> Kognetiks Analytics</h1>';
-    echo '<p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Reporting and additional documentation please click <a href="?page=chatbot-chatgpt&file=analytics-package.md&tab=support&dir=analytics-package">here</a>.</b></p>';
+    echo '<p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Analytics and additional documentation please click <a href="?page=chatbot-chatgpt&file=analytics-package.md&tab=support&dir=analytics-package">here</a>.</b></p>';
     
     // Determine if the last scoring date/time is earlier than the current date/time, if so, then start the scoring process, else exit
     $last_scoring_date = get_option('kognetiks_analytics_last_scoring_date');
