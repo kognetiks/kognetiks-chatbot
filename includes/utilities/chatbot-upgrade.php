@@ -333,7 +333,9 @@ function chatbot_chatgpt_upgrade() {
     // back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log table created');
 
     // Ensure sentiment_score column exists for existing installations
-    add_sentiment_score_column_to_existing_table();
+    if (function_exists('chatbot_chatgpt_add_sentiment_score_column')) {
+        chatbot_chatgpt_add_sentiment_score_column();
+    }
     // DIAG - Log the column addition
     // back_trace( 'NOTICE', 'sentiment_score column ensured');
 

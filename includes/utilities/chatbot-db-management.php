@@ -376,38 +376,6 @@ function chatbot_chatgpt_conversation_log_cleanup() {
     return true;
 
 }
-
-// Function to manually add sentiment_score column to existing installations
-function add_sentiment_score_column_to_existing_table() {
-    
-    global $wpdb;
-    
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
-    
-    // Check if the table exists
-    if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
-        // Table doesn't exist, nothing to do
-        return false;
-    }
-    
-    // Check if sentiment_score column already exists
-    if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) === 'sentiment_score') {
-        // Column already exists
-        return true;
-    }
-    
-    // Add the sentiment_score column
-    $sql = "ALTER TABLE $table_name ADD COLUMN sentiment_score FLOAT AFTER message_text";
-    $result = $wpdb->query($sql);
-    
-    if ($result === false) {
-        error_log('[Chatbot] [chatbot-db-management.php] Error adding sentiment_score column: ' . $wpdb->last_error);
-        return false;
-    }
-    
-    return true;
-}
-
 // Register activation and deactivation hooks
 register_activation_hook(plugin_dir_path(dirname(__FILE__)) . 'chatbot-chatgpt.php', 'chatbot_chatgpt_activate_db');
 register_deactivation_hook(plugin_dir_path(dirname(__FILE__)) . 'chatbot-chatgpt.php', 'chatbot_chatgpt_deactivate_db');

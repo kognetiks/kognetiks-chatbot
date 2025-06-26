@@ -42,6 +42,39 @@ if ( empty( $chatbot_chatgpt_installed_language_code ) ) {
     $chatbot_chatgpt_installed_language_code = 'en_US';
 
 }
-
 // Load the language-specific globals
 kognetiks_analytics_load_globals( $chatbot_chatgpt_installed_language_code );
+
+// Add sentiment_score column if missing - Ver 2.3.1
+function chatbot_chatgpt_add_sentiment_score_column() {
+
+    global $wpdb;
+    
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    
+    // Check if the table exists
+    if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
+        // Table doesn't exist, nothing to do
+        return false;
+    }
+    
+    // Check if sentiment_score column already exists
+    if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) === 'sentiment_score') {
+        // Column already exists
+        return true;
+    }
+    
+    // Add the sentiment_score column
+    $sql = "ALTER TABLE $table_name ADD COLUMN sentiment_score FLOAT AFTER message_text";
+    $result = $wpdb->query($sql);
+    
+    if ($result === false) {
+        prod_trace ('ERROR', 'Error adding sentiment_score column: ' . $wpdb->last_error);
+        return false;
+    }
+    
+    return true;
+}
+
+// Automatically add the sentiment_score column when analytics is loaded
+chatbot_chatgpt_add_sentiment_score_column();
