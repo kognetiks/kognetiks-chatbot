@@ -21,12 +21,9 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## Documentation
 
-**What's new in Version 2.3.1**
+**What's new in Version 2.3.2**
 
-* **Mistral API Websearch**: Added support for realtime websearch using a Mistral Assistant.
-* **LocalServer**: JAN.AI requires an API key for local models which is set when server is started.
-* **Error Logging**: For developers improved error logging for troubleshooting and debugging.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.0.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.1.
 
 ## Features
 
