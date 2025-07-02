@@ -23,6 +23,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 **What's new in Version 2.3.2**
 
+* **Local Server**: Fixed status check message for local server.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.1.
 
 ## Features
