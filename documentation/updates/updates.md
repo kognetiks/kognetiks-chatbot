@@ -1,5 +1,10 @@
 # Past Updates
 
+## What's new in Version 2.3.2
+
+* **Local Server**: Fixed status check message for local server.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.1.
+
 ## What's new in Version 2.3.1
 
 * **Mistral API Websearch**: Added support for realtime websearch using a Mistral Assistant.
