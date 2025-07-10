@@ -668,7 +668,7 @@ function kchat_fetch_api_status($api_key, $model) {
             $response_data = json_decode(wp_remote_retrieve_body($response));
 
             // DIAG - Diagnostics
-            back_trace( 'NOTICE', 'Response: ' . print_r($response_data, true));
+            // back_trace( 'NOTICE', 'Response: ' . print_r($response_data, true));
 
             // Handle request errors
             if (is_wp_error($response)) {
