@@ -269,28 +269,43 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
-    // FIXME - Set the sentiment score to 0 for now - Ver 2.3.1
-    $sentiment_score = 0;
+    // Check if sentiment_score column exists and analytics module is available
+    $include_sentiment_score = false;
+    if (function_exists('chatbot_chatgpt_add_sentiment_score_column')) {
+        // Try to add the column if it doesn't exist
+        chatbot_chatgpt_add_sentiment_score_column();
+        // Check if the column now exists
+        if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) === 'sentiment_score') {
+            $include_sentiment_score = true;
+        }
+    }
+
+    // Prepare the data array
+    $data = array(
+        'session_id' => $session_id,
+        'user_id' => $user_id,
+        'page_id' => $page_id,
+        'user_type' => $user_type,
+        'thread_id' => $thread_id,
+        'assistant_id' => $assistant_id,
+        'assistant_name' => $assistant_name,
+        'interaction_time' => current_time('mysql'),
+        'message_text' => $message
+    );
+
+    // Prepare the format array
+    $format = array(
+        '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s'
+    );
+
+    // Add sentiment_score if available
+    if ($include_sentiment_score) {
+        $data['sentiment_score'] = 0; // Default sentiment score
+        $format[] = '%f';
+    }
 
     // Prepare and execute the SQL statement
-    $insert_result = $wpdb->insert(
-        $table_name,
-        array(
-            'session_id' => $session_id,
-            'user_id' => $user_id,
-            'page_id' => $page_id,
-            'user_type' => $user_type,
-            'thread_id' => $thread_id,
-            'assistant_id' => $assistant_id,
-            'assistant_name' => $assistant_name,
-            'interaction_time' => current_time('mysql'),
-            'message_text' => $message,
-            'sentiment_score' => $sentiment_score
-        ),
-        array(
-            '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'
-        )
-    );
+    $insert_result = $wpdb->insert($table_name, $data, $format);
 
     // Check if the insert was successful
     if ($insert_result === false) {
@@ -392,6 +407,37 @@ function chatbot_chatgpt_activate_db() {
     if (!wp_next_scheduled('chatbot_chatgpt_conversation_log_cleanup_event')) {
         wp_schedule_event(time(), 'daily', 'chatbot_chatgpt_conversation_log_cleanup_event');
     }
+}
+
+// Add sentiment_score column if missing - Ver 2.3.1
+function chatbot_chatgpt_add_sentiment_score_column() {
+
+    global $wpdb;
+    
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+    
+    // Check if the table exists
+    if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
+        // Table doesn't exist, nothing to do
+        return false;
+    }
+    
+    // Check if sentiment_score column already exists
+    if ($wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table_name LIKE %s", 'sentiment_score')) === 'sentiment_score') {
+        // Column already exists
+        return true;
+    }
+    
+    // Add the sentiment_score column
+    $sql = "ALTER TABLE $table_name ADD COLUMN sentiment_score FLOAT AFTER message_text";
+    $result = $wpdb->query($sql);
+    
+    if ($result === false) {
+        error_log('[Chatbot] [chatbot-db-management.php] Error adding sentiment_score column: ' . $wpdb->last_error);
+        return false;
+    }
+    
+    return true;
 }
 
 // Function to handle cleanup on deactivation

@@ -73,6 +73,16 @@ if ( ! defined( 'WPINC' ) ) {
         $updated_status = 'API Testing Not Required';
         update_option('chatbot_transformer_model_api_status', 'API Error Type: Status Unknown');
         update_option('chatbot_transformer_model_api_status', $updated_status);
+    } elseif ($chatbot_chatbot_ai_platform_choice == 'Local Server') {
+        $updated_status = 'API Testing Not Required';
+        $api_key = esc_attr(get_option('chatbot_local_server_api_key', 'NOT SET'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+        // Model and message for testing
+        $model = esc_attr(get_option('chatbot_local_server_model_choice', 'local-server'));
+        $updated_status = kchat_fetch_api_status($api_key, $model);
+        update_option('chatbot_local_server_api_status', 'API Error Type: Status Unknown');
+        update_option('chatbot_local_server_api_status', $updated_status);
     } else {
         $updated_status = 'API Error Type: Platform Choice Invalid';
     }
@@ -549,7 +559,156 @@ function kchat_fetch_api_status($api_key, $model) {
 
             return $updated_status;
 
-            break;    
+            break;
+
+        case 'Local Server':
+
+            update_option('chatbot_mistral_api_status', 'API Error Type: Status Unknown');
+            $api_key = esc_attr(get_option('chatbot_local_server_api_key', 'NOT SET'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            
+            // Model and message for testing
+            $model = esc_attr(get_option('chatbot_local_server_model_choice', 'llama3.2-3b-instruct'));
+            
+            // The current DeepSeek API URL endpoint
+            // $api_url = 'https://127.0.0.1:1337/v1/chat/completions';
+            $api_url = get_chat_completions_api_url();
+
+            // Start the model
+            chatbot_local_start_model();
+            
+            // API key for the local server - Typically not needed
+            $api_key = esc_attr(get_option('chatbot_local_api_key', ''));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+
+            // Set the headers
+            $headers = array(
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type'  => 'application/json',
+            );
+
+            // Retrieve model settings
+            $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', '$model: ' . $model);
+            $max_tokens = intval(get_option('chatbot_local_max_tokens_setting', 10000));
+            $temperature = floatval(get_option('chatbot_local_temperature', 0.8));
+            $top_p = floatval(get_option('chatbot_local_top_p', 0.95));
+            $context = esc_attr(get_option('chatbot_local_conversation_context', 'You are a versatile, friendly, and helpful assistant that responds using Markdown syntax.'));
+            $timeout = intval(get_option('chatbot_local_timeout_setting', 360));
+
+            $message = 'Test message';
+
+            // Construct request body to match the expected schema
+            $body = array(
+                'model' => $model,
+                'stream' => null,
+                'max_tokens' => $max_tokens,
+                'stop' => array("End"),
+                'frequency_penalty' => 0.2,
+                'presence_penalty' => 0.6,
+                'temperature' => $temperature,
+                'top_p' => $top_p,
+                'modalities' => array("text"),
+                'audio' => array(
+                    'voice' => 'default',
+                    'format' => 'mp3'
+                ),
+                'store' => null,
+                'metadata' => array(
+                    'type' => 'conversation'
+                ),
+                'logit_bias' => array(
+                    "15496" => -100,
+                    "51561" => -100
+                ),
+                'logprobs' => null,
+                'n' => 1,
+                'response_format' => array('type' => 'text'),
+                'seed' => 123,
+                'stream_options' => null,
+                // 'tools' => array(
+                //     array(
+                //         'type' => 'function',
+                //         'function' => array(
+                //             'name' => '',
+                //             'parameters' => array(),
+                //             'strict' => null
+                //         )
+                //     )
+                // ),
+                'tools' => null,
+                'parallel_tool_calls' => null,
+                'messages' => array(
+                    array('role' => 'system', 'content' => $context),
+                    array('role' => 'user', 'content' => $message)
+                )
+            );
+
+            // API request arguments
+            $args = array(
+                'headers' => $headers,
+                'body'    => json_encode($body),
+                'method'  => 'POST',
+                'timeout' => $timeout,
+                'data_format' => 'body',
+            );
+
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'URL: ' . $api_url);
+            // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
+            // back_trace( 'NOTICE', 'Body: ' . $body);
+
+            // Send request
+            $response = wp_remote_post($api_url, $args);
+
+            // Get the response body
+            $response_data = json_decode(wp_remote_retrieve_body($response));
+
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Response: ' . print_r($response_data, true));
+
+            // Handle request errors
+            if (is_wp_error($response)) {
+                return 'Error: ' . $response->get_error_message() . ' Please check Settings for a valid API key.';
+            }
+
+            // Check for API-specific errors
+            if (isset($response_data->error)) {
+
+                // Extract error type and message safely
+                $error_type = $response_data->error->type ?? 'Unknown Error Type';
+                $error_message = $response_data->error->message ?? 'No additional information.';
+            
+                // Handle error response
+                $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
+                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+            
+            } elseif (isset($response_data->choices[0]->message)) {
+
+                // Handle successful response
+                $content_type = $response_data->choices[0]->message->role ?? 'Unknown Content Type';
+                $content_text = $response_data->choices[0]->message->content ?? 'No content available.';
+            
+                // Handle successful response
+                $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
+                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
+
+            } else {
+
+                // Handle unexpected response structure
+                $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
+                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+
+            }
+            
+            update_option('chatbot_mistral_api_status', $updated_status);
+
+            return $updated_status;
+
+            break;
 
         case 'Transformer':
 
