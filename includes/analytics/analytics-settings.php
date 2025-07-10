@@ -95,7 +95,7 @@ function kognetiks_analytics_settings_page() {
         }
 
         // Ensure sentiment_score column exists for existing installations
-        if ($table_exists) {
+        if ($table_exists && function_exists('chatbot_chatgpt_add_sentiment_score_column')) {
             chatbot_chatgpt_add_sentiment_score_column();
         }
 

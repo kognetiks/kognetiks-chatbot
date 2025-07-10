@@ -50,7 +50,7 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
                     'slug'                => 'chatbot-chatgpt',
                     'type'                => 'plugin',
                     'public_key'          => 'pk_ea667ce516b3acd5d3756a0c2530b',
-                    'is_premium'          => true,
+                    'is_premium'          => false,
                     'has_premium_version' => true,
                     'premium_suffix'      => 'Premium',
                     'has_paid_plans'      => true,
