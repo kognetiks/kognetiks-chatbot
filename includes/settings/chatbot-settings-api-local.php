@@ -54,7 +54,7 @@ function chatbot_local_api_model_chat_settings_section_callback($args) {
     <?php
 }
 
-// Local Model Settings Callback - Ver 2.2.6
+// Local Model Settings Callback - Ver 2.3.3
 function chatbot_local_chat_model_choice_callback($args) {
 
     $model_choice = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
@@ -63,10 +63,22 @@ function chatbot_local_chat_model_choice_callback($args) {
     // Fetch models from the API
     $models = chatbot_local_get_models();
 
-    // Remove the models not owned by Local
-    // $models = array_filter($models, function($model) {
-    //     return $model['owned_by'] === 'local';
-    // });
+    // Auto-sync: Update chatbot setting to match Jan.ai active model - Ver 2.3.3
+    if (!empty($models) && is_array($models)) {
+        $active_model = $models[0]; // Jan.ai API now returns only the active model
+        $current_setting = get_option('chatbot_local_model_choice', '');
+        
+        // If the active model is different from our setting, update it
+        if ($current_setting !== $active_model) {
+            update_option('chatbot_local_model_choice', $active_model);
+            $model_choice = $active_model;
+            
+            // Show sync notification
+            echo '<div style="background-color: #e7f3ff; padding: 8px; margin-bottom: 10px; border-left: 4px solid #0073aa;">';
+            echo '<strong>Auto-Sync:</strong> Model setting updated to match Jan.ai active model: <code>' . esc_html($active_model) . '</code>';
+            echo '</div>';
+        }
+    }
 
     // Check for errors
     if (is_string($models) && strpos($models, 'Error:') === 0) {
@@ -76,16 +88,22 @@ function chatbot_local_chat_model_choice_callback($args) {
         <select id="chatbot_chatgpt_model_choice" name="chatbot_chatgpt_model_choice">
             <option value="<?php echo esc_attr( 'llama3.2-3b-instruct' ); ?>" <?php selected( $model_choice, 'llama3.2-3b-instruct' ); ?>><?php echo esc_html( 'llama3.2-3b-instruct' ); ?></option>
         </select>
+        <p class="description" style="color: #d63638;">
+            <strong>Connection Error:</strong> Cannot connect to Jan.ai server. Using fallback model selection.
+        </p>
         <?php
     } else {
         // If models are fetched successfully, display them dynamically
         ?>
         <select id="chatbot_local_model_choice" name="chatbot_local_model_choice">
             <?php foreach ($models as $model): ?>
-                <option value="<?php echo esc_attr($model); ?>" <?php selected(esc_attr(get_option('chatbot_local_model_choice')), $model); ?>><?php echo esc_html($model); ?></option>
+                <option value="<?php echo esc_attr($model); ?>" <?php selected($model_choice, $model); ?>><?php echo esc_html($model); ?></option>
             <?php endforeach; ?>
-            ?>
         </select>
+        <p class="description">
+            <strong>Active Model:</strong> This reflects the currently active model in Jan.ai. 
+            To use a different model, activate it in Jan.ai first, then refresh this page.
+        </p>
         <?php
     }
 

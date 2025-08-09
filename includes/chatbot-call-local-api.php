@@ -433,7 +433,7 @@ function chatbot_local_start_model() {
 function chatbot_local_get_models() {
     
     // DiAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_local_get_models');
+    back_trace( 'NOTICE', 'chatbot_local_get_models');
 
     // Set the API URL
     $api_url = esc_attr(get_option('chatbot_local_base_url','http://127.0.0.1:1337/v1')) . '/models';
@@ -470,7 +470,7 @@ function chatbot_local_get_models() {
     $raw_response = wp_remote_retrieve_body($response);
 
     // DiAG - Diagnostics
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
+    back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // For each model in the $response_body, add the model to return array
     $models = array();
@@ -478,9 +478,27 @@ function chatbot_local_get_models() {
     // Check if $response_body is not null and has 'data' key before iterating
     if ($response_body && isset($response_body['data']) && is_array($response_body['data'])) {
         foreach ($response_body['data'] as $model) {
-            if (isset($model['status']) && $model['status'] == 'downloaded') {
-                $models[] = $model['id'];
+            // Check for new Jan.ai API format (no status field) or old format (with status field)
+            if (isset($model['id'])) {
+                // New format: if model has an ID, assume it's available
+                if (!isset($model['status'])) {
+                    $models[] = $model['id'];
+                }
+                // Old format: only include if status is 'downloaded'
+                elseif (isset($model['status']) && $model['status'] == 'downloaded') {
+                    $models[] = $model['id'];
+                }
             }
+        }
+        
+        // If no models found with the new logic, log for debugging
+        if (empty($models)) {
+            $debug_info = array(
+                'response_code' => $response_code,
+                'response_body' => $response_body,
+                'message' => 'No models found with valid ID or downloaded status'
+            );
+            prod_trace('WARNING', 'No valid models found in API response. Debug info: ' . json_encode($debug_info));
         }
     } else {
         // Enhanced logging with more details
