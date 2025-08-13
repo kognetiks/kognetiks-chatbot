@@ -45,4 +45,5 @@ includes/transformers/sentential_embeddings_cache.php
 includes/transformers/lexical_embeddings_cache.php
 includes/tools/test-jan-ai.php
 GIT-COMMANDS.md
+LOCAL-AI MODEL.md
 

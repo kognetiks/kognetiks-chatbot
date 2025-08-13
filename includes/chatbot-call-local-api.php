@@ -70,6 +70,11 @@ function chatbot_chatgpt_call_local_model_api($message) {
     // Start the model
     chatbot_local_start_model();
 
+    // In Jan.ai, models start automatically on first chat request
+    // No need for manual model starting or seeding - Ver 2.3.3 - 2025-08-13
+    $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
+    prod_trace('NOTICE', 'Using model: ' . $model . ' - will start automatically on first use');
+
     // API key for the local server - Typically not needed
     $api_key = esc_attr(get_option('chatbot_local_api_key', ''));
     // Decrypt the API key - Ver 2.2.6
@@ -265,6 +270,16 @@ function chatbot_chatgpt_call_local_model_api($message) {
     $response_code = wp_remote_retrieve_response_code($response);
     $raw_response = wp_remote_retrieve_body($response);
 
+    // Enhanced debugging for Jan.ai - Ver 2.3.3 - 2025-08-13
+    prod_trace('NOTICE', 'Jan.ai API Response Code: ' . $response_code);
+    prod_trace('NOTICE', 'Jan.ai API Raw Response: ' . substr($raw_response, 0, 500) . (strlen($raw_response) > 500 ? '...' : ''));
+    
+    if ($response_body) {
+        prod_trace('NOTICE', 'Jan.ai API Response Body: ' . print_r($response_body, true));
+    } else {
+        prod_trace('WARNING', 'Jan.ai API Response Body is null or invalid JSON');
+    }
+
     // // Check for content in response
     // if (!empty($response_body['choices'][0]['message']['content'])) {
 
@@ -379,58 +394,98 @@ function chatbot_local_start_model() {
     // DiAG - Diagnostics
     // back_trace( 'NOTICE', '$model: ' . $model);
 
-    // Set the API URL
-    $api_url = esc_attr(get_option('chatbot_local_base_url','http://127.0.0.1:1337/v1')) . '/models/start';
+    // In Jan.ai, models are started automatically when you make a chat request
+    // There's no separate /models/start endpoint - Ver 2.3.3 - 2025-08-13
+    // We'll just set the status and let the first chat request start the model
+    
+    // Set the model status
+    $chatbot_local_model_status = 'ready';
 
-    // Get API key for authorization - Ver 2.2.6
-    $api_key = esc_attr(get_option('chatbot_local_api_key', ''));
-    // Decrypt the API key - Ver 2.2.6
-    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+    prod_trace('NOTICE', 'Model status set to ready for: ' . $model . ' - will start automatically on first chat request');
 
-    // Prepare headers with authorization
+    return 'Model ready - will start automatically on first chat request';
+    
+}
+
+// Fetch the local models - Ver 2.3.3 - 2025-08-11
+function chatbot_local_get_models() {
+
+    // DiAG - Diagnostics
+    back_trace('NOTICE', 'chatbot_local_get_models');
+
+    $base    = esc_url_raw(get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1'));
+    $api_url = trailingslashit($base) . 'models';
+
+    // API key (required by Jan local server)
+    $api_key_enc = get_option('chatbot_local_api_key', '');
+    $api_key     = chatbot_chatgpt_decrypt_api_key($api_key_enc);
+    if (!$api_key) {
+        // DiAG - Diagnostics
+        prod_trace('ERROR', 'JAN API key missing. Set one in Jan (Settings → Local API Server) and in plugin settings.');
+        return array('llama3.2-3b-instruct'); // safe fallback
+    }
+
     $headers = array(
         'Authorization' => 'Bearer ' . $api_key,
         'Content-Type'  => 'application/json',
     );
 
-    // Prepare the data
-    $data = array(
-        'model' => $model
-    );
-
-    // Send the request
-    $response = wp_remote_post($api_url, array(
-        'headers' => $headers,
-        'body' => json_encode(array(
-            'model' => $model
-        )),
+    $response = wp_remote_get($api_url, array(
+        'headers'  => $headers,
+        'timeout'  => 15,
+        'blocking' => true,
+        // 'sslverify' => false, // only if you’re using self-signed HTTPS
     ));
 
-    // Check for errors
     if (is_wp_error($response)) {
-        $error_message = $response->get_error_message();
-        // Log the error
-        prod_trace( 'ERROR', $error_message);
-        // Set the model status
-        $chatbot_local_model_status = 'error';
-        return $response;
+        prod_trace('ERROR', 'JAN /models failed: ' . $response->get_error_message());
+        return array('llama3.2-3b-instruct');
     }
 
-    // Get the response body
-    $response_body = wp_remote_retrieve_body($response);
+    $code = wp_remote_retrieve_response_code($response);
+    $body = wp_remote_retrieve_body($response);
+
+    if ($code < 200 || $code >= 300) {
+        // DiAG - Diagnostics
+        prod_trace('ERROR', sprintf('JAN /models non-2xx (%d). Body: %s', $code, $body));
+        return array('llama3.2-3b-instruct');
+    }
+
+    $json = json_decode($body, true);
 
     // DiAG - Diagnostics
-    // back_trace( 'NOTICE', '$response_body: ' . $response_body);
+    back_trace('NOTICE', '$response_body: ' . print_r($json, true));
 
-    // Set the model status
-    $chatbot_local_model_status = 'started';
+    $models = array();
 
-    return $response_body;
+    // Accept either {"data":[...]} or [...]
+    $list = (is_array($json) && isset($json['data']) && is_array($json['data'])) ? $json['data'] : $json;
+
+    if (is_array($list)) {
+        foreach ($list as $m) {
+            // OpenAI-compatible shape: { id: "name", object: "model", ... }
+            if (is_array($m) && isset($m['id']) && is_string($m['id'])) {
+                $models[] = $m['id'];
+            } elseif (is_string($m)) {
+                // super-permissive fallback if server returns ["id1","id2"]
+                $models[] = $m;
+            }
+        }
+    }
+
+    if (empty($models)) {
+        // DiAG - Diagnostics
+        prod_trace('WARNING', 'No models parsed from /models. Body: ' . $body);
+        // Friendly fallback so UI doesn’t break
+        $models = array('llama3.2-3b-instruct');
+    }
+
+    return array_values(array_unique($models));
     
 }
 
 // Fetch the local models
-function chatbot_local_get_models() {
+function chatbot_local_get_models_OLD() {
     
     // DiAG - Diagnostics
     back_trace( 'NOTICE', 'chatbot_local_get_models');
@@ -515,3 +570,405 @@ function chatbot_local_get_models() {
     return $models;
     
 }
+
+// Seed the model - Ver 2.3.3 - 2025-08-11
+function chatbot_local_seed_model( $model_id ) {
+    // First check if the Jan.ai server is available
+    $base = esc_url_raw( get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1') );
+    $health_url = trailingslashit($base) . 'models';
+    
+    // Get API key for authentication
+    $api_key_enc = get_option('chatbot_local_api_key', '');
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key_enc);
+    
+    $headers = array(
+        'Content-Type' => 'application/json',
+    );
+    if ($api_key) {
+        $headers['Authorization'] = 'Bearer ' . $api_key;
+    }
+    
+    // Quick health check - just see if the server responds
+    $health_response = wp_remote_get($health_url, array(
+        'headers' => $headers,
+        'timeout' => 5,
+        'blocking' => true,
+    ));
+    
+    if (is_wp_error($health_response)) {
+        prod_trace('NOTICE', 'Jan.ai server not available for seeding, skipping: ' . $health_response->get_error_message());
+        return false;
+    }
+    
+    $health_code = wp_remote_retrieve_response_code($health_response);
+    if ($health_code < 200 || $health_code >= 300) {
+        prod_trace('NOTICE', 'Jan.ai server not ready for seeding (HTTP ' . $health_code . '), skipping');
+        return false;
+    }
+    
+    // Server is available, proceed with seeding
+    $api_url = trailingslashit($base) . 'chat/completions';
+
+    $payload = array(
+        'model' => sanitize_text_field($model_id),
+        'messages' => array(
+            array('role' => 'user', 'content' => 'ping'),
+        ),
+        'max_tokens' => 1,
+        'stream' => false,
+    );
+
+    $res = wp_remote_post($api_url, array(
+        'headers' => $headers,
+        'body'    => wp_json_encode($payload),
+        'timeout' => 20,
+    ));
+
+    if (is_wp_error($res)) {
+        prod_trace('ERROR', 'Seed model failed for ' . $model_id . ': ' . $res->get_error_message());
+        return false;
+    }
+
+    $code = wp_remote_retrieve_response_code($res);
+    if ($code < 200 || $code >= 300) {
+        prod_trace('ERROR', 'Seed model non-2xx for ' . $model_id . ': ' . wp_remote_retrieve_body($res));
+        return false;
+    }
+
+    return true;
+}
+
+// Simple test function to debug Jan.ai connection - Ver 2.3.3 - 2025-08-13
+function chatbot_local_test_connection() {
+    $base = esc_url_raw( get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1') );
+    $api_key_enc = get_option('chatbot_local_api_key', '');
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key_enc);
+    
+    if (!$api_key) {
+        return array(
+            'success' => false,
+            'message' => 'No API key configured'
+        );
+    }
+    
+    $headers = array(
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'application/json',
+    );
+    
+    // Test 1: Check if server responds to /models
+    $models_url = trailingslashit($base) . 'models';
+    $models_response = wp_remote_get($models_url, array(
+        'headers' => $headers,
+        'timeout' => 10,
+    ));
+    
+    if (is_wp_error($models_response)) {
+        return array(
+            'success' => false,
+            'message' => 'Server not responding: ' . $models_response->get_error_message()
+        );
+    }
+    
+    $models_code = wp_remote_retrieve_response_code($models_response);
+    $models_body = wp_remote_retrieve_body($models_response);
+    
+    if ($models_code != 200) {
+        return array(
+            'success' => false,
+            'message' => 'Models endpoint error (HTTP ' . $models_code . '): ' . $models_body
+        );
+    }
+    
+    // Test 2: Test model availability with minimal chat request
+    // In Jan.ai, models start automatically on first chat request
+    $model_id = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
+    $test_url = trailingslashit($base) . 'chat/completions';
+    
+    $test_payload = array(
+        'model' => $model_id,
+        'messages' => array(
+            array('role' => 'user', 'content' => 'test'),
+        ),
+        'max_tokens' => 1,
+        'stream' => false,
+    );
+    
+    $test_response = wp_remote_post($test_url, array(
+        'headers' => $headers,
+        'body' => json_encode($test_payload),
+        'timeout' => 30,
+    ));
+    
+    if (is_wp_error($test_response)) {
+        return array(
+            'success' => false,
+            'message' => 'Test chat request failed: ' . $test_response->get_error_message()
+        );
+    }
+    
+    $test_code = wp_remote_retrieve_response_code($test_response);
+    $test_body = wp_remote_retrieve_body($test_response);
+    
+    return array(
+        'success' => true,
+        'message' => 'Connection test completed',
+        'models_response' => array(
+            'code' => $models_code,
+            'body' => $models_body
+        ),
+        'test_response' => array(
+            'code' => $test_code,
+            'body' => $test_body,
+            'model' => $model_id
+        )
+    );
+}
+
+// Manual model backend start function - Ver 2.3.3 - 2025-08-13
+function chatbot_local_manual_start_model_backend($model_id = null) {
+    if (!$model_id) {
+        $model_id = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
+    }
+    
+    // In Jan.ai, models are started automatically when you make a chat request
+    // There's no separate /models/start endpoint - Ver 2.3.3 - 2025-08-13
+    
+    $base = esc_url_raw( get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1') );
+    
+    // Get API key for authentication
+    $api_key_enc = get_option('chatbot_local_api_key', '');
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key_enc);
+    
+    if (!$api_key) {
+        prod_trace('ERROR', 'No API key configured for Jan.ai server');
+        return array(
+            'success' => false,
+            'message' => 'No API key configured. Please set an API key in your plugin settings.'
+        );
+    }
+    
+    prod_trace('NOTICE', 'Jan.ai models start automatically on first chat request for: ' . $model_id);
+    
+    // Test if the model is available by making a minimal chat request
+    $test_url = trailingslashit($base) . 'chat/completions';
+    
+    $headers = array(
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'application/json',
+    );
+    
+    $test_payload = array(
+        'model' => $model_id,
+        'messages' => array(
+            array('role' => 'user', 'content' => 'test'),
+        ),
+        'max_tokens' => 1,
+        'stream' => false,
+    );
+    
+    prod_trace('NOTICE', 'Testing model availability with minimal chat request for: ' . $model_id);
+    
+    $test_response = wp_remote_post($test_url, array(
+        'headers' => $headers,
+        'body' => json_encode($test_payload),
+        'timeout' => 30,
+    ));
+    
+    if (is_wp_error($test_response)) {
+        $error_msg = 'Failed to test model: ' . $test_response->get_error_message();
+        prod_trace('ERROR', $error_msg);
+        return array(
+            'success' => false,
+            'message' => $error_msg
+        );
+    }
+    
+    $test_code = wp_remote_retrieve_response_code($test_response);
+    $test_body = wp_remote_retrieve_body($test_response);
+    
+    if ($test_code == 200) {
+        prod_trace('NOTICE', 'Model is available and ready for: ' . $model_id);
+        return array(
+            'success' => true,
+            'message' => 'Model is available and ready for ' . $model_id,
+            'note' => 'Jan.ai models start automatically on first use - no manual start needed'
+        );
+    } else {
+        prod_trace('ERROR', 'Model test failed (HTTP ' . $test_code . '): ' . $test_body);
+        return array(
+            'success' => false,
+            'message' => 'Model test failed (HTTP ' . $test_code . '): ' . $test_body
+        );
+    }
+}
+
+// Check and start model backend if needed - Ver 2.3.3 - 2025-08-13
+function chatbot_local_ensure_model_backend_running($model_id) {
+    // In Jan.ai, models are started automatically when you make a chat request
+    // There's no separate /models/start endpoint - Ver 2.3.3 - 2025-08-13
+    // We'll just check if the server is available and assume the model will start on first use
+    
+    $base = esc_url_raw( get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1') );
+    
+    // Get API key for authentication
+    $api_key_enc = get_option('chatbot_local_api_key', '');
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key_enc);
+    
+    $headers = array(
+        'Content-Type' => 'application/json',
+    );
+    if ($api_key) {
+        $headers['Authorization'] = 'Bearer ' . $api_key;
+    }
+    
+    // Just check if the server is available by calling /models
+    $models_url = trailingslashit($base) . 'models';
+    
+    prod_trace('NOTICE', 'Checking if Jan.ai server is available for: ' . $model_id);
+    
+    $models_response = wp_remote_get($models_url, array(
+        'headers' => $headers,
+        'timeout' => 10,
+    ));
+    
+    if (is_wp_error($models_response)) {
+        prod_trace('ERROR', 'Jan.ai server not available: ' . $models_response->get_error_message());
+        return false;
+    }
+    
+    $models_code = wp_remote_retrieve_response_code($models_response);
+    
+    if ($models_code == 200) {
+        prod_trace('NOTICE', 'Jan.ai server is available - model will start automatically on first chat request');
+        return true;
+    } else {
+        prod_trace('ERROR', 'Jan.ai server error (HTTP ' . $models_code . ')');
+        return false;
+    }
+}
+
+// Simple debug function to test Jan.ai connection - Ver 2.3.3 - 2025-08-13
+function chatbot_local_debug_connection() {
+    $result = chatbot_local_test_connection();
+    
+    if ($result['success']) {
+        echo '<div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; margin: 10px 0; border-radius: 4px;">';
+        echo '<strong>✅ Jan.ai Connection Test Successful</strong><br>';
+        echo 'Models endpoint: HTTP ' . $result['models_response']['code'] . '<br>';
+        echo 'Test chat request: HTTP ' . $result['test_response']['code'] . '<br>';
+        echo 'Model: ' . $result['test_response']['model'] . '<br>';
+        echo '<small>Note: Jan.ai models start automatically on first chat request</small>';
+        echo '</div>';
+    } else {
+        echo '<div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; margin: 10px 0; border-radius: 4px;">';
+        echo '<strong>❌ Jan.ai Connection Test Failed</strong><br>';
+        echo 'Error: ' . $result['message'];
+        echo '</div>';
+    }
+    
+    return $result;
+}
+
+// Step-by-step Jan.ai test function - Ver 2.3.3 - 2025-08-13
+function chatbot_local_step_by_step_test() {
+    echo '<div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 4px;">';
+    echo '<h3>🔍 Jan.ai Step-by-Step Connection Test</h3>';
+    
+    $base = esc_url_raw( get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1') );
+    $api_key_enc = get_option('chatbot_local_api_key', '');
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key_enc);
+    
+    if (!$api_key) {
+        echo '<div style="color: #721c24; margin: 10px 0;">❌ <strong>Step 1: API Key</strong> - No API key configured</div>';
+        echo '</div>';
+        return false;
+    }
+    echo '<div style="color: #155724; margin: 10px 0;">✅ <strong>Step 1: API Key</strong> - API key found</div>';
+    
+    $headers = array(
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'application/json',
+    );
+    
+    // Test 1: Check if server responds to /models
+    echo '<div style="margin: 10px 0;"><strong>Step 2: Server Availability</strong></div>';
+    $models_url = trailingslashit($base) . 'models';
+    $models_response = wp_remote_get($models_url, array(
+        'headers' => $headers,
+        'timeout' => 10,
+    ));
+    
+    if (is_wp_error($models_response)) {
+        echo '<div style="color: #721c24; margin: 10px 0;">❌ Server not responding: ' . $models_response->get_error_message() . '</div>';
+        echo '</div>';
+        return false;
+    }
+    
+    $models_code = wp_remote_retrieve_response_code($models_response);
+    $models_body = wp_remote_retrieve_body($models_response);
+    
+    if ($models_code == 200) {
+        echo '<div style="color: #155724; margin: 10px 0;">✅ Server responding (HTTP ' . $models_code . ')</div>';
+        echo '<div style="font-size: 12px; color: #6c757d; margin: 5px 0;">Models response: ' . substr($models_body, 0, 200) . '...</div>';
+    } else {
+        echo '<div style="color: #721c24; margin: 10px 0;">❌ Server error (HTTP ' . $models_code . '): ' . $models_body . '</div>';
+        echo '</div>';
+        return false;
+    }
+    
+    // Test 2: Try a minimal chat request
+    echo '<div style="margin: 10px 0;"><strong>Step 3: Model Chat Test</strong></div>';
+    $model_id = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
+    $test_url = trailingslashit($base) . 'chat/completions';
+    
+    $test_payload = array(
+        'model' => $model_id,
+        'messages' => array(
+            array('role' => 'user', 'content' => 'Hello'),
+        ),
+        'max_tokens' => 10,
+        'stream' => false,
+    );
+    
+    echo '<div style="font-size: 12px; color: #6c757d; margin: 5px 0;">Testing model: ' . $model_id . '</div>';
+    echo '<div style="font-size: 12px; color: #6c757d; margin: 5px 0;">URL: ' . $test_url . '</div>';
+    
+    $test_response = wp_remote_post($test_url, array(
+        'headers' => $headers,
+        'body' => json_encode($test_payload),
+        'timeout' => 60,
+    ));
+    
+    if (is_wp_error($test_response)) {
+        echo '<div style="color: #721c24; margin: 10px 0;">❌ Chat test failed: ' . $test_response->get_error_message() . '</div>';
+        echo '</div>';
+        return false;
+    }
+    
+    $test_code = wp_remote_retrieve_response_code($test_response);
+    $test_body = wp_remote_retrieve_body($test_response);
+    
+    if ($test_code == 200) {
+        echo '<div style="color: #155724; margin: 10px 0;">✅ Chat test successful (HTTP ' . $test_code . ')</div>';
+        echo '<div style="font-size: 12px; color: #6c757d; margin: 5px 0;">Response: ' . substr($test_body, 0, 300) . '...</div>';
+        
+        // Try to parse the response
+        $test_json = json_decode($test_body, true);
+        if ($test_json && isset($test_json['choices'][0]['message']['content'])) {
+            echo '<div style="color: #155724; margin: 10px 0;">✅ Response content found: ' . substr($test_json['choices'][0]['message']['content'], 0, 100) . '...</div>';
+        } else {
+            echo '<div style="color: #856404; margin: 10px 0;">⚠️ Response content missing or invalid</div>';
+            echo '<div style="font-size: 12px; color: #6c757d; margin: 5px 0;">Parsed response: ' . print_r($test_json, true) . '</div>';
+        }
+    } else {
+        echo '<div style="color: #721c24; margin: 10px 0;">❌ Chat test failed (HTTP ' . $test_code . '): ' . $test_body . '</div>';
+        echo '</div>';
+        return false;
+    }
+    
+    echo '<div style="color: #155724; margin: 15px 0; font-weight: bold;">🎉 All tests passed! Jan.ai is working correctly.</div>';
+    echo '</div>';
+    return true;
+}
+

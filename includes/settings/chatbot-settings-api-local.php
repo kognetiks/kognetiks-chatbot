@@ -16,6 +16,12 @@ if ( ! defined( 'WPINC' ) ) {
 
 // API/Local settings section callback - Ver 2.2.6
 function chatbot_local_model_settings_section_callback($args) {
+
+    // DiAG - Diagnostics
+    back_trace('NOTICE', 'Calling chatbot_local_step_by_step_test');
+    chatbot_local_step_by_step_test();
+    back_trace('NOTICE', 'Completed call to chatbot_local_step_by_step_test');
+
     ?>
     <p>Configure the default settings for the Chatbot plugin to use a Local Server for chat generation.  Start by adding your API key then selecting your choices below.  <strong>NOTE</strong>: This may not be required in your configuration.</p>
     <p>More information about Local models and their capability can be found at <a href="https://huggingface.co/models?library=gguf&sort=downloads" target="_blank">https://huggingface.co/models?library=gguf&sort=downloads</a>.</p>
