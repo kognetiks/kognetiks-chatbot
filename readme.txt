@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.8
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -232,6 +232,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.3.3 - Released 2025-08-14 =
+
+* **Local Server**: Updated support for the latest release of JAN.AI local server v0.6.8. See [JAN.AI](https://jan.ai/) for more information.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.2.
 
 = 2.3.2 - Released 2025-07-10 =
 

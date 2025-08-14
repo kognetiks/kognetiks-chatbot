@@ -21,10 +21,10 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## Documentation
 
-**What's new in Version 2.3.2**
+**What's new in Version 2.3.3**
 
-* **Local Server**: Fixed status check message for local server.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.1.
+* **Local Server**: Updated support for the latest release of JAN.AI local server v0.6.8. See [JAN.AI](https://jan.ai/) for more information.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.2.
 
 ## Features
 

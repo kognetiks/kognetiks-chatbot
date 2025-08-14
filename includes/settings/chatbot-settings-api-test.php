@@ -575,9 +575,6 @@ function kchat_fetch_api_status($api_key, $model) {
             // $api_url = 'https://127.0.0.1:1337/v1/chat/completions';
             $api_url = get_chat_completions_api_url();
 
-            // Start the model
-            chatbot_local_start_model();
-            
             // API key for the local server - Typically not needed
             $api_key = esc_attr(get_option('chatbot_local_api_key', ''));
             // Decrypt the API key - Ver 2.2.6
