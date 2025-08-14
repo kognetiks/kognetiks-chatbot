@@ -233,7 +233,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.3.3 - Released TBD =
+= 2.3.3 - Released 2025-08-14 =
 
 * **Local Server**: Updated support for the latest release of JAN.AI local server v0.6.8. See [JAN.AI](https://jan.ai/) for more information.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.2.
