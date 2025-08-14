@@ -44,7 +44,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
     // In Jan.ai, models start automatically on first chat request
     // No need for manual model starting or seeding - Ver 2.3.3 - 2025-08-13
     $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
-    prod_trace('NOTICE', 'Using model: ' . $model . ' - will start automatically on first use');
+    // DIAG - Diagnostics
+    // back_trace('NOTICE', 'Using model: ' . $model . ' - will start automatically on first use.');
 
     // API key for the local server - Typically not needed
     $api_key = esc_attr(get_option('chatbot_local_api_key', ''));
@@ -152,7 +153,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
         // Add a note that context was truncated
         $context = $truncated_context . ' [Context truncated due to length limits]';
         
-        prod_trace('NOTICE', 'Context truncated from ' . $context_length . ' to ' . $max_context_length . ' estimated tokens');
+        // DIAG - Diagnostics
+        // back_trace('NOTICE', 'Context truncated from ' . $context_length . ' to ' . $max_context_length . ' estimated tokens');
     }
 
     // Construct request body to match the expected schema
@@ -201,10 +203,10 @@ function chatbot_chatgpt_call_local_model_api($message) {
         $error_body = wp_remote_retrieve_body($response);
         $error_message = 'HTTP ' . $response_code . ' Error: ' . $error_body;
         
-        // Log the error details for debugging
-        prod_trace('ERROR', 'Jan.ai API Error: ' . $error_message);
-        prod_trace('ERROR', 'Request URL: ' . $api_url);
-        prod_trace('ERROR', 'Request Body: ' . json_encode($body));
+        // DIAG - Diagnostics
+        // back_trace('ERROR', 'API Error: ' . $error_message);
+        // back_trace('ERROR', 'Request URL: ' . $api_url);
+        // back_trace('ERROR', 'Request Body: ' . json_encode($body));
         
         return 'Error: ' . $error_message . ' Please check the request format and try again.';
     }
@@ -250,6 +252,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
         addEntry('chatbot_chatgpt_context_history', $response_text);
         return $response_text;
     } else {
+
+        // DIAG - Diagnostics
         prod_trace('WARNING', 'No valid response text found in API response.');
     
         $localized_errorResponses = (get_locale() !== "en_US") 
@@ -264,8 +268,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
 // Clean up response text from local models - Ver 2.3.3 - 2025-08-13
 function chatbot_local_clean_response_text($text) {
 
-    // DiAG - Diagnostics
-    back_trace('NOTICE', 'raw $text: ' . $text);
+    // DIAG - Diagnostics
+    // back_trace('NOTICE', 'raw $text: ' . $text);
 
     // First, try to extract just the final message content
     // Look for the pattern that indicates the final assistant response
@@ -273,10 +277,10 @@ function chatbot_local_clean_response_text($text) {
     
     if (preg_match($final_pattern, $text, $matches)) {
         $text = $matches[1]; // Extract just the content after the final message marker
-        back_trace('NOTICE', 'extracted final message: ' . $text);
+        // back_trace('NOTICE', 'extracted final message: ' . $text);
     } else {
         // Fallback: if we can't find the final message pattern, clean up the whole text
-        back_trace('NOTICE', 'final message pattern not found, cleaning entire text');
+        // back_trace('NOTICE', 'final message pattern not found, cleaning entire text');
         
         // Remove common special tokens that local models include - more aggressive cleaning
         $patterns = array(
@@ -326,8 +330,8 @@ function chatbot_local_clean_response_text($text) {
     $text = preg_replace('/\s+/', ' ', $text);
     $text = trim($text);
     
-    // DiAG - Diagnostics
-    back_trace('NOTICE', 'cleaned $text: ' . $text);
+    // DIAG - Diagnostics
+    // back_trace('NOTICE', 'cleaned $text: ' . $text);
     
     return $text;
 }
@@ -335,19 +339,19 @@ function chatbot_local_clean_response_text($text) {
 // Fetch the local models - Ver 2.3.3 - 2025-08-11
 function chatbot_local_get_models() {
 
-    // DiAG - Diagnostics
-    back_trace('NOTICE', 'chatbot_local_get_models');
+    // DIAG - Diagnostics
+    // back_trace('NOTICE', 'chatbot_local_get_models');
 
     $base    = esc_url_raw(get_option('chatbot_local_base_url', 'http://127.0.0.1:1337/v1'));
     $api_url = trailingslashit($base) . 'models';
 
-    // API key (required by Jan local server)
+    // API key (required by Jan.ai local server) - Ver 2.3.3 - 2025-08-13
     $api_key_enc = get_option('chatbot_local_api_key', '');
     $api_key     = chatbot_chatgpt_decrypt_api_key($api_key_enc);
     if (!$api_key) {
-        // DiAG - Diagnostics
-        prod_trace('ERROR', 'JAN API key missing. Set one in Jan (Settings → Local API Server) and in plugin settings.');
-        return array('llama3.2-3b-instruct'); // safe fallback
+        // DIAG - Diagnostics
+        prod_trace('ERROR', 'API key missing. Set one in plugin settings.');
+        return array('llama3.2-3b-instruct'); // Safe fallback
     }
 
     $headers = array(
@@ -363,7 +367,8 @@ function chatbot_local_get_models() {
     ));
 
     if (is_wp_error($response)) {
-        prod_trace('ERROR', 'JAN /models failed: ' . $response->get_error_message());
+        // DIAG - Diagnostics
+        prod_trace('ERROR', 'Get local models failed: ' . $response->get_error_message());
         return array('llama3.2-3b-instruct');
     }
 
@@ -371,15 +376,15 @@ function chatbot_local_get_models() {
     $body = wp_remote_retrieve_body($response);
 
     if ($code < 200 || $code >= 300) {
-        // DiAG - Diagnostics
-        prod_trace('ERROR', sprintf('JAN /models non-2xx (%d). Body: %s', $code, $body));
+        // DIAG - Diagnostics
+        prod_trace('ERROR', sprintf('Get local models non-2xx (%d). Body: %s', $code, $body));
         return array('llama3.2-3b-instruct');
     }
 
     $json = json_decode($body, true);
 
-    // DiAG - Diagnostics
-    back_trace('NOTICE', '$response_body: ' . print_r($json, true));
+    // DIAG - Diagnostics
+    // back_trace('NOTICE', '$response_body: ' . print_r($json, true));
 
     $models = array();
 
@@ -399,8 +404,8 @@ function chatbot_local_get_models() {
     }
 
     if (empty($models)) {
-        // DiAG - Diagnostics
-        prod_trace('WARNING', 'No models parsed from /models. Body: ' . $body);
+        // DIAG - Diagnostics
+        prod_trace('WARNING', 'No models parsed from endpoint /models. Body: ' . $body);
         // Friendly fallback so UI doesn't break
         $models = array('llama3.2-3b-instruct');
     }
