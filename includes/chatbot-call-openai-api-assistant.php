@@ -640,30 +640,78 @@ function getTheMessage($thread_id, $api_key) {
         'Authorization' => 'Bearer ' . $api_key
     ];
 
-    // Fetch the response
-    $response = wp_remote_get($url, [
-        "headers" => $headers,
-        "timeout" => 30,
-    ]);
+    // Fetch all messages with pagination support
+    $all_messages = [];
+    $next_cursor = null;
+    $max_pages = 10; // Prevent infinite loops
+    $page_count = 0;
+    
+    do {
+        $current_url = $url;
+        if ($next_cursor) {
+            $current_url .= '?after=' . urlencode($next_cursor);
+        } else {
+            // Add limit parameter to get more messages per page (default is 20)
+            $current_url .= '?limit=100';
+        }
+        
+        $response = wp_remote_get($current_url, [
+            "headers" => $headers,
+            "timeout" => 30,
+        ]);
 
-    // ✅ Handle request errors
-    if (is_wp_error($response)) {
-        prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
-        return "Error: Failed to communicate with the API.";
-    }
+        // ✅ Handle request errors
+        if (is_wp_error($response)) {
+            prod_trace('ERROR', 'HTTP Request failed: ' . $response->get_error_message());
+            return "Error: Failed to communicate with the API.";
+        }
 
-    // ✅ Extract response body
-    $response_body = wp_remote_retrieve_body($response);
+        // ✅ Extract response body
+        $response_body = wp_remote_retrieve_body($response);
 
-    // ✅ Ensure the response is a valid JSON string before decoding
-    $response_data = json_decode($response_body, true);
-    if ($response_data === null) {
-        prod_trace('ERROR', 'JSON Decode Error: ' . json_last_error_msg());
-        return "Error: Invalid JSON response from API.";
-    }
+        // ✅ Ensure the response is a valid JSON string before decoding
+        $response_data = json_decode($response_body, true);
+        if ($response_data === null) {
+            prod_trace('ERROR', 'JSON Decode Error: ' . json_last_error_msg());
+            return "Error: Invalid JSON response from API.";
+        }
+        
+        // Add messages from this page to our collection
+        if (isset($response_data['data']) && is_array($response_data['data'])) {
+            $all_messages = array_merge($all_messages, $response_data['data']);
+            // DIAG - Diagnostics - Ver 2.2.9 - Multiple Messages Fix
+            back_trace( 'NOTICE', 'Page ' . $page_count . ': Added ' . count($response_data['data']) . ' messages. Total so far: ' . count($all_messages));
+        }
+        
+        // Check for next page - CRITICAL: Continue until has_more = false
+        $next_cursor = null;
+        if (isset($response_data['has_more']) && $response_data['has_more'] === true) {
+            // Use 'last_id' for pagination cursor
+            $next_cursor = isset($response_data['last_id']) ? $response_data['last_id'] : null;
+        }
+        
+        // DIAG - Diagnostics - Ver 2.2.9 - Multiple Messages Fix
+        back_trace( 'NOTICE', 'Page ' . $page_count . ': has_more=' . (isset($response_data['has_more']) ? ($response_data['has_more'] ? 'true' : 'false') : 'not_set') . ', next_cursor=' . ($next_cursor ?: 'null'));
+        
+        $page_count++;
+        
+    } while ($next_cursor && $page_count < $max_pages);
+    
+    // Replace the original response data with our complete message collection
+    $response_data['data'] = $all_messages;
+    
+    // CRITICAL: Sort messages by created_at for proper chronological order
+    usort($response_data['data'], function($a, $b) {
+        $time_a = isset($a['created_at']) ? $a['created_at'] : 0;
+        $time_b = isset($b['created_at']) ? $b['created_at'] : 0;
+        return $time_a - $time_b; // Ascending order (oldest first)
+    });
+    
+    // DIAG - Diagnostics - Ver 2.2.9 - Multiple Messages Fix
+    back_trace( 'NOTICE', 'Pagination completed. Total messages fetched: ' . count($all_messages) . ' across ' . $page_count . ' pages');
 
     // DIAG - Diagnostics - Ver 2.0.3
-    // back_trace( 'NOTICE', 'Step 8 - $response_data: ' . print_r($response_data, true));
+    back_trace( 'NOTICE', 'Step 8 - $response_data: ' . print_r($response_data, true));
 
     // Download any file attachments - Ver 2.0.3
     if (isset($response_data['data']) && is_array($response_data['data'])) {
@@ -1001,6 +1049,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     } else {
 
         // Original Context Instructions - No Enhanced Context
+        // Initialize undefined variables to prevent PHP warnings
+        $sys_message = isset($sys_message) ? $sys_message : '';
+        $chatgpt_last_response = isset($chatgpt_last_response) ? $chatgpt_last_response : '';
+        $chatbot_chatgpt_kn_conversation_context = isset($chatbot_chatgpt_kn_conversation_context) ? $chatbot_chatgpt_kn_conversation_context : '';
+        
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     }
@@ -1171,6 +1224,30 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Step 8: Get the Message
   // back_trace( 'NOTICE', 'Step 8: Get the Message');
     $assistants_response = getTheMessage($thread_id, $api_key);
+    
+    // Step 8.5: Poll for additional messages (handle trailing messages from multiple runs)
+    // This addresses the ChatGPT suggestion to poll for additional assistant messages
+    $initial_message_count = isset($assistants_response['data']) ? count($assistants_response['data']) : 0;
+    $max_poll_attempts = 3;
+    $poll_delay = 1000000; // 1 second in microseconds
+    
+    for ($poll_attempt = 1; $poll_attempt <= $max_poll_attempts; $poll_attempt++) {
+        usleep($poll_delay);
+        
+        $poll_response = getTheMessage($thread_id, $api_key);
+        $current_message_count = isset($poll_response['data']) ? count($poll_response['data']) : 0;
+        
+        if ($current_message_count > $initial_message_count) {
+            // DIAG - Diagnostics - Ver 2.2.9 - Multiple Messages Fix
+            back_trace( 'NOTICE', 'Poll attempt ' . $poll_attempt . ': Found ' . ($current_message_count - $initial_message_count) . ' additional messages');
+            $assistants_response = $poll_response; // Use the updated response
+            $initial_message_count = $current_message_count;
+        } else {
+            // DIAG - Diagnostics - Ver 2.2.9 - Multiple Messages Fix
+            back_trace( 'NOTICE', 'Poll attempt ' . $poll_attempt . ': No additional messages found');
+            break; // No new messages, stop polling
+        }
+    }
 
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();
@@ -1186,7 +1263,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     }
 
     // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
+    back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
     // Add a check here to see if the response [data][0][content][0][text][value] contains the string "[conversation_transcript]"
     if (strpos($assistants_response["data"][0]["content"][0]["text"]["value"], "[conversation_transcript]") !== false) {
@@ -1222,8 +1299,42 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'NOTICE', 'The response does not contain the string "[conversation_transcript]"');
     }
 
-    // Return the response text, checking for the fallback content[1][text] if available
-    if (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {
+    // Process all assistant messages and return them in correct chronological order
+    $all_responses = '';
+    if (isset($assistants_response['data']) && is_array($assistants_response['data'])) {
+        // DIAG - Diagnostics - Ver 2.2.9 - Multiple Messages Fix
+        back_trace( 'NOTICE', 'Total messages retrieved: ' . count($assistants_response['data']));
+        
+        // Messages are already sorted chronologically (oldest first) by the pagination logic
+        $messages = $assistants_response['data'];
+        
+        $assistant_message_count = 0;
+        foreach ($messages as $message) {
+            // DIAG - Diagnostics - Ver 2.2.9 - Multiple Messages Fix
+            back_trace( 'NOTICE', 'Processing message: role=' . (isset($message['role']) ? $message['role'] : 'unknown') . ', run_id=' . (isset($message['run_id']) ? $message['run_id'] : 'none') . ', created_at=' . (isset($message['created_at']) ? $message['created_at'] : 'unknown'));
+            
+            // Only process assistant messages (role = 'assistant')
+            if (isset($message['role']) && $message['role'] === 'assistant') {
+                $assistant_message_count++;
+                // Check for multiple content blocks in the message
+                if (isset($message['content']) && is_array($message['content'])) {
+                    foreach ($message['content'] as $content) {
+                        if (isset($content['text']['value'])) {
+                            $all_responses .= $content['text']['value'] . "\n\n";
+                        }
+                    }
+                }
+            }
+        }
+        
+        // DIAG - Diagnostics - Ver 2.2.9 - Multiple Messages Fix
+        back_trace( 'NOTICE', 'Assistant messages processed: ' . $assistant_message_count);
+    }
+    
+    // Return all assistant responses, or fallback to the original logic
+    if (!empty($all_responses)) {
+        return trim($all_responses);
+    } elseif (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {
         return $assistants_response["data"][0]["content"][1]["text"]["value"];
     } elseif (isset($assistants_response["data"][0]["content"][0]["text"]["value"])) {
         return $assistants_response["data"][0]["content"][0]["text"]["value"];
@@ -1610,3 +1721,4 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
     }
 
 }
+
