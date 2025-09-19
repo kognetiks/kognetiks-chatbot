@@ -84,7 +84,7 @@ function chatbot_chatgpt_dashboard_widget_content() {
     }
     
     // Debug: Log the calculated start date
-    prod_trace( 'NOTICE', 'Dashboard widget - Period: ' . $period . ', Start date: ' . $start_date);
+    // back_trace( 'NOTICE', 'Dashboard widget - Period: ' . $period . ', Start date: ' . $start_date);
     
     // Get chat statistics
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -169,26 +169,27 @@ function chatbot_chatgpt_dashboard_widget_content() {
     // Close the table existence check
     }
     
-    // DIAG - Diagnostics - Ver 2.2.7
-    if (empty($daily_chats)) {
-        prod_trace( 'NOTICE', 'No data in daily_chats. Period: ' . $period . ', Start date: ' . $start_date);
-        prod_trace( 'NOTICE', 'Total chats count: ' . $chat_count);
+    // DIAG - Diagnostics - Ver 2.3.4
+    // if (empty($daily_chats)) {
         
-        // Check if table exists and has data
-        if (isset($table_exists) && !$table_exists) {
-            prod_trace( 'ERROR', 'Table ' . $table_name . ' does not exist');
-        } else {
-            $total_rows = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
-            prod_trace( 'NOTICE', 'Table exists with ' . $total_rows . ' total rows');
+    //     prod_trace( 'NOTICE', 'No data in daily_chats. Period: ' . $period . ', Start date: ' . $start_date);
+    //     prod_trace( 'NOTICE', 'Total chats count: ' . $chat_count);
+        
+    //     // Check if table exists and has data
+    //     if (isset($table_exists) && !$table_exists) {
+    //         prod_trace( 'ERROR', 'Table ' . $table_name . ' does not exist');
+    //     } else {
+    //         $total_rows = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+    //         prod_trace( 'NOTICE', 'Table exists with ' . $total_rows . ' total rows');
             
-            // Check for recent data
-            $recent_data = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $table_name WHERE interaction_time >= %s",
-                $start_date
-            ));
-            prod_trace( 'NOTICE', 'Recent data count: ' . $recent_data);
-        }
-    }
+    //         // Check for recent data
+    //         $recent_data = $wpdb->get_var($wpdb->prepare(
+    //             "SELECT COUNT(*) FROM $table_name WHERE interaction_time >= %s",
+    //             $start_date
+    //         ));
+    //         prod_trace( 'NOTICE', 'Recent data count: ' . $recent_data);
+    //     }
+    // }
     
     // Get token usage - only if table exists
     if (isset($table_exists) && $table_exists) {

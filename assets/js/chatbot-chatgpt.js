@@ -707,8 +707,28 @@ jQuery(document).ready(function ($) {
             return `{{HTML_TAG_${predefinedHtml.length - 1}}}`;
         });
     
-        // Step 3: Escape HTML outside of code blocks
-        markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
+        // Step 2.5: Extract LaTeX mathematical expressions to preserve them - Ver 2.1.5 MathJax Fix
+        let latexExpressions = [];
+        // Extract display math: \[...\] and $$...$$
+        markdown = markdown.replace(/\\\[[\s\S]*?\\\]|\$\$[\s\S]*?\$\$/g, (match) => {
+            latexExpressions.push(match);
+            return `{{LATEX_DISPLAY_${latexExpressions.length - 1}}}`;
+        });
+        // Extract inline math: \(...\) and $...$ (but not $$...$$)
+        markdown = markdown.replace(/\\\([\s\S]*?\\\)|\$(?!\$)[\s\S]*?\$(?!\$)/g, (match) => {
+            latexExpressions.push(match);
+            return `{{LATEX_INLINE_${latexExpressions.length - 1}}}`;
+        });
+        // Extract [latext]...[/latext] tags and convert to display math - Ver 2.1.5 MathJax Fix
+        markdown = markdown.replace(/\[latext\]([\s\S]*?)\[\/latext\]/gi, (match, content) => {
+            // Convert [latext] tags to display math format
+            const displayMath = `\\[${content.trim()}\\]`;
+            latexExpressions.push(displayMath);
+            return `{{LATEX_DISPLAY_${latexExpressions.length - 1}}}`;
+        });
+    
+        // Step 3: Escape HTML outside of code blocks and LaTeX expressions
+        markdown = markdown.split(/(```[\s\S]+?```|{{LATEX_DISPLAY_\d+}}|{{LATEX_INLINE_\d+}})/g).map((chunk, index) => {
             return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
         }).join('');
     
@@ -747,7 +767,15 @@ jQuery(document).ready(function ($) {
             return line.match(/^<h|<p|<ul|<pre|<blockquote/) ? line : line.trim() ? `${line}</p>` : '';
         }).filter(line => line.trim() !== '').join('');
    
-        // Step 12: Reinsert predefined HTML tags
+        // Step 12: Reinsert LaTeX expressions - Ver 2.1.5 MathJax Fix
+        markdown = markdown.replace(/{{LATEX_DISPLAY_(\d+)}}/g, (match, index) => {
+            return latexExpressions[parseInt(index)];
+        });
+        markdown = markdown.replace(/{{LATEX_INLINE_(\d+)}}/g, (match, index) => {
+            return latexExpressions[parseInt(index)];
+        });
+
+        // Step 13: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
             return predefinedHtml[parseInt(index)];
         });
