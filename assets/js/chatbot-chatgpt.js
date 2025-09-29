@@ -764,6 +764,12 @@ window.resetAllLocks = resetAllLocks;
 
     // markdownToHtml - Ver 2.1.5
     function markdownToHtml(markdown) {
+        // Ensure markdown is a string
+        if (typeof markdown !== 'string') {
+            console.warn('markdownToHtml: Input is not a string:', typeof markdown, markdown);
+            return String(markdown || '');
+        }
+        
         // Step 1: Process links before any other inline elements
         markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
     
@@ -1054,7 +1060,7 @@ window.resetAllLocks = resetAllLocks;
                     let messageInfo = ` (${messageCount} / ${messageLimit})`;
                     botResponse += messageInfo;
                 }
-                botResponse = markdownToHtml(botResponse);
+                botResponse = markdownToHtml(botResponse || '');
             },
             error: function (jqXHR, status, error) {
                 if(status === "timeout") {
@@ -1260,7 +1266,7 @@ window.resetAllLocks = resetAllLocks;
                 if (typeof response === 'string') {
                     response = JSON.parse(response);
                 }
-                response.data = markdownToHtml(response.data);
+                response.data = markdownToHtml(response.data || '');
                 // appendMessage('Text-to-Speech: ' + response.data, 'bot');
                 appendMessage(response.data, 'bot');
             },

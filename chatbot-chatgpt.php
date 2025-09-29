@@ -1263,14 +1263,56 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     // Process the message based on platform
     prod_trace('NOTICE', 'Processing queued message - Platform: ' . $chatbot_ai_platform_choice);
     
-    if ($chatbot_ai_platform_choice == 'OpenAI') {
-        prod_trace('NOTICE', 'Calling OpenAI Assistant API for queued message');
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
-    } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
-        prod_trace('NOTICE', 'Calling Azure OpenAI Assistant API for queued message');
-        $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
-    } else {
-        $response = "Error: Unsupported platform for queued message";
+    switch ($chatbot_ai_platform_choice) {
+        case 'OpenAI':
+            prod_trace('NOTICE', 'Calling OpenAI Assistant API for queued message');
+            $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+            break;
+            
+        case 'Azure OpenAI':
+            prod_trace('NOTICE', 'Calling Azure OpenAI Assistant API for queued message');
+            $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+            break;
+            
+        case 'Mistral':
+            prod_trace('NOTICE', 'Calling Mistral Agent API for queued message');
+            $response = chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+            break;
+            
+        case 'NVIDIA':
+            prod_trace('NOTICE', 'Calling NVIDIA API for queued message');
+            $response = chatbot_nvidia_call_api($api_key, $message);
+            break;
+            
+        case 'Anthropic':
+            prod_trace('NOTICE', 'Calling Anthropic API for queued message');
+            $response = chatbot_call_anthropic_api($api_key, $message);
+            break;
+            
+        case 'DeepSeek':
+            prod_trace('NOTICE', 'Calling DeepSeek API for queued message');
+            $response = chatbot_call_deepseek_api($api_key, $message);
+            break;
+            
+        case 'Markov Chain':
+            prod_trace('NOTICE', 'Calling Markov Chain API for queued message');
+            $response = chatbot_chatgpt_call_markov_chain_api($message);
+            break;
+            
+        case 'Transformer':
+            prod_trace('NOTICE', 'Calling Transformer Model API for queued message');
+            $response = chatbot_chatgpt_call_transformer_model_api($message);
+            break;
+            
+        case 'Local Server':
+            prod_trace('NOTICE', 'Calling Local Model API for queued message');
+            $response = chatbot_chatgpt_call_local_model_api($message);
+            break;
+            
+        default:
+            prod_trace('NOTICE', 'Calling default ChatGPT API for queued message');
+            $response = chatbot_chatgpt_call_api($api_key, $message);
+            break;
     }
 
     // Log the response
@@ -1556,6 +1598,9 @@ function chatbot_chatgpt_send_message() {
     
     // Set conversation lock
     set_transient($conv_lock, true, 60);
+    
+    // Debug logging for lock setting
+    prod_trace('NOTICE', 'Set conversation lock - Lock key: ' . $conv_lock);
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
@@ -1754,7 +1799,7 @@ function chatbot_chatgpt_send_message() {
         if ($chatbot_ai_platform_choice == 'OpenAI') {
         // Send message to Custom GPT API - Ver 1.6.7
         // DIAG - Diagnostics
-        prod_trace('NOTICE', 'Calling OpenAI Assistant API for main message');
+        back_trace('NOTICE', 'Calling OpenAI Assistant API for main message');
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
         } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
             // Send message to Custom GPT API - Ver 2.2.6
@@ -1819,12 +1864,13 @@ function chatbot_chatgpt_send_message() {
             $extra_message = esc_attr(get_option('chatbot_chatgpt_extra_message', ''));
             $response = chatbot_chatgpt_append_extra_message($response, $extra_message);
         
-        // Send success response
-        wp_send_json_success($response);
-        
-        // Clear conversation lock and process queue
-        delete_transient($conv_lock);
-        chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
+            // Clear conversation lock and process queue BEFORE sending response
+            delete_transient($conv_lock);
+            prod_trace('NOTICE', 'Cleared conversation lock - Lock key: ' . $conv_lock);
+            chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
+            
+            // Send success response
+            wp_send_json_success($response);
 
         }
 
@@ -2073,6 +2119,7 @@ function chatbot_chatgpt_send_message() {
 
         // Clear conversation lock and process queue BEFORE sending response
         delete_transient($conv_lock);
+        prod_trace('NOTICE', 'Cleared conversation lock - Lock key: ' . $conv_lock);
         chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
         
         // Return response
