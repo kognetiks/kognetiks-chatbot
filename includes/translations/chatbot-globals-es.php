@@ -159,4 +159,6 @@ $chatbot_chatgpt_fixed_literal_messages = [
     "Conversación borrada. Por favor, espera mientras se recarga la página.",                           // [16]
     "Conversación borrada.",                                                                            // [17]
     "Conversación no borrada.",                                                                         // [18]
+    "Estoy trabajando en tu mensaje anterior - por favor, envíalo de nuevo en unos minutos.",           // [19]
+    "Mensaje en cola. Procesando...",                                                                   // [20]
 ];

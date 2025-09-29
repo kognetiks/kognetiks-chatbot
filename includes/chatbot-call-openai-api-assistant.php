@@ -325,7 +325,12 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key, $message
     
         // Return user-friendly message for "already has an active run" error
         if (strpos($errorMessage, 'already has an active run') !== false) {
-            return "I'm still working on your previous message—please send again in a moment.";
+            global $chatbot_chatgpt_fixed_literal_messages;
+            $default_message = "I'm still working on your previous message—please send again in a moment.";
+            $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
+                ? $chatbot_chatgpt_fixed_literal_messages[19] 
+                : $default_message;
+            return $locked_message;
         }
     
         return "Error: {$errorMessage}";
@@ -916,7 +921,12 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Check if there's already a lock for this conversation
     if (get_transient($conv_lock)) {
         prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
-        return "I'm still working on your previous message—please send again in a moment.";
+        global $chatbot_chatgpt_fixed_literal_messages;
+        $default_message = "I'm still working on your previous message—please send again in a moment.";
+        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[19] 
+            : $default_message;
+        return $locked_message;
     }
     
     // Set the conversation lock
@@ -974,7 +984,12 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         if (get_transient($thread_lock)) {
             delete_transient($conv_lock);
             prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
-            return "I'm still working on your previous message—please send again in a moment.";
+            global $chatbot_chatgpt_fixed_literal_messages;
+            $default_message = "I'm still working on your previous message—please send again in a moment.";
+            $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
+                ? $chatbot_chatgpt_fixed_literal_messages[19] 
+                : $default_message;
+            return $locked_message;
         }
         set_transient($thread_lock, $message_uuid, $lock_timeout);
         
@@ -987,7 +1002,12 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         if (get_transient($thread_lock)) {
             delete_transient($conv_lock);
             prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
-            return "I'm still working on your previous message—please send again in a moment.";
+            global $chatbot_chatgpt_fixed_literal_messages;
+            $default_message = "I'm still working on your previous message—please send again in a moment.";
+            $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
+                ? $chatbot_chatgpt_fixed_literal_messages[19] 
+                : $default_message;
+            return $locked_message;
         }
         set_transient($thread_lock, $message_uuid, $lock_timeout);
 
@@ -1126,7 +1146,12 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
             delete_transient($thread_lock);
             delete_transient($conv_lock);
             prod_trace('NOTICE', 'Active run detected, returning friendly message');
-            return "I'm still working on your previous message—please send again in a moment.";
+            global $chatbot_chatgpt_fixed_literal_messages;
+            $default_message = "I'm still working on your previous message—please send again in a moment.";
+            $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
+                ? $chatbot_chatgpt_fixed_literal_messages[19] 
+                : $default_message;
+            return $locked_message;
         }
         
         $assistants_response = runTheAssistant($thread_id, $assistant_id, $context, $api_key, $message_uuid);
