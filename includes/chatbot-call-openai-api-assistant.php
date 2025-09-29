@@ -84,7 +84,7 @@ function createAnAssistant($api_key) {
 // -------------------------------------------------------------------------
 // Step 3: Add a message
 // -------------------------------------------------------------------------
-function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
+function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null, $message_uuid = null) {
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Step 3 - addAMessage()');
@@ -136,6 +136,11 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
                 ]
             ],
         ];
+        
+        // Add message UUID to metadata if provided
+        if ($message_uuid) {
+            $data['metadata'] = ['message_uuid' => $message_uuid];
+        }
 
     }
 
@@ -168,6 +173,11 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
         if ( $file_type == 'vision' ) {
             $data = chatbot_chatgpt_image_attachment($prompt, $file_id, $beta_version);
         }
+        
+        // Add message UUID to metadata if provided
+        if ($message_uuid && isset($data)) {
+            $data['metadata'] = ['message_uuid' => $message_uuid];
+        }
 
     }
 
@@ -198,7 +208,7 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null) {
 // -------------------------------------------------------------------------
 // Step 4: Run the Assistant
 // -------------------------------------------------------------------------
-function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
+function runTheAssistant($thread_id, $assistant_id, $context, $api_key, $message_uuid = null) {
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Step 4 - runTheAssistant()');
@@ -264,6 +274,11 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
         ),
         "additional_instructions" => $additional_instructions,
     );
+    
+    // Add message UUID to run metadata for end-to-end idempotency
+    if (isset($message_uuid)) {
+        $data["metadata"] = ["message_uuid" => $message_uuid];
+    }
 
     $response = wp_remote_post($url, [
         "headers"       => $headers,
@@ -307,6 +322,11 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key) {
     
         prod_trace('ERROR', "OpenAI API Error: {$errorMessage}");
         prod_trace('ERROR', "Error Type: {$errorType}");
+    
+        // Return user-friendly message for "already has an active run" error
+        if (strpos($errorMessage, 'already has an active run') !== false) {
+            return "I'm still working on your previous message—please send again in a moment.";
+        }
     
         return "Error: {$errorMessage}";
     }
@@ -361,7 +381,7 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
 
     while ($status != "completed" && $totalRetryCount < $maxTotalRetries) {
 
-        $response = wp_remote_post($url, [
+        $response = wp_remote_get($url, [
             "headers"       => $headers,
             "timeout"       => 30,
         ]);
@@ -614,13 +634,18 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
 // -------------------------------------------------------------------------
 // Step 8: Get the Message
 // -------------------------------------------------------------------------
-function getTheMessage($thread_id, $api_key) {
+function getTheMessage($thread_id, $api_key, $run_id = null) {
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', 'Step 8 - getTheMessage()');
     // back_trace( 'NOTICE', 'Step 8 - $thread_id: ' . $thread_id);
 
     $url = get_threads_api_url() . '/' . $thread_id . '/messages';
+    
+    // Add run_id filter if provided to only get messages from the current run
+    if ($run_id) {
+        $url .= '?run_id=' . $run_id . '&order=asc';
+    }
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '$url: ' . $url);
@@ -834,8 +859,9 @@ function cancel_active_run($thread_id, $api_key) {
         while ($wait_count < $max_wait) {
             usleep($wait_time);
             
-            // Check if the run is still active
-            $check_response = wp_remote_get($cancel_url, [
+            // Check if the run is cancelled by polling the run status endpoint
+            $run_status_url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $current_run['id'];
+            $check_response = wp_remote_get($run_status_url, [
                 "headers" => $headers,
                 "timeout" => 30,
             ]);
@@ -861,7 +887,7 @@ function cancel_active_run($thread_id, $api_key) {
 }
 
 // CustomGPT - Assistants - Ver 1.7.2
-function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id) {
+function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null) {
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
@@ -872,6 +898,33 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$message: ' . $message);
     // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
+
+    // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
+    $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
+    
+    // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
+    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $lock_timeout = 60; // 60 seconds timeout
+    
+    // Check for duplicate message UUID in conversation log
+    $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
+    if (get_transient($duplicate_key)) {
+        prod_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        return "Error: Duplicate request detected. Please try again.";
+    }
+    
+    // Check if there's already a lock for this conversation
+    if (get_transient($conv_lock)) {
+        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
+        return "I'm still working on your previous message—please send again in a moment.";
+    }
+    
+    // Set the conversation lock
+    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+    
+    // Log the start of the request
+    prod_trace('NOTICE', 'Starting API call - Assistant: ' . $assistant_id . ', User: ' . $user_id . ', Page: ' . $page_id . ', Session: ' . $session_id . ', Message UUID: ' . $message_uuid);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
@@ -916,9 +969,27 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
         set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
         
+        // Now that we have the thread_id, also set a per-thread lock
+        $thread_lock = 'chatgpt_run_lock_' . $thread_id;
+        if (get_transient($thread_lock)) {
+            delete_transient($conv_lock);
+            prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
+            return "I'm still working on your previous message—please send again in a moment.";
+        }
+        set_transient($thread_lock, $message_uuid, $lock_timeout);
+        
     } else {
 
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
+        
+        // Now that we have the thread_id, also set a per-thread lock
+        $thread_lock = 'chatgpt_run_lock_' . $thread_id;
+        if (get_transient($thread_lock)) {
+            delete_transient($conv_lock);
+            prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
+            return "I'm still working on your previous message—please send again in a moment.";
+        }
+        set_transient($thread_lock, $message_uuid, $lock_timeout);
 
     }
 
@@ -1007,12 +1078,12 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     if (empty($file_id)) {
         // back_trace( 'NOTICE', 'No file to retrieve');
-        $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, '');
+        $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, '', $message_uuid);
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
         // back_trace( 'NOTICE', 'File to retrieve');
         // back_trace( 'NOTICE', '$file_id ' . print_r($file_id, true));
-        $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, $file_id);
+        $assistants_response = addAMessage($thread_id, $prompt, $context, $api_key, $file_id, $message_uuid);
         // DIAG - Print the response
         // back_trace( 'NOTICE', $assistants_response);
     }
@@ -1028,42 +1099,57 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // Step 4: Run the Assistant
       // back_trace( 'NOTICE', 'Step 4 - Run the Assistant');
         
-        // First, check and cancel any active runs
-        $cancel_attempts = 0;
-        $max_cancel_attempts = 3;
-        $cancel_success = false;
-
-        while ($cancel_attempts < $max_cancel_attempts && !$cancel_success) {
-            if (cancel_active_run($thread_id, $api_key)) {
-                $cancel_success = true;
-            } else {
-                $cancel_attempts++;
-              // back_trace( 'NOTICE', 'Cancel attempt ' . $cancel_attempts . ' failed. Waiting before retry...');
-                usleep(2000000); // 2 seconds
-            }
-        }
-
-        if (!$cancel_success) {
-          // back_trace( 'ERROR', 'Failed to cancel active runs after ' . $max_cancel_attempts . ' attempts');
-            return "Error: Failed to cancel active runs";
+        // Check for active runs before creating a new one
+        $run_status_url = get_threads_api_url() . '/' . $thread_id . '/runs?limit=1&order=desc';
+        $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
+        $beta_version = ($assistant_beta_version == 'v2') ? "assistants=v2" : "assistants=v1";
+        
+        $headers = [
+            "Content-Type"  => "application/json",
+            "OpenAI-Beta"   => $beta_version,
+            "Authorization" => "Bearer " . $api_key
+        ];
+        
+        $latest = wp_remote_get($run_status_url, [
+            'headers' => $headers,
+            'timeout' => 30
+        ]);
+        
+        $active = false;
+        if (!is_wp_error($latest)) {
+            $j = json_decode(wp_remote_retrieve_body($latest), true);
+            $active = !empty($j['data'][0]) && in_array($j['data'][0]['status'], ['in_progress', 'queued', 'requires_action']);
         }
         
-        // Wait a moment for the cancellation to take effect
-        usleep(2000000); // 2 seconds
+        if ($active) {
+            // Clear locks and return friendly message
+            delete_transient($thread_lock);
+            delete_transient($conv_lock);
+            prod_trace('NOTICE', 'Active run detected, returning friendly message');
+            return "I'm still working on your previous message—please send again in a moment.";
+        }
         
-        $assistants_response = runTheAssistant($thread_id, $assistant_id, $context, $api_key);
+        $assistants_response = runTheAssistant($thread_id, $assistant_id, $context, $api_key, $message_uuid);
 
         // Check if the response is not an array or is a string indicating an error
         if (!is_array($assistants_response) || is_string($assistants_response)) {
           // back_trace( 'ERROR', 'Invalid response format or error occurred');
+            // Clear both locks before returning error
+            delete_transient($thread_lock);
+            delete_transient($conv_lock);
             return "Error: Invalid response format or error occurred.";
         }
 
         // Check if the 'id' key exists in the response
         if (isset($assistants_response["id"])) {
             $runId = $assistants_response["id"];
+            // Log the run creation
+            prod_trace('NOTICE', 'Run created - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message UUID: ' . $message_uuid);
         } else {
           // back_trace( 'ERROR', 'runId key not found in response');
+            // Clear both locks before returning error
+            delete_transient($thread_lock);
+            delete_transient($conv_lock);
             return "Error: 'id' key not found in response.";
         }
 
@@ -1123,6 +1209,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
               // back_trace( 'NOTICE', 'Run completed successfully');
                 $run_completed = true;
                 $run_status = "completed";
+                // Log run completion
+                prod_trace('NOTICE', 'Run completed - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message UUID: ' . $message_uuid);
                 break;
             }
             // Check if the run has failed
@@ -1152,6 +1240,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Failed after multiple retries
     if ($run_status != "completed") {
       // back_trace( 'ERROR', 'Run failed after ' . $maxRetries . ' retries. Status: ' . $run_status);
+        // Clear both locks before returning error
+        delete_transient($thread_lock);
+        delete_transient($conv_lock);
         return "Error: Run failed after maximum retries. Status: " . $run_status;
     }
 
@@ -1168,9 +1259,15 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
   // back_trace( 'NOTICE', 'Step 7 - Get the Step\'s Status');
     getTheStepsStatus($thread_id, $runId, $api_key);
 
-    // Step 8: Get the Message
+    // Step 8: Get the Message - Filter to only show current run results
   // back_trace( 'NOTICE', 'Step 8: Get the Message');
-    $assistants_response = getTheMessage($thread_id, $api_key);
+    $assistants_response = getTheMessage($thread_id, $api_key, $runId);
+    
+    // Log message retrieval
+    if (isset($assistants_response["data"][0]["id"])) {
+        $message_id = $assistants_response["data"][0]["id"];
+        prod_trace('NOTICE', 'Message retrieved - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message ID: ' . $message_id . ', Message UUID: ' . $message_uuid);
+    }
 
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();
@@ -1221,6 +1318,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     } else {
         // back_trace( 'NOTICE', 'The response does not contain the string "[conversation_transcript]"');
     }
+
+    // Clear both locks before returning
+    delete_transient($thread_lock);
+    delete_transient($conv_lock);
+    
+    // Log the completion of the request
+    prod_trace('NOTICE', 'Completed API call - Thread: ' . $thread_id . ', Message UUID: ' . $message_uuid);
 
     // Return the response text, checking for the fallback content[1][text] if available
     if (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {
