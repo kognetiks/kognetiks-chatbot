@@ -233,8 +233,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.3.4 - Released TBD =
+= 2.3.4 - Released 09-29-2025 =
 
+* **Conversation Locking**: Implemented conversation locking mechanism to prevent multiple simultaneous requests and improve user experience.
+* **Input Processing**: Enhanced input processing to handle impatient user interactions more gracefully.
+* **Dashboard Widget**: Fixed dashboard widget errors and improved LaTeX rendering functionality.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.3.
 
 = 2.3.3 - Released 2025-08-14 =
