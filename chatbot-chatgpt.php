@@ -1178,11 +1178,14 @@ function chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assi
 }
 
 function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id) {
-    prod_trace('NOTICE', 'Processing queue - user_id: ' . $user_id . ', page_id: ' . $page_id . ', session_id: ' . $session_id . ', assistant_id: ' . $assistant_id);
+
+    // DIAG - Diagnostics - Ver 2.3.4
+    // back_trace('NOTICE', 'Processing queue - user_id: ' . $user_id . ', page_id: ' . $page_id . ', session_id: ' . $session_id . ', assistant_id: ' . $assistant_id);
     
     $queue_status = chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id);
     
-    prod_trace('NOTICE', 'Queue status - has_messages: ' . ($queue_status['has_messages'] ? 'Yes' : 'No') . ', count: ' . $queue_status['count']);
+    // DIAG - Diagnostics - Ver 2.3.4
+    // back_trace('NOTICE', 'Queue status - has_messages: ' . ($queue_status['has_messages'] ? 'Yes' : 'No') . ', count: ' . $queue_status['count']);
     
     if (!$queue_status['has_messages']) {
         return false;
@@ -1197,7 +1200,8 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     set_transient($conv_lock, true, 60);
     
-    prod_trace('NOTICE', 'Set queue lock - Lock key: ' . $conv_lock);
+    // DIAG - Diagnostics - Ver 2.3.4
+    // back_trace('NOTICE', 'Set queue lock - Lock key: ' . $conv_lock);
     
     // Process the message using the existing logic
     $response = chatbot_chatgpt_process_queued_message($message_data);
@@ -1205,7 +1209,8 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     // Clear conversation lock
     delete_transient($conv_lock);
     
-    prod_trace('NOTICE', 'Cleared queue lock - Lock key: ' . $conv_lock);
+    // DIAG - Diagnostics - Ver 2.3.4
+    // back_trace('NOTICE', 'Cleared queue lock - Lock key: ' . $conv_lock);
     
     // Recursively process the next message in queue
     chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
@@ -1261,56 +1266,67 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
     // Process the message based on platform
-    prod_trace('NOTICE', 'Processing queued message - Platform: ' . $chatbot_ai_platform_choice);
+    // DIAG - Diagnostics - Ver 2.3.4
+    // back_trace('NOTICE', 'Processing queued message - Platform: ' . $chatbot_ai_platform_choice);
     
     switch ($chatbot_ai_platform_choice) {
         case 'OpenAI':
-            prod_trace('NOTICE', 'Calling OpenAI Assistant API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling OpenAI Assistant API for queued message');
             $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
             break;
             
         case 'Azure OpenAI':
-            prod_trace('NOTICE', 'Calling Azure OpenAI Assistant API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling Azure OpenAI Assistant API for queued message');
             $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
             break;
             
         case 'Mistral':
-            prod_trace('NOTICE', 'Calling Mistral Agent API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling Mistral Agent API for queued message');
             $response = chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
             break;
             
         case 'NVIDIA':
-            prod_trace('NOTICE', 'Calling NVIDIA API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling NVIDIA API for queued message');
             $response = chatbot_nvidia_call_api($api_key, $message);
             break;
             
         case 'Anthropic':
-            prod_trace('NOTICE', 'Calling Anthropic API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling Anthropic API for queued message');
             $response = chatbot_call_anthropic_api($api_key, $message);
             break;
             
         case 'DeepSeek':
-            prod_trace('NOTICE', 'Calling DeepSeek API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling DeepSeek API for queued message');
             $response = chatbot_call_deepseek_api($api_key, $message);
             break;
             
         case 'Markov Chain':
-            prod_trace('NOTICE', 'Calling Markov Chain API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling Markov Chain API for queued message');
             $response = chatbot_chatgpt_call_markov_chain_api($message);
             break;
             
         case 'Transformer':
-            prod_trace('NOTICE', 'Calling Transformer Model API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling Transformer Model API for queued message');
             $response = chatbot_chatgpt_call_transformer_model_api($message);
             break;
             
         case 'Local Server':
-            prod_trace('NOTICE', 'Calling Local Model API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling Local Model API for queued message');
             $response = chatbot_chatgpt_call_local_model_api($message);
             break;
             
         default:
-            prod_trace('NOTICE', 'Calling default ChatGPT API for queued message');
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Calling default ChatGPT API for queued message');
             $response = chatbot_chatgpt_call_api($api_key, $message);
             break;
     }
@@ -1576,7 +1592,8 @@ function chatbot_chatgpt_send_message() {
     $is_processing = get_transient($conv_lock);
     
     // Debug logging for lock check
-    prod_trace('NOTICE', 'Main send function - Lock key: ' . $conv_lock . ', Exists: ' . ($is_processing ? 'Yes' : 'No'));
+    // DIAG - Diagnostics - Ver 2.3.4
+    // back_trace('NOTICE', 'Main send function - Lock key: ' . $conv_lock . ', Exists: ' . ($is_processing ? 'Yes' : 'No'));
     
     if ($is_processing) {
         // If already processing, enqueue the message
@@ -1600,7 +1617,8 @@ function chatbot_chatgpt_send_message() {
     set_transient($conv_lock, true, 60);
     
     // Debug logging for lock setting
-    prod_trace('NOTICE', 'Set conversation lock - Lock key: ' . $conv_lock);
+    // DIAG - Diagnostics - Ver 2.3.4
+    // back_trace('NOTICE', 'Set conversation lock - Lock key: ' . $conv_lock);
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
@@ -1732,7 +1750,8 @@ function chatbot_chatgpt_send_message() {
     $additional_instructions = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
 
     // Decide whether to use Flow, Assistant or Original ChatGPT
-    prod_trace('NOTICE', 'Decision point - model: ' . $model . ', use_assistant_id: ' . $use_assistant_id);
+    // DIAG - Diagnostics - Ver 2.3.4
+    // back_trace('NOTICE', 'Decision point - model: ' . $model . ', use_assistant_id: ' . $use_assistant_id);
     
     if ($model == 'flow'){
         
@@ -1775,7 +1794,8 @@ function chatbot_chatgpt_send_message() {
 
     } elseif ($use_assistant_id == 'Yes') {
 
-        prod_trace('NOTICE', 'Using Assistant ID path - use_assistant_id: ' . $use_assistant_id);
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace('NOTICE', 'Using Assistant ID path - use_assistant_id: ' . $use_assistant_id);
         // DIAG - Diagnostics - Ver 2.1.1.1
         // back_trace( 'NOTICE', 'Using Assistant ID: ' . $use_assistant_id);
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
@@ -1799,7 +1819,7 @@ function chatbot_chatgpt_send_message() {
         if ($chatbot_ai_platform_choice == 'OpenAI') {
         // Send message to Custom GPT API - Ver 1.6.7
         // DIAG - Diagnostics
-        back_trace('NOTICE', 'Calling OpenAI Assistant API for main message');
+        // back_trace('NOTICE', 'Calling OpenAI Assistant API for main message');
         $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
         } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
             // Send message to Custom GPT API - Ver 2.2.6
@@ -1866,7 +1886,8 @@ function chatbot_chatgpt_send_message() {
         
             // Clear conversation lock and process queue BEFORE sending response
             delete_transient($conv_lock);
-            prod_trace('NOTICE', 'Cleared conversation lock - Lock key: ' . $conv_lock);
+            // DIAG - Diagnostics - Ver 2.3.4
+            // back_trace('NOTICE', 'Cleared conversation lock - Lock key: ' . $conv_lock);
             chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
             
             // Send success response
@@ -1876,8 +1897,8 @@ function chatbot_chatgpt_send_message() {
 
     } else {
 
-        prod_trace('NOTICE', 'Using ChatGPT path - use_assistant_id: ' . $use_assistant_id);
-        // DIAG - Diagnostics - Ver 2.1.1.1
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace('NOTICE', 'Using ChatGPT path - use_assistant_id: ' . $use_assistant_id);
         // back_trace( 'NOTICE', 'Using ChatGPT');
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
@@ -1928,7 +1949,7 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        prod_trace('NOTICE', 'Calling ChatGPT Omni API');
+                        // back_trace('NOTICE', 'Calling ChatGPT Omni API');
                         // Send message to ChatGPT API - Ver 1.6.7
                         $response = chatbot_chatgpt_call_omni($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
@@ -1939,7 +1960,7 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        prod_trace('NOTICE', 'Calling ChatGPT API');
+                        // back_trace('NOTICE', 'Calling ChatGPT API');
                         // Send message to ChatGPT API - Ver 1.6.7
                         $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
@@ -1950,7 +1971,7 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        prod_trace('NOTICE', 'Calling Dall E Image API');
+                        // back_trace('NOTICE', 'Calling Dall E Image API');
                         // Send message to Image API - Ver 1.9.4
                         $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
@@ -1962,7 +1983,7 @@ function chatbot_chatgpt_send_message() {
                         $kchat_settings['model'] = $model;
                         $kchat_settings['voice'] = $voice;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        prod_trace('NOTICE', 'Calling TTS API');
+                        // back_trace('NOTICE', 'Calling TTS API');
                         // Send message to TTS API - Text-to-speech - Ver 1.9.5
                         $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
@@ -2119,7 +2140,8 @@ function chatbot_chatgpt_send_message() {
 
         // Clear conversation lock and process queue BEFORE sending response
         delete_transient($conv_lock);
-        prod_trace('NOTICE', 'Cleared conversation lock - Lock key: ' . $conv_lock);
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace('NOTICE', 'Cleared conversation lock - Lock key: ' . $conv_lock);
         chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
         
         // Return response
@@ -2190,9 +2212,9 @@ function chatbot_chatgpt_unlock_conversation_handler() {
         $queue_exists = get_transient($queue_key);
         $deleted_queue = delete_transient($queue_key);
         
-        // Debug logging
-        prod_trace('NOTICE', 'Unlock called - Lock key: ' . $conv_lock . ', Exists: ' . ($lock_exists ? 'Yes' : 'No') . ', Deleted: ' . ($deleted_lock ? 'Yes' : 'No'));
-        prod_trace('NOTICE', 'Unlock called - Queue key: ' . $queue_key . ', Exists: ' . ($queue_exists ? 'Yes' : 'No') . ', Deleted: ' . ($deleted_queue ? 'Yes' : 'No'));
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace('NOTICE', 'Unlock called - Lock key: ' . $conv_lock . ', Exists: ' . ($lock_exists ? 'Yes' : 'No') . ', Deleted: ' . ($deleted_lock ? 'Yes' : 'No'));
+        // back_trace('NOTICE', 'Unlock called - Queue key: ' . $queue_key . ', Exists: ' . ($queue_exists ? 'Yes' : 'No') . ', Deleted: ' . ($deleted_queue ? 'Yes' : 'No'));
         
         // Try to clear all possible lock variations
         $possible_locks = [
@@ -2206,13 +2228,15 @@ function chatbot_chatgpt_unlock_conversation_handler() {
         foreach ($possible_locks as $lock_key) {
             if (get_transient($lock_key)) {
                 delete_transient($lock_key);
-                prod_trace('NOTICE', 'Cleared additional lock: ' . $lock_key);
+                // DIAG - Diagnostics - Ver 2.3.4
+                // back_trace('NOTICE', 'Cleared additional lock: ' . $lock_key);
             }
         }
         
         wp_send_json_success('Conversation unlocked');
     } else {
-        prod_trace('ERROR', 'Unlock failed - Missing parameters: user_id=' . $user_id . ', page_id=' . $page_id . ', session_id=' . $session_id . ', assistant_id=' . $assistant_id);
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace('ERROR', 'Unlock failed - Missing parameters: user_id=' . $user_id . ', page_id=' . $page_id . ', session_id=' . $session_id . ', assistant_id=' . $assistant_id);
         wp_send_json_error('Missing parameters');
     }
 }
@@ -2247,7 +2271,8 @@ function chatbot_chatgpt_reset_all_locks_handler() {
             if (get_transient($lock_key)) {
                 delete_transient($lock_key);
                 $cleared_count++;
-                prod_trace('NOTICE', 'Reset cleared lock: ' . $lock_key);
+                // DIAG - Diagnostics - Ver 2.3.4
+                // back_trace('NOTICE', 'Reset cleared lock: ' . $lock_key);
             }
         }
         
@@ -2264,16 +2289,23 @@ function chatbot_chatgpt_reset_all_locks_handler() {
             if (get_transient($queue_key)) {
                 delete_transient($queue_key);
                 $cleared_count++;
-                prod_trace('NOTICE', 'Reset cleared queue: ' . $queue_key);
+                // DIAG - Diagnostics - Ver 2.3.4
+                // back_trace('NOTICE', 'Reset cleared queue: ' . $queue_key);
             }
         }
         
-        prod_trace('NOTICE', 'Reset completed - Cleared ' . $cleared_count . ' locks/queues');
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace('NOTICE', 'Reset completed - Cleared ' . $cleared_count . ' locks/queues');
         wp_send_json_success('Reset completed - Cleared ' . $cleared_count . ' locks/queues');
+
     } else {
-        prod_trace('ERROR', 'Reset failed - Missing parameters: user_id=' . $user_id . ', page_id=' . $page_id . ', session_id=' . $session_id . ', assistant_id=' . $assistant_id);
+
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace('ERROR', 'Reset failed - Missing parameters: user_id=' . $user_id . ', page_id=' . $page_id . ', session_id=' . $session_id . ', assistant_id=' . $assistant_id);
         wp_send_json_error('Missing parameters');
+    
     }
+
 }
 
 // Append an extra message to the response - Ver 2.0.9

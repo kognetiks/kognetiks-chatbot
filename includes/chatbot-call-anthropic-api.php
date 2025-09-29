@@ -39,7 +39,8 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        prod_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -242,8 +243,8 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     // Handle WP Error
     if (is_wp_error($response)) {
 
-        // DIAG - Diagnostics
-        prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
@@ -260,8 +261,8 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
         $error_type = $response_body['error']['type'] ?? 'Unknown Error Type';
         $error_message = $response_body['error']['message'] ?? 'No additional information.';
 
-        // DIAG - Diagnostics
-        prod_trace( 'ERROR', 'Error: Type: Type: ' . $error_type . ' Message: ' . $error_message);
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace( 'ERROR', 'Error: Type: Type: ' . $error_type . ' Message: ' . $error_message);
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';

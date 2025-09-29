@@ -39,7 +39,8 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     // Check for duplicate message UUID in conversation log
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
-        prod_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
