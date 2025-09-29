@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the Local API
-function chatbot_chatgpt_call_local_model_api($message) {
+function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
     global $session_id;
     global $user_id;
@@ -28,6 +28,35 @@ function chatbot_chatgpt_call_local_model_api($message) {
     global $voice;
     
     global $errorResponses;
+
+    // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
+    $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
+
+    // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
+    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $lock_timeout = 60; // 60 seconds timeout
+
+    // Check for duplicate message UUID in conversation log
+    $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
+    if (get_transient($duplicate_key)) {
+        prod_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        return "Error: Duplicate request detected. Please try again.";
+    }
+
+    // Check if there's already a lock for this conversation
+    if (get_transient($conv_lock)) {
+        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
+        global $chatbot_chatgpt_fixed_literal_messages;
+        $default_message = "I'm still working on your previous message—please send again in a moment.";
+        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[19] 
+            : $default_message;
+        return $locked_message;
+    }
+
+    // Set the conversation lock
+    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // Jan.ai Download
     // https://jan.ai/download
@@ -194,6 +223,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
 
     // Handle request errors
     if (is_wp_error($response)) {
+        // Clear locks on error
+        delete_transient($conv_lock);
         return 'Error: ' . $response->get_error_message() . ' Please check Settings for a valid API key.';
     }
 
@@ -208,6 +239,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
         // back_trace('ERROR', 'Request URL: ' . $api_url);
         // back_trace('ERROR', 'Request Body: ' . json_encode($body));
         
+        // Clear locks on error
+        delete_transient($conv_lock);
         return 'Error: ' . $error_message . ' Please check the request format and try again.';
     }
 
@@ -250,6 +283,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
         $response_text = chatbot_local_clean_response_text($response_text);
         
         addEntry('chatbot_chatgpt_context_history', $response_text);
+        // Clear locks on success
+        delete_transient($conv_lock);
         return $response_text;
     } else {
 
@@ -260,6 +295,8 @@ function chatbot_chatgpt_call_local_model_api($message) {
             ? get_localized_errorResponses(get_locale(), $errorResponses) 
             : $errorResponses;
     
+        // Clear locks on error
+        delete_transient($conv_lock);
         return $localized_errorResponses[array_rand($localized_errorResponses)];
     }
 

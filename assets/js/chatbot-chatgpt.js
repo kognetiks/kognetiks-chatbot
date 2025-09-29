@@ -8,6 +8,74 @@ jQuery(document).ready(function ($) {
     } else {
         // console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
     }
+    
+// Unlock conversation on page load/refresh to prevent stuck locks
+function unlockConversationOnLoad() {
+    let user_id = kchat_settings.user_id;
+    let page_id = kchat_settings.page_id;
+    let session_id = kchat_settings.session_id;
+    let assistant_id = kchat_settings.assistant_id;
+    
+    if (user_id && page_id && session_id && assistant_id) {
+        $.ajax({
+            url: kchat_settings.ajax_url,
+            method: 'POST',
+            timeout: 5000, // 5 second timeout
+            data: {
+                action: 'chatbot_chatgpt_unlock_conversation',
+                user_id: user_id,
+                page_id: page_id,
+                session_id: session_id,
+                assistant_id: assistant_id
+            },
+            success: function(response) {
+                // console.log('Chatbot: NOTICE: Conversation unlocked on page load');
+            },
+            error: function() {
+                // Silently fail - this is just a cleanup operation
+            }
+        });
+    }
+}
+
+// Reset all locks - emergency function
+function resetAllLocks() {
+    let user_id = kchat_settings.user_id;
+    let page_id = kchat_settings.page_id;
+    let session_id = kchat_settings.session_id;
+    let assistant_id = kchat_settings.assistant_id;
+    
+    if (user_id && page_id && session_id && assistant_id) {
+        $.ajax({
+            url: kchat_settings.ajax_url,
+            method: 'POST',
+            timeout: 10000, // 10 second timeout
+            data: {
+                action: 'chatbot_chatgpt_reset_all_locks',
+                user_id: user_id,
+                page_id: page_id,
+                session_id: session_id,
+                assistant_id: assistant_id
+            },
+            success: function(response) {
+                console.log('Chatbot: NOTICE: All locks reset - ' + response.data);
+                // Reload the page to ensure clean state
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1000);
+            },
+            error: function() {
+                console.log('Chatbot: ERROR: Failed to reset locks');
+            }
+        });
+    }
+}
+
+// Call unlock function on page load
+unlockConversationOnLoad();
+
+// Expose resetAllLocks globally for console access
+window.resetAllLocks = resetAllLocks;
 
     // Only call the function if the chatbot shortcode is present
     if (isChatbotShortcodePresent()) {
@@ -902,6 +970,13 @@ jQuery(document).ready(function ($) {
         // console.log('Chatbot: NOTICE: page_id: ' + page_id);
         // console.log('Chatbot: NOTICE: message: ' + message);
 
+        // Generate a unique client message ID for idempotency
+        let client_message_id = 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // Variable to track if this is a "still working" message
+        let isStillWorkingMessage = false;
+        let ajaxResponse = null; // Store response for use in complete handler
+
         $.ajax({
             url: kchat_settings.ajax_url,
             method: 'POST',
@@ -912,6 +987,7 @@ jQuery(document).ready(function ($) {
                 user_id: user_id, // pass the user ID here
                 page_id: page_id, // pass the page ID here
                 session_id: session_id, // pass the session ID here
+                client_message_id: client_message_id, // pass the client message ID for idempotency
             },
             headers: {  // Adding headers to prevent caching
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -924,7 +1000,25 @@ jQuery(document).ready(function ($) {
             },
             success: function (response) {
                 // console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
-                botResponse = response.data;
+                
+                // Store response for use in complete handler
+                ajaxResponse = response;
+                
+                // Handle queued responses
+                if (response.queued) {
+                    botResponse = response.message;
+                    // For queued messages, we don't want to disable the button
+                    // The queue will handle processing and the button will be re-enabled
+                    // when the actual response comes through
+                } else {
+                    botResponse = response.data;
+                }
+                
+                // Check if this is a "still working" message that should re-enable the button
+                if (typeof botResponse === 'string') {
+                    isStillWorkingMessage = botResponse.includes("I'm still working on your previous message") || 
+                                          botResponse.includes("still working on your previous message");
+                }
                 // Revision to how disclaimers are handled - Ver 1.5.0
                 if (kchat_settings.chatbot_chatgpt_disclaimer_setting === 'No') {
                     const prefixes = [
@@ -991,7 +1085,13 @@ jQuery(document).ready(function ($) {
                     };
                 }
                 scrollToLastBotResponse();
-                submitButton.prop('disabled', false);
+                
+                // Re-enable the button if this is not a queued response OR if it's a "still working" message
+                // For queued responses, the button should remain disabled until the actual response
+                // For "still working" messages, the button should be re-enabled immediately
+                if (ajaxResponse && (!ajaxResponse.queued || isStillWorkingMessage)) {
+                    submitButton.prop('disabled', false);
+                }
             },
             cache: false, // This ensures jQuery does not cache the result
         });

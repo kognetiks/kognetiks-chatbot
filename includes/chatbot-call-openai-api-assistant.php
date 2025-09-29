@@ -918,19 +918,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         return "Error: Duplicate request detected. Please try again.";
     }
     
-    // Check if there's already a lock for this conversation
-    if (get_transient($conv_lock)) {
-        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
-        global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
-        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[19] 
-            : $default_message;
-        return $locked_message;
-    }
+    // Lock check removed - main send function handles locking
     
-    // Set the conversation lock
-    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    // Lock setting removed - main send function handles locking
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
     
     // Log the start of the request
@@ -979,37 +969,13 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // back_trace( 'NOTICE', '$page_id ' . $page_id);
         set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
         
-        // Now that we have the thread_id, also set a per-thread lock
-        $thread_lock = 'chatgpt_run_lock_' . $thread_id;
-        if (get_transient($thread_lock)) {
-            delete_transient($conv_lock);
-            prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
-            global $chatbot_chatgpt_fixed_literal_messages;
-            $default_message = "I'm still working on your previous message—please send again in a moment.";
-            $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-                ? $chatbot_chatgpt_fixed_literal_messages[19] 
-                : $default_message;
-            return $locked_message;
-        }
-        set_transient($thread_lock, $message_uuid, $lock_timeout);
+        // Thread lock check removed - main send function handles locking
         
     } else {
 
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         
-        // Now that we have the thread_id, also set a per-thread lock
-        $thread_lock = 'chatgpt_run_lock_' . $thread_id;
-        if (get_transient($thread_lock)) {
-            delete_transient($conv_lock);
-            prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
-            global $chatbot_chatgpt_fixed_literal_messages;
-            $default_message = "I'm still working on your previous message—please send again in a moment.";
-            $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-                ? $chatbot_chatgpt_fixed_literal_messages[19] 
-                : $default_message;
-            return $locked_message;
-        }
-        set_transient($thread_lock, $message_uuid, $lock_timeout);
+        // Thread lock check removed - main send function handles locking
 
     }
 
@@ -1266,8 +1232,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     if ($run_status != "completed") {
       // back_trace( 'ERROR', 'Run failed after ' . $maxRetries . ' retries. Status: ' . $run_status);
         // Clear both locks before returning error
-        delete_transient($thread_lock);
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return "Error: Run failed after maximum retries. Status: " . $run_status;
     }
 
@@ -1345,8 +1310,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     }
 
     // Clear both locks before returning
-    delete_transient($thread_lock);
-    delete_transient($conv_lock);
+    // Lock clearing removed - main send function handles locking
     
     // Log the completion of the request
     prod_trace('NOTICE', 'Completed API call - Thread: ' . $thread_id . ', Message UUID: ' . $message_uuid);

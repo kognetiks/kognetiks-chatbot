@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the ChatGPT API
-function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_id = null, $page_id = null, $session_id = null) {
+function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
     global $chatbot_chatgpt_plugin_dir_path;
 
@@ -32,6 +32,35 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     global $learningMessages;
     global $errorResponses;
+
+    // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
+    $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
+
+    // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
+    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $lock_timeout = 60; // 60 seconds timeout
+
+    // Check for duplicate message UUID in conversation log
+    $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
+    if (get_transient($duplicate_key)) {
+        prod_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        return "Error: Duplicate request detected. Please try again.";
+    }
+
+    // Check if there's already a lock for this conversation
+    if (get_transient($conv_lock)) {
+        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
+        global $chatbot_chatgpt_fixed_literal_messages;
+        $default_message = "I'm still working on your previous message—please send again in a moment.";
+        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[19] 
+            : $default_message;
+        return $locked_message;
+    }
+
+    // Set the conversation lock
+    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
@@ -171,6 +200,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // Check for WP errors
     if (is_wp_error($response)) {
+        // Clear locks on error
+        delete_transient($conv_lock);
         return 'Error: ' . $response->get_error_message();
     }
 
@@ -180,6 +211,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // Check the HTTP response code
     if ($http_code !== 200) {
+        // Clear locks on error
+        delete_transient($conv_lock);
         return 'Error: API responded with HTTP code ' . $http_code . ': ' . $response_body;
     }
 
@@ -187,6 +220,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     $result = file_put_contents($audio_file, $response_body);
 
     if ($result === false) {
+        // Clear locks on error
+        delete_transient($conv_lock);
         return 'Error: Failed to write the audio file.';
     }
 
@@ -231,6 +266,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         // DIAG - Diagnostics - Ver 1.9.5
         // back_trace( 'NOTICE', '$audio_output: ' . $audio_output);
 
+        // Clear locks on success
+        delete_transient($conv_lock);
         return $audio_output;
 
     } else {
@@ -241,6 +278,8 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         } else {
             $localized_errorResponses = $errorResponses;
         }
+        // Clear locks on error
+        delete_transient($conv_lock);
         // Return a random error message
         return $localized_errorResponses[array_rand($localized_errorResponses)];
     }

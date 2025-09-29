@@ -102,6 +102,14 @@ function chatbot_chatgpt_erase_conversation_handler() {
 
     delete_chatbot_chatgpt_threads($user_id, $page_id);
     delete_any_file_transients($session_id);
+    
+    // Clear the message queue for this conversation
+    $queue_key = 'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    delete_transient($queue_key);
+    
+    // Clear any conversation locks
+    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    delete_transient($conv_lock);
 
     // DIAG - Diagnostics - Ver 2.0.4
     // back_trace( 'NOTICE', '$chatbot_chatgpt_force_page_reload: ' . $chatbot_chatgpt_force_page_reload);

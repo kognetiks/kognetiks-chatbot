@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the ChatGPT API for Speech-to-Text (STT)
-function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
+function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'chatbot_chatgpt_call_stt_api()' );
@@ -32,6 +32,35 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     global $learningMessages;
     global $errorResponses;
 
+    // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
+    $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
+
+    // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
+    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $lock_timeout = 60; // 60 seconds timeout
+
+    // Check for duplicate message UUID in conversation log
+    $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
+    if (get_transient($duplicate_key)) {
+        prod_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        return "Error: Duplicate request detected. Please try again.";
+    }
+
+    // Check if there's already a lock for this conversation
+    if (get_transient($conv_lock)) {
+        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
+        global $chatbot_chatgpt_fixed_literal_messages;
+        $default_message = "I'm still working on your previous message—please send again in a moment.";
+        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[19] 
+            : $default_message;
+        return $locked_message;
+    }
+
+    // Set the conversation lock
+    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+
     // Check for the API key
     if (empty($api_key) || $api_key == '[private]') {
         $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
@@ -42,6 +71,8 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
             $localized_errorResponses = (get_locale() !== "en_US") 
                 ? get_localized_errorResponses(get_locale(), $errorResponses) 
                 : $errorResponses;
+            // Clear locks on error
+            delete_transient($conv_lock);
             return $localized_errorResponses[array_rand($localized_errorResponses)];
         }
     }
@@ -116,6 +147,8 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
     // Handle errors
     if (is_wp_error($response)) {
         prod_trace( 'ERROR', 'WP error: ' . $response->get_error_message() );
+        // Clear locks on error
+        delete_transient($conv_lock);
         return 'Error: ' . $response->get_error_message();
     }
 
@@ -131,6 +164,8 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
         http_response_code(400);
         // DIAG - Diagnostics
         prod_trace( 'ERROR', 'API error: ' . $response_data['error']['message'] );
+        // Clear locks on error
+        delete_transient($conv_lock);
         return 'Error: ' . esc_html($response_data['error']['message']);
     }
 
@@ -139,11 +174,16 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null) {
 
     // Return early if only transcription is needed
     if ($stt_option === 'transcription-only') {
+        // Clear locks on success
+        delete_transient($conv_lock);
         return $transcription;
     }
 
     // Post-process the transcription with ChatGPT
-    return chatbot_chatgpt_post_process_transcription($api_key, $message, $transcription);
+    $result = chatbot_chatgpt_post_process_transcription($api_key, $message, $transcription);
+    // Clear locks on success
+    delete_transient($conv_lock);
+    return $result;
 
 }
 
