@@ -925,7 +925,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
     
     // Log the start of the request
-    prod_trace('NOTICE', 'Starting API call - Assistant: ' . $assistant_id . ', User: ' . $user_id . ', Page: ' . $page_id . ', Session: ' . $session_id . ', Message UUID: ' . $message_uuid);
+    // DIAG - Diagnostics - Ver 2.3.5
+    // prod_trace('NOTICE', 'Starting API call - Assistant: ' . $assistant_id . ', User: ' . $user_id . ', Page: ' . $page_id . ', Session: ' . $session_id . ', Message UUID: ' . $message_uuid);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
@@ -1112,7 +1113,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
             // Clear locks and return friendly message
             delete_transient($thread_lock);
             delete_transient($conv_lock);
-            prod_trace('NOTICE', 'Active run detected, returning friendly message');
+            // DIAG - Diagnostics - Ver 2.3.5
+            // prod_trace('NOTICE', 'Active run detected, returning friendly message');
             global $chatbot_chatgpt_fixed_literal_messages;
             $default_message = "I'm still working on your previous message—please send again in a moment.";
             $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
@@ -1136,7 +1138,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         if (isset($assistants_response["id"])) {
             $runId = $assistants_response["id"];
             // Log the run creation
-            prod_trace('NOTICE', 'Run created - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message UUID: ' . $message_uuid);
+            // DIAG - Diagnostics - Ver 2.3.5
+            // prod_trace('NOTICE', 'Run created - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message UUID: ' . $message_uuid);
         } else {
           // back_trace( 'ERROR', 'runId key not found in response');
             // Clear both locks before returning error
@@ -1202,7 +1205,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
                 $run_completed = true;
                 $run_status = "completed";
                 // Log run completion
-                prod_trace('NOTICE', 'Run completed - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message UUID: ' . $message_uuid);
+                // DIAG - Diagnostics - Ver 2.3.5
+                // prod_trace('NOTICE', 'Run completed - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message UUID: ' . $message_uuid);
                 break;
             }
             // Check if the run has failed
@@ -1257,7 +1261,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Log message retrieval
     if (isset($assistants_response["data"][0]["id"])) {
         $message_id = $assistants_response["data"][0]["id"];
-        prod_trace('NOTICE', 'Message retrieved - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message ID: ' . $message_id . ', Message UUID: ' . $message_uuid);
+        // DIAG - Diagnostics - Ver 2.3.5
+        // prod_trace('NOTICE', 'Message retrieved - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message ID: ' . $message_id . ', Message UUID: ' . $message_uuid);
     }
 
     // Interaction Tracking - Ver 1.6.3
@@ -1314,7 +1319,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Lock clearing removed - main send function handles locking
     
     // Log the completion of the request
-    prod_trace('NOTICE', 'Completed API call - Thread: ' . $thread_id . ', Message UUID: ' . $message_uuid);
+    // prod_trace('NOTICE', 'Completed API call - Thread: ' . $thread_id . ', Message UUID: ' . $message_uuid);
 
     // Return the response text, checking for the fallback content[1][text] if available
     if (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {
