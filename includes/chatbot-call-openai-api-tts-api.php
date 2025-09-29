@@ -47,19 +47,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         return "Error: Duplicate request detected. Please try again.";
     }
 
-    // Check if there's already a lock for this conversation
-    if (get_transient($conv_lock)) {
-        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
-        global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
-        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[19] 
-            : $default_message;
-        return $locked_message;
-    }
-
-    // Set the conversation lock
-    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -201,7 +189,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // Check for WP errors
     if (is_wp_error($response)) {
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message();
     }
 
@@ -212,7 +200,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // Check the HTTP response code
     if ($http_code !== 200) {
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return 'Error: API responded with HTTP code ' . $http_code . ': ' . $response_body;
     }
 
@@ -221,7 +209,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     if ($result === false) {
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return 'Error: Failed to write the audio file.';
     }
 
@@ -267,7 +255,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         // back_trace( 'NOTICE', '$audio_output: ' . $audio_output);
 
         // Clear locks on success
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return $audio_output;
 
     } else {
@@ -279,7 +267,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
             $localized_errorResponses = $errorResponses;
         }
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         // Return a random error message
         return $localized_errorResponses[array_rand($localized_errorResponses)];
     }

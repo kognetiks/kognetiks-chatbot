@@ -43,19 +43,7 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
         return "Error: Duplicate request detected. Please try again.";
     }
 
-    // Check if there's already a lock for this conversation
-    if (get_transient($conv_lock)) {
-        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
-        global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
-        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[19] 
-            : $default_message;
-        return $locked_message;
-    }
-
-    // Set the conversation lock
-    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -217,8 +205,7 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     if (is_wp_error($response)) {
         // DIAG - Diagnostics - Ver 2.0.2.1
         prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
-        // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your OpenAI account for additional information.';
     }
 
@@ -274,8 +261,7 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
         // Handle the response from the chat engine
         // Context History - Ver 1.6.1
         addEntry('chatbot_chatgpt_context_history', $response_body['choices'][0]['message']['content']);
-        // Clear locks on success
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return $response_body['choices'][0]['message']['content'];
     } else {
         // FIXME - Decide what to return here - it's an error
@@ -284,8 +270,7 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
         } else {
             $localized_errorResponses = $errorResponses;
         }
-        // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         // Return a random error message
         return $localized_errorResponses[array_rand($localized_errorResponses)];
     }

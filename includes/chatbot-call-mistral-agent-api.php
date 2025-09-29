@@ -149,19 +149,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         return "Error: Duplicate request detected. Please try again.";
     }
 
-    // Check if there's already a lock for this conversation
-    if (get_transient($conv_lock)) {
-        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
-        global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
-        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[19] 
-            : $default_message;
-        return $locked_message;
-    }
-
-    // Set the conversation lock
-    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.2.2
@@ -367,7 +355,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         // DIAG - Diagnostics - Ver 2.3.1
         // back_trace( 'ERROR', 'Mistral API Error: ' . $response->get_error_message());
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message();
     }
 
@@ -380,7 +368,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         // DIAG - Diagnostics - Ver 2.3.1
         // back_trace( 'ERROR', 'Mistral API Error: ' . $data['error']['message']);
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return 'Error: ' . $data['error']['message'];
     }
 
@@ -453,7 +441,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         // DIAG - Diagnostics - Ver 2.3.1
         prod_trace( 'ERROR', 'Mistral response found but content is empty or malformed. Response structure: ' . print_r($data, true));
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return 'Error: Assistant responded with no text.';
     }
     

@@ -47,19 +47,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
         return "Error: Duplicate request detected. Please try again.";
     }
 
-    // Check if there's already a lock for this conversation
-    if (get_transient($conv_lock)) {
-        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
-        global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
-        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[19] 
-            : $default_message;
-        return $locked_message;
-    }
-
-    // Set the conversation lock
-    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -164,7 +152,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
 
     // Set success and return $message
     // Clear locks on success
-    delete_transient($conv_lock);
+    // Lock clearing removed - main send function handles locking
     return $message;
     
 }

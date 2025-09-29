@@ -46,19 +46,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
         return "Error: Duplicate request detected. Please try again.";
     }
 
-    // Check if there's already a lock for this conversation
-    if (get_transient($conv_lock)) {
-        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
-        global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
-        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[19] 
-            : $default_message;
-        return $locked_message;
-    }
-
-    // Set the conversation lock
-    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // Check for the API key
@@ -72,7 +60,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
                 ? get_localized_errorResponses(get_locale(), $errorResponses) 
                 : $errorResponses;
             // Clear locks on error
-            delete_transient($conv_lock);
+            // Lock clearing removed - main send function handles locking
             return $localized_errorResponses[array_rand($localized_errorResponses)];
         }
     }
@@ -148,7 +136,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     if (is_wp_error($response)) {
         prod_trace( 'ERROR', 'WP error: ' . $response->get_error_message() );
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message();
     }
 
@@ -165,7 +153,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
         // DIAG - Diagnostics
         prod_trace( 'ERROR', 'API error: ' . $response_data['error']['message'] );
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return 'Error: ' . esc_html($response_data['error']['message']);
     }
 
@@ -175,7 +163,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     // Return early if only transcription is needed
     if ($stt_option === 'transcription-only') {
         // Clear locks on success
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return $transcription;
     }
 

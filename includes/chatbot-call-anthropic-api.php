@@ -43,19 +43,7 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
         return "Error: Duplicate request detected. Please try again.";
     }
 
-    // Check if there's already a lock for this conversation
-    if (get_transient($conv_lock)) {
-        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
-        global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
-        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[19] 
-            : $default_message;
-        return $locked_message;
-    }
-
-    // Set the conversation lock
-    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -257,7 +245,7 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
         // DIAG - Diagnostics
         prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
 
     }
@@ -275,7 +263,7 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
         // DIAG - Diagnostics
         prod_trace( 'ERROR', 'Error: Type: Type: ' . $error_type . ' Message: ' . $error_message);
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';
 
     }
@@ -327,7 +315,7 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
         // Context History - Ver 1.6.1
         addEntry('chatbot_chatgpt_context_history', $response_body['content'][0]['text']);
         // Clear locks on success
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return $response_body['content'][0]['text'];
     } else {
         // FIXME - Decide what to return here - it's an error
@@ -337,7 +325,7 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
             $localized_errorResponses = $errorResponses;
         }
         // Clear locks on error
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         // Return a random error message
         return $localized_errorResponses[array_rand($localized_errorResponses)];
     }

@@ -1687,6 +1687,8 @@ function chatbot_chatgpt_send_message() {
     $additional_instructions = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
 
     // Decide whether to use Flow, Assistant or Original ChatGPT
+    prod_trace('NOTICE', 'Decision point - model: ' . $model . ', use_assistant_id: ' . $use_assistant_id);
+    
     if ($model == 'flow'){
         
         // DIAG - Diagnostics - Ver 2.1.1.1
@@ -1728,6 +1730,7 @@ function chatbot_chatgpt_send_message() {
 
     } elseif ($use_assistant_id == 'Yes') {
 
+        prod_trace('NOTICE', 'Using Assistant ID path - use_assistant_id: ' . $use_assistant_id);
         // DIAG - Diagnostics - Ver 2.1.1.1
         // back_trace( 'NOTICE', 'Using Assistant ID: ' . $use_assistant_id);
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
@@ -1827,6 +1830,7 @@ function chatbot_chatgpt_send_message() {
 
     } else {
 
+        prod_trace('NOTICE', 'Using ChatGPT path - use_assistant_id: ' . $use_assistant_id);
         // DIAG - Diagnostics - Ver 2.1.1.1
         // back_trace( 'NOTICE', 'Using ChatGPT');
         // back_trace( 'NOTICE', '$user_id ' . $user_id);
@@ -1878,9 +1882,9 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        // back_trace( 'NOTICE', 'Calling ChatGPT Omni API');
+                        prod_trace('NOTICE', 'Calling ChatGPT Omni API');
                         // Send message to ChatGPT API - Ver 1.6.7
-                        $response = chatbot_chatgpt_call_omni($api_key, $message);
+                        $response = chatbot_chatgpt_call_omni($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
                         break;
 
@@ -1889,9 +1893,9 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        // back_trace( 'NOTICE', 'Calling ChatGPT API');
+                        prod_trace('NOTICE', 'Calling ChatGPT API');
                         // Send message to ChatGPT API - Ver 1.6.7
-                        $response = chatbot_chatgpt_call_api($api_key, $message);
+                        $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
                         break;
 
@@ -1900,9 +1904,9 @@ function chatbot_chatgpt_send_message() {
                         // Reload the model - BELT & SUSPENDERS
                         $kchat_settings['model'] = $model;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        // back_trace( 'NOTICE', 'Calling Dall E Image API');
+                        prod_trace('NOTICE', 'Calling Dall E Image API');
                         // Send message to Image API - Ver 1.9.4
-                        $response = chatbot_chatgpt_call_image_api($api_key, $message);
+                        $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
                         break;
 
@@ -1912,9 +1916,9 @@ function chatbot_chatgpt_send_message() {
                         $kchat_settings['model'] = $model;
                         $kchat_settings['voice'] = $voice;
                         // DIAG - Diagnostics - Ver 2.1.8
-                        // back_trace( 'NOTICE', 'Calling TTS API');
+                        prod_trace('NOTICE', 'Calling TTS API');
                         // Send message to TTS API - Text-to-speech - Ver 1.9.5
-                        $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id);
+                        $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
 
                         break;
 

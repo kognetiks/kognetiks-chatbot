@@ -758,19 +758,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         return "Error: Duplicate request detected. Please try again.";
     }
 
-    // Check if there's already a lock for this conversation
-    if (get_transient($conv_lock)) {
-        prod_trace('NOTICE', 'Conversation is locked, skipping concurrent call');
-        global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
-        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
-            ? $chatbot_chatgpt_fixed_literal_messages[19] 
-            : $default_message;
-        return $locked_message;
-    }
-
-    // Set the conversation lock
-    set_transient($conv_lock, $message_uuid, $lock_timeout);
+    // Lock check removed - main send function handles locking
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // See if there is a $thread_id
@@ -818,7 +806,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // Now that we have the thread_id, also set a per-thread lock
     $thread_lock = 'chatgpt_run_lock_' . $thread_id;
     if (get_transient($thread_lock)) {
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
         global $chatbot_chatgpt_fixed_literal_messages;
         $default_message = "I'm still working on your previous message—please send again in a moment.";
@@ -945,7 +933,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         // back_trace( 'ERROR', 'Error - FAILED AFTER MULTIPLE RETRIES - GPT Assistant - Step 5: ' . $run_status);
         // Clear locks on error
         delete_transient($thread_lock);
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return "Error: Step 5 - " . $run_status;
     }
 
@@ -1029,7 +1017,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         prod_trace('ERROR', 'Error: "data" key is missing or not an array.');
         // Clear locks on error
         delete_transient($thread_lock);
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return '';
     }
 
@@ -1051,7 +1039,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         prod_trace('ERROR', 'Error: No assistant messages found.');
         // Clear locks on error
         delete_transient($thread_lock);
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return '';
     }
 
@@ -1070,7 +1058,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         prod_trace('ERROR', 'Error: No text value found in the latest assistant message.');
         // Clear locks on error
         delete_transient($thread_lock);
-        delete_transient($conv_lock);
+        // Lock clearing removed - main send function handles locking
         return '';
     }
 
