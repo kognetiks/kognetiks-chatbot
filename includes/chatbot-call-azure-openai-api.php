@@ -40,7 +40,7 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 

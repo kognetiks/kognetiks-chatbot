@@ -146,7 +146,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -172,7 +172,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         ))
     ) {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace('NOTICE', 'Assistant ID is missing or default, creating new websearch agent...');
+        // back_trace( 'NOTICE', 'Assistant ID is missing or default, creating new websearch agent...');
 
         $assistant_id = create_mistral_websearch_agent($api_key);
 
@@ -181,7 +181,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         }
     } else {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace('NOTICE', 'Using provided assistant_id: ' . $assistant_id);
+        // back_trace( 'NOTICE', 'Using provided assistant_id: ' . $assistant_id);
     }
 
     // Mistral.com API Documentation

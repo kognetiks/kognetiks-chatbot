@@ -42,7 +42,7 @@ function chatbot_chatgpt_call_markov_chain_api($message, $user_id = null, $page_
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 

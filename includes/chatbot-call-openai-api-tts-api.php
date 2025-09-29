@@ -44,7 +44,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace('NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
