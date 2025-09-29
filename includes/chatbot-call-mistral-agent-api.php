@@ -120,7 +120,7 @@ function create_mistral_websearch_agent($api_key) {
 }
 
 // Call the Mistral API
-function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id) {
+function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null) {
 
     global $session_id;
     global $user_id;
@@ -134,6 +134,24 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     global $voice;
     
     global $errorResponses;
+
+    // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
+    $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
+
+    // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
+    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $lock_timeout = 60; // 60 seconds timeout
+
+    // Check for duplicate message UUID in conversation log
+    $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
+    if (get_transient($duplicate_key)) {
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        return "Error: Duplicate request detected. Please try again.";
+    }
+
+    // Lock check removed - main send function handles locking
+    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.2.2
     // back_trace( 'NOTICE', 'chatbot_call_mistral_api - start');
@@ -154,7 +172,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         ))
     ) {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace('NOTICE', 'Assistant ID is missing or default, creating new websearch agent...');
+        // back_trace( 'NOTICE', 'Assistant ID is missing or default, creating new websearch agent...');
 
         $assistant_id = create_mistral_websearch_agent($api_key);
 
@@ -163,7 +181,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         }
     } else {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace('NOTICE', 'Using provided assistant_id: ' . $assistant_id);
+        // back_trace( 'NOTICE', 'Using provided assistant_id: ' . $assistant_id);
     }
 
     // Mistral.com API Documentation
@@ -337,6 +355,8 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     if (is_wp_error($response)) {
         // DIAG - Diagnostics - Ver 2.3.1
         // back_trace( 'ERROR', 'Mistral API Error: ' . $response->get_error_message());
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message();
     }
 
@@ -348,6 +368,8 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     if (isset($data['error'])) {
         // DIAG - Diagnostics - Ver 2.3.1
         // back_trace( 'ERROR', 'Mistral API Error: ' . $data['error']['message']);
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
         return 'Error: ' . $data['error']['message'];
     }
 
@@ -419,8 +441,13 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     if (empty($response_text)) {
         // DIAG - Diagnostics - Ver 2.3.1
         prod_trace( 'ERROR', 'Mistral response found but content is empty or malformed. Response structure: ' . print_r($data, true));
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
         return 'Error: Assistant responded with no text.';
     }
+    
+    // Clear locks on success
+    delete_transient($conv_lock);
     
     return $response_text;
 

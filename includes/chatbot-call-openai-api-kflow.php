@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the ChatGPT API
-function chatbot_chatgpt_call_flow_api($api_key, $message) {
+function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
     global $wpdb;
 
@@ -32,6 +32,24 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     global $errorResponses;
 
     global $kflow_data;
+
+    // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
+    $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
+
+    // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
+    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $lock_timeout = 60; // 60 seconds timeout
+
+    // Check for duplicate message UUID in conversation log
+    $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
+    if (get_transient($duplicate_key)) {
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        return "Error: Duplicate request detected. Please try again.";
+    }
+
+    // Lock check removed - main send function handles locking
+    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_calll_flow_api()');
@@ -134,6 +152,8 @@ function chatbot_chatgpt_call_flow_api($api_key, $message) {
     }
 
     // Set success and return $message
+    // Clear locks on success
+    // Lock clearing removed - main send function handles locking
     return $message;
     
 }

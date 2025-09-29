@@ -8,6 +8,74 @@ jQuery(document).ready(function ($) {
     } else {
         // console.log('Chatbot: NOTICE: kchat_settings:', kchat_settings);
     }
+    
+// Unlock conversation on page load/refresh to prevent stuck locks
+function unlockConversationOnLoad() {
+    let user_id = kchat_settings.user_id;
+    let page_id = kchat_settings.page_id;
+    let session_id = kchat_settings.session_id;
+    let assistant_id = kchat_settings.assistant_id;
+    
+    if (user_id && page_id && session_id && assistant_id) {
+        $.ajax({
+            url: kchat_settings.ajax_url,
+            method: 'POST',
+            timeout: 5000, // 5 second timeout
+            data: {
+                action: 'chatbot_chatgpt_unlock_conversation',
+                user_id: user_id,
+                page_id: page_id,
+                session_id: session_id,
+                assistant_id: assistant_id
+            },
+            success: function(response) {
+                // console.log('Chatbot: NOTICE: Conversation unlocked on page load');
+            },
+            error: function() {
+                // Silently fail - this is just a cleanup operation
+            }
+        });
+    }
+}
+
+// Reset all locks - emergency function
+function resetAllLocks() {
+    let user_id = kchat_settings.user_id;
+    let page_id = kchat_settings.page_id;
+    let session_id = kchat_settings.session_id;
+    let assistant_id = kchat_settings.assistant_id;
+    
+    if (user_id && page_id && session_id && assistant_id) {
+        $.ajax({
+            url: kchat_settings.ajax_url,
+            method: 'POST',
+            timeout: 10000, // 10 second timeout
+            data: {
+                action: 'chatbot_chatgpt_reset_all_locks',
+                user_id: user_id,
+                page_id: page_id,
+                session_id: session_id,
+                assistant_id: assistant_id
+            },
+            success: function(response) {
+                console.log('Chatbot: NOTICE: All locks reset - ' + response.data);
+                // Reload the page to ensure clean state
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1000);
+            },
+            error: function() {
+                console.log('Chatbot: ERROR: Failed to reset locks');
+            }
+        });
+    }
+}
+
+// Call unlock function on page load
+unlockConversationOnLoad();
+
+// Expose resetAllLocks globally for console access
+window.resetAllLocks = resetAllLocks;
 
     // Only call the function if the chatbot shortcode is present
     if (isChatbotShortcodePresent()) {
@@ -696,6 +764,12 @@ jQuery(document).ready(function ($) {
 
     // markdownToHtml - Ver 2.1.5
     function markdownToHtml(markdown) {
+        // Ensure markdown is a string
+        if (typeof markdown !== 'string') {
+            console.warn('markdownToHtml: Input is not a string:', typeof markdown, markdown);
+            return String(markdown || '');
+        }
+        
         // Step 1: Process links before any other inline elements
         markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
     
@@ -707,8 +781,28 @@ jQuery(document).ready(function ($) {
             return `{{HTML_TAG_${predefinedHtml.length - 1}}}`;
         });
     
-        // Step 3: Escape HTML outside of code blocks
-        markdown = markdown.split(/(```[\s\S]+?```)/g).map((chunk, index) => {
+        // Step 2.5: Extract LaTeX mathematical expressions to preserve them - Ver 2.1.5 MathJax Fix
+        let latexExpressions = [];
+        // Extract display math: \[...\] and $$...$$
+        markdown = markdown.replace(/\\\[[\s\S]*?\\\]|\$\$[\s\S]*?\$\$/g, (match) => {
+            latexExpressions.push(match);
+            return `{{LATEX_DISPLAY_${latexExpressions.length - 1}}}`;
+        });
+        // Extract inline math: \(...\) and $...$ (but not $$...$$)
+        markdown = markdown.replace(/\\\([\s\S]*?\\\)|\$(?!\$)[\s\S]*?\$(?!\$)/g, (match) => {
+            latexExpressions.push(match);
+            return `{{LATEX_INLINE_${latexExpressions.length - 1}}}`;
+        });
+        // Extract [latext]...[/latext] tags and convert to display math - Ver 2.1.5 MathJax Fix
+        markdown = markdown.replace(/\[latext\]([\s\S]*?)\[\/latext\]/gi, (match, content) => {
+            // Convert [latext] tags to display math format
+            const displayMath = `\\[${content.trim()}\\]`;
+            latexExpressions.push(displayMath);
+            return `{{LATEX_DISPLAY_${latexExpressions.length - 1}}}`;
+        });
+    
+        // Step 3: Escape HTML outside of code blocks and LaTeX expressions
+        markdown = markdown.split(/(```[\s\S]+?```|{{LATEX_DISPLAY_\d+}}|{{LATEX_INLINE_\d+}})/g).map((chunk, index) => {
             return index % 2 === 0 ? chunk.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : chunk;
         }).join('');
     
@@ -747,7 +841,15 @@ jQuery(document).ready(function ($) {
             return line.match(/^<h|<p|<ul|<pre|<blockquote/) ? line : line.trim() ? `${line}</p>` : '';
         }).filter(line => line.trim() !== '').join('');
    
-        // Step 12: Reinsert predefined HTML tags
+        // Step 12: Reinsert LaTeX expressions - Ver 2.1.5 MathJax Fix
+        markdown = markdown.replace(/{{LATEX_DISPLAY_(\d+)}}/g, (match, index) => {
+            return latexExpressions[parseInt(index)];
+        });
+        markdown = markdown.replace(/{{LATEX_INLINE_(\d+)}}/g, (match, index) => {
+            return latexExpressions[parseInt(index)];
+        });
+
+        // Step 13: Reinsert predefined HTML tags
         markdown = markdown.replace(/{{HTML_TAG_(\d+)}}/g, (match, index) => {
             return predefinedHtml[parseInt(index)];
         });
@@ -874,6 +976,13 @@ jQuery(document).ready(function ($) {
         // console.log('Chatbot: NOTICE: page_id: ' + page_id);
         // console.log('Chatbot: NOTICE: message: ' + message);
 
+        // Generate a unique client message ID for idempotency
+        let client_message_id = 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // Variable to track if this is a "still working" message
+        let isStillWorkingMessage = false;
+        let ajaxResponse = null; // Store response for use in complete handler
+
         $.ajax({
             url: kchat_settings.ajax_url,
             method: 'POST',
@@ -884,6 +993,7 @@ jQuery(document).ready(function ($) {
                 user_id: user_id, // pass the user ID here
                 page_id: page_id, // pass the page ID here
                 session_id: session_id, // pass the session ID here
+                client_message_id: client_message_id, // pass the client message ID for idempotency
             },
             headers: {  // Adding headers to prevent caching
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -896,7 +1006,25 @@ jQuery(document).ready(function ($) {
             },
             success: function (response) {
                 // console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
-                botResponse = response.data;
+                
+                // Store response for use in complete handler
+                ajaxResponse = response;
+                
+                // Handle queued responses
+                if (response.queued) {
+                    botResponse = response.message;
+                    // For queued messages, we don't want to disable the button
+                    // The queue will handle processing and the button will be re-enabled
+                    // when the actual response comes through
+                } else {
+                    botResponse = response.data;
+                }
+                
+                // Check if this is a "still working" message that should re-enable the button
+                if (typeof botResponse === 'string') {
+                    isStillWorkingMessage = botResponse.includes("I'm still working on your previous message") || 
+                                          botResponse.includes("still working on your previous message");
+                }
                 // Revision to how disclaimers are handled - Ver 1.5.0
                 if (kchat_settings.chatbot_chatgpt_disclaimer_setting === 'No') {
                     const prefixes = [
@@ -932,7 +1060,7 @@ jQuery(document).ready(function ($) {
                     let messageInfo = ` (${messageCount} / ${messageLimit})`;
                     botResponse += messageInfo;
                 }
-                botResponse = markdownToHtml(botResponse);
+                botResponse = markdownToHtml(botResponse || '');
             },
             error: function (jqXHR, status, error) {
                 if(status === "timeout") {
@@ -963,7 +1091,13 @@ jQuery(document).ready(function ($) {
                     };
                 }
                 scrollToLastBotResponse();
-                submitButton.prop('disabled', false);
+                
+                // Re-enable the button if this is not a queued response OR if it's a "still working" message
+                // For queued responses, the button should remain disabled until the actual response
+                // For "still working" messages, the button should be re-enabled immediately
+                if (ajaxResponse && (!ajaxResponse.queued || isStillWorkingMessage)) {
+                    submitButton.prop('disabled', false);
+                }
             },
             cache: false, // This ensures jQuery does not cache the result
         });
@@ -1132,7 +1266,7 @@ jQuery(document).ready(function ($) {
                 if (typeof response === 'string') {
                     response = JSON.parse(response);
                 }
-                response.data = markdownToHtml(response.data);
+                response.data = markdownToHtml(response.data || '');
                 // appendMessage('Text-to-Speech: ' + response.data, 'bot');
                 appendMessage(response.data, 'bot');
             },

@@ -83,7 +83,7 @@ function create_an_azure_assistant($api_key) {
 // -------------------------------------------------------------------------
 // Step 3: Add a message
 // -------------------------------------------------------------------------
-function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id = null) {
+function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id = null, $message_uuid = null) {
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', 'Step 3 - add_an_azure_message()');
@@ -211,7 +211,7 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 // -------------------------------------------------------------------------
 // Step 4: Run the Assistant
 // -------------------------------------------------------------------------
-function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key) {
+function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $message_uuid = null) {
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', 'Step 4 - run_an_azure_assistant()');
@@ -563,7 +563,7 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
 // -------------------------------------------------------------------------
 // Step 8: Get the Message
 // -------------------------------------------------------------------------
-function get_the_azure_message($thread_id, $api_key) {
+function get_the_azure_message($thread_id, $api_key, $run_id = null) {
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', 'Step 8 - get_the_azure_message()');
@@ -726,7 +726,7 @@ function get_the_azure_message($thread_id, $api_key) {
 }
 
 // CustomGPT - Assistants - Ver 1.7.2
-function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id) {
+function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null) {
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_azure_custom_gpt_call_api()' );
@@ -743,6 +743,24 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     global $learningMessages;
     global $errorResponses;
     global $stopWords;
+
+    // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
+    $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
+
+    // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
+    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $lock_timeout = 60; // 60 seconds timeout
+
+    // Check for duplicate message UUID in conversation log
+    $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
+    if (get_transient($duplicate_key)) {
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        return "Error: Duplicate request detected. Please try again.";
+    }
+
+    // Lock check removed - main send function handles locking
+    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // See if there is a $thread_id
     if (empty($thread_id)) {
@@ -785,6 +803,20 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
 
     }
+
+    // Now that we have the thread_id, also set a per-thread lock
+    $thread_lock = 'chatgpt_run_lock_' . $thread_id;
+    if (get_transient($thread_lock)) {
+        // Lock clearing removed - main send function handles locking
+        prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
+        global $chatbot_chatgpt_fixed_literal_messages;
+        $default_message = "I'm still working on your previous message—please send again in a moment.";
+        $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[19] 
+            : $default_message;
+        return $locked_message;
+    }
+    set_transient($thread_lock, $message_uuid, $lock_timeout);
 
     // Conversation Context - Ver 2.2.3
     $context = "";
@@ -842,12 +874,12 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     }
     if (empty($file_id)) {
         // back_trace( 'NOTICE', 'No file to retrieve');
-        $assistants_response = add_an_azure_message($thread_id, $prompt, $context, $api_key, '');
+        $assistants_response = add_an_azure_message($thread_id, $prompt, $context, $api_key, '', $message_uuid);
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
         // back_trace( 'NOTICE', 'File to retrieve');
         // back_trace( 'NOTICE', '$file_id ' . print_r($file_id, true));
-        $assistants_response = add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id);
+        $assistants_response = add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id, $message_uuid);
         // DIAG - Print the response
         // back_trace( 'NOTICE', $assistants_response);
     }
@@ -862,7 +894,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
         // Step 4: Run the Assistant
         // back_trace( 'NOTICE', 'Step 4 - Run the Assistant');
-        $assistants_response = run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key);
+        $assistants_response = run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $message_uuid);
 
         // Check if the response is not an array or is a string indicating an error
         if (!is_array($assistants_response) || is_string($assistants_response)) {
@@ -900,6 +932,9 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // Failed after multiple retries
     if ($run_status == "failed" || $run_status == "incomplete") {
         // back_trace( 'ERROR', 'Error - FAILED AFTER MULTIPLE RETRIES - GPT Assistant - Step 5: ' . $run_status);
+        // Clear locks on error
+        delete_transient($thread_lock);
+        // Lock clearing removed - main send function handles locking
         return "Error: Step 5 - " . $run_status;
     }
 
@@ -943,7 +978,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     // Step 8: Get the Message
     // back_trace( 'NOTICE', 'Step 8: Get the Message');
-    $assistants_response = get_the_azure_message($thread_id, $api_key);
+    $assistants_response = get_the_azure_message($thread_id, $api_key, $runId);
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
@@ -961,6 +996,10 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // Interaction Tracking - Ver 1.6.3
     update_interaction_tracking();
 
+    // Clear locks on success
+    delete_transient($thread_lock);
+    delete_transient($conv_lock);
+
     // Remove citations from the response
     if (isset($assistants_response["data"][0]["content"][0]["text"]["value"])) {
         $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
@@ -977,6 +1016,9 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // Verify that "data" exists and is an array.
     if (!isset($assistants_response["data"]) || !is_array($assistants_response["data"])) {
         prod_trace('ERROR', 'Error: "data" key is missing or not an array.');
+        // Clear locks on error
+        delete_transient($thread_lock);
+        // Lock clearing removed - main send function handles locking
         return '';
     }
 
@@ -996,6 +1038,9 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     if ($latest_index === -1) {
         prod_trace('ERROR', 'Error: No assistant messages found.');
+        // Clear locks on error
+        delete_transient($thread_lock);
+        // Lock clearing removed - main send function handles locking
         return '';
     }
 
@@ -1012,6 +1057,9 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         return $latest_response;
     } else {
         prod_trace('ERROR', 'Error: No text value found in the latest assistant message.');
+        // Clear locks on error
+        delete_transient($thread_lock);
+        // Lock clearing removed - main send function handles locking
         return '';
     }
 

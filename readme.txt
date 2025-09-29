@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.8
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -232,6 +232,13 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.3.4 - Released 09-29-2025 =
+
+* **Conversation Locking**: Implemented conversation locking mechanism to prevent multiple simultaneous requests and improve user experience.
+* **Input Processing**: Enhanced input processing to handle impatient user interactions more gracefully.
+* **Dashboard Widget**: Fixed dashboard widget errors and improved LaTeX rendering functionality.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.3.
 
 = 2.3.3 - Released 2025-08-14 =
 

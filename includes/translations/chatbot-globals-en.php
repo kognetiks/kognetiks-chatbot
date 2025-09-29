@@ -163,4 +163,6 @@ $chatbot_chatgpt_fixed_literal_messages = [
     "Conversation cleared. Please wait while the page reloads.",                         // [16]
     "Conversation cleared.",                                                             // [17]
     "Conversation not cleared.",                                                         // [18]
+    "I'm still working on your previous message—please send again in a moment.",         // [19]
+    "Message queued. Processing...",                                                     // [20]
 ];

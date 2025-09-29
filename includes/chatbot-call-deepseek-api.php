@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Call the DeepSeek API
-function chatbot_call_deepseek_api($api_key, $message) {
+function chatbot_call_deepseek_api($api_key, $message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
     global $session_id;
     global $user_id;
@@ -28,6 +28,24 @@ function chatbot_call_deepseek_api($api_key, $message) {
     global $voice;
     
     global $errorResponses;
+
+    // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
+    $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
+
+    // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
+    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $lock_timeout = 60; // 60 seconds timeout
+
+    // Check for duplicate message UUID in conversation log
+    $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
+    if (get_transient($duplicate_key)) {
+        // DIAG - Diagnostics - Ver 2.3.4
+        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        return "Error: Duplicate request detected. Please try again.";
+    }
+
+    // Lock check removed - main send function handles locking
+    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.2.2
     // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - start');
@@ -213,6 +231,8 @@ function chatbot_call_deepseek_api($api_key, $message) {
     
         // DIAG - Diagnostics
         prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
     
     }
@@ -229,6 +249,8 @@ function chatbot_call_deepseek_api($api_key, $message) {
     
         // DIAG - Diagnostics
         prod_trace( 'ERROR', 'Error: Type: ' . $error_type . ' Message: ' . $error_message);
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';
     
     }
@@ -288,6 +310,8 @@ function chatbot_call_deepseek_api($api_key, $message) {
     if (isset($response_body->choices[0]->message->content) && !empty($response_body->choices[0]->message->content)) {
         $response_text = $response_body->choices[0]->message->content;
         addEntry('chatbot_chatgpt_context_history', $response_text);
+        // Clear locks on success
+        // Lock clearing removed - main send function handles locking
         return $response_text;
     } else {
         prod_trace( 'WARNING', 'No valid response text found in API response.');
@@ -296,6 +320,8 @@ function chatbot_call_deepseek_api($api_key, $message) {
             ? get_localized_errorResponses(get_locale(), $errorResponses) 
             : $errorResponses;
 
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
         return $localized_errorResponses[array_rand($localized_errorResponses)];
     }
     

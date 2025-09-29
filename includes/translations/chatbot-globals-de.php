@@ -159,4 +159,6 @@ $chatbot_chatgpt_fixed_literal_messages = [
     "Konversation gelöscht. Bitte warten, während die Seite neu geladen wird.",                                     // [16]
     "Konversation gelöscht.",                                                                                       // [17]
     "Konversation nicht gelöscht.",                                                                                 // [18]
+    "Ich arbeite noch an Ihrer vorherigen Nachricht - bitte senden Sie sie erneut in ein paar Minuten.",            // [19]
+    "Nachricht in Warteschlange gestellt. Verarbeitung läuft...",                                                // [20]
 ];
