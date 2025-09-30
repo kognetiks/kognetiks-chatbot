@@ -888,6 +888,53 @@ window.resetAllLocks = resetAllLocks;
         return String(val || '');
     }
 
+    // Poll queue status to determine when to re-enable the submit button
+    function pollQueueStatus() {
+        let user_id = kchat_settings.user_id;
+        let page_id = kchat_settings.page_id;
+        let session_id = kchat_settings.session_id;
+        let assistant_id = kchat_settings.assistant_id;
+        
+        $.ajax({
+            url: kchat_settings.ajax_url,
+            method: 'POST',
+            timeout: 5000,
+            data: {
+                action: 'chatbot_chatgpt_get_queue_status',
+                user_id: user_id,
+                page_id: page_id,
+                session_id: session_id,
+                assistant_id: assistant_id
+            },
+            success: function(response) {
+                if (response.success && response.data) {
+                    const queueStatus = response.data;
+                    if (!queueStatus.has_messages || queueStatus.count === 0) {
+                        // Queue is empty, re-enable the button
+                        submitButton.prop('disabled', false);
+                        removeTypingIndicator();
+                    } else {
+                        // Queue still has messages, poll again in 1 second
+                        setTimeout(pollQueueStatus, 1000);
+                    }
+                } else {
+                    // Fallback: re-enable button after 5 seconds if polling fails
+                    setTimeout(function() {
+                        submitButton.prop('disabled', false);
+                        removeTypingIndicator();
+                    }, 5000);
+                }
+            },
+            error: function() {
+                // Fallback: re-enable button after 5 seconds if polling fails
+                setTimeout(function() {
+                    submitButton.prop('disabled', false);
+                    removeTypingIndicator();
+                }, 5000);
+            }
+        });
+    }
+
     function resetMessageCount(today) {
         localStorage.setItem('chatbot_chatgpt_message_count', 0); // Reset the counter
         localStorage.setItem('chatbot_chatgpt_last_reset', today); // Update last reset date
@@ -1029,16 +1076,20 @@ window.resetAllLocks = resetAllLocks;
                 ajaxResponse = response;
                 
                 // Handle queued responses
-                if (response.queued) {
+                const isQueued = response.data && typeof response.data === 'object' && response.data.queued;
+                // console.log('Chatbot: Checking response.data.queued:', isQueued);
+                if (isQueued) {
                     // For queued messages, don't show any message - keep the typing indicator
                     botResponse = null;
                     // For queued messages, we don't want to disable the button
                     // The queue will handle processing and the button will be re-enabled
                     // when the actual response comes through
+                    // console.log('Chatbot: Queued response detected - botResponse set to null');
                 } else {
                     botResponse = response.data;
                     // Safe string coercion to prevent [object Object] display
                     botResponse = safeStringCoercion(botResponse);
+                    // console.log('Chatbot: Non-queued response - botResponse set to:', botResponse);
                 }
                 
                 // Check if this is a "still working" message that should re-enable the button
@@ -1098,10 +1149,12 @@ window.resetAllLocks = resetAllLocks;
             },
             complete: function () {
                 // Only remove typing indicator for non-queued responses
-                if (!ajaxResponse || !ajaxResponse.queued) {
+                const isQueuedResponse = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
+                if (!isQueuedResponse) {
                     removeTypingIndicator();
                 }
                 if (botResponse) {
+                    // console.log('Chatbot: Appending botResponse:', botResponse);
                     appendMessage(botResponse, 'bot');
                     // FIXME - Add custom JS to the bot's response - Ver 2.0.9
                     // Append custom JS to the bot's response - Ver 2.0.9
@@ -1113,19 +1166,20 @@ window.resetAllLocks = resetAllLocks;
                             appendMessage(customMessage, 'bot');
                         }
                     };
+                } else {
+                    // console.log('Chatbot: botResponse is null/empty - not appending message');
                 }
                 scrollToLastBotResponse();
                 
                 // Re-enable the button if this is not a queued response OR if it's a "still working" message
-                // For queued responses, re-enable the button after a short delay to allow for queue processing
+                // For queued responses, keep the button disabled until queue processing is complete
                 // For "still working" messages, the button should be re-enabled immediately
-                if (ajaxResponse && (!ajaxResponse.queued || isStillWorkingMessage)) {
+                const isQueuedForButton = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
+                if (ajaxResponse && (!isQueuedForButton || isStillWorkingMessage)) {
                     submitButton.prop('disabled', false);
-                } else if (ajaxResponse && ajaxResponse.queued) {
-                    // For queued responses, re-enable the button after a delay to allow queue processing
-                    setTimeout(function() {
-                        submitButton.prop('disabled', false);
-                    }, 2000); // 2 second delay
+                } else if (isQueuedForButton) {
+                    // For queued responses, poll the queue status and re-enable when empty
+                    pollQueueStatus();
                 }
             },
             cache: false, // This ensures jQuery does not cache the result
@@ -1154,7 +1208,10 @@ window.resetAllLocks = resetAllLocks;
     messageInput.on('keydown', function (e) {
         if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
-            submitButton.trigger('click');
+            // Only trigger click if the submit button is not disabled
+            if (!submitButton.prop('disabled')) {
+                submitButton.trigger('click');
+            }
         }
     });
 

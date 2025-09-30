@@ -1219,6 +1219,22 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     
 }
 
+// AJAX handler to get queue status
+function chatbot_chatgpt_get_queue_status_ajax() {
+    $user_id = sanitize_text_field($_POST['user_id']);
+    $page_id = sanitize_text_field($_POST['page_id']);
+    $session_id = sanitize_text_field($_POST['session_id']);
+    $assistant_id = sanitize_text_field($_POST['assistant_id']);
+    
+    if (!$user_id || !$page_id || !$session_id || !$assistant_id) {
+        wp_send_json_error('Missing required parameters');
+        return;
+    }
+    
+    $queue_status = chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id);
+    wp_send_json_success($queue_status);
+}
+
 function chatbot_chatgpt_process_queued_message($message_data) {
     // This function processes a queued message using the same logic as the main handler
     // but without the AJAX response handling
@@ -2170,6 +2186,10 @@ function chatbot_chatgpt_send_message() {
 // Add action to send messages - Ver 1.0.0
 add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
+
+// Add action to get queue status
+add_action('wp_ajax_chatbot_chatgpt_get_queue_status', 'chatbot_chatgpt_get_queue_status_ajax');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_get_queue_status', 'chatbot_chatgpt_get_queue_status_ajax');
 
 // Add action to upload files - Ver 1.7.6
 add_action('wp_ajax_chatbot_chatgpt_upload_files', 'chatbot_chatgpt_upload_files');
