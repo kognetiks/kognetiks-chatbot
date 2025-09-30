@@ -1180,12 +1180,12 @@ function chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assi
 function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id) {
 
     // DIAG - Diagnostics - Ver 2.3.4
-    back_trace( 'NOTICE', 'Processing queue - user_id: ' . $user_id . ', page_id: ' . $page_id . ', session_id: ' . $session_id . ', assistant_id: ' . $assistant_id);
+    // back_trace( 'NOTICE', 'Processing queue - user_id: ' . $user_id . ', page_id: ' . $page_id . ', session_id: ' . $session_id . ', assistant_id: ' . $assistant_id);
     
     $queue_status = chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id);
     
     // DIAG - Diagnostics - Ver 2.3.4
-    back_trace( 'NOTICE', 'Queue status - has_messages: ' . ($queue_status['has_messages'] ? 'Yes' : 'No') . ', count: ' . $queue_status['count']);
+    // back_trace( 'NOTICE', 'Queue status - has_messages: ' . ($queue_status['has_messages'] ? 'Yes' : 'No') . ', count: ' . $queue_status['count']);
     
     if (!$queue_status['has_messages']) {
         return false;
@@ -1201,7 +1201,7 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     set_transient($conv_lock, true, 60);
     
     // DIAG - Diagnostics - Ver 2.3.4
-    back_trace( 'NOTICE', 'Set queue lock - Lock key: ' . $conv_lock);
+    // back_trace( 'NOTICE', 'Set queue lock - Lock key: ' . $conv_lock);
     
     // Process the message using the existing logic
     $response = chatbot_chatgpt_process_queued_message($message_data);
@@ -1210,7 +1210,7 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     delete_transient($conv_lock);
     
     // DIAG - Diagnostics - Ver 2.3.4
-    back_trace( 'NOTICE', 'Cleared queue lock - Lock key: ' . $conv_lock);
+    // back_trace( 'NOTICE', 'Cleared queue lock - Lock key: ' . $conv_lock);
     
     // Recursively process the next message in queue
     chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
