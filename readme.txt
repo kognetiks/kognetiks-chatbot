@@ -2,7 +2,7 @@
 Contributors: Kognetiks
 Tags: chatbot, chatgpt, openai, nvidia, anthropic
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
-Tested up to: 6.8
+Tested up to: 6.8.3
 Stable tag: 2.3.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html

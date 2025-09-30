@@ -54,7 +54,7 @@
 		 * @return string
 		 */
 		function get_secure_token( FS_Scope_Entity $entity, $timestamp, $action = '' ) {
-			return md5(
+			return wp_hash(
 				$timestamp .
 				$entity->id .
 				$entity->secret_key .
@@ -93,7 +93,7 @@
 		 * @return string
 		 */
 		function get_trial_token( FS_Plugin $plugin, FS_Plugin_Plan $plan, $trial_timestamp ) {
-			return md5(
+			return wp_hash(
 				$plugin->secret_key . $plugin->public_key .
 				$plan->trial_period .
 				$plan->id .

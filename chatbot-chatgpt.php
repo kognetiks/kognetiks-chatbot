@@ -1124,7 +1124,7 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
 
 // Message Queue Management Functions
 function chatbot_chatgpt_enqueue_message($user_id, $page_id, $session_id, $assistant_id, $message, $client_message_id = null) {
-    $queue_key = 'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     
     $queue = get_transient($queue_key);
     if (!$queue) {
@@ -1148,7 +1148,7 @@ function chatbot_chatgpt_enqueue_message($user_id, $page_id, $session_id, $assis
 }
 
 function chatbot_chatgpt_dequeue_message($user_id, $page_id, $session_id, $assistant_id) {
-    $queue_key = 'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     
     $queue = get_transient($queue_key);
     if (!$queue || empty($queue)) {
@@ -1167,7 +1167,7 @@ function chatbot_chatgpt_dequeue_message($user_id, $page_id, $session_id, $assis
 }
 
 function chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id) {
-    $queue_key = 'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     $queue = get_transient($queue_key);
     
     return [
@@ -1180,12 +1180,12 @@ function chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assi
 function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id) {
 
     // DIAG - Diagnostics - Ver 2.3.4
-    // back_trace( 'NOTICE', 'Processing queue - user_id: ' . $user_id . ', page_id: ' . $page_id . ', session_id: ' . $session_id . ', assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', 'Processing queue - user_id: ' . $user_id . ', page_id: ' . $page_id . ', session_id: ' . $session_id . ', assistant_id: ' . $assistant_id);
     
     $queue_status = chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id);
     
     // DIAG - Diagnostics - Ver 2.3.4
-    // back_trace( 'NOTICE', 'Queue status - has_messages: ' . ($queue_status['has_messages'] ? 'Yes' : 'No') . ', count: ' . $queue_status['count']);
+    back_trace( 'NOTICE', 'Queue status - has_messages: ' . ($queue_status['has_messages'] ? 'Yes' : 'No') . ', count: ' . $queue_status['count']);
     
     if (!$queue_status['has_messages']) {
         return false;
@@ -1197,11 +1197,11 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     }
     
     // Set conversation lock for the queued message
-    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     set_transient($conv_lock, true, 60);
     
     // DIAG - Diagnostics - Ver 2.3.4
-    // back_trace( 'NOTICE', 'Set queue lock - Lock key: ' . $conv_lock);
+    back_trace( 'NOTICE', 'Set queue lock - Lock key: ' . $conv_lock);
     
     // Process the message using the existing logic
     $response = chatbot_chatgpt_process_queued_message($message_data);
@@ -1210,12 +1210,13 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     delete_transient($conv_lock);
     
     // DIAG - Diagnostics - Ver 2.3.4
-    // back_trace( 'NOTICE', 'Cleared queue lock - Lock key: ' . $conv_lock);
+    back_trace( 'NOTICE', 'Cleared queue lock - Lock key: ' . $conv_lock);
     
     // Recursively process the next message in queue
     chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
     
     return true;
+    
 }
 
 function chatbot_chatgpt_process_queued_message($message_data) {
@@ -1588,7 +1589,7 @@ function chatbot_chatgpt_send_message() {
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
     
     // Check if there's already a conversation lock (active processing)
-    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     $is_processing = get_transient($conv_lock);
     
     // Debug logging for lock check
@@ -2203,12 +2204,12 @@ function chatbot_chatgpt_unlock_conversation_handler() {
     
     if ($user_id && $page_id && $session_id && $assistant_id) {
         // Clear the conversation lock
-        $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+        $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
         $lock_exists = get_transient($conv_lock);
         $deleted_lock = delete_transient($conv_lock);
         
         // Clear the message queue
-        $queue_key = 'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+        $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
         $queue_exists = get_transient($queue_key);
         $deleted_queue = delete_transient($queue_key);
         
@@ -2218,9 +2219,9 @@ function chatbot_chatgpt_unlock_conversation_handler() {
         
         // Try to clear all possible lock variations
         $possible_locks = [
-            'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_conv_lock_' . md5($user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_conv_lock_' . md5($session_id),
+            'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_conv_lock_' . wp_hash($user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_conv_lock_' . wp_hash($session_id),
             'chatgpt_conv_lock_' . $session_id,
             'chatgpt_conv_lock_' . $user_id . '_' . $page_id . '_' . $session_id,
         ];
@@ -2255,14 +2256,14 @@ function chatbot_chatgpt_reset_all_locks_handler() {
     if ($user_id && $page_id && $session_id && $assistant_id) {
         // Clear all possible lock variations for this conversation
         $possible_locks = [
-            'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_conv_lock_' . md5($user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_conv_lock_' . md5($session_id),
+            'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_conv_lock_' . wp_hash($user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_conv_lock_' . wp_hash($session_id),
             'chatgpt_conv_lock_' . $session_id,
             'chatgpt_conv_lock_' . $user_id . '_' . $page_id . '_' . $session_id,
-            'chatgpt_run_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_run_lock_' . md5($user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_run_lock_' . md5($session_id),
+            'chatgpt_run_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_run_lock_' . wp_hash($user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_run_lock_' . wp_hash($session_id),
             'chatgpt_run_lock_' . $session_id,
             'chatgpt_run_lock_' . $user_id . '_' . $page_id . '_' . $session_id,
         ];
@@ -2278,9 +2279,9 @@ function chatbot_chatgpt_reset_all_locks_handler() {
         
         // Clear all possible queue variations
         $possible_queues = [
-            'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
-            'chatbot_message_queue_' . md5($user_id . '|' . $page_id . '|' . $session_id),
-            'chatbot_message_queue_' . md5($session_id),
+            'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
+            'chatbot_message_queue_' . wp_hash($user_id . '|' . $page_id . '|' . $session_id),
+            'chatbot_message_queue_' . wp_hash($session_id),
             'chatbot_message_queue_' . $session_id,
             'chatbot_message_queue_' . $user_id . '_' . $page_id . '_' . $session_id,
         ];

@@ -870,6 +870,24 @@ window.resetAllLocks = resetAllLocks;
         return Math.ceil((((d - oneJan) / 86400000) + oneJan.getDay() + 1) / 7);
     }
 
+    // Safe string coercion to prevent [object Object] display
+    function safeStringCoercion(val) {
+        if (typeof val === 'string') {
+            return val;
+        }
+        if (val && typeof val === 'object') {
+            // Try common properties that might contain the actual message
+            if (val.text) return val.text;
+            if (val.message) return val.message;
+            if (val.content) return val.content;
+            if (val.data) return safeStringCoercion(val.data); // Recursive for nested objects
+            // Fallback to JSON stringify
+            return JSON.stringify(val);
+        }
+        // Handle null, undefined, numbers, etc.
+        return String(val || '');
+    }
+
     function resetMessageCount(today) {
         localStorage.setItem('chatbot_chatgpt_message_count', 0); // Reset the counter
         localStorage.setItem('chatbot_chatgpt_last_reset', today); // Update last reset date
@@ -1012,12 +1030,15 @@ window.resetAllLocks = resetAllLocks;
                 
                 // Handle queued responses
                 if (response.queued) {
-                    botResponse = response.message;
+                    // For queued messages, don't show any message - keep the typing indicator
+                    botResponse = null;
                     // For queued messages, we don't want to disable the button
                     // The queue will handle processing and the button will be re-enabled
                     // when the actual response comes through
                 } else {
                     botResponse = response.data;
+                    // Safe string coercion to prevent [object Object] display
+                    botResponse = safeStringCoercion(botResponse);
                 }
                 
                 // Check if this is a "still working" message that should re-enable the button
@@ -1076,7 +1097,10 @@ window.resetAllLocks = resetAllLocks;
                 }
             },
             complete: function () {
-                removeTypingIndicator();
+                // Only remove typing indicator for non-queued responses
+                if (!ajaxResponse || !ajaxResponse.queued) {
+                    removeTypingIndicator();
+                }
                 if (botResponse) {
                     appendMessage(botResponse, 'bot');
                     // FIXME - Add custom JS to the bot's response - Ver 2.0.9
@@ -1093,10 +1117,15 @@ window.resetAllLocks = resetAllLocks;
                 scrollToLastBotResponse();
                 
                 // Re-enable the button if this is not a queued response OR if it's a "still working" message
-                // For queued responses, the button should remain disabled until the actual response
+                // For queued responses, re-enable the button after a short delay to allow for queue processing
                 // For "still working" messages, the button should be re-enabled immediately
                 if (ajaxResponse && (!ajaxResponse.queued || isStillWorkingMessage)) {
                     submitButton.prop('disabled', false);
+                } else if (ajaxResponse && ajaxResponse.queued) {
+                    // For queued responses, re-enable the button after a delay to allow queue processing
+                    setTimeout(function() {
+                        submitButton.prop('disabled', false);
+                    }, 2000); // 2 second delay
                 }
             },
             cache: false, // This ensures jQuery does not cache the result
@@ -1268,7 +1297,7 @@ window.resetAllLocks = resetAllLocks;
                 }
                 response.data = markdownToHtml(response.data || '');
                 // appendMessage('Text-to-Speech: ' + response.data, 'bot');
-                appendMessage(response.data, 'bot');
+                appendMessage(safeStringCoercion(response.data), 'bot');
             },
             error: function(jqXHR, status, error) {
                 if(status === "timeout") {
@@ -1712,7 +1741,7 @@ window.resetAllLocks = resetAllLocks;
                 // DIAG - Log the response
                 // console.log('Chatbot: NOTICE: Removing conversation from sessionStorage');
                 // console.log('Chatbot: SUCCESS:', response.data);
-                appendMessage( response.data, 'bot');
+                appendMessage(safeStringCoercion(response.data), 'bot');
                 // Check localStorage setting and force a page reload if equal to 'Yes' - Ver 2.0.4
                 if (kchat_settings.chatbot_chatgpt_force_page_reload === 'Yes') {
                     location.reload(); // Force a page reload after clearing the conversation

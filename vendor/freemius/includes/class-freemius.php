@@ -2344,7 +2344,7 @@
                     }
                 }
 
-                $caller_file_hash = md5( $caller_file_path );
+                $caller_file_hash = wp_hash( $caller_file_path );
 
                 if ( ! isset( $caller_map[ $caller_file_hash ] ) ) {
                     foreach ( $all_plugins_paths as $plugin_path ) {
@@ -4019,7 +4019,7 @@
                      'put your unique phrase here' === $secure_auth
                 ) {
                     // Protect against default auth key.
-                    $secure_auth = md5( microtime() );
+                    $secure_auth = wp_hash( microtime() );
                 }
 
                 /**
@@ -4030,7 +4030,7 @@
                  * @author Vova Feldman (@svovaf)
                  * @since  1.2.3
                  */
-                $unique_id = md5( $key . $secure_auth );
+                $unique_id = wp_hash( $key . $secure_auth );
 
                 self::$_accounts->set_option( 'unique_id', $unique_id, true, $blog_id );
             }
@@ -4089,7 +4089,7 @@
             if ( ! defined( 'COOKIEHASH' ) ) {
                 $siteurl = get_site_option( 'siteurl' );
                 if ( $siteurl ) {
-                    define( 'COOKIEHASH', md5( $siteurl ) );
+                    define( 'COOKIEHASH', wp_hash( $siteurl ) );
                 } else {
                     define( 'COOKIEHASH', '' );
                 }
@@ -8723,7 +8723,7 @@
                                ( $data['is_active'] ? '1' : '0' ) . ';';
             }
 
-            return md5( $thumbprint );
+            return wp_hash( $thumbprint );
         }
 
         /**
@@ -8991,7 +8991,7 @@
             }
 
             // Check if themes status changed (version or active/inactive).
-            $themes_changed = ( $all_cached_themes->md5 !== md5( $themes_signature ) );
+            $themes_changed = ( $all_cached_themes->md5 !== wp_hash( $themes_signature ) );
 
             $themes_update_data = array();
 
@@ -9042,7 +9042,7 @@
                     }
                 }
 
-                $all_cached_themes->md5       = md5( $themes_signature );
+                $all_cached_themes->md5       = wp_hash( $themes_signature );
                 $all_cached_themes->timestamp = time();
                 self::$_accounts->set_option( $option_name, $all_cached_themes, true );
             }
@@ -12466,10 +12466,10 @@
          */
         private function store_last_activated_license_data( FS_Plugin_License $license, $license_user = null ) {
             if ( ! is_object( $license_user ) ) {
-                $this->_storage->last_license_key     = md5( $license->secret_key );
+                $this->_storage->last_license_key     = wp_hash( $license->secret_key );
                 $this->_storage->last_license_user_id = null;
             } else {
-                $this->_storage->last_license_user_key = md5( $license_user->secret_key );
+                $this->_storage->last_license_user_key = wp_hash( $license_user->secret_key );
                 $this->_storage->last_license_user_id  = $license_user->id;
             }
         }
@@ -17060,8 +17060,8 @@
                 // Plus, this should never run in production since the secret should never
                 // be included in the production version.
                 $params['ts']     = WP_FS__SCRIPT_START_TIME;
-                $params['salt']   = md5( uniqid( rand() ) );
-                $params['secure'] = md5(
+                $params['salt']   = wp_hash( uniqid( rand() ) );
+                $params['secure'] = wp_hash(
                     $params['ts'] .
                     $params['salt'] .
                     $this->get_secret_key()
@@ -20747,7 +20747,7 @@
                     'last_license_user_key'
                 );
 
-                if ( md5( $license_or_user_key ) !== $stored_key ) {
+                if ( wp_hash( $license_or_user_key ) !== $stored_key ) {
                     $this->shoot_ajax_failure( sprintf(
                         '%s... %s',
                         $this->get_text_x_inline( 'Oops', 'exclamation', 'oops' ),
@@ -24811,7 +24811,7 @@
         ) {
             $should_cache = ($success_cache_expiration + $failure_cache_expiration > 0);
 
-            $cache_key = $should_cache ? md5( fs_strip_url_protocol($url) . json_encode( $request ) ) : false;
+            $cache_key = $should_cache ? wp_hash( fs_strip_url_protocol($url) . json_encode( $request ) ) : false;
 
             $response = (!WP_FS__DEBUG_SDK && ( false !== $cache_key )) ?
                 get_transient( $cache_key ) :
