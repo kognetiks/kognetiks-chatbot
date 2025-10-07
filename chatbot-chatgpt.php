@@ -1410,6 +1410,26 @@ function chatbot_chatgpt_send_message() {
         return;
     }
 
+    // Security: Rate limiting for unauthenticated users to prevent API abuse
+    $user_id = get_current_user_id();
+    $is_authenticated = $user_id > 0;
+    
+    if (!$is_authenticated) {
+        // Get client IP for rate limiting
+        $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rate_limit_key = 'chatbot_rate_limit_' . md5($client_ip);
+        
+        // Check rate limit (max 10 requests per minute for unauthenticated users)
+        $current_count = get_transient($rate_limit_key) ?: 0;
+        if ($current_count >= 10) {
+            wp_send_json_error('Rate limit exceeded. Please wait before sending another message.', 429);
+            return;
+        }
+        
+        // Increment rate limit counter
+        set_transient($rate_limit_key, $current_count + 1, 60); // 60 seconds
+    }
+
     // Global variables
     global $session_id;
     global $user_id;
