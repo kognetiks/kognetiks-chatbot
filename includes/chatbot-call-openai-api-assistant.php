@@ -151,8 +151,12 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null, $
         // *********************************************************************************
 
         // FIXME - Retrieve the first item file type - assumes they are all the same, not mixed
-        $file_type = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_type', $session_id, $file_id[0]);
+        $file_type = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, 0);
         $file_type = $file_type ? $file_type : 'unknown';
+        
+        // DEBUG: Log file type retrieval
+        error_log('FILE TYPE DEBUG: Session ID: ' . $session_id);
+        error_log('FILE TYPE DEBUG: Retrieved file_type: ' . $file_type);
     
         // DIAG - Diagnostics - Ver 2.0.3
         // back_trace( 'NOTICE', '========================================');
@@ -991,6 +995,10 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         
     // Fetch the file id - Ver 2.23
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
+    
+    // DEBUG: Log what files are being retrieved for the prompt
+    error_log('PROMPT DEBUG: Session ID: ' . $session_id);
+    error_log('PROMPT DEBUG: Retrieved file_id for prompt: ' . print_r($file_id, true));
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -1059,8 +1067,11 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     } else {
 
-        // Original Context Instructions - No Enhanced Context
-        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+        // When Advanced Content Search is disabled, send only the basic context - Ver 2.3.5.2
+        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context;
+        
+        // DEBUG: Log that Knowledge Navigator context is being excluded
+        error_log('KNOWLEDGE NAVIGATOR DEBUG: Advanced Content Search disabled - excluding Knowledge Navigator context');
 
     }
 
@@ -1318,6 +1329,28 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Clear both locks before returning
     // Lock clearing removed - main send function handles locking
     
+    // Mark uploaded files for deletion after successful processing - Ver 2.3.5.2
+    if (!empty($file_id)) {
+        $counter = 0;
+        $current_file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+        
+        while (!empty($current_file_id)) {
+            // Set a transient that expires in 2 hours
+            $timeFrameForDelete = time() + 2 * 60 * 60;
+            set_transient('chatbot_chatgpt_delete_uploaded_file_' . $current_file_id, $current_file_id, $timeFrameForDelete);
+
+            // Set a cron job to delete the file in 1 hour 45 minutes
+            $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
+            if (!wp_next_scheduled('delete_uploaded_file', array($current_file_id))) {
+                wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($current_file_id));
+            }
+            
+            // Increment counter and get next file
+            $counter++;
+            $current_file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
+        }
+    }
+    
     // Log the completion of the request
     // prod_trace('NOTICE', 'Completed API call - Thread: ' . $thread_id . ', Message UUID: ' . $message_uuid);
 
@@ -1352,29 +1385,19 @@ function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id ) {
     $file_types = [];
 
     $file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
-    $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $file_id);
+    $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $counter);
 
     // DIAG - Diagnostics - Ver 2.0.3
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_types, true));
+    
+    // DEBUG: Log what files are being retrieved
+    error_log('FILE RETRIEVAL DEBUG: Session ID: ' . $session_id);
+    error_log('FILE RETRIEVAL DEBUG: Counter: ' . $counter);
+    error_log('FILE RETRIEVAL DEBUG: Retrieved file_id: ' . $file_id);
+    error_log('FILE RETRIEVAL DEBUG: Retrieved file_types: ' . $file_types);
 
     while (!empty($file_id)) {
-        // Delete the transient
-        // delete_chatbot_chatgpt_transients_files( 'chatbot_chatgpt_assistant_file_id', $session_id, $counter);
-
-        // Delete the file
-        // deleteUploadedFile($file_id);
-
-        // Set a transient that expires in 2 hours
-        $timeFrameForDelete = time() + 2 * 60 * 60;
-        set_transient('chatbot_chatgpt_delete_uploaded_file_' . $file_id, $file_id, $timeFrameForDelete);
-
-        // Set a cron job to delete the file in 1 hour 45 minutes
-        $shorterTimeFrameForDelete = time() + 1 * 60 * 60 + 45 * 60;
-        if (!wp_next_scheduled('delete_uploaded_file', array($file_id))) {
-            wp_schedule_single_event($shorterTimeFrameForDelete, 'delete_uploaded_file', array($file_id));
-        }
-
         // Add the file id to the list
         $file_ids[] = $file_id;
         $file_ids[$file_id] = $file_types;
@@ -1384,7 +1407,7 @@ function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id ) {
 
         // Retrieve the next file id
         $file_id = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $session_id, $counter);
-        $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $file_id);
+        $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $counter);
 
     }
 

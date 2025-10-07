@@ -15,6 +15,12 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_download_transcript() {
 
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_transcript_nonce')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+
     global $chatbot_chatgpt_plugin_dir_path;
 
     if (!isset($_POST['user_id'], $_POST['page_id'], $_POST['conversation_content'])) {

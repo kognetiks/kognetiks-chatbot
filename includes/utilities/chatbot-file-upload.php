@@ -16,6 +16,18 @@ if ( ! defined( 'WPINC' ) ) {
 // Upload Multiple files to the Assistant
 function chatbot_chatgpt_upload_files() {
 
+    // Security: Check if user has permission to upload files
+    if (!current_user_can('upload_files')) {
+        wp_send_json_error('Insufficient permissions to upload files.', 403);
+        return;
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_upload_nonce')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+
     global $session_id;
     global $user_id;
     global $page_id;
@@ -283,8 +295,11 @@ function chatbot_chatgpt_upload_files() {
             }
 
             // Store API response
-            set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $responseData['id'], $session_id, $i);
-            set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $purpose, $session_id, $responseData['id']);
+            set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $responseData['id'], $session_id, $i);
+            set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $purpose, $session_id, $i);
+            
+            // Clean up old transient keys to prevent conflicts
+            chatbot_chatgpt_cleanup_old_file_transients($session_id);
 
             $responses[] = [
                 'status' => 'success',
@@ -410,6 +425,18 @@ function upload_file_in_chunks($file_path, $api_key, $file_name, $file_type) {
 
 // Upload files - Ver 2.0.1
 function chatbot_chatgpt_upload_mp3() {
+
+    // Security: Check if user has permission to upload files
+    if (!current_user_can('upload_files')) {
+        wp_send_json_error('Insufficient permissions to upload files.', 403);
+        return;
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_upload_nonce')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
 
     global $session_id;
     global $user_id;
@@ -544,7 +571,8 @@ function chatbot_chatgpt_upload_mp3() {
         // Save the file name for later
         // DIAG - Diagnostics - Ver 2.0.1
         // back_trace( 'NOTICE', '$newFileName: ' . $newFileName);
-        set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_id', $newFileName, $session_id, $i);
+        set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_ids', $newFileName, $session_id, $i);
+        set_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', 'mp3', $session_id, $i);
         $responses[] = array(
             'status' => 'success',
             'message' => "File uploaded successfully."

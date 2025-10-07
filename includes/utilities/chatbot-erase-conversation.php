@@ -15,6 +15,18 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_erase_conversation_handler() {
 
+    // Security: Check if user has permission to manage options (admin capability)
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Insufficient permissions to erase conversation.', 403);
+        return;
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_erase_nonce')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+
     // FIXME - This is not working - Ver 1.8.6
     // THIS IS NOT CONFIRMED WORKING YET FOR ASSISTANTS
     // ITS NOT SETTING THE $page_id CORRECTLY
