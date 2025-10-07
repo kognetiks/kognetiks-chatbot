@@ -1477,11 +1477,11 @@ add_action( 'delete_uploaded_file', 'deleteUploadedFile' );
 function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key) {
     
     // DIAG - Diagnostics - Ver 2.2.7
-  // back_trace( 'NOTICE', 'Starting tool usage check');
-  // back_trace( 'NOTICE', 'Parameters:');
-  // back_trace( 'NOTICE', '- Assistant ID: ' . $assistant_id);
-  // back_trace( 'NOTICE', '- Thread ID: ' . $thread_id);
-  // back_trace( 'NOTICE', '- Run ID: ' . $run_id);
+    // back_trace( 'NOTICE', 'Starting tool usage check');
+    // back_trace( 'NOTICE', 'Parameters:');
+    // back_trace( 'NOTICE', '- Assistant ID: ' . $assistant_id);
+    // back_trace( 'NOTICE', '- Thread ID: ' . $thread_id);
+    // back_trace( 'NOTICE', '- Run ID: ' . $run_id);
 
     try {
 
@@ -1489,7 +1489,7 @@ function check_assistant_tool_usage($assistant_id, $thread_id, $run_id, $api_key
         $url = get_threads_api_url() . '/' . $thread_id . '/runs/' . $run_id;
 
         // DIAG - Diagnostics - Ver 2.2.7
-      // back_trace( 'NOTICE', 'Checking run status from: ' . $url);
+        // back_trace( 'NOTICE', 'Checking run status from: ' . $url);
 
         // Determine API version
         $assistant_beta_version = esc_attr(get_option('chatbot_chatgpt_assistant_beta_version', 'v2'));
