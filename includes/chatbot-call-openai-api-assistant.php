@@ -154,9 +154,9 @@ function addAMessage($thread_id, $prompt, $context, $api_key, $file_id = null, $
         $file_type = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, 0);
         $file_type = $file_type ? $file_type : 'unknown';
         
-        // DEBUG: Log file type retrieval
-        error_log('FILE TYPE DEBUG: Session ID: ' . $session_id);
-        error_log('FILE TYPE DEBUG: Retrieved file_type: ' . $file_type);
+        // DIAG - Diagnostics - Version 2.3.5.2 - Log file type retrieval
+        // back_trace( 'NOTICE', 'FILE TYPE DEBUG: Session ID: ' . $session_id);
+        // back_trace( 'NOTICE', 'FILE TYPE DEBUG: Retrieved file_type: ' . $file_type);
     
         // DIAG - Diagnostics - Ver 2.0.3
         // back_trace( 'NOTICE', '========================================');
@@ -996,9 +996,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Fetch the file id - Ver 2.23
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
     
-    // DEBUG: Log what files are being retrieved for the prompt
-    error_log('PROMPT DEBUG: Session ID: ' . $session_id);
-    error_log('PROMPT DEBUG: Retrieved file_id for prompt: ' . print_r($file_id, true));
+    // DIAG - Diagnostics - Version 2.3.5.2 - Log what files are being retrieved for the prompt
+    // back_trace( 'NOTICE', 'PROMPT DEBUG: Session ID: ' . $session_id);
+    // back_trace( 'NOTICE', 'PROMPT DEBUG: Retrieved file_id for prompt: ' . print_r($file_id, true));
 
     // DIAG - Diagnostics - Ver 2.2.3
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -1070,8 +1070,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // When Advanced Content Search is disabled, send only the basic context - Ver 2.3.5.2
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context;
         
-        // DEBUG: Log that Knowledge Navigator context is being excluded
-        error_log('KNOWLEDGE NAVIGATOR DEBUG: Advanced Content Search disabled - excluding Knowledge Navigator context');
+        // DIAG - Diagnostics - Version 2.3.5.2 - Log that Knowledge Navigator context is being excluded
+        // back_trace( 'NOTICE', 'KNOWLEDGE NAVIGATOR DEBUG: Advanced Content Search disabled - excluding Knowledge Navigator context');
 
     }
 
@@ -1257,9 +1257,15 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     $assistants_response = getTheRunsSteps($thread_id, $runId, $api_key);
     
     // Add the usage to the conversation tracker
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["completion_tokens"]);
-    append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["total_tokens"]);
+    if (is_array($assistants_response) && 
+        isset($assistants_response["data"]) && 
+        is_array($assistants_response["data"]) && 
+        isset($assistants_response["data"][0]) && 
+        isset($assistants_response["data"][0]["usage"])) {
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["completion_tokens"]);
+        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["total_tokens"]);
+    }
 
     // Step 7: Get the Step's Status
   // back_trace( 'NOTICE', 'Step 7 - Get the Step\'s Status');
@@ -1280,7 +1286,15 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     update_interaction_tracking();
 
     // Remove citations from the response
-    if (isset($assistants_response["data"][0]["content"][0]["text"]["value"])) {
+    if (is_array($assistants_response) && 
+        isset($assistants_response["data"]) && 
+        is_array($assistants_response["data"]) && 
+        isset($assistants_response["data"][0]) && 
+        isset($assistants_response["data"][0]["content"]) && 
+        is_array($assistants_response["data"][0]["content"]) && 
+        isset($assistants_response["data"][0]["content"][0]) && 
+        isset($assistants_response["data"][0]["content"][0]["text"]) && 
+        isset($assistants_response["data"][0]["content"][0]["text"]["value"])) {
         $assistants_response["data"][0]["content"][0]["text"]["value"] = preg_replace('/\【.*?\】/', '', $assistants_response["data"][0]["content"][0]["text"]["value"]);
     }
 
@@ -1293,7 +1307,17 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
     // Add a check here to see if the response [data][0][content][0][text][value] contains the string "[conversation_transcript]"
-    if (strpos($assistants_response["data"][0]["content"][0]["text"]["value"], "[conversation_transcript]") !== false) {
+    // First validate that $assistants_response is an array with the expected structure
+    if (is_array($assistants_response) && 
+        isset($assistants_response["data"]) && 
+        is_array($assistants_response["data"]) && 
+        isset($assistants_response["data"][0]) && 
+        isset($assistants_response["data"][0]["content"]) && 
+        is_array($assistants_response["data"][0]["content"]) && 
+        isset($assistants_response["data"][0]["content"][0]) && 
+        isset($assistants_response["data"][0]["content"][0]["text"]) && 
+        isset($assistants_response["data"][0]["content"][0]["text"]["value"]) && 
+        strpos($assistants_response["data"][0]["content"][0]["text"]["value"], "[conversation_transcript]") !== false) {
         // back_trace( 'NOTICE', 'The response contains the string "[conversation_transcript]"');
         
         // Build the conversation transcript by gathering all messages in reverse order
@@ -1355,14 +1379,31 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // prod_trace('NOTICE', 'Completed API call - Thread: ' . $thread_id . ', Message UUID: ' . $message_uuid);
 
     // Return the response text, checking for the fallback content[1][text] if available
-    if (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {
-        return $assistants_response["data"][0]["content"][1]["text"]["value"];
-    } elseif (isset($assistants_response["data"][0]["content"][0]["text"]["value"])) {
-        return $assistants_response["data"][0]["content"][0]["text"]["value"];
-    } else {
-        // Return a default value or an empty string if none exist
-        return '';
+    if (is_array($assistants_response) && 
+        isset($assistants_response["data"]) && 
+        is_array($assistants_response["data"]) && 
+        isset($assistants_response["data"][0]) && 
+        isset($assistants_response["data"][0]["content"]) && 
+        is_array($assistants_response["data"][0]["content"])) {
+        
+        // Check for content[1][text] first (fallback)
+        if (isset($assistants_response["data"][0]["content"][1]["text"]["value"])) {
+            return $assistants_response["data"][0]["content"][1]["text"]["value"];
+        } 
+        // Check for content[0][text] (primary)
+        elseif (isset($assistants_response["data"][0]["content"][0]["text"]["value"])) {
+            return $assistants_response["data"][0]["content"][0]["text"]["value"];
+        }
     }
+    
+    // If $assistants_response is not an array or doesn't have the expected structure, 
+    // it might be an error message string, so return it
+    if (is_string($assistants_response)) {
+        return $assistants_response;
+    }
+    
+    // Return a default value if none exist
+    return 'Error: Unable to retrieve response from API.';
 
 }
 
@@ -1391,11 +1432,11 @@ function chatbot_chatgpt_retrieve_file_id( $user_id, $page_id ) {
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
     // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_types, true));
     
-    // DEBUG: Log what files are being retrieved
-    error_log('FILE RETRIEVAL DEBUG: Session ID: ' . $session_id);
-    error_log('FILE RETRIEVAL DEBUG: Counter: ' . $counter);
-    error_log('FILE RETRIEVAL DEBUG: Retrieved file_id: ' . $file_id);
-    error_log('FILE RETRIEVAL DEBUG: Retrieved file_types: ' . $file_types);
+    // DIAG - Diagnostics - Version 2.3.5.2 - Log what files are being retrieved
+    // back_trace( 'NOTICE', 'FILE RETRIEVAL DEBUG: Session ID: ' . $session_id);
+    // back_trace( 'NOTICE', 'FILE RETRIEVAL DEBUG: Counter: ' . $counter);
+    // back_trace( 'NOTICE', 'FILE RETRIEVAL DEBUG: Retrieved file_id: ' . $file_id);
+    // back_trace( 'NOTICE', 'FILE RETRIEVAL DEBUG: Retrieved file_types: ' . $file_types);
 
     while (!empty($file_id)) {
         // Add the file id to the list
