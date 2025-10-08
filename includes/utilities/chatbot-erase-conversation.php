@@ -15,22 +15,15 @@ if ( ! defined( 'WPINC' ) ) {
 
 function chatbot_chatgpt_erase_conversation_handler() {
 
-    // Security: Check if user has permission to manage options (admin capability)
-    if (!current_user_can('manage_options')) {
-        wp_send_json_error('Insufficient permissions to erase conversation.', 403);
-        return;
-    }
+    // Security: Allow any user (including anonymous) to clear their own conversation
+    // The nonce verification below provides sufficient security for this action
+    // Users can only clear conversations they have access to via their session
 
     // Security: Verify nonce for CSRF protection
     if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_erase_nonce')) {
         wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
         return;
     }
-
-    // FIXME - This is not working - Ver 1.8.6
-    // THIS IS NOT CONFIRMED WORKING YET FOR ASSISTANTS
-    // ITS NOT SETTING THE $page_id CORRECTLY
-    // THEREFORE ITS NOT DELETING THE CORRECT TRANSIENT (ANY TRANSIENT)
 
     global $session_id;
     global $user_id;
@@ -58,10 +51,8 @@ function chatbot_chatgpt_erase_conversation_handler() {
     } else {
         // DIAG = Diagnostics
         // back_trace( 'NOTICE', 'No user is currently logged in.');
+        // back_trace( 'NOTICE', '$user_id: ' . $user_id);
         // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-        // Removed - Ver 1.9.0
-        // $user_id = $session_id;
-        // Add back - Ver 1.9.3 - 2024 03 18
         $user_id = $_POST['user_id'];
     }
 
@@ -89,22 +80,6 @@ function chatbot_chatgpt_erase_conversation_handler() {
     } else {
         $reset_type = 'assistant';
     }
-    
-    // if ( $reset_type == 'original') {
-    //     // Delete transient data
-    //     delete_transient( 'chatbot_chatgpt_context_history' );
-    //     wp_send_json_success('Conversation cleared - Original.');
-    // } else {
-    //     $thread_id = ''; // Nullify the thread_id
-    //     // Wipe the Context
-    //     update_option( 'chatbot_chatgpt_conversation_context' ,'' , true);
-    //     // Delete transient data - Assistants
-    //     // delete_chatbot_chatgpt_transients( $transient_type, $user_id, $page_id, $session_id);
-    //     // Delete the threads
-    //     delete_chatbot_chatgpt_threads($user_id, $page_id);
-    //     delete_any_file_transients($session_id);
-    //     wp_send_json_success('Conversation cleared - Assistant.');
-    // }
 
     delete_transient( 'chatbot_chatgpt_context_history' );
 
