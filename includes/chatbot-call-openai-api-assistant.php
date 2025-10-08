@@ -13,6 +13,99 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+// Helper function for retryable API calls with timeout handling
+function chatbot_chatgpt_retryable_api_call($url, $args, $max_retries = 3, $base_timeout = null) {
+    $retry_count = 0;
+    
+    // Get timeout setting from options if not provided
+    if ($base_timeout === null) {
+        $base_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '30')));
+    }
+    
+    while ($retry_count < $max_retries) {
+        // Increase timeout with each retry
+        $timeout = $base_timeout + ($retry_count * 10); // base, base+10s, base+20s
+        $args['timeout'] = $timeout;
+        
+        $response = wp_remote_get($url, $args);
+        
+        // If it's not a WP_Error, return the response
+        if (!is_wp_error($response)) {
+            return $response;
+        }
+        
+        $error_message = $response->get_error_message();
+        
+        // Check if it's a timeout error that we should retry
+        if (strpos($error_message, 'cURL error 28') !== false || 
+            strpos($error_message, 'Operation timed out') !== false) {
+            
+            $retry_count++;
+            if ($retry_count < $max_retries) {
+                // Log the retry attempt with detailed stats
+                prod_trace('WARNING', "API timeout (attempt {$retry_count}/{$max_retries}), retrying with {$timeout}s timeout...");
+                chatbot_chatgpt_log_timeout_stats(basename($url), $retry_count, $timeout);
+                
+                // Wait before retrying (exponential backoff)
+                $wait_time = min(pow(2, $retry_count), 8); // 2s, 4s, 8s max
+                sleep($wait_time);
+                continue;
+            }
+        }
+        
+        // For non-timeout errors or final retry, return the error
+        prod_trace('ERROR', 'HTTP Request failed: ' . $error_message);
+        return $response;
+    }
+    
+    // This should never be reached, but just in case
+    return $response;
+}
+
+// Helper function to get appropriate timeout for assistant operations
+function chatbot_chatgpt_get_assistant_timeout() {
+    $base_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '30')));
+    
+    // Assistant operations often take longer, so increase the base timeout
+    // but cap it at a reasonable maximum to prevent extremely long waits
+    $assistant_timeout = min($base_timeout + 30, 120); // Add 30s but max 120s
+    
+    return $assistant_timeout;
+}
+
+// Helper function to log timeout statistics for monitoring
+function chatbot_chatgpt_log_timeout_stats($function_name, $attempt, $timeout_used) {
+    // Log timeout attempts for monitoring purposes
+    prod_trace('INFO', "Timeout attempt {$attempt} in {$function_name} with {$timeout_used}s timeout");
+    
+    // Optionally store timeout stats in transients for analysis
+    $timeout_stats = get_transient('chatbot_timeout_stats');
+    if (!$timeout_stats) {
+        $timeout_stats = [];
+    }
+    
+    $today = date('Y-m-d');
+    if (!isset($timeout_stats[$today])) {
+        $timeout_stats[$today] = [];
+    }
+    
+    if (!isset($timeout_stats[$today][$function_name])) {
+        $timeout_stats[$today][$function_name] = 0;
+    }
+    
+    $timeout_stats[$today][$function_name]++;
+    
+    // Keep only last 7 days of stats
+    $seven_days_ago = date('Y-m-d', strtotime('-7 days'));
+    foreach ($timeout_stats as $date => $stats) {
+        if ($date < $seven_days_ago) {
+            unset($timeout_stats[$date]);
+        }
+    }
+    
+    set_transient('chatbot_timeout_stats', $timeout_stats, 7 * DAY_IN_SECONDS);
+}
+
 // -------------------------------------------------------------------------
 // Step 1: Create a thread
 // -------------------------------------------------------------------------
@@ -390,10 +483,10 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
 
     while ($status != "completed" && $totalRetryCount < $maxTotalRetries) {
 
-        $response = wp_remote_get($url, [
-            "headers"       => $headers,
-            "timeout"       => 30,
-        ]);
+        // Use retryable API call with timeout handling
+        $response = chatbot_chatgpt_retryable_api_call($url, [
+            "headers" => $headers,
+        ], 3, chatbot_chatgpt_get_assistant_timeout());
     
         // ✅ Check if `wp_remote_post()` returned an error
         if (is_wp_error($response)) {
@@ -508,11 +601,10 @@ function getTheRunsSteps($thread_id, $runId, $api_key) {
         "Authorization" => "Bearer " . $api_key
     ];
 
-    // 🚀 ✅ FIX: Change from `wp_remote_post()` to `wp_remote_get()`
-    $response = wp_remote_get($url, [
-        "headers"       => $headers,
-        "timeout"       => 30,
-    ]);
+    // Use retryable API call with timeout handling
+    $response = chatbot_chatgpt_retryable_api_call($url, [
+        "headers" => $headers,
+    ], 3, chatbot_chatgpt_get_assistant_timeout());
 
     // ✅ Handle request errors
     if (is_wp_error($response)) {
@@ -583,11 +675,10 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
 
     while ($retry_count < $max_retries) {
 
-        // 🚀 ✅ FIX: Changed from `wp_remote_post()` to `wp_remote_get()`
-        $response = wp_remote_get($url, [
-            "headers"       => $headers,
-            "timeout"       => 30,
-        ]);
+        // Use retryable API call with timeout handling
+        $response = chatbot_chatgpt_retryable_api_call($url, [
+            "headers" => $headers,
+        ], 3, chatbot_chatgpt_get_assistant_timeout());
 
         // ✅ Handle request errors
         if (is_wp_error($response)) {
@@ -674,11 +765,10 @@ function getTheMessage($thread_id, $api_key, $run_id = null) {
         'Authorization' => 'Bearer ' . $api_key
     ];
 
-    // Fetch the response
-    $response = wp_remote_get($url, [
+    // Use retryable API call with timeout handling
+    $response = chatbot_chatgpt_retryable_api_call($url, [
         "headers" => $headers,
-        "timeout" => 30,
-    ]);
+    ], 3, chatbot_chatgpt_get_assistant_timeout());
 
     // ✅ Handle request errors
     if (is_wp_error($response)) {
