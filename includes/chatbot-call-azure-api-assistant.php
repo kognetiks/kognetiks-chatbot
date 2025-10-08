@@ -810,7 +810,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         // Lock clearing removed - main send function handles locking
         prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
         global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
+        $default_message = "The system is currently busy processing requests. Please try again in a few moments.";
         $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
             ? $chatbot_chatgpt_fixed_literal_messages[19] 
             : $default_message;

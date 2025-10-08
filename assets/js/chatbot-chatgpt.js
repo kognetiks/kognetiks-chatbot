@@ -26,7 +26,8 @@ function unlockConversationOnLoad() {
                 user_id: user_id,
                 page_id: page_id,
                 session_id: session_id,
-                assistant_id: assistant_id
+                assistant_id: assistant_id,
+                chatbot_nonce: kchat_settings.chatbot_unlock_nonce // Security: CSRF protection
             },
             success: function(response) {
                 // console.log('Chatbot: NOTICE: Conversation unlocked on page load');
@@ -55,7 +56,8 @@ function resetAllLocks() {
                 user_id: user_id,
                 page_id: page_id,
                 session_id: session_id,
-                assistant_id: assistant_id
+                assistant_id: assistant_id,
+                chatbot_nonce: kchat_settings.chatbot_reset_nonce // Security: CSRF protection
             },
             success: function(response) {
                 console.log('Chatbot: NOTICE: All locks reset - ' + response.data);
@@ -904,7 +906,8 @@ window.resetAllLocks = resetAllLocks;
                 user_id: user_id,
                 page_id: page_id,
                 session_id: session_id,
-                assistant_id: assistant_id
+                assistant_id: assistant_id,
+                chatbot_nonce: kchat_settings.chatbot_queue_nonce // Security: CSRF protection
             },
             success: function(response) {
                 if (response.success && response.data) {
@@ -1059,6 +1062,7 @@ window.resetAllLocks = resetAllLocks;
                 page_id: page_id, // pass the page ID here
                 session_id: session_id, // pass the session ID here
                 client_message_id: client_message_id, // pass the client message ID for idempotency
+                chatbot_nonce: kchat_settings.chatbot_message_nonce, // Security: CSRF protection
             },
             headers: {  // Adding headers to prevent caching
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -1094,8 +1098,7 @@ window.resetAllLocks = resetAllLocks;
                 
                 // Check if this is a "still working" message that should re-enable the button
                 if (typeof botResponse === 'string') {
-                    isStillWorkingMessage = botResponse.includes("I'm still working on your previous message") || 
-                                          botResponse.includes("still working on your previous message");
+                    isStillWorkingMessage = botResponse.includes("The system is currently busy processing requests");
                 }
                 // Revision to how disclaimers are handled - Ver 1.5.0
                 if (kchat_settings.chatbot_chatgpt_disclaimer_setting === 'No') {
@@ -1258,7 +1261,8 @@ window.resetAllLocks = resetAllLocks;
                 action: 'chatbot_chatgpt_download_transcript',
                 user_id: kchat_settings.user_id,
                 page_id: kchat_settings.page_id,
-                conversation_content: conversationContent  // Send the conversation content
+                conversation_content: conversationContent,  // Send the conversation content
+                chatbot_nonce: kchat_settings.chatbot_transcript_nonce // Security: CSRF protection
             },
             beforeSend: function () {
                 // Show typing indicator and disable submit button
@@ -1343,6 +1347,7 @@ window.resetAllLocks = resetAllLocks;
                 user_id: kchat_settings.user_id,
                 page_id: kchat_settings.page_id,
                 session_id: kchat_settings.session_id,
+                chatbot_nonce: kchat_settings.chatbot_tts_nonce // Security: CSRF protection
             },
             beforeSend: function () {
                 showTypingIndicator();
@@ -1642,6 +1647,7 @@ window.resetAllLocks = resetAllLocks;
         formData.append('user_id', user_id); // Add user_id to FormData
         formData.append('page_id', page_id); // Add page_id to FormData
         formData.append('session_id', session_id); // Add session_id to FormData
+        formData.append('chatbot_nonce', kchat_settings.chatbot_upload_nonce); // Security: CSRF protection
     
         $.ajax({
             url: kchat_settings.ajax_url,
@@ -1726,6 +1732,7 @@ window.resetAllLocks = resetAllLocks;
         }
         // console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_mp3');
+        formData.append('chatbot_nonce', kchat_settings.chatbot_upload_nonce); // Security: CSRF protection
     
         $.ajax({
             url: kchat_settings.ajax_url,
@@ -1788,6 +1795,7 @@ window.resetAllLocks = resetAllLocks;
                 thread_id: thread_id, // pass the thread ID
                 assistant_id: assistant_id, // pass the assistant ID
                 chatbot_chatgpt_force_page_reload: chatbot_chatgpt_force_page_reload, // pass the force page reload setting
+                chatbot_nonce: kchat_settings.chatbot_erase_nonce, // Security: CSRF protection
             },
             beforeSend: function () {
                 showTypingIndicator();

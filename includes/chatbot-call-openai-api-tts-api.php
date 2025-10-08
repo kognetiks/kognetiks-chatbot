@@ -278,6 +278,12 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 // Call the Text-to-Speech API
 function chatbot_chatgpt_read_aloud($message) {
 
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_tts_nonce')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+
     global $session_id;
     global $user_id;
     global $page_id;
