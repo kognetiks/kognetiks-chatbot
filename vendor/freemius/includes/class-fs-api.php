@@ -94,7 +94,7 @@
             $sdk_version = null,
             $url = null
         ) {
-			$identifier = md5( $slug . $scope . $id . $public_key . ( is_string( $secret_key ) ? $secret_key : '' ) . json_encode( $is_sandbox ) );
+			$identifier = wp_hash( $slug . $scope . $id . $public_key . ( is_string( $secret_key ) ? $secret_key : '' ) . json_encode( $is_sandbox ) );
 
 			if ( ! isset( self::$_instances[ $identifier ] ) ) {
 				self::_init();
@@ -470,8 +470,8 @@
 		private function get_cache_key( $path, $method = 'GET', $params = array() ) {
 			$canonized = $this->_api->CanonizePath( $path );
 //			$exploded = explode('/', $canonized);
-//			return $method . '_' . array_pop($exploded) . '_' . md5($canonized . json_encode($params));
-			return strtolower( $method . ':' . $canonized ) . ( ! empty( $params ) ? '#' . md5( json_encode( $params ) ) : '' );
+//			return $method . '_' . array_pop($exploded) . '_' . wp_hash($canonized . json_encode($params));
+			return strtolower( $method . ':' . $canonized ) . ( ! empty( $params ) ? '#' . wp_hash( json_encode( $params ) ) : '' );
 		}
 
         /**

@@ -159,6 +159,6 @@ $chatbot_chatgpt_fixed_literal_messages = [
     "Conversation effacée. Veuillez patienter pendant que la page se recharge.",                                // [16]
     "Conversation effacée.",                                                                                    // [17]
     "Conversation non effacée.",                                                                                // [18]
-    "Je travaille encore sur votre message précédent - veuillez l'envoyer à nouveau dans quelques minutes.",    // [19]
+    "Le système est occupé à traiter les demandes. Veuillez réessayer plus tard.",                              // [19]
     "Message en file d'attente. Traitement en cours...",                                                        // [20]
 ];

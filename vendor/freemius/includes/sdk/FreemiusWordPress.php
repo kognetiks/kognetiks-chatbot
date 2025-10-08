@@ -184,7 +184,7 @@
 
 		/**
 		 * Sign request with the following HTTP headers:
-		 *      Content-MD5: MD5(HTTP Request body)
+		 *      Content-MD5: wp_hash(HTTP Request body)
 		 *      Date: Current date (i.e Sat, 14 Feb 2016 20:24:46 +0000)
 		 *      Authorization: FS {scope_entity_id}:{scope_entity_public_key}:base64encode(sha256(string_to_sign,
 		 *      {scope_entity_secret_key}))
@@ -214,7 +214,7 @@
 		/**
 		 * Generate Authorization request headers:
 		 *
-		 *      Content-MD5: MD5(HTTP Request body)
+		 *      Content-MD5: wp_hash(HTTP Request body)
 		 *      Date: Current date (i.e Sat, 14 Feb 2016 20:24:46 +0000)
 		 *      Authorization: FS {scope_entity_id}:{scope_entity_public_key}:base64encode(sha256(string_to_sign,
 		 *      {scope_entity_secret_key}))
@@ -245,7 +245,7 @@
                 $content_type = 'application/json';
 
                 if ( ! empty( $pPostParams ) ) {
-                    $content_md5 = md5( $pPostParams );
+                    $content_md5 = wp_hash( $pPostParams );
                 }
             }
 

@@ -7,6 +7,8 @@
 /httpRequests/
 
 # Datasource local storage ignored files
+.vscode
+.dcignore
 .DS_Store
 /dataSources/
 /dataSources.local.xml

@@ -748,7 +748,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
 
     // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
-    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     $lock_timeout = 60; // 60 seconds timeout
 
     // Check for duplicate message UUID in conversation log
@@ -810,7 +810,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         // Lock clearing removed - main send function handles locking
         prod_trace('NOTICE', 'Thread ' . $thread_id . ' is locked, skipping concurrent call');
         global $chatbot_chatgpt_fixed_literal_messages;
-        $default_message = "I'm still working on your previous message—please send again in a moment.";
+        $default_message = "The system is currently busy processing requests. Please try again in a few moments.";
         $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
             ? $chatbot_chatgpt_fixed_literal_messages[19] 
             : $default_message;

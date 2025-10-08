@@ -401,7 +401,7 @@
             }
 
             if ( '' === $id ) {
-                $id = md5( $title . ' ' . $message . ' ' . $type );
+                $id = wp_hash( $title . ' ' . $message . ' ' . $type );
             }
 
             $message_object = array(

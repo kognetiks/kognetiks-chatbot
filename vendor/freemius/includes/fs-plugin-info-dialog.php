@@ -1552,7 +1552,7 @@
                 ) {
                     $missing_notice = array(
                         'type'    => 'error',
-                        'id'      => md5( microtime() ),
+                        'id'      => wp_hash( microtime() ),
                         'message' => $api->is_paid ?
                             fs_text_inline( 'Paid add-on must be deployed to Freemius.', 'paid-addon-not-deployed', $api->slug ) :
                             fs_text_inline( 'Add-on must be deployed to WordPress.org or Freemius.', 'free-addon-not-deployed', $api->slug ),

@@ -159,6 +159,6 @@ $chatbot_chatgpt_fixed_literal_messages = [
     "Rozmowa została usunięta. Proszę czekać, aż strona się odświeży.",                         // [16]
     "Rozmowa została usunięta.",                                                                // [17]
     "Rozmowa nie została usunięta.",                                                            // [18]
-    "Pracuję nad Twoją poprzednią wiadomością - proszę, ponownie wysyłaj ją za chwilę.",        // [19]
+    "System jest zajęty przetwarzaniem żądań. Spróbuj ponownie później.",                       // [19]
     "Wiadomość w kolejce. Przetwarzanie...",                                                    // [20]
 ];

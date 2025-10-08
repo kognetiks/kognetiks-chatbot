@@ -159,6 +159,6 @@ $chatbot_chatgpt_fixed_literal_messages = [
     "Conversa apagada. Por favor, aguarde enquanto a página recarrega.",                                    // [16]
     "Conversa apagada.",                                                                                    // [17]
     "Conversa não apagada.",                                                                                // [18]
-    "Estou trabalhando em sua mensagem anterior - por favor, envie-a novamente em alguns minutos.",         // [19]
+    "O sistema está ocupado processando solicitações. Por favor, tente novamente mais tarde.",              // [19]
     "Mensagem em fila. Processando...",                                                                     // [20]
 ];

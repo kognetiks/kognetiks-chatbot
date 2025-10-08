@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.3.4
+ * Version:     2.3.5
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -84,7 +84,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.3.4';
+$chatbot_chatgpt_plugin_version = '2.3.5';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -956,6 +956,15 @@ function chatbot_chatgpt_enqueue_scripts() {
         'additional_instructions' => $additional_instructions,
         'model' => $model,
         'voice' => $voice,
+        // Security: Generate nonces for AJAX requests
+        'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
+        'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
+        'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
+        'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
+        'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
+        'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
+        'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
+        'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
     ));
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -1124,7 +1133,7 @@ if (!wp_next_scheduled('chatbot_chatgpt_cleanup_download_files')) {
 
 // Message Queue Management Functions
 function chatbot_chatgpt_enqueue_message($user_id, $page_id, $session_id, $assistant_id, $message, $client_message_id = null) {
-    $queue_key = 'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     
     $queue = get_transient($queue_key);
     if (!$queue) {
@@ -1148,7 +1157,7 @@ function chatbot_chatgpt_enqueue_message($user_id, $page_id, $session_id, $assis
 }
 
 function chatbot_chatgpt_dequeue_message($user_id, $page_id, $session_id, $assistant_id) {
-    $queue_key = 'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     
     $queue = get_transient($queue_key);
     if (!$queue || empty($queue)) {
@@ -1167,7 +1176,7 @@ function chatbot_chatgpt_dequeue_message($user_id, $page_id, $session_id, $assis
 }
 
 function chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id) {
-    $queue_key = 'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     $queue = get_transient($queue_key);
     
     return [
@@ -1197,7 +1206,7 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     }
     
     // Set conversation lock for the queued message
-    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     set_transient($conv_lock, true, 60);
     
     // DIAG - Diagnostics - Ver 2.3.4
@@ -1216,6 +1225,29 @@ function chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assista
     chatbot_chatgpt_process_queue($user_id, $page_id, $session_id, $assistant_id);
     
     return true;
+    
+}
+
+// AJAX handler to get queue status
+function chatbot_chatgpt_get_queue_status_ajax() {
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_queue_nonce')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+
+    $user_id = sanitize_text_field($_POST['user_id']);
+    $page_id = sanitize_text_field($_POST['page_id']);
+    $session_id = sanitize_text_field($_POST['session_id']);
+    $assistant_id = sanitize_text_field($_POST['assistant_id']);
+    
+    if (!$user_id || !$page_id || !$session_id || !$assistant_id) {
+        wp_send_json_error('Missing required parameters');
+        return;
+    }
+    
+    $queue_status = chatbot_chatgpt_get_queue_status($user_id, $page_id, $session_id, $assistant_id);
+    wp_send_json_success($queue_status);
 }
 
 function chatbot_chatgpt_process_queued_message($message_data) {
@@ -1371,6 +1403,32 @@ function chatbot_chatgpt_process_single_message($message_data) {
 
 // Handle Ajax requests
 function chatbot_chatgpt_send_message() {
+
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_message_nonce')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+
+    // Security: Rate limiting for unauthenticated users to prevent API abuse
+    $user_id = get_current_user_id();
+    $is_authenticated = $user_id > 0;
+    
+    if (!$is_authenticated) {
+        // Get client IP for rate limiting
+        $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rate_limit_key = 'chatbot_rate_limit_' . (function_exists('wp_fast_hash') ? wp_fast_hash($client_ip) : hash('sha256', $client_ip));
+        
+        // Check rate limit (max 10 requests per minute for unauthenticated users)
+        $current_count = get_transient($rate_limit_key) ?: 0;
+        if ($current_count >= 10) {
+            wp_send_json_error('Rate limit exceeded. Please wait before sending another message.', 429);
+            return;
+        }
+        
+        // Increment rate limit counter
+        set_transient($rate_limit_key, $current_count + 1, 60); // 60 seconds
+    }
 
     // Global variables
     global $session_id;
@@ -1588,7 +1646,7 @@ function chatbot_chatgpt_send_message() {
     $voice = isset($kchat_settings['chatbot_chatgpt_voice_option']) ? $kchat_settings['chatbot_chatgpt_voice_option'] : '';
     
     // Check if there's already a conversation lock (active processing)
-    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     $is_processing = get_transient($conv_lock);
     
     // Debug logging for lock check
@@ -2170,30 +2228,49 @@ function chatbot_chatgpt_send_message() {
 add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 
-// Add action to upload files - Ver 1.7.6
+// Add action to get queue status
+add_action('wp_ajax_chatbot_chatgpt_get_queue_status', 'chatbot_chatgpt_get_queue_status_ajax');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_get_queue_status', 'chatbot_chatgpt_get_queue_status_ajax');
+
+// Add action to upload files - Ver 1.7.6 (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_upload_files', 'chatbot_chatgpt_upload_files');
-add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_files', 'chatbot_chatgpt_upload_files');
 
-// Add action to upload files - Ver 1.7.6
+// Add action to upload mp3 files - Ver 1.7.6 (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_upload_mp3', 'chatbot_chatgpt_upload_mp3');
-add_action('wp_ajax_nopriv_chatbot_chatgpt_upload_mp3', 'chatbot_chatgpt_upload_mp3');
 
-// Add action to erase conversation - Ver 1.8.6
+// Add action to erase conversation - Ver 1.8.6 (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation_handler');
-add_action('wp_ajax_nopriv_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation_handler'); // For logged-out users, if needed
+add_action('wp_ajax_nopriv_chatbot_chatgpt_erase_conversation', 'chatbot_chatgpt_erase_conversation_handler');
 
-// Add action to unlock conversation - Ver 2.3.0
+// Add action to unlock conversation - Ver 2.3.0 (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_unlock_conversation', 'chatbot_chatgpt_unlock_conversation_handler');
-add_action('wp_ajax_nopriv_chatbot_chatgpt_unlock_conversation', 'chatbot_chatgpt_unlock_conversation_handler'); // For logged-out users, if needed
 
+// Add action to reset all locks (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_reset_all_locks', 'chatbot_chatgpt_reset_all_locks_handler');
-add_action('wp_ajax_nopriv_chatbot_chatgpt_reset_all_locks', 'chatbot_chatgpt_reset_all_locks_handler'); // For logged-out users, if needed
+
+// Add action for text-to-speech (Security: Authentication required)
+add_action('wp_ajax_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
+
+// Add action for transcript download (Security: Authentication required)
+add_action('wp_ajax_chatbot_chatgpt_download_transcript', 'chatbot_chatgpt_download_transcript');
 
 // Settings and Deactivation - Ver 1.5.0
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chatbot_chatgpt_plugin_action_links');
 
 // Unlock conversation handler - Ver 2.3.0
 function chatbot_chatgpt_unlock_conversation_handler() {
+    
+    // Security: Check if user has permission to manage options (admin capability)
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Insufficient permissions to unlock conversation.', 403);
+        return;
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_unlock_nonce')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
     
     // Get parameters from POST
     $user_id = isset($_POST['user_id']) ? sanitize_text_field($_POST['user_id']) : '';
@@ -2203,12 +2280,12 @@ function chatbot_chatgpt_unlock_conversation_handler() {
     
     if ($user_id && $page_id && $session_id && $assistant_id) {
         // Clear the conversation lock
-        $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+        $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
         $lock_exists = get_transient($conv_lock);
         $deleted_lock = delete_transient($conv_lock);
         
         // Clear the message queue
-        $queue_key = 'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+        $queue_key = 'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
         $queue_exists = get_transient($queue_key);
         $deleted_queue = delete_transient($queue_key);
         
@@ -2218,9 +2295,9 @@ function chatbot_chatgpt_unlock_conversation_handler() {
         
         // Try to clear all possible lock variations
         $possible_locks = [
-            'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_conv_lock_' . md5($user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_conv_lock_' . md5($session_id),
+            'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_conv_lock_' . wp_hash($user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_conv_lock_' . wp_hash($session_id),
             'chatgpt_conv_lock_' . $session_id,
             'chatgpt_conv_lock_' . $user_id . '_' . $page_id . '_' . $session_id,
         ];
@@ -2244,6 +2321,18 @@ function chatbot_chatgpt_unlock_conversation_handler() {
 // Global lock reset handler - Ver 2.3.0
 function chatbot_chatgpt_reset_all_locks_handler() {
     
+    // Security: Check if user has permission to manage options (admin capability)
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Insufficient permissions to reset locks.', 403);
+        return;
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_reset_nonce')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+    
     // Get parameters from POST
     $user_id = isset($_POST['user_id']) ? sanitize_text_field($_POST['user_id']) : '';
     $page_id = isset($_POST['page_id']) ? sanitize_text_field($_POST['page_id']) : '';
@@ -2255,14 +2344,14 @@ function chatbot_chatgpt_reset_all_locks_handler() {
     if ($user_id && $page_id && $session_id && $assistant_id) {
         // Clear all possible lock variations for this conversation
         $possible_locks = [
-            'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_conv_lock_' . md5($user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_conv_lock_' . md5($session_id),
+            'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_conv_lock_' . wp_hash($user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_conv_lock_' . wp_hash($session_id),
             'chatgpt_conv_lock_' . $session_id,
             'chatgpt_conv_lock_' . $user_id . '_' . $page_id . '_' . $session_id,
-            'chatgpt_run_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_run_lock_' . md5($user_id . '|' . $page_id . '|' . $session_id),
-            'chatgpt_run_lock_' . md5($session_id),
+            'chatgpt_run_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_run_lock_' . wp_hash($user_id . '|' . $page_id . '|' . $session_id),
+            'chatgpt_run_lock_' . wp_hash($session_id),
             'chatgpt_run_lock_' . $session_id,
             'chatgpt_run_lock_' . $user_id . '_' . $page_id . '_' . $session_id,
         ];
@@ -2278,9 +2367,9 @@ function chatbot_chatgpt_reset_all_locks_handler() {
         
         // Clear all possible queue variations
         $possible_queues = [
-            'chatbot_message_queue_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
-            'chatbot_message_queue_' . md5($user_id . '|' . $page_id . '|' . $session_id),
-            'chatbot_message_queue_' . md5($session_id),
+            'chatbot_message_queue_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id),
+            'chatbot_message_queue_' . wp_hash($user_id . '|' . $page_id . '|' . $session_id),
+            'chatbot_message_queue_' . wp_hash($session_id),
             'chatbot_message_queue_' . $session_id,
             'chatbot_message_queue_' . $user_id . '_' . $page_id . '_' . $session_id,
         ];

@@ -574,6 +574,25 @@ function chatbot_error_log($message) {
 // Log Chatbot Errors to the Server - Ver 2.0.3
 function log_chatbot_error() {
 
+    // Security: Rate limiting for unauthenticated users to prevent log spam
+    $user_id = get_current_user_id();
+    $is_authenticated = $user_id > 0;
+    
+    if (!$is_authenticated) {
+        // Get client IP for rate limiting
+        $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rate_limit_key = 'chatbot_log_rate_limit_' . (function_exists('wp_fast_hash') ? wp_fast_hash($client_ip) : hash('sha256', $client_ip));
+        
+        // Check rate limit (max 5 log entries per minute for unauthenticated users)
+        $current_count = get_transient($rate_limit_key) ?: 0;
+        if ($current_count >= 5) {
+            wp_die('Rate limit exceeded for logging.', 'Rate Limit Exceeded', array('response' => 429));
+        }
+        
+        // Increment rate limit counter
+        set_transient($rate_limit_key, $current_count + 1, 60); // 60 seconds
+    }
+
     global $chatbot_chatgpt_plugin_dir_path;
     
     if (isset($_POST['error_message'])) {

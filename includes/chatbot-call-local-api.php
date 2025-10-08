@@ -33,7 +33,7 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
 
     // Lock the conversation BEFORE thread resolution to prevent empty-thread vs real-thread lock split
-    $conv_lock = 'chatgpt_conv_lock_' . md5($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
+    $conv_lock = 'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $user_id . '|' . $page_id . '|' . $session_id);
     $lock_timeout = 60; // 60 seconds timeout
 
     // Check for duplicate message UUID in conversation log

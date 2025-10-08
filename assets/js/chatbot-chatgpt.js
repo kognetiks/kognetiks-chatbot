@@ -26,7 +26,8 @@ function unlockConversationOnLoad() {
                 user_id: user_id,
                 page_id: page_id,
                 session_id: session_id,
-                assistant_id: assistant_id
+                assistant_id: assistant_id,
+                chatbot_nonce: kchat_settings.chatbot_unlock_nonce // Security: CSRF protection
             },
             success: function(response) {
                 // console.log('Chatbot: NOTICE: Conversation unlocked on page load');
@@ -55,7 +56,8 @@ function resetAllLocks() {
                 user_id: user_id,
                 page_id: page_id,
                 session_id: session_id,
-                assistant_id: assistant_id
+                assistant_id: assistant_id,
+                chatbot_nonce: kchat_settings.chatbot_reset_nonce // Security: CSRF protection
             },
             success: function(response) {
                 console.log('Chatbot: NOTICE: All locks reset - ' + response.data);
@@ -870,6 +872,72 @@ window.resetAllLocks = resetAllLocks;
         return Math.ceil((((d - oneJan) / 86400000) + oneJan.getDay() + 1) / 7);
     }
 
+    // Safe string coercion to prevent [object Object] display
+    function safeStringCoercion(val) {
+        if (typeof val === 'string') {
+            return val;
+        }
+        if (val && typeof val === 'object') {
+            // Try common properties that might contain the actual message
+            if (val.text) return val.text;
+            if (val.message) return val.message;
+            if (val.content) return val.content;
+            if (val.data) return safeStringCoercion(val.data); // Recursive for nested objects
+            // Fallback to JSON stringify
+            return JSON.stringify(val);
+        }
+        // Handle null, undefined, numbers, etc.
+        return String(val || '');
+    }
+
+    // Poll queue status to determine when to re-enable the submit button
+    function pollQueueStatus() {
+        let user_id = kchat_settings.user_id;
+        let page_id = kchat_settings.page_id;
+        let session_id = kchat_settings.session_id;
+        let assistant_id = kchat_settings.assistant_id;
+        
+        $.ajax({
+            url: kchat_settings.ajax_url,
+            method: 'POST',
+            timeout: 5000,
+            data: {
+                action: 'chatbot_chatgpt_get_queue_status',
+                user_id: user_id,
+                page_id: page_id,
+                session_id: session_id,
+                assistant_id: assistant_id,
+                chatbot_nonce: kchat_settings.chatbot_queue_nonce // Security: CSRF protection
+            },
+            success: function(response) {
+                if (response.success && response.data) {
+                    const queueStatus = response.data;
+                    if (!queueStatus.has_messages || queueStatus.count === 0) {
+                        // Queue is empty, re-enable the button
+                        submitButton.prop('disabled', false);
+                        removeTypingIndicator();
+                    } else {
+                        // Queue still has messages, poll again in 1 second
+                        setTimeout(pollQueueStatus, 1000);
+                    }
+                } else {
+                    // Fallback: re-enable button after 5 seconds if polling fails
+                    setTimeout(function() {
+                        submitButton.prop('disabled', false);
+                        removeTypingIndicator();
+                    }, 5000);
+                }
+            },
+            error: function() {
+                // Fallback: re-enable button after 5 seconds if polling fails
+                setTimeout(function() {
+                    submitButton.prop('disabled', false);
+                    removeTypingIndicator();
+                }, 5000);
+            }
+        });
+    }
+
     function resetMessageCount(today) {
         localStorage.setItem('chatbot_chatgpt_message_count', 0); // Reset the counter
         localStorage.setItem('chatbot_chatgpt_last_reset', today); // Update last reset date
@@ -994,6 +1062,7 @@ window.resetAllLocks = resetAllLocks;
                 page_id: page_id, // pass the page ID here
                 session_id: session_id, // pass the session ID here
                 client_message_id: client_message_id, // pass the client message ID for idempotency
+                chatbot_nonce: kchat_settings.chatbot_message_nonce, // Security: CSRF protection
             },
             headers: {  // Adding headers to prevent caching
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -1011,19 +1080,25 @@ window.resetAllLocks = resetAllLocks;
                 ajaxResponse = response;
                 
                 // Handle queued responses
-                if (response.queued) {
-                    botResponse = response.message;
+                const isQueued = response.data && typeof response.data === 'object' && response.data.queued;
+                // console.log('Chatbot: Checking response.data.queued:', isQueued);
+                if (isQueued) {
+                    // For queued messages, don't show any message - keep the typing indicator
+                    botResponse = null;
                     // For queued messages, we don't want to disable the button
                     // The queue will handle processing and the button will be re-enabled
                     // when the actual response comes through
+                    // console.log('Chatbot: Queued response detected - botResponse set to null');
                 } else {
                     botResponse = response.data;
+                    // Safe string coercion to prevent [object Object] display
+                    botResponse = safeStringCoercion(botResponse);
+                    // console.log('Chatbot: Non-queued response - botResponse set to:', botResponse);
                 }
                 
                 // Check if this is a "still working" message that should re-enable the button
                 if (typeof botResponse === 'string') {
-                    isStillWorkingMessage = botResponse.includes("I'm still working on your previous message") || 
-                                          botResponse.includes("still working on your previous message");
+                    isStillWorkingMessage = botResponse.includes("The system is currently busy processing requests");
                 }
                 // Revision to how disclaimers are handled - Ver 1.5.0
                 if (kchat_settings.chatbot_chatgpt_disclaimer_setting === 'No') {
@@ -1076,8 +1151,13 @@ window.resetAllLocks = resetAllLocks;
                 }
             },
             complete: function () {
-                removeTypingIndicator();
+                // Only remove typing indicator for non-queued responses
+                const isQueuedResponse = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
+                if (!isQueuedResponse) {
+                    removeTypingIndicator();
+                }
                 if (botResponse) {
+                    // console.log('Chatbot: Appending botResponse:', botResponse);
                     appendMessage(botResponse, 'bot');
                     // FIXME - Add custom JS to the bot's response - Ver 2.0.9
                     // Append custom JS to the bot's response - Ver 2.0.9
@@ -1089,14 +1169,20 @@ window.resetAllLocks = resetAllLocks;
                             appendMessage(customMessage, 'bot');
                         }
                     };
+                } else {
+                    // console.log('Chatbot: botResponse is null/empty - not appending message');
                 }
                 scrollToLastBotResponse();
                 
                 // Re-enable the button if this is not a queued response OR if it's a "still working" message
-                // For queued responses, the button should remain disabled until the actual response
+                // For queued responses, keep the button disabled until queue processing is complete
                 // For "still working" messages, the button should be re-enabled immediately
-                if (ajaxResponse && (!ajaxResponse.queued || isStillWorkingMessage)) {
+                const isQueuedForButton = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
+                if (ajaxResponse && (!isQueuedForButton || isStillWorkingMessage)) {
                     submitButton.prop('disabled', false);
+                } else if (isQueuedForButton) {
+                    // For queued responses, poll the queue status and re-enable when empty
+                    pollQueueStatus();
                 }
             },
             cache: false, // This ensures jQuery does not cache the result
@@ -1125,7 +1211,10 @@ window.resetAllLocks = resetAllLocks;
     messageInput.on('keydown', function (e) {
         if (e.keyCode === 13  && !e.shiftKey) {
             e.preventDefault();
-            submitButton.trigger('click');
+            // Only trigger click if the submit button is not disabled
+            if (!submitButton.prop('disabled')) {
+                submitButton.trigger('click');
+            }
         }
     });
 
@@ -1172,7 +1261,8 @@ window.resetAllLocks = resetAllLocks;
                 action: 'chatbot_chatgpt_download_transcript',
                 user_id: kchat_settings.user_id,
                 page_id: kchat_settings.page_id,
-                conversation_content: conversationContent  // Send the conversation content
+                conversation_content: conversationContent,  // Send the conversation content
+                chatbot_nonce: kchat_settings.chatbot_transcript_nonce // Security: CSRF protection
             },
             beforeSend: function () {
                 // Show typing indicator and disable submit button
@@ -1257,6 +1347,7 @@ window.resetAllLocks = resetAllLocks;
                 user_id: kchat_settings.user_id,
                 page_id: kchat_settings.page_id,
                 session_id: kchat_settings.session_id,
+                chatbot_nonce: kchat_settings.chatbot_tts_nonce // Security: CSRF protection
             },
             beforeSend: function () {
                 showTypingIndicator();
@@ -1268,7 +1359,7 @@ window.resetAllLocks = resetAllLocks;
                 }
                 response.data = markdownToHtml(response.data || '');
                 // appendMessage('Text-to-Speech: ' + response.data, 'bot');
-                appendMessage(response.data, 'bot');
+                appendMessage(safeStringCoercion(response.data), 'bot');
             },
             error: function(jqXHR, status, error) {
                 if(status === "timeout") {
@@ -1556,6 +1647,7 @@ window.resetAllLocks = resetAllLocks;
         formData.append('user_id', user_id); // Add user_id to FormData
         formData.append('page_id', page_id); // Add page_id to FormData
         formData.append('session_id', session_id); // Add session_id to FormData
+        formData.append('chatbot_nonce', kchat_settings.chatbot_upload_nonce); // Security: CSRF protection
     
         $.ajax({
             url: kchat_settings.ajax_url,
@@ -1640,6 +1732,7 @@ window.resetAllLocks = resetAllLocks;
         }
         // console.log('Chatbot: NOTICE: Files selected ' + fileField.files);
         formData.append('action', 'chatbot_chatgpt_upload_mp3');
+        formData.append('chatbot_nonce', kchat_settings.chatbot_upload_nonce); // Security: CSRF protection
     
         $.ajax({
             url: kchat_settings.ajax_url,
@@ -1702,6 +1795,7 @@ window.resetAllLocks = resetAllLocks;
                 thread_id: thread_id, // pass the thread ID
                 assistant_id: assistant_id, // pass the assistant ID
                 chatbot_chatgpt_force_page_reload: chatbot_chatgpt_force_page_reload, // pass the force page reload setting
+                chatbot_nonce: kchat_settings.chatbot_erase_nonce, // Security: CSRF protection
             },
             beforeSend: function () {
                 showTypingIndicator();
@@ -1712,7 +1806,7 @@ window.resetAllLocks = resetAllLocks;
                 // DIAG - Log the response
                 // console.log('Chatbot: NOTICE: Removing conversation from sessionStorage');
                 // console.log('Chatbot: SUCCESS:', response.data);
-                appendMessage( response.data, 'bot');
+                appendMessage(safeStringCoercion(response.data), 'bot');
                 // Check localStorage setting and force a page reload if equal to 'Yes' - Ver 2.0.4
                 if (kchat_settings.chatbot_chatgpt_force_page_reload === 'Yes') {
                     location.reload(); // Force a page reload after clearing the conversation
