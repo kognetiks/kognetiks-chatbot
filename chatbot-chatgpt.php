@@ -1417,7 +1417,7 @@ function chatbot_chatgpt_send_message() {
     if (!$is_authenticated) {
         // Get client IP for rate limiting
         $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $rate_limit_key = 'chatbot_rate_limit_' . md5($client_ip);
+        $rate_limit_key = 'chatbot_rate_limit_' . (function_exists('wp_fast_hash') ? wp_fast_hash($client_ip) : hash('sha256', $client_ip));
         
         // Check rate limit (max 10 requests per minute for unauthenticated users)
         $current_count = get_transient($rate_limit_key) ?: 0;
