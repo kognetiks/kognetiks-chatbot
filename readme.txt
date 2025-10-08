@@ -233,7 +233,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.3.5 - Released TBD =
+= 2.3.5 - Released 2025-10-08 =
 
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.4.
 
