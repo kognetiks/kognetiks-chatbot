@@ -159,6 +159,6 @@ $chatbot_chatgpt_fixed_literal_messages = [
     "Rozhovor byl vymazán. Počkejte, prosím, až se stránka znovu načte.",                           // [16]
     "Rozhovor byl vymazán.",                                                                        // [17]
     "Konverzace nebyla vymazána.",                                                                  // [18]                       
-    "Stále pracuji na vaší předchozí zprávě - prosím, pošlete ji znovu za chvíli.",                 // [19]
+    "Systém je zaneprázdněn zpracováním požadavků. Zkuste to prosím znovu později.",                // [19]
     "Zpráva byla do fronty přidána. Probíhá zpracování...",                                         // [20]
 ];

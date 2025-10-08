@@ -13,97 +13,15 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Helper function for retryable API calls with timeout handling
-function chatbot_chatgpt_retryable_api_call($url, $args, $max_retries = 3, $base_timeout = null) {
-    $retry_count = 0;
-    
-    // Get timeout setting from options if not provided
-    if ($base_timeout === null) {
-        $base_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '30')));
-    }
-    
-    while ($retry_count < $max_retries) {
-        // Increase timeout with each retry
-        $timeout = $base_timeout + ($retry_count * 10); // base, base+10s, base+20s
-        $args['timeout'] = $timeout;
-        
-        $response = wp_remote_get($url, $args);
-        
-        // If it's not a WP_Error, return the response
-        if (!is_wp_error($response)) {
-            return $response;
-        }
-        
-        $error_message = $response->get_error_message();
-        
-        // Check if it's a timeout error that we should retry
-        if (strpos($error_message, 'cURL error 28') !== false || 
-            strpos($error_message, 'Operation timed out') !== false) {
-            
-            $retry_count++;
-            if ($retry_count < $max_retries) {
-                // Log the retry attempt with detailed stats
-                prod_trace('WARNING', "API timeout (attempt {$retry_count}/{$max_retries}), retrying with {$timeout}s timeout...");
-                chatbot_chatgpt_log_timeout_stats(basename($url), $retry_count, $timeout);
-                
-                // Wait before retrying (exponential backoff)
-                $wait_time = min(pow(2, $retry_count), 8); // 2s, 4s, 8s max
-                sleep($wait_time);
-                continue;
-            }
-        }
-        
-        // For non-timeout errors or final retry, return the error
-        prod_trace('ERROR', 'HTTP Request failed: ' . $error_message);
-        return $response;
-    }
-    
-    // This should never be reached, but just in case
-    return $response;
-}
-
 // Helper function to get appropriate timeout for assistant operations
 function chatbot_chatgpt_get_assistant_timeout() {
     $base_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '30')));
     
     // Assistant operations often take longer, so increase the base timeout
     // but cap it at a reasonable maximum to prevent extremely long waits
-    $assistant_timeout = min($base_timeout + 30, 120); // Add 30s but max 120s
+    $assistant_timeout = min($base_timeout + 60, 180); // Add 60s but max 180s (3 minutes)
     
     return $assistant_timeout;
-}
-
-// Helper function to log timeout statistics for monitoring
-function chatbot_chatgpt_log_timeout_stats($function_name, $attempt, $timeout_used) {
-    // Log timeout attempts for monitoring purposes
-    prod_trace('INFO', "Timeout attempt {$attempt} in {$function_name} with {$timeout_used}s timeout");
-    
-    // Optionally store timeout stats in transients for analysis
-    $timeout_stats = get_transient('chatbot_timeout_stats');
-    if (!$timeout_stats) {
-        $timeout_stats = [];
-    }
-    
-    $today = date('Y-m-d');
-    if (!isset($timeout_stats[$today])) {
-        $timeout_stats[$today] = [];
-    }
-    
-    if (!isset($timeout_stats[$today][$function_name])) {
-        $timeout_stats[$today][$function_name] = 0;
-    }
-    
-    $timeout_stats[$today][$function_name]++;
-    
-    // Keep only last 7 days of stats
-    $seven_days_ago = date('Y-m-d', strtotime('-7 days'));
-    foreach ($timeout_stats as $date => $stats) {
-        if ($date < $seven_days_ago) {
-            unset($timeout_stats[$date]);
-        }
-    }
-    
-    set_transient('chatbot_timeout_stats', $timeout_stats, 7 * DAY_IN_SECONDS);
 }
 
 // -------------------------------------------------------------------------
@@ -423,7 +341,7 @@ function runTheAssistant($thread_id, $assistant_id, $context, $api_key, $message
         // Return user-friendly message for "already has an active run" error
         if (strpos($errorMessage, 'already has an active run') !== false) {
             global $chatbot_chatgpt_fixed_literal_messages;
-            $default_message = "I'm still working on your previous message—please send again in a moment.";
+            $default_message = "The system is currently busy processing requests. Please try again in a few moments.";
             $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
                 ? $chatbot_chatgpt_fixed_literal_messages[19] 
                 : $default_message;
@@ -470,23 +388,23 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
 
     $status = "";
 
-    // Exponential backoff parameters - Ver 2.2.0
-    $initialSleep = 500000;        // Initial sleep time in microseconds (0.5 seconds)
-    $maxSleep = 20000000;          // Maximum sleep time in microseconds (20 seconds)
+    // Exponential backoff parameters - Ver 2.2.0 (Enhanced for slow servers)
+    $initialSleep = 2000000;       // Initial sleep time in microseconds (2 seconds) - increased for slow servers
+    $maxSleep = 30000000;          // Maximum sleep time in microseconds (30 seconds) - increased for slow servers
     $sleepTime = $initialSleep;
     $retryCount = 0;
-    $maxRetriesBeforeReset = 5;    // Number of retries before resetting the sleep time
-    $resetRangeMin = 500000;       // Minimum reset sleep time in microseconds (0.5 seconds)
-    $resetRangeMax = 2000000;      // Maximum reset sleep time in microseconds (2 seconds)
-    $maxTotalRetries = 50;         // Maximum total retries to prevent infinite loops
+    $maxRetriesBeforeReset = 3;    // Number of retries before resetting the sleep time (reduced for faster adaptation)
+    $resetRangeMin = 2000000;      // Minimum reset sleep time in microseconds (2 seconds) - increased
+    $resetRangeMax = 5000000;      // Maximum reset sleep time in microseconds (5 seconds) - increased
+    $maxTotalRetries = 100;        // Maximum total retries to prevent infinite loops (increased for slow servers)
     $totalRetryCount = 0;          // Total retry counter
 
     while ($status != "completed" && $totalRetryCount < $maxTotalRetries) {
 
-        // Use retryable API call with timeout handling
-        $response = chatbot_chatgpt_retryable_api_call($url, [
-            "headers" => $headers,
-        ], 3, chatbot_chatgpt_get_assistant_timeout());
+        $response = wp_remote_get($url, [
+            "headers"       => $headers,
+            "timeout"       => chatbot_chatgpt_get_assistant_timeout(),
+        ]);
     
         // ✅ Check if `wp_remote_post()` returned an error
         if (is_wp_error($response)) {
@@ -601,10 +519,10 @@ function getTheRunsSteps($thread_id, $runId, $api_key) {
         "Authorization" => "Bearer " . $api_key
     ];
 
-    // Use retryable API call with timeout handling
-    $response = chatbot_chatgpt_retryable_api_call($url, [
-        "headers" => $headers,
-    ], 3, chatbot_chatgpt_get_assistant_timeout());
+    $response = wp_remote_get($url, [
+        "headers"       => $headers,
+        "timeout"       => chatbot_chatgpt_get_assistant_timeout(),
+    ]);
 
     // ✅ Handle request errors
     if (is_wp_error($response)) {
@@ -668,17 +586,17 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
         "Authorization" => "Bearer " . $api_key
     ];
 
-    // Retry settings
-    $max_retries = 30; // Max retries before giving up
+    // Retry settings (Enhanced for slow servers)
+    $max_retries = 60; // Max retries before giving up (increased for slow servers)
     $retry_count = 0;
-    $sleep_time = 500000; // 0.5 seconds
+    $sleep_time = 2000000; // 2 seconds (increased for slow servers)
 
     while ($retry_count < $max_retries) {
 
-        // Use retryable API call with timeout handling
-        $response = chatbot_chatgpt_retryable_api_call($url, [
-            "headers" => $headers,
-        ], 3, chatbot_chatgpt_get_assistant_timeout());
+        $response = wp_remote_get($url, [
+            "headers"       => $headers,
+            "timeout"       => chatbot_chatgpt_get_assistant_timeout(),
+        ]);
 
         // ✅ Handle request errors
         if (is_wp_error($response)) {
@@ -720,9 +638,12 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
             return "Error: Missing 'data' in API response.";
         }
 
-        // Sleep before retrying
+        // Sleep before retrying with progressive increase for slow servers
         usleep($sleep_time);
         $retry_count++;
+        
+        // Increase sleep time progressively (2s, 4s, 6s, 8s, 10s max)
+        $sleep_time = min($sleep_time + 2000000, 10000000); // Add 2s each time, max 10s
     }
 
     // ✅ Log and return failure if retries exceeded
@@ -765,10 +686,10 @@ function getTheMessage($thread_id, $api_key, $run_id = null) {
         'Authorization' => 'Bearer ' . $api_key
     ];
 
-    // Use retryable API call with timeout handling
-    $response = chatbot_chatgpt_retryable_api_call($url, [
-        "headers" => $headers,
-    ], 3, chatbot_chatgpt_get_assistant_timeout());
+    $response = wp_remote_get($url, [
+        "headers"       => $headers,
+        "timeout"       => chatbot_chatgpt_get_assistant_timeout(),
+    ]);
 
     // ✅ Handle request errors
     if (is_wp_error($response)) {
@@ -1217,7 +1138,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
             // DIAG - Diagnostics - Ver 2.3.5
             // prod_trace('NOTICE', 'Active run detected, returning friendly message');
             global $chatbot_chatgpt_fixed_literal_messages;
-            $default_message = "I'm still working on your previous message—please send again in a moment.";
+            $default_message = "The system is currently busy processing requests. Please try again in a few moments.";
             $locked_message = isset($chatbot_chatgpt_fixed_literal_messages[19]) 
                 ? $chatbot_chatgpt_fixed_literal_messages[19] 
                 : $default_message;

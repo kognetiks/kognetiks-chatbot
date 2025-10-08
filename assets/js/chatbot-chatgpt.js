@@ -1098,8 +1098,7 @@ window.resetAllLocks = resetAllLocks;
                 
                 // Check if this is a "still working" message that should re-enable the button
                 if (typeof botResponse === 'string') {
-                    isStillWorkingMessage = botResponse.includes("I'm still working on your previous message") || 
-                                          botResponse.includes("still working on your previous message");
+                    isStillWorkingMessage = botResponse.includes("The system is currently busy processing requests");
                 }
                 // Revision to how disclaimers are handled - Ver 1.5.0
                 if (kchat_settings.chatbot_chatgpt_disclaimer_setting === 'No') {

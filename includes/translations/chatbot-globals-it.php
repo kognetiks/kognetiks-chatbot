@@ -159,6 +159,6 @@ $chatbot_chatgpt_fixed_literal_messages = [
     "Conversazione cancellata. Attendere mentre la pagina si ricarica.",                                        // [16]
     "Conversazione cancellata.",                                                                                // [17]
     "Conversazione non cancellata.",                                                                            // [18]
-    "Sto lavorando ancora sulla tua precedente messaggio - per favore, invialo di nuovo tra qualche minuto.",   // [19]
+    "Il sistema è occupato nell'elaborazione delle richieste. Si prega di riprovare più tardi.",                // [19]
     "Messaggio in coda. In elaborazione...",                                                                    // [20]
 ];
