@@ -1079,6 +1079,9 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     } else {
 
         // When Advanced Content Search is disabled, send only the basic context - Ver 2.3.5.2
+        // Initialize variables to prevent undefined variable warnings
+        $sys_message = '';
+        $chatgpt_last_response = '';
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context;
         
         // DIAG - Diagnostics - Version 2.3.5.2 - Log that Knowledge Navigator context is being excluded
@@ -1133,6 +1136,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         
         if ($active) {
             // Clear locks and return friendly message
+            $thread_lock = 'chatgpt_run_lock_' . $thread_id;
             delete_transient($thread_lock);
             delete_transient($conv_lock);
             // DIAG - Diagnostics - Ver 2.3.5
@@ -1151,6 +1155,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         if (!is_array($assistants_response) || is_string($assistants_response)) {
           // back_trace( 'ERROR', 'Invalid response format or error occurred');
             // Clear both locks before returning error
+            $thread_lock = 'chatgpt_run_lock_' . $thread_id;
             delete_transient($thread_lock);
             delete_transient($conv_lock);
             return "Error: Invalid response format or error occurred.";
@@ -1165,6 +1170,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         } else {
           // back_trace( 'ERROR', 'runId key not found in response');
             // Clear both locks before returning error
+            $thread_lock = 'chatgpt_run_lock_' . $thread_id;
             delete_transient($thread_lock);
             delete_transient($conv_lock);
             return "Error: 'id' key not found in response.";
