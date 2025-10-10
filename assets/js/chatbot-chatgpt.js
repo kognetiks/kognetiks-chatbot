@@ -45,6 +45,12 @@ function resetAllLocks() {
     let page_id = kchat_settings.page_id;
     let session_id = kchat_settings.session_id;
     let assistant_id = kchat_settings.assistant_id;
+
+    console.log('kchat_settings:', kchat_settings);
+    console.log('user_id:', kchat_settings.user_id);
+    console.log('page_id:', kchat_settings.page_id);
+    console.log('session_id:', kchat_settings.session_id);
+    console.log('assistant_id:', kchat_settings.assistant_id);
     
     if (user_id && page_id && session_id && assistant_id) {
         $.ajax({

@@ -2248,6 +2248,9 @@ add_action('wp_ajax_chatbot_chatgpt_unlock_conversation', 'chatbot_chatgpt_unloc
 // Add action to reset all locks (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_reset_all_locks', 'chatbot_chatgpt_reset_all_locks_handler');
 
+// Add action to reset cache and locks (Security: Authentication required) - Ver 2.3.6
+add_action('wp_ajax_chatbot_chatgpt_reset_cache_locks', 'chatbot_chatgpt_reset_cache_locks_handler');
+
 // Add action for text-to-speech (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
 
@@ -2395,6 +2398,93 @@ function chatbot_chatgpt_reset_all_locks_handler() {
     
     }
 
+}
+
+// Reset Cache and Locks Handler - Ver 2.3.6
+function chatbot_chatgpt_reset_cache_locks_handler() {
+    
+    // Security: Check if user has permission to manage options (admin capability)
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Insufficient permissions to reset cache and locks.', 403);
+        return;
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_reset_cache_locks')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+    
+    global $wpdb;
+    $cleared_count = 0;
+    
+    try {
+        // Clear all conversation locks
+        $lock_patterns = [
+            '_transient_chatgpt_conv_lock_%',
+            '_transient_timeout_chatgpt_conv_lock_%',
+            '_transient_chatgpt_run_lock_%',
+            '_transient_timeout_chatgpt_run_lock_%',
+            '_transient_chatbot_message_queue_%',
+            '_transient_timeout_chatbot_message_queue_%',
+            '_transient_chatbot_chatgpt_%',
+            '_transient_timeout_chatbot_chatgpt_%'
+        ];
+        
+        foreach ($lock_patterns as $pattern) {
+            $result = $wpdb->query($wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+                $pattern
+            ));
+            $cleared_count += $result;
+        }
+        
+        // Clear expired transients
+        $expired_result = $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+            '_transient_timeout_%',
+            time()
+        ));
+        $cleared_count += $expired_result;
+        
+        // Clear WordPress object cache if available
+        if (function_exists('wp_cache_flush')) {
+            wp_cache_flush();
+        }
+        
+        // Clear any file-based caches
+        $cache_dirs = [
+            WP_CONTENT_DIR . '/cache/',
+            WP_CONTENT_DIR . '/uploads/chatbot-chatgpt/',
+            plugin_dir_path(__FILE__) . 'cache/',
+            plugin_dir_path(__FILE__) . 'audio/',
+            plugin_dir_path(__FILE__) . 'downloads/',
+            plugin_dir_path(__FILE__) . 'transcripts/'
+        ];
+        
+        foreach ($cache_dirs as $cache_dir) {
+            if (is_dir($cache_dir)) {
+                $files = glob($cache_dir . '*');
+                foreach ($files as $file) {
+                    if (is_file($file) && filemtime($file) < (time() - 3600)) { // Older than 1 hour
+                        @unlink($file);
+                        $cleared_count++;
+                    }
+                }
+            }
+        }
+        
+        // Log the action
+        $log_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Cache and locks reset by admin user ID: ' . get_current_user_id() . ' - Cleared ' . $cleared_count . ' entries';
+        chatbot_error_log($log_message);
+        
+        wp_send_json_success('Cache and locks reset successfully. Cleared ' . $cleared_count . ' entries.');
+        
+    } catch (Exception $e) {
+        $log_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Error: ' . $e->getMessage();
+        chatbot_error_log($log_message);
+        wp_send_json_error('Error resetting cache and locks: ' . $e->getMessage());
+    }
 }
 
 // Append an extra message to the response - Ver 2.0.9
