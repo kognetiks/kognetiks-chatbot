@@ -128,33 +128,39 @@ window.resetAllLocks = resetAllLocks;
 
     // Get an open icon for the chatbot - Ver 1.8.6
     // chatbotopenicon = plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
-    chatbotopenicon = kchat_settings.chatbot_chatgpt_appearance_open_icon || plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    const chatbotopeniconUrl = kchat_settings.chatbot_chatgpt_appearance_open_icon || plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    // Sanitize the open icon URL to prevent XSS
+    const sanitizedOpenIcon = DOMPurify.sanitize(chatbotopeniconUrl, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
     chatbotopenicon = $('<img>')
     .attr('id', 'chatbot-open-icon')
     .attr('class', 'chatbot-open-icon')
-    .attr('src', chatbotopenicon)
+    .attr('src', sanitizedOpenIcon)
     .attr('decoding', 'async')
     .attr('width', '24')
     .attr('height', '24');
 
     // Get a collapse icon for the chatbot - Ver 1.8.6
     // chatbotcollapseicon = plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
-    chatbotcollapseicon = kchat_settings.chatbot_chatgpt_appearance_collapse_icon || plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
+    const chatbotcollapseiconUrl = kchat_settings.chatbot_chatgpt_appearance_collapse_icon || plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
+    // Sanitize the collapse icon URL to prevent XSS
+    const sanitizedCollapseIcon = DOMPurify.sanitize(chatbotcollapseiconUrl, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
     chatbotcollapseicon = $('<img>')
     .attr('id', 'chatbot-collapse-icon')
     .attr('class', 'chatbot-collapse-icon')
-    .attr('src', chatbotcollapseicon)
+    .attr('src', sanitizedCollapseIcon)
     .attr('decoding', 'async')
     .attr('width', '24')
     .attr('height', '24');
 
     // Get an erase icon for the chatbot - Ver 1.8.6
     // chatboteraseicon = plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
-    chatboteraseicon = kchat_settings.chatbot_chatgpt_appearance_erase_icon || plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
+    const chatboteraseiconUrl = kchat_settings.chatbot_chatgpt_appearance_erase_icon || plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
+    // Sanitize the erase icon URL to prevent XSS
+    const sanitizedEraseIcon = DOMPurify.sanitize(chatboteraseiconUrl, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
     chatboteraseicon = $('<img>')
     .attr('id', 'chatbot-erase-icon')
     .attr('class', 'chatbot-erase-icon')
-    .attr('src', chatboteraseicon)
+    .attr('src', sanitizedEraseIcon)
     .attr('decoding', 'async')
     .attr('width', '24')
     .attr('height', '24');
@@ -197,9 +203,13 @@ window.resetAllLocks = resetAllLocks;
     let chatbotresizedowniconSrc = kchat_settings.chatbot_chatgpt_appearance_resize_down_icon 
         || plugins_url + 'assets/icons/bottom_panel_close_FILL0_wght400_GRAD0_opsz24.png';
 
+    // Sanitize the resize icon URLs to prevent XSS
+    const sanitizedResizeUpIcon = DOMPurify.sanitize(chatbotresizeupiconSrc, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
+    const sanitizedResizeDownIcon = DOMPurify.sanitize(chatbotresizedowniconSrc, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
+
     let chatbotresizeicon = $('<img>')
         .attr('id', 'chatbot-resize-icon')
-        .attr('src', chatbotresizeupiconSrc)
+        .attr('src', sanitizedResizeUpIcon)
         .attr('width', '24')
         .attr('height', '24');
 
@@ -576,7 +586,7 @@ window.resetAllLocks = resetAllLocks;
             });
 
             $('#chatbot-resize-icon')
-                .attr('src', chatbotresizedowniconSrc)
+                .attr('src', sanitizedResizeDownIcon)
                 .attr('alt', 'Reduce Chat');
 
             enlarged = true;
@@ -589,7 +599,7 @@ window.resetAllLocks = resetAllLocks;
             $('#chatbot-chatgpt-conversation').css('max-height', '400px');
 
             $('#chatbot-resize-icon')
-                .attr('src', chatbotresizeupiconSrc)
+                .attr('src', sanitizedResizeUpIcon)
                 .attr('alt', 'Enlarge Chat');
 
             enlarged = false;
@@ -1502,11 +1512,15 @@ window.resetAllLocks = resetAllLocks;
     chatbotmicenabledicon = kchat_settings.chatbot_chatgpt_appearance_mic_enabled_icon || plugins_url + 'assets/icons/' + 'mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png';
     // console.log('Chatbot: NOTICE: kchat_settings.chatbot_chatgpt_appearance_mic_enabled_icon: ' + kchat_settings.chatbot_chatgpt_appearance_mic_enabled_icon);
     // console.log('Chatbot: NOTICE: chatbotmicenabledicon: ' + chatbotmicenabledicon);
+    
+    // Sanitize the icon URL to prevent XSS
+    const sanitizedMicEnabledIcon = DOMPurify.sanitize(chatbotmicenabledicon, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
+    
     const micIcon = $('<img>')
         .attr('decoding', 'async')
         .attr('id', 'chatbot-mic-icon')
         .attr('class', 'chatbot-mic-icon')
-        .attr('src', chatbotmicenabledicon)
+        .attr('src', sanitizedMicEnabledIcon)
         .attr('width', '24')
         .attr('height', '24');
 
@@ -1514,16 +1528,20 @@ window.resetAllLocks = resetAllLocks;
     chatbotmicdisabledicon = kchat_settings.chatbot_chatgpt_appearance_mic_disabled_icon || plugins_url + 'assets/icons/' + 'mic_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.png';
     // console.log('Chatbot: NOTICE: kchat_settings.chatbot_chatgpt_appearance_mic_disabled_icon: ' + kchat_settings.chatbot_chatgpt_appearance_mic_disabled_icon);
     // console.log('Chatbot: NOTICE: chatbotmicdisabledicon: ' + chatbotmicdisabledicon);
+    
+    // Sanitize the disabled icon URL to prevent XSS
+    const sanitizedMicDisabledIcon = DOMPurify.sanitize(chatbotmicdisabledicon, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
+    
     const micSlashIcon = $('<img>')
         .attr('decoding', 'async')
         .attr('id', 'chatbot-mic-slash-icon')
         .attr('class', 'chatbot-mic-icon')
-        .attr('src', chatbotmicdisabledicon)
+        .attr('src', sanitizedMicDisabledIcon)
         .attr('width', '24')
         .attr('height', '24');
 
     // Add the initial icon (microphone on) to the button
-    $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
+    $('#chatbot-chatgpt-speech-recognition-btn').empty().append(micIcon);
 
     // Flag to track the recognition state
     let isRecognizing = false;  // Track if recognition is active
@@ -1642,7 +1660,7 @@ window.resetAllLocks = resetAllLocks;
     function resetRecognition() {
         isRecognizing = false;
         // Switch back to the "microphone on" icon
-        $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
+        $('#chatbot-chatgpt-speech-recognition-btn').empty().append(micIcon);
     }
 
     // Function to send recognized speech text to chatbot input - V2.1.5.1

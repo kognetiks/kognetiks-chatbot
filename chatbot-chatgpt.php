@@ -1698,6 +1698,21 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics - Ver 2.3.4
     // back_trace( 'NOTICE', 'Main send function - Lock key: ' . $conv_lock . ', Exists: ' . ($is_processing ? 'Yes' : 'No'));
     
+    // For visitors, add additional lock validation to prevent stuck locks
+    if ($is_processing && $current_user_id === 0) {
+        // Check if the lock is older than 2 minutes (120 seconds) - likely stuck
+        $lock_timeout_key = '_transient_timeout_' . $conv_lock;
+        $lock_timeout = get_option($lock_timeout_key);
+        
+        if ($lock_timeout && (time() - ($lock_timeout - 60)) > 120) {
+            // Lock is older than 2 minutes, clear it
+            delete_transient($conv_lock);
+            $is_processing = false;
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE', 'Cleared stuck visitor lock: ' . $conv_lock);
+        }
+    }
+    
     if ($is_processing) {
         // If already processing, enqueue the message
         $enqueued_id = chatbot_chatgpt_enqueue_message($user_id, $page_id, $session_id, $assistant_id, $message, $client_message_id);
@@ -1716,8 +1731,9 @@ function chatbot_chatgpt_send_message() {
         ]);
     }
     
-    // Set conversation lock
-    set_transient($conv_lock, true, 60);
+    // Set conversation lock with shorter timeout for visitors to prevent stuck locks
+    $lock_timeout = ($current_user_id === 0) ? 30 : 60; // 30 seconds for visitors, 60 for logged-in users
+    set_transient($conv_lock, true, $lock_timeout);
     
     // Debug logging for lock setting
     // DIAG - Diagnostics - Ver 2.3.4
@@ -2286,6 +2302,66 @@ function chatbot_chatgpt_refresh_nonce() {
     wp_send_json_success($nonces);
 }
 
+// Function to clear stuck visitor locks - Ver 2.3.6
+function chatbot_chatgpt_clear_stuck_visitor_locks() {
+    global $wpdb;
+    
+    // Only run for visitors (not logged in users)
+    if (is_user_logged_in()) {
+        return;
+    }
+    
+    // Clear locks older than 2 minutes
+    $expired_time = time() - 120; // 2 minutes ago
+    
+    $lock_patterns = [
+        '_transient_chatgpt_conv_lock_%',
+        '_transient_timeout_chatgpt_conv_lock_%',
+    ];
+    
+    foreach ($lock_patterns as $pattern) {
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+            $pattern,
+            $expired_time
+        ));
+    }
+}
+
+// Hook to clear stuck locks on init for visitors
+add_action('init', 'chatbot_chatgpt_clear_stuck_visitor_locks', 5);
+
+// Add admin menu for visitor lock clearing tool - Ver 2.3.6
+function chatbot_chatgpt_add_visitor_lock_tool_menu() {
+    add_submenu_page(
+        'chatbot-chatgpt',
+        'Clear Visitor Locks',
+        'Clear Visitor Locks',
+        'manage_options',
+        'chatbot-clear-visitor-locks',
+        'chatbot_chatgpt_visitor_lock_tool_page'
+    );
+}
+add_action('admin_menu', 'chatbot_chatgpt_add_visitor_lock_tool_menu');
+
+// Admin page for visitor lock clearing tool
+function chatbot_chatgpt_visitor_lock_tool_page() {
+    if (isset($_POST['clear_locks']) && wp_verify_nonce($_POST['_wpnonce'], 'clear_visitor_locks')) {
+        chatbot_chatgpt_clear_stuck_visitor_locks();
+        echo '<div class="notice notice-success"><p>Visitor locks cleared successfully!</p></div>';
+    }
+    
+    echo '<div class="wrap">';
+    echo '<h1>Clear Visitor Locks</h1>';
+    echo '<p>This tool clears stuck conversation locks that may be preventing visitors from using the chatbot.</p>';
+    echo '<p><strong>Use this if visitors are getting "system is busy processing requests" messages.</strong></p>';
+    echo '<form method="post">';
+    wp_nonce_field('clear_visitor_locks');
+    echo '<p><input type="submit" name="clear_locks" class="button-primary" value="Clear All Visitor Locks" onclick="return confirm(\'Are you sure you want to clear all visitor locks?\')"></p>';
+    echo '</form>';
+    echo '</div>';
+}
+
 // Add action to send messages - Ver 1.0.0
 add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
@@ -2369,6 +2445,9 @@ function chatbot_chatgpt_unlock_conversation_handler() {
             'chatgpt_conv_lock_' . wp_hash($session_id),
             'chatgpt_conv_lock_' . $session_id,
             'chatgpt_conv_lock_' . $user_id . '_' . $page_id . '_' . $session_id,
+            // Additional variations for visitor locks
+            'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $session_id . '|' . $page_id),
+            'chatgpt_conv_lock_' . wp_hash($session_id . '|' . $page_id),
         ];
         
         foreach ($possible_locks as $lock_key) {
