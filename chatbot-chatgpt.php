@@ -1410,12 +1410,29 @@ function chatbot_chatgpt_send_message() {
         return;
     }
 
-    // Security: Rate limiting for unauthenticated users to prevent API abuse
-    $user_id = get_current_user_id();
-    $is_authenticated = $user_id > 0;
+    // Security: Get current user and verify authorization
+    $current_user = wp_get_current_user();
+    $current_user_id = $current_user->ID;
     
-    if (!$is_authenticated) {
-        // Get client IP for rate limiting
+    // For anonymous users, we need to verify they own the session
+    if ($current_user_id === 0) {
+        // Anonymous user - verify session ownership through session_id
+        if (!isset($_POST['session_id'])) {
+            wp_send_json_error('Session ID required for anonymous users.', 403);
+            return;
+        }
+        $session_id = sanitize_text_field($_POST['session_id']);
+        
+        // Verify the session belongs to the current request
+        if (!verify_session_ownership($session_id)) {
+            wp_send_json_error('Unauthorized access to conversation.', 403);
+            return;
+        }
+        
+        // For anonymous users, use session_id as user_id
+        $user_id = $session_id;
+        
+        // Rate limiting for unauthenticated users to prevent API abuse
         $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $rate_limit_key = 'chatbot_rate_limit_' . (function_exists('wp_fast_hash') ? wp_fast_hash($client_ip) : hash('sha256', $client_ip));
         
@@ -1428,6 +1445,9 @@ function chatbot_chatgpt_send_message() {
         
         // Increment rate limit counter
         set_transient($rate_limit_key, $current_count + 1, 60); // 60 seconds
+    } else {
+        // Logged-in user - use their actual user ID
+        $user_id = $current_user_id;
     }
 
     // Global variables
@@ -1602,11 +1622,29 @@ function chatbot_chatgpt_send_message() {
     // $page_id = '';
     
     // Check the transient for the Assistant ID - Ver 1.7.2
-    // $user_id = intval($_POST['user_id']); // REMOVED intval in Ver 2.0.8
-    // $page_id = intval($_POST['page_id']); // REMOVED intval in Ver 2.0.8
-    $user_id = $_POST['user_id'];
-    $page_id = $_POST['page_id'];
-    $session_id = $_POST['session_id'];
+    // Security: Get page_id from POST (this is safe as it's just identifying the page)
+    $page_id = isset($_POST['page_id']) ? sanitize_text_field($_POST['page_id']) : '';
+    
+    // For logged-in users, session_id should come from the secure session
+    // For anonymous users, session_id was already validated above
+    if ($current_user_id === 0) {
+        // session_id was already validated and set above for anonymous users
+        // No need to overwrite it
+    } else {
+        // For logged-in users, get session_id from POST but validate it
+        if (isset($_POST['session_id'])) {
+            $session_id = sanitize_text_field($_POST['session_id']);
+        } else {
+            // Fallback to generating a new session ID
+            $session_id = kognetiks_get_unique_id();
+        }
+    }
+
+    // Additional security: Verify the conversation belongs to this user
+    if (!verify_conversation_ownership($user_id, $page_id)) {
+        wp_send_json_error('Unauthorized access to conversation.', 403);
+        return;
+    }
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
