@@ -1078,6 +1078,26 @@ window.resetAllLocks = resetAllLocks;
             beforeSend: function () {
                 showTypingIndicator();
                 submitButton.prop('disabled', true);
+                
+                // Proactive nonce refresh if the nonce is getting old
+                const nonceAge = Date.now() - (kchat_settings.nonce_timestamp || 0);
+                if (nonceAge > 3600000) { // 1 hour in milliseconds
+                    console.log('Chatbot: Proactively refreshing nonce due to age');
+                    $.ajax({
+                        url: kchat_settings.ajax_url,
+                        method: 'POST',
+                        data: {
+                            action: 'chatbot_chatgpt_refresh_nonce'
+                        },
+                        success: function(response) {
+                            if (response.success && response.data && response.data.chatbot_message_nonce) {
+                                kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
+                                kchat_settings.nonce_timestamp = Date.now();
+                                console.log('Chatbot: Nonce proactively refreshed');
+                            }
+                        }
+                    });
+                }
             },
             success: function (response) {
                 // console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
@@ -1227,7 +1247,12 @@ window.resetAllLocks = resetAllLocks;
                         },
                         error: function() {
                             console.log('Chatbot: Failed to refresh nonce');
-                            appendMessage('Oops! Security check failed. Please refresh the page and try again.', 'error');
+                            // Try to reload the page to get fresh nonces
+                            if (confirm('Security token expired. Would you like to reload the page to continue?')) {
+                                window.location.reload();
+                            } else {
+                                appendMessage('Oops! Security check failed. Please refresh the page and try again.', 'error');
+                            }
                             botResponse = '';
                         }
                     });

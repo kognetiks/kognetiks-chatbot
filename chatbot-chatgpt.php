@@ -965,6 +965,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
         'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
         'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+        'nonce_timestamp' => time() * 1000, // JavaScript timestamp format
     ));
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -1406,6 +1407,8 @@ function chatbot_chatgpt_send_message() {
 
     // Security: Verify nonce for CSRF protection
     if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_message_nonce')) {
+        // Log the security failure for debugging
+        error_log('Chatbot Security Check Failed - Nonce verification failed. POST data: ' . print_r($_POST, true));
         wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
         return;
     }

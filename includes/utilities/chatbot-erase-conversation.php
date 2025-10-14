@@ -177,6 +177,16 @@ function verify_session_ownership($session_id) {
         return false;
     }
     
+    // Additional security: Check if session_id is reasonable length (not too short or too long)
+    if (strlen($session_id) < 8 || strlen($session_id) > 64) {
+        return false;
+    }
+    
+    // For enhanced security, you could also check:
+    // - Session creation timestamp
+    // - IP address consistency
+    // - User agent consistency
+    
     return true;
 }
 
