@@ -2224,9 +2224,30 @@ function chatbot_chatgpt_send_message() {
 
 }
 
+// Handle nonce refresh requests - Ver 2.3.6
+function chatbot_chatgpt_refresh_nonce() {
+    // Generate fresh nonces
+    $nonces = array(
+        'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
+        'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
+        'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
+        'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
+        'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
+        'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
+        'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
+        'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+    );
+    
+    wp_send_json_success($nonces);
+}
+
 // Add action to send messages - Ver 1.0.0
 add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
+
+// Add action to refresh nonce - Ver 2.3.6
+add_action('wp_ajax_chatbot_chatgpt_refresh_nonce', 'chatbot_chatgpt_refresh_nonce');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_refresh_nonce', 'chatbot_chatgpt_refresh_nonce');
 
 // Add action to get queue status
 add_action('wp_ajax_chatbot_chatgpt_get_queue_status', 'chatbot_chatgpt_get_queue_status_ajax');

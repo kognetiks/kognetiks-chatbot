@@ -1149,6 +1149,88 @@ window.resetAllLocks = resetAllLocks;
                     // console.log('Chatbot: ERROR: ' + error);
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
+                } else if (jqXHR.status === 403) {
+                    // Handle 403 Forbidden - likely nonce expiration
+                    console.log('Chatbot: 403 Error detected - attempting nonce refresh');
+                    
+                    // Try to refresh the nonce by making a request to get fresh settings
+                    $.ajax({
+                        url: kchat_settings.ajax_url,
+                        method: 'POST',
+                        data: {
+                            action: 'chatbot_chatgpt_refresh_nonce'
+                        },
+                        success: function(response) {
+                            if (response.success && response.data && response.data.chatbot_message_nonce) {
+                                // Update the nonce in settings
+                                kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
+                                console.log('Chatbot: Nonce refreshed successfully');
+                                
+                                // Retry the original request with the new nonce
+                                $.ajax({
+                                    url: kchat_settings.ajax_url,
+                                    method: 'POST',
+                                    timeout: timeout_setting,
+                                    data: {
+                                        action: 'chatbot_chatgpt_send_message',
+                                        message: message,
+                                        user_id: user_id,
+                                        page_id: page_id,
+                                        session_id: session_id,
+                                        client_message_id: client_message_id,
+                                        chatbot_nonce: kchat_settings.chatbot_message_nonce,
+                                    },
+                                    headers: {
+                                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                        'Pragma': 'no-cache',
+                                        'Expires': '0'
+                                    },
+                                    success: function(response) {
+                                        ajaxResponse = response;
+                                        const isQueued = response.data && typeof response.data === 'object' && response.data.queued;
+                                        if (isQueued) {
+                                            botResponse = null;
+                                        } else {
+                                            botResponse = response.data;
+                                            if (kchat_settings.chatbot_chatgpt_message_limit_setting === 'Yes') {
+                                                let messageCount = parseInt(localStorage.getItem('chatbot_chatgpt_message_count') || '0') + 1;
+                                                let messageLimit = parseInt(kchat_settings.chatbot_chatgpt_message_limit_period_setting || '10');
+                                                let messageInfo = ` (${messageCount} / ${messageLimit})`;
+                                                botResponse += messageInfo;
+                                            }
+                                            botResponse = markdownToHtml(botResponse || '');
+                                        }
+                                    },
+                                    error: function(retryJqXHR, retryStatus, retryError) {
+                                        console.log('Chatbot: Retry failed - ' + retryError);
+                                        appendMessage('Oops! Something went wrong on our end. Please refresh the page and try again.', 'error');
+                                        botResponse = '';
+                                    },
+                                    complete: function() {
+                                        const isQueuedResponse = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
+                                        if (!isQueuedResponse) {
+                                            removeTypingIndicator();
+                                        }
+                                        if (botResponse) {
+                                            appendMessage(botResponse, 'bot');
+                                            // Execute any custom JavaScript in the response
+                                            executeCustomJavaScript();
+                                        }
+                                        submitButton.prop('disabled', false);
+                                    }
+                                });
+                            } else {
+                                console.log('Chatbot: Failed to refresh nonce');
+                                appendMessage('Oops! Security check failed. Please refresh the page and try again.', 'error');
+                                botResponse = '';
+                            }
+                        },
+                        error: function() {
+                            console.log('Chatbot: Failed to refresh nonce');
+                            appendMessage('Oops! Security check failed. Please refresh the page and try again.', 'error');
+                            botResponse = '';
+                        }
+                    });
                 } else {
                     // appendMessage('Error: ' + error, 'error')
                     // console.log('Chatbot: ERROR: ' + error);
