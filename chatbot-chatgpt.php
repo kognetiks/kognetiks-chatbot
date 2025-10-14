@@ -1428,6 +1428,8 @@ function chatbot_chatgpt_send_message() {
         
         // Verify the session belongs to the current request
         if (!verify_session_ownership($session_id)) {
+            // Log the session validation failure for debugging
+            error_log('Chatbot Session Validation Failed - Session ID: ' . $session_id . ', Length: ' . strlen($session_id));
             wp_send_json_error('Unauthorized access to conversation.', 403);
             return;
         }
@@ -1645,6 +1647,8 @@ function chatbot_chatgpt_send_message() {
 
     // Additional security: Verify the conversation belongs to this user
     if (!verify_conversation_ownership($user_id, $page_id)) {
+        // Log the conversation ownership validation failure for debugging
+        error_log('Chatbot Conversation Ownership Validation Failed - User ID: ' . $user_id . ', Page ID: ' . $page_id);
         wp_send_json_error('Unauthorized access to conversation.', 403);
         return;
     }
