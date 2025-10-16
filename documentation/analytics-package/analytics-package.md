@@ -1,4 +1,4 @@
-# 📊 Analytics Package Overview (Premium Feature)
+# 📊 Analytics Package Overview
 
 The **Analytics** tab in the Kognetiks Chatbot for WordPress plugin provides a powerful dashboard to help you track, measure, and optimize chatbot performance on your site.
 
@@ -12,7 +12,7 @@ The analytics package summarizes data for sentiment analysis, engagement analysi
 
 ![Analysis](analytics-package.png)
 
-> ⚠️ **Note**: This feature is only available in the premium version of the plugin. Activation requires a valid license key.
+> ℹ️ **Note**: This feature is available to all users. Make sure conversation logging is enabled to see analytics data.
 
 ## 📅 Period & Filter Controls
 
@@ -123,18 +123,6 @@ The ability to filter and analyze visitor/user sentiment separately from chatbot
 ## 🧩 Compatibility
 
 - Works seamlessly with conversation continuation, Assistant-based interactions, and all AI Platform APIs supported by the plugin when Conversation Logging is enabled.
-
----
-
-## 🔐 Premium Activation
-
-To unlock this tab:
-
-1. Go to the **Plugin Settings > License** tab.
-2. Enter your activation key.
-3. Save settings and refresh the Analytics tab.
-
-Need help? Visit our support site or email [support@kognetiks.com](mailto:support@kognetiks.com).
 
 ---
 

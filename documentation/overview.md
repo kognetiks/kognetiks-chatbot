@@ -92,7 +92,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Dashboard Widget](dashboard/dashboard.md)
 
-- [Analytics Package](analytics-package/analytics-package.md) ⚠️ **Note:** This is a premium feature.
+- [Analytics Package](analytics-package/analytics-package.md)
 
 - [Reporting](reporting/reporting.md)
 

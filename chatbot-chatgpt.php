@@ -21,63 +21,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
- * @fs_premium_only /includes/analytics/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-
-if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
-    chatbot_chatgpt_freemius()->set_basename( true, __FILE__ );
-} else {
-    /**
-     * DO NOT REMOVE THIS IF, IT IS ESSENTIAL FOR THE
-     * `function_exists` CALL ABOVE TO PROPERLY WORK.
-     */
-    if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
-
-        function chatbot_chatgpt_freemius() {
-
-            global $chatbot_chatgpt_freemius;
-
-            if ( ! isset( $chatbot_chatgpt_freemius ) ) {
-                // Include Freemius SDK
-                require_once dirname(__FILE__) . '/vendor/freemius/start.php';
-
-                $chatbot_chatgpt_freemius = fs_dynamic_init( array(
-                    'id'                  => '18850',
-                    'slug'                => 'chatbot-chatgpt',
-                    'type'                => 'plugin',
-                    'public_key'          => 'pk_ea667ce516b3acd5d3756a0c2530b',
-                    'is_premium'          => false,
-                    'has_premium_version' => true,
-                    'premium_suffix'      => 'Premium',
-                    'has_paid_plans'      => true,
-                    'trial'               => array(
-                        'days'               => 7,
-                        'is_require_payment' => false,
-                    ),
-                    'menu' => array(
-                        'slug'       => 'chatbot-chatgpt',
-                        'first-path' => 'admin.php?page=chatbot-chatgpt&tab=support',
-                        'network'    => true,
-                    ),
-                ) );
-            }
-
-            return $chatbot_chatgpt_freemius;
-
-        }
-
-        // Initialize Freemius
-        chatbot_chatgpt_freemius();
-        do_action( 'chatbot_chatgpt_freemius_loaded' );
-
-    }
-
-// ADD THIS TO THE END OF THE FILE - NOT HERE
-// }
 
 // Start output buffering earlier to prevent "headers already sent" issues - Ver 2.1.8
 ob_start();
@@ -206,7 +154,6 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-loc
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-markov-chain.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-menus.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-notices.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-premium.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-api.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-kn.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration.php';
@@ -259,41 +206,37 @@ function fs_active_addon( $addon_slug ) {
     return true;
 }
 
-// Include Analytics library - Premium Only
-if ( function_exists( 'chatbot_chatgpt_freemius' ) && 
-     chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() && 
-     chatbot_chatgpt_freemius()->is_plan( 'Premium' ) ) {
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/analytics-settings.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/chatbot-analytics.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/languages/en_US.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/scoring-models/sentiment-analysis.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/utilities.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/globals.php';
 
-    add_action('admin_init', function() {
-        if (
-            isset($_POST['chatbot_chatgpt_analytics_action']) &&
-            $_POST['chatbot_chatgpt_analytics_action'] === 'period_filter' &&
-            isset($_POST['chatbot_chatgpt_analytics_period_filter_nonce']) &&
-            wp_verify_nonce(
-                sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter_nonce'])),
-                'chatbot_chatgpt_analytics_period_filter_action'
-            )
-        ) {
-            // Handle the period filter logic here
-            // e.g., set a transient, update an option, or set a global variable
-            // Then redirect back to the settings page to prevent resubmission
-            $selected_period = isset($_POST['chatbot_chatgpt_analytics_period_filter'])
-                ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter']))
-                : 'Today';
-            // Store in a transient or option, or pass as needed
-            set_transient('chatbot_chatgpt_selected_period', $selected_period, 60*5);
-            wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=analytics'));
-            exit;
-        }
-    });
-    
-}
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/analytics-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/chatbot-analytics.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/languages/en_US.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/scoring-models/sentiment-analysis.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/utilities.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/globals.php';
+
+add_action('admin_init', function() {
+    if (
+        isset($_POST['chatbot_chatgpt_analytics_action']) &&
+        $_POST['chatbot_chatgpt_analytics_action'] === 'period_filter' &&
+        isset($_POST['chatbot_chatgpt_analytics_period_filter_nonce']) &&
+        wp_verify_nonce(
+            sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter_nonce'])),
+            'chatbot_chatgpt_analytics_period_filter_action'
+        )
+    ) {
+        // Handle the period filter logic here
+        // e.g., set a transient, update an option, or set a global variable
+        // Then redirect back to the settings page to prevent resubmission
+        $selected_period = isset($_POST['chatbot_chatgpt_analytics_period_filter'])
+            ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter']))
+            : 'Today';
+        // Store in a transient or option, or pass as needed
+        set_transient('chatbot_chatgpt_selected_period', $selected_period, 60*5);
+        wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=analytics'));
+        exit;
+    }
+});
+
 
 // Include necessary files - Widgets - Ver 2.1.3
 require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-manage-widget-logs.php';
@@ -2919,4 +2862,3 @@ function kchat_get_plugin_version() {
 }
 
 // DO NOT REMOVE THIS IF, IT IS ESSENTIAL FOR THE AUTOMATIC DEACTIVATION OF THE PLUGIN
-}
