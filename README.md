@@ -23,6 +23,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 **What's new in Version 2.3.6**
 
+* **Analytics**: Comprehensive dashboard providing conversation statistics, sentiment analysis, engagement metrics, and token usage tracking to help optimize chatbot performance and user experience.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.5
 
 ## Features
