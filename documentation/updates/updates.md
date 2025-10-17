@@ -1,5 +1,9 @@
 # Past Updates
 
+## What's new in Version 2.3.5
+
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.4.
+
 ## What's new in Version 2.3.4
 
 * **Conversation Locking**: Implemented conversation locking mechanism to prevent multiple simultaneous requests and improve user experience.

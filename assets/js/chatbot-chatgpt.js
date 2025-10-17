@@ -45,6 +45,12 @@ function resetAllLocks() {
     let page_id = kchat_settings.page_id;
     let session_id = kchat_settings.session_id;
     let assistant_id = kchat_settings.assistant_id;
+
+    // console.log('kchat_settings:', kchat_settings);
+    // console.log('user_id:', kchat_settings.user_id);
+    // console.log('page_id:', kchat_settings.page_id);
+    // console.log('session_id:', kchat_settings.session_id);
+    // console.log('assistant_id:', kchat_settings.assistant_id);
     
     if (user_id && page_id && session_id && assistant_id) {
         $.ajax({
@@ -60,14 +66,14 @@ function resetAllLocks() {
                 chatbot_nonce: kchat_settings.chatbot_reset_nonce // Security: CSRF protection
             },
             success: function(response) {
-                console.log('Chatbot: NOTICE: All locks reset - ' + response.data);
+                // console.log('Chatbot: NOTICE: All locks reset - ' + response.data);
                 // Reload the page to ensure clean state
                 setTimeout(function() {
                     window.location.reload();
                 }, 1000);
             },
             error: function() {
-                console.log('Chatbot: ERROR: Failed to reset locks');
+                // console.log('Chatbot: ERROR: Failed to reset locks');
             }
         });
     }
@@ -122,33 +128,39 @@ window.resetAllLocks = resetAllLocks;
 
     // Get an open icon for the chatbot - Ver 1.8.6
     // chatbotopenicon = plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
-    chatbotopenicon = kchat_settings.chatbot_chatgpt_appearance_open_icon || plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    const chatbotopeniconUrl = kchat_settings.chatbot_chatgpt_appearance_open_icon || plugins_url + 'assets/icons/' + 'chat_FILL0_wght400_GRAD0_opsz24.png';
+    // Sanitize the open icon URL to prevent XSS
+    const sanitizedOpenIcon = DOMPurify.sanitize(chatbotopeniconUrl, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
     chatbotopenicon = $('<img>')
     .attr('id', 'chatbot-open-icon')
     .attr('class', 'chatbot-open-icon')
-    .attr('src', chatbotopenicon)
+    .attr('src', sanitizedOpenIcon)
     .attr('decoding', 'async')
     .attr('width', '24')
     .attr('height', '24');
 
     // Get a collapse icon for the chatbot - Ver 1.8.6
     // chatbotcollapseicon = plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
-    chatbotcollapseicon = kchat_settings.chatbot_chatgpt_appearance_collapse_icon || plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
+    const chatbotcollapseiconUrl = kchat_settings.chatbot_chatgpt_appearance_collapse_icon || plugins_url + 'assets/icons/' + 'close_FILL0_wght400_GRAD0_opsz24.png';
+    // Sanitize the collapse icon URL to prevent XSS
+    const sanitizedCollapseIcon = DOMPurify.sanitize(chatbotcollapseiconUrl, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
     chatbotcollapseicon = $('<img>')
     .attr('id', 'chatbot-collapse-icon')
     .attr('class', 'chatbot-collapse-icon')
-    .attr('src', chatbotcollapseicon)
+    .attr('src', sanitizedCollapseIcon)
     .attr('decoding', 'async')
     .attr('width', '24')
     .attr('height', '24');
 
     // Get an erase icon for the chatbot - Ver 1.8.6
     // chatboteraseicon = plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
-    chatboteraseicon = kchat_settings.chatbot_chatgpt_appearance_erase_icon || plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
+    const chatboteraseiconUrl = kchat_settings.chatbot_chatgpt_appearance_erase_icon || plugins_url + 'assets/icons/' + 'delete_FILL0_wght400_GRAD0_opsz24.png';
+    // Sanitize the erase icon URL to prevent XSS
+    const sanitizedEraseIcon = DOMPurify.sanitize(chatboteraseiconUrl, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
     chatboteraseicon = $('<img>')
     .attr('id', 'chatbot-erase-icon')
     .attr('class', 'chatbot-erase-icon')
-    .attr('src', chatboteraseicon)
+    .attr('src', sanitizedEraseIcon)
     .attr('decoding', 'async')
     .attr('width', '24')
     .attr('height', '24');
@@ -191,9 +203,13 @@ window.resetAllLocks = resetAllLocks;
     let chatbotresizedowniconSrc = kchat_settings.chatbot_chatgpt_appearance_resize_down_icon 
         || plugins_url + 'assets/icons/bottom_panel_close_FILL0_wght400_GRAD0_opsz24.png';
 
+    // Sanitize the resize icon URLs to prevent XSS
+    const sanitizedResizeUpIcon = DOMPurify.sanitize(chatbotresizeupiconSrc, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
+    const sanitizedResizeDownIcon = DOMPurify.sanitize(chatbotresizedowniconSrc, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
+
     let chatbotresizeicon = $('<img>')
         .attr('id', 'chatbot-resize-icon')
-        .attr('src', chatbotresizeupiconSrc)
+        .attr('src', sanitizedResizeUpIcon)
         .attr('width', '24')
         .attr('height', '24');
 
@@ -570,7 +586,7 @@ window.resetAllLocks = resetAllLocks;
             });
 
             $('#chatbot-resize-icon')
-                .attr('src', chatbotresizedowniconSrc)
+                .attr('src', sanitizedResizeDownIcon)
                 .attr('alt', 'Reduce Chat');
 
             enlarged = true;
@@ -583,7 +599,7 @@ window.resetAllLocks = resetAllLocks;
             $('#chatbot-chatgpt-conversation').css('max-height', '400px');
 
             $('#chatbot-resize-icon')
-                .attr('src', chatbotresizeupiconSrc)
+                .attr('src', sanitizedResizeUpIcon)
                 .attr('alt', 'Enlarge Chat');
 
             enlarged = false;
@@ -1072,6 +1088,26 @@ window.resetAllLocks = resetAllLocks;
             beforeSend: function () {
                 showTypingIndicator();
                 submitButton.prop('disabled', true);
+                
+                // Proactive nonce refresh if the nonce is getting old
+                const nonceAge = Date.now() - (kchat_settings.nonce_timestamp || 0);
+                if (nonceAge > 3600000) { // 1 hour in milliseconds
+                    // console.log('Chatbot: Proactively refreshing nonce due to age');
+                    $.ajax({
+                        url: kchat_settings.ajax_url,
+                        method: 'POST',
+                        data: {
+                            action: 'chatbot_chatgpt_refresh_nonce'
+                        },
+                        success: function(response) {
+                            if (response.success && response.data && response.data.chatbot_message_nonce) {
+                                kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
+                                kchat_settings.nonce_timestamp = Date.now();
+                                // console.log('Chatbot: Nonce proactively refreshed');
+                            }
+                        }
+                    });
+                }
             },
             success: function (response) {
                 // console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
@@ -1143,6 +1179,93 @@ window.resetAllLocks = resetAllLocks;
                     // console.log('Chatbot: ERROR: ' + error);
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
+                } else if (jqXHR.status === 403) {
+                    // Handle 403 Forbidden - likely nonce expiration
+                    // console.log('Chatbot: 403 Error detected - attempting nonce refresh');
+                    
+                    // Try to refresh the nonce by making a request to get fresh settings
+                    $.ajax({
+                        url: kchat_settings.ajax_url,
+                        method: 'POST',
+                        data: {
+                            action: 'chatbot_chatgpt_refresh_nonce'
+                        },
+                        success: function(response) {
+                            if (response.success && response.data && response.data.chatbot_message_nonce) {
+                                // Update the nonce in settings
+                                kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
+                                // console.log('Chatbot: Nonce refreshed successfully');
+                                
+                                // Retry the original request with the new nonce
+                                $.ajax({
+                                    url: kchat_settings.ajax_url,
+                                    method: 'POST',
+                                    timeout: timeout_setting,
+                                    data: {
+                                        action: 'chatbot_chatgpt_send_message',
+                                        message: message,
+                                        user_id: user_id,
+                                        page_id: page_id,
+                                        session_id: session_id,
+                                        client_message_id: client_message_id,
+                                        chatbot_nonce: kchat_settings.chatbot_message_nonce,
+                                    },
+                                    headers: {
+                                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                        'Pragma': 'no-cache',
+                                        'Expires': '0'
+                                    },
+                                    success: function(response) {
+                                        ajaxResponse = response;
+                                        const isQueued = response.data && typeof response.data === 'object' && response.data.queued;
+                                        if (isQueued) {
+                                            botResponse = null;
+                                        } else {
+                                            botResponse = response.data;
+                                            if (kchat_settings.chatbot_chatgpt_message_limit_setting === 'Yes') {
+                                                let messageCount = parseInt(localStorage.getItem('chatbot_chatgpt_message_count') || '0') + 1;
+                                                let messageLimit = parseInt(kchat_settings.chatbot_chatgpt_message_limit_period_setting || '10');
+                                                let messageInfo = ` (${messageCount} / ${messageLimit})`;
+                                                botResponse += messageInfo;
+                                            }
+                                            botResponse = markdownToHtml(botResponse || '');
+                                        }
+                                    },
+                                    error: function(retryJqXHR, retryStatus, retryError) {
+                                        // console.log('Chatbot: Retry failed - ' + retryError);
+                                        appendMessage('Oops! Something went wrong on our end. Please refresh the page and try again.', 'error');
+                                        botResponse = '';
+                                    },
+                                    complete: function() {
+                                        const isQueuedResponse = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
+                                        if (!isQueuedResponse) {
+                                            removeTypingIndicator();
+                                        }
+                                        if (botResponse) {
+                                            appendMessage(botResponse, 'bot');
+                                            // Execute any custom JavaScript in the response
+                                            executeCustomJavaScript();
+                                        }
+                                        submitButton.prop('disabled', false);
+                                    }
+                                });
+                            } else {
+                                // console.log('Chatbot: Failed to refresh nonce');
+                                appendMessage('Oops! Security check failed. Please refresh the page and try again.', 'error');
+                                botResponse = '';
+                            }
+                        },
+                        error: function() {
+                            // console.log('Chatbot: Failed to refresh nonce');
+                            // Try to reload the page to get fresh nonces
+                            if (confirm('Security token expired. Would you like to reload the page to continue?')) {
+                                window.location.reload();
+                            } else {
+                                appendMessage('Oops! Security check failed. Please refresh the page and try again.', 'error');
+                            }
+                            botResponse = '';
+                        }
+                    });
                 } else {
                     // appendMessage('Error: ' + error, 'error')
                     // console.log('Chatbot: ERROR: ' + error);
@@ -1389,11 +1512,15 @@ window.resetAllLocks = resetAllLocks;
     chatbotmicenabledicon = kchat_settings.chatbot_chatgpt_appearance_mic_enabled_icon || plugins_url + 'assets/icons/' + 'mic_24dp_000000_FILL0_wght400_GRAD0_opsz24.png';
     // console.log('Chatbot: NOTICE: kchat_settings.chatbot_chatgpt_appearance_mic_enabled_icon: ' + kchat_settings.chatbot_chatgpt_appearance_mic_enabled_icon);
     // console.log('Chatbot: NOTICE: chatbotmicenabledicon: ' + chatbotmicenabledicon);
+    
+    // Sanitize the icon URL to prevent XSS
+    const sanitizedMicEnabledIcon = DOMPurify.sanitize(chatbotmicenabledicon, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
+    
     const micIcon = $('<img>')
         .attr('decoding', 'async')
         .attr('id', 'chatbot-mic-icon')
         .attr('class', 'chatbot-mic-icon')
-        .attr('src', chatbotmicenabledicon)
+        .attr('src', sanitizedMicEnabledIcon)
         .attr('width', '24')
         .attr('height', '24');
 
@@ -1401,16 +1528,20 @@ window.resetAllLocks = resetAllLocks;
     chatbotmicdisabledicon = kchat_settings.chatbot_chatgpt_appearance_mic_disabled_icon || plugins_url + 'assets/icons/' + 'mic_off_24dp_000000_FILL0_wght400_GRAD0_opsz24.png';
     // console.log('Chatbot: NOTICE: kchat_settings.chatbot_chatgpt_appearance_mic_disabled_icon: ' + kchat_settings.chatbot_chatgpt_appearance_mic_disabled_icon);
     // console.log('Chatbot: NOTICE: chatbotmicdisabledicon: ' + chatbotmicdisabledicon);
+    
+    // Sanitize the disabled icon URL to prevent XSS
+    const sanitizedMicDisabledIcon = DOMPurify.sanitize(chatbotmicdisabledicon, {ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i});
+    
     const micSlashIcon = $('<img>')
         .attr('decoding', 'async')
         .attr('id', 'chatbot-mic-slash-icon')
         .attr('class', 'chatbot-mic-icon')
-        .attr('src', chatbotmicdisabledicon)
+        .attr('src', sanitizedMicDisabledIcon)
         .attr('width', '24')
         .attr('height', '24');
 
     // Add the initial icon (microphone on) to the button
-    $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
+    $('#chatbot-chatgpt-speech-recognition-btn').empty().append(micIcon);
 
     // Flag to track the recognition state
     let isRecognizing = false;  // Track if recognition is active
@@ -1529,7 +1660,7 @@ window.resetAllLocks = resetAllLocks;
     function resetRecognition() {
         isRecognizing = false;
         // Switch back to the "microphone on" icon
-        $('#chatbot-chatgpt-speech-recognition-btn').html(micIcon);
+        $('#chatbot-chatgpt-speech-recognition-btn').empty().append(micIcon);
     }
 
     // Function to send recognized speech text to chatbot input - V2.1.5.1

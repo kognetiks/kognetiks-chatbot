@@ -116,6 +116,23 @@ function chatbot_chatgpt_diagnostics_settings_init() {
         'chatbot_chatgpt_diagnostics_section'
     );
 
+    // Advanced Settings Section - Ver 2.3.6
+    add_settings_section(
+        'chatbot_chatgpt_advanced_section',                 // ID
+        'Advanced',                                          // Title
+        'chatbot_chatgpt_advanced_section_callback',        // Callback
+        'chatbot_chatgpt_advanced'                          // Page
+    );
+
+    // Reset Cache/Locks Field - Ver 2.3.6
+    add_settings_field(
+        'chatbot_chatgpt_reset_cache_locks',                // ID
+        'Reset Cache/Locks',                                // Title
+        'chatbot_chatgpt_reset_cache_locks_callback',       // Callback
+        'chatbot_chatgpt_advanced',                         // Page
+        'chatbot_chatgpt_advanced_section'                  // Section
+    );
+
     // Enable Beta Features Section - Ver 2.2.1
     add_settings_section(
         'chatbot_chatgpt_beta_features_section',            // ID
@@ -671,4 +688,76 @@ if (isset($_GET['test_logging']) && current_user_can('manage_options')) {
         echo '<div class="notice notice-info"><p>' . esc_html($result) . '</p></div>';
     });
 
+}
+
+// Advanced Settings Section Callback - Ver 2.3.6
+function chatbot_chatgpt_advanced_section_callback($args) {
+    ?>
+    <p><strong>⚠️ Caution: Advanced Features Ahead</strong></p>
+    <p>Use these advanced features with caution. They can affect the performance and stability of your chatbot.</p>
+    <p>These tools are designed for troubleshooting and maintenance purposes only.</p>
+    <?php
+}
+
+// Reset Cache/Locks Callback - Ver 2.3.6
+function chatbot_chatgpt_reset_cache_locks_callback($args) {
+    ?>
+    <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 10px 0; border-radius: 5px;">
+        <p><strong>⚠️ Warning:</strong> This action will:</p>
+        <ul style="margin-left: 20px;">
+            <li>Clear all conversation locks</li>
+            <li>Reset message queues</li>
+            <li>Clean up expired transients</li>
+            <li>Clear cached data</li>
+        </ul>
+        <p><strong>Use this only if you're experiencing issues with stuck conversations or performance problems.</strong></p>
+        
+        <button type="button" id="chatbot-reset-cache-locks" class="button button-secondary" style="background-color: #dc3545; color: white; border-color: #dc3545;">
+            Reset Cache/Locks
+        </button>
+        
+        <div id="chatbot-reset-status" style="margin-top: 10px; display: none;"></div>
+    </div>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        $('#chatbot-reset-cache-locks').on('click', function() {
+            if (!confirm('Are you sure you want to reset all cache and locks? This action cannot be undone.')) {
+                return;
+            }
+            
+            var button = $(this);
+            var statusDiv = $('#chatbot-reset-status');
+            
+            button.prop('disabled', true).text('Resetting...');
+            statusDiv.show().html('<p style="color: #0073aa;">⏳ Resetting cache and locks...</p>');
+            
+            $.ajax({
+                url: ajaxurl,
+                method: 'POST',
+                data: {
+                    action: 'chatbot_chatgpt_reset_cache_locks',
+                    chatbot_nonce: '<?php echo wp_create_nonce('chatbot_reset_cache_locks'); ?>'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        statusDiv.html('<p style="color: #28a745;">✅ ' + response.data + '</p>');
+                    } else {
+                        statusDiv.html('<p style="color: #dc3545;">❌ Error: ' + response.data + '</p>');
+                    }
+                },
+                error: function() {
+                    statusDiv.html('<p style="color: #dc3545;">❌ Error: Failed to reset cache and locks</p>');
+                },
+                complete: function() {
+                    button.prop('disabled', false).text('Reset Cache/Locks');
+                    setTimeout(function() {
+                        statusDiv.fadeOut();
+                    }, 5000);
+                }
+            });
+        });
+    });
+    </script>
+    <?php
 }

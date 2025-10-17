@@ -8,13 +8,18 @@
 
 # Datasource local storage ignored files
 .vscode
+.snyk
+.snykignore
+composer.json
+package.json
 .dcignore
 .DS_Store
 /dataSources/
 /dataSources.local.xml
 .idea/
 /debug/
-package.json
+# package.json is now needed for Snyk configuration
+# package.json
 QUERIES.md
 TESTS.md
 TODO.md
@@ -48,4 +53,8 @@ includes/transformers/lexical_embeddings_cache.php
 includes/tools/test-jan-ai.php
 GIT-COMMANDS.md
 LOCAL-AI MODEL.md
+
+# Ignore third-party vendor libraries
+vendor/
+
 

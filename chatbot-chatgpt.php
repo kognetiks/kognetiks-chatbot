@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.3.5
+ * Version:     2.3.6
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -21,70 +21,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
- * @fs_premium_only /includes/analytics/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
-    chatbot_chatgpt_freemius()->set_basename( true, __FILE__ );
-} else {
-    /**
-     * DO NOT REMOVE THIS IF, IT IS ESSENTIAL FOR THE
-     * `function_exists` CALL ABOVE TO PROPERLY WORK.
-     */
-    if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
-
-        function chatbot_chatgpt_freemius() {
-
-            global $chatbot_chatgpt_freemius;
-
-            if ( ! isset( $chatbot_chatgpt_freemius ) ) {
-                // Include Freemius SDK
-                require_once dirname(__FILE__) . '/vendor/freemius/start.php';
-
-                $chatbot_chatgpt_freemius = fs_dynamic_init( array(
-                    'id'                  => '18850',
-                    'slug'                => 'chatbot-chatgpt',
-                    'type'                => 'plugin',
-                    'public_key'          => 'pk_ea667ce516b3acd5d3756a0c2530b',
-                    'is_premium'          => false,
-                    'has_premium_version' => true,
-                    'premium_suffix'      => 'Premium',
-                    'has_paid_plans'      => true,
-                    'trial'               => array(
-                        'days'               => 7,
-                        'is_require_payment' => false,
-                    ),
-                    'menu' => array(
-                        'slug'       => 'chatbot-chatgpt',
-                        'first-path' => 'admin.php?page=chatbot-chatgpt&tab=support',
-                        'network'    => true,
-                    ),
-                ) );
-            }
-
-            return $chatbot_chatgpt_freemius;
-
-        }
-
-        // Initialize Freemius
-        chatbot_chatgpt_freemius();
-        do_action( 'chatbot_chatgpt_freemius_loaded' );
-
-    }
-
-// ADD THIS TO THE END OF THE FILE - NOT HERE
-// }
-
 // Start output buffering earlier to prevent "headers already sent" issues - Ver 2.1.8
 ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.3.5';
+$chatbot_chatgpt_plugin_version = '2.3.6';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -206,7 +154,6 @@ require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-loc
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-markov-chain.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-menus.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-notices.php';
-require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-premium.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-api.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration-kn.php';
 require_once plugin_dir_path(__FILE__) . 'includes/settings/chatbot-settings-registration.php';
@@ -254,46 +201,37 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
-// FIXME - Analytics - Ver 1.0.0
-function fs_active_addon( $addon_slug ) {
-    return true;
-}
+// Include necessary files - Analytics - Ver 2.3.6
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/analytics-settings.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/chatbot-analytics.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/languages/en_US.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/scoring-models/sentiment-analysis.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/utilities.php';
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/globals.php';
 
-// Include Analytics library - Premium Only
-if ( function_exists( 'chatbot_chatgpt_freemius' ) && 
-     chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() && 
-     chatbot_chatgpt_freemius()->is_plan( 'Premium' ) ) {
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/analytics-settings.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/chatbot-analytics.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/languages/en_US.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/scoring-models/sentiment-analysis.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/utilities.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/analytics/globals.php';
+add_action('admin_init', function() {
+    if (
+        isset($_POST['chatbot_chatgpt_analytics_action']) &&
+        $_POST['chatbot_chatgpt_analytics_action'] === 'period_filter' &&
+        isset($_POST['chatbot_chatgpt_analytics_period_filter_nonce']) &&
+        wp_verify_nonce(
+            sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter_nonce'])),
+            'chatbot_chatgpt_analytics_period_filter_action'
+        )
+    ) {
+        // Handle the period filter logic here
+        // e.g., set a transient, update an option, or set a global variable
+        // Then redirect back to the settings page to prevent resubmission
+        $selected_period = isset($_POST['chatbot_chatgpt_analytics_period_filter'])
+            ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter']))
+            : 'Today';
+        // Store in a transient or option, or pass as needed
+        set_transient('chatbot_chatgpt_selected_period', $selected_period, 60*5);
+        wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=analytics'));
+        exit;
+    }
+});
 
-    add_action('admin_init', function() {
-        if (
-            isset($_POST['chatbot_chatgpt_analytics_action']) &&
-            $_POST['chatbot_chatgpt_analytics_action'] === 'period_filter' &&
-            isset($_POST['chatbot_chatgpt_analytics_period_filter_nonce']) &&
-            wp_verify_nonce(
-                sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter_nonce'])),
-                'chatbot_chatgpt_analytics_period_filter_action'
-            )
-        ) {
-            // Handle the period filter logic here
-            // e.g., set a transient, update an option, or set a global variable
-            // Then redirect back to the settings page to prevent resubmission
-            $selected_period = isset($_POST['chatbot_chatgpt_analytics_period_filter'])
-                ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter']))
-                : 'Today';
-            // Store in a transient or option, or pass as needed
-            set_transient('chatbot_chatgpt_selected_period', $selected_period, 60*5);
-            wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=analytics'));
-            exit;
-        }
-    });
-    
-}
 
 // Include necessary files - Widgets - Ver 2.1.3
 require_once plugin_dir_path(__FILE__) . 'widgets/chatbot-manage-widget-logs.php';
@@ -965,6 +903,7 @@ function chatbot_chatgpt_enqueue_scripts() {
         'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
         'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
         'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+        'nonce_timestamp' => time() * 1000, // JavaScript timestamp format
     ));
 
     // DIAG - Diagnostics - Ver 1.8.6
@@ -1406,16 +1345,43 @@ function chatbot_chatgpt_send_message() {
 
     // Security: Verify nonce for CSRF protection
     if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_message_nonce')) {
-        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        // Log the security failure for debugging
+        prod_trace( 'ERROR', 'Chatbot Security Check Failed - Nonce verification failed. POST data: ' . print_r($_POST, true));
+        
+        // Enhanced error response with nonce refresh suggestion
+        wp_send_json_error(array(
+            'message' => 'Security check failed. Please refresh the page and try again.',
+            'code' => 'nonce_failed',
+            'suggestion' => 'refresh_nonce'
+        ), 403);
         return;
     }
 
-    // Security: Rate limiting for unauthenticated users to prevent API abuse
-    $user_id = get_current_user_id();
-    $is_authenticated = $user_id > 0;
+    // Security: Get current user and verify authorization
+    $current_user = wp_get_current_user();
+    $current_user_id = $current_user->ID;
     
-    if (!$is_authenticated) {
-        // Get client IP for rate limiting
+    // For anonymous users, we need to verify they own the session
+    if ($current_user_id === 0) {
+        // Anonymous user - verify session ownership through session_id
+        if (!isset($_POST['session_id'])) {
+            wp_send_json_error('Session ID required for anonymous users.', 403);
+            return;
+        }
+        $session_id = sanitize_text_field($_POST['session_id']);
+        
+        // Verify the session belongs to the current request
+        if (!verify_session_ownership($session_id)) {
+            // Log the session validation failure for debugging
+            prod_trace( 'ERROR', 'Chatbot Session Validation Failed - Session ID: ' . $session_id . ', Length: ' . strlen($session_id));
+            wp_send_json_error('Unauthorized access to conversation.', 403);
+            return;
+        }
+        
+        // For anonymous users, use session_id as user_id
+        $user_id = $session_id;
+        
+        // Rate limiting for unauthenticated users to prevent API abuse
         $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $rate_limit_key = 'chatbot_rate_limit_' . (function_exists('wp_fast_hash') ? wp_fast_hash($client_ip) : hash('sha256', $client_ip));
         
@@ -1428,6 +1394,9 @@ function chatbot_chatgpt_send_message() {
         
         // Increment rate limit counter
         set_transient($rate_limit_key, $current_count + 1, 60); // 60 seconds
+    } else {
+        // Logged-in user - use their actual user ID
+        $user_id = $current_user_id;
     }
 
     // Global variables
@@ -1602,11 +1571,31 @@ function chatbot_chatgpt_send_message() {
     // $page_id = '';
     
     // Check the transient for the Assistant ID - Ver 1.7.2
-    // $user_id = intval($_POST['user_id']); // REMOVED intval in Ver 2.0.8
-    // $page_id = intval($_POST['page_id']); // REMOVED intval in Ver 2.0.8
-    $user_id = $_POST['user_id'];
-    $page_id = $_POST['page_id'];
-    $session_id = $_POST['session_id'];
+    // Security: Get page_id from POST (this is safe as it's just identifying the page)
+    $page_id = isset($_POST['page_id']) ? sanitize_text_field($_POST['page_id']) : '';
+    
+    // For logged-in users, session_id should come from the secure session
+    // For anonymous users, session_id was already validated above
+    if ($current_user_id === 0) {
+        // session_id was already validated and set above for anonymous users
+        // No need to overwrite it
+    } else {
+        // For logged-in users, get session_id from POST but validate it
+        if (isset($_POST['session_id'])) {
+            $session_id = sanitize_text_field($_POST['session_id']);
+        } else {
+            // Fallback to generating a new session ID
+            $session_id = kognetiks_get_unique_id();
+        }
+    }
+
+    // Additional security: Verify the conversation belongs to this user
+    if (!verify_conversation_ownership($user_id, $page_id)) {
+        // Log the conversation ownership validation failure for debugging
+        prod_trace( 'ERROR', 'Chatbot Conversation Ownership Validation Failed - User ID: ' . $user_id . ', Page ID: ' . $page_id);
+        wp_send_json_error('Unauthorized access to conversation.', 403);
+        return;
+    }
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -1653,6 +1642,21 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics - Ver 2.3.4
     // back_trace( 'NOTICE', 'Main send function - Lock key: ' . $conv_lock . ', Exists: ' . ($is_processing ? 'Yes' : 'No'));
     
+    // For visitors, add additional lock validation to prevent stuck locks
+    if ($is_processing && $current_user_id === 0) {
+        // Check if the lock is older than 2 minutes (120 seconds) - likely stuck
+        $lock_timeout_key = '_transient_timeout_' . $conv_lock;
+        $lock_timeout = get_option($lock_timeout_key);
+        
+        if ($lock_timeout && (time() - ($lock_timeout - 60)) > 120) {
+            // Lock is older than 2 minutes, clear it
+            delete_transient($conv_lock);
+            $is_processing = false;
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE', 'Cleared stuck visitor lock: ' . $conv_lock);
+        }
+    }
+    
     if ($is_processing) {
         // If already processing, enqueue the message
         $enqueued_id = chatbot_chatgpt_enqueue_message($user_id, $page_id, $session_id, $assistant_id, $message, $client_message_id);
@@ -1671,8 +1675,9 @@ function chatbot_chatgpt_send_message() {
         ]);
     }
     
-    // Set conversation lock
-    set_transient($conv_lock, true, 60);
+    // Set conversation lock with shorter timeout for visitors to prevent stuck locks
+    $lock_timeout = ($current_user_id === 0) ? 30 : 60; // 30 seconds for visitors, 60 for logged-in users
+    set_transient($conv_lock, true, $lock_timeout);
     
     // Debug logging for lock setting
     // DIAG - Diagnostics - Ver 2.3.4
@@ -2224,9 +2229,90 @@ function chatbot_chatgpt_send_message() {
 
 }
 
+// Handle nonce refresh requests - Ver 2.3.6
+function chatbot_chatgpt_refresh_nonce() {
+    // Generate fresh nonces
+    $nonces = array(
+        'chatbot_message_nonce' => wp_create_nonce('chatbot_message_nonce'),
+        'chatbot_upload_nonce' => wp_create_nonce('chatbot_upload_nonce'),
+        'chatbot_erase_nonce' => wp_create_nonce('chatbot_erase_nonce'),
+        'chatbot_unlock_nonce' => wp_create_nonce('chatbot_unlock_nonce'),
+        'chatbot_reset_nonce' => wp_create_nonce('chatbot_reset_nonce'),
+        'chatbot_queue_nonce' => wp_create_nonce('chatbot_queue_nonce'),
+        'chatbot_tts_nonce' => wp_create_nonce('chatbot_tts_nonce'),
+        'chatbot_transcript_nonce' => wp_create_nonce('chatbot_transcript_nonce'),
+    );
+    
+    wp_send_json_success($nonces);
+}
+
+// Function to clear stuck visitor locks - Ver 2.3.6
+function chatbot_chatgpt_clear_stuck_visitor_locks() {
+    global $wpdb;
+    
+    // Only run for visitors (not logged in users)
+    if (is_user_logged_in()) {
+        return;
+    }
+    
+    // Clear locks older than 2 minutes
+    $expired_time = time() - 120; // 2 minutes ago
+    
+    $lock_patterns = [
+        '_transient_chatgpt_conv_lock_%',
+        '_transient_timeout_chatgpt_conv_lock_%',
+    ];
+    
+    foreach ($lock_patterns as $pattern) {
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+            $pattern,
+            $expired_time
+        ));
+    }
+}
+
+// Hook to clear stuck locks on init for visitors
+add_action('init', 'chatbot_chatgpt_clear_stuck_visitor_locks', 5);
+
+// Add admin menu for visitor lock clearing tool - Ver 2.3.6
+function chatbot_chatgpt_add_visitor_lock_tool_menu() {
+    add_submenu_page(
+        'chatbot-chatgpt',
+        'Clear Visitor Locks',
+        'Clear Visitor Locks',
+        'manage_options',
+        'chatbot-clear-visitor-locks',
+        'chatbot_chatgpt_visitor_lock_tool_page'
+    );
+}
+add_action('admin_menu', 'chatbot_chatgpt_add_visitor_lock_tool_menu');
+
+// Admin page for visitor lock clearing tool
+function chatbot_chatgpt_visitor_lock_tool_page() {
+    if (isset($_POST['clear_locks']) && wp_verify_nonce($_POST['_wpnonce'], 'clear_visitor_locks')) {
+        chatbot_chatgpt_clear_stuck_visitor_locks();
+        echo '<div class="notice notice-success"><p>Visitor locks cleared successfully!</p></div>';
+    }
+    
+    echo '<div class="wrap">';
+    echo '<h1>Clear Visitor Locks</h1>';
+    echo '<p>This tool clears stuck conversation locks that may be preventing visitors from using the chatbot.</p>';
+    echo '<p><strong>Use this if visitors are getting "system is busy processing requests" messages.</strong></p>';
+    echo '<form method="post">';
+    wp_nonce_field('clear_visitor_locks');
+    echo '<p><input type="submit" name="clear_locks" class="button-primary" value="Clear All Visitor Locks" onclick="return confirm(\'Are you sure you want to clear all visitor locks?\')"></p>';
+    echo '</form>';
+    echo '</div>';
+}
+
 // Add action to send messages - Ver 1.0.0
 add_action('wp_ajax_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
 add_action('wp_ajax_nopriv_chatbot_chatgpt_send_message', 'chatbot_chatgpt_send_message');
+
+// Add action to refresh nonce - Ver 2.3.6
+add_action('wp_ajax_chatbot_chatgpt_refresh_nonce', 'chatbot_chatgpt_refresh_nonce');
+add_action('wp_ajax_nopriv_chatbot_chatgpt_refresh_nonce', 'chatbot_chatgpt_refresh_nonce');
 
 // Add action to get queue status
 add_action('wp_ajax_chatbot_chatgpt_get_queue_status', 'chatbot_chatgpt_get_queue_status_ajax');
@@ -2247,6 +2333,9 @@ add_action('wp_ajax_chatbot_chatgpt_unlock_conversation', 'chatbot_chatgpt_unloc
 
 // Add action to reset all locks (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_reset_all_locks', 'chatbot_chatgpt_reset_all_locks_handler');
+
+// Add action to reset cache and locks (Security: Authentication required) - Ver 2.3.6
+add_action('wp_ajax_chatbot_chatgpt_reset_cache_locks', 'chatbot_chatgpt_reset_cache_locks_handler');
 
 // Add action for text-to-speech (Security: Authentication required)
 add_action('wp_ajax_chatbot_chatgpt_read_aloud', 'chatbot_chatgpt_read_aloud');
@@ -2300,6 +2389,9 @@ function chatbot_chatgpt_unlock_conversation_handler() {
             'chatgpt_conv_lock_' . wp_hash($session_id),
             'chatgpt_conv_lock_' . $session_id,
             'chatgpt_conv_lock_' . $user_id . '_' . $page_id . '_' . $session_id,
+            // Additional variations for visitor locks
+            'chatgpt_conv_lock_' . wp_hash($assistant_id . '|' . $session_id . '|' . $page_id),
+            'chatgpt_conv_lock_' . wp_hash($session_id . '|' . $page_id),
         ];
         
         foreach ($possible_locks as $lock_key) {
@@ -2395,6 +2487,93 @@ function chatbot_chatgpt_reset_all_locks_handler() {
     
     }
 
+}
+
+// Reset Cache and Locks Handler - Ver 2.3.6
+function chatbot_chatgpt_reset_cache_locks_handler() {
+    
+    // Security: Check if user has permission to manage options (admin capability)
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Insufficient permissions to reset cache and locks.', 403);
+        return;
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_reset_cache_locks')) {
+        wp_send_json_error('Security check failed. Please refresh the page and try again.', 403);
+        return;
+    }
+    
+    global $wpdb;
+    $cleared_count = 0;
+    
+    try {
+        // Clear all conversation locks
+        $lock_patterns = [
+            '_transient_chatgpt_conv_lock_%',
+            '_transient_timeout_chatgpt_conv_lock_%',
+            '_transient_chatgpt_run_lock_%',
+            '_transient_timeout_chatgpt_run_lock_%',
+            '_transient_chatbot_message_queue_%',
+            '_transient_timeout_chatbot_message_queue_%',
+            '_transient_chatbot_chatgpt_%',
+            '_transient_timeout_chatbot_chatgpt_%'
+        ];
+        
+        foreach ($lock_patterns as $pattern) {
+            $result = $wpdb->query($wpdb->prepare(
+                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+                $pattern
+            ));
+            $cleared_count += $result;
+        }
+        
+        // Clear expired transients
+        $expired_result = $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+            '_transient_timeout_%',
+            time()
+        ));
+        $cleared_count += $expired_result;
+        
+        // Clear WordPress object cache if available
+        if (function_exists('wp_cache_flush')) {
+            wp_cache_flush();
+        }
+        
+        // Clear any file-based caches
+        $cache_dirs = [
+            WP_CONTENT_DIR . '/cache/',
+            WP_CONTENT_DIR . '/uploads/chatbot-chatgpt/',
+            plugin_dir_path(__FILE__) . 'cache/',
+            plugin_dir_path(__FILE__) . 'audio/',
+            plugin_dir_path(__FILE__) . 'downloads/',
+            plugin_dir_path(__FILE__) . 'transcripts/'
+        ];
+        
+        foreach ($cache_dirs as $cache_dir) {
+            if (is_dir($cache_dir)) {
+                $files = glob($cache_dir . '*');
+                foreach ($files as $file) {
+                    if (is_file($file) && filemtime($file) < (time() - 3600)) { // Older than 1 hour
+                        @unlink($file);
+                        $cleared_count++;
+                    }
+                }
+            }
+        }
+        
+        // Log the action
+        $log_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Cache and locks reset by admin user ID: ' . get_current_user_id() . ' - Cleared ' . $cleared_count . ' entries';
+        chatbot_error_log($log_message);
+        
+        wp_send_json_success('Cache and locks reset successfully. Cleared ' . $cleared_count . ' entries.');
+        
+    } catch (Exception $e) {
+        $log_message = '[' . date('Y-m-d H:i:s') . '] [Chatbot] [Advanced Reset] Error: ' . $e->getMessage();
+        chatbot_error_log($log_message);
+        wp_send_json_error('Error resetting cache and locks: ' . $e->getMessage());
+    }
 }
 
 // Append an extra message to the response - Ver 2.0.9
@@ -2678,4 +2857,3 @@ function kchat_get_plugin_version() {
 }
 
 // DO NOT REMOVE THIS IF, IT IS ESSENTIAL FOR THE AUTOMATIC DEACTIVATION OF THE PLUGIN
-}
