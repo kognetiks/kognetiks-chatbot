@@ -233,7 +233,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.3.6 - Released TBD =
+= 2.3.6 - Released 2025-10-17 =
 
 * **Analytics**: Comprehensive dashboard providing conversation statistics, sentiment analysis, engagement metrics, and token usage tracking to help optimize chatbot performance and user experience.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.5.
@@ -242,7 +242,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.4.
 
-= 2.3.4 - Released 09-29-2025 =
+= 2.3.4 - Released 2025-09-29 =
 
 * **Conversation Locking**: Implemented conversation locking mechanism to prevent multiple simultaneous requests and improve user experience.
 * **Input Processing**: Enhanced input processing to handle impatient user interactions more gracefully.
