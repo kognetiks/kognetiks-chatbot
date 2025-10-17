@@ -307,8 +307,12 @@ Users must agree to terms of service for each AI platform:
 - **Version 2.2.1**: Anthropic API integration
 - **Version 2.1.8**: NVIDIA NIM API integration
 
-## Conclusion
+## Summary
 
 The Kognetiks Chatbot provides a comprehensive, flexible solution for integrating AI-powered conversational experiences into WordPress websites. With support for multiple AI platforms, advanced features like Knowledge Navigator and Analytics, and extensive customization options, it offers both technical sophistication and user-friendly implementation for businesses, educators, and content creators seeking to enhance their website's interactive capabilities.
 
 The plugin's modular architecture allows for easy maintenance and future enhancements, while its comprehensive documentation and support resources ensure successful deployment and ongoing management.
+
+---
+
+- **[Back to the Overview](/overview.md)**
