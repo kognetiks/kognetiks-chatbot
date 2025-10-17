@@ -201,12 +201,7 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-options-exporter.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester.php';
 require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.php';
 
-// FIXME - Analytics - Ver 1.0.0
-function fs_active_addon( $addon_slug ) {
-    return true;
-}
-
-
+// Include necessary files - Analytics - Ver 2.3.6
 require_once plugin_dir_path(__FILE__) . 'includes/analytics/analytics-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/analytics/chatbot-analytics.php';
 require_once plugin_dir_path(__FILE__) . 'includes/analytics/languages/en_US.php';
@@ -1351,7 +1346,7 @@ function chatbot_chatgpt_send_message() {
     // Security: Verify nonce for CSRF protection
     if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_message_nonce')) {
         // Log the security failure for debugging
-        error_log('Chatbot Security Check Failed - Nonce verification failed. POST data: ' . print_r($_POST, true));
+        prod_trace( 'ERROR', 'Chatbot Security Check Failed - Nonce verification failed. POST data: ' . print_r($_POST, true));
         
         // Enhanced error response with nonce refresh suggestion
         wp_send_json_error(array(
@@ -1378,7 +1373,7 @@ function chatbot_chatgpt_send_message() {
         // Verify the session belongs to the current request
         if (!verify_session_ownership($session_id)) {
             // Log the session validation failure for debugging
-            error_log('Chatbot Session Validation Failed - Session ID: ' . $session_id . ', Length: ' . strlen($session_id));
+            prod_trace( 'ERROR', 'Chatbot Session Validation Failed - Session ID: ' . $session_id . ', Length: ' . strlen($session_id));
             wp_send_json_error('Unauthorized access to conversation.', 403);
             return;
         }
@@ -1597,7 +1592,7 @@ function chatbot_chatgpt_send_message() {
     // Additional security: Verify the conversation belongs to this user
     if (!verify_conversation_ownership($user_id, $page_id)) {
         // Log the conversation ownership validation failure for debugging
-        error_log('Chatbot Conversation Ownership Validation Failed - User ID: ' . $user_id . ', Page ID: ' . $page_id);
+        prod_trace( 'ERROR', 'Chatbot Conversation Ownership Validation Failed - User ID: ' . $user_id . ', Page ID: ' . $page_id);
         wp_send_json_error('Unauthorized access to conversation.', 403);
         return;
     }

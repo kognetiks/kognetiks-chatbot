@@ -46,11 +46,11 @@ function resetAllLocks() {
     let session_id = kchat_settings.session_id;
     let assistant_id = kchat_settings.assistant_id;
 
-    console.log('kchat_settings:', kchat_settings);
-    console.log('user_id:', kchat_settings.user_id);
-    console.log('page_id:', kchat_settings.page_id);
-    console.log('session_id:', kchat_settings.session_id);
-    console.log('assistant_id:', kchat_settings.assistant_id);
+    // console.log('kchat_settings:', kchat_settings);
+    // console.log('user_id:', kchat_settings.user_id);
+    // console.log('page_id:', kchat_settings.page_id);
+    // console.log('session_id:', kchat_settings.session_id);
+    // console.log('assistant_id:', kchat_settings.assistant_id);
     
     if (user_id && page_id && session_id && assistant_id) {
         $.ajax({
@@ -66,14 +66,14 @@ function resetAllLocks() {
                 chatbot_nonce: kchat_settings.chatbot_reset_nonce // Security: CSRF protection
             },
             success: function(response) {
-                console.log('Chatbot: NOTICE: All locks reset - ' + response.data);
+                // console.log('Chatbot: NOTICE: All locks reset - ' + response.data);
                 // Reload the page to ensure clean state
                 setTimeout(function() {
                     window.location.reload();
                 }, 1000);
             },
             error: function() {
-                console.log('Chatbot: ERROR: Failed to reset locks');
+                // console.log('Chatbot: ERROR: Failed to reset locks');
             }
         });
     }
@@ -1092,7 +1092,7 @@ window.resetAllLocks = resetAllLocks;
                 // Proactive nonce refresh if the nonce is getting old
                 const nonceAge = Date.now() - (kchat_settings.nonce_timestamp || 0);
                 if (nonceAge > 3600000) { // 1 hour in milliseconds
-                    console.log('Chatbot: Proactively refreshing nonce due to age');
+                    // console.log('Chatbot: Proactively refreshing nonce due to age');
                     $.ajax({
                         url: kchat_settings.ajax_url,
                         method: 'POST',
@@ -1103,7 +1103,7 @@ window.resetAllLocks = resetAllLocks;
                             if (response.success && response.data && response.data.chatbot_message_nonce) {
                                 kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
                                 kchat_settings.nonce_timestamp = Date.now();
-                                console.log('Chatbot: Nonce proactively refreshed');
+                                // console.log('Chatbot: Nonce proactively refreshed');
                             }
                         }
                     });
@@ -1181,7 +1181,7 @@ window.resetAllLocks = resetAllLocks;
                     botResponse = '';
                 } else if (jqXHR.status === 403) {
                     // Handle 403 Forbidden - likely nonce expiration
-                    console.log('Chatbot: 403 Error detected - attempting nonce refresh');
+                    // console.log('Chatbot: 403 Error detected - attempting nonce refresh');
                     
                     // Try to refresh the nonce by making a request to get fresh settings
                     $.ajax({
@@ -1194,7 +1194,7 @@ window.resetAllLocks = resetAllLocks;
                             if (response.success && response.data && response.data.chatbot_message_nonce) {
                                 // Update the nonce in settings
                                 kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
-                                console.log('Chatbot: Nonce refreshed successfully');
+                                // console.log('Chatbot: Nonce refreshed successfully');
                                 
                                 // Retry the original request with the new nonce
                                 $.ajax({
@@ -1232,7 +1232,7 @@ window.resetAllLocks = resetAllLocks;
                                         }
                                     },
                                     error: function(retryJqXHR, retryStatus, retryError) {
-                                        console.log('Chatbot: Retry failed - ' + retryError);
+                                        // console.log('Chatbot: Retry failed - ' + retryError);
                                         appendMessage('Oops! Something went wrong on our end. Please refresh the page and try again.', 'error');
                                         botResponse = '';
                                     },
@@ -1250,13 +1250,13 @@ window.resetAllLocks = resetAllLocks;
                                     }
                                 });
                             } else {
-                                console.log('Chatbot: Failed to refresh nonce');
+                                // console.log('Chatbot: Failed to refresh nonce');
                                 appendMessage('Oops! Security check failed. Please refresh the page and try again.', 'error');
                                 botResponse = '';
                             }
                         },
                         error: function() {
-                            console.log('Chatbot: Failed to refresh nonce');
+                            // console.log('Chatbot: Failed to refresh nonce');
                             // Try to reload the page to get fresh nonces
                             if (confirm('Security token expired. Would you like to reload the page to continue?')) {
                                 window.location.reload();
