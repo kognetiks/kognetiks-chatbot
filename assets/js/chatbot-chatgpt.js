@@ -30,10 +30,16 @@ function unlockConversationOnLoad() {
                 chatbot_nonce: kchat_settings.chatbot_unlock_nonce // Security: CSRF protection
             },
             success: function(response) {
+                // Gate the success path - if server returned success:false, handle it silently
+                if (response && typeof response === 'object' && response.success === false) {
+                    // Silently handle - this is just a cleanup operation, don't show errors
+                    return;
+                }
                 // console.log('Chatbot: NOTICE: Conversation unlocked on page load');
             },
-            error: function() {
+            error: function(jqXHR, status, error) {
                 // Silently fail - this is just a cleanup operation
+                // No-op to keep console clean, especially for 403 errors from Wordfence/Hostinger
             }
         });
     }
@@ -660,6 +666,9 @@ window.resetAllLocks = resetAllLocks;
         let customErrorMessage = kchat_settings['chatbot_chatgpt_custom_error_message'] || 'Your custom error message goes here.';
     
         if (typeof message !== 'undefined' && message !== null) {
+            // Normalize message to string before any string operations (fixes TypeError: message.startsWith is not a function)
+            message = toSafeString(message);
+            
             if (message.startsWith('Error')) {
                 logErrorToServer(message);  // Log the error to the server
         
@@ -782,11 +791,8 @@ window.resetAllLocks = resetAllLocks;
 
     // markdownToHtml - Ver 2.1.5
     function markdownToHtml(markdown) {
-        // Ensure markdown is a string
-        if (typeof markdown !== 'string') {
-            console.warn('markdownToHtml: Input is not a string:', typeof markdown, markdown);
-            return String(markdown || '');
-        }
+        // Normalize input to string defensively before any string operations
+        markdown = toSafeString(markdown);
         
         // Step 1: Process links before any other inline elements
         markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
@@ -904,6 +910,23 @@ window.resetAllLocks = resetAllLocks;
         }
         // Handle null, undefined, numbers, etc.
         return String(val || '');
+    }
+
+    // Single source of truth wrapper - ensures always returns a string (never null/undefined)
+    function toSafeString(x) {
+        return safeStringCoercion(x) || '';
+    }
+
+    // Safe JSON parser for error responses
+    function tryParseJSON(str) {
+        if (!str || typeof str !== 'string') {
+            return null;
+        }
+        try {
+            return JSON.parse(str);
+        } catch (e) {
+            return null;
+        }
     }
 
     // Poll queue status to determine when to re-enable the submit button
@@ -1112,6 +1135,15 @@ window.resetAllLocks = resetAllLocks;
             success: function (response) {
                 // console.log('Chatbot: SUCCESS: ' + JSON.stringify(response));
                 
+                // Gate the success path - if server returned a structured object with success flag
+                if (response && typeof response === 'object' && response.success === false) {
+                    appendMessage(toSafeString(response.data || response.message || response));
+                    botResponse = '';
+                    removeTypingIndicator();
+                    submitButton.prop('disabled', false);
+                    return;
+                }
+                
                 // Store response for use in complete handler
                 ajaxResponse = response;
                 
@@ -1127,13 +1159,13 @@ window.resetAllLocks = resetAllLocks;
                     // console.log('Chatbot: Queued response detected - botResponse set to null');
                 } else {
                     botResponse = response.data;
-                    // Safe string coercion to prevent [object Object] display
-                    botResponse = safeStringCoercion(botResponse);
+                    // Normalize to string before any string operations
+                    botResponse = toSafeString(botResponse);
                     // console.log('Chatbot: Non-queued response - botResponse set to:', botResponse);
                 }
                 
                 // Check if this is a "still working" message that should re-enable the button
-                if (typeof botResponse === 'string') {
+                if (botResponse) {
                     isStillWorkingMessage = botResponse.includes("The system is currently busy processing requests");
                 }
                 // Revision to how disclaimers are handled - Ver 1.5.0
@@ -1147,7 +1179,7 @@ window.resetAllLocks = resetAllLocks;
                         "As an artificial intelligence developed by OpenAI, "
                     ];
                     for (let prefix of prefixes) {
-                        if (typeof botResponse === 'string' && botResponse.startsWith(prefix)) {
+                        if (botResponse && botResponse.startsWith(prefix)) {
                             botResponse = botResponse.slice(prefix.length);
                             break;
                         }
@@ -1180,6 +1212,28 @@ window.resetAllLocks = resetAllLocks;
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
                 } else if (jqXHR.status === 403) {
+                    // Handle 403 with safe error message extraction
+                    let errorMessage = 'Oops! Security check failed. Please refresh the page and try again.';
+                    const contentType = jqXHR.getResponseHeader('content-type') || '';
+                    
+                    // If response is JSON, try to parse it safely
+                    if (contentType.includes('application/json') && jqXHR.responseText) {
+                        const payload = tryParseJSON(jqXHR.responseText);
+                        if (payload) {
+                            errorMessage = toSafeString(payload.data || payload.message || payload);
+                        }
+                    } else if (jqXHR.responseText) {
+                        // Try parsing anyway in case Content-Type header is missing
+                        const payload = tryParseJSON(jqXHR.responseText);
+                        if (payload) {
+                            errorMessage = toSafeString(payload.data || payload.message || payload);
+                        }
+                    }
+                    
+                    // Use extracted error message or fallback
+                    if (errorMessage && errorMessage !== 'Oops! Security check failed. Please refresh the page and try again.') {
+                        appendMessage(errorMessage, 'error');
+                    }
                     // Handle 403 Forbidden - likely nonce expiration
                     // console.log('Chatbot: 403 Error detected - attempting nonce refresh');
                     
@@ -1216,12 +1270,23 @@ window.resetAllLocks = resetAllLocks;
                                         'Expires': '0'
                                     },
                                     success: function(response) {
+                                        // Gate the success path - if server returned success:false, handle it
+                                        if (response && typeof response === 'object' && response.success === false) {
+                                            appendMessage(toSafeString(response.data || response.message || response));
+                                            botResponse = '';
+                                            removeTypingIndicator();
+                                            submitButton.prop('disabled', false);
+                                            return;
+                                        }
+                                        
                                         ajaxResponse = response;
                                         const isQueued = response.data && typeof response.data === 'object' && response.data.queued;
                                         if (isQueued) {
                                             botResponse = null;
                                         } else {
                                             botResponse = response.data;
+                                            // Normalize to string before string operations
+                                            botResponse = toSafeString(botResponse);
                                             if (kchat_settings.chatbot_chatgpt_message_limit_setting === 'Yes') {
                                                 let messageCount = parseInt(localStorage.getItem('chatbot_chatgpt_message_count') || '0') + 1;
                                                 let messageLimit = parseInt(kchat_settings.chatbot_chatgpt_message_limit_period_setting || '10');
@@ -1233,7 +1298,15 @@ window.resetAllLocks = resetAllLocks;
                                     },
                                     error: function(retryJqXHR, retryStatus, retryError) {
                                         // console.log('Chatbot: Retry failed - ' + retryError);
-                                        appendMessage('Oops! Something went wrong on our end. Please refresh the page and try again.', 'error');
+                                        // Extract error message safely from response
+                                        let errorMsg = 'Oops! Something went wrong on our end. Please refresh the page and try again.';
+                                        if (retryJqXHR.responseText) {
+                                            const payload = tryParseJSON(retryJqXHR.responseText);
+                                            if (payload) {
+                                                errorMsg = toSafeString(payload.data || payload.message || payload);
+                                            }
+                                        }
+                                        appendMessage(errorMsg, 'error');
                                         botResponse = '';
                                     },
                                     complete: function() {
@@ -1267,9 +1340,34 @@ window.resetAllLocks = resetAllLocks;
                         }
                     });
                 } else {
+                    // Extract error message safely from response
+                    let errorMsg = 'Oops! Something went wrong on our end. Please try again later.';
+                    const contentType = jqXHR.getResponseHeader('content-type') || '';
+                    
+                    if (jqXHR.responseText) {
+                        // Try parsing JSON if Content-Type suggests it, or try anyway
+                        if (contentType.includes('application/json')) {
+                            const payload = tryParseJSON(jqXHR.responseText);
+                            if (payload) {
+                                errorMsg = toSafeString(payload.data || payload.message || payload || jqXHR.statusText);
+                            }
+                        } else {
+                            // Try parsing anyway in case Content-Type header is missing
+                            const payload = tryParseJSON(jqXHR.responseText);
+                            if (payload) {
+                                errorMsg = toSafeString(payload.data || payload.message || payload);
+                            } else {
+                                // Fallback to statusText if available
+                                errorMsg = toSafeString(jqXHR.statusText || error || errorMsg);
+                            }
+                        }
+                    } else {
+                        errorMsg = toSafeString(jqXHR.statusText || error || errorMsg);
+                    }
+                    
                     // appendMessage('Error: ' + error, 'error')
                     // console.log('Chatbot: ERROR: ' + error);
-                    appendMessage('Oops! Something went wrong on our end. Please try again later.', 'error');
+                    appendMessage(errorMsg, 'error');
                     botResponse = '';
                 }
             },
