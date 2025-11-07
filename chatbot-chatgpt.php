@@ -171,7 +171,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants-
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assisted-search.php';              // Assisted Search - Ver 2.2.7 - 2025-03-26
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php';         // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-content-search.php';               // Functions - Ver 2.2.4
-require_once plugin_dir_path(__FILE__) . 'includes/dashboard/chatbot-chatgpt-dashboard-widget.php';      // Dashboard Widget - Ver 2.2.7
+require_once plugin_dir_path(__FILE__) . 'includes/dashboard/chatbot-chatgpt-dashboard-widget.php';     // Dashboard Widget - Ver 2.2.7
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php';                // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php';                   // Deactivation - Ver 1.9.9
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-download-transcript.php';          // Functions - Ver 1.9.9
