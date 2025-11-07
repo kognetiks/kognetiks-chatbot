@@ -48,13 +48,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // header("Cache-Control: no-cache, must-revalidate, max-age=0");
     // header("Pragma: no-cache");
 
-    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    // Fetch the User ID - Updated Ver 2.3.6
+    // For anonymous users, user_id should be 0 (session_id is used in transient key via set_chatbot_chatgpt_transients)
+    // For logged-in users, user_id should be > 0 (WordPress user ID)
     $user_id = get_current_user_id();
     // Fetch the Kognetiks cookie
     $session_id = kognetiks_get_unique_id();
-    if (empty($user_id) || $user_id == 0) {
-        $user_id = $session_id;
-    }
+    // Keep user_id as 0 for anonymous users - don't replace with session_id
 
     // DIAG - Diagnostics - Ver 2.1.0
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -535,13 +535,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         }
     }
 
-    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    // Fetch the User ID - Updated Ver 2.3.6
+    // For anonymous users, user_id should be 0 (session_id is used in transient key via set_chatbot_chatgpt_transients)
+    // For logged-in users, user_id should be > 0 (WordPress user ID)
     $user_id = get_current_user_id();
     // Fetch the Kognetiks cookie
     $session_id = kognetiks_get_unique_id();
-    if (empty($user_id) || $user_id == 0) {
-        $user_id = $session_id;
-    }
+    // Keep user_id as 0 for anonymous users - don't replace with session_id
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
@@ -622,13 +622,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     
     }    
 
-    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    // Fetch the User ID - Updated Ver 2.3.6
+    // For anonymous users, user_id should be 0 (session_id is used in transient key via set_chatbot_chatgpt_transients)
+    // For logged-in users, user_id should be > 0 (WordPress user ID)
     $user_id = get_current_user_id();
     // Fetch the Kognetiks cookie
     $session_id = kognetiks_get_unique_id();
-    if (empty($user_id) || $user_id == 0) {
-        $user_id = $session_id;
-    }
+    // Keep user_id as 0 for anonymous users - don't replace with session_id
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
@@ -1063,13 +1063,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     </script>
     <?php
 
-    // Fetch the User ID - Updated Ver 2.0.6 - 2024 07 11
+    // Fetch the User ID - Updated Ver 2.3.6
+    // For anonymous users, user_id should be 0 (session_id is used in transient key via set_chatbot_chatgpt_transients)
+    // For logged-in users, user_id should be > 0 (WordPress user ID)
     $user_id = get_current_user_id();
     // Fetch the Kognetiks cookie
     $session_id = kognetiks_get_unique_id();
-    if (empty($user_id) || $user_id == 0) {
-        $user_id = $session_id;
-    }
+    // Keep user_id as 0 for anonymous users - don't replace with session_id
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
     // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
