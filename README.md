@@ -21,9 +21,9 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## Documentation
 
-**What's new in Version 2.3.7**
+**What's new in Version 2.3.8**
 
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.6
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.7
 
 ## Features
 
