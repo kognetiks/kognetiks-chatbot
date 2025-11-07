@@ -909,6 +909,11 @@ function cancel_active_run($thread_id, $api_key) {
 // CustomGPT - Assistants - Ver 1.7.2
 function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null) {
 
+    // Globals - Ver 2.3.6
+    global $learningMessages;
+    global $errorResponses;
+    global $stopWords;
+
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', 'chatbot_chatgpt_custom_gpt_call_api()' );
     // back_trace( 'NOTICE', '$user_id: ' . $user_id);
@@ -917,7 +922,6 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
     // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', '$message: ' . $message);
-    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
 
     // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
@@ -943,10 +947,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // DIAG - Diagnostics - Ver 2.3.5
     // prod_trace('NOTICE', 'Starting API call - Assistant: ' . $assistant_id . ', User: ' . $user_id . ', Page: ' . $page_id . ', Session: ' . $session_id . ', Message UUID: ' . $message_uuid);
 
-    // Globals added for Ver 1.7.2
-    global $learningMessages;
-    global $errorResponses;
-    global $stopWords;
+    // Globals already declared at top of function - Ver 2.3.6
 
     // See if there is a $thread_id
     if (empty($thread_id)) {

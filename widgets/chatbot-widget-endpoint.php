@@ -212,7 +212,7 @@ $chatbot_widget_height = ($iframe_height - 20) . 'px';
 <!DOCTYPE html>
 <html>
 <head>
-    <?php get_header(); // Use theme integration instead of wp_head() ?>
+    <?php wp_head(); // Use wp_head() instead of get_header() to avoid theme dependency ?>
     <style>
         /* Include any additional styles needed */
         body, html {
@@ -246,7 +246,7 @@ $chatbot_widget_height = ($iframe_height - 20) . 'px';
     <div class="chatbot-wrapper">
         <?php echo $chatbot_html; ?>
     </div>
-    <?php get_footer(); // Use theme integration instead of wp_footer() ?>
+    <?php wp_footer(); // Use wp_footer() instead of get_footer() to avoid theme dependency ?>
     <script type="text/javascript">
 
         // Set values for the chatbot

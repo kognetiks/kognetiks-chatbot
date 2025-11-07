@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.3.6
+ * Version:     2.3.7
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -32,7 +32,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.3.6';
+$chatbot_chatgpt_plugin_version = '2.3.7';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -171,7 +171,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assistants-
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-assisted-search.php';              // Assisted Search - Ver 2.2.7 - 2025-03-26
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-conversation-history.php';         // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-content-search.php';               // Functions - Ver 2.2.4
-require_once plugin_dir_path(__FILE__) . 'includes/dashboard/chatbot-chatgpt-dashboard-widget.php';      // Dashboard Widget - Ver 2.2.7
+require_once plugin_dir_path(__FILE__) . 'includes/dashboard/chatbot-chatgpt-dashboard-widget.php';     // Dashboard Widget - Ver 2.2.7
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-db-management.php';                // Database Management for Reporting - Ver 1.6.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-deactivate.php';                   // Deactivation - Ver 1.9.9
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-download-transcript.php';          // Functions - Ver 1.9.9
@@ -1190,6 +1190,7 @@ function chatbot_chatgpt_get_queue_status_ajax() {
 }
 
 function chatbot_chatgpt_process_queued_message($message_data) {
+
     // This function processes a queued message using the same logic as the main handler
     // but without the AJAX response handling
     
@@ -1227,7 +1228,64 @@ function chatbot_chatgpt_process_queued_message($message_data) {
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_azure_model_choice', 'gpt-4-1106-preview'));
             break;
-        // Add other cases as needed
+        case 'NVIDIA':
+            $api_key = esc_attr(get_option('chatbot_nvidia_api_key'));
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
+            break;
+        case 'Anthropic':
+            $api_key = esc_attr(get_option('chatbot_anthropic_api_key'));
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_anthropic_model_choice', 'claude-3-5-sonnet-latest'));
+            break;
+        case 'DeepSeek':
+            $api_key = esc_attr(get_option('chatbot_deepseek_api_key'));
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
+            break;
+        case 'Markov Chain':
+            $api_key = esc_attr(get_option('chatbot_markov_chain_api_key', 'NOT REQUIRED'));
+            $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
+            break;
+        case 'Transformer':
+            $api_key = esc_attr(get_option('chatbot_transformer_api_key', 'NOT REQUIRED'));
+            $model = esc_attr(get_option('chatbot_transformer_model_choice', 'lexical-context-model'));
+            break;
+        case 'Local Server':
+            $api_key = esc_attr(get_option('chatbot_local_api_key', 'NOT REQUIRED'));
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
+            break;
+        case 'Mistral':
+            $api_key = esc_attr(get_option('chatbot_mistral_api_key'));
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
+            break;
+        default:
+            $api_key = esc_attr(get_option('chatbot_chatgpt_api_key'));
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
+            break;
+    }
+
+    // Retrieve settings from transients (same as main handler) - Ver 2.3.6
+    $kchat_settings['chatbot_chatgpt_display_style'] = get_chatbot_chatgpt_transients( 'display_style', $user_id, $page_id, $session_id);
+    $kchat_settings['chatbot_chatgpt_assistant_alias'] = get_chatbot_chatgpt_transients( 'assistant_alias', $user_id, $page_id, $session_id);
+    $kchat_settings['assistant_id'] = get_chatbot_chatgpt_transients( 'assistant_id', $user_id, $page_id, $session_id);
+    $kchat_settings['thread_id'] = get_chatbot_chatgpt_transients( 'thread_id', $user_id, $page_id, $session_id);
+    $kchat_settings['chatbot_chatgpt_model'] = get_chatbot_chatgpt_transients( 'model', $user_id, $page_id, $session_id);
+    $kchat_settings['model'] = $kchat_settings['chatbot_chatgpt_model'] ?: $model;
+    $kchat_settings['chatbot_chatgpt_voice_option'] = get_chatbot_chatgpt_transients( 'voice', $user_id, $page_id, $session_id);
+    $kchat_settings['additional_instructions'] = get_chatbot_chatgpt_transients( 'additional_instructions', $user_id, $page_id, $session_id);
+    
+    $voice = $kchat_settings['chatbot_chatgpt_voice_option'];
+    $model = $kchat_settings['model'] ?: $model;
+    $additional_instructions = $kchat_settings['additional_instructions'];
+    $chatbot_chatgpt_assistant_alias = $kchat_settings['chatbot_chatgpt_assistant_alias'];
+    
+    // Override assistant_id from transient if available - Ver 2.3.6
+    if (!empty($kchat_settings['assistant_id'])) {
+        $assistant_id = $kchat_settings['assistant_id'];
     }
 
     // Get thread information
@@ -1236,70 +1294,195 @@ function chatbot_chatgpt_process_queued_message($message_data) {
     // Log the message
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Visitor', $thread_id, $assistant_id, null, $message);
 
-    // Process the message based on platform
-    // DIAG - Diagnostics - Ver 2.3.4
-    // back_trace( 'NOTICE', 'Processing queued message - Platform: ' . $chatbot_ai_platform_choice);
+    // Determine whether to use assistant_id or regular ChatGPT API (same logic as main handler) - Ver 2.3.6
+    // Which Assistant ID to use - Ver 1.7.2
+    if ($chatbot_chatgpt_assistant_alias == 'original') {
+
+        $use_assistant_id = 'No';
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE' , 'Using Original ChatGPT - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+
+    } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
+
+        $assistant_id = esc_attr(get_option('assistant_id'));
+        $use_assistant_id = 'Yes';
+
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE' , 'Using Primary Assistant - $assistant_id: ' .  $assistant_id);
+        
+        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
+        if (empty($assistant_id) || $assistant_id == "Please provide the Assistant Id.") {
+        
+            // Primary assistant_id not set
+            $chatbot_chatgpt_assistant_alias = 'original';
+            $use_assistant_id = 'No';
+        
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
+        }
+
+    } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
+
+        $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
+        $use_assistant_id = 'Yes';
+
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE' , 'Using Alternate Assistant - $assistant_id: ' .  $assistant_id);
+
+        // Check if the GPT Assistant ID is blank, null, or "Please provide the GPT Assistant ID."
+        if (empty($assistant_id) || $assistant_id == "Please provide the Assistant Id.") {
+
+            /// Alternate assistant_id not set
+            $chatbot_chatgpt_assistant_alias = 'original';
+            $use_assistant_id = 'No';
+
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
+        
+        }
+
+    } elseif (str_starts_with($assistant_id, 'asst_')) {
+
+        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
+        $use_assistant_id = 'Yes';
+
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE' ,'Assistant ID pass as a parameter - $assistant_id: ' . $assistant_id );
+
+    } elseif (str_starts_with($assistant_id, 'ag:')) {
+
+        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
+        $use_assistant_id = 'Yes';
+
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE' ,'MISTRAL: Agent ID pass as a parameter - $assistant_id: ' . $assistant_id );
+
+    } elseif (str_starts_with($assistant_id, 'websearch')) {
+
+        $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
+        $use_assistant_id = 'Yes';
+
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE' ,'MISTRAL: Websearch ID pass as a parameter - $assistant_id: ' . $assistant_id );
+
+    } else {
+
+        // Reference GPT Assistant IDs directly - Ver 1.7.3
+        // Check both $chatbot_chatgpt_assistant_alias and $assistant_id - Ver 2.3.6
+        if (!empty($chatbot_chatgpt_assistant_alias) && (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_') || str_starts_with($chatbot_chatgpt_assistant_alias, 'ag:') || str_starts_with($chatbot_chatgpt_assistant_alias, 'websearch'))) {
+            
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE', 'Using GPT Assistant ID from alias: ' . $chatbot_chatgpt_assistant_alias);
+
+            // Override the $assistant_id with the GPT Assistant ID
+            $assistant_id = $chatbot_chatgpt_assistant_alias;
+            $use_assistant_id = 'Yes';
+
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE' , 'ALERT: Using $assistant_id ' . $assistant_id);
+
+        } elseif (!empty($assistant_id) && (str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'ag:') || str_starts_with($assistant_id, 'websearch'))) {
+            
+            // Check $assistant_id directly if $chatbot_chatgpt_assistant_alias is empty - Ver 2.3.6
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE', 'Using GPT Assistant ID from assistant_id: ' . $assistant_id);
+
+            // Set the alias to match the assistant_id
+            $chatbot_chatgpt_assistant_alias = $assistant_id;
+            $use_assistant_id = 'Yes';
+
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE' , 'ALERT: Using $assistant_id ' . $assistant_id);
+
+        } else {
+
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE', 'Using ChatGPT API: ' . $chatbot_chatgpt_assistant_alias);
+
+            // Override the $use_assistant_id and set it to 'No'
+            $use_assistant_id = 'No';
+            
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE' , 'ALERT: Falling back to ChatGPT API');
+
+        }
+
+    }
+
+    // Process the message based on platform and use_assistant_id - Ver 2.3.6
+    // DIAG - Diagnostics - Ver 2.3.6
+    // back_trace( 'NOTICE', 'Processing queued message - Platform: ' . $chatbot_ai_platform_choice . ', use_assistant_id: ' . $use_assistant_id);
     
-    switch ($chatbot_ai_platform_choice) {
-        case 'OpenAI':
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling OpenAI Assistant API for queued message');
-            $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
-            break;
-            
-        case 'Azure OpenAI':
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling Azure OpenAI Assistant API for queued message');
-            $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
-            break;
-            
-        case 'Mistral':
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling Mistral Agent API for queued message');
-            $response = chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
-            break;
-            
-        case 'NVIDIA':
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling NVIDIA API for queued message');
-            $response = chatbot_nvidia_call_api($api_key, $message);
-            break;
-            
-        case 'Anthropic':
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling Anthropic API for queued message');
-            $response = chatbot_call_anthropic_api($api_key, $message);
-            break;
-            
-        case 'DeepSeek':
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling DeepSeek API for queued message');
-            $response = chatbot_call_deepseek_api($api_key, $message);
-            break;
-            
-        case 'Markov Chain':
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling Markov Chain API for queued message');
-            $response = chatbot_chatgpt_call_markov_chain_api($message);
-            break;
-            
-        case 'Transformer':
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling Transformer Model API for queued message');
-            $response = chatbot_chatgpt_call_transformer_model_api($message);
-            break;
-            
-        case 'Local Server':
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling Local Model API for queued message');
-            $response = chatbot_chatgpt_call_local_model_api($message);
-            break;
-            
-        default:
-            // DIAG - Diagnostics - Ver 2.3.4
-            // back_trace( 'NOTICE', 'Calling default ChatGPT API for queued message');
-            $response = chatbot_chatgpt_call_api($api_key, $message);
-            break;
+    // Check if we should use assistant_id or regular API
+    if ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'OpenAI') {
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'Calling OpenAI Assistant API for queued message');
+        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+    } elseif ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'Azure OpenAI') {
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'Calling Azure OpenAI Assistant API for queued message');
+        $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+    } elseif ($use_assistant_id == 'Yes' && $chatbot_ai_platform_choice == 'Mistral') {
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'Calling Mistral Agent API for queued message');
+        $response = chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+    } else {
+        // Use regular API calls (not assistant_id) - Ver 2.3.6
+        switch ($chatbot_ai_platform_choice) {
+            case 'OpenAI':
+                // Determine which OpenAI API to call based on model
+                if (str_starts_with($model, 'gpt-4o')) {
+                    $response = chatbot_chatgpt_call_omni($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+                } elseif (str_starts_with($model, 'gpt')) {
+                    $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+                } elseif (str_starts_with($model, 'dall')) {
+                    $response = chatbot_chatgpt_call_image_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+                } elseif (str_starts_with($model, 'tts')) {
+                    $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+                } elseif (str_starts_with($model, 'whisper')) {
+                    $response = chatbot_chatgpt_call_stt_api($api_key, $message);
+                } else {
+                    $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+                }
+                break;
+                
+            case 'Azure OpenAI':
+                $response = chatbot_call_azure_openai_api($api_key, $message);
+                break;
+                
+            case 'NVIDIA':
+                $response = chatbot_nvidia_call_api($api_key, $message);
+                break;
+                
+            case 'Anthropic':
+                $response = chatbot_call_anthropic_api($api_key, $message);
+                break;
+                
+            case 'DeepSeek':
+                $response = chatbot_call_deepseek_api($api_key, $message);
+                break;
+                
+            case 'Markov Chain':
+                $response = chatbot_chatgpt_call_markov_chain_api($message);
+                break;
+                
+            case 'Transformer':
+                $response = chatbot_chatgpt_call_transformer_model_api($message);
+                break;
+                
+            case 'Local Server':
+                $response = chatbot_chatgpt_call_local_model_api($message);
+                break;
+                
+            case 'Mistral':
+                // If use_assistant_id is No, use regular Mistral API
+                $response = chatbot_chatgpt_call_mistral_api($api_key, $message);
+                break;
+                
+            default:
+                $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
+                break;
+        }
     }
 
     // Log the response
@@ -1378,8 +1561,8 @@ function chatbot_chatgpt_send_message() {
             return;
         }
         
-        // For anonymous users, use session_id as user_id
-        $user_id = $session_id;
+        // For anonymous users, user_id should be 0 (session_id is used in transient key via get_chatbot_chatgpt_transients)
+        $user_id = 0;
         
         // Rate limiting for unauthenticated users to prevent API abuse
         $client_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
@@ -1397,6 +1580,12 @@ function chatbot_chatgpt_send_message() {
     } else {
         // Logged-in user - use their actual user ID
         $user_id = $current_user_id;
+        // Get session_id for logged-in users (needed for transient keys) - Ver 2.3.6
+        if (!isset($_POST['session_id'])) {
+            $session_id = kognetiks_get_unique_id();
+        } else {
+            $session_id = sanitize_text_field($_POST['session_id']);
+        }
     }
 
     // Global variables
@@ -1710,11 +1899,20 @@ function chatbot_chatgpt_send_message() {
     // Which Assistant ID to use - Ver 1.7.2
     if ($chatbot_chatgpt_assistant_alias == 'original') {
 
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'Using Original ChatGPT - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'Using Original ChatGPT - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
+
         $use_assistant_id = 'No';
         // DIAG - Diagnostics - Ver 2.0.5
         // back_trace( 'NOTICE' , 'Using Original ChatGPT - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
 
     } elseif ($chatbot_chatgpt_assistant_alias == 'primary') {
+
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'Using Primary Assistant - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
 
         $assistant_id = esc_attr(get_option('assistant_id'));
         // $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions', '')); // REMOVED VER 2.0.9
@@ -1732,9 +1930,13 @@ function chatbot_chatgpt_send_message() {
         
             // DIAG - Diagnostics - Ver 2.0.5
             // back_trace( 'NOTICE' ,'Falling back to ChatGPT API - $assistant_id: ' . $assistant_id );
+
         }
 
     } elseif ($chatbot_chatgpt_assistant_alias == 'alternate') {
+
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'Using Alternate Assistant - $chatbot_chatgpt_assistant_alias: ' . $chatbot_chatgpt_assistant_alias);
 
         $assistant_id = esc_attr(get_option('chatbot_chatgpt_assistant_id_alternate'));
         // $additional_instructions = esc_attr(get_option('chatbot_chatgpt_assistant_instructions_alternate', '')); // REMOVED VER 2.0.9
@@ -1757,6 +1959,9 @@ function chatbot_chatgpt_send_message() {
 
     } elseif (str_starts_with($assistant_id, 'asst_')) {
 
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'Assistant ID pass as a parameter - $assistant_id: ' . $assistant_id );
+
         $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
         $use_assistant_id = 'Yes';
 
@@ -1765,6 +1970,9 @@ function chatbot_chatgpt_send_message() {
 
     } elseif (str_starts_with($assistant_id, 'ag:')) {
 
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'MISTRAL: Agent ID pass as a parameter - $assistant_id: ' . $assistant_id );
+
         $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
         $use_assistant_id = 'Yes';
 
@@ -1772,6 +1980,9 @@ function chatbot_chatgpt_send_message() {
         // back_trace( 'NOTICE' ,'MISTRAL: Agent ID pass as a parameter - $assistant_id: ' . $assistant_id );
 
     } elseif (str_starts_with($assistant_id, 'websearch')) {
+
+        // DIAG - Diagnostics - Ver 2.3.6
+        // back_trace( 'NOTICE', 'MISTRAL: Websearch ID pass as a parameter - $assistant_id: ' . $assistant_id );
 
         $chatbot_chatgpt_assistant_alias = $assistant_id; // Belt & Suspenders
         $use_assistant_id = 'Yes';
@@ -1782,16 +1993,30 @@ function chatbot_chatgpt_send_message() {
     } else {
 
         // Reference GPT Assistant IDs directly - Ver 1.7.3
-        if (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_') || str_starts_with($chatbot_chatgpt_assistant_alias, 'ag:') || str_starts_with($chatbot_chatgpt_assistant_alias, 'websearch')) {
+        // Check both $chatbot_chatgpt_assistant_alias and $assistant_id - Ver 2.3.6
+        if (!empty($chatbot_chatgpt_assistant_alias) && (str_starts_with($chatbot_chatgpt_assistant_alias, 'asst_') || str_starts_with($chatbot_chatgpt_assistant_alias, 'ag:') || str_starts_with($chatbot_chatgpt_assistant_alias, 'websearch'))) {
 
             // DIAG - Diagnostics - 2.0.5
-            // back_trace( 'NOTICE', 'Using GPT Assistant ID: ' . $chatbot_chatgpt_assistant_alias);
+            // back_trace( 'NOTICE', 'Using GPT Assistant ID from alias: ' . $chatbot_chatgpt_assistant_alias);
 
             // Override the $assistant_id with the GPT Assistant ID
             $assistant_id = $chatbot_chatgpt_assistant_alias;
             $use_assistant_id = 'Yes';
 
             // DIAG - Diagnostics - Ver 2.0.5
+            // back_trace( 'NOTICE' , 'ALERT: Using $assistant_id ' . $assistant_id);
+
+        } elseif (!empty($assistant_id) && (str_starts_with($assistant_id, 'asst_') || str_starts_with($assistant_id, 'ag:') || str_starts_with($assistant_id, 'websearch'))) {
+            
+            // Check $assistant_id directly if $chatbot_chatgpt_assistant_alias is empty - Ver 2.3.6
+            // DIAG - Diagnostics - Ver 2.3.6
+            // back_trace( 'NOTICE', 'Using GPT Assistant ID from assistant_id: ' . $assistant_id);
+
+            // Set the alias to match the assistant_id
+            $chatbot_chatgpt_assistant_alias = $assistant_id;
+            $use_assistant_id = 'Yes';
+
+            // DIAG - Diagnostics - Ver 2.3.6
             // back_trace( 'NOTICE' , 'ALERT: Using $assistant_id ' . $assistant_id);
 
         } else {
