@@ -207,8 +207,17 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     $response = wp_remote_post($api_url, $args);
 
     // Decode the response
-    $response_body = json_decode(wp_remote_retrieve_body($response), true);
+    $raw_response_body = wp_remote_retrieve_body($response);
+    $response_body_size = strlen($raw_response_body);
+    // prod_trace('NOTICE', 'Response body size: ' . $response_body_size . ' bytes');
+    
+    $response_body = json_decode($raw_response_body, true);
     $response_code = wp_remote_retrieve_response_code($response);
+    
+    // Check for JSON decode errors
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        prod_trace('ERROR', 'JSON decode error: ' . json_last_error_msg() . '. Response size: ' . $response_body_size . ' bytes');
+    }
 
     // Handle request errors
     if (is_wp_error($response)) {
@@ -248,6 +257,31 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     $input_tokens = $response_body['usage']['prompt_tokens'] ?? 0;
     $output_tokens = $response_body['usage']['completion_tokens'] ?? 0;
     $total_tokens = $input_tokens + $output_tokens;
+    
+    // Check for truncation indicators - Ver 2.3.4 - Diagnostic
+    $finish_reason = $response_body['choices'][0]['finish_reason'] ?? 'unknown';
+    $was_truncated = false;
+    $truncation_reason = '';
+    
+    // Check if response was truncated due to max_tokens limit
+    if ($output_tokens >= $max_tokens) {
+        $was_truncated = true;
+        $truncation_reason = 'max_tokens limit reached (' . $max_tokens . ' tokens)';
+        // prod_trace('WARNING', 'Response may be truncated: ' . $truncation_reason . '. Consider increasing max_tokens setting.');
+    }
+    
+    // Check finish_reason field (OpenAI-compatible API should include this)
+    if ($finish_reason === 'length') {
+        $was_truncated = true;
+        $truncation_reason = 'Response truncated by AI server (finish_reason: length)';
+        // prod_trace('WARNING', 'Response truncated by AI server. Max tokens setting may be too low.');
+    } elseif ($finish_reason === 'stop') {
+        // Normal completion - response finished naturally
+        // No truncation
+    } else {
+        // Log unknown finish reason for debugging
+        prod_trace('NOTICE', 'Finish reason: ' . $finish_reason);
+    }
 
     if ($response['response']['code'] == 200) {
 
@@ -268,8 +302,23 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     if (isset($response_body['choices'][0]['message']['content']) && !empty($response_body['choices'][0]['message']['content'])) {
         $response_text = $response_body['choices'][0]['message']['content'];
         
+        // Log raw response length for diagnostics
+        $raw_length = strlen($response_text);
+        // prod_trace('NOTICE', 'Raw response length: ' . $raw_length . ' characters, ' . $output_tokens . ' tokens');
+        
         // Clean up special tokens that local models often include
         $response_text = chatbot_local_clean_response_text($response_text);
+        
+        // Log cleaned response length for diagnostics
+        $cleaned_length = strlen($response_text);
+        // if ($raw_length != $cleaned_length) {
+        //     // prod_trace('NOTICE', 'Response cleaned: ' . $raw_length . ' -> ' . $cleaned_length . ' characters');
+        // }
+        
+        // Add warning to response if it was truncated
+        if ($was_truncated) {
+            $response_text .= "\n\n[Note: Response may have been truncated. " . $truncation_reason . "]";
+        }
         
         addEntry('chatbot_chatgpt_context_history', $response_text);
         // Clear locks on success
@@ -291,12 +340,26 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
 
 }
 
-// Clean up response text from local models - Ver 2.3.3 - 2025-08-13
+// Clean up response text from local models - Ver 2.3.4 - Fixed aggressive cleaning
 function chatbot_local_clean_response_text($text) {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'raw $text: ' . $text);
 
+    // Store original length for comparison
+    $original_length = strlen($text);
+    
+    // First, check if the response contains special tokens that need cleaning
+    // If it's a clean OpenAI-compatible response (like from Jan.ai), skip aggressive cleaning
+    $has_special_tokens = preg_match('/<\|(?:start|end|channel|message)\|?>/', $text);
+    
+    if (!$has_special_tokens) {
+        // No special tokens detected - return text as-is (just trim)
+        // This preserves markdown formatting and full content
+        return trim($text);
+    }
+    
+    // Only apply aggressive cleaning if special tokens are actually present
     // First, try to extract just the final message content
     // Look for the pattern that indicates the final assistant response
     $final_pattern = '/<\|start\|>assistant<\|channel\|>final<\|message\|>(.*?)(?:<\||$)/s';
@@ -305,59 +368,45 @@ function chatbot_local_clean_response_text($text) {
         $text = $matches[1]; // Extract just the content after the final message marker
         // back_trace( 'NOTICE', 'extracted final message: ' . $text);
     } else {
-        // Fallback: if we can't find the final message pattern, clean up the whole text
-        // back_trace( 'NOTICE', 'final message pattern not found, cleaning entire text');
-        
-        // Remove common special tokens that local models include - more aggressive cleaning
+        // Remove only the specific special token patterns, not generic pipe patterns
+        // This is more conservative and won't remove legitimate content
         $patterns = array(
-            // Complete token pairs
+            // Complete special token pairs (only these specific tokens)
             '/<\|channel\|>[^<]*<\/\|channel\|>/',           // <|channel|>content</|channel|>
             '/<\|message\|>[^<]*<\/\|message\|>/',           // <|message|>content</|message|>
             '/<\|start\|>[^<]*<\/\|start\|>/',               // <|start|>content</|start|>
             '/<\|end\|>[^<]*<\/\|end\|>/',                   // <|end|>content</|end|>
             
-            // Incomplete token pairs
+            // Incomplete special token pairs
             '/<\|channel\|>[^<]*<\|/',                       // <|channel|>content<|
             '/<\|message\|>[^<]*<\|/',                       // <|message|>content<|
             '/<\|start\|>[^<]*<\|/',                         // <|start|>content<|
             '/<\|end\|>[^<]*<\|/',                           // <|end|>content<|
             
-            // Tokens at end of text
+            // Special tokens at end of text
             '/<\|channel\|>[^<]*$/',                         // <|channel|>content at end
             '/<\|message\|>[^<]*$/',                         // <|message|>content at end
             '/<\|start\|>[^<]*$/',                           // <|start|>content at end
             '/<\|end\|>[^<]*$/',                             // <|end|>content at end
             
-            // Any <|token|> format
-            '/<\|[^>]*\|>/',                                 // Any <|token|> format
-            
-            // Partial tokens at end
-            '/<\|[^>]*$/',                                   // Any <|token at end
-            
-            // Additional patterns for partial tokens
-            '/message\|>[^<]*/',                             // message|>content
-            '/start\|>[^<]*/',                               // start|>content
-            '/channel\|>[^<]*/',                             // channel|>content
-            '/end\|>[^<]*/',                                 // end|>content
-            
-            // Catch any remaining partial tokens
-            '/[a-z]+\|[^<]*/',                               // word|content
-            '/[a-z]+\|[^>]*/',                               // word|content>
-            
-            // Remove any remaining pipe patterns
-            '/\|[^<]*/',                                     // |content
-            '/\|[^>]*/',                                     // |content>
+            // Any <|token|> format (only at start of special tokens)
+            '/<\|(?:start|end|channel|message)\|?>/',        // Only these specific tokens
         );
         
         $text = preg_replace($patterns, '', $text);
     }
     
-    // Clean up extra whitespace and newlines
-    $text = preg_replace('/\s+/', ' ', $text);
+    // Only clean up excessive whitespace (multiple spaces/newlines), but preserve markdown formatting
+    // Don't collapse all whitespace - preserve single newlines for markdown
+    $text = preg_replace('/[ \t]+/', ' ', $text);  // Collapse multiple spaces/tabs to single space
+    $text = preg_replace('/\n{3,}/', "\n\n", $text); // Collapse 3+ newlines to 2 (preserve paragraph breaks)
     $text = trim($text);
     
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'cleaned $text: ' . $text);
+    $cleaned_length = strlen($text);
+    if ($original_length != $cleaned_length) {
+        // prod_trace('NOTICE', 'Response cleaned: ' . $original_length . ' -> ' . $cleaned_length . ' characters (special tokens removed)');
+    }
     
     return $text;
 }
