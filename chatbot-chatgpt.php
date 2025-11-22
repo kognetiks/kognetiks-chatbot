@@ -2123,18 +2123,19 @@ function chatbot_chatgpt_send_message() {
         // Send message to Custom GPT API - Ver 1.6.7
         $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
+        // Route based on chatbot_ai_platform_choice setting - Ver 2.3.6
         if ($chatbot_ai_platform_choice == 'OpenAI') {
-        // Send message to Custom GPT API - Ver 1.6.7
-        // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'Calling OpenAI Assistant API for main message');
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+            // Send message to OpenAI Assitant API - Ver 1.6.7
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Calling OpenAI Assistant API for main message');
+            $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
         } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
-            // Send message to Custom GPT API - Ver 2.2.6
+            // Send message to Azure Assistant API - Ver 2.2.6
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Using Azure OpenAI');
             $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
         } elseif ($chatbot_ai_platform_choice == 'Mistral') {
-            // Send message to Custom GPT API - Ver 2.2.6
+            // Send message to Mistral Assistant API - Ver 2.2.6
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Using Mistral');
             $response = chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
