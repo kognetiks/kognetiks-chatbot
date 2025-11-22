@@ -1090,7 +1090,17 @@ window.resetAllLocks = resetAllLocks;
         let isStillWorkingMessage = false;
         let ajaxResponse = null; // Store response for use in complete handler
 
-        $.ajax({
+        // Function to send message with nonce (extracted for reuse)
+        function sendMessageWithNonce() {
+            // Ensure nonce is present
+            if (!kchat_settings.chatbot_message_nonce) {
+                appendMessage('Oops! Security token is missing. Please refresh the page.', 'error');
+                removeTypingIndicator();
+                submitButton.prop('disabled', false);
+                return;
+            }
+
+            $.ajax({
             url: kchat_settings.ajax_url,
             method: 'POST',
             timeout: timeout_setting, // Example: 10,000ms = 10 seconds
@@ -1214,28 +1224,41 @@ window.resetAllLocks = resetAllLocks;
                 } else if (jqXHR.status === 403) {
                     // Handle 403 with safe error message extraction
                     let errorMessage = 'Oops! Security check failed. Please refresh the page and try again.';
+                    let isNonceError = false;
                     const contentType = jqXHR.getResponseHeader('content-type') || '';
                     
                     // If response is JSON, try to parse it safely
+                    let payload = null;
                     if (contentType.includes('application/json') && jqXHR.responseText) {
-                        const payload = tryParseJSON(jqXHR.responseText);
-                        if (payload) {
-                            errorMessage = toSafeString(payload.data || payload.message || payload);
-                        }
+                        payload = tryParseJSON(jqXHR.responseText);
                     } else if (jqXHR.responseText) {
                         // Try parsing anyway in case Content-Type header is missing
-                        const payload = tryParseJSON(jqXHR.responseText);
-                        if (payload) {
-                            errorMessage = toSafeString(payload.data || payload.message || payload);
-                        }
+                        payload = tryParseJSON(jqXHR.responseText);
                     }
                     
-                    // Use extracted error message or fallback
-                    if (errorMessage && errorMessage !== 'Oops! Security check failed. Please refresh the page and try again.') {
+                    if (payload) {
+                        // Check if this is specifically a nonce failure
+                        if (payload.data && (payload.data.code === 'nonce_failed' || payload.data.suggestion === 'refresh_nonce')) {
+                            isNonceError = true;
+                        } else if (payload.code === 'nonce_failed' || payload.suggestion === 'refresh_nonce') {
+                            isNonceError = true;
+                        }
+                        
+                        errorMessage = toSafeString(payload.data?.message || payload.message || payload.data || payload);
+                    }
+                    
+                    // Only show error message if it's not a nonce error (we'll handle nonce refresh silently)
+                    if (!isNonceError && errorMessage && errorMessage !== 'Oops! Security check failed. Please refresh the page and try again.') {
                         appendMessage(errorMessage, 'error');
                     }
+                    
                     // Handle 403 Forbidden - likely nonce expiration
-                    // console.log('Chatbot: 403 Error detected - attempting nonce refresh');
+                    // Always try to refresh nonce on 403, but especially if it's a nonce error
+                    if (isNonceError) {
+                        // console.log('Chatbot: Nonce error detected - refreshing nonce');
+                    } else {
+                        // console.log('Chatbot: 403 Error detected - attempting nonce refresh');
+                    }
                     
                     // Try to refresh the nonce by making a request to get fresh settings
                     $.ajax({
@@ -1408,6 +1431,40 @@ window.resetAllLocks = resetAllLocks;
             },
             cache: false, // This ensures jQuery does not cache the result
         });
+        } // End of sendMessageWithNonce function
+        
+        // Check if nonce exists, if not fetch it first
+        if (!kchat_settings.chatbot_message_nonce) {
+            // console.log('Chatbot: Nonce missing, fetching before request');
+            // Fetch nonce before proceeding
+            $.ajax({
+                url: kchat_settings.ajax_url,
+                method: 'POST',
+                data: {
+                    action: 'chatbot_chatgpt_refresh_nonce'
+                },
+                success: function(response) {
+                    if (response.success && response.data && response.data.chatbot_message_nonce) {
+                        kchat_settings.chatbot_message_nonce = response.data.chatbot_message_nonce;
+                        kchat_settings.nonce_timestamp = Date.now();
+                        // Retry the original request now that we have a nonce
+                        sendMessageWithNonce();
+                    } else {
+                        appendMessage('Oops! Unable to initialize security token. Please refresh the page.', 'error');
+                        removeTypingIndicator();
+                        submitButton.prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    appendMessage('Oops! Unable to initialize security token. Please refresh the page.', 'error');
+                    removeTypingIndicator();
+                    submitButton.prop('disabled', false);
+                }
+            });
+        } else {
+            // Nonce exists, proceed with request
+            sendMessageWithNonce();
+        }
     });
 
     // Input mitigation - Ver 2.0.0

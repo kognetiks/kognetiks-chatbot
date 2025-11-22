@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.3.7
+ * Version:     2.3.8
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -32,7 +32,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.3.7';
+$chatbot_chatgpt_plugin_version = '2.3.8';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -1527,15 +1527,34 @@ function chatbot_chatgpt_process_single_message($message_data) {
 function chatbot_chatgpt_send_message() {
 
     // Security: Verify nonce for CSRF protection
-    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_message_nonce')) {
-        // Log the security failure for debugging
-        prod_trace( 'ERROR', 'Chatbot Security Check Failed - Nonce verification failed. POST data: ' . print_r($_POST, true));
+    $nonce_present = isset($_POST['chatbot_nonce']);
+    $nonce_valid = false;
+    
+    if ($nonce_present) {
+        $nonce_valid = wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_message_nonce');
+    }
+    
+    if (!$nonce_present || !$nonce_valid) {
+        // Log the security failure for debugging with more detail
+        $nonce_status = !$nonce_present ? 'missing' : 'invalid';
+        $post_data_sanitized = array();
+        foreach ($_POST as $key => $value) {
+            // Sanitize POST data for logging (exclude sensitive data)
+            if ($key !== 'chatbot_nonce') {
+                $post_data_sanitized[$key] = is_string($value) ? substr($value, 0, 100) : $value;
+            } else {
+                $post_data_sanitized[$key] = $nonce_present ? (strlen($value) > 0 ? '[present]' : '[empty]') : '[missing]';
+            }
+        }
+        
+        prod_trace('ERROR', 'Chatbot Security Check Failed - Nonce ' . $nonce_status . '. POST data: ' . print_r($post_data_sanitized, true));
         
         // Enhanced error response with nonce refresh suggestion
         wp_send_json_error(array(
             'message' => 'Security check failed. Please refresh the page and try again.',
             'code' => 'nonce_failed',
-            'suggestion' => 'refresh_nonce'
+            'suggestion' => 'refresh_nonce',
+            'nonce_status' => $nonce_status
         ), 403);
         return;
     }
@@ -2104,18 +2123,19 @@ function chatbot_chatgpt_send_message() {
         // Send message to Custom GPT API - Ver 1.6.7
         $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
+        // Route based on chatbot_ai_platform_choice setting - Ver 2.3.6
         if ($chatbot_ai_platform_choice == 'OpenAI') {
-        // Send message to Custom GPT API - Ver 1.6.7
-        // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'Calling OpenAI Assistant API for main message');
-        $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
+            // Send message to OpenAI Assitant API - Ver 1.6.7
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Calling OpenAI Assistant API for main message');
+            $response = chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
         } elseif ($chatbot_ai_platform_choice == 'Azure OpenAI') {
-            // Send message to Custom GPT API - Ver 2.2.6
+            // Send message to Azure Assistant API - Ver 2.2.6
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Using Azure OpenAI');
             $response = chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
         } elseif ($chatbot_ai_platform_choice == 'Mistral') {
-            // Send message to Custom GPT API - Ver 2.2.6
+            // Send message to Mistral Assistant API - Ver 2.2.6
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Using Mistral');
             $response = chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id);
