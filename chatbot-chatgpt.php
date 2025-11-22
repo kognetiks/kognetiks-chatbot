@@ -1527,15 +1527,34 @@ function chatbot_chatgpt_process_single_message($message_data) {
 function chatbot_chatgpt_send_message() {
 
     // Security: Verify nonce for CSRF protection
-    if (!isset($_POST['chatbot_nonce']) || !wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_message_nonce')) {
-        // Log the security failure for debugging
-        prod_trace( 'ERROR', 'Chatbot Security Check Failed - Nonce verification failed. POST data: ' . print_r($_POST, true));
+    $nonce_present = isset($_POST['chatbot_nonce']);
+    $nonce_valid = false;
+    
+    if ($nonce_present) {
+        $nonce_valid = wp_verify_nonce($_POST['chatbot_nonce'], 'chatbot_message_nonce');
+    }
+    
+    if (!$nonce_present || !$nonce_valid) {
+        // Log the security failure for debugging with more detail
+        $nonce_status = !$nonce_present ? 'missing' : 'invalid';
+        $post_data_sanitized = array();
+        foreach ($_POST as $key => $value) {
+            // Sanitize POST data for logging (exclude sensitive data)
+            if ($key !== 'chatbot_nonce') {
+                $post_data_sanitized[$key] = is_string($value) ? substr($value, 0, 100) : $value;
+            } else {
+                $post_data_sanitized[$key] = $nonce_present ? (strlen($value) > 0 ? '[present]' : '[empty]') : '[missing]';
+            }
+        }
+        
+        prod_trace('ERROR', 'Chatbot Security Check Failed - Nonce ' . $nonce_status . '. POST data: ' . print_r($post_data_sanitized, true));
         
         // Enhanced error response with nonce refresh suggestion
         wp_send_json_error(array(
             'message' => 'Security check failed. Please refresh the page and try again.',
             'code' => 'nonce_failed',
-            'suggestion' => 'refresh_nonce'
+            'suggestion' => 'refresh_nonce',
+            'nonce_status' => $nonce_status
         ), 403);
         return;
     }

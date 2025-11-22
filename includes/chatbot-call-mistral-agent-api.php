@@ -98,12 +98,39 @@ function create_mistral_websearch_agent($api_key) {
         return false;
     }
     
+    // Check for HTTP error status codes
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code >= 400) {
+        $error_body = wp_remote_retrieve_body($response);
+        $error_data = json_decode($error_body, true);
+        
+        $error_message = 'HTTP ' . $response_code . ' Error';
+        if (isset($error_data['message'])) {
+            $error_message .= ': ' . $error_data['message'];
+        } elseif (isset($error_data['error']['message'])) {
+            $error_message .= ': ' . $error_data['error']['message'];
+        }
+        
+        prod_trace('ERROR', 'Failed to create Mistral agent: ' . $error_message);
+        return false;
+    }
+    
     $body = wp_remote_retrieve_body($response);
     $data = json_decode($body, true);
     
+    // Check for Mistral error response format (object => 'error')
+    if (isset($data['object']) && $data['object'] === 'error') {
+        $error_message = isset($data['message']) ? $data['message'] : 'Unknown error occurred';
+        prod_trace('ERROR', 'Mistral API Error creating agent: ' . $error_message);
+        return false;
+    }
+    
+    // Also check for nested error structure (backward compatibility)
     if (isset($data['error'])) {
         // DIAG - Diagnostics - Ver 2.3.1
         // back_trace( 'ERROR', 'Mistral API Error creating agent: ' . $data['error']['message']);
+        $error_message = isset($data['error']['message']) ? $data['error']['message'] : 'Unknown error occurred';
+        prod_trace('ERROR', 'Mistral API Error creating agent: ' . $error_message);
         return false;
     }
     
@@ -360,17 +387,54 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         return 'Error: ' . $response->get_error_message();
     }
 
+    // Check for HTTP error status codes
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code >= 400) {
+        $error_body = wp_remote_retrieve_body($response);
+        $error_data = json_decode($error_body, true);
+        
+        // Extract error message from Mistral error response
+        $error_message = 'HTTP ' . $response_code . ' Error';
+        if (isset($error_data['message'])) {
+            $error_message .= ': ' . $error_data['message'];
+        } elseif (isset($error_data['error']['message'])) {
+            $error_message .= ': ' . $error_data['error']['message'];
+        } elseif (!empty($error_body)) {
+            $error_message .= ': ' . $error_body;
+        }
+        
+        prod_trace('ERROR', 'Mistral API HTTP Error: ' . $error_message);
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
+        return 'Error: ' . $error_message;
+    }
+
     // Get the response body
     $body = wp_remote_retrieve_body($response);
     $data = json_decode($body, true);
 
-    // Check for API errors
+    // Check for API errors in response body (Mistral uses 'object' => 'error' format)
+    if (isset($data['object']) && $data['object'] === 'error') {
+        // Mistral error response format: {object: 'error', message: '...', type: '...', code: ...}
+        $error_message = isset($data['message']) ? $data['message'] : 'Unknown error occurred';
+        $error_type = isset($data['type']) ? $data['type'] : 'unknown';
+        $error_code = isset($data['code']) ? $data['code'] : '';
+        
+        prod_trace('ERROR', 'Mistral API Error - Type: ' . $error_type . ', Code: ' . $error_code . ', Message: ' . $error_message);
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
+        return 'Error: ' . $error_message;
+    }
+
+    // Also check for nested error structure (backward compatibility)
     if (isset($data['error'])) {
         // DIAG - Diagnostics - Ver 2.3.1
         // back_trace( 'ERROR', 'Mistral API Error: ' . $data['error']['message']);
+        $error_message = isset($data['error']['message']) ? $data['error']['message'] : 'Unknown error occurred';
+        prod_trace('ERROR', 'Mistral API Error: ' . $error_message);
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
-        return 'Error: ' . $data['error']['message'];
+        return 'Error: ' . $error_message;
     }
 
     // DIAG - Diagnostics - Ver 2.3.1
@@ -439,11 +503,26 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     }
 
     if (empty($response_text)) {
+        // Check if this might be an error response that wasn't caught earlier
+        if (isset($data['object']) && $data['object'] === 'error') {
+            $error_message = isset($data['message']) ? $data['message'] : 'Unknown error occurred';
+            prod_trace('ERROR', 'Mistral error response detected (missed earlier): ' . $error_message);
+            return 'Error: ' . $error_message;
+        }
+        
         // DIAG - Diagnostics - Ver 2.3.1
         prod_trace( 'ERROR', 'Mistral response found but content is empty or malformed. Response structure: ' . print_r($data, true));
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
-        return 'Error: Assistant responded with no text.';
+        
+        // Provide more helpful error message
+        $localized_errorResponses = (get_locale() !== "en_US") 
+            ? get_localized_errorResponses(get_locale(), $errorResponses) 
+            : $errorResponses;
+        
+        return !empty($localized_errorResponses) 
+            ? $localized_errorResponses[array_rand($localized_errorResponses)]
+            : 'Error: Assistant responded with no text. Please try again.';
     }
     
     // Clear locks on success
