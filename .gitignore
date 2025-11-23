@@ -36,6 +36,7 @@ downloads/*
 chatbot-logs/*
 widget-logs/*
 includes/transformers/sentential_embeddings_cache/*
+includes/transformers/lexical_embeddings_cache/*
 
 # Allow tracking of only the index.php file in the results folder
 !results/index.php
@@ -53,6 +54,11 @@ includes/transformers/lexical_embeddings_cache.php
 includes/tools/test-jan-ai.php
 GIT-COMMANDS.md
 LOCAL-AI MODEL.md
+
+# Ignore compressed cache files
+*.gz
+*.ser
+*.old
 
 # Ignore third-party vendor libraries
 vendor/
