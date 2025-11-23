@@ -541,6 +541,7 @@
     text-decoration: none !important;
 }
 
+/* Original history class - keep for backward compatibility */
 .chatbot-chatgpt-chatbot-history {
     display: flex;
     flex-direction: column;
@@ -550,6 +551,18 @@
     background-color: #f1f1f1;
     border-radius: 5px;
     margin: 10px;
+}
+
+/* Override for conversation history shortcode date groups */
+.chatbot-chatgpt-chatbot-history-wrapper .chatbot-chatgpt-chatbot-history {
+    display: block;
+    flex-direction: initial;
+    align-items: initial;
+    justify-content: initial;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+    margin: 0 0 20px 0;
 }
 
 /* Added in Version 2.0.3 - 2024 05 29 */
@@ -667,5 +680,90 @@ iframe {
 
 html, body {
     overflow-x: hidden; /* Prevents unwanted horizontal scrolling */
+}
+
+/* Conversation History Styles - Ver 2.3.6 */
+.chatbot-chatgpt-chatbot-history-wrapper {
+    margin: 20px 0;
+}
+
+.chatbot-chatgpt-chatbot-history > a {
+    display: block;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.chatbot-chatgpt-chatbot-history > a:hover {
+    background-color: #e0e0e0;
+}
+
+.chatbot-chatgpt-chatbot-history .thread-messages {
+    padding: 10px;
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+}
+
+.chatbot-chatgpt-chatbot-history .history-message {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-left: 3px solid #ddd;
+}
+
+.chatbot-chatgpt-chatbot-history .history-message.user-message {
+    background-color: #e3f2fd;
+    border-left-color: #2196f3;
+}
+
+.chatbot-chatgpt-chatbot-history .history-message.bot-message {
+    background-color: #f5f5f5;
+    border-left-color: #4caf50;
+}
+
+.chatbot-chatgpt-chatbot-history .history-message b {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.chatbot-chatgpt-chatbot-history .message-content {
+    line-height: 1.6;
+}
+
+.chatbot-chatgpt-chatbot-history .message-content ul,
+.chatbot-chatgpt-chatbot-history .message-content ol {
+    margin: 10px 0;
+    padding-left: 30px;
+}
+
+.chatbot-chatgpt-chatbot-history .message-content li {
+    margin: 5px 0;
+}
+
+.chatbot-chatgpt-chatbot-history .message-content a {
+    color: #2196f3;
+    text-decoration: underline;
+}
+
+.chatbot-chatgpt-chatbot-history .message-content a:hover {
+    color: #1976d2;
+}
+
+.chatbot-chatgpt-chatbot-history .message-content p {
+    margin: 10px 0;
+}
+
+.chatbot-chatgpt-chatbot-history .message-content h1,
+.chatbot-chatgpt-chatbot-history .message-content h2,
+.chatbot-chatgpt-chatbot-history .message-content h3,
+.chatbot-chatgpt-chatbot-history .message-content h4,
+.chatbot-chatgpt-chatbot-history .message-content h5,
+.chatbot-chatgpt-chatbot-history .message-content h6 {
+    margin: 15px 0 10px 0;
+    font-weight: bold;
 }
 

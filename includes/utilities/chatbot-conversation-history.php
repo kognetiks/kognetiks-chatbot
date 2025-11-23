@@ -13,6 +13,76 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+// Function to balance unmatched HTML tags - Ver 2.3.6
+// This ensures that opening tags have matching closing tags to prevent formatting issues
+// Simplified approach that closes unclosed tags at the end of each message
+function chatbot_chatgpt_balance_html_tags($html) {
+    if (empty($html)) {
+        return $html;
+    }
+    
+    // List of self-closing tags that don't need closing tags
+    $self_closing_tags = ['br', 'hr', 'img', 'input', 'meta', 'link', 'area', 'base', 'col', 'embed', 'source', 'track', 'wbr'];
+    
+    // Simple regex-based approach for basic tag balancing
+    // Extract all opening and closing tags
+    preg_match_all('/<(\/?)([a-z0-9]+)(?:\s[^>]*)?(?:\s*\/)?>/i', $html, $matches, PREG_OFFSET_CAPTURE);
+    
+    $tag_stack = [];
+    $result = '';
+    $last_pos = 0;
+    
+    foreach ($matches[0] as $index => $match) {
+        $tag_full = $match[0];
+        $tag_pos = $match[1];
+        $is_closing = !empty($matches[1][$index][0]);
+        $tag_name = strtolower(trim($matches[2][$index][0]));
+        $is_self_closing = substr(trim($tag_full), -2) === '/>' || substr(trim($tag_full), -1) === '/';
+        
+        // Append text before this tag
+        $result .= substr($html, $last_pos, $tag_pos - $last_pos);
+        
+        if ($is_closing) {
+            // Find matching opening tag
+            $found = false;
+            for ($j = count($tag_stack) - 1; $j >= 0; $j--) {
+                if ($tag_stack[$j] === $tag_name) {
+                    // Close all tags between
+                    for ($k = count($tag_stack) - 1; $k > $j; $k--) {
+                        $unclosed = array_pop($tag_stack);
+                        $result .= '</' . $unclosed . '>';
+                    }
+                    array_pop($tag_stack);
+                    $result .= $tag_full;
+                    $found = true;
+                    break;
+                }
+            }
+            // Ignore orphaned closing tags - don't append them
+        } elseif (in_array($tag_name, $self_closing_tags) || $is_self_closing) {
+            // Self-closing tag
+            $result .= $tag_full;
+        } else {
+            // Opening tag - add to stack
+            $tag_stack[] = $tag_name;
+            $result .= $tag_full;
+        }
+        
+        $last_pos = $tag_pos + strlen($tag_full);
+    }
+    
+    // Append remaining text
+    $result .= substr($html, $last_pos);
+    
+    // Close any remaining unclosed tags (in reverse order)
+    while (!empty($tag_stack)) {
+        $unclosed = array_pop($tag_stack);
+        $result .= '</' . $unclosed . '>';
+    }
+    
+    return $result;
+}
+
 // Shortcode to display the chatbot conversation history for the logged-in user
 // Usage: [chat_history] or [chatbot_conversation] or [chatbot_chatgpt_history]
 function interactive_chat_history() {
@@ -31,7 +101,8 @@ function interactive_chat_history() {
     $user_id_str = (string) $current_user_id;
     
     // Query conversations by user_id (as string to match VARCHAR column)
-    $query = $wpdb->prepare("SELECT c.message_text, c.user_type, c.thread_id, c.interaction_time, c.assistant_id, c.assistant_name, DATE(c.interaction_time) as interaction_date
+    // Fixed Ver 2.3.6: Added DISTINCT and id to prevent duplicate entries
+    $query = $wpdb->prepare("SELECT DISTINCT c.id, c.message_text, c.user_type, c.thread_id, c.interaction_time, c.assistant_id, c.assistant_name, DATE(c.interaction_time) as interaction_date
     FROM $table_name c
     WHERE c.user_id = %s 
     AND c.user_type IN ('Chatbot', 'Visitor')
@@ -45,12 +116,27 @@ function interactive_chat_history() {
     }
 
     // Group messages by interaction_date
+    // Fixed Ver 2.3.6: Use unique message IDs to prevent duplicates
     $grouped_conversations = [];
+    $seen_message_ids = []; // Track seen message IDs to prevent duplicates
+    
     foreach ($conversations as $conversation) {
-    $grouped_conversations[$conversation->interaction_date][] = $conversation;
+        // Use the database ID to prevent duplicates
+        $message_id = isset($conversation->id) ? $conversation->id : null;
+        
+        if ($message_id && isset($seen_message_ids[$message_id])) {
+            // Skip duplicate message
+            continue;
+        }
+        
+        if ($message_id) {
+            $seen_message_ids[$message_id] = true;
+        }
+        
+        $grouped_conversations[$conversation->interaction_date][] = $conversation;
     }
 
-    $output = '<div class="chatbot-chatgpt-chatbot-history">';
+    $output = '<div class="chatbot-chatgpt-chatbot-history-wrapper">';
     foreach ($grouped_conversations as $interaction_date => $messages) {
         $first_message = reset($messages); // Get the first message to use its date
         $date_label = date("F j, Y, g:i a", strtotime($first_message->interaction_time)); // Format the date
@@ -66,10 +152,26 @@ function interactive_chat_history() {
                 $assistant_name = esc_attr(get_option('chatbot_chatgpt_bot_name'));
             }
             $user_type = $message->user_type === 'Chatbot' ? 'Chatbot' : 'You';
+            
+            // Fixed Ver 2.3.6: Properly render HTML content instead of escaping it
+            // Processing order: balance tags -> sanitize -> format paragraphs
+            $message_text = stripslashes($message->message_text);
+            
+            // Step 1: Balance unmatched HTML tags to prevent formatting issues
+            // This closes any unclosed tags (especially inline tags like <i>, <b>, <a>)
+            $message_text = chatbot_chatgpt_balance_html_tags($message_text);
+            
+            // Step 2: Sanitize to allow only safe HTML tags
+            // wp_kses_post allows anchor tags with href attribute
+            $message_text = wp_kses_post($message_text);
+            
+            // Step 3: Convert line breaks to paragraphs (this should be done last)
+            $message_text = wpautop($message_text);
+            
             if ($user_type == 'You') {
-                $output .= sprintf('<b>%s</b><br>%s<br>', esc_html($user_type), stripslashes(esc_html($message->message_text)));
+                $output .= sprintf('<div class="history-message user-message"><b>%s</b><div class="message-content">%s</div></div>', esc_html($user_type), $message_text);
             } else {
-                $output .= sprintf('<b>%s</b><br>%s<br>', esc_html($assistant_name), stripslashes(esc_html($message->message_text)));
+                $output .= sprintf('<div class="history-message bot-message"><b>%s</b><div class="message-content">%s</div></div>', esc_html($assistant_name), $message_text);
             }
         }
         $output .= '</div></div>';
