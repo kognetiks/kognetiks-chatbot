@@ -70,6 +70,50 @@ function chatbot_chatgpt_convert_markdown_links($text) {
     return $text;
 }
 
+// Function to convert markdown headers to HTML heading tags - Ver 2.3.9
+// Converts # Header to <h1>Header</h1>, ## Header to <h2>Header</h2>, etc.
+function chatbot_chatgpt_convert_markdown_headers($text) {
+    if (empty($text)) {
+        return $text;
+    }
+    
+    // Pattern to match markdown headers at the start of a line
+    // Matches: # Header, ## Header, ### Header, etc. (up to 6 # symbols)
+    // Pattern: ^#{1,6}\s+(.+)$
+    // - ^ = start of line (or start of string after newline)
+    // - #{1,6} = 1 to 6 hash symbols
+    // - \s+ = one or more whitespace characters
+    // - (.+) = the header text (captured)
+    // - $ = end of line
+    
+    // Process line by line to handle headers properly
+    $lines = explode("\n", $text);
+    $processed_lines = [];
+    
+    foreach ($lines as $line) {
+        // Check if line starts with 1-6 hash symbols followed by space
+        if (preg_match('/^(#{1,6})\s+(.+)$/', $line, $matches)) {
+            $hash_count = strlen($matches[1]);  // Count of # symbols (1-6)
+            $header_text = trim($matches[2]);   // The header text
+            
+            // Limit to h1-h6 (hash_count should already be 1-6 from regex)
+            $level = min($hash_count, 6);
+            
+            // Escape the header text for HTML
+            $header_text_escaped = esc_html($header_text);
+            
+            // Create the HTML heading tag
+            $processed_lines[] = '<h' . $level . '>' . $header_text_escaped . '</h' . $level . '>';
+        } else {
+            // Not a header line, keep as-is
+            $processed_lines[] = $line;
+        }
+    }
+    
+    // Join lines back together
+    return implode("\n", $processed_lines);
+}
+
 // Function to balance unmatched HTML tags - Ver 2.3.9
 // This ensures that opening tags have matching closing tags to prevent formatting issues
 // Simplified approach that closes unclosed tags at the end of each message
@@ -211,26 +255,30 @@ function interactive_chat_history() {
             $user_type = $message->user_type === 'Chatbot' ? 'Chatbot' : 'You';
             
             // Fixed Ver 2.3.9: Properly render HTML content instead of escaping it
-            // Processing order: markdown bold -> markdown links -> balance tags -> sanitize -> format paragraphs
+            // Processing order: markdown headers -> markdown bold -> markdown links -> balance tags -> sanitize -> format paragraphs
             $message_text = stripslashes($message->message_text);
             
-            // Step 1: Convert markdown bold (**text**) to HTML (<b>text</b>)
+            // Step 1: Convert markdown headers (# Header) to HTML heading tags - Ver 2.3.9
+            // Format: # → <h1>, ## → <h2>, ### → <h3>, etc.
+            $message_text = chatbot_chatgpt_convert_markdown_headers($message_text);
+            
+            // Step 2: Convert markdown bold (**text**) to HTML (<b>text</b>)
             // This function also cleans up any line breaks between numbers and bold markers
             $message_text = chatbot_chatgpt_convert_bold_markdown($message_text);
             
-            // Step 2: Convert markdown links [text](url) to HTML anchor tags - Ver 2.3.9
+            // Step 3: Convert markdown links [text](url) to HTML anchor tags - Ver 2.3.9
             // Format: <a title="text" href="url" target="_blank">text</a>
             $message_text = chatbot_chatgpt_convert_markdown_links($message_text);
             
-            // Step 3: Balance unmatched HTML tags to prevent formatting issues - Ver 2.3.9
+            // Step 4: Balance unmatched HTML tags to prevent formatting issues - Ver 2.3.9
             // This closes any unclosed tags (especially inline tags like <i>, <b>, <a>)
             $message_text = chatbot_chatgpt_balance_html_tags($message_text);
             
-            // Step 4: Sanitize to allow only safe HTML tags - Ver 2.3.9
-            // wp_kses_post allows anchor tags with href attribute
+            // Step 5: Sanitize to allow only safe HTML tags - Ver 2.3.9
+            // wp_kses_post allows anchor tags with href attribute and heading tags
             $message_text = wp_kses_post($message_text);
             
-            // Step 5: Convert line breaks to paragraphs (this should be done last) - Ver 2.3.9
+            // Step 6: Convert line breaks to paragraphs (this should be done last) - Ver 2.3.9
             // wpautop will handle double line breaks as paragraphs, but single breaks in lists are now spaces
             $message_text = wpautop($message_text);
             
