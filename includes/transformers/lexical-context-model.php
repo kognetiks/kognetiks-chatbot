@@ -416,13 +416,33 @@ function transformer_model_lexical_context_generate_contextual_response($input, 
         return "I'm having trouble understanding that. Could you rephrase your question?";
     }
 
-    // Improved input preprocessing
+    // Improved input preprocessing - filter out stop words
     $input = preg_replace('/[^\w\s]/u', ' ', $input); // Remove punctuation
     $inputWords = preg_split('/\s+/', strtolower(trim($input)));
-    $inputWords = array_filter($inputWords, function($word) {
-        return !empty($word) && strlen($word) > 1;
+    
+    // Ensure stopWords is initialized
+    if (!isset($stopWords) || !is_array($stopWords)) {
+        $stopWords = [];
+    }
+    
+    // Filter out stop words using the global $stopWords list
+    $inputWords = array_filter($inputWords, function($word) use ($stopWords) {
+        return !empty($word) && 
+               strlen($word) > 2 && // At least 3 characters
+               !in_array($word, $stopWords, true); // Use strict comparison
     });
     $inputWords = array_values($inputWords);
+    
+    // If we filtered out everything, keep at least the longer words (likely the actual query terms)
+    if (empty($inputWords)) {
+        $allWords = preg_split('/\s+/', strtolower(trim($input)));
+        $inputWords = array_filter($allWords, function($word) use ($stopWords) {
+            return !empty($word) && 
+                   strlen($word) > 3 && // Keep words longer than 3 chars
+                   !in_array($word, $stopWords, true); // Still filter stop words
+        });
+        $inputWords = array_values($inputWords);
+    }
 
     if (empty($inputWords)) {
         return "I didn't understand that, please try again.";
@@ -605,6 +625,35 @@ function transformer_model_lexical_context_build_sentences_from_corpus($corpus, 
             continue; // Skip citation-style sentences
         }
         
+        // Skip sentences that are just questions without answers
+        // These often start with "What is" but don't contain the actual answer
+        $questionPatterns = [
+            '/^what\s+is\s+[^?]+\?$/i', // "What is X?" - just a question
+            '/^what\s+are\s+[^?]+\?$/i', // "What are X?" - just a question
+        ];
+        $isJustQuestion = false;
+        foreach ($questionPatterns as $pattern) {
+            if (preg_match($pattern, $sentenceTrimmed)) {
+                // Check if it contains any of our input words (if it does, it might be relevant)
+                $hasInputWords = false;
+                foreach ($inputWordsLower as $inputWord) {
+                    if (stripos($sentenceLower, $inputWord) !== false) {
+                        $hasInputWords = true;
+                        break;
+                    }
+                }
+                // If it's just a question and doesn't have our input words, skip it
+                if (!$hasInputWords) {
+                    $isJustQuestion = true;
+                    break;
+                }
+            }
+        }
+        
+        if ($isJustQuestion) {
+            continue; // Skip sentences that are just questions
+        }
+        
         $score = 0;
         $matchedWords = [];
         $inputWordsMatched = 0;
@@ -665,11 +714,38 @@ function transformer_model_lexical_context_build_sentences_from_corpus($corpus, 
             $score *= 0.9; // Slight penalty for longer sentences
         }
         
-        // Include sentences that match input words (preferred) OR have good similarity score
-        // Lower threshold if we have some input word matches
-        $minScore = $inputWordsMatched > 0 ? 1 : 5; // Lower threshold if input words matched
+        // REQUIRE that sentences must match at least one significant input word
+        // This prevents matching generic "what is" questions that don't answer the query
+        $hasSignificantMatch = false;
+        if (!empty($inputWordsLower)) {
+            foreach ($inputWordsLower as $inputWord) {
+                if (strlen($inputWord) >= 4) { // Only check words 4+ chars (significant terms)
+                    $pattern = '/\b' . preg_quote($inputWord, '/') . '\b/i';
+                    if (preg_match($pattern, $sentenceLower)) {
+                        $hasSignificantMatch = true;
+                        break;
+                    }
+                }
+            }
+        }
         
-        if ($inputWordsMatched > 0 || $score >= $minScore) {
+        // If we have input words but none match, require at least one match
+        // Exception: if all input words are short (<4 chars), be more lenient
+        $allShortWords = true;
+        foreach ($inputWordsLower as $word) {
+            if (strlen($word) >= 4) {
+                $allShortWords = false;
+                break;
+            }
+        }
+        
+        // Include sentences that:
+        // 1. Match at least one significant input word (4+ chars), OR
+        // 2. Match multiple input words (even if short), OR  
+        // 3. Have very high similarity score (fallback)
+        $minScore = $inputWordsMatched > 0 ? 1 : 10; // Higher threshold if no input words matched
+        
+        if ($hasSignificantMatch || $inputWordsMatched >= 2 || ($allShortWords && $inputWordsMatched > 0) || $score >= $minScore) {
             $sentenceScores[] = [
                 'sentence' => $sentenceTrimmed,
                 'score' => $score,
@@ -677,7 +753,8 @@ function transformer_model_lexical_context_build_sentences_from_corpus($corpus, 
                 'inputMatched' => $inputWordsMatched,
                 'wordCount' => $sentenceWordCount,
                 'density' => $density,
-                'inputAtStart' => $inputWordsAtStart
+                'inputAtStart' => $inputWordsAtStart,
+                'hasSignificantMatch' => $hasSignificantMatch
             ];
         }
     }
@@ -688,27 +765,33 @@ function transformer_model_lexical_context_build_sentences_from_corpus($corpus, 
     
     // Sort by: prioritize concise, direct, relevant sentences
     usort($sentenceScores, function($a, $b) {
-        // First priority: sentences with input words at the start (more direct)
+        // First priority: sentences with significant matches (actual query terms)
+        $aHasSig = isset($a['hasSignificantMatch']) ? $a['hasSignificantMatch'] : false;
+        $bHasSig = isset($b['hasSignificantMatch']) ? $b['hasSignificantMatch'] : false;
+        if ($aHasSig != $bHasSig) {
+            return $bHasSig ? 1 : -1; // Significant matches first
+        }
+        // Second priority: sentences with input words at the start (more direct)
         if ($a['inputAtStart'] != $b['inputAtStart']) {
             return $b['inputAtStart'] - $a['inputAtStart'];
         }
-        // Second priority: sentences with more input words matched
+        // Third priority: sentences with more input words matched
         if ($a['inputMatched'] != $b['inputMatched']) {
             return $b['inputMatched'] - $a['inputMatched'];
         }
-        // Third priority: relevance density (more relevant words per total words)
+        // Fourth priority: relevance density (more relevant words per total words)
         if (abs($a['density'] - $b['density']) > 0.1) {
             return $b['density'] > $a['density'] ? 1 : -1;
         }
-        // Fourth priority: total score
+        // Fifth priority: total score
         if ($a['score'] != $b['score']) {
             return $b['score'] - $a['score'];
         }
-        // Fifth priority: prefer shorter sentences when scores are similar
+        // Sixth priority: prefer shorter sentences when scores are similar
         if (abs($a['wordCount'] - $b['wordCount']) > 5) {
             return $a['wordCount'] - $b['wordCount']; // Shorter is better
         }
-        // Sixth priority: number of unique words matched
+        // Seventh priority: number of unique words matched
         return $b['matched'] - $a['matched'];
     });
     
@@ -754,17 +837,29 @@ function transformer_model_lexical_context_build_sentences_from_corpus($corpus, 
     $sentencesAddedBefore = 0;
     
     // Always start with the best matching sentence (index 0)
+    // But first check if it has significant matches - if not, we might want to skip it
     if (!empty($qualitySentences)) {
-        $sentence = trim($qualitySentences[0]['sentence']);
-        if (!empty($sentence)) {
-            // Ensure sentence ends with punctuation
-            if (!preg_match('/[.!?]$/', $sentence)) {
-                $sentence .= '.';
+        $bestSentence = $qualitySentences[0];
+        $hasSignificantContent = isset($bestSentence['hasSignificantMatch']) && $bestSentence['hasSignificantMatch'];
+        $hasInputWords = isset($bestSentence['inputMatched']) && $bestSentence['inputMatched'] > 0;
+        
+        // Only use the best sentence if it has significant matches or input words
+        // This prevents returning generic "what is" questions
+        if ($hasSignificantContent || $hasInputWords) {
+            $sentence = trim($bestSentence['sentence']);
+            if (!empty($sentence)) {
+                // Ensure sentence ends with punctuation
+                if (!preg_match('/[.!?]$/', $sentence)) {
+                    $sentence .= '.';
+                }
+                $response = $sentence;
+                $wordCount = str_word_count($sentence);
+                $tokensUsedAfter += $wordCount; // Count best match as part of "after" tokens
+                $sentencesAdded = 1;
             }
-            $response = $sentence;
-            $wordCount = str_word_count($sentence);
-            $tokensUsedAfter += $wordCount; // Count best match as part of "after" tokens
-            $sentencesAdded = 1;
+        } else {
+            // Best sentence doesn't have significant matches - return empty to trigger fallback
+            return '';
         }
     }
     
