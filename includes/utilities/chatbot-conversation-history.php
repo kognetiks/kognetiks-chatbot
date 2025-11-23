@@ -30,6 +30,7 @@ function chatbot_chatgpt_convert_bold_markdown($text) {
     
     // Convert bold: **text** to <b>text</b>
     // Use non-greedy matching to handle multiple bold sections
+    // Important: This must be done BEFORE italics conversion to avoid conflicts
     $text = preg_replace('/\*\*([^*]+)\*\*/', '<b>$1</b>', $text);
     
     // Also clean up any whitespace issues between "1." and "<b>" after conversion
@@ -262,7 +263,7 @@ function interactive_chat_history() {
             // Format: # → <h1>, ## → <h2>, ### → <h3>, etc.
             $message_text = chatbot_chatgpt_convert_markdown_headers($message_text);
             
-            // Step 2: Convert markdown bold (**text**) to HTML (<b>text</b>)
+            // Step 2: Convert markdown bold (**text**) to HTML (<b>text</b>) - Ver 2.3.9
             // This function also cleans up any line breaks between numbers and bold markers
             $message_text = chatbot_chatgpt_convert_bold_markdown($message_text);
             
