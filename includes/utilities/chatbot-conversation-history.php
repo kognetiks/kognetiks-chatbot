@@ -40,6 +40,36 @@ function chatbot_chatgpt_convert_bold_markdown($text) {
     return $text;
 }
 
+// Function to convert markdown links to HTML anchor tags - Ver 2.3.9
+// Converts [text](url) to <a title="text" href="url" target="_blank">text</a>
+function chatbot_chatgpt_convert_markdown_links($text) {
+    if (empty($text)) {
+        return $text;
+    }
+    
+    // Pattern to match markdown links: [text](url)
+    // Matches: [link text](https://example.com)
+    // Captures: $1 = link text, $2 = URL
+    $pattern = '/\[([^\]]+)\]\(([^\)]+)\)/';
+    
+    // Replace with HTML anchor tag
+    // Format: <a title="text" href="url" target="_blank">text</a>
+    $text = preg_replace_callback($pattern, function($matches) {
+        $link_text = $matches[1];  // The text inside the square brackets
+        $url = $matches[2];         // The URL inside the parentheses
+        
+        // Escape attributes to prevent XSS
+        $link_text_escaped = esc_attr($link_text);
+        $url_escaped = esc_url($url);
+        $link_text_html = esc_html($link_text);
+        
+        // Return HTML anchor tag with title, href, and target attributes
+        return '<a title="' . $link_text_escaped . '" href="' . $url_escaped . '" target="_blank">' . $link_text_html . '</a>';
+    }, $text);
+    
+    return $text;
+}
+
 // Function to balance unmatched HTML tags - Ver 2.3.9
 // This ensures that opening tags have matching closing tags to prevent formatting issues
 // Simplified approach that closes unclosed tags at the end of each message
@@ -181,22 +211,26 @@ function interactive_chat_history() {
             $user_type = $message->user_type === 'Chatbot' ? 'Chatbot' : 'You';
             
             // Fixed Ver 2.3.9: Properly render HTML content instead of escaping it
-            // Processing order: markdown bold -> balance tags -> sanitize -> format paragraphs
+            // Processing order: markdown bold -> markdown links -> balance tags -> sanitize -> format paragraphs
             $message_text = stripslashes($message->message_text);
             
             // Step 1: Convert markdown bold (**text**) to HTML (<b>text</b>)
             // This function also cleans up any line breaks between numbers and bold markers
             $message_text = chatbot_chatgpt_convert_bold_markdown($message_text);
             
-            // Step 2: Balance unmatched HTML tags to prevent formatting issues
+            // Step 2: Convert markdown links [text](url) to HTML anchor tags - Ver 2.3.9
+            // Format: <a title="text" href="url" target="_blank">text</a>
+            $message_text = chatbot_chatgpt_convert_markdown_links($message_text);
+            
+            // Step 3: Balance unmatched HTML tags to prevent formatting issues - Ver 2.3.9
             // This closes any unclosed tags (especially inline tags like <i>, <b>, <a>)
             $message_text = chatbot_chatgpt_balance_html_tags($message_text);
             
-            // Step 4: Sanitize to allow only safe HTML tags
+            // Step 4: Sanitize to allow only safe HTML tags - Ver 2.3.9
             // wp_kses_post allows anchor tags with href attribute
             $message_text = wp_kses_post($message_text);
             
-            // Step 5: Convert line breaks to paragraphs (this should be done last)
+            // Step 5: Convert line breaks to paragraphs (this should be done last) - Ver 2.3.9
             // wpautop will handle double line breaks as paragraphs, but single breaks in lists are now spaces
             $message_text = wpautop($message_text);
             
