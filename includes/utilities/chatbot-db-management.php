@@ -260,7 +260,15 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
     // Belt & Suspenders - Ver 1.9.3 - 20224 03 18
     // Cannot have a partial user_id based on the number value of the session_id - it trims it
     // 9ae6a5ebfacc3df8015a42d01bb25fbe becomes 9 - UGH!
-    if ( $user_id == $session_id ) {
+    // Fixed Ver 2.3.6: Only set user_id to 0 if it's actually a string matching session_id
+    // For logged-in users, preserve their actual WordPress user ID (integer > 0)
+    if ( is_string($user_id) && $user_id === $session_id ) {
+        $user_id = 0;
+    } elseif ( is_numeric($user_id) && $user_id > 0 ) {
+        // For logged-in users, ensure we keep their WordPress user ID
+        $user_id = (int) $user_id;
+    } elseif ( empty($user_id) || $user_id == 0 ) {
+        // For anonymous users, ensure user_id is 0
         $user_id = 0;
     }
 
@@ -294,8 +302,9 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
     );
 
     // Prepare the format array
+    // Fixed: Changed user_id and page_id from %d to %s since columns are VARCHAR(255) - Ver 2.3.6
     $format = array(
-        '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s'
+        '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'
     );
 
     // Add sentiment_score if available

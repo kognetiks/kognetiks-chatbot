@@ -1598,7 +1598,6 @@ function chatbot_chatgpt_send_message() {
         set_transient($rate_limit_key, $current_count + 1, 60); // 60 seconds
     } else {
         // Logged-in user - use their actual user ID
-        $user_id = $current_user_id;
         // Get session_id for logged-in users (needed for transient keys) - Ver 2.3.6
         if (!isset($_POST['session_id'])) {
             $session_id = kognetiks_get_unique_id();
@@ -1608,9 +1607,18 @@ function chatbot_chatgpt_send_message() {
     }
 
     // Global variables
+    // Fixed Ver 2.3.6: Set global variables AFTER determining the correct values
+    // This ensures the global $user_id is set correctly for logged-in users
     global $session_id;
     global $user_id;
     global $page_id;
+    
+    // Set the global $user_id to the correct value (don't let global declaration overwrite it)
+    if ($current_user_id === 0) {
+        $user_id = 0; // Anonymous user
+    } else {
+        $user_id = $current_user_id; // Logged-in user - preserve their WordPress user ID
+    }
     global $thread_id;
     global $assistant_id;
     global $chatbot_chatgpt_assistant_alias;

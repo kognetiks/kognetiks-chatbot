@@ -16,6 +16,12 @@ if ( ! defined( 'WPINC' ) ) {
 // Call the ChatGPT API
 function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
+    // Fixed Ver 2.3.6: Store parameters before declaring globals to preserve logged-in user IDs
+    $param_user_id = $user_id;
+    $param_page_id = $page_id;
+    $param_session_id = $session_id;
+    $param_assistant_id = $assistant_id;
+    
     global $session_id;
     global $user_id;
     global $page_id;
@@ -28,6 +34,20 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     global $voice;
     
     global $errorResponses;
+    
+    // Use parameter if provided (not null), otherwise use global
+    if ($param_user_id !== null) {
+        $user_id = $param_user_id;
+    }
+    if ($param_page_id !== null) {
+        $page_id = $param_page_id;
+    }
+    if ($param_session_id !== null) {
+        $session_id = $param_session_id;
+    }
+    if ($param_assistant_id !== null) {
+        $assistant_id = $param_assistant_id;
+    }
 
     // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();

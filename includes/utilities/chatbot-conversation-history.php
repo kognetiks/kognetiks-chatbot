@@ -26,13 +26,17 @@ function interactive_chat_history() {
     $current_user_id = get_current_user_id();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log'; // Adjust the table name as necessary
 
-    // New query with sub-query for correct sorting
+    // Fixed Ver 2.3.6: Query by user_id as string to match VARCHAR column type
+    // The logging function has been fixed to preserve user_id for logged-in users
+    $user_id_str = (string) $current_user_id;
+    
+    // Query conversations by user_id (as string to match VARCHAR column)
     $query = $wpdb->prepare("SELECT c.message_text, c.user_type, c.thread_id, c.interaction_time, c.assistant_id, c.assistant_name, DATE(c.interaction_time) as interaction_date
     FROM $table_name c
-    WHERE c.user_id = %d 
+    WHERE c.user_id = %s 
     AND c.user_type IN ('Chatbot', 'Visitor')
     ORDER BY interaction_date DESC, c.interaction_time ASC", 
-    $current_user_id);
+    $user_id_str);
 
     $conversations = $wpdb->get_results($query);
 
@@ -47,12 +51,14 @@ function interactive_chat_history() {
     }
 
     $output = '<div class="chatbot-chatgpt-chatbot-history">';
-    foreach ($grouped_conversations as $thread_id => $messages) {
+    foreach ($grouped_conversations as $interaction_date => $messages) {
         $first_message = reset($messages); // Get the first message to use its date
         $date_label = date("F j, Y, g:i a", strtotime($first_message->interaction_time)); // Format the date
+        // Create a unique ID based on the date (sanitize for use in HTML ID attribute)
+        $date_id = sanitize_html_class($interaction_date);
 
-        $output .= sprintf('<div class="chatbot-chatgpt-chatbot-history" id="thread-%s">', esc_attr($thread_id));
-        $output .= '<a href="#" onclick="toggleThread(\'' . esc_attr($thread_id) . '\');return false;">' . esc_html($date_label) . '</a>';
+        $output .= sprintf('<div class="chatbot-chatgpt-chatbot-history" id="thread-%s">', esc_attr($date_id));
+        $output .= '<a href="#" onclick="toggleThread(\'' . esc_attr($date_id) . '\');return false;">' . esc_html($date_label) . '</a>';
         $output .= '<div class="thread-messages" style="display:none;">';
         foreach ($messages as $message) {
             $assistant_name = $message->assistant_name;
