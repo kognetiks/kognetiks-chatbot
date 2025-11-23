@@ -725,7 +725,7 @@ html, body {
 }
 
 .chatbot-chatgpt-chatbot-history .history-message b {
-    display: block;
+    /* display: block; */
     margin-bottom: 5px;
     color: #555;
 }

@@ -20,9 +20,22 @@ function chatbot_chatgpt_convert_bold_markdown($text) {
         return $text;
     }
     
+    // First, normalize any whitespace issues - remove any CR/LF/LF between "1." and "**"
+    // This handles cases where line breaks might be inserted between numbers and bold markers
+    $text = preg_replace('/(\d+\.)\s*[\r\n]+\s*(\*\*)/', '$1 $2', $text);
+    
+    // Remove quotes that might be separating numbered items from bold markers
+    // Pattern: "1." followed by optional quotes and then "**"
+    $text = preg_replace('/(\d+\.)\s*["\']+\s*(\*\*)/', '$1 $2', $text);
+    
     // Convert bold: **text** to <b>text</b>
     // Use non-greedy matching to handle multiple bold sections
     $text = preg_replace('/\*\*([^*]+)\*\*/', '<b>$1</b>', $text);
+    
+    // Also clean up any whitespace issues between "1." and "<b>" after conversion
+    // Remove any line breaks, quotes, or extra spaces between number and opening bold tag
+    $text = preg_replace('/(\d+\.)\s*["\']*\s*[\r\n]+\s*["\']*\s*(<b>)/', '$1 $2', $text);
+    $text = preg_replace('/(\d+\.)\s*["\']+\s*(<b>)/', '$1 $2', $text);
     
     return $text;
 }
@@ -172,17 +185,19 @@ function interactive_chat_history() {
             $message_text = stripslashes($message->message_text);
             
             // Step 1: Convert markdown bold (**text**) to HTML (<b>text</b>)
+            // This function also cleans up any line breaks between numbers and bold markers
             $message_text = chatbot_chatgpt_convert_bold_markdown($message_text);
             
             // Step 2: Balance unmatched HTML tags to prevent formatting issues
             // This closes any unclosed tags (especially inline tags like <i>, <b>, <a>)
             $message_text = chatbot_chatgpt_balance_html_tags($message_text);
             
-            // Step 3: Sanitize to allow only safe HTML tags
+            // Step 4: Sanitize to allow only safe HTML tags
             // wp_kses_post allows anchor tags with href attribute
             $message_text = wp_kses_post($message_text);
             
-            // Step 4: Convert line breaks to paragraphs (this should be done last)
+            // Step 5: Convert line breaks to paragraphs (this should be done last)
+            // wpautop will handle double line breaks as paragraphs, but single breaks in lists are now spaces
             $message_text = wpautop($message_text);
             
             if ($user_type == 'You') {
