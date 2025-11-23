@@ -13,7 +13,21 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Function to balance unmatched HTML tags - Ver 2.3.6
+// Function to convert markdown bold to HTML - Ver 2.3.9
+// Converts **text** to <b>text</b>
+function chatbot_chatgpt_convert_bold_markdown($text) {
+    if (empty($text)) {
+        return $text;
+    }
+    
+    // Convert bold: **text** to <b>text</b>
+    // Use non-greedy matching to handle multiple bold sections
+    $text = preg_replace('/\*\*([^*]+)\*\*/', '<b>$1</b>', $text);
+    
+    return $text;
+}
+
+// Function to balance unmatched HTML tags - Ver 2.3.9
 // This ensures that opening tags have matching closing tags to prevent formatting issues
 // Simplified approach that closes unclosed tags at the end of each message
 function chatbot_chatgpt_balance_html_tags($html) {
@@ -96,12 +110,12 @@ function interactive_chat_history() {
     $current_user_id = get_current_user_id();
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log'; // Adjust the table name as necessary
 
-    // Fixed Ver 2.3.6: Query by user_id as string to match VARCHAR column type
+    // Fixed Ver 2.3.9: Query by user_id as string to match VARCHAR column type
     // The logging function has been fixed to preserve user_id for logged-in users
     $user_id_str = (string) $current_user_id;
     
     // Query conversations by user_id (as string to match VARCHAR column)
-    // Fixed Ver 2.3.6: Added DISTINCT and id to prevent duplicate entries
+    // Fixed Ver 2.3.9: Added DISTINCT and id to prevent duplicate entries
     $query = $wpdb->prepare("SELECT DISTINCT c.id, c.message_text, c.user_type, c.thread_id, c.interaction_time, c.assistant_id, c.assistant_name, DATE(c.interaction_time) as interaction_date
     FROM $table_name c
     WHERE c.user_id = %s 
@@ -116,7 +130,7 @@ function interactive_chat_history() {
     }
 
     // Group messages by interaction_date
-    // Fixed Ver 2.3.6: Use unique message IDs to prevent duplicates
+    // Fixed Ver 2.3.9: Use unique message IDs to prevent duplicates
     $grouped_conversations = [];
     $seen_message_ids = []; // Track seen message IDs to prevent duplicates
     
@@ -153,19 +167,22 @@ function interactive_chat_history() {
             }
             $user_type = $message->user_type === 'Chatbot' ? 'Chatbot' : 'You';
             
-            // Fixed Ver 2.3.6: Properly render HTML content instead of escaping it
-            // Processing order: balance tags -> sanitize -> format paragraphs
+            // Fixed Ver 2.3.9: Properly render HTML content instead of escaping it
+            // Processing order: markdown bold -> balance tags -> sanitize -> format paragraphs
             $message_text = stripslashes($message->message_text);
             
-            // Step 1: Balance unmatched HTML tags to prevent formatting issues
+            // Step 1: Convert markdown bold (**text**) to HTML (<b>text</b>)
+            $message_text = chatbot_chatgpt_convert_bold_markdown($message_text);
+            
+            // Step 2: Balance unmatched HTML tags to prevent formatting issues
             // This closes any unclosed tags (especially inline tags like <i>, <b>, <a>)
             $message_text = chatbot_chatgpt_balance_html_tags($message_text);
             
-            // Step 2: Sanitize to allow only safe HTML tags
+            // Step 3: Sanitize to allow only safe HTML tags
             // wp_kses_post allows anchor tags with href attribute
             $message_text = wp_kses_post($message_text);
             
-            // Step 3: Convert line breaks to paragraphs (this should be done last)
+            // Step 4: Convert line breaks to paragraphs (this should be done last)
             $message_text = wpautop($message_text);
             
             if ($user_type == 'You') {
