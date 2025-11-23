@@ -72,6 +72,76 @@ To ensure your **Kognetiks Chatbot** functions optimally, you need to configure 
     - **Tip**: The higher the setting the more content ahead of the match based on the prompt will be returned,  Experiment with various settings to determine what works best with your content.
     - **NOTE**: This setting controls how much additional context is included before a match. Adjust with care, as they may overlap or conflict with the `Leading Sentence Ratio`.
 
+## Tuning Guide
+
+### Recommended Parameter Settings for Tighter Responses
+
+For tighter, more concise responses, try these settings:
+
+1. **Sentence Response Count: 2-3** (instead of 5)
+   - Fewer sentences = more focused responses
+
+2. **Similarity Threshold: 0.4-0.5** (instead of 0.3)
+   - Higher threshold = only the most relevant sentences
+
+3. **Leading Sentences Ratio: 0.1** (instead of 0.2)
+   - Less leading context = more direct answers
+
+4. **Leading Token Ratio: 0.1** (instead of 0.2)
+   - Less padding before the main answer
+
+5. **Maximum Tokens: 200-300** (instead of 500)
+   - Shorter responses = more concise
+
+### Quick Tuning Guide
+
+Use these guidelines to fine-tune your responses:
+
+- **Too verbose?** → Increase Similarity Threshold to 0.5, reduce Sentence Response Count to 2
+- **Too brief?** → Decrease Similarity Threshold to 0.2, increase Sentence Response Count to 4
+- **Too much padding?** → Reduce Leading Sentences/Token Ratios to 0.05-0.1
+- **Want more context?** → Increase Leading Ratios to 0.3-0.4
+
+### Algorithm Improvements for Tighter Responses
+
+The lexical context model includes several improvements to generate more concise, direct responses:
+
+1. **Sentence Length Filtering**
+   - Automatically skips sentences over 60 words
+   - Applies length penalties: ideal length is 10-25 words
+   - Slight penalty for 30-40 words, stronger penalty for >40 words
+
+2. **Citation and Metadata Filtering**
+   - Automatically detects and skips citation-style sentences (author lists, publication info)
+   - Skips sentences with excessive commas (likely lists)
+   - Reduces introductory padding
+
+3. **Relevance Density Scoring**
+   - Calculates how much of each sentence is actually relevant
+   - Prefers sentences with higher relevance density
+   - Reduces filler content
+
+4. **Input Word Position Bonus**
+   - Gives bonus points for input words appearing in the first 10 words
+   - Prioritizes direct, upfront answers
+
+5. **Improved Sorting Algorithm**
+   - Priority order:
+     1. Input words at sentence start
+     2. Number of input words matched
+     3. Relevance density
+     4. Total score
+     5. Shorter sentences (when scores are similar)
+     6. Unique words matched
+
+6. **Early Stopping**
+   - Stops after 2-3 good sentences if quality is high
+   - Prevents run-on responses
+
+7. **Smarter Context Allocation**
+   - Only adds leading context for sentences with input words
+   - Prefers trailing context for tighter flow
+
 ---
 
 - **[Back to the Overview](/overview.md)**
