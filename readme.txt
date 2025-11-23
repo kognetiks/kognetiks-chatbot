@@ -156,6 +156,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 = 2.3.9 - Released TBD =
 
+* **Conversation History**: Improved the conversation history display to show the conversation history for the logged-in user.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.8.
 
 = 2.3.8 - Released 2025-11-22 =
