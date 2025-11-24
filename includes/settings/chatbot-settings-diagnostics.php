@@ -119,7 +119,7 @@ function chatbot_chatgpt_diagnostics_settings_init() {
     // Advanced Settings Section - Ver 2.3.6
     add_settings_section(
         'chatbot_chatgpt_advanced_section',                 // ID
-        'Advanced',                                          // Title
+        'Advanced',                                         // Title
         'chatbot_chatgpt_advanced_section_callback',        // Callback
         'chatbot_chatgpt_advanced'                          // Page
     );

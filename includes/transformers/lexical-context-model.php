@@ -84,7 +84,7 @@ function transformer_model_lexical_context_get_cached_embeddings($corpus, $windo
     $cacheVersionFile = $cacheDir . '/lexical_embeddings_cache_version.txt';
     
     // Calculate corpus hash for cache invalidation
-    $corpusHash = md5($corpus);
+    $corpusHash = hash('sha256', $corpus);
     $cacheValid = false;
 
     // Check if cache exists and is valid

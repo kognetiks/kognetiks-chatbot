@@ -659,3 +659,161 @@ function chatbot_mistral_get_models() {
     return $default_model_list;
 
 }
+
+// Function to get the Model names from Google API
+function chatbot_google_get_models() {
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE' , 'chatbot_google_get_models');
+
+    $api_key = '';
+
+    // Retrieve the API key
+    $api_key = esc_attr(get_option('chatbot_google_api_key'));
+    // Decrypt the API key - Ver 2.3.9
+    $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+
+    // Default model list
+    $default_model_list = '';
+    $default_model_list = array(
+        array(
+            'id' => 'gemini-pro',
+            'object' => 'model',
+            'created' => null,
+            'owned_by' => 'google'
+        ),
+        array(
+            'id' => 'gemini-pro-vision',
+            'object' => 'model',
+            'created' => null,
+            'owned_by' => 'google'
+        ),
+        array(
+            'id' => 'gemini-1.5-pro',
+            'object' => 'model',
+            'created' => null,
+            'owned_by' => 'google'
+        ),
+        array(
+            'id' => 'gemini-1.5-flash',
+            'object' => 'model',
+            'created' => null,
+            'owned_by' => 'google'
+        ),
+        array(
+            'id' => 'gemini-2.0-flash',
+            'object' => 'model',
+            'created' => null,
+            'owned_by' => 'google'
+        ),
+    );
+
+    // See if the option exists, if not then create it and set the default
+    if (esc_attr(get_option('chatbot_google_model_choice')) === false) {
+        update_option('chatbot_google_model_choice', 'gemini-2.0-flash');
+    }
+
+    // Check if the API key is empty
+    if (empty($api_key)) {
+        return $default_model_list;
+    }
+
+    // Get the base URL from settings
+    $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta/models/'));
+    $google_models_url = rtrim($google_base_url, '/');
+    
+    // If the URL doesn't end with /models, add it
+    if (substr($google_models_url, -7) !== '/models') {
+        $google_models_url = rtrim($google_models_url, '/') . '/models';
+    }
+
+    // Google API uses query parameter for API key
+    $google_models_url = add_query_arg('key', $api_key, $google_models_url);
+
+    // Set HTTP request arguments
+    $args = array(
+        'headers' => array(
+            'Content-Type'  => 'application/json'
+        ),
+        'timeout' => 15, // Set a timeout to avoid long waits
+    );
+
+    // Make the request using WP HTTP API
+    $response = wp_remote_get($google_models_url, $args);
+
+    // Check for errors
+    if (is_wp_error($response)) {
+        prod_trace( 'ERROR', 'Error fetching Google models: ' . $response->get_error_message());
+        return $default_model_list;
+    }
+
+    // Decode the JSON response
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE', '$data: ' . print_r($data, true));
+
+    // Check for API errors
+    if (isset($data['error'])) {
+        // return "Error: " . $data['error']['message'];
+        // On 1st install needs an API key
+        // So return a short list of the base models until an API key is entered
+        return $default_model_list;
+    }
+
+    // Extract the models from the response
+    // Google API may return models in different formats
+    if (isset($data['models']) && is_array($data['models'])) {
+        $models = array_map(function($model) {
+            // Google API returns model names as "models/gemini-pro" - extract just the model name
+            $model_id = $model['name'] ?? $model['displayName'] ?? $model['id'] ?? '';
+            // Remove "models/" prefix if present
+            if (strpos($model_id, 'models/') === 0) {
+                $model_id = substr($model_id, 7);
+            }
+            return array(
+                'id' => $model_id,
+                'object' => 'model',
+                'created' => null,
+                'owned_by' => 'google'
+            );
+        }, $data['models']);
+    } elseif (isset($data['data']) && is_array($data['data'])) {
+        $models = array_map(function($model) {
+            // Google API returns model names as "models/gemini-pro" - extract just the model name
+            $model_id = $model['id'] ?? $model['name'] ?? '';
+            // Remove "models/" prefix if present
+            if (strpos($model_id, 'models/') === 0) {
+                $model_id = substr($model_id, 7);
+            }
+            return array(
+                'id' => $model_id,
+                'object' => $model['object'] ?? 'model',
+                'created' => $model['created'] ?? null,
+                'owned_by' => $model['owned_by'] ?? 'google'
+            );
+        }, $data['data']);
+    } else {
+        // Handle the case where models are not in expected format
+        $models = [];
+        prod_trace( 'WARNING', 'Models not found in expected format in Google API response.');
+    }
+
+    // Ensure $models is an array
+    if (!is_array($models) || empty($models)) {
+        return $default_model_list;
+    } else {
+        // Sort the models by name
+        usort($models, function($a, $b) {
+            return $a['id'] <=> $b['id'];
+        });
+    }
+
+    // DIAG - Diagnostics - Ver 2.3.9
+    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
+
+    // Return the list of models
+    return $models;
+
+}

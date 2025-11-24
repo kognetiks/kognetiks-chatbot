@@ -65,6 +65,15 @@ if ( ! defined( 'WPINC' ) ) {
         $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
         $updated_status = kchat_fetch_api_status($api_key, $model);
         update_option('chatbot_deepseek_api_status', $updated_status);
+    } elseif ($chatbot_chatbot_ai_platform_choice == 'Google') {
+        update_option('chatbot_google_api_status', 'API Error Type: Status Unknown');
+        $api_key = esc_attr(get_option('chatbot_google_api_key', 'NOT SET'));
+        // Decrypt the API key - Ver 2.2.6
+        $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+        // Model and message for testing
+        $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+        $updated_status = kchat_fetch_api_status($api_key, $model);
+        update_option('chatbot_google_api_status', $updated_status);
     } elseif ($chatbot_chatbot_ai_platform_choice == 'Markov Chain') {
         $updated_status = 'API Testing Not Required';
         update_option('chatbot_markov_chain_api_status', 'API Error Type: Status Unknown');
@@ -556,6 +565,104 @@ function kchat_fetch_api_status($api_key, $model) {
             }
             
             update_option('chatbot_mistral_api_status', $updated_status);
+
+            return $updated_status;
+
+            break;
+
+        case 'Google':
+
+            update_option('chatbot_google_api_status', 'API Error Type: Status Unknown');
+            $api_key = esc_attr(get_option('chatbot_google_api_key', 'NOT SET'));
+            // Decrypt the API key - Ver 2.2.6
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            
+            // Model and message for testing
+            $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+            
+            // Get the base URL from settings
+            $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta/models/'));
+            $google_base_url = rtrim($google_base_url, '/');
+            
+            // Google API endpoint format: https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
+            $api_url = $google_base_url . '/' . $model . ':generateContent';
+            
+            // Add API key as query parameter
+            $api_url = add_query_arg('key', $api_key, $api_url);
+
+            // Set the headers
+            $headers = array(
+                'Content-Type' => 'application/json'
+            );
+
+            // Set the body - Google API uses 'contents' instead of 'messages'
+            $body = array(
+                'contents' => array(
+                    array(
+                        'parts' => array(
+                            array(
+                                'text' => $test_message
+                            )
+                        )
+                    )
+                )
+            );
+
+            // Get timeout setting
+            $timeout = intval(esc_attr(get_option('chatbot_google_timeout_setting', 240)));
+
+            // Encode the body
+            $body = json_encode($body);
+
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'URL: ' . $api_url);
+            // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
+            // back_trace( 'NOTICE', 'Body: ' . $body);
+
+            // Call the API
+            $response = wp_remote_post($api_url, array(
+                'headers' => $headers,
+                'body' => $body,
+                'timeout' => $timeout
+            ));
+
+            // Handle WP Error
+            if (is_wp_error($response)) {
+                // DIAG - Diagnostics
+                prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
+                return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your Google account for additional information.';
+            }
+
+            // Retrieve and Decode Response
+            $response_data = json_decode(wp_remote_retrieve_body($response), true);
+
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Response: ' . print_r($response_data, true));
+
+            // Check for API-specific errors
+            if (isset($response_data['error'])) {
+                // Extract error type and message safely
+                $error_type = $response_data['error']['status'] ?? 'Unknown Error Type';
+                $error_message = $response_data['error']['message'] ?? 'No additional information.';
+            
+                // Handle error response
+                $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
+                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+            
+            } elseif (isset($response_data['candidates']) && !empty($response_data['candidates'])) {
+                // Google API uses 'candidates' instead of 'choices'
+                // Handle successful response
+                $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
+                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
+
+            } else {
+                // Handle unexpected response structure
+                $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
+                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+
+            }
+            
+            update_option('chatbot_google_api_status', $updated_status);
 
             return $updated_status;
 

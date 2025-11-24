@@ -293,6 +293,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_mistral_api_enabled = 'No';
         update_option('chatbot_mistral_api_enabled', 'No');
+
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
         
         // Model choice - Ver 1.9.4
         if (esc_attr(get_option('chatbot_chatgpt_model_choice')) === null) {
@@ -344,6 +347,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_mistral_api_enabled = 'No';
         update_option('chatbot_mistral_api_enabled', 'No');
+
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
         
         // Model choice - Ver 1.9.4
         if (esc_attr(get_option('chatbot_azure_model_choice')) === null) {
@@ -399,6 +405,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_mistral_api_enabled = 'No';
         update_option('chatbot_mistral_api_enabled', 'No');
 
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
+
         // Model choice - Ver 2.1.8
         if (esc_attr(get_option('chatbot_nvidia_model_choice')) === null) {
             $model = 'nvidia/llama-3.1-nemotron-51b-instruct';
@@ -448,6 +457,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_mistral_api_enabled = 'No';
         update_option('chatbot_mistral_api_enabled', 'No');
+
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
         
         // Model choice - Ver 2.2.1
         if (esc_attr(get_option('chatbot_anthropic_model_choice')) === null) {
@@ -498,6 +510,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_mistral_api_enabled = 'No';
         update_option('chatbot_mistral_api_enabled', 'No');
+
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
         
         // Model choice - Ver 2.2.1
         if (esc_attr(get_option('chatbot_deepseek_model_choice')) === null) {
@@ -549,6 +564,9 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_mistral_api_enabled = 'Yes';
         update_option('chatbot_mistral_api_enabled', 'Yes');
 
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
+
         // Model choice - Ver 2.2.1
         if (esc_attr(get_option('chatbot_mistral_model_choice')) === null) {
             $model = 'mistral-small-latest';
@@ -564,6 +582,59 @@ switch ($chatbot_ai_platform_choice) {
         // Disable File Uploads - Ver 2.2.1
         update_option('chatbot_chatgpt_allow_file_uploads', 'No');
         // Disable MP3 Uploads - Ver 2.2.1
+        update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
+
+        break;
+
+    case 'Google':
+
+        update_option('chatbot_ai_platform_choice', 'Google');
+
+        $chatbot_chatgpt_api_enabled = 'No';
+        update_option('chatbot_chatgpt_api_enabled', 'No');
+
+        $chatbot_azure_api_enabled = 'No';
+        update_option('chatbot_azure_api_enabled', 'No');
+
+        $chatbot_nvidia_api_enabled = 'No';
+        update_option('chatbot_nvidia_api_enabled', 'No');
+
+        $chatbot_anthropic_api_enabled = 'No';
+        update_option('chatbot_anthropic_api_enabled', 'No');
+
+        $chatbot_deepseek_api_enabled = 'No';
+        update_option('chatbot_deepseek_api_enabled', 'No');
+
+        $chatbot_markov_chain_api_enabled = 'No';
+        update_option('chatbot_markov_chain_api_enabled', 'No');
+
+        $chatbot_transformer_model_api_enabled = 'No';
+        update_option('chatbot_transformer_model_api_enabled', 'No');
+
+        $chatbot_local_api_enabled = 'No';
+        update_option('chatbot_local_api_enabled', 'No');
+
+        $chatbot_mistral_api_enabled = 'No';
+        update_option('chatbot_mistral_api_enabled', 'No');
+
+        $chatbot_google_api_enabled = 'Yes';
+        update_option('chatbot_google_api_enabled', 'Yes');
+        
+        // Model choice - Ver 2.3.9
+        if (esc_attr(get_option('chatbot_google_model_choice')) === null) {
+            $model = 'gemini-2.0-flash';
+            update_option('chatbot_google_model_choice', $model);
+            // DIAG - Diagnostics
+            // back_trace( 'NOTICE', 'Model upgraded: ' . $model);
+        } elseif (empty($model)) {
+            $model = 'gemini-2.0-flash';
+        }
+
+        // Disable Read Aloud - Ver 2.3.9
+        update_option('chatbot_chatgpt_read_aloud_option', 'no');
+        // Disable File Uploads - Ver 2.3.9
+        update_option('chatbot_chatgpt_allow_file_uploads', 'No');
+        // Disable MP3 Uploads - Ver 2.3.9
         update_option('chatbot_chatgpt_allow_mp3_uploads', 'No');
 
         break;
@@ -598,7 +669,10 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_mistral_api_enabled = 'No';
         update_option('chatbot_mistral_api_enabled', 'No');
-                 
+
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
+                 	
         // Model choice - Ver 2.1.8
         if (esc_attr(get_option('chatbot_markov_chain_model_choice')) === null) {
             $model = 'markov-chain-flask';
@@ -648,6 +722,9 @@ switch ($chatbot_ai_platform_choice) {
         
         $chatbot_mistral_api_enabled = 'No';
         update_option('chatbot_mistral_api_enabled', 'No');
+
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
     
         // Model choice - Ver 2.2.0
         if (esc_attr(get_option('chatbot_transformer_model_choice')) === null) {
@@ -702,8 +779,8 @@ switch ($chatbot_ai_platform_choice) {
         $chatbot_mistral_api_enabled = 'No';
         update_option('chatbot_mistral_api_enabled', 'No');
 
-        $chatbot_mistral_api_enabled = 'No';
-        update_option('chatbot_mistral_api_enabled', 'No');
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
     
         // Model choice - Ver 2.2.0
         if (esc_attr(get_option('chatbot_local_model_choice')) === null) {
@@ -751,6 +828,9 @@ switch ($chatbot_ai_platform_choice) {
 
         $chatbot_mistral_api_enabled = 'No';
         update_option('chatbot_mistral_api_enabled', 'No');
+
+        $chatbot_google_api_enabled = 'No';
+        update_option('chatbot_google_api_enabled', 'No');
 
         // Model choice - Ver 1.9.4
         if (esc_attr(get_option('chatbot_chatgpt_model_choice')) === null) {

@@ -570,7 +570,7 @@ function chatbot_transformer_model_handle_cache_rebuild() {
 
     $status = 'write_error';
     if (transformer_model_lexical_context_save_cache($cacheFile, $embeddings)) {
-        file_put_contents($cacheVersionFile, md5($corpus));
+        file_put_contents($cacheVersionFile, hash('sha256', $corpus));
         $status = 'success';
     }
 
