@@ -287,17 +287,20 @@ function transformer_model_lexical_context_migrate_old_cache($cacheFile) {
 
 // Function to save cache with compression
 function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
-    
+
     // Try compressed serialization first (most efficient)
     $compressedFile = $cacheFile . '.gz';
     $serialized = serialize($embeddings);
     $compressed = gzencode($serialized, 9); // Maximum compression level
+    list($createdAt, $updatedAt) = transformer_model_lexical_context_get_cache_timestamps($cacheFile);
     
     if ($compressed !== false) {
         if (file_put_contents($compressedFile, $compressed) !== false) {
             // Also create a PHP wrapper for backward compatibility
             $wrapperContent = "<?php\n";
-            $wrapperContent .= "// Compressed cache - use transformer_model_lexical_context_load_cache() to load\n";
+            $wrapperContent .= "// Lexical embeddings cache (compressed)\n";
+            $wrapperContent .= "// Created: {$createdAt}\n";
+            $wrapperContent .= "// Updated: {$updatedAt}\n";
             $wrapperContent .= "// File size: " . number_format(filesize($compressedFile)) . " bytes\n";
             $wrapperContent .= "// Original size would be: " . number_format(strlen($serialized)) . " bytes\n";
             $wrapperContent .= "// Compression ratio: " . round((1 - filesize($compressedFile) / strlen($serialized)) * 100, 1) . "%\n";
@@ -312,7 +315,9 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     $serializedFile = $cacheFile . '.ser';
     if (file_put_contents($serializedFile, serialize($embeddings)) !== false) {
         $wrapperContent = "<?php\n";
-        $wrapperContent .= "// Serialized cache\n";
+        $wrapperContent .= "// Lexical embeddings cache (serialized)\n";
+        $wrapperContent .= "// Created: {$createdAt}\n";
+        $wrapperContent .= "// Updated: {$updatedAt}\n";
         $wrapperContent .= "return unserialize(file_get_contents(__FILE__ . '.ser'));\n";
         file_put_contents($cacheFile, $wrapperContent);
         return true;
@@ -320,7 +325,11 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     
     // Last resort: use var_export (original method, but should rarely be needed)
     back_trace('WARNING', 'Cache compression failed, using var_export fallback');
-    $cacheContent = '<?php return ' . var_export($embeddings, true) . ';';
+    $cacheContent = "<?php\n";
+    $cacheContent .= "// Lexical embeddings cache (exported)\n";
+    $cacheContent .= "// Created: {$createdAt}\n";
+    $cacheContent .= "// Updated: {$updatedAt}\n";
+    $cacheContent .= 'return ' . var_export($embeddings, true) . ";\n";
     return file_put_contents($cacheFile, $cacheContent) !== false;
     
 }
@@ -365,6 +374,29 @@ function transformer_model_lexical_context_load_cache($cacheFile) {
     
     return [];
     
+}
+
+// Function to capture cache timestamps for metadata comments
+function transformer_model_lexical_context_get_cache_timestamps($cacheFile) {
+
+    $createdAt = null;
+    $timestampPattern = '/Created:\s*(.+)/';
+
+    if (file_exists($cacheFile)) {
+        $existingContent = file_get_contents($cacheFile);
+        if ($existingContent && preg_match($timestampPattern, $existingContent, $matches)) {
+            $createdAt = trim($matches[1]);
+        }
+    }
+
+    $currentTimestamp = gmdate('Y-m-d H:i:s') . ' UTC';
+
+    if (empty($createdAt)) {
+        $createdAt = $currentTimestamp;
+    }
+
+    return [$createdAt, $currentTimestamp];
+
 }
 
 // Function to calculate cosine similarity between two vectors

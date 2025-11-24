@@ -142,6 +142,31 @@ The lexical context model includes several improvements to generate more concise
    - Only adds leading context for sentences with input words
    - Prefers trailing context for tighter flow
 
+## Resource Limits and What to Watch For
+
+Although there is no hard-coded maximum corpus size, the transformer models ultimately depend on the PHP resources available on your host. Keep the following in mind:
+
+1. **PHP Memory Usage**
+   - Loading the compressed cache (`lexical_embeddings_cache.php.gz`) requires enough memory for the compressed blob, the decompressed blob, and the full PHP array produced by `unserialize()`.
+   - On large sites it’s easy to hit the default `memory_limit` (128 MB or 256 MB). If you see “Allowed memory size exhausted” errors, raise the limit in `wp-config.php` – e.g. `define('WP_MEMORY_LIMIT', '512M');`.
+
+2. **Corpus Size and PMI Generation**
+   - Building the PMI matrix scales with both the number of words and the window size. Very large corpora (tens of thousands of long posts) can consume huge amounts of RAM/time when the cache is rebuilt.
+   - Symptoms include timeouts, rebuilds that never finish, or the cache failing to write because PHP ran out of memory.
+   - Mitigations:
+     - Lower the **Word Content Window Size** so fewer co-occurrences are tracked.
+     - Exclude extremely long or low-value content from the corpus.
+     - Rebuild during off-peak hours and monitor `memory_limit` and `max_execution_time`.
+
+3. **Cache File Size Monitoring**
+   - When `lexical_embeddings_cache.php.gz` grows into the tens of megabytes, you are approaching the practical limits of typical shared hosting.
+   - Keep an eye on both the compressed and decompressed sizes; the uncompressed array can be several times larger than the `.gz` file.
+
+4. **Execution Time**
+   - Rebuilding the cache iterates through the entire corpus. For large sites, ensure `max_execution_time` is high enough (e.g., 300 s) or run rebuilds via WP-CLI/cron where higher limits are permitted.
+
+If you encounter recurring memory or timeout issues, consider splitting the site into smaller topic-focused corpora, trimming the content included in the corpus, or migrating to the Sentential Context Model, which scales differently.
+
 ---
 
 - **[Back to the Overview](/overview.md)**

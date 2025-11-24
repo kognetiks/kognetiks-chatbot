@@ -45,6 +45,108 @@ function chatbot_transformer_model_api_model_general_section_callback($args){
     <?php
 }
 
+function chatbot_transformer_model_cache_info_callback($args) {
+
+    $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
+
+    if ($model_choice !== 'lexical-context-model') {
+        echo '<p>This section becomes available when the <strong>Lexical Context Model</strong> is selected.</p>';
+        return;
+    }
+
+    global $chatbot_chatgpt_plugin_dir_path;
+
+    if (empty($chatbot_chatgpt_plugin_dir_path)) {
+        echo '<p>Unable to locate the lexical cache directory.</p>';
+        return;
+    }
+
+    $cacheDir = trailingslashit($chatbot_chatgpt_plugin_dir_path) . 'includes/transformers/lexical_embeddings_cache';
+    $cacheFile = $cacheDir . '/lexical_embeddings_cache.php';
+    $compressedFile = $cacheFile . '.gz';
+
+    if (!file_exists($cacheFile) || !file_exists($compressedFile)) {
+        echo '<p>The lexical embeddings cache has not been created yet. Run the transformer build process to generate it.</p>';
+        return;
+    }
+
+    if (!function_exists('transformer_model_lexical_context_get_cache_timestamps')) {
+        require_once $chatbot_chatgpt_plugin_dir_path . 'includes/transformers/lexical-context-model.php';
+    }
+
+    list($createdAt, $updatedAt) = transformer_model_lexical_context_get_cache_timestamps($cacheFile);
+
+    $wrapperContent = file_get_contents($cacheFile);
+    $originalSize = null;
+    $compressionRatio = null;
+
+    if ($wrapperContent !== false) {
+        if (preg_match('/Original size would be:\s*([0-9,]+)/i', $wrapperContent, $match)) {
+            $originalSize = (int) str_replace(',', '', $match[1]);
+        }
+        if (preg_match('/Compression ratio:\s*([0-9.]+)%/i', $wrapperContent, $match)) {
+            $compressionRatio = floatval($match[1]);
+        }
+        if (empty($createdAt) && preg_match('/Created:\s*(.+)/i', $wrapperContent, $match)) {
+            $createdAt = trim(str_replace(['//', 'Created:'], '', $match[0]));
+        }
+        if (empty($updatedAt) && preg_match('/Updated:\s*(.+)/i', $wrapperContent, $match)) {
+            $updatedAt = trim(str_replace(['//', 'Updated:'], '', $match[0]));
+        }
+    }
+
+    $compressedSize = file_exists($compressedFile) ? filesize($compressedFile) : 0;
+
+    if (empty($originalSize)) {
+        $originalSize = filesize($cacheFile);
+    }
+
+    if (!empty($originalSize) && empty($compressionRatio) && $compressedSize > 0) {
+        $compressionRatio = round((1 - ($compressedSize / $originalSize)) * 100, 1);
+    }
+
+    $estimatedMemoryBytes = $originalSize ? ($originalSize * 2) : ($compressedSize * 2);
+
+    ?>
+    <table class="widefat fixed striped">
+        <tbody>
+            <tr>
+                <th scope="row">Cache Directory</th>
+                <td><?php echo esc_html(str_replace($chatbot_chatgpt_plugin_dir_path, '', $cacheDir)); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Created</th>
+                <td><?php echo esc_html($createdAt ?: 'Unknown'); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Last Updated</th>
+                <td><?php echo esc_html($updatedAt ?: 'Unknown'); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Original Serialized Size</th>
+                <td><?php echo esc_html(chatbot_transformer_model_format_bytes($originalSize)); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Compressed Size (.gz)</th>
+                <td><?php echo esc_html(chatbot_transformer_model_format_bytes($compressedSize)); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Compression Ratio</th>
+                <td><?php echo esc_html(isset($compressionRatio) ? $compressionRatio . '%' : 'N/A'); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Estimated Memory Needed</th>
+                <td>
+                    <?php echo esc_html(chatbot_transformer_model_format_bytes($estimatedMemoryBytes)); ?>
+                    <p class="description">Approximation: serialized size × 2 to cover decompression and PHP array overhead.</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <?php
+
+}
+
 // Transformer Advanced Settings Callback - Ver 2.1.9
 function chatbot_transformer_model_advanced_settings_section_callback($args) {
 
@@ -267,6 +369,13 @@ function chatbot_transformer_model_api_settings_init() {
         'chatbot_transformer_model_api_model_general'
     );
 
+    add_settings_section(
+        'chatbot_transformer_model_cache_info_section',
+        'Lexical Context Cache Status',
+        'chatbot_transformer_model_cache_info_callback',
+        'chatbot_transformer_model_cache_info'
+    );
+
     add_settings_field(
         'chatbot_transformer_model_choice',
         'Transformer Model Choice',
@@ -345,5 +454,19 @@ function chatbot_transformer_model_api_settings_init() {
         'chatbot_transformer_model_advanced_settings_section'
     );
 
+}
+
+if (!function_exists('chatbot_transformer_model_format_bytes')) {
+    function chatbot_transformer_model_format_bytes($bytes) {
+        if (!is_numeric($bytes) || $bytes <= 0) {
+            return 'N/A';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $power = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
+        $power = min($power, count($units) - 1);
+
+        return number_format($bytes / pow(1024, $power), 2) . ' ' . $units[$power];
+    }
 }
 add_action('admin_init', 'chatbot_transformer_model_api_settings_init');

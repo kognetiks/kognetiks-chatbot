@@ -490,6 +490,13 @@ function chatbot_chatgpt_settings_page() {
                 do_settings_sections('chatbot_transformer_model_api_model_general');
                 echo '</div>';
 
+                $selected_transformer_model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
+                if ('lexical-context-model' === $selected_transformer_model) {
+                    echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                    do_settings_sections('chatbot_transformer_model_cache_info');
+                    echo '</div>';
+                }
+
                 // Transformer Chat Settings - Ver 2.2.1
                 // echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 // do_settings_sections('chatbot_transformer_model_status');
