@@ -54,6 +54,25 @@ function chatbot_transformer_model_cache_info_callback($args) {
         return;
     }
 
+    $status_message = '';
+    if (!empty($_GET['lexical_cache_status'])) {
+        $status = sanitize_text_field($_GET['lexical_cache_status']);
+        switch ($status) {
+            case 'success':
+                $status_message = '<div class="notice notice-success is-dismissible"><p>Lexical cache deleted and rebuilt successfully.</p></div>';
+                break;
+            case 'empty_corpus':
+                $status_message = '<div class="notice notice-warning is-dismissible"><p>No published content was found, so the lexical cache could not be rebuilt.</p></div>';
+                break;
+            case 'write_error':
+                $status_message = '<div class="notice notice-error is-dismissible"><p>Unable to write the lexical cache to disk. Check file permissions and try again.</p></div>';
+                break;
+            case 'build_error':
+                $status_message = '<div class="notice notice-error is-dismissible"><p>The lexical cache rebuild failed. Please review your logs for details.</p></div>';
+                break;
+        }
+    }
+
     global $chatbot_chatgpt_plugin_dir_path;
 
     if (empty($chatbot_chatgpt_plugin_dir_path)) {
@@ -108,6 +127,7 @@ function chatbot_transformer_model_cache_info_callback($args) {
     $estimatedMemoryBytes = $originalSize ? ($originalSize * 2) : ($compressedSize * 2);
 
     ?>
+    <?php echo wp_kses_post($status_message); ?>
     <table class="widefat fixed striped">
         <tbody>
             <tr>
@@ -143,6 +163,20 @@ function chatbot_transformer_model_cache_info_callback($args) {
             </tr>
         </tbody>
     </table>
+    <?php
+        $rebuild_url = wp_nonce_url(
+            admin_url('admin-post.php?action=chatbot_transformer_model_rebuild_cache'),
+            'chatbot_transformer_model_rebuild_cache'
+        );
+    ?>
+    <p style="margin-top: 15px;">
+        <a href="<?php echo esc_url($rebuild_url); ?>" class="button button-secondary" onclick="return confirm('Delete and rebuild the lexical cache now?');">
+            Delete &amp; Rebuild Lexical Cache
+        </a>
+    </p>
+    <p class="description">
+        This removes the existing lexical cache file and rebuilds it immediately. Depending on your site size, this may take a few minutes.
+    </p>
     <?php
 
 }
@@ -469,4 +503,80 @@ if (!function_exists('chatbot_transformer_model_format_bytes')) {
         return number_format($bytes / pow(1024, $power), 2) . ' ' . $units[$power];
     }
 }
+
+/**
+ * Handle Lexical Cache rebuild requests from the settings UI.
+ */
+function chatbot_transformer_model_handle_cache_rebuild() {
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have permission to perform this action.', 'chatbot-chatgpt'));
+    }
+
+    check_admin_referer('chatbot_transformer_model_rebuild_cache');
+
+    $redirect_url = admin_url('admin.php?page=chatbot-chatgpt&tab=api_transformer');
+    $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
+    if ($model_choice !== 'lexical-context-model') {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'build_error', $redirect_url));
+        exit;
+    }
+
+    global $chatbot_chatgpt_plugin_dir_path;
+    if (empty($chatbot_chatgpt_plugin_dir_path)) {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'build_error', $redirect_url));
+        exit;
+    }
+
+    $cacheDir = trailingslashit($chatbot_chatgpt_plugin_dir_path) . 'includes/transformers/lexical_embeddings_cache';
+    $cacheFile = $cacheDir . '/lexical_embeddings_cache.php';
+    $cacheVersionFile = $cacheDir . '/lexical_embeddings_cache_version.txt';
+
+    if (!file_exists($cacheDir)) {
+        wp_mkdir_p($cacheDir);
+    }
+
+    require_once $chatbot_chatgpt_plugin_dir_path . 'includes/transformers/lexical-context-model.php';
+
+    // Remove existing cache artefacts before rebuilding.
+    $filesToDelete = [
+        $cacheFile,
+        $cacheFile . '.gz',
+        $cacheFile . '.ser',
+        $cacheFile . '.old',
+        $cacheVersionFile,
+    ];
+
+    foreach ($filesToDelete as $file) {
+        if ($file && file_exists($file)) {
+            @unlink($file);
+        }
+    }
+
+    $corpus = transformer_model_lexical_context_fetch_wordpress_content();
+    if (empty($corpus)) {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'empty_corpus', $redirect_url));
+        exit;
+    }
+
+    $windowSize = intval(get_option('chatbot_transformer_model_word_content_window_size', 3));
+    $windowSize = max(1, $windowSize);
+
+    $embeddings = transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize);
+
+    if (empty($embeddings)) {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'build_error', $redirect_url));
+        exit;
+    }
+
+    $status = 'write_error';
+    if (transformer_model_lexical_context_save_cache($cacheFile, $embeddings)) {
+        file_put_contents($cacheVersionFile, md5($corpus));
+        $status = 'success';
+    }
+
+    wp_safe_redirect(add_query_arg('lexical_cache_status', $status, $redirect_url));
+    exit;
+}
+add_action('admin_post_chatbot_transformer_model_rebuild_cache', 'chatbot_transformer_model_handle_cache_rebuild');
+
 add_action('admin_init', 'chatbot_transformer_model_api_settings_init');
