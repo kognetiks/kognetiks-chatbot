@@ -182,7 +182,7 @@ function chatbot_google_api_model_advanced_section_callback($args) {
 // Base URL for the Google API - Ver 2.3.9
 function chatbot_google_base_url_callback($args) {
 
-    $chatbot_google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta/models/'));
+    $chatbot_google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta'));
     ?>
     <input type="text" id="chatbot_google_base_url" name="chatbot_google_base_url" value="<?php echo esc_attr( $chatbot_google_base_url ); ?>" class="regular-text">
     <?php

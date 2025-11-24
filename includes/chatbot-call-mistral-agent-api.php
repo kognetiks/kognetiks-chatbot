@@ -79,7 +79,7 @@ function create_mistral_websearch_agent($api_key) {
         // back_trace( 'WARNING', 'Model ' . $model . ' does not support tools, skipping tool registration.');
     }
     
-    $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
+    $timeout = esc_attr(get_option('chatbot_mistral_timeout_setting', 240 ));
 
     $args = array(
         'headers' => array(
@@ -363,7 +363,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         );
     }
 
-    $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
+    $timeout = esc_attr(get_option('chatbot_mistral_timeout_setting', 240 ));
 
     // Set up the API request
     $args = array(

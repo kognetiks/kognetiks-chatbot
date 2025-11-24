@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Call the Anthropic API
+// Call the Transformer Model API
 function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
     global $session_id;

@@ -1543,6 +1543,10 @@ function chatbot_chatgpt_process_queued_message($message_data) {
             case 'DeepSeek':
                 $response = chatbot_call_deepseek_api($api_key, $message);
                 break;
+
+            case 'Google':
+                $response = chatbot_call_google_api($api_key, $message);
+                break;
                 
             case 'Markov Chain':
                 $response = chatbot_chatgpt_call_markov_chain_api($message);
@@ -1780,6 +1784,18 @@ function chatbot_chatgpt_send_message() {
             // back_trace( 'NOTICE', '$model: ' . $model);
             break;
         
+        case 'Google':
+
+            $api_key = esc_attr(get_option('chatbot_google_api_key'));
+            // Decrypt the API key - Ver 2.3.9
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+            $kchat_settings['chatbot_chatgpt_model'] = $model;
+            $kchat_settings['model'] = $model;
+            // DIAG - Diagnostics - Ver 2.3.9
+            // back_trace( 'NOTICE', '$model: ' . $model);
+            break;
+
         case 'Markov Chain':
 
             $api_key = esc_attr(get_option('chatbot_markov_chain_api_key', 'NOT REQUIRED'));
@@ -2439,6 +2455,16 @@ function chatbot_chatgpt_send_message() {
                 // back_trace( 'NOTICE', 'Calling DeepSeek API');
                 // Send message to DeepSeek API - Ver 2.2.2
                 $response = chatbot_call_deepseek_api($api_key, $message);
+
+                break;
+
+            case 'Google':
+
+                $kchat_settings['model'] = $model;
+                // DIAG - Diagnostics - Ver 2.3.9
+                // back_trace( 'NOTICE', 'Calling Google API');
+                // Send message to Google API - Ver 2.3.9
+                $response = chatbot_call_google_api($api_key, $message);
 
                 break;
 

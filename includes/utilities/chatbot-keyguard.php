@@ -151,6 +151,9 @@ function chatbot_chatgpt_decrypt_api_key($data, $option_name = null) {
             case 'DeepSeek':
                 $option_name = 'chatbot_deepseek_api_key';
                 break;
+            case 'Google':
+                $option_name = 'chatbot_google_api_key';
+                break;
             case 'Mistral':
                 $option_name = 'chatbot_mistral_api_key';
                 break;
@@ -244,6 +247,7 @@ function chatbot_chatgpt_fetch_stored_api_keys($chatbot_ai_platform_choice = nul
         'chatbot_nvidia_api_key' => esc_attr( get_option('chatbot_nvidia_api_key') ),
         'chatbot_anthropic_api_key' => esc_attr( get_option('chatbot_anthropic_api_key') ),
         'chatbot_deepseek_api_key' => esc_attr( get_option('chatbot_deepseek_api_key') ),
+        'chatbot_google_api_key' => esc_attr( get_option('chatbot_google_api_key') ),
         'chatbot_mistral_api_key' => esc_attr( get_option('chatbot_mistral_api_key') ),
         'chatbot_azure_api_key' => esc_attr( get_option('chatbot_azure_api_key') ),
     );
@@ -268,6 +272,8 @@ function chatbot_chatgpt_update_stored_api_key($key_id, $new_encrypted_value) {
         update_option('chatbot_anthropic_api_key', $new_encrypted_value);
     } elseif ($key_id == 'chatbot_deepseek_api_key') {
         update_option('chatbot_deepseek_api_key', $new_encrypted_value);
+    } elseif ($key_id == 'chatbot_google_api_key') {
+        update_option('chatbot_google_api_key', $new_encrypted_value);
     } elseif ($key_id == 'chatbot_mistral_api_key') {
         update_option('chatbot_mistral_api_key', $new_encrypted_value);
     } elseif ($key_id == 'chatbot_azure_api_key') {

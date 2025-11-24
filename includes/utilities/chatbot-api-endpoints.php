@@ -50,6 +50,15 @@ function get_api_base_url() {
             return esc_attr(get_option('chatbot_deepseek_base_url', 'https://api.deepseek.com'));
             break;
 
+        // Base URL for the Google API calls - Ver 2.3.9
+        case 'Google':
+            
+            // Get the base URL from settings, default to base URL without /models/
+            $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta'));
+
+            return $google_base_url;
+            break;
+
         // Base URL for the Mistral API calls - Ver 2.3.0
         case 'Mistral':
 
@@ -146,6 +155,16 @@ function get_chat_completions_api_url() {
         case 'DeepSeek':
 
             return get_api_base_url() . "/chat/completions";
+            break;
+
+        // Base URL for the Google API calls - Ver 2.3.9
+        // Note: Google API uses /models/{model}:generateContent format, not /chat/completions
+        // This function returns a base URL that can be used to construct the full endpoint
+        case 'Google':
+
+            // Google API endpoint format: {base}/models/{model}:generateContent
+            // This function returns the base, caller must append /models/{model}:generateContent
+            return get_api_base_url() . "/models";
             break;
 
         // Base URL for the Mistral API calls - Ver 2.3.0
