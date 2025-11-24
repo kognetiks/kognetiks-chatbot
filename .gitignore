@@ -9,7 +9,8 @@
 # Datasource local storage ignored files
 .vscode
 .snyk
-.snykignore
+# .snykignore should be committed to help with Snyk bundle size
+# .snykignore
 composer.json
 package.json
 .dcignore
