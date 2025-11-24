@@ -1325,6 +1325,11 @@ function chatbot_chatgpt_process_queued_message($message_data) {
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             $model = esc_attr(get_option('chatbot_deepseek_model_choice', 'deepseek-chat'));
             break;
+        case 'Google':
+            $api_key = esc_attr(get_option('chatbot_google_api_key'));
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
+            break;
         case 'Markov Chain':
             $api_key = esc_attr(get_option('chatbot_markov_chain_api_key', 'NOT REQUIRED'));
             $model = esc_attr(get_option('chatbot_markov_chain_model_choice', 'markov-chain-flask'));
