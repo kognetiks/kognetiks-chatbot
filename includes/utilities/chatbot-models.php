@@ -719,7 +719,7 @@ function chatbot_google_get_models() {
     }
 
     // Get the base URL from settings
-    $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta/models/'));
+    $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta'));
     $google_models_url = rtrim($google_base_url, '/');
     
     // If the URL doesn't end with /models, add it

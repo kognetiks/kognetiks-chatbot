@@ -282,7 +282,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         $error_message = $response_body['error']['message'] ?? 'No additional information.';
 
         // DIAG - Diagnostics - Ver 2.3.9
-        // back_trace( 'ERROR', 'Error: Type: ' . $error_type . ' Message: ' . $error_message);
+        back_trace( 'ERROR', 'Error: Type: ' . $error_type . ' Message: ' . $error_message);
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';

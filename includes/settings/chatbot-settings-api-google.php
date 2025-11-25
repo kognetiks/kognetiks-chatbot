@@ -175,7 +175,7 @@ function chatbot_google_top_p_callback($args) {
 
 function chatbot_google_api_model_advanced_section_callback($args) {
     ?>
-    <p><strong>CAUTION</strong>: Configure the advanced settings for the plugin. Enter the base URL for the Google API.  The default is <code>https://generativelanguage.googleapis.com/v1beta/models/</code>.</p>
+    <p><strong>CAUTION</strong>: Configure the advanced settings for the plugin. Enter the base URL for the Google API.  The default is <code>https://generativelanguage.googleapis.com/v1beta</code>.</p>
     <?php
 }
 

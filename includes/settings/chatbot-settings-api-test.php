@@ -581,7 +581,7 @@ function kchat_fetch_api_status($api_key, $model) {
             $model = esc_attr(get_option('chatbot_google_model_choice', 'gemini-2.0-flash'));
             
             // Get the base URL from settings
-            $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta/models/'));
+            $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta'));
             $google_base_url = rtrim($google_base_url, '/');
             
             // Google API endpoint format: https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent

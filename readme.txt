@@ -1,6 +1,6 @@
 === Kognetiks Chatbot ===
 Contributors: Kognetiks
-Tags: chat, chatbot, chatgpt, openai, ai chat
+Tags: chat, chatbot, chatgpt, openai, ai
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.8.3
 Stable tag: 2.3.8
@@ -64,6 +64,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
 - **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
 - **Mistral**: [Terms of Service](https://mistral.ai/terms#terms-of-service) | [Privacy Policy](https://mistral.ai/terms#privacy-policy)
+- **Google**: [Terms of Use](https://ai.google.dev/gemini-api/terms) | [Privacy Policy](https://policies.google.com/privacy)
 - **JAN.AI**: [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy)
 
 **IMPORTANT**:
@@ -78,6 +79,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
    - [Anthropic API Keys](https://www.anthropic.com/)
    - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
    - [Mistral API Keys](https://console.mistral.ai/api-keys)
+   - [Google API Keys](https://aistudio.google.com/api-keys)
 
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
@@ -156,6 +158,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 = 2.3.9 - Released TBD =
 
+* **Google API**: Added support for Google's API to provide advanced conversational capabilities for the chatbot.
 * **Conversation History**: Improved the conversation history display to show the conversation history for the logged-in user.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.8.
 
