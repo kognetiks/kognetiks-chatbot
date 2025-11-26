@@ -156,18 +156,31 @@ function chatbot_google_temperature_callback($args) {
 
 }
 
-// Set chatbot_google_top_p - Ver 2.3.9
+// Media Resolution - Ver 2.3.9+
 // https://ai.google.dev/docs
-function chatbot_google_top_p_callback($args) {
+function chatbot_google_media_resolution_callback($args) {
 
-    $top_p = esc_attr(get_option('chatbot_google_top_p', 1.00));
+    $media_resolution = esc_attr(get_option('chatbot_google_media_resolution', 'Default'));
     ?>
-    <select id="chatbot_google_top_p" name="chatbot_google_top_p">
-        <?php
-        for ($i = 0.01; $i <= 1.01; $i += 0.01) {
-            echo '<option value="' . $i . '" ' . selected($top_p, (string)$i) . '>' . esc_html($i) . '</option>';
-        }
-        ?>
+    <select id="chatbot_google_media_resolution" name="chatbot_google_media_resolution">
+        <option value="Default" <?php selected($media_resolution, 'Default'); ?>>Default</option>
+        <option value="Low" <?php selected($media_resolution, 'Low'); ?>>Low</option>
+        <option value="Medium" <?php selected($media_resolution, 'Medium'); ?>>Medium</option>
+        <option value="High" <?php selected($media_resolution, 'High'); ?>>High</option>
+    </select>
+    <?php
+
+}
+
+// Thinking Level - Ver 2.3.9+
+// https://ai.google.dev/docs
+function chatbot_google_thinking_level_callback($args) {
+
+    $thinking_level = esc_attr(get_option('chatbot_google_thinking_level', 'Low'));
+    ?>
+    <select id="chatbot_google_thinking_level" name="chatbot_google_thinking_level">
+        <option value="Low" <?php selected($thinking_level, 'Low'); ?>>Low</option>
+        <option value="High" <?php selected($thinking_level, 'High'); ?>>High</option>
     </select>
     <?php
 
@@ -224,7 +237,8 @@ function chatbot_google_api_settings_init() {
     register_setting('chatbot_google_api_model', 'chatbot_google_max_tokens_setting');
     register_setting('chatbot_google_api_model', 'chatbot_google_conversation_context');
     register_setting('chatbot_google_api_model', 'chatbot_google_temperature');
-    register_setting('chatbot_google_api_model', 'chatbot_google_top_p');
+    register_setting('chatbot_google_api_model', 'chatbot_google_media_resolution');
+    register_setting('chatbot_google_api_model', 'chatbot_google_thinking_level');
 
     add_settings_section(
         'chatbot_google_api_model_general_section',
@@ -301,11 +315,20 @@ function chatbot_google_api_settings_init() {
         'chatbot_google_api_model_chat_settings_section'
     );
 
-    // Top P - Ver 2.3.9
+    // Media Resolution - Ver 2.3.9+
     add_settings_field(
-        'chatbot_google_top_p',
-        'Top P',
-        'chatbot_google_top_p_callback',
+        'chatbot_google_media_resolution',
+        'Media Resolution',
+        'chatbot_google_media_resolution_callback',
+        'chatbot_google_api_model_chat_settings',
+        'chatbot_google_api_model_chat_settings_section'
+    );
+
+    // Thinking Level - Ver 2.3.9+
+    add_settings_field(
+        'chatbot_google_thinking_level',
+        'Thinking Level',
+        'chatbot_google_thinking_level_callback',
         'chatbot_google_api_model_chat_settings',
         'chatbot_google_api_model_chat_settings_section'
     );

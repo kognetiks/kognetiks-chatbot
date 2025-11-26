@@ -211,7 +211,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // $generationConfig['responseMimeType'] = 'application/json';
 
     // BEST PRACTICE: SYSTEM INSTRUCTIONS
-    // Instead of faking a user message, use the native systemInstruction field.
+    // Use the native systemInstruction field.
     $systemInstruction = null;
     if (!empty($context)) {
         $systemInstruction = array(
