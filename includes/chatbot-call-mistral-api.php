@@ -86,32 +86,27 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     $context = esc_attr(get_option('chatbot_mistral_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
     $raw_context = $context;
  
-    // Context History - Ver 1.6.1
-    $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
-    // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
-    
-    // IDEA Strip any href links and text from the $chatgpt_last_response
-    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
-
-    // IDEA Strip any $learningMessages from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-    } else {
-        $localized_learningMessages = $learningMessages;
-    }
-    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
-
-    // IDEA Strip any $errorResponses from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-    } else {
-        $localized_errorResponses = $errorResponses;
-    }
-    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', 'Yes'));
+
+    // Build a summary of conversation history for system message (backward compatibility)
+    // Extract text content from structured messages to create a summary string
+    $chatgpt_last_response = '';
+    if (!empty($conversation_context['messages'])) {
+        $message_texts = [];
+        foreach ($conversation_context['messages'] as $msg) {
+            if (isset($msg['content'])) {
+                $message_texts[] = $msg['content'];
+            }
+        }
+        if (!empty($message_texts)) {
+            $chatgpt_last_response = implode(' ', $message_texts);
+        }
+    }
 
     $sys_message = 'We previously have been talking about the following things: ';
 
@@ -131,7 +126,7 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
             }
             // Join the content texts and append to context
             if (!empty($content_texts)) {
-                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
@@ -144,16 +139,10 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
 
     }
 
-    // Conversation Continuity - Ver 2.1.8
-    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
-
-    // DIAG Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
-
-    if ($chatbot_chatgpt_conversation_continuation == 'On') {
-        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
-        $context = $conversation_history . ' ' . $context;
+    // Add session history to context if available (from conversation continuity)
+    if (!empty($conversation_context['session_history'])) {
+        // Session history is a concatenated string, so we'll add it to context
+        $context = $conversation_context['session_history'] . ' ' . $context;
     }
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
@@ -188,13 +177,15 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     );
 
     // Define the request body
+    // Note: Mistral API uses system + user messages format
+    // Conversation history is included in the system message context summary - Ver 2.3.9+
     $body = json_encode(array(
         'model' => $model,
         'max_tokens' => $max_tokens,
         'messages' => array(
             array(
                 'role' => 'system',
-                'content' => $context, // System input
+                'content' => $context, // System input with conversation history summary
             ),
             array(
                 'role' => 'user',
@@ -212,30 +203,103 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     // DIAG - Diagnostics - Ver 2.2.2
     // back_trace( 'NOTICE', '$body: ' . $body);
 
-    // Convert the body array to JSON
-    $body_json = json_encode($body);
-
     // DIAG Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
     // back_trace( 'NOTICE', '$context: ' . $context);
     // back_trace( 'NOTICE', '$message: ' . $message);  
 
-    // API Call
-    $response = wp_remote_post($api_url, array(
-        'headers' => $headers,
-        'body' => $body,
-        'timeout' => $timeout,
-    ));
+    // API Call with exponential backoff retry for rate limits - Ver 2.3.9+
+    $max_retries = 5;
+    $retries = 0;
+    $response = null;
+    
+    while ($retries < $max_retries) {
+        // Make API call
+        $response = wp_remote_post($api_url, array(
+            'headers' => $headers,
+            'body' => $body,
+            'timeout' => $timeout,
+        ));
 
-    // Handle WP Error
-    if (is_wp_error($response)) {
-    
-        // DIAG - Diagnostics
-        prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
-        // Clear locks on error
-        // Lock clearing removed - main send function handles locking
-        return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
-    
+        // Handle WP Error
+        if (is_wp_error($response)) {
+            // DIAG - Diagnostics
+            prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
+            // Clear locks on error
+            // Lock clearing removed - main send function handles locking
+            return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
+        }
+        
+        // Check for HTTP error status codes
+        $response_code = wp_remote_retrieve_response_code($response);
+        
+        // If we get a 429 (rate limit), retry with exponential backoff
+        if ($response_code == 429) {
+            $retries++;
+            if ($retries < $max_retries) {
+                $delay = pow(2, $retries - 1); // Exponential backoff: 1, 2, 4, 8, 16 seconds
+                prod_trace('NOTICE', 'Mistral API rate limit hit (429). Retrying in ' . $delay . ' seconds... (Attempt ' . $retries . '/' . $max_retries . ')');
+                sleep($delay);
+                continue; // Retry the request
+            } else {
+                // Max retries exceeded
+                $error_body = wp_remote_retrieve_body($response);
+                $error_data = json_decode($error_body, true);
+                $error_message = isset($error_data['message']) ? $error_data['message'] : 'Rate limit exceeded';
+                
+                prod_trace('ERROR', 'Mistral API rate limit exceeded after ' . $max_retries . ' retries: ' . $error_message);
+                
+                // Clear locks on error
+                // Lock clearing removed - main send function handles locking
+                return 'Mistral API is currently at capacity. Please try again in a few moments.';
+            }
+        }
+        
+        // For other HTTP errors (not 429), handle them normally
+        if ($response_code >= 400) {
+            $error_body = wp_remote_retrieve_body($response);
+            
+            // Try to parse JSON error response for better error messages
+            $error_data = json_decode($error_body, true);
+            
+            if (isset($error_data['message'])) {
+                $error_message = $error_data['message'];
+                $error_type = $error_data['type'] ?? 'unknown';
+                
+                // Handle specific error types with user-friendly messages
+                if ($error_type == 'service_tier_capacity_exceeded') {
+                    $user_message = 'Mistral API is currently at capacity. Please try again in a few moments.';
+                } elseif ($response_code == 401) {
+                    $user_message = 'Mistral API authentication failed. Please check your API key in settings.';
+                } elseif ($response_code == 403) {
+                    $user_message = 'Mistral API access forbidden. Please check your API permissions.';
+                } else {
+                    $user_message = 'Mistral API error: ' . $error_message;
+                }
+                
+                // DIAG - Diagnostics
+                prod_trace('ERROR', 'Mistral API Error (HTTP ' . $response_code . '): ' . $error_type . ' - ' . $error_message);
+                
+                // Clear locks on error
+                // Lock clearing removed - main send function handles locking
+                return $user_message;
+            } else {
+                // Fallback for non-JSON error responses
+                $error_message = 'HTTP ' . $response_code . ' Error: ' . $error_body;
+                
+                // DIAG - Diagnostics
+                prod_trace('ERROR', 'Mistral API Error: ' . $error_message);
+                
+                // Clear locks on error
+                // Lock clearing removed - main send function handles locking
+                return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
+            }
+        }
+        
+        // Success (200 status code) - break out of retry loop
+        if ($response_code == 200) {
+            break;
+        }
     }
     
     // Retrieve and Decode Response
@@ -254,6 +318,11 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';
     
+    }
+    
+    // Debug: Log response structure if no content found
+    if (!isset($response_body->choices) || !isset($response_body->choices[0])) {
+        prod_trace('WARNING', 'Mistral API response structure unexpected. Response: ' . print_r($response_body, true));
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
