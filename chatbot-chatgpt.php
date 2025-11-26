@@ -1519,7 +1519,7 @@ function chatbot_chatgpt_process_queued_message($message_data) {
         switch ($chatbot_ai_platform_choice) {
             case 'OpenAI':
                 // Determine which OpenAI API to call based on model
-                if (str_starts_with($model, 'gpt-4oXXXXXX')) {
+                if (str_starts_with($model, 'gpt-4o')) {
                     $response = chatbot_chatgpt_call_omni($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
                 } elseif (str_starts_with($model, 'gpt')) {
                     $response = chatbot_chatgpt_call_api($api_key, $message, $user_id, $page_id, $session_id, $assistant_id, $client_message_id);
@@ -2363,7 +2363,7 @@ function chatbot_chatgpt_send_message() {
 
                 switch ($model) {
 
-                    case str_starts_with($model, 'gpt-4oXXXXXX'):
+                    case str_starts_with($model, 'gpt-4o'):
 
                         // The string 'gpt-4o' is found in $model
                         // Reload the model - BELT & SUSPENDERS

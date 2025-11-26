@@ -169,8 +169,6 @@ function chatgpt_max_tokens_setting_callback($args) {
         for ($i=100; $i<=16300; $i+=100) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
-        // Add exact maximum value
-        echo '<option value="1000" ' . selected($max_tokens, '1000', false) . '>1000</option>';
         ?>
     </select>
     <?php
