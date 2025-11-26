@@ -44,7 +44,7 @@ function chatbot_ai_platform_choice_callback($args) {
 
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
-    $platforms = ['OpenAI', 'Azure OpenAI', 'NVIDIA', 'Markov Chain', 'Transformer', 'Anthropic', 'Google', 'DeepSeek', 'Mistral', 'Local Server'];
+    $platforms = ['Anthropic', 'Azure OpenAI', 'DeepSeek', 'Google', 'Local Server', 'Markov Chain', 'Mistral', 'NVIDIA', 'OpenAI', 'Transformer'];
     if (!in_array($chatbot_ai_platform_choice, $platforms)) {
         $chatbot_ai_platform_choice = 'OpenAI';
     }
@@ -58,13 +58,13 @@ function chatbot_ai_platform_choice_callback($args) {
     ?>
     <select id="chatbot_ai_platform_choice" name="chatbot_ai_platform_choice">
         <option value="OpenAI" <?php selected( $chatbot_ai_platform_choice, 'OpenAI' ); ?>><?php echo esc_html( 'OpenAI' ); ?></option>
-        <option value="Azure OpenAI" <?php selected( $chatbot_ai_platform_choice, 'Azure OpenAI' ); ?>><?php echo esc_html( 'Azure OpenAI' ); ?></option>
-        <option value="NVIDIA" <?php selected( $chatbot_ai_platform_choice, 'NVIDIA' ); ?>><?php echo esc_html( 'NVIDIA' ); ?></option>
         <option value="Anthropic" <?php selected( $chatbot_ai_platform_choice, 'Anthropic' ); ?>><?php echo esc_html( 'Anthropic' ); ?></option>
-        <option value="Google" <?php selected( $chatbot_ai_platform_choice, 'Google' ); ?>><?php echo esc_html( 'Google' ); ?></option>
+        <option value="Azure OpenAI" <?php selected( $chatbot_ai_platform_choice, 'Azure OpenAI' ); ?>><?php echo esc_html( 'Azure OpenAI' ); ?></option>
         <option value="DeepSeek" <?php selected( $chatbot_ai_platform_choice, 'DeepSeek' ); ?>><?php echo esc_html( 'DeepSeek' ); ?></option>
-        <option value="Mistral" <?php selected( $chatbot_ai_platform_choice, 'Mistral' ); ?>><?php echo esc_html( 'Mistral' ); ?></option>
+        <option value="Google" <?php selected( $chatbot_ai_platform_choice, 'Google' ); ?>><?php echo esc_html( 'Google' ); ?></option>
         <option value="Local Server" <?php selected( $chatbot_ai_platform_choice, 'Local Server' ); ?>><?php echo esc_html( 'Local Server' ); ?></option>
+        <option value="Mistral" <?php selected( $chatbot_ai_platform_choice, 'Mistral' ); ?>><?php echo esc_html( 'Mistral' ); ?></option>
+        <option value="NVIDIA" <?php selected( $chatbot_ai_platform_choice, 'NVIDIA' ); ?>><?php echo esc_html( 'NVIDIA' ); ?></option>
         <?php
         $chatbot_chatgpt_enable_beta_features = esc_attr(get_option('chatbot_chatgpt_enable_beta_features', 'no'));
         if ($chatbot_chatgpt_enable_beta_features === 'yes') : ?>
