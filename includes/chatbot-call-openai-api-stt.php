@@ -172,7 +172,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     }
 
     // Post-process the transcription with ChatGPT
-    $result = chatbot_chatgpt_post_process_transcription($api_key, $message, $transcription);
+    $result = chatbot_chatgpt_post_process_transcription($api_key, $message, $transcription, $session_id);
     // Clear locks on success
     delete_transient($conv_lock);
     return $result;
@@ -180,7 +180,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
 }
 
 //Process the transcription using ChatGPT to correct spelling and formatting.
-function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcription) {
+function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcription, $session_id = null) {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'chatbot_chatgpt_post_process_transcription()' );
@@ -190,24 +190,41 @@ function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcr
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
     $max_tokens = intval(get_option('chatbot_chatgpt_max_tokens_setting', 1000));
 
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
+
     // Instructions for AI
     $additional_instructions = 'You are a helpful assistant. Your task is to correct any spelling discrepancies in the transcribed text. Only add necessary punctuation such as periods, commas, and capitalization, and use only the context provided.';
+
+    // Build system message with instructions and context
+    // $message contains the original system instructions, combine with additional instructions
+    $system_content = $additional_instructions . ' ' . $message;
+    
+    // Add session history to system message if available (from conversation continuity)
+    if (!empty($conversation_context['session_history'])) {
+        $system_content = $conversation_context['session_history'] . ' ' . $system_content;
+    }
+
+    // Build messages array with system message, conversation history, and transcription - Ver 2.3.9+
+    $messages = array(
+        array('role' => 'system', 'content' => $system_content)
+    );
+    
+    // Add conversation history messages (structured format for better context) - Ver 2.3.9+
+    if (!empty($conversation_context['messages'])) {
+        $messages = array_merge($messages, $conversation_context['messages']);
+    }
+    
+    // Add transcription as user message
+    $messages[] = array('role' => 'user', 'content' => $transcription);
 
     // Prepare the request body
     $body = array(
         'model'       => $model,
         'max_tokens'  => $max_tokens,
         'temperature' => 0.5,
-        'messages'    => array(
-            array(
-                'role'    => 'system',
-                'content' => $message
-            ),
-            array(
-                'role'    => 'user',
-                'content' => $transcription
-            )
-        )
+        'messages'    => $messages
     );
 
     // Convert the body array to JSON
