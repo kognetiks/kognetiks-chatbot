@@ -83,32 +83,27 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
     // Top P - Ver 2.1.8
     $top_p = floatval(esc_attr(get_option('chatbot_nvidia_top_p', '1.0')));
 
-    // Context History - Ver 1.6.1
-    $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
-    // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
-    
-    // IDEA Strip any href links and text from the $chatgpt_last_response
-    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
-
-    // IDEA Strip any $learningMessages from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-    } else {
-        $localized_learningMessages = $learningMessages;
-    }
-    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
-
-    // IDEA Strip any $errorResponses from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-    } else {
-        $localized_errorResponses = $errorResponses;
-    }
-    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', ''));
+
+    // Build a summary of conversation history for system message (backward compatibility)
+    // Extract text content from structured messages to create a summary string
+    $chatgpt_last_response = '';
+    if (!empty($conversation_context['messages'])) {
+        $message_texts = [];
+        foreach ($conversation_context['messages'] as $msg) {
+            if (isset($msg['content'])) {
+                $message_texts[] = $msg['content'];
+            }
+        }
+        if (!empty($message_texts)) {
+            $chatgpt_last_response = implode(' ', $message_texts);
+        }
+    }
 
     $sys_message = 'We previously have been talking about the following things: ';
 
@@ -128,7 +123,7 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
             }
             // Join the content texts and append to context
             if (!empty($content_texts)) {
-                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
@@ -141,16 +136,10 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
 
     }
 
-    // Conversation Continuity - Ver 2.1.8
-    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
-
-    // DIAG Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
-
-    if ($chatbot_chatgpt_conversation_continuation == 'On') {
-        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
-        $context = $conversation_history . ' ' . $context;
+    // Add session history to context if available (from conversation continuity)
+    if (!empty($conversation_context['session_history'])) {
+        // Session history is a concatenated string, so we'll add it to context
+        $context = $conversation_context['session_history'] . ' ' . $context;
     }
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
@@ -173,16 +162,26 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
         // back_trace( 'NOTICE', 'Context length is within limits.');
     }
     
+    // Build messages array with system message, conversation history, and current user message - Ver 2.3.9+
+    $messages = array(
+        array('role' => 'system', 'content' => $context)
+    );
+    
+    // Add conversation history messages (structured format for better context) - Ver 2.3.9+
+    if (!empty($conversation_context['messages'])) {
+        $messages = array_merge($messages, $conversation_context['messages']);
+    }
+    
+    // Add current user message
+    $messages[] = array('role' => 'user', 'content' => $message);
+    
     // Added Role, System, Content Static Variable - Ver 1.6.0
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
         'temperature' => $temperature,
         'top_p' => $top_p,
-        'messages' => array(
-            array('role' => 'system', 'content' => $context),
-            array('role' => 'user', 'content' => $message)
-            ),
+        'messages' => $messages,
     );
 
     // DIAG - Diagnostics - Ver 2.1.8
@@ -229,11 +228,66 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
         return 'Error: ' . $response->get_error_message().' Please check Settings for a valid API key or your NVIDIA account for additional information.';
     }
 
+    // Check for HTTP error status codes
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code >= 400) {
+        $error_body = wp_remote_retrieve_body($response);
+        
+        // Try to parse JSON error response for better error messages
+        $error_data = json_decode($error_body, true);
+        
+        if (isset($error_data['error']['message'])) {
+            $error_message = $error_data['error']['message'];
+            $error_type = $error_data['error']['type'] ?? 'unknown';
+            
+            // Handle specific error types with user-friendly messages
+            if ($response_code == 429) {
+                $user_message = 'NVIDIA API is currently at capacity. Please try again in a few moments.';
+            } elseif ($response_code == 401) {
+                $user_message = 'NVIDIA API authentication failed. Please check your API key in settings.';
+            } elseif ($response_code == 403) {
+                $user_message = 'NVIDIA API access forbidden. Please check your API permissions.';
+            } else {
+                $user_message = 'NVIDIA API error: ' . $error_message;
+            }
+            
+            // DIAG - Diagnostics
+            prod_trace('ERROR', 'NVIDIA API Error (HTTP ' . $response_code . '): ' . $error_type . ' - ' . $error_message);
+            
+            // Clear locks on error
+            // Lock clearing removed - main send function handles locking
+            return $user_message;
+        } else {
+            // Fallback for non-JSON error responses
+            $error_message = 'HTTP ' . $response_code . ' Error: ' . $error_body;
+            
+            // DIAG - Diagnostics
+            prod_trace('ERROR', 'NVIDIA API Error: ' . $error_message);
+            
+            // Clear locks on error
+            // Lock clearing removed - main send function handles locking
+            return 'NVIDIA API error occurred. Please check Settings for a valid API key or your NVIDIA account for additional information.';
+        }
+    }
+
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', print_r($response, true));
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
+    
+    // Check for API errors in response body
+    if (isset($response_body['error'])) {
+        $error_message = $response_body['error']['message'] ?? 'Unknown error';
+        $error_type = $response_body['error']['type'] ?? 'unknown';
+        
+        // DIAG - Diagnostics
+        prod_trace('ERROR', 'NVIDIA API Error: ' . $error_type . ' - ' . $error_message);
+        
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
+        return 'NVIDIA API error: ' . $error_message;
+    }
 
     // if (isset($response_body['message'])) {
     //     $response_body['message'] = trim($response_body['message']);
@@ -281,21 +335,41 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
     // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
-    if ($response['response']['code'] == 200) {
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $response_body["usage"]["prompt_tokens"]);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $response_body["usage"]["completion_tokens"]);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $response_body["usage"]["total_tokens"]);
+    if ($response_code == 200 && isset($response_body['usage'])) {
+        $input_tokens = $response_body['usage']['prompt_tokens'] ?? 0;
+        $output_tokens = $response_body['usage']['completion_tokens'] ?? 0;
+        $total_tokens = $response_body['usage']['total_tokens'] ?? 0;
+        
+        if ($input_tokens > 0) {
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $input_tokens);
+        }
+        if ($output_tokens > 0) {
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $output_tokens);
+        }
+        if ($total_tokens > 0) {
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $total_tokens);
+        }
     }
     
-    if (!empty($response_body['choices'])) {
+    // Debug: Log response structure if no content found
+    if (!isset($response_body['choices']) || !isset($response_body['choices'][0])) {
+        prod_trace('WARNING', 'NVIDIA API response structure unexpected. Response code: ' . $response_code . ', Response: ' . print_r($response_body, true));
+    }
+    
+    if (!empty($response_body['choices']) && isset($response_body['choices'][0]['message']['content'])) {
         // Handle the response from the chat engine
+        $response_text = $response_body['choices'][0]['message']['content'];
+        
         // Context History - Ver 1.6.1
-        addEntry('chatbot_chatgpt_context_history', $response_body['choices'][0]['message']['content']);
+        addEntry('chatbot_chatgpt_context_history', $response_text);
         // Clear locks on success
         // Lock clearing removed - main send function handles locking
-        return $response_body['choices'][0]['message']['content'];
+        return $response_text;
     
     } else {
+        // Log the issue for debugging
+        prod_trace('WARNING', 'No valid response text found in NVIDIA API response. Response code: ' . $response_code . ', Response: ' . print_r($response_body, true));
+        
         // FIXME - Decide what to return here - it's an error
         if (get_locale() !== "en_US") {
             $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
