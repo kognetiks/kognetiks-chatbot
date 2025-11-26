@@ -184,13 +184,26 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     $messages[] = array('role' => 'user', 'content' => $message);
     
     // Added Role, System, Content Static Variable - Ver 1.6.0
+    // Determine which parameter to use based on model - Ver 2.3.9+
+    // Newer models (gpt-5, o1, o3, etc.) require max_completion_tokens instead of max_tokens
+    // Some models (o1, o3) don't support temperature/top_p parameters
     $body = array(
         'model' => $model,
-        'max_tokens' => $max_tokens,
-        // 'temperature' => (float)$temperature,
-        // 'top_p' => (float)$top_p,
         'messages' => $messages,
     );
+    
+    // Only add temperature and top_p if the model supports them
+    if (!chatbot_openai_doesnt_support_temperature($model)) {
+        $body['temperature'] = (float)$temperature;
+        $body['top_p'] = (float)$top_p;
+    }
+    
+    // Use max_completion_tokens for newer models, max_tokens for older models
+    if (chatbot_openai_requires_max_completion_tokens($model)) {
+        $body['max_completion_tokens'] = $max_tokens;
+    } else {
+        $body['max_tokens'] = $max_tokens;
+    }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
     // back_trace( 'NOTICE', '$body: ' . print_r($body, true));

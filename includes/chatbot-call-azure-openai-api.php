@@ -181,13 +181,26 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     // Add current user message
     $messages[] = array('role' => 'user', 'content' => $message);
     
+    // Determine which parameter to use based on model - Ver 2.3.9+
+    // Newer models (gpt-5, o1, o3, etc.) require max_completion_tokens instead of max_tokens
+    // Some models (o1, o3) don't support temperature/top_p parameters
     $body = array(
         'model' => $model,
-        'max_tokens' => $max_tokens,
-        'temperature' => $temperature,
-        'top_p' => $top_p,
         'messages' => $messages,
     );
+    
+    // Only add temperature and top_p if the model supports them
+    if (!chatbot_openai_doesnt_support_temperature($model)) {
+        $body['temperature'] = $temperature;
+        $body['top_p'] = $top_p;
+    }
+    
+    // Use max_completion_tokens for newer models, max_tokens for older models
+    if (chatbot_openai_requires_max_completion_tokens($model)) {
+        $body['max_completion_tokens'] = $max_tokens;
+    } else {
+        $body['max_tokens'] = $max_tokens;
+    }
 
     // FIXME - Allow for file uploads here
     // $file = 'path/to/file';

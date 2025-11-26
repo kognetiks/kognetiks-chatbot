@@ -61,7 +61,7 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
+        back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -69,12 +69,12 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
-    back_trace( 'NOTICE', 'chatbot_chatgpt_call_api');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', 'chatbot_chatgpt_call_api()');
+    back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     // $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -175,13 +175,13 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
+        back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
-        // back_trace( 'NOTICE', 'Context length is within limits.');
+        back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // DIAG Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$context: ' . $context);
+    back_trace( 'NOTICE', '$context: ' . $context);
 
     // Added Role, System, Content Static Variable - Ver 1.6.0
     // Build messages array with system message, conversation history, and current user message - Ver 2.3.9+
@@ -197,13 +197,26 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     // Add current user message
     $messages[] = array('role' => 'user', 'content' => $message);
     
+    // Determine which parameter to use based on model - Ver 2.3.9+
+    // Newer models (gpt-5, o1, o3, etc.) require max_completion_tokens instead of max_tokens
+    // Some models (o1, o3) don't support temperature/top_p parameters
     $body = array(
         'model' => $model,
-        'max_tokens' => $max_tokens,
-        'temperature' => $temperature,
-        'top_p' => $top_p,
         'messages' => $messages,
     );
+    
+    // Only add temperature and top_p if the model supports them
+    if (!chatbot_openai_doesnt_support_temperature($model)) {
+        $body['temperature'] = $temperature;
+        $body['top_p'] = $top_p;
+    }
+    
+    // Use max_completion_tokens for newer models, max_tokens for older models
+    if (chatbot_openai_requires_max_completion_tokens($model)) {
+        $body['max_completion_tokens'] = $max_tokens;
+    } else {
+        $body['max_tokens'] = $max_tokens;
+    }
 
     // FIXME - Allow for file uploads here
     // $file = 'path/to/file';
@@ -232,7 +245,7 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     $response = wp_remote_post($api_url, $args);
  
     // DIAG - Diagnostics - Ver 1.6.7
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -242,10 +255,88 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', print_r($response, true));
+    back_trace( 'NOTICE', print_r($response, true));
 
-    // Return json_decode(wp_remote_retrieve_body($response), true);
-    $response_body = json_decode(wp_remote_retrieve_body($response), true);
+    // Get the raw response body
+    $raw_response_body = wp_remote_retrieve_body($response);
+    
+    // Clean the response body - remove BOM, trim whitespace
+    $raw_response_body = trim($raw_response_body);
+    // Remove UTF-8 BOM if present
+    if (substr($raw_response_body, 0, 3) === "\xEF\xBB\xBF") {
+        $raw_response_body = substr($raw_response_body, 3);
+    }
+    
+    // DIAG - Diagnostics - Check raw response body
+    back_trace( 'NOTICE', 'Raw response body length: ' . strlen($raw_response_body));
+    back_trace( 'NOTICE', 'Raw response body (first 500 chars): ' . substr($raw_response_body, 0, 500));
+    back_trace( 'NOTICE', 'Raw response body (last 100 chars): ' . substr($raw_response_body, -100));
+    
+    // Validate that we have a non-empty string that looks like JSON
+    if (empty($raw_response_body)) {
+        back_trace( 'ERROR', 'Raw response body is empty');
+        if (get_locale() !== "en_US") {
+            $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+        } else {
+            $localized_errorResponses = $errorResponses;
+        }
+        return $localized_errorResponses[array_rand($localized_errorResponses)];
+    }
+    
+    // Check if it looks like JSON (starts with { or [)
+    $first_char = substr(trim($raw_response_body), 0, 1);
+    if ($first_char !== '{' && $first_char !== '[') {
+        back_trace( 'ERROR', 'Response body does not look like JSON. First char: ' . $first_char);
+        back_trace( 'ERROR', 'Raw response body (first 200 chars): ' . substr($raw_response_body, 0, 200));
+        if (get_locale() !== "en_US") {
+            $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+        } else {
+            $localized_errorResponses = $errorResponses;
+        }
+        return $localized_errorResponses[array_rand($localized_errorResponses)];
+    }
+    
+    // Decode the JSON response
+    $response_body = json_decode($raw_response_body, true);
+    
+    // DIAG - Log the result immediately after decode
+    back_trace( 'NOTICE', 'json_decode result type: ' . gettype($response_body));
+    back_trace( 'NOTICE', 'json_last_error: ' . json_last_error());
+    back_trace( 'NOTICE', 'json_last_error_msg: ' . json_last_error_msg());
+    
+    // Check if json_decode failed
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $json_error = json_last_error_msg();
+        back_trace( 'ERROR', 'JSON decode failed: ' . $json_error);
+        back_trace( 'ERROR', 'Raw response body length: ' . strlen($raw_response_body));
+        back_trace( 'ERROR', 'Raw response body (full): ' . $raw_response_body);
+        
+        if (get_locale() !== "en_US") {
+            $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+        } else {
+            $localized_errorResponses = $errorResponses;
+        }
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
+        return $localized_errorResponses[array_rand($localized_errorResponses)];
+    }
+    
+    // Validate that response_body is an array
+    if (!is_array($response_body)) {
+        back_trace( 'ERROR', 'Response body is not an array. Type: ' . gettype($response_body));
+        back_trace( 'ERROR', 'Response body value: ' . var_export($response_body, true));
+        back_trace( 'ERROR', 'Raw response body (first 1000 chars): ' . substr($raw_response_body, 0, 1000));
+        
+        if (get_locale() !== "en_US") {
+            $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+        } else {
+            $localized_errorResponses = $errorResponses;
+        }
+        // Clear locks on error
+        // Lock clearing removed - main send function handles locking
+        return $localized_errorResponses[array_rand($localized_errorResponses)];
+    }
+    
     if (isset($response_body['message'])) {
         $response_body['message'] = trim($response_body['message']);
         if (!str_ends_with($response_body['message'], '.')) {
@@ -254,7 +345,17 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
+    back_trace( 'NOTICE', '$response_body type: ' . gettype($response_body));
+    back_trace( 'NOTICE', '$response_body is_array: ' . (is_array($response_body) ? 'true' : 'false'));
+    if (is_array($response_body)) {
+        back_trace( 'NOTICE', '$response_body keys: ' . implode(', ', array_keys($response_body)));
+        back_trace( 'NOTICE', 'has choices key: ' . (isset($response_body['choices']) ? 'true' : 'false'));
+        if (isset($response_body['choices'])) {
+            back_trace( 'NOTICE', 'choices is_array: ' . (is_array($response_body['choices']) ? 'true' : 'false'));
+            back_trace( 'NOTICE', 'choices count: ' . (is_array($response_body['choices']) ? count($response_body['choices']) : 'N/A'));
+            back_trace( 'NOTICE', 'choices empty check: ' . (empty($response_body['choices']) ? 'true (empty)' : 'false (not empty)'));
+        }
+    }
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -270,33 +371,109 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
+    back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
+    back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
+    back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
+    back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
+    back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // DIAG - Diagnostics - Ver 1.8.1
     // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
+    if (isset($response_body["usage"]["prompt_tokens"])) {
+        back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
+    }
+    if (isset($response_body["usage"]["completion_tokens"])) {
+        back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
+    }
+    if (isset($response_body["usage"]["total_tokens"])) {
+        back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
+    }
 
     // Add the usage to the conversation tracker
-    if ($response['response']['code'] == 200) {
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $response_body["usage"]["prompt_tokens"]);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $response_body["usage"]["completion_tokens"]);
-        append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $response_body["usage"]["total_tokens"]);
+    if ($response['response']['code'] == 200 && isset($response_body["usage"])) {
+        if (isset($response_body["usage"]["prompt_tokens"])) {
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $response_body["usage"]["prompt_tokens"]);
+        }
+        if (isset($response_body["usage"]["completion_tokens"])) {
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', null, null, null, $response_body["usage"]["completion_tokens"]);
+        }
+        if (isset($response_body["usage"]["total_tokens"])) {
+            append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', null, null, null, $response_body["usage"]["total_tokens"]);
+        }
+    }
+    
+    // DIAG - Check before choices validation
+    back_trace( 'NOTICE', 'Before choices check - response_body type: ' . gettype($response_body));
+    back_trace( 'NOTICE', 'Before choices check - isset choices: ' . (isset($response_body['choices']) ? 'true' : 'false'));
+    if (isset($response_body['choices'])) {
+        back_trace( 'NOTICE', 'Before choices check - choices type: ' . gettype($response_body['choices']));
+        back_trace( 'NOTICE', 'Before choices check - empty check: ' . (empty($response_body['choices']) ? 'true (empty)' : 'false (not empty)'));
     }
     
     if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine
+        $content = isset($response_body['choices'][0]['message']['content']) 
+            ? trim($response_body['choices'][0]['message']['content']) 
+            : '';
+        
+        // DIAG - Log content extraction
+        back_trace( 'NOTICE', 'Content extracted - length: ' . strlen($content));
+        back_trace( 'NOTICE', 'Content extracted - first 100 chars: ' . substr($content, 0, 100));
+        
+        // Check if content is empty - this can happen with gpt-5 when all tokens are used for reasoning
+        if (empty($content)) {
+            // Check if this is a reasoning model that consumed all tokens
+            $finish_reason = isset($response_body['choices'][0]['finish_reason']) 
+                ? $response_body['choices'][0]['finish_reason'] 
+                : '';
+            $reasoning_tokens = isset($response_body['usage']['completion_tokens_details']['reasoning_tokens']) 
+                ? $response_body['usage']['completion_tokens_details']['reasoning_tokens'] 
+                : 0;
+            
+            // DIAG - Diagnostics - Ver 2.3.9+
+            back_trace('WARNING', 'Empty content response. Finish reason: ' . $finish_reason . ', Reasoning tokens: ' . $reasoning_tokens);
+            
+            if ($finish_reason === 'length' && $reasoning_tokens > 0) {
+                // All tokens were used for reasoning, suggest increasing max_completion_tokens
+                if (get_locale() !== "en_US") {
+                    $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+                } else {
+                    $localized_errorResponses = $errorResponses;
+                }
+                // Clear locks on error
+                // Lock clearing removed - main send function handles locking
+                return 'The response was cut off because all available tokens were used for reasoning. Please try increasing the "Maximum Tokens" setting or rephrase your question to be more concise.';
+            }
+            
+            // Generic empty response error
+            if (get_locale() !== "en_US") {
+                $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+            } else {
+                $localized_errorResponses = $errorResponses;
+            }
+            // Clear locks on error
+            // Lock clearing removed - main send function handles locking
+            return $localized_errorResponses[array_rand($localized_errorResponses)];
+        }
+        
         // Context History - Ver 1.6.1
-        addEntry('chatbot_chatgpt_context_history', $response_body['choices'][0]['message']['content']);
+        addEntry('chatbot_chatgpt_context_history', $content);
         // Clear locks on success
         // Lock clearing removed - main send function handles locking
-        return $response_body['choices'][0]['message']['content'];
+        return $content;
     } else {
+        // DIAG - Log why we're in the else block
+        back_trace( 'ERROR', 'No choices found in response_body');
+        back_trace( 'ERROR', 'response_body type: ' . gettype($response_body));
+        if (is_array($response_body)) {
+            back_trace( 'ERROR', 'response_body keys: ' . implode(', ', array_keys($response_body)));
+            back_trace( 'ERROR', 'isset choices: ' . (isset($response_body['choices']) ? 'true' : 'false'));
+            if (isset($response_body['choices'])) {
+                back_trace( 'ERROR', 'choices type: ' . gettype($response_body['choices']));
+                back_trace( 'ERROR', 'choices value: ' . var_export($response_body['choices'], true));
+            }
+        }
+        
         // FIXME - Decide what to return here - it's an error
         if (get_locale() !== "en_US") {
             $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
@@ -340,16 +517,29 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
     $top_p = floatval(esc_attr(get_option('chatbot_chatgpt_top_p', '1.0')));
  
     // Added Role, System, Content Static Variable - Ver 1.6.0
+    // Determine which parameter to use based on model - Ver 2.3.9+
+    // Newer models (gpt-5, o1, o3, etc.) require max_completion_tokens instead of max_tokens
+    // Some models (o1, o3) don't support temperature/top_p parameters
     $body = array(
         'model' => $model,
-        'max_tokens' => $max_tokens,
-        'temperature' => $temperature,
-        'top_p' => $top_p,
         'messages' => array(
             array('role' => 'system', 'content' => $context),
             array('role' => 'user', 'content' => $message)
             ),
     );
+    
+    // Only add temperature and top_p if the model supports them
+    if (!chatbot_openai_doesnt_support_temperature($model)) {
+        $body['temperature'] = $temperature;
+        $body['top_p'] = $top_p;
+    }
+    
+    // Use max_completion_tokens for newer models, max_tokens for older models
+    if (chatbot_openai_requires_max_completion_tokens($model)) {
+        $body['max_completion_tokens'] = $max_tokens;
+    } else {
+        $body['max_tokens'] = $max_tokens;
+    }
 
     $chatbot_chatgpt_timeout = intval(esc_attr(get_option('chatbot_chatgpt_timeout_setting', '50')));
 
@@ -363,7 +553,7 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
 
     $response = wp_remote_post($api_url, $args);
     // DIAG - Diagnostics - Ver 1.6.7
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
+    back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -373,7 +563,7 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', print_r($response, true));
+    back_trace( 'NOTICE', print_r($response, true));
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
@@ -385,7 +575,7 @@ function chatbot_chatgpt_call_api_basic($api_key, $message) {
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
+    back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
     
     if (!empty($response_body['choices'])) {
         // Handle the response from the chat engine

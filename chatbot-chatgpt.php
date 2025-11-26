@@ -83,6 +83,9 @@ if (empty($user_id) || $user_id == 0) {
 
 ob_end_flush(); // End output buffering and send the buffer to the browser
 
+// Include necessary files - Utilities (must be loaded before API files that use them)
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php';                    // Ver 1.8.6
+
 // Include necessary files - Main files
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-anthropic-api.php';         // ANT API - Ver 2.0.7
 require_once plugin_dir_path(__FILE__) . 'includes/chatbot-call-azure-openai-api.php';      // Azure OpenAI API - Ver 2.2.6
@@ -192,7 +195,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-threads.php
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-file.php';              // Ver 1.9.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php';                   // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php';                      // Ver 1.6.7
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-utilities.php';                    // Ver 1.8.6
+// chatbot-utilities.php moved above to be loaded before API files - Ver 2.3.9
 
 // Third-party libraries
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php';                            // Version 2.0.2.1

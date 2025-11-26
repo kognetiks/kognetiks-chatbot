@@ -1242,6 +1242,8 @@ window.resetAllLocks = resetAllLocks;
                     // console.log('Chatbot: ERROR: ' + error);
                     appendMessage('Oops! This request timed out. Please try again.', 'error');
                     botResponse = '';
+                    removeTypingIndicator();
+                    submitButton.prop('disabled', false);
                 } else if (jqXHR.status === 403) {
                     // Handle 403 with safe error message extraction
                     let errorMessage = 'Oops! Security check failed. Please refresh the page and try again.';
@@ -1352,6 +1354,8 @@ window.resetAllLocks = resetAllLocks;
                                         }
                                         appendMessage(errorMsg, 'error');
                                         botResponse = '';
+                                        removeTypingIndicator();
+                                        submitButton.prop('disabled', false);
                                     },
                                     complete: function() {
                                         const isQueuedResponse = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
@@ -1370,6 +1374,8 @@ window.resetAllLocks = resetAllLocks;
                                 // console.log('Chatbot: Failed to refresh nonce');
                                 appendMessage('Oops! Security check failed. Please refresh the page and try again.', 'error');
                                 botResponse = '';
+                                removeTypingIndicator();
+                                submitButton.prop('disabled', false);
                             }
                         },
                         error: function() {
@@ -1379,6 +1385,8 @@ window.resetAllLocks = resetAllLocks;
                                 window.location.reload();
                             } else {
                                 appendMessage('Oops! Security check failed. Please refresh the page and try again.', 'error');
+                                removeTypingIndicator();
+                                submitButton.prop('disabled', false);
                             }
                             botResponse = '';
                         }
@@ -1413,6 +1421,8 @@ window.resetAllLocks = resetAllLocks;
                     // console.log('Chatbot: ERROR: ' + error);
                     appendMessage(errorMsg, 'error');
                     botResponse = '';
+                    removeTypingIndicator();
+                    submitButton.prop('disabled', false);
                 }
             },
             complete: function () {
@@ -1442,12 +1452,17 @@ window.resetAllLocks = resetAllLocks;
                 // Re-enable the button if this is not a queued response OR if it's a "still working" message
                 // For queued responses, keep the button disabled until queue processing is complete
                 // For "still working" messages, the button should be re-enabled immediately
+                // Also handle error cases where ajaxResponse might be null/undefined
                 const isQueuedForButton = ajaxResponse && ajaxResponse.data && typeof ajaxResponse.data === 'object' && ajaxResponse.data.queued;
                 if (ajaxResponse && (!isQueuedForButton || isStillWorkingMessage)) {
                     submitButton.prop('disabled', false);
                 } else if (isQueuedForButton) {
                     // For queued responses, poll the queue status and re-enable when empty
                     pollQueueStatus();
+                } else {
+                    // Handle error cases where ajaxResponse is null/undefined - always re-enable button
+                    // This ensures the button is re-enabled even if error handlers didn't do it
+                    submitButton.prop('disabled', false);
                 }
             },
             cache: false, // This ensures jQuery does not cache the result
