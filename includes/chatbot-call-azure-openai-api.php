@@ -84,32 +84,28 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     // Top P - Ver 2.2.6
     $top_p = floatval(esc_attr(get_option('chatbot_azure_top_p', '1.0')));
  
-    // Context History - Ver 2.2.6
-    $chatgpt_last_response = concatenateHistory('chatbot_azure_context_history');
-    // DIAG Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
-    
-    // IDEA Strip any href links and text from the $chatgpt_last_response
-    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
-
-    // IDEA Strip any $learningMessages from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-    } else {
-        $localized_learningMessages = $learningMessages;
-    }
-    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
-
-    // IDEA Strip any $errorResponses from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-    } else {
-        $localized_errorResponses = $errorResponses;
-    }
-    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    // Note: Azure uses 'chatbot_azure_context_history' as the transient name
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id, 'chatbot_azure_context_history');
     
     // Knowledge Navigator keyword append for context
     $chatbot_azure_kn_conversation_context = esc_attr(get_option('chatbot_azure_kn_conversation_context', ''));
+
+    // Build a summary of conversation history for system message (backward compatibility)
+    // Extract text content from structured messages to create a summary string
+    $chatgpt_last_response = '';
+    if (!empty($conversation_context['messages'])) {
+        $message_texts = [];
+        foreach ($conversation_context['messages'] as $msg) {
+            if (isset($msg['content'])) {
+                $message_texts[] = $msg['content'];
+            }
+        }
+        if (!empty($message_texts)) {
+            $chatgpt_last_response = implode(' ', $message_texts);
+        }
+    }
 
     $sys_message = 'We previously have been talking about the following things: ';
 
@@ -129,7 +125,7 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
             }
             // Join the content texts and append to context
             if (!empty($content_texts)) {
-                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
@@ -138,20 +134,14 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     } else {
 
         // Original Context Instructions - No Enhanced Context
-        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_azure_kn_conversation_context;
 
     }
 
-    // Conversation Continuity - Ver 2.2.6
-    $chatbot_azure_conversation_continuation = esc_attr(get_option('chatbot_azure_conversation_continuation', 'Off'));
-
-    // DIAG Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$chatbot_azure_conversation_continuation: ' . $chatbot_azure_conversation_continuation);
-
-    if ($chatbot_azure_conversation_continuation == 'On') {
-        $conversation_history = chatbot_azure_get_converation_history($session_id);
-        $context = $conversation_history . ' ' . $context;
+    // Add session history to context if available (from conversation continuity)
+    if (!empty($conversation_context['session_history'])) {
+        // Session history is a concatenated string, so we'll add it to context
+        $context = $conversation_context['session_history'] . ' ' . $context;
     }
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
@@ -178,15 +168,25 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     // back_trace( 'NOTICE', '$context: ' . $context);
 
     // Added Role, System, Content Static Variable - Ver 2.2.6
+    // Build messages array with system message, conversation history, and current user message - Ver 2.3.9+
+    $messages = array(
+        array('role' => 'system', 'content' => $context)
+    );
+    
+    // Add conversation history messages (structured format for better context) - Ver 2.3.9+
+    if (!empty($conversation_context['messages'])) {
+        $messages = array_merge($messages, $conversation_context['messages']);
+    }
+    
+    // Add current user message
+    $messages[] = array('role' => 'user', 'content' => $message);
+    
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
         'temperature' => $temperature,
         'top_p' => $top_p,
-        'messages' => array(
-            array('role' => 'system', 'content' => $context),
-            array('role' => 'user', 'content' => $message)
-            ),
+        'messages' => $messages,
     );
 
     // FIXME - Allow for file uploads here
