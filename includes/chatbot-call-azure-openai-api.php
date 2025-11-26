@@ -48,7 +48,7 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'chatbot_call_api()');
+    back_trace( 'NOTICE', 'chatbot_call_azure_openai_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);

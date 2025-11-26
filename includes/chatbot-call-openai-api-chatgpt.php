@@ -69,7 +69,7 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_call_api()');
+    back_trace( 'NOTICE', 'chatbot_chatgpt_call_api');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
@@ -101,32 +101,27 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     // Top P - Ver 2.1.8
     $top_p = floatval(esc_attr(get_option('chatbot_chatgpt_top_p', '1.0')));
  
-    // Context History - Ver 1.6.1
-    $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
-    // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
-    
-    // IDEA Strip any href links and text from the $chatgpt_last_response
-    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
-
-    // IDEA Strip any $learningMessages from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-    } else {
-        $localized_learningMessages = $learningMessages;
-    }
-    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
-
-    // IDEA Strip any $errorResponses from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-    } else {
-        $localized_errorResponses = $errorResponses;
-    }
-    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', ''));
+
+    // Build a summary of conversation history for system message (backward compatibility)
+    // Extract text content from structured messages to create a summary string
+    $chatgpt_last_response = '';
+    if (!empty($conversation_context['messages'])) {
+        $message_texts = [];
+        foreach ($conversation_context['messages'] as $msg) {
+            if (isset($msg['content'])) {
+                $message_texts[] = $msg['content'];
+            }
+        }
+        if (!empty($message_texts)) {
+            $chatgpt_last_response = implode(' ', $message_texts);
+        }
+    }
 
     $sys_message = 'We previously have been talking about the following things: ';
 
@@ -159,16 +154,10 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
 
     }
 
-    // Conversation Continuity - Ver 2.1.8
-    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
-
-    // DIAG Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
-
-    if ($chatbot_chatgpt_conversation_continuation == 'On') {
-        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
-        $context = $conversation_history . ' ' . $context;
+    // Add session history to context if available (from conversation continuity)
+    if (!empty($conversation_context['session_history'])) {
+        // Session history is a concatenated string, so we'll add it to context
+        $context = $conversation_context['session_history'] . ' ' . $context;
     }
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
@@ -195,15 +184,25 @@ function chatbot_chatgpt_call_api($api_key, $message, $user_id = null, $page_id 
     // back_trace( 'NOTICE', '$context: ' . $context);
 
     // Added Role, System, Content Static Variable - Ver 1.6.0
+    // Build messages array with system message, conversation history, and current user message - Ver 2.3.9+
+    $messages = array(
+        array('role' => 'system', 'content' => $context)
+    );
+    
+    // Add conversation history messages (structured format for better context) - Ver 2.3.9+
+    if (!empty($conversation_context['messages'])) {
+        $messages = array_merge($messages, $conversation_context['messages']);
+    }
+    
+    // Add current user message
+    $messages[] = array('role' => 'user', 'content' => $message);
+    
     $body = array(
         'model' => $model,
         'max_tokens' => $max_tokens,
         'temperature' => $temperature,
         'top_p' => $top_p,
-        'messages' => array(
-            array('role' => 'system', 'content' => $context),
-            array('role' => 'user', 'content' => $message)
-            ),
+        'messages' => $messages,
     );
 
     // FIXME - Allow for file uploads here

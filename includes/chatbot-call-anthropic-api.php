@@ -48,12 +48,12 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
-  // back_trace( 'NOTICE', 'chatbot_call_anthropic_api()');
-  // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-  // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-  // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-  // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-  // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+    back_trace( 'NOTICE', 'chatbot_call_anthropic_api()');
+    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
+    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
+    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
+    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
+    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Anthropic.com API Documentation
     // https://docs.anthropic.com/en/api/messages

@@ -31,6 +31,9 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     global $additional_instructions;
     global $model;
     global $voice;
+
+    // DIAG - Diagnostics
+    back_trace( 'NOTICE', 'chatbot_chatgpt_call_image_api()');
     
     // Use parameter if provided (not null), otherwise use global
     if ($param_user_id !== null) {

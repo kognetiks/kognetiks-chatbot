@@ -181,6 +181,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.2.2
+    back_trace( 'NOTICE', 'chatbot_call_mistral_agent_call_api()');
     // back_trace( 'NOTICE', 'chatbot_call_mistral_api - start');
     // back_trace( 'NOTICE', 'chatbot_call_mistral_api - $message: ' . $message);
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);

@@ -48,6 +48,7 @@ function chatbot_call_deepseek_api($api_key, $message, $user_id = null, $page_id
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.2.2
+    back_trace( 'NOTICE', 'chatbot_call_deepseek_api()');
     // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - start');
     // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $api_key: ' . $api_key);
     // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $message: ' . $message);

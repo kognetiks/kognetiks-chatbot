@@ -129,95 +129,16 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         }
     }
 
-    // Get conversation history array (not concatenated) - Ver 2.3.9+
-    // The context_history transient stores messages in chronological order
-    // Entries alternate: user message, model response, user message, model response, etc.
-    $context_history_array = get_transient('chatbot_chatgpt_context_history');
-    if (!$context_history_array) {
-        $context_history_array = [];
-    }
-
-    // Build conversation history for contents array
-    // Google API expects conversation history as alternating user/model messages in contents
-    $conversation_contents = array();
-    $history_count = count($context_history_array);
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    $conversation_context = chatbot_chatgpt_build_conversation_context('google', 10, $session_id);
+    $conversation_contents = $conversation_context['messages'];
     
-    // Limit conversation history to last 10 pairs (20 messages) to avoid token limits - Ver 2.3.9+
-    // Keep the most recent conversation pairs
-    $max_history_pairs = 10;
-    $max_history_entries = $max_history_pairs * 2;
-    if ($history_count > $max_history_entries) {
-        // Keep only the most recent entries
-        $context_history_array = array_slice($context_history_array, -$max_history_entries);
-        $history_count = count($context_history_array);
-    }
-    
-    // Process history in pairs (user, model) - Ver 2.3.9+
-    // Start from the beginning and pair up messages
-    for ($i = 0; $i < $history_count; $i += 2) {
-        // User message (even indices)
-        if (isset($context_history_array[$i])) {
-            $user_msg = $context_history_array[$i];
-            // Strip unwanted content
-            $user_msg = preg_replace('/\[URL:.*?\]/', '', $user_msg);
-            if (get_locale() !== "en_US") {
-                $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-                $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-            } else {
-                $localized_learningMessages = $learningMessages;
-                $localized_errorResponses = $errorResponses;
-            }
-            $user_msg = str_replace($localized_learningMessages, '', $user_msg);
-            $user_msg = str_replace($localized_errorResponses, '', $user_msg);
-            $user_msg = trim($user_msg);
-            
-            if (!empty($user_msg)) {
-                $conversation_contents[] = array(
-                    'role' => 'user',
-                    'parts' => array(
-                        array('text' => $user_msg)
-                    )
-                );
-            }
-        }
-        
-        // Model response (odd indices)
-        if (isset($context_history_array[$i + 1])) {
-            $model_msg = $context_history_array[$i + 1];
-            // Strip unwanted content
-            $model_msg = preg_replace('/\[URL:.*?\]/', '', $model_msg);
-            if (get_locale() !== "en_US") {
-                $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-                $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-            } else {
-                $localized_learningMessages = $learningMessages;
-                $localized_errorResponses = $errorResponses;
-            }
-            $model_msg = str_replace($localized_learningMessages, '', $model_msg);
-            $model_msg = str_replace($localized_errorResponses, '', $model_msg);
-            $model_msg = trim($model_msg);
-            
-            if (!empty($model_msg)) {
-                $conversation_contents[] = array(
-                    'role' => 'model',
-                    'parts' => array(
-                        array('text' => $model_msg)
-                    )
-                );
-            }
-        }
-    }
-
-    // Conversation Continuity - Ver 2.3.9
-    // If enabled, also add session-based conversation history
-    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
-    if ($chatbot_chatgpt_conversation_continuation == 'On' && !empty($session_id)) {
-        $session_history = chatbot_chatgpt_get_converation_history($session_id);
-        if (!empty($session_history)) {
-            // Session history is a concatenated string, so we'll add it to base context
-            // This provides additional context without breaking the structured contents array
-            $base_context = $session_history . ' ' . $base_context;
-        }
+    // Add session history to base context if available (from conversation continuity)
+    if (!empty($conversation_context['session_history'])) {
+        // Session history is a concatenated string, so we'll add it to base context
+        // This provides additional context without breaking the structured contents array
+        $base_context = $conversation_context['session_history'] . ' ' . $base_context;
     }
 
     // Final system context (base instructions only, not conversation history)
