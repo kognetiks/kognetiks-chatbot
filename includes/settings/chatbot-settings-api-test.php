@@ -584,8 +584,13 @@ function kchat_fetch_api_status($api_key, $model) {
             $google_base_url = esc_attr(get_option('chatbot_google_base_url', 'https://generativelanguage.googleapis.com/v1beta'));
             $google_base_url = rtrim($google_base_url, '/');
             
+            // Remove /models if present to ensure we have just the base URL
+            if (substr($google_base_url, -7) === '/models') {
+                $google_base_url = substr($google_base_url, 0, -7);
+            }
+            
             // Google API endpoint format: https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
-            $api_url = $google_base_url . '/' . $model . ':generateContent';
+            $api_url = $google_base_url . '/models/' . $model . ':generateContent';
             
             // Add API key as query parameter
             $api_url = add_query_arg('key', $api_key, $api_url);
@@ -595,10 +600,12 @@ function kchat_fetch_api_status($api_key, $model) {
                 'Content-Type' => 'application/json'
             );
 
-            // Set the body - Google API uses 'contents' instead of 'messages'
+            // Set the body - Google API uses 'contents' with 'role' and 'parts'
+            // This matches the structure used in chatbot_call_google_api()
             $body = array(
                 'contents' => array(
                     array(
+                        'role' => 'user',
                         'parts' => array(
                             array(
                                 'text' => $test_message
@@ -649,11 +656,19 @@ function kchat_fetch_api_status($api_key, $model) {
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
                 // back_trace( 'ERROR', 'API Status: ' . $updated_status);
             
-            } elseif (isset($response_data['candidates']) && !empty($response_data['candidates'])) {
+            } elseif (isset($response_data['candidates'][0])) {
                 // Google API uses 'candidates' instead of 'choices'
-                // Handle successful response
-                $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
+                // Verify that the candidate has valid content
+                $candidate = $response_data['candidates'][0];
+                if (isset($candidate['content']['parts'][0]['text']) || isset($candidate['content']['parts'])) {
+                    // Handle successful response
+                    $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
+                    // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
+                } else {
+                    // Candidate exists but no valid content
+                    $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
+                    // back_trace( 'ERROR', 'API Status: ' . $updated_status);
+                }
 
             } else {
                 // Handle unexpected response structure

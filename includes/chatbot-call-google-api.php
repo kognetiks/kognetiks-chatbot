@@ -74,8 +74,20 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         $model = $kchat_settings['model'];
     }
 
-    // Check if this is a "Thinking" model to adjust behaviors later
-    $is_thinking_model = (strpos($model, 'thinking') !== false);
+    // Detect model version and type for compatibility with Gemini 2.0, 3.0, thinking, and non-thinking models
+    // Check if this is a "Thinking" model - supports both Gemini 2.0 and 3.0 thinking models
+    $is_thinking_model = (
+        stripos($model, 'thinking') !== false || 
+        stripos($model, 'exp-thinking') !== false ||
+        preg_match('/gemini-[23]\.0.*thinking/i', $model)
+    );
+    
+    // Detect Gemini version (2.0 or 3.0) for potential version-specific handling
+    $is_gemini_3 = (stripos($model, 'gemini-3') !== false || stripos($model, 'gemini-3.0') !== false);
+    $is_gemini_2 = (stripos($model, 'gemini-2') !== false || stripos($model, 'gemini-2.0') !== false);
+    
+    // DIAG - Diagnostics - Ver 2.3.9+
+    // back_trace( 'NOTICE', 'Model: ' . $model . ' | Thinking: ' . ($is_thinking_model ? 'Yes' : 'No') . ' | Version: ' . ($is_gemini_3 ? '3.0' : ($is_gemini_2 ? '2.0' : 'Unknown')));
 
     // DIAG - Diagnostics - Ver 2.3.9
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
@@ -91,42 +103,16 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     $max_tokens = intval(esc_attr(get_option('chatbot_google_max_tokens_setting', '1000')));
 
     // Conversation Context - Ver 2.3.9
-    $context = esc_attr(get_option('chatbot_google_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
-
-    // Context History - Ver 2.3.9
-    $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
-    // DIAG Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
-    
-    // IDEA Strip any href links and text from the $chatgpt_last_response
-    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
-
-    // IDEA Strip any $learningMessages from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-    } else {
-        $localized_learningMessages = $learningMessages;
-    }
-    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
-
-    // IDEA Strip any $errorResponses from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-    } else {
-        $localized_errorResponses = $errorResponses;
-    }
-    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+    // Base context for systemInstruction (without conversation history)
+    $base_context = esc_attr(get_option('chatbot_google_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
 
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', 'Yes'));
-
-    $sys_message = 'We previously have been talking about the following things: ';
 
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.3.9
     $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
 
     if ($use_enhanced_content_search == 'Yes') {
-
         $search_results = chatbot_chatgpt_content_search($message);
         If ( !empty ($search_results) ) {
             // Extract relevant content from search results array
@@ -138,35 +124,107 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
             }
             // Join the content texts and append to context
             if (!empty($content_texts)) {
-                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+                $base_context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $base_context;
             }
         }
-        // DIAG Diagnostics - Ver 2.3.9
-        // back_trace( 'NOTICE', '$context: ' . $context);
+    }
 
-    } else {
+    // Get conversation history array (not concatenated) - Ver 2.3.9+
+    // The context_history transient stores messages in chronological order
+    // Entries alternate: user message, model response, user message, model response, etc.
+    $context_history_array = get_transient('chatbot_chatgpt_context_history');
+    if (!$context_history_array) {
+        $context_history_array = [];
+    }
 
-        // Original Context Instructions - No Enhanced Context
-        $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-
+    // Build conversation history for contents array
+    // Google API expects conversation history as alternating user/model messages in contents
+    $conversation_contents = array();
+    $history_count = count($context_history_array);
+    
+    // Limit conversation history to last 10 pairs (20 messages) to avoid token limits - Ver 2.3.9+
+    // Keep the most recent conversation pairs
+    $max_history_pairs = 10;
+    $max_history_entries = $max_history_pairs * 2;
+    if ($history_count > $max_history_entries) {
+        // Keep only the most recent entries
+        $context_history_array = array_slice($context_history_array, -$max_history_entries);
+        $history_count = count($context_history_array);
+    }
+    
+    // Process history in pairs (user, model) - Ver 2.3.9+
+    // Start from the beginning and pair up messages
+    for ($i = 0; $i < $history_count; $i += 2) {
+        // User message (even indices)
+        if (isset($context_history_array[$i])) {
+            $user_msg = $context_history_array[$i];
+            // Strip unwanted content
+            $user_msg = preg_replace('/\[URL:.*?\]/', '', $user_msg);
+            if (get_locale() !== "en_US") {
+                $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
+                $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+            } else {
+                $localized_learningMessages = $learningMessages;
+                $localized_errorResponses = $errorResponses;
+            }
+            $user_msg = str_replace($localized_learningMessages, '', $user_msg);
+            $user_msg = str_replace($localized_errorResponses, '', $user_msg);
+            $user_msg = trim($user_msg);
+            
+            if (!empty($user_msg)) {
+                $conversation_contents[] = array(
+                    'role' => 'user',
+                    'parts' => array(
+                        array('text' => $user_msg)
+                    )
+                );
+            }
+        }
+        
+        // Model response (odd indices)
+        if (isset($context_history_array[$i + 1])) {
+            $model_msg = $context_history_array[$i + 1];
+            // Strip unwanted content
+            $model_msg = preg_replace('/\[URL:.*?\]/', '', $model_msg);
+            if (get_locale() !== "en_US") {
+                $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
+                $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
+            } else {
+                $localized_learningMessages = $learningMessages;
+                $localized_errorResponses = $errorResponses;
+            }
+            $model_msg = str_replace($localized_learningMessages, '', $model_msg);
+            $model_msg = str_replace($localized_errorResponses, '', $model_msg);
+            $model_msg = trim($model_msg);
+            
+            if (!empty($model_msg)) {
+                $conversation_contents[] = array(
+                    'role' => 'model',
+                    'parts' => array(
+                        array('text' => $model_msg)
+                    )
+                );
+            }
+        }
     }
 
     // Conversation Continuity - Ver 2.3.9
+    // If enabled, also add session-based conversation history
     $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
-
-    // DIAG Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
-
-    if ($chatbot_chatgpt_conversation_continuation == 'On') {
-        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
-        $context = $conversation_history . ' ' . $context;
+    if ($chatbot_chatgpt_conversation_continuation == 'On' && !empty($session_id)) {
+        $session_history = chatbot_chatgpt_get_converation_history($session_id);
+        if (!empty($session_history)) {
+            // Session history is a concatenated string, so we'll add it to base context
+            // This provides additional context without breaking the structured contents array
+            $base_context = $session_history . ' ' . $base_context;
+        }
     }
 
+    // Final system context (base instructions only, not conversation history)
+    $context = $base_context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+    
     // Check the length of the context and truncate if necessary - Ver 2.3.9
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
-    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
-    // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 100000; // Estimate at 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
         // Truncate to the max length
@@ -178,13 +236,11 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
-    } else {
-        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // DIAG Diagnostics - Ver 2.3.9
     // back_trace( 'NOTICE', '$context: ' . $context);
+    // back_trace( 'NOTICE', 'Conversation history pairs: ' . count($conversation_contents) / 2);
 
     // Build the Google API request body
 
@@ -196,15 +252,20 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Temperature - Ver 2.3.9
     $temperature = floatval(esc_attr(get_option('chatbot_google_temperature', '0.50')));
 
-    // Top P - Ver 2.3.9
-    $top_p = floatval(esc_attr(get_option('chatbot_google_top_p', '1.00')));
+    // Media Resolution - Ver 2.3.9+
+    // Note: Google's API doesn't have a direct "resolution" parameter.
+    // The resolution is determined by the image data itself (base64 encoded).
+    // This setting is stored for potential future use or documentation.
+    $media_resolution = esc_attr(get_option('chatbot_google_media_resolution', 'Default'));
+
+    // Thinking Level - Ver 2.3.9+
+    $thinking_level = esc_attr(get_option('chatbot_google_thinking_level', 'Low'));
 
     // Generation Configuration
     // BEST PRACTICE: If using a Thinking model, Google often recommends standard or specific temperatures.
     $generationConfig = array(
         'maxOutputTokens' => $max_tokens,
-        'temperature'     => $temperature,
-        'topP'            => $top_p
+        'temperature'     => $temperature
     );
 
     // Optional: Force JSON response if needed (Gemini 1.5+ supports this natively)
@@ -222,12 +283,17 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     }
 
     // BEST PRACTICE: MEDIA RESOLUTION & MULTIMODAL
-    // Gemini does not have a "resolution" parameter (Low/High).
-    // It analyzes the raw tokens of the image. You must send base64 data.
+    // Gemini does not have a direct "resolution" parameter in the API.
+    // It analyzes the raw tokens of the image based on the base64 data sent.
     // The $image_data variable assumes an array ['mime_type' => 'image/jpeg', 'base64' => '...']
+    // The $media_resolution setting (Default, Low, Medium, High) is stored for reference
+    // and potential future use in image preprocessing or documentation.
     $user_message_parts = array();
 
     if (!empty($image_data) && is_array($image_data)) {
+        // DIAG - Diagnostics - Ver 2.3.9+
+        // back_trace( 'NOTICE', 'Media Resolution setting: ' . $media_resolution);
+        
         $user_message_parts[] = array(
             'inlineData' => array(
                 'mimeType' => $image_data['mime_type'],
@@ -241,12 +307,14 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         'text' => $message
     );
 
-    // Build the Contents Array
-    $contents = array(
-        array(
-            'role' => 'user',
-            'parts' => $user_message_parts
-        )
+    // Build the Contents Array - Ver 2.3.9+
+    // Include conversation history (previous user/model pairs) + current user message
+    $contents = $conversation_contents; // Start with conversation history
+    
+    // Add the current user message at the end
+    $contents[] = array(
+        'role' => 'user',
+        'parts' => $user_message_parts
     );
 
     // Assemble Final Body
@@ -281,15 +349,31 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     }
 
     // BEST PRACTICE: THINKING CONFIG
-    // If this is a Gemini 2.0 Thinking model, we can enable thought visibility.
-    // Currently, Google controls the "Level" internally, but we can ask to see the thoughts.
-    // Note: This API shape is experimental and subject to change for the 'exp' models.
-    /*
+    // Support for both Gemini 2.0 and 3.0 Thinking models
+    // The thinking level (Low/High) controls the depth of reasoning.
+    // Note: API support for thinking level may vary between versions.
     if ($is_thinking_model) {
-       // Code to handle thinking config if Google releases specific params for it
-       // Currently, it is implicit in the model name.
+        // DIAG - Diagnostics - Ver 2.3.9+
+        // back_trace( 'NOTICE', 'Thinking model detected: ' . $model . ' | Thinking Level: ' . $thinking_level);
+        
+        // For thinking models, we can potentially add thinking-specific configuration
+        // Gemini 2.0 and 3.0 thinking models may have different API support
+        // Currently, Google controls the thinking behavior internally, but we store
+        // the setting for future API support or documentation purposes.
+        
+        // Gemini 3.0+ may support explicit thinking configuration
+        if ($is_gemini_3) {
+            // Future: When Gemini 3.0+ API supports explicit thinking level configuration
+            // if ($thinking_level === 'High') {
+            //     $generationConfig['thinkingConfig'] = array('level' => 'HIGH');
+            // } else {
+            //     $generationConfig['thinkingConfig'] = array('level' => 'LOW');
+            // }
+        }
+        
+        // For Gemini 2.0 thinking models, the thinking behavior is typically implicit
+        // but the setting is stored for reference and potential future use
     }
-    */
 
     // DIAG Diagnostics - Ver 2.3.9
     // back_trace( 'NOTICE', '$body: ' . print_r($body, true));
@@ -390,6 +474,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     }
 
     // Google API uses 'candidates' instead of 'choices'
+    // Compatible with both Gemini 2.0 and 3.0, thinking and non-thinking models
     if (isset($response_body['candidates'][0])) {
         $candidate = $response_body['candidates'][0];
         $finish_reason = $candidate['finishReason'] ?? 'UNKNOWN';
@@ -398,16 +483,35 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
             return isset($errorResponses['safety_block']) ? $errorResponses['safety_block'] : 'Blocked by safety filters.';
         }
 
-        // Logic to grab text. Note: In Thinking models, thoughts might be in a separate part
-        // but usually, they are concatenated in the first text part or separated.
-        // We iterate through parts to ensure we get all text.
+        // Logic to grab text - handles both thinking and non-thinking models
+        // For thinking models (Gemini 2.0/3.0), thoughts might be in separate parts
+        // or concatenated. We iterate through all parts to ensure we get complete text.
+        // For non-thinking models, typically only one text part exists.
         $full_response_text = '';
         if (isset($candidate['content']['parts'])) {
             foreach ($candidate['content']['parts'] as $part) {
+                // Extract text from standard text parts
                 if (isset($part['text'])) {
                     $full_response_text .= $part['text'];
                 }
+                
+                // For thinking models, handle potential thinking-specific parts
+                // (Future: if Google adds explicit thinking part types)
+                if ($is_thinking_model && isset($part['thinking'])) {
+                    // Thinking models may have separate thinking parts
+                    // For now, we include them if present
+                    if (isset($part['thinking']['text'])) {
+                        // Optionally include thinking process (can be filtered out if needed)
+                        // $full_response_text .= "\n[Thinking: " . $part['thinking']['text'] . "]";
+                    }
+                }
             }
+        }
+
+        // Handle alternative response structures (for compatibility with different API versions)
+        // Some responses might have text directly in content
+        if (empty($full_response_text) && isset($candidate['content']['text'])) {
+            $full_response_text = $candidate['content']['text'];
         }
 
         if (!empty($full_response_text)) {
@@ -430,5 +534,5 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Lock clearing removed - main send function handles locking
     // Return a random error message
     return $localized_errorResponses[array_rand($localized_errorResponses)];
-    
+
 }
