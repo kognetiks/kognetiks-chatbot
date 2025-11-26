@@ -697,7 +697,7 @@ function kchat_fetch_api_status($api_key, $model) {
             $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', '$model: ' . $model);
-            $max_tokens = intval(get_option('chatbot_local_max_tokens_setting', 10000));
+            $max_tokens = intval(get_option('chatbot_local_max_tokens_setting', 1000));
             $temperature = floatval(get_option('chatbot_local_temperature', 0.8));
             $top_p = floatval(get_option('chatbot_local_top_p', 0.95));
             $context = esc_attr(get_option('chatbot_local_conversation_context', 'You are a versatile, friendly, and helpful assistant that responds using Markdown syntax.'));

@@ -73,7 +73,7 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     // back_trace( 'NOTICE', '$model: ' . $model);
  
     // Max tokens - Ver 2.2.6
-    $max_tokens = intval(esc_attr(get_option('chatbot_azure_max_tokens_setting', '500')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_azure_max_tokens_setting', '1000')));
 
     // Conversation Context - Ver 2.2.6
     $context = esc_attr(get_option('chatbot_azure_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));

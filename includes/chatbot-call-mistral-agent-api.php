@@ -232,7 +232,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
  
     // Max tokens
-    $max_tokens = intval(esc_attr(get_option('chatbot_mistral_max_tokens_setting', '5000')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_mistral_max_tokens_setting', '1000')));
 
     // Conversation Context - Ver 1.6.1
     $context = esc_attr(get_option('chatbot_mistral_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));

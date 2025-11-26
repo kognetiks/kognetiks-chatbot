@@ -333,8 +333,8 @@ function chatbot_transformer_model_choice_callback($args) {
 // Max Tokens choice - Ver 2.1.9
 function chatbot_transformer_model_max_tokens_setting_callback($args) {
 
-    // Get the saved chatbot_transformer_model_max_tokens or default to 10000
-    $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', '10000'));
+    // Get the saved chatbot_transformer_model_max_tokens or default to 1000
+    $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', '1000'));
 
     // Allow for a range of tokens between 100 and 10000 in 100-step increments - Ver 2.0.4
     ?>

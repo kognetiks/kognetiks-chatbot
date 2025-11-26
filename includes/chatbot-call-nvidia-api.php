@@ -72,7 +72,7 @@ function chatbot_nvidia_call_api($api_key, $message, $user_id = null, $page_id =
     $model = esc_attr(get_option('chatbot_nvidia_model_choice', 'nvidia/llama-3.1-nemotron-51b-instruct'));
  
     // Max tokens
-    $max_tokens = intval(esc_attr(get_option('chatbot_nvidia_max_tokens_setting', '500')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_nvidia_max_tokens_setting', '1000')));
 
     // Conversation Context
     $context = esc_attr(get_option('chatbot_nvidia_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));

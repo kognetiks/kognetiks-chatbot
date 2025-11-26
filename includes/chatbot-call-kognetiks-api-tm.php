@@ -60,7 +60,7 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     $model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
  
     // Max tokens
-    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1000')));
 
     // Conversation Context - Ver 1.6.1
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));

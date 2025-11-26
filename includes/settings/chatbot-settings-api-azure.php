@@ -157,8 +157,8 @@ function chatbot_azure_model_choice_callback($args) {
 // Max Tokens choice - Ver 2.2.6
 function chatbot_azure_max_tokens_setting_callback($args) {
 
-    // Get the saved chatbot_azure_max_tokens_setting or default to 500
-    $max_tokens = esc_attr(get_option('chatbot_azure_max_tokens_setting', '500'));
+    // Get the saved chatbot_azure_max_tokens_setting or default to 1000
+    $max_tokens = esc_attr(get_option('chatbot_azure_max_tokens_setting', '1000'));
     // Allow for a range of tokens between 100 and 10000 in 100-step increments - Ver 2.2.6
     ?>
     <select id="chatbot_azure_max_tokens_setting" name="chatbot_azure_max_tokens_setting">

@@ -13,8 +13,8 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Call the Google API - Ver 2.3.9
-function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
+// Call the Google API - Ver 2.3.9 - Updated with Gemini 3 Pro recommendations
+function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null, $image_data = null) {
 
     global $session_id;
     global $user_id;
@@ -48,7 +48,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', 'chatbot_call_google_api()');
+    back_trace( 'NOTICE', 'chatbot_call_google_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
@@ -74,6 +74,9 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         $model = $kchat_settings['model'];
     }
 
+    // Check if this is a "Thinking" model to adjust behaviors later
+    $is_thinking_model = (strpos($model, 'thinking') !== false);
+
     // DIAG - Diagnostics - Ver 2.3.9
     // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
     // back_trace( 'NOTICE', '$model: ' . $model);
@@ -84,8 +87,8 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Add API key as query parameter
     $api_url = add_query_arg('key', $api_key, $api_url);
 
-    // Max tokens
-    $max_tokens = intval(esc_attr(get_option('chatbot_google_max_tokens_setting', '500')));
+    // Max tokens - Increased default for Gemini models (Ver 2.3.9+)
+    $max_tokens = intval(esc_attr(get_option('chatbot_google_max_tokens_setting', '1000')));
 
     // Conversation Context - Ver 2.3.9
     $context = esc_attr(get_option('chatbot_google_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
@@ -196,49 +199,97 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Top P - Ver 2.3.9
     $top_p = floatval(esc_attr(get_option('chatbot_google_top_p', '1.00')));
 
-    // Google API uses 'contents' array with 'parts' containing 'text'
-    // System instruction can be included in the first content or as a separate systemInstruction field
-    $contents = array();
+    // Generation Configuration
+    // BEST PRACTICE: If using a Thinking model, Google often recommends standard or specific temperatures.
+    $generationConfig = array(
+        'maxOutputTokens' => $max_tokens,
+        'temperature'     => $temperature,
+        'topP'            => $top_p
+    );
 
-    // Add system instruction as first content if context is provided
+    // Optional: Force JSON response if needed (Gemini 1.5+ supports this natively)
+    // $generationConfig['responseMimeType'] = 'application/json';
+
+    // BEST PRACTICE: SYSTEM INSTRUCTIONS
+    // Instead of faking a user message, use the native systemInstruction field.
+    $systemInstruction = null;
     if (!empty($context)) {
-        $contents[] = array(
-            'role' => 'user',
+        $systemInstruction = array(
             'parts' => array(
-                array(
-                    'text' => $context
-                )
-            )
-        );
-        $contents[] = array(
-            'role' => 'model',
-            'parts' => array(
-                array(
-                    'text' => 'Understood. I will follow these instructions.'
-                )
+                array('text' => $context)
             )
         );
     }
 
-    // Add the user message
-    $contents[] = array(
-        'role' => 'user',
-        'parts' => array(
+    // BEST PRACTICE: MEDIA RESOLUTION & MULTIMODAL
+    // Gemini does not have a "resolution" parameter (Low/High).
+    // It analyzes the raw tokens of the image. You must send base64 data.
+    // The $image_data variable assumes an array ['mime_type' => 'image/jpeg', 'base64' => '...']
+    $user_message_parts = array();
+
+    if (!empty($image_data) && is_array($image_data)) {
+        $user_message_parts[] = array(
+            'inlineData' => array(
+                'mimeType' => $image_data['mime_type'],
+                'data'     => $image_data['base64']
+            )
+        );
+    }
+
+    // Add text to the parts
+    $user_message_parts[] = array(
+        'text' => $message
+    );
+
+    // Build the Contents Array
+    $contents = array(
+        array(
+            'role' => 'user',
+            'parts' => $user_message_parts
+        )
+    );
+
+    // Assemble Final Body
+    $body = array(
+        'contents'         => $contents,
+        'generationConfig' => $generationConfig,
+        'safetySettings'   => array(
+            // BEST PRACTICE: SAFETY SETTINGS
+            // Default Gemini settings are strict. This prevents "FinishReason: SAFETY" blocks.
             array(
-                'text' => $message
+                'category' => 'HARM_CATEGORY_HARASSMENT',
+                'threshold' => 'BLOCK_ONLY_HIGH'
+            ),
+            array(
+                'category' => 'HARM_CATEGORY_HATE_SPEECH',
+                'threshold' => 'BLOCK_ONLY_HIGH'
+            ),
+            array(
+                'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                'threshold' => 'BLOCK_ONLY_HIGH'
+            ),
+            array(
+                'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                'threshold' => 'BLOCK_ONLY_HIGH'
             )
         )
     );
 
-    // Define the request body
-    $body = array(
-        'contents' => $contents,
-        'generationConfig' => array(
-            'maxOutputTokens' => $max_tokens,
-            'temperature' => $temperature,
-            'topP' => $top_p
-        )
-    );
+    // Add System Instruction if it exists (Supported in v1beta)
+    if ($systemInstruction) {
+        $body['systemInstruction'] = $systemInstruction;
+    }
+
+    // BEST PRACTICE: THINKING CONFIG
+    // If this is a Gemini 2.0 Thinking model, we can enable thought visibility.
+    // Currently, Google controls the "Level" internally, but we can ask to see the thoughts.
+    // Note: This API shape is experimental and subject to change for the 'exp' models.
+    /*
+    if ($is_thinking_model) {
+       // Code to handle thinking config if Google releases specific params for it
+       // Currently, it is implicit in the model name.
+    }
+    */
 
     // DIAG Diagnostics - Ver 2.3.9
     // back_trace( 'NOTICE', '$body: ' . print_r($body, true));
@@ -267,7 +318,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         // back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
-        return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
+        return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'API Connection Error: ' . $response->get_error_message();
 
     }
 
@@ -278,14 +329,13 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     if (isset($response_body['error'])) {
 
         // Extract error type and message safely
-        $error_type = $response_body['error']['status'] ?? 'Unknown Error Type';
-        $error_message = $response_body['error']['message'] ?? 'No additional information.';
+        $error_msg = $response_body['error']['message'] ?? 'Unknown API Error';
 
         // DIAG - Diagnostics - Ver 2.3.9
-        back_trace( 'ERROR', 'Error: Type: ' . $error_type . ' Message: ' . $error_message);
+        back_trace( 'ERROR', 'Gemini API Error: ' . $error_msg);
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
-        return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';
+        return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'Error: ' . $error_msg;
 
     }
 
@@ -319,13 +369,14 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Extract input and output tokens if available
     $input_tokens = $response_body['usageMetadata']['promptTokenCount'] ?? 0;
     $output_tokens = $response_body['usageMetadata']['candidatesTokenCount'] ?? 0;
-    $total_tokens = $response_body['usageMetadata']['totalTokenCount'] ?? ($input_tokens + $output_tokens);
+    $total_tokens = $response_body['usageMetadata']['totalTokenCount'] ?? 0;
 
     // DIAG - Diagnostics - Ver 2.3.9
     // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $input_tokens);
     // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $output_tokens);
     // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $total_tokens);
 
+    // Log Tokens
     if (isset($response['response']['code']) && $response['response']['code'] == 200) {
         if ($input_tokens > 0) {
             append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $input_tokens);
@@ -341,31 +392,30 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Google API uses 'candidates' instead of 'choices'
     if (isset($response_body['candidates'][0])) {
         $candidate = $response_body['candidates'][0];
+        $finish_reason = $candidate['finishReason'] ?? 'UNKNOWN';
         
-        // Check for safety blocks or other finish reasons
-        if (isset($candidate['finishReason']) && $candidate['finishReason'] !== 'STOP') {
-            $finish_reason = $candidate['finishReason'];
-            // DIAG - Diagnostics - Ver 2.3.9
-            // back_trace( 'WARNING', 'Finish reason: ' . $finish_reason);
-            
-            if ($finish_reason === 'SAFETY') {
-                return isset($errorResponses['safety_block']) ? $errorResponses['safety_block'] : 'Response was blocked due to safety filters.';
-            } elseif ($finish_reason === 'MAX_TOKENS') {
-                // Response was truncated but may still be valid
-            } elseif ($finish_reason === 'RECITATION') {
-                return isset($errorResponses['recitation_block']) ? $errorResponses['recitation_block'] : 'Response was blocked due to recitation detection.';
+        if ($finish_reason === 'SAFETY') {
+            return isset($errorResponses['safety_block']) ? $errorResponses['safety_block'] : 'Blocked by safety filters.';
+        }
+
+        // Logic to grab text. Note: In Thinking models, thoughts might be in a separate part
+        // but usually, they are concatenated in the first text part or separated.
+        // We iterate through parts to ensure we get all text.
+        $full_response_text = '';
+        if (isset($candidate['content']['parts'])) {
+            foreach ($candidate['content']['parts'] as $part) {
+                if (isset($part['text'])) {
+                    $full_response_text .= $part['text'];
+                }
             }
         }
-        
-        // Check if content and text are available
-        if (isset($candidate['content']['parts'][0]['text']) && !empty($candidate['content']['parts'][0]['text'])) {
-            // Handle the response from the chat engine
-            $response_text = $candidate['content']['parts'][0]['text'];
+
+        if (!empty($full_response_text)) {
             // Context History - Ver 2.3.9
-            addEntry('chatbot_chatgpt_context_history', $response_text);
+            addEntry('chatbot_chatgpt_context_history', $full_response_text);
             // Clear locks on success
             // Lock clearing removed - main send function handles locking
-            return $response_text;
+            return $full_response_text;
         }
     }
     
