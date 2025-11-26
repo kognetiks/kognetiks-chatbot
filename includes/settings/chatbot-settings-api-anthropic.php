@@ -92,13 +92,15 @@ function chatbot_anthropic_chat_model_choice_callback($args) {
 function chatgpt_anthropic_max_tokens_setting_callback($args) {
     // Get the saved chatbot_anthropic_max_tokens_setting or default to 1000
     $max_tokens = esc_attr(get_option('chatbot_anthropic_max_tokens_setting', '1000'));
-    // Allow for a range of tokens between 100 and 10000 in 100-step increments - Ver 2.0.4
+    // Allow for a range of tokens between 100 and 8192 in 100-step increments - Ver 2.0.4
     ?>
     <select id="chatbot_anthropic_max_tokens_setting" name="chatbot_anthropic_max_tokens_setting">
         <?php
-        for ($i=100; $i<=10000; $i+=100) {
+        for ($i=100; $i<=8100; $i+=100) {
             echo '<option value="' . esc_attr($i) . '" ' . selected($max_tokens, (string)$i, false) . '>' . esc_html($i) . '</option>';
         }
+        // Add exact maximum value
+        echo '<option value="1000" ' . selected($max_tokens, '1000', false) . '>1000</option>';
         ?>
     </select>
     <?php
