@@ -52,12 +52,17 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_flow_api()');
+    back_trace( 'NOTICE', 'chatbot_chatgpt_call_flow_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
     // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
     // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
+
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    // Note: Kflow is a flow controller, but we build context for consistency and potential use in custom GPT API calls
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
 
     // Fetch the KFlow data
     // $sequence_id = $kchat_settings['sequence_id'];
