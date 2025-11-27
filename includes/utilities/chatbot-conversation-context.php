@@ -28,6 +28,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @param string $transient_name Optional. Transient name for context history. Default 'chatbot_chatgpt_context_history'.
  * @return array Array of conversation messages in the specified format
  */
+
 function chatbot_chatgpt_build_conversation_context($format = 'standard', $max_pairs = 10, $session_id = null, $transient_name = 'chatbot_chatgpt_context_history') {
     
     global $learningMessages;

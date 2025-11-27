@@ -68,7 +68,7 @@ function transformer_model_lexical_context_get_cached_embeddings($corpus, $windo
     if (!file_exists($cacheDir)) {
         if (!wp_mkdir_p($cacheDir)) {
             // If directory creation fails, log error and return empty array
-            back_trace('ERROR', 'Failed to create cache directory: ' . $cacheDir);
+            prod_trace('ERROR', 'Failed to create cache directory: ' . $cacheDir);
             return [];
         }
     }
@@ -263,7 +263,7 @@ function transformer_model_lexical_context_migrate_old_cache($cacheFile) {
         $fileSize = filesize($cacheFile);
         // If file is very large (> 1MB), it's likely the old var_export format
         if ($fileSize > 1048576) {
-            back_trace('NOTICE', 'Migrating old cache format to compressed format. Old size: ' . number_format($fileSize) . ' bytes');
+            prod_trace('NOTICE', 'Migrating old cache format to compressed format. Old size: ' . number_format($fileSize) . ' bytes');
             
             // Try to load old cache
             $embeddings = include $cacheFile;
@@ -277,7 +277,7 @@ function transformer_model_lexical_context_migrate_old_cache($cacheFile) {
                     }
                     // Delete old uncompressed file (keep backup for safety)
                     // unlink($cacheFile); // Uncomment to delete old file after migration
-                    back_trace('NOTICE', 'Cache migration completed. Backup saved to: ' . basename($backupFile));
+                    prod_trace('NOTICE', 'Cache migration completed. Backup saved to: ' . basename($backupFile));
                 }
             }
         }
