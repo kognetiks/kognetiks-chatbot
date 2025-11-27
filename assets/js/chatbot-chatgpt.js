@@ -849,15 +849,28 @@ window.resetAllLocks = resetAllLocks;
             // Process italic inside bold content (match *text* but not **)
             // Replace single asterisks that form italic, avoiding ** patterns
             let processedContent = content;
-            // Match italic pattern: *text* where * is not part of **
-            processedContent = processedContent.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+            // Match italic pattern: *text* where text contains any character except asterisk
+            // The [^*] character class includes newlines, so this works across lines
+            processedContent = processedContent.replace(/\*([^*]+?)\*/g, '<em>$1</em>');
             const placeholder = `{{BOLD_${boldIndex}}}`;
             boldPlaceholders[boldIndex] = '<strong>' + processedContent + '</strong>';
             boldIndex++;
             return placeholder;
         });
         // Process remaining standalone italic (not inside bold placeholders)
-        markdown = markdown.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+        // Since bold patterns (**text**) are already extracted as placeholders, remaining *...* are italic
+        // Match *text* where text contains any character except asterisk
+        // Note: [^*] character class matches any character except *, including newlines, spaces, etc.
+        // Use multiple passes to catch all italic patterns, including those that span multiple lines
+        let maxIterations = 5;
+        for (let i = 0; i < maxIterations; i++) {
+            const before = markdown;
+            // Match italic: *text* where text is one or more non-asterisk characters
+            // This pattern works across newlines because [^*] includes \n and \r
+            markdown = markdown.replace(/\*([^*]+?)\*/g, '<em>$1</em>');
+            // If no changes were made, we're done
+            if (before === markdown) break;
+        }
         // Restore bold blocks
         markdown = markdown.replace(/{{BOLD_(\d+)}}/g, (match, index) => {
             return boldPlaceholders[parseInt(index)] || match;
