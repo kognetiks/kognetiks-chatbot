@@ -173,6 +173,24 @@ function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
     // Get WordPress version
     global $wp_version;
     global $chatbot_chatgpt_plugin_version;
+    global $chatbot_chatgpt_plugin_dir_path;
+
+    // DIAG - Diagnostics - Ver 2.3.9
+    back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_version: ' . $chatbot_chatgpt_plugin_version);
+    back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
+    
+    // Ensure the plugin version is set - fallback to reading from plugin header if global is not set
+    // if (empty($chatbot_chatgpt_plugin_version)) {
+        if (!function_exists('get_plugin_data')) {
+            require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+        }
+        // Use the global plugin directory path if available, otherwise construct it
+        $plugin_file = !empty($chatbot_chatgpt_plugin_dir_path) 
+            ? $chatbot_chatgpt_plugin_dir_path . 'chatbot-chatgpt.php'
+            : plugin_dir_path(dirname(dirname(__FILE__))) . 'chatbot-chatgpt.php';
+        $plugin_data = get_plugin_data($plugin_file);
+        $chatbot_chatgpt_plugin_version = !empty($plugin_data['Version']) ? $plugin_data['Version'] : '0.0.0';
+    // }
 
     echo '<p>Chatbot Version: <b>' . $chatbot_chatgpt_plugin_version . '</b><br>';
     echo 'PHP Version: <b>' . $php_version . '</b><br>';
