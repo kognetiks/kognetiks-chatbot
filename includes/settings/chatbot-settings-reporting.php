@@ -574,58 +574,78 @@ function chatbot_chatgpt_interactions_table() {
 
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
+    // Use conversation_log table for consistency with dashboard widget
+    $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+
+    // Check if table exists
+    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'");
+    if (!$table_exists) {
+        return '<p>No data to report at this time. Please visit again later.</p>';
+    }
 
     // Get the reporting period from the options
     $reporting_period = esc_attr(get_option('chatbot_chatgpt_reporting_period'));
     
-        // Calculate the start date and group by clause based on the reporting period
-        if($reporting_period === 'Daily') {
-            $start_date = date('Y-m-d', strtotime("-7 days"));
-            // $group_by = "DATE_FORMAT(date, '%Y-%m-%d')";
-            $group_by = "DATE_FORMAT(date, '%m-%d')";
-        } elseif($reporting_period === 'Monthly') {
-            $start_date = date('Y-m-01', strtotime("-3 months"));
-            $group_by = "DATE_FORMAT(date, '%Y-%m')";
-        } else {
-            $start_date = date('Y-01-01', strtotime("-3 years"));
-            $group_by = "DATE_FORMAT(date, '%Y')";
+    // Calculate the start date and group by clause based on the reporting period
+    if($reporting_period === 'Daily') {
+        $start_date = date('Y-m-d H:i:s', strtotime("-7 days"));
+        $group_by = "DATE_FORMAT(interaction_time, '%%m-%%d')";
+        $order_by = "MIN(interaction_time) ASC";
+    } elseif($reporting_period === 'Monthly') {
+        $start_date = date('Y-m-01 00:00:00', strtotime("-3 months"));
+        $group_by = "DATE_FORMAT(interaction_time, '%%Y-%%m')";
+        $order_by = "DATE_FORMAT(interaction_time, '%%Y-%%m') ASC";
+    } else {
+        $start_date = date('Y-01-01 00:00:00', strtotime("-3 years"));
+        $group_by = "DATE_FORMAT(interaction_time, '%%Y')";
+        $order_by = "DATE_FORMAT(interaction_time, '%%Y') ASC";
+    }
+    
+    // Query conversation_log table similar to dashboard widget
+    // Count interactions by dividing by 2 (each interaction has Visitor + Chatbot messages)
+    $results = $wpdb->get_results($wpdb->prepare(
+        "SELECT 
+            $group_by AS date, 
+            COUNT(*) / 2 AS count 
+        FROM $table_name 
+        WHERE interaction_time >= %s 
+        AND user_type IN ('Chatbot', 'Visitor')
+        GROUP BY $group_by
+        ORDER BY $order_by",
+        $start_date
+    ));
+
+    if(!empty($wpdb->last_error)) {
+        // DIAG - Handle the error
+        // back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
+        return '<p>Error retrieving interaction data. Please try again later.</p>';
+    } else if(!empty($results)) {
+        $labels = [];
+        $data = [];
+        foreach ($results as $result) {
+            $labels[] = $result->date;
+            $data[] = $result->count;
         }
         
-        // Modify the SQL query to group the results based on the reporting period
-        $results = $wpdb->get_results("SELECT $group_by AS date, SUM(count) AS count FROM $table_name WHERE date >= '$start_date' GROUP BY $group_by");
+        $a['labels'] = $labels;
+        $atts['data'] = $data;
 
-        if(!empty($wpdb->last_error)) {
-            // DIAG - Handle the error
-            // back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
-            return;
-        } else if(!empty($results)) {
-            $labels = [];
-            $data = [];
-            foreach ($results as $result) {
-                $labels[] = $result->date;
-                $data[] = $result->count;
-            }
-            
-            $a['labels'] = $labels;
-            $atts['data'] = $data;
-
-            $output = '<table class="widefat striped" style="table-layout: fixed; width: auto;">';
-            $output .= '<thead><tr><th style="width: 96px;">Date</th><th style="width: 96px;">Count</th></tr></thead>';
-            $output .= '<tbody>';
-            foreach ($results as $result) {
-                $output .= '<tr>';
-                $output .= '<td style="width: 96px;">' . $result->date . '</td>';
-                $output .= '<td style="width: 96px;">' . $result->count . '</td>';
-                $output .= '</tr>';
-            }
-            $output .= '</tbody>';
-            $output .= '</table>';            
+        $output = '<table class="widefat striped" style="table-layout: fixed; width: auto;">';
+        $output .= '<thead><tr><th style="width: 96px;">Date</th><th style="width: 96px;">Count</th></tr></thead>';
+        $output .= '<tbody>';
+        foreach ($results as $result) {
+            $output .= '<tr>';
+            $output .= '<td style="width: 96px;">' . esc_html($result->date) . '</td>';
+            $output .= '<td style="width: 96px;">' . esc_html(number_format($result->count, 0)) . '</td>';
+            $output .= '</tr>';
+        }
+        $output .= '</tbody>';
+        $output .= '</table>';            
 
         return $output;
 
     } else {
-        return '<p>No data to report at this time. Plesae visit again later.</p>';
+        return '<p>No data to report at this time. Please visit again later.</p>';
     }
 
 }
@@ -685,28 +705,41 @@ function chatbot_chatgpt_total_tokens() {
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     
+    // Check if table exists
+    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'");
+    if (!$table_exists) {
+        return '<p>No data to report at this time. Please visit again later.</p>';
+    }
+    
     // Get the reporting period from the options
     $reporting_period = esc_attr(get_option('chatbot_chatgpt_reporting_period'));
     
     // Calculate the start date and group by clause based on the reporting period
     if ($reporting_period === 'Daily') {
-        $start_date = date('Y-m-d', strtotime("-7 days"));
-        $group_by = "DATE_FORMAT(interaction_time, '%m-%d')";
+        $start_date = date('Y-m-d H:i:s', strtotime("-7 days"));
+        $group_by = "DATE_FORMAT(interaction_time, '%%m-%%d')";
+        $order_by = "MIN(interaction_time) ASC";
     } elseif ($reporting_period === 'Monthly') {
-        $start_date = date('Y-m-01', strtotime("-3 months"));
-        $group_by = "DATE_FORMAT(interaction_time, '%Y-%m')";
+        $start_date = date('Y-m-01 00:00:00', strtotime("-3 months"));
+        $group_by = "DATE_FORMAT(interaction_time, '%%Y-%%m')";
+        $order_by = "DATE_FORMAT(interaction_time, '%%Y-%%m') ASC";
     } else {
-        $start_date = date('Y-01-01', strtotime("-3 years"));
-        $group_by = "DATE_FORMAT(interaction_time, '%Y')";
+        $start_date = date('Y-01-01 00:00:00', strtotime("-3 years"));
+        $group_by = "DATE_FORMAT(interaction_time, '%%Y')";
+        $order_by = "DATE_FORMAT(interaction_time, '%%Y') ASC";
     }
     
-    $results = $wpdb->get_results("
-        SELECT $group_by AS interaction_time, 
+    // Use prepared statement for security and proper date comparison
+    $results = $wpdb->get_results($wpdb->prepare(
+        "SELECT 
+            $group_by AS interaction_time, 
             SUM(CASE WHEN user_type = 'Total Tokens' THEN CAST(message_text AS UNSIGNED) ELSE 0 END) AS count 
         FROM $table_name 
-        WHERE interaction_time >= '$start_date' 
+        WHERE interaction_time >= %s 
         GROUP BY $group_by
-        ");
+        ORDER BY $order_by",
+        $start_date
+    ));
     
     if (!empty($wpdb->last_error)) {
         // Handle the error
@@ -715,7 +748,7 @@ function chatbot_chatgpt_total_tokens() {
         $labels = [];
         $data = [];
         foreach ($results as $result) {
-            $labels[] = $result->interaction_time; // Changed from result->date to result->interaction_time
+            $labels[] = $result->interaction_time;
             $data[] = $result->count;
         }
         
@@ -724,7 +757,7 @@ function chatbot_chatgpt_total_tokens() {
         $output .= '<tbody>';
         foreach ($results as $result) {
             $output .= '<tr>';
-            $output .= '<td>' . esc_html($result->interaction_time) . '</td>'; // Corrected to use interaction_time
+            $output .= '<td>' . esc_html($result->interaction_time) . '</td>';
             $output .= '<td>' . number_format($result->count) . '</td>';
             $output .= '</tr>';
         }

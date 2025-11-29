@@ -14,6 +14,8 @@ Please review the section [Conversation Logging and History](../support/conversa
 
 - [Reporting Settings](reporting-settings.md)
 
+- [Conversation Digest Settings](conversation-digest.md)
+
 
 ## How to Use Reporting Settings
 
@@ -36,6 +38,15 @@ Please review the section [Conversation Logging and History](../support/conversa
      - **Enable Conversation Logging**: Toggle to turn logging on or off.
      - **Conversation Log Days to Keep**: Set the number of days to retain conversation logs.
    - **Action**: Adjust these settings to fit your monitoring and data retention needs, then click "Save Settings" to apply.
+
+5. **Conversation Digest Settings**
+   - **Description**: Configure automatic email summaries of new chatbot conversations to be sent to a specified email address.
+   - **Options**:
+     - **Enabled**: Toggle to enable or disable conversation digest emails (Yes/No).
+     - **Frequency**: Choose how often digest emails are sent (Hourly, Daily, Weekly).
+     - **Email Address**: Enter the email address where conversation digests should be sent.
+   - **Action**: Enable the feature, set your preferred frequency, enter an email address, and click "Save Settings". Use the "Test Email" button to verify your email configuration.
+   - **Note**: Conversation logging must be enabled in Reporting Settings for digest emails to include conversation data.
 
 ---
 
