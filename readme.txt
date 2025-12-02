@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chat, chatbot, chatgpt, openai, ai
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.9
-Stable tag: 2.3.8
+Stable tag: 2.3.9
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
