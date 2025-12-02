@@ -324,7 +324,7 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     }
     
     // Last resort: use var_export (original method, but should rarely be needed)
-    back_trace('WARNING', 'Cache compression failed, using var_export fallback');
+    // back_trace('WARNING', 'Cache compression failed, using var_export fallback');
     $cacheContent = "<?php\n";
     $cacheContent .= "// Lexical embeddings cache (exported)\n";
     $cacheContent .= "// Created: {$createdAt}\n";

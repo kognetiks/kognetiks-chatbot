@@ -34,7 +34,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     global $errorResponses;
 
     // DIAG - Diagnostics
-    back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
 
     // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();

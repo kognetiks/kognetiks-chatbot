@@ -176,8 +176,8 @@ function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
     global $chatbot_chatgpt_plugin_dir_path;
 
     // DIAG - Diagnostics - Ver 2.3.9
-    back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_version: ' . $chatbot_chatgpt_plugin_version);
-    back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_version: ' . $chatbot_chatgpt_plugin_version);
+    // back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
     
     // Ensure the plugin version is set - fallback to reading from plugin header if global is not set
     // if (empty($chatbot_chatgpt_plugin_version)) {

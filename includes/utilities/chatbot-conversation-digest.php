@@ -24,7 +24,7 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_schedule_conversation_digest() {
 
     // DIAG - Diagnostics - Ver 2.3.9
-    back_trace( 'NOTICE', 'chatbot_chatgpt_schedule_conversation_digest()');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_schedule_conversation_digest()');
 
     // Get the enabled setting
     $enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));
@@ -67,7 +67,7 @@ function chatbot_chatgpt_schedule_conversation_digest() {
 function chatbot_chatgpt_send_conversation_digest() {
 
     // DIAG - Diagnostics - Ver 2.3.9
-    back_trace( 'NOTICE', 'chatbot_chatgpt_send_conversation_digest()');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_send_conversation_digest()');
 
     // Get the enabled setting
     $enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));

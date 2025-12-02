@@ -48,7 +48,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.3.9
-    back_trace( 'NOTICE', 'chatbot_call_google_api()');
+    // back_trace( 'NOTICE', 'chatbot_call_google_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
@@ -337,7 +337,7 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         $error_msg = $response_body['error']['message'] ?? 'Unknown API Error';
 
         // DIAG - Diagnostics - Ver 2.3.9
-        back_trace( 'ERROR', 'Gemini API Error: ' . $error_msg);
+        // back_trace( 'ERROR', 'Gemini API Error: ' . $error_msg);
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'Error: ' . $error_msg;

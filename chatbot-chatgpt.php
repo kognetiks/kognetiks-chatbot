@@ -1603,20 +1603,25 @@ function chatbot_chatgpt_process_single_message($message_data) {
     global $voice;
     global $flow_data;
 
-    $api_key = '';
-    $message = $message_data['message'];
-    $user_id = $message_data['user_id'];
-    $page_id = $message_data['page_id'];
-    $session_id = $message_data['session_id'];
-    $assistant_id = $message_data['assistant_id'];
+    $api_key  = '';
+    $message  = $message_data['message'];
+    $user_id  = $message_data['user_id'];
+    $page_id  = $message_data['page_id'];
+    $session_id        = $message_data['session_id'];
+    $assistant_id      = $message_data['assistant_id'];
     $client_message_id = $message_data['client_message_id'];
 
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
-    // Continue with the existing message processing logic...
-    // (The rest of the function will be moved here)
-    
-    return "Message processed: " . $message;
+    // If your core pipeline expects a nonce in $_POST, we can safely provide one here:
+    if (!isset($_POST['chatbot_nonce'])) {
+        $_POST['chatbot_nonce'] = wp_create_nonce('chatbot_message_nonce');
+    }
+
+    // IMPORTANT: pass the full array, not just $message
+    $response = chatbot_chatgpt_send_message($message_data);
+
+    return $response;
 }
 
 // Handle Ajax requests

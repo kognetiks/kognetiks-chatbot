@@ -1023,7 +1023,7 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     
     // Log email attempt
     if (function_exists('back_trace')) {
-        back_trace('NOTICE', 'Attempting to send test email to: ' . $email_address);
+        // back_trace('NOTICE', 'Attempting to send test email to: ' . $email_address);
     }
     
     // Send the email
@@ -1032,13 +1032,13 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     // Log result
     if (function_exists('back_trace')) {
         if ($sent) {
-            back_trace('NOTICE', 'Test email sent successfully to: ' . $email_address);
+            // back_trace('NOTICE', 'Test email sent successfully to: ' . $email_address);
         } else {
-            back_trace('ERROR', 'Failed to send test email to: ' . $email_address);
+            // back_trace('ERROR', 'Failed to send test email to: ' . $email_address);
             // Check for PHP mail errors
             $last_error = error_get_last();
             if ($last_error && strpos($last_error['message'], 'mail') !== false) {
-                back_trace('ERROR', 'PHP mail error: ' . $last_error['message']);
+                // back_trace('ERROR', 'PHP mail error: ' . $last_error['message']);
             }
         }
     }

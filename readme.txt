@@ -2,7 +2,7 @@
 Contributors: Kognetiks
 Tags: chat, chatbot, chatgpt, openai, ai
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
-Tested up to: 6.8.3
+Tested up to: 6.9
 Stable tag: 2.3.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -156,9 +156,10 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.3.9 - Released TBD =
+= 2.3.9 - Released 2025-12-02 =
 
 * **Google API**: Added support for Google's API to provide advanced conversational capabilities for the chatbot.
+* **Conversation Digest**: Added a new feature to send a digest of the conversation to the site admin via email.
 * **Conversation History**: Improved the conversation history display to show the conversation history for the logged-in user.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.8.
 
