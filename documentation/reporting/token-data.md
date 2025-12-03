@@ -41,4 +41,5 @@ By using these settings, you can effectively monitor and analyze the token usage
 
 ---
 
+- **[Back to Reporting Overview](reporting.md)**
 - **[Back to the Overview](/overview.md)**

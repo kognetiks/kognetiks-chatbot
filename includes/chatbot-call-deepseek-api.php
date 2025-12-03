@@ -48,6 +48,7 @@ function chatbot_call_deepseek_api($api_key, $message, $user_id = null, $page_id
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.2.2
+    // back_trace( 'NOTICE', 'chatbot_call_deepseek_api()');
     // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - start');
     // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $api_key: ' . $api_key);
     // back_trace( 'NOTICE', 'chatbot_call_deepseek_api - $message: ' . $message);
@@ -79,38 +80,33 @@ function chatbot_call_deepseek_api($api_key, $message, $user_id = null, $page_id
     // $model = $kchat_settings['model'];
  
     // Max tokens
-    $max_tokens = intval(esc_attr(get_option('chatbot_deepseek_max_tokens_setting', '1024')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_deepseek_max_tokens_setting', '100')));
 
     // Conversation Context - Ver 1.6.1
     $context = esc_attr(get_option('chatbot_deepseek_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
     $raw_context = $context;
  
-    // Context History - Ver 1.6.1
-    $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
-    // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
-    
-    // IDEA Strip any href links and text from the $chatgpt_last_response
-    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
-
-    // IDEA Strip any $learningMessages from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-    } else {
-        $localized_learningMessages = $learningMessages;
-    }
-    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
-
-    // IDEA Strip any $errorResponses from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-    } else {
-        $localized_errorResponses = $errorResponses;
-    }
-    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', 'Yes'));
+
+    // Build a summary of conversation history for system message (backward compatibility)
+    // Extract text content from structured messages to create a summary string
+    $chatgpt_last_response = '';
+    if (!empty($conversation_context['messages'])) {
+        $message_texts = [];
+        foreach ($conversation_context['messages'] as $msg) {
+            if (isset($msg['content'])) {
+                $message_texts[] = $msg['content'];
+            }
+        }
+        if (!empty($message_texts)) {
+            $chatgpt_last_response = implode(' ', $message_texts);
+        }
+    }
 
     $sys_message = 'We previously have been talking about the following things: ';
 
@@ -130,7 +126,7 @@ function chatbot_call_deepseek_api($api_key, $message, $user_id = null, $page_id
             }
             // Join the content texts and append to context
             if (!empty($content_texts)) {
-                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
@@ -143,16 +139,10 @@ function chatbot_call_deepseek_api($api_key, $message, $user_id = null, $page_id
 
     }
 
-    // Conversation Continuity - Ver 2.1.8
-    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
-
-    // DIAG Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
-
-    if ($chatbot_chatgpt_conversation_continuation == 'On') {
-        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
-        $context = $conversation_history . ' ' . $context;
+    // Add session history to context if available (from conversation continuity)
+    if (!empty($conversation_context['session_history'])) {
+        // Session history is a concatenated string, so we'll add it to context
+        $context = $conversation_context['session_history'] . ' ' . $context;
     }
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
@@ -186,20 +176,24 @@ function chatbot_call_deepseek_api($api_key, $message, $user_id = null, $page_id
         'Authorization' => 'Bearer ' . $api_key
     );
 
+    // Build messages array with system message, conversation history, and current user message - Ver 2.3.9+
+    $messages = array(
+        array('role' => 'system', 'content' => $context)
+    );
+    
+    // Add conversation history messages (structured format for better context) - Ver 2.3.9+
+    if (!empty($conversation_context['messages'])) {
+        $messages = array_merge($messages, $conversation_context['messages']);
+    }
+    
+    // Add current user message
+    $messages[] = array('role' => 'user', 'content' => $message);
+    
     // Define the request body
     $body = json_encode(array(
         'model' => $model,
         'max_tokens' => $max_tokens,
-        'messages' => array(
-            array(
-                'role' => 'system',
-                'content' => $context, // System input
-            ),
-            array(
-                'role' => 'user',
-                'content' => $message, // User input
-            ),
-        ),
+        'messages' => $messages,
         'stream' => false,
     ));
 
@@ -210,9 +204,6 @@ function chatbot_call_deepseek_api($api_key, $message, $user_id = null, $page_id
 
     // DIAG - Diagnostics - Ver 2.2.2
     // back_trace( 'NOTICE', '$body: ' . $body);
-
-    // Convert the body array to JSON
-    $body_json = json_encode($body);
 
     // DIAG Diagnostics - Ver 1.6.1
     // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);

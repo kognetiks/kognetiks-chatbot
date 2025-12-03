@@ -35,4 +35,5 @@ By using these settings, you can effectively manage and analyze the conversation
 
 ---
 
+- **[Back to Reporting Overview](reporting.md)**
 - **[Back to the Overview](/overview.md)**

@@ -40,4 +40,5 @@ By using these settings, you can effectively manage and analyze the interactions
 
 ---
 
+- **[Back to Reporting Overview](reporting.md)**
 - **[Back to the Overview](/overview.md)**

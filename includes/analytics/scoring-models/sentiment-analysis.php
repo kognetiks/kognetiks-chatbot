@@ -477,6 +477,9 @@ function kognetiks_analytics_compute_sentiment_score_ai_based($message_text) {
         case 'DeepSeek':
             $ai_model_choice = get_option('chatbot_deepseek_model_choice');
             break;
+        case 'Google':
+            $ai_model_choice = get_option('chatbot_google_model_choice');
+            break;
         case 'Mistral':
             $ai_model_choice = get_option('chatbot_mistral_model_choice');
             break;  
@@ -517,6 +520,13 @@ function kognetiks_analytics_compute_sentiment_score_ai_based($message_text) {
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             // Call Azure OpenAI API
             $sentiment_score = kognetiks_analytics_azure_api_call($api_key, $sentiment_prompt . $message_text);
+            break;
+        case 'Google':
+            $api_key = get_option('chatbot_google_api_key');
+            // Decrypt the API Key
+            $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
+            // Call Google API
+            $sentiment_score = kognetiks_analytics_google_api_call($api_key, $sentiment_prompt . $message_text);
             break;
         case 'DeepSeek':
             $api_key = get_option('chatbot_deepseek_api_key');

@@ -15,11 +15,12 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - **Anthropic**: [Terms of Service](https://www.anthropic.com/legal/consumer-terms) | [Privacy Policy](https://docs.anthropic.com/en/docs/legal-center/privacy)
 - **DeepSeek**: [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html)
 - **Mistral**: [Terms of Service](https://mistral.ai/terms#terms-of-service) | [Privacy Policy](https://mistral.ai/terms#privacy-policy)
+- **Google**: [Terms of Use](https://ai.google.dev/gemini-api/terms) | [Privacy Policy](https://policies.google.com/privacy)
 - **JAN.AI**: [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy)
 
 **IMPORTANT**:
 
-- This plugin requires an API key from OpenAI, NVIDIA, Anthropic, DeepSeek, Mistral to function. Without an API key, the chatbot cannot process user queries.
+- This plugin requires an API key from OpenAI, NVIDIA, Anthropic, DeepSeek, Google, Mistral to function. Without an API key, the chatbot cannot process user queries.
 
 - Obtain API keys here:
 
@@ -28,6 +29,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
    - [NVIDIA API Keys](https://developer.nvidia.com/nim)
    - [Anthropic API Keys](https://www.anthropic.com/)
    - [DeepSeek API Keys](https://platform.deepseek.com/sign_in)
+   - [Google API Keys](https://aistudio.google.com/api-keys)
    - [Mistral API Keys](https://console.mistral.ai/api-keys)
    
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
@@ -42,9 +44,12 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's new in Version 2.3.8
+## What's new in Version 2.3.9
 
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.7.
+* **Google API**: Added support for Google's API to provide advanced conversational capabilities for the chatbot.
+* **Conversation Digest**: Added a new feature to send a digest of the conversation to the site admin via email.
+* **Conversation History**: Improved the conversation history display to show the conversation history for the logged-in user.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.8.
 
 ## Past Updates
 
@@ -73,6 +78,8 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 - [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
 
 - [API/DeepSeek Settings](api-deepseek-settings/api-deepseek-model-settings.md)
+
+- [API/Google Settings](api-google-settings/api-google-model-settings.md)
 
 - [API/Mistral Settings](api-mistral-settings/api-mistral-model-settings.md)
 
@@ -132,7 +139,7 @@ While AI-powered applications strive for accuracy, they can sometimes make mista
 
 ## Disclaimer
 
-WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, Azure and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek or Mistral.
+WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Google, Mistral, Azure and related trademarks are the property of their respective owners. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek, Google or Mistral.
 
 ---
 

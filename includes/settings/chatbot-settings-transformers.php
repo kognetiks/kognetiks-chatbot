@@ -30,7 +30,7 @@ function chatbot_transformer_model_settings_section_callback($args) {
         <li><code>&#91;chatbot style="embedded" model="sentential-context-model"&#93;</code> - Style is embedded, specific model</li>
     </ul>
     <!-- <p>A Transformer Model generates text using a local algorithm based on the <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)" target="_blank" rel="noopener noreferrer">deep learning architecture</a>, a concept developed by researchers at Google and based on the multi-head attention mechanism proposed in a 2017 paper titled 'Attention Is All You Need'. The transformer-inspired models included here are trained on your site's published content, including pages and posts. These models run locally on your server and are not available on the OpenAI platform. Although these models may not match the sophistication of OpenAI's offerings and might occasionally generate nonsensical output, they can still be effective, especially when your site contains a large amount of content.</p>  -->
-    <p><strong>Transformer-Inspired Models</strong>: The transformer-inspired models (below) in this plugin generate text using local algorithms inspired by the <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)" target="_blank" rel="noopener noreferrer">Transformer deep learning architecture</a>, a concept developed by researchers at Google in their 2017 paper "Attention Is All You Need". While these models do not implement the full transformer architecture, they utilize similar principles, such as word embeddings and context analysis, to generate responses based on your site's content. They run locally on your server, providing privacy and control over the data. Although less advanced than models like those provided by OpenAI, NVIDIA, Anthropic, DeepSeek or Mistral and may sometimes produce nonsensical output, they can be effective, especially when your site contains a substantial amount of content.</p>
+    <p><strong>Transformer-Inspired Models</strong>: The transformer-inspired models (below) in this plugin generate text using local algorithms inspired by the <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)" target="_blank" rel="noopener noreferrer">Transformer deep learning architecture</a>, a concept developed by researchers at Google in their 2017 paper "Attention Is All You Need". While these models do not implement the full transformer architecture, they utilize similar principles, such as word embeddings and context analysis, to generate responses based on your site's content. They run locally on your server, providing privacy and control over the data. Although less advanced than models like those provided by OpenAI, NVIDIA, Anthropic, DeepSeek, Google or Mistral and may sometimes produce nonsensical output, they can be effective, especially when your site contains a substantial amount of content.</p>
     <p><strong>The Sentential Context Model (SCM) is a sentence-based model.</strong> The SCM operates at the level of entire sentences, analyzing the structure and meaning of sentences to generate coherent and contextually relevant responses. By comparing input sentences with sentences from your WordPress content, the SCM selects the most appropriate responses based on sentence-level similarity. This approach allows the chatbot to provide more comprehensive and context-aware replies, enhancing user interactions with more natural and meaningful conversations. <strong>When to use SCM</strong>: Ideal for generating more comprehensive and context-aware responses, particularly when conversational flow and coherence are important.</p>
     <!-- <p><strong>The Lexical Context Model (LCM) is a word-based model. (COMING SOON)</strong> The LCM focuses on individual words and their relationships within the text. It utilizes word embeddings derived from co-occurrence matrices to understand the context in which words appear. By analyzing word-level similarities between the user's input and the content from your WordPress site, the LCM generates responses that are relevant based on specific keywords and phrases. This model is effective for generating quick and pertinent answers by leveraging word-level context. <strong>When to use LCM</strong>: Best suited for quick, keyword-focused answers where speed and relevance to specific terms are prioritized.</p> -->
     <p><strong>Privacy Advantage</strong>: The tranformer models process data locally on your server, ensuring that user interactions and site content are not sent to external services. This enhances privacy and allows you to maintain control over your data.</p>
@@ -43,6 +43,142 @@ function chatbot_transformer_model_api_model_general_section_callback($args){
     ?>
     <p>Configure the settings for the plugin when using transformer models.  Depending on the transformer model you choose, the maximum tokens may be as high as 10000.  The default is 500.</p>
     <?php
+}
+
+function chatbot_transformer_model_cache_info_callback($args) {
+
+    $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
+
+    if ($model_choice !== 'lexical-context-model') {
+        echo '<p>This section becomes available when the <strong>Lexical Context Model</strong> is selected.</p>';
+        return;
+    }
+
+    $status_message = '';
+    if (!empty($_GET['lexical_cache_status'])) {
+        $status = sanitize_text_field($_GET['lexical_cache_status']);
+        switch ($status) {
+            case 'success':
+                $status_message = '<div class="notice notice-success is-dismissible"><p>Lexical cache deleted and rebuilt successfully.</p></div>';
+                break;
+            case 'empty_corpus':
+                $status_message = '<div class="notice notice-warning is-dismissible"><p>No published content was found, so the lexical cache could not be rebuilt.</p></div>';
+                break;
+            case 'write_error':
+                $status_message = '<div class="notice notice-error is-dismissible"><p>Unable to write the lexical cache to disk. Check file permissions and try again.</p></div>';
+                break;
+            case 'build_error':
+                $status_message = '<div class="notice notice-error is-dismissible"><p>The lexical cache rebuild failed. Please review your logs for details.</p></div>';
+                break;
+        }
+    }
+
+    global $chatbot_chatgpt_plugin_dir_path;
+
+    if (empty($chatbot_chatgpt_plugin_dir_path)) {
+        echo '<p>Unable to locate the lexical cache directory.</p>';
+        return;
+    }
+
+    $cacheDir = trailingslashit($chatbot_chatgpt_plugin_dir_path) . 'includes/transformers/lexical_embeddings_cache';
+    $cacheFile = $cacheDir . '/lexical_embeddings_cache.php';
+    $compressedFile = $cacheFile . '.gz';
+
+    if (!file_exists($cacheFile) || !file_exists($compressedFile)) {
+        echo '<p>The lexical embeddings cache has not been created yet. Run the transformer build process to generate it.</p>';
+        return;
+    }
+
+    if (!function_exists('transformer_model_lexical_context_get_cache_timestamps')) {
+        require_once $chatbot_chatgpt_plugin_dir_path . 'includes/transformers/lexical-context-model.php';
+    }
+
+    list($createdAt, $updatedAt) = transformer_model_lexical_context_get_cache_timestamps($cacheFile);
+
+    $wrapperContent = file_get_contents($cacheFile);
+    $originalSize = null;
+    $compressionRatio = null;
+
+    if ($wrapperContent !== false) {
+        if (preg_match('/Original size would be:\s*([0-9,]+)/i', $wrapperContent, $match)) {
+            $originalSize = (int) str_replace(',', '', $match[1]);
+        }
+        if (preg_match('/Compression ratio:\s*([0-9.]+)%/i', $wrapperContent, $match)) {
+            $compressionRatio = floatval($match[1]);
+        }
+        if (empty($createdAt) && preg_match('/Created:\s*(.+)/i', $wrapperContent, $match)) {
+            $createdAt = trim(str_replace(['//', 'Created:'], '', $match[0]));
+        }
+        if (empty($updatedAt) && preg_match('/Updated:\s*(.+)/i', $wrapperContent, $match)) {
+            $updatedAt = trim(str_replace(['//', 'Updated:'], '', $match[0]));
+        }
+    }
+
+    $compressedSize = file_exists($compressedFile) ? filesize($compressedFile) : 0;
+
+    if (empty($originalSize)) {
+        $originalSize = filesize($cacheFile);
+    }
+
+    if (!empty($originalSize) && empty($compressionRatio) && $compressedSize > 0) {
+        $compressionRatio = round((1 - ($compressedSize / $originalSize)) * 100, 1);
+    }
+
+    $estimatedMemoryBytes = $originalSize ? ($originalSize * 2) : ($compressedSize * 2);
+
+    ?>
+    <?php echo wp_kses_post($status_message); ?>
+    <table class="widefat fixed striped">
+        <tbody>
+            <tr>
+                <th scope="row">Cache Directory</th>
+                <td><?php echo esc_html(str_replace($chatbot_chatgpt_plugin_dir_path, '', $cacheDir)); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Created</th>
+                <td><?php echo esc_html($createdAt ?: 'Unknown'); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Last Updated</th>
+                <td><?php echo esc_html($updatedAt ?: 'Unknown'); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Original Serialized Size</th>
+                <td><?php echo esc_html(chatbot_transformer_model_format_bytes($originalSize)); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Compressed Size (.gz)</th>
+                <td><?php echo esc_html(chatbot_transformer_model_format_bytes($compressedSize)); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Compression Ratio</th>
+                <td><?php echo esc_html(isset($compressionRatio) ? $compressionRatio . '%' : 'N/A'); ?></td>
+            </tr>
+            <tr>
+                <th scope="row">Estimated Memory Needed</th>
+                <td>
+                    <?php echo esc_html(chatbot_transformer_model_format_bytes($estimatedMemoryBytes)); ?>
+                    <p class="description">Approximation: serialized size × 2 to cover decompression and PHP array overhead.</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <?php
+        $rebuild_url = wp_nonce_url(
+            admin_url('admin-post.php?action=chatbot_transformer_model_rebuild_cache'),
+            'chatbot_transformer_model_rebuild_cache'
+        );
+    ?>
+    <p style="margin-top: 15px;">
+        <a href="<?php echo esc_url($rebuild_url); ?>" class="button button-secondary" onclick="return confirm('Delete and rebuild the lexical cache now?');">
+            Delete &amp; Rebuild Lexical Cache
+        </a>
+    </p>
+    <p class="description">
+        This removes the existing lexical cache file and rebuilds it immediately. Depending on your site size, this may take a few minutes.
+    </p>
+    <?php
+
 }
 
 // Transformer Advanced Settings Callback - Ver 2.1.9
@@ -186,7 +322,7 @@ function chatbot_transformer_model_choice_callback($args) {
 
     ?>
     <select id="chatbot_transformer_model_choice" name="chatbot_transformer_model_choice">
-        <!-- <option value="<?php echo esc_attr( 'lexical-context-model' ); ?>" <?php selected( $model_choice, 'lexical-context-model' ); ?>><?php echo esc_html( 'lexical-context-model' ); ?></option> -->
+        <option value="<?php echo esc_attr( 'lexical-context-model' ); ?>" <?php selected( $model_choice, 'lexical-context-model' ); ?>><?php echo esc_html( 'lexical-context-model' ); ?></option>
         <option value="<?php echo esc_attr( 'sentential-context-model-lite' ); ?>" <?php selected( $model_choice, 'sentential-context-model-lite' ); ?>><?php echo esc_html( 'sentential-context-model-lite' ); ?></option>
         <option value="<?php echo esc_attr( 'sentential-context-model' ); ?>" <?php selected( $model_choice, 'sentential-context-model' ); ?>><?php echo esc_html( 'sentential-context-model' ); ?></option>
     </select>
@@ -197,8 +333,8 @@ function chatbot_transformer_model_choice_callback($args) {
 // Max Tokens choice - Ver 2.1.9
 function chatbot_transformer_model_max_tokens_setting_callback($args) {
 
-    // Get the saved chatbot_transformer_model_max_tokens or default to 10000
-    $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', '10000'));
+    // Get the saved chatbot_transformer_model_max_tokens or default to 1000
+    $max_tokens = esc_attr(get_option('chatbot_transformer_model_max_tokens', '1000'));
 
     // Allow for a range of tokens between 100 and 10000 in 100-step increments - Ver 2.0.4
     ?>
@@ -265,6 +401,13 @@ function chatbot_transformer_model_api_settings_init() {
         'Transformer Model Settings',
         'chatbot_transformer_model_api_model_general_section_callback',
         'chatbot_transformer_model_api_model_general'
+    );
+
+    add_settings_section(
+        'chatbot_transformer_model_cache_info_section',
+        'Lexical Context Cache Status',
+        'chatbot_transformer_model_cache_info_callback',
+        'chatbot_transformer_model_cache_info'
     );
 
     add_settings_field(
@@ -346,4 +489,94 @@ function chatbot_transformer_model_api_settings_init() {
     );
 
 }
+
+if (!function_exists('chatbot_transformer_model_format_bytes')) {
+    function chatbot_transformer_model_format_bytes($bytes) {
+        if (!is_numeric($bytes) || $bytes <= 0) {
+            return 'N/A';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $power = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
+        $power = min($power, count($units) - 1);
+
+        return number_format($bytes / pow(1024, $power), 2) . ' ' . $units[$power];
+    }
+}
+
+/**
+ * Handle Lexical Cache rebuild requests from the settings UI.
+ */
+function chatbot_transformer_model_handle_cache_rebuild() {
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have permission to perform this action.', 'chatbot-chatgpt'));
+    }
+
+    check_admin_referer('chatbot_transformer_model_rebuild_cache');
+
+    $redirect_url = admin_url('admin.php?page=chatbot-chatgpt&tab=api_transformer');
+    $model_choice = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
+    if ($model_choice !== 'lexical-context-model') {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'build_error', $redirect_url));
+        exit;
+    }
+
+    global $chatbot_chatgpt_plugin_dir_path;
+    if (empty($chatbot_chatgpt_plugin_dir_path)) {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'build_error', $redirect_url));
+        exit;
+    }
+
+    $cacheDir = trailingslashit($chatbot_chatgpt_plugin_dir_path) . 'includes/transformers/lexical_embeddings_cache';
+    $cacheFile = $cacheDir . '/lexical_embeddings_cache.php';
+    $cacheVersionFile = $cacheDir . '/lexical_embeddings_cache_version.txt';
+
+    if (!file_exists($cacheDir)) {
+        wp_mkdir_p($cacheDir);
+    }
+
+    require_once $chatbot_chatgpt_plugin_dir_path . 'includes/transformers/lexical-context-model.php';
+
+    // Remove existing cache artefacts before rebuilding.
+    $filesToDelete = [
+        $cacheFile,
+        $cacheFile . '.gz',
+        $cacheFile . '.ser',
+        $cacheFile . '.old',
+        $cacheVersionFile,
+    ];
+
+    foreach ($filesToDelete as $file) {
+        if ($file && file_exists($file)) {
+            @unlink($file);
+        }
+    }
+
+    $corpus = transformer_model_lexical_context_fetch_wordpress_content();
+    if (empty($corpus)) {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'empty_corpus', $redirect_url));
+        exit;
+    }
+
+    $windowSize = intval(get_option('chatbot_transformer_model_word_content_window_size', 3));
+    $windowSize = max(1, $windowSize);
+
+    $embeddings = transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize);
+
+    if (empty($embeddings)) {
+        wp_safe_redirect(add_query_arg('lexical_cache_status', 'build_error', $redirect_url));
+        exit;
+    }
+
+    $status = 'write_error';
+    if (transformer_model_lexical_context_save_cache($cacheFile, $embeddings)) {
+        file_put_contents($cacheVersionFile, hash('sha256', $corpus));
+        $status = 'success';
+    }
+
+    wp_safe_redirect(add_query_arg('lexical_cache_status', $status, $redirect_url));
+    exit;
+}
+add_action('admin_post_chatbot_transformer_model_rebuild_cache', 'chatbot_transformer_model_handle_cache_rebuild');
+
 add_action('admin_init', 'chatbot_transformer_model_api_settings_init');

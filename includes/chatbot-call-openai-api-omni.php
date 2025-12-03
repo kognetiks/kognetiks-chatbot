@@ -16,6 +16,12 @@ if ( ! defined( 'WPINC' ) ) {
 // Call the ChatGPT API
 function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
+    // Fixed Ver 2.3.6: Store parameters before declaring globals to preserve logged-in user IDs
+    $param_user_id = $user_id;
+    $param_page_id = $page_id;
+    $param_session_id = $session_id;
+    $param_assistant_id = $assistant_id;
+    
     global $session_id;
     global $user_id;
     global $page_id;
@@ -28,6 +34,20 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     global $voice;
     
     global $errorResponses;
+    
+    // Use parameter if provided (not null), otherwise use global
+    if ($param_user_id !== null) {
+        $user_id = $param_user_id;
+    }
+    if ($param_page_id !== null) {
+        $page_id = $param_page_id;
+    }
+    if ($param_session_id !== null) {
+        $session_id = $param_session_id;
+    }
+    if ($param_assistant_id !== null) {
+        $assistant_id = $param_assistant_id;
+    }
 
     // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
@@ -48,7 +68,7 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_call_api()');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_omni()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
@@ -69,41 +89,33 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'gpt-3.5-turbo'));
  
     // Max tokens - Ver 1.4.2
-    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '500')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1000')));
 
     // Conversation Context - Ver 1.6.1
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
  
-    // Context History - Ver 1.6.1
-    $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
-    // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
-    
-    // IDEA Strip any href links and text from the $chatgpt_last_response
-    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
-
-    // IDEA Strip any $learningMessages from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-    } else {
-        $localized_learningMessages = $learningMessages;
-    }
-    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
-
-    // IDEA Strip any $errorResponses from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-    } else {
-        $localized_errorResponses = $errorResponses;
-    }
-    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', ''));
 
-    // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
-    // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
-    // Added "We previously have been talking about the following things: " - Ver 1.9.5 - 2024 04 12
+    // Build a summary of conversation history for system message (backward compatibility)
+    // Extract text content from structured messages to create a summary string
+    $chatgpt_last_response = '';
+    if (!empty($conversation_context['messages'])) {
+        $message_texts = [];
+        foreach ($conversation_context['messages'] as $msg) {
+            if (isset($msg['content'])) {
+                $message_texts[] = $msg['content'];
+            }
+        }
+        if (!empty($message_texts)) {
+            $chatgpt_last_response = implode(' ', $message_texts);
+        }
+    }
+
     $sys_message = 'We previously have been talking about the following things: ';
 
     // DIAG Diagnostics - Ver 1.6.1
@@ -130,7 +142,7 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
             }
             // Join the content texts and append to context
             if (!empty($content_texts)) {
-                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts);
+                $context = ' When answering the prompt, please consider the following information: ' . implode(' ', $content_texts) . ' ' . $context;
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
@@ -142,17 +154,11 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
         $context = $sys_message . ' ' . $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
 
     }
-    
-    // Conversation Continuity - Ver 2.1.8
-    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
 
-    // DIAG Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
-
-    if ($chatbot_chatgpt_conversation_continuation == 'On') {
-        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
-        $context = $conversation_history . ' ' . $context;
+    // Add session history to context if available (from conversation continuity)
+    if (!empty($conversation_context['session_history'])) {
+        // Session history is a concatenated string, so we'll add it to context
+        $context = $conversation_context['session_history'] . ' ' . $context;
     }
 
     $temperature = esc_attr(get_option('chatbot_chatgpt_temperature', 0.5));
@@ -164,17 +170,40 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     // https://github.com/openai/openai-cookbook/blob/main/examples/gpt4o/introduction_to_gpt4o.ipynb
     //
 
+    // Build messages array with system message, conversation history, and current user message - Ver 2.3.9+
+    $messages = array(
+        array('role' => 'system', 'content' => $context)
+    );
+    
+    // Add conversation history messages (structured format for better context) - Ver 2.3.9+
+    if (!empty($conversation_context['messages'])) {
+        $messages = array_merge($messages, $conversation_context['messages']);
+    }
+    
+    // Add current user message
+    $messages[] = array('role' => 'user', 'content' => $message);
+    
     // Added Role, System, Content Static Variable - Ver 1.6.0
+    // Determine which parameter to use based on model - Ver 2.3.9+
+    // Newer models (gpt-5, o1, o3, etc.) require max_completion_tokens instead of max_tokens
+    // Some models (o1, o3) don't support temperature/top_p parameters
     $body = array(
         'model' => $model,
-        'max_tokens' => $max_tokens,
-        // 'temperature' => (float)$temperature,
-        // 'top_p' => (float)$top_p,
-        'messages' => array(
-            array('role' => 'system', 'content' => $context),
-            array('role' => 'user', 'content' => $message),
-            ),
+        'messages' => $messages,
     );
+    
+    // Only add temperature and top_p if the model supports them
+    if (!chatbot_openai_doesnt_support_temperature($model)) {
+        $body['temperature'] = (float)$temperature;
+        $body['top_p'] = (float)$top_p;
+    }
+    
+    // Use max_completion_tokens for newer models, max_tokens for older models
+    if (chatbot_openai_requires_max_completion_tokens($model)) {
+        $body['max_completion_tokens'] = $max_tokens;
+    } else {
+        $body['max_tokens'] = $max_tokens;
+    }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
     // back_trace( 'NOTICE', '$body: ' . print_r($body, true));

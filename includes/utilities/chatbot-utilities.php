@@ -55,3 +55,75 @@ function create_directory_and_index_file($dir_path) {
     return true;
 
 }
+
+/**
+ * Check if a model requires max_completion_tokens instead of max_tokens
+ * Newer OpenAI models (gpt-5, o1, o3, etc.) require max_completion_tokens
+ * 
+ * @param string $model The model name
+ * @return bool True if model requires max_completion_tokens, false otherwise
+ */
+function chatbot_openai_requires_max_completion_tokens($model) {
+    // Models that require max_completion_tokens instead of max_tokens
+    $models_requiring_max_completion_tokens = array(
+        'gpt-5',
+        'gpt-5-',
+        'o1',
+        'o1-',
+        'o3',
+        'o3-',
+    );
+    
+    // Use str_starts_with if available (PHP 8.0+), otherwise use substr
+    foreach ($models_requiring_max_completion_tokens as $prefix) {
+        if (function_exists('str_starts_with')) {
+            if (str_starts_with($model, $prefix)) {
+                return true;
+            }
+        } else {
+            // PHP 7.x compatibility
+            if (substr($model, 0, strlen($prefix)) === $prefix) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Check if a model doesn't support temperature and top_p parameters
+ * Some newer OpenAI models (gpt-5, o1, o3, etc.) use fixed values and don't accept these parameters
+ * 
+ * @param string $model The model name
+ * @return bool True if model doesn't support temperature/top_p, false otherwise
+ */
+function chatbot_openai_doesnt_support_temperature($model) {
+    // Models that don't support temperature/top_p parameters
+    // gpt-5 only supports the default temperature value (1.0), not custom values
+    // o1 and o3 models use fixed values and don't accept these parameters at all
+    $models_without_temperature = array(
+        'gpt-5',
+        'gpt-5-',
+        'o1',
+        'o1-',
+        'o3',
+        'o3-',
+    );
+    
+    // Use str_starts_with if available (PHP 8.0+), otherwise use substr
+    foreach ($models_without_temperature as $prefix) {
+        if (function_exists('str_starts_with')) {
+            if (str_starts_with($model, $prefix)) {
+                return true;
+            }
+        } else {
+            // PHP 7.x compatibility
+            if (substr($model, 0, strlen($prefix)) === $prefix) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}

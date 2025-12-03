@@ -33,6 +33,9 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     global $learningMessages;
     global $errorResponses;
 
+    // DIAG - Diagnostics
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
+
     // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
 
@@ -53,7 +56,7 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // DIAG - Diagnostics - Ver 1.8.6
     // back_trace( 'NOTICE', '========================================');
-    // back_trace( 'NOTICE', 'chatbot_calll_tts_api()');
+    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
     // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
     // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
@@ -150,6 +153,11 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     // back_trace( 'NOTICE', '$model: ' . $model);
     // back_trace( 'NOTICE', '$voice: ' . $voice);
     // back_trace( 'NOTICE', '$audio_format: ' . $audio_format);
+
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // Note: TTS API doesn't use conversation history in the API call itself,
+    // but we build context for consistency and to maintain conversation history tracking
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
 
     // API URL for the TTS service
     $api_url = 'https://api.openai.com/v1/audio/speech';

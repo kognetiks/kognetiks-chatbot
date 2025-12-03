@@ -1,0 +1,57 @@
+# Exclude large asset directories
+assets/fonts/
+assets/icons/
+assets/images/
+assets/js/
+
+# Exclude vendor dependencies (already scanned by Snyk separately)
+vendor/
+
+# Exclude log files
+chatbot-logs/
+widget-logs/
+*.log
+
+# Exclude cache files
+includes/transformers/sentential_embeddings_cache/
+includes/transformers/lexical_embeddings_cache/
+*.gz
+*.ser
+*.old
+
+# Exclude debug and test files
+debug/
+results/
+uploads/
+audio/
+transcripts/
+downloads/
+
+# Exclude documentation (not code to scan)
+documentation/
+
+# Exclude large binary files
+*.ttf
+*.woff
+*.woff2
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.zip
+
+# Exclude temporary and build files
+*.tmp
+*.cache
+.DS_Store
+
+# Exclude IDE files
+.idea/
+.vscode/
+*.iml
+
+# Exclude markdown documentation files
+*.md
+!README.md
+!SECURITY.md
+

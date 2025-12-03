@@ -840,9 +840,30 @@ window.resetAllLocks = resetAllLocks;
                         .replace(/^# (.*)$/gim, '<h1>$1</h1>');
     
         // Step 6: Bold, Italic, Strikethrough
-        markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/\~\~(.*?)\~\~/g, '<del>$1</del>');
+        // Process bold first, handling nested italic inside bold
+        // Strategy: Extract bold blocks, process italic inside them, then process remaining italic
+        const boldPlaceholders = [];
+        let boldIndex = 0;
+        // Match bold: **text** - use non-greedy matching to handle multiple bold blocks
+        markdown = markdown.replace(/\*\*([\s\S]*?)\*\*/g, (match, content) => {
+            // Process italic inside bold content (match *text* but not **)
+            // Replace single asterisks that form italic, avoiding ** patterns
+            let processedContent = content;
+            // Match italic pattern: *text* where * is not part of **
+            processedContent = processedContent.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+            const placeholder = `{{BOLD_${boldIndex}}}`;
+            boldPlaceholders[boldIndex] = '<strong>' + processedContent + '</strong>';
+            boldIndex++;
+            return placeholder;
+        });
+        // Process remaining standalone italic (not inside bold placeholders)
+        markdown = markdown.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+        // Restore bold blocks
+        markdown = markdown.replace(/{{BOLD_(\d+)}}/g, (match, index) => {
+            return boldPlaceholders[parseInt(index)] || match;
+        });
+        // Process strikethrough
+        markdown = markdown.replace(/\~\~([^~]+?)\~\~/g, '<del>$1</del>');
     
         // Step 7: Multi-line code blocks
         markdown = markdown.replace(/```([\s\S]*?)```/gm, '<pre><code>$1</code></pre>');

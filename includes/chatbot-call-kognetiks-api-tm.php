@@ -13,7 +13,7 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Call the Anthropic API
+// Call the Transformer Model API
 function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
     global $session_id;
@@ -60,40 +60,34 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
     $model = esc_attr(get_option('chatbot_transformer_model_choice', 'sentential-context-model'));
  
     // Max tokens
-    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1024')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_chatgpt_max_tokens_setting', '1000')));
 
     // Conversation Context - Ver 1.6.1
     $context = esc_attr(get_option('chatbot_chatgpt_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
  
-    // Context History - Ver 1.6.1
-    $chatgpt_last_response = concatenateHistory('chatbot_chatgpt_context_history');
-    // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$chatgpt_last_response: ' . $chatgpt_last_response);
-    
-    // IDEA Strip any href links and text from the $chatgpt_last_response
-    $chatgpt_last_response = preg_replace('/\[URL:.*?\]/', '', $chatgpt_last_response);
-
-    // IDEA Strip any $learningMessages from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_learningMessages = get_localized_learningMessages(get_locale(), $learningMessages);
-    } else {
-        $localized_learningMessages = $learningMessages;
-    }
-    $chatgpt_last_response = str_replace($localized_learningMessages, '', $chatgpt_last_response);
-
-    // IDEA Strip any $errorResponses from the $chatgpt_last_response
-    if (get_locale() !== "en_US") {
-        $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
-    } else {
-        $localized_errorResponses = $errorResponses;
-    }
-    $chatgpt_last_response = str_replace($localized_errorResponses, '', $chatgpt_last_response);
+    // Build conversation context using standardized function - Ver 2.3.9+
+    // This function handles conversation history building, message cleaning, and conversation continuity
+    // Note: Transformer Model API uses a simple context string, not structured messages
+    $conversation_context = chatbot_chatgpt_build_conversation_context('standard', 10, $session_id);
     
     // Knowledge Navigator keyword append for context
     $chatbot_chatgpt_kn_conversation_context = esc_attr(get_option('chatbot_chatgpt_kn_conversation_context', ''));
 
-    // Append prior message, then context, then Knowledge Navigator - Ver 1.6.1
-    // $context = $chatgpt_last_response . ' ' . $context . ' ' . $chatbot_chatgpt_kn_conversation_context;
+    // Build a summary of conversation history for context (backward compatibility)
+    // Extract text content from structured messages to create a summary string
+    $chatgpt_last_response = '';
+    if (!empty($conversation_context['messages'])) {
+        $message_texts = [];
+        foreach ($conversation_context['messages'] as $msg) {
+            if (isset($msg['content'])) {
+                $message_texts[] = $msg['content'];
+            }
+        }
+        if (!empty($message_texts)) {
+            $chatgpt_last_response = implode(' ', $message_texts);
+        }
+    }
+
     // Added "We previously have been talking about the following things: " - Ver 1.9.5 - 2024 04 12
     $sys_message = 'We previously have been talking about the following things: ';
 
@@ -130,16 +124,10 @@ function chatbot_chatgpt_call_transformer_model_api($message, $user_id = null, $
 
     }
 
-    // Conversation Continuity - Ver 2.1.8
-    $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
-
-    // DIAG Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
-
-    if ($chatbot_chatgpt_conversation_continuation == 'On') {
-        $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
-        $context = $conversation_history . ' ' . $context;
+    // Add session history to context if available (from conversation continuity)
+    if (!empty($conversation_context['session_history'])) {
+        // Session history is a concatenated string, so we'll add it to context
+        $context = $conversation_context['session_history'] . ' ' . $context;
     }
 
     // Context History - Ver 1.6.1

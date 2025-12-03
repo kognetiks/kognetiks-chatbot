@@ -46,4 +46,5 @@ By configuring these settings, you can effectively manage how conversation data 
 
 ---
 
+- **[Back to Reporting Overview](reporting.md)**
 - **[Back to the Overview](/overview.md)**

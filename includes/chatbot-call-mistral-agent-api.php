@@ -79,7 +79,7 @@ function create_mistral_websearch_agent($api_key) {
         // back_trace( 'WARNING', 'Model ' . $model . ' does not support tools, skipping tool registration.');
     }
     
-    $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
+    $timeout = esc_attr(get_option('chatbot_mistral_timeout_setting', 240 ));
 
     $args = array(
         'headers' => array(
@@ -181,6 +181,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
 
     // DIAG - Diagnostics - Ver 2.2.2
+    // back_trace( 'NOTICE', 'chatbot_call_mistral_agent_call_api()');
     // back_trace( 'NOTICE', 'chatbot_call_mistral_api - start');
     // back_trace( 'NOTICE', 'chatbot_call_mistral_api - $message: ' . $message);
     // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
@@ -232,7 +233,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
  
     // Max tokens
-    $max_tokens = intval(esc_attr(get_option('chatbot_mistral_max_tokens_setting', '5000')));
+    $max_tokens = intval(esc_attr(get_option('chatbot_mistral_max_tokens_setting', '1000')));
 
     // Conversation Context - Ver 1.6.1
     $context = esc_attr(get_option('chatbot_mistral_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
@@ -363,7 +364,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         );
     }
 
-    $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
+    $timeout = esc_attr(get_option('chatbot_mistral_timeout_setting', 240 ));
 
     // Set up the API request
     $args = array(

@@ -77,6 +77,10 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting DeepSeek options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_deepseek%'");
 
+        // Delete Google options
+        // back_trace( 'NOTICE', 'Deleting Google options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_google%'");
+
         // Delete Mistral options
         // back_trace( 'NOTICE', 'Deleting Mistral options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_mistral%'");
@@ -119,6 +123,10 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting Anthropic tables');
         // NONE CURRENTLY - Ver 2.2.0
 
+        // Delete Google tables
+        // back_trace( 'NOTICE', 'Deleting Google tables');
+        // NONE CURRENTLY - Ver 2.3.9
+
         // Delete Sentential Transformer tables
         // back_trace( 'NOTICE', 'Deleting Transformer tables');
         // NONE CURENTLY - Ver 2.2.1
@@ -138,6 +146,10 @@ function chatbot_chatgpt_uninstall(){
         // Delete Anthropic transients
         // back_trace( 'NOTICE', 'Deleting Anthropic transients');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_anthropic%' OR option_name LIKE '_transient_timeout_chatbot_anthropic%'");
+
+        // Delete Google transients
+        // back_trace( 'NOTICE', 'Deleting Google transients');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE '_transient_chatbot_google%' OR option_name LIKE '_transient_timeout_chatbot_google%'");
 
         // Delete Markov Chain transients
         // back_trace( 'NOTICE', 'Deleting Markov Chain transients');
