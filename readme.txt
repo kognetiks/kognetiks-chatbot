@@ -156,7 +156,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.3.9 - Released 2025-12-02 =
+= 2.3.9 - Released 2025-12-03 =
 
 * **Google API**: Added support for Google's API to provide advanced conversational capabilities for the chatbot.
 * **Conversation Digest**: Added a new feature to send a digest of the conversation to the site admin via email.
