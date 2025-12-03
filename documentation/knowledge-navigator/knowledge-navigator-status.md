@@ -1,12 +1,12 @@
 # Understanding the Knowledge Navigator Status
 
-The Knowledge Navigator Status section provides an overview of the automated content analysis process performed by the Kognetiks Chatbot. This helps ensure that the chatbot's knowledge base is up-to-date and accurate. Here’s how to interpret and use the information provided:
+The Knowledge Navigator Status section provides an overview of the automated content analysis process performed by the Kognetiks Chatbot. This helps ensure that the chatbot's knowledge base is up-to-date and accurate. Here's how to interpret and use the information provided:
 
 ![Knowledge Navigator Status](knowledge-navigator-status.png)
 
 1. **Scheduled to Run**:
    - **Description**: Indicates how frequently the Knowledge Navigator is scheduled to run.
-   - **Example**: If it’s set to "Daily," the system will automatically analyze content every day.
+   - **Example**: If it's set to "Daily," the system will automatically analyze content every day.
    - **Use**: Verify that the schedule aligns with your content update frequency to keep the chatbot's knowledge current.
 
 2. **Status of Last Run**:

@@ -23,12 +23,12 @@ From bloggers and educators to small business owners and agencies, Kognetiks Cha
 - **Simple Setup** - Install, activate, and start chatting in minutes.
 - **Multiple AI Engines** - Choose OpenAI, NVIDIA, Anthropic, Mistral, Google, DeepSeek, Azure, or run your own local JAN.AI server (no API fees, no external data transfer).
 - **Embedded or Floating Chat** - Place your chatbot anywhere using simple shortcodes.
-- **Knowledge Navigator** - Teach your chatbot your site’s content for smarter, context-aware answers.
+- **Knowledge Navigator** - Teach your chatbot your site's content for smarter, context-aware answers.
 - **Custom Assistants** - Create specialized assistants for support, sales, education, or internal knowledge.
 - **Conversation Logging** - Review interactions, export chat logs, and improve user experience.
 - **Sentiment Analysis** - Gain insights into visitor sentiment and overall engagement quality.
 - **Speech Recognition & Voice Replies** - Talk and listen for a natural, voice-enabled experience.
-- **Multi-Language Ready** - Automatically adapts to your WordPress site’s language.
+- **Multi-Language Ready** - Automatically adapts to your WordPress site's language.
 - **Privacy & Security First** - Manage API keys safely and keep data secure.
 
 ## 🌐 Why Choose Kognetiks Chatbot
@@ -93,7 +93,7 @@ Yes. You control which AI engine processes data, and local AI options keep all d
 
 The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality.
 
-By using this plugin, you agree to abide by each service’s terms of service and privacy policy.
+By using this plugin, you agree to abide by each service's terms of service and privacy policy.
 
 | Provider | Terms | Privacy | API Key |
 |--|--|-|-|

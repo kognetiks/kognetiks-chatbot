@@ -82,7 +82,7 @@
 
 ## 2.2.5 - Released 2025-02-16
 
-* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site’s existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
+* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site's existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.4.
 
 ## 2.2.4 - Released 2025-02-06
@@ -153,7 +153,7 @@
 ## 2.1.3 - Released 2024-08-31
 
 * **Remote Server Access**: The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
-* **Improving Math Handling**: Integrated code enhances chatbot’s ability to render complex mathematical expressions.
+* **Improving Math Handling**: Integrated code enhances chatbot's ability to render complex mathematical expressions.
 * **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 ## 2.1.2 - Released 2024-08-28

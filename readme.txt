@@ -30,12 +30,12 @@ From bloggers and educators to small business owners and agencies, Kognetiks Cha
 * **Simple Setup** - Install, activate, and start chatting in minutes.
 * **Multiple AI Engines** - Choose OpenAI, NVIDIA, Anthropic, Mistral, DeepSeek, Azure, or run your own local JAN.AI server (no API fees, no external data transfer).
 * **Embedded or Floating Chat** - Place your chatbot anywhere using easy shortcodes.
-* **Knowledge Navigator** - Teach your chatbot your site’s content for smarter, context-aware answers.
+* **Knowledge Navigator** - Teach your chatbot your site's content for smarter, context-aware answers.
 * **Custom Assistants** - Create specialized assistants for support, sales, education, or internal knowledge.
 * **Conversation Logging** - Review interactions, export chat logs, and improve user experience.
 * **Sentiment Analysis** - Gain insights into visitor sentiment and improve your chatbot's performance.
 * **Speech Recognition & Voice Replies** - Talk and listen for a natural AI chat experience.
-* **Multi-Language Ready** - Automatically adapts to your WordPress site’s language.
+* **Multi-Language Ready** - Automatically adapts to your WordPress site's language.
 * **Privacy & Security First** - Manage API keys safely and keep data secure.
 
 ### 🌐 **Why Choose Kognetiks Chatbot**
@@ -56,7 +56,7 @@ Learn more at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-
 
 == External Services ==
 
-The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
+The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service's terms of service and privacy policy:
 
 - **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
 - **Azure OpenAI**: [Terms of Use](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/data-privacy?tabs=azure-portal) | [Privacy Polisy](https://www.microsoft.com/en-us/privacy/privacystatement)
@@ -84,10 +84,10 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
    - Consent to sending user queries and related data to the selected AI provider for processing and response generation.
-   - Agree to abide by the provider’s terms of service, pricing, and privacy policy.
+   - Agree to abide by the provider's terms of service, pricing, and privacy policy.
    - Acknowledge that your data, including text submitted by users, may be transferred to and processed by the AI platform in accordance with its privacy policy.
 
-**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider’s pricing and usage policies before proceeding.
+**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
 == Installation ==
 
@@ -238,7 +238,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 = 2.2.5 - Released 2025-02-16 =
 
-* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site’s existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
+* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site's existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.4.
 
 = 2.2.4 - Released 2025-02-06 =
@@ -309,7 +309,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 = 2.1.3 - Released 2024-08-31 =
 
 * **Remote Server Access**: The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
-* **Improving Math Handling**: Integrated code enhances chatbot’s ability to render complex mathematical expressions.
+* **Improving Math Handling**: Integrated code enhances chatbot's ability to render complex mathematical expressions.
 * **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 = 2.1.2 - Released 2024-08-28 =

@@ -5,7 +5,7 @@ The Output Format setting allows you to specify the format in which the **Knowle
 ![Analysis](knowledge-navigator-analysis.png)
 
 1. **Output Format**:
-   - **Description**: This setting allows you to select the format in which the chatbot’s data will be exported.
+   - **Description**: This setting allows you to select the format in which the chatbot's data will be exported.
    - **Options**: 
      - `CSV`: Comma-Separated Values format, which is compatible with most spreadsheet and data analysis tools.
      - Other formats: Coming soon - JSON, XML, etc.

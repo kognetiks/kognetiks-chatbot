@@ -1,6 +1,6 @@
 # Overview
 
-**Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate OpenAI’s ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
+**Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate OpenAI's ChatGPT API into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
 
 Conversational AI platforms - like those from OpenAI, NVIDIA and others - use natural language processing and machine learning algorithms to interact with users in a human-like manner. They are designed to answer questions, provide suggestions, and engage in conversations with users. This is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, these platforms can be used in various fields such as healthcare, education, finance, and many more.
 

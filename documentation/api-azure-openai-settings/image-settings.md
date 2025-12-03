@@ -12,7 +12,7 @@ To enhance your Kognetiks Chatbot with image generation capabilities, follow the
 2. **Image Output Option**:
    - **Description**: This setting specifies the format for the generated image.
    - **Options**: Common formats include `PNG`, with other options available in the future.
-   - **Selection**: Choose the format that works best for your application’s requirements and compatibility.
+   - **Selection**: Choose the format that works best for your application's requirements and compatibility.
 
 3. **Image Output Size**:
    - **Description**: This setting allows you to specify the dimensions of the generated image.
@@ -32,7 +32,7 @@ To enhance your Kognetiks Chatbot with image generation capabilities, follow the
 6. **Image Style Output**:
    - **Description**: This setting defines the style of the generated images.
    - **Options**: Styles might include `Natural` or `Vivid`, with other options available in the future.
-   - **Selection**: Select the style that aligns with your content’s theme and desired appearance.
+   - **Selection**: Select the style that aligns with your content's theme and desired appearance.
 
 ## Steps to Configure
 

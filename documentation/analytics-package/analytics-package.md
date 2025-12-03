@@ -18,10 +18,10 @@ The analytics package summarizes data for sentiment analysis, engagement analysi
 
 At the top of the Analytics tab, you'll find controls that allow you to:
 
-- **Period Selector** – Choose the comparison windows like ```Today vs Yesterday```, ```This Week vs Last Week```, etc.
-- **Type Filter** – Filter results by conversation type, e.g., ```All```, ```Visitor```, ```Chatbot```).
-- **Scoring** – Switch between sentiment scoring that is ```Manual``` or ```Automated```.  If automated sentiment scores will be computed hourly.
-- **Manual Controls** – Use ```Start```, ```Stop```, ```Restart```, or ```Reset`` to control manual sentiment scoring.
+- **Period Selector** – Choose the comparison windows like `Today vs Yesterday`, `This Week vs Last Week`, etc.
+- **Type Filter** – Filter results by conversation type, e.g., `All`, `Visitor`, `Chatbot`).
+- **Scoring** – Switch between sentiment scoring that is `Manual` or `Automated`.  If automated sentiment scores will be computed hourly.
+- **Manual Controls** – Use `Start`, `Stop`, `Restart`, or `Reset`` to control manual sentiment scoring.
 
 ---
 

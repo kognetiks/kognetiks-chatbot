@@ -45,21 +45,21 @@ To ensure your Kognetiks Chatbot functions optimally, you need to configure the 
 ## Example Shortcodes
 
 - **Default Chat Model**:
-  ```
+  `
   [chatbot]
-  ```
+  `
   - **Description**: Uses the default chat model with a floating style.
   
 - **Floating Style, Specific Model**:
-  ```
+  `
   [chatbot style="floating" model="gemini-2.0-flash"]
-  ```
+  `
   - **Description**: Uses a floating style with a specified model (`gemini-2.0-flash` in this case).
 
 - **Embedded Style, Default Chat Model**:
-  ```
+  `
   [chatbot style="embedded" model="gemini-2.0-flash"]
-  ```
+  `
   - **Description**: Uses an embedded style with the default chat model.
 
 ## Steps to Configure

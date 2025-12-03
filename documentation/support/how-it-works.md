@@ -4,7 +4,7 @@ Imagine you are having a conversation with a helpful assistant on a website. Thi
 
 ![Architecture Overview](architecture-overview.png)
 
-Here’s how it all works, step by step, using the diagram as our guide:
+Here's how it all works, step by step, using the diagram as our guide:
 
 1. **Desktop Computer or Mobile Device**:
    - You, the user, interact with the chatbot using various devices like a desktop computer, a mobile phone, or a tablet.
@@ -23,7 +23,7 @@ Here’s how it all works, step by step, using the diagram as our guide:
 
 4. **Components on the Web Server**:
 
-   - **JavaScript and PHP**: These are programming languages that help the chatbot process your request. JavaScript handles things on the user’s side, making sure the chatbot responds quickly and smoothly. PHP works on the server side, managing the logic and data processing.
+   - **JavaScript and PHP**: These are programming languages that help the chatbot process your request. JavaScript handles things on the user's side, making sure the chatbot responds quickly and smoothly. PHP works on the server side, managing the logic and data processing.
 
    - **SQL Database Server**: This is where the chatbot stores and retrieves information. When you ask a question, the chatbot might need to look up information in this database to provide an accurate answer.
 
@@ -36,7 +36,7 @@ Here’s how it all works, step by step, using the diagram as our guide:
    - Your question travels from your device to the web server via the internet.
    - The web server processes your question using JavaScript, PHP, and may consult the SQL Database or the OpenAI ChatGPT API.
    - Once the chatbot has the information it needs, it sends the answer back to your device through the internet.
-   - Your device then displays the chatbot’s response, allowing you to read the answer and continue the conversation.
+   - Your device then displays the chatbot's response, allowing you to read the answer and continue the conversation.
 
 # Summary
 

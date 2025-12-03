@@ -142,7 +142,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 1. **Enable Advanced Content Search**:
 
-   - **Description**: When enabled, this feature allows the chatbot to pull information from your site’s existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
+   - **Description**: When enabled, this feature allows the chatbot to pull information from your site's existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
    - **Options**: `Yes` or `No`.
    - **Selection**: Choose `Yes` if you want the AI to reference your local content when responding to user queries.
 
@@ -188,7 +188,7 @@ By configuring these settings, you ensure that your Kognetiks Chatbot plugin ope
 
 - **Greeting Messages**: Keep initial and subsequent greetings friendly and helpful to create a positive user experience.
 
-- **User Expectations**: Including disclaimers can help manage expectations and improve user understanding of the chatbot’s capabilities.
+- **User Expectations**: Including disclaimers can help manage expectations and improve user understanding of the chatbot's capabilities.
 
 By configuring these settings, you ensure that your Kognetiks Chatbot is customized to provide a welcoming and user-friendly experience for your website visitors.
 
