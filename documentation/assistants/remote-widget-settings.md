@@ -93,4 +93,5 @@ By implementing these security measures, you significantly enhance the protectio
 
 ---
 
+- **[Back to Managing Assistants and Agents](manage-assistants.md)**
 - **[Back to the Overview](/overview.md)**

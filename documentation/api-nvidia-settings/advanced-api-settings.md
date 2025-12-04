@@ -31,4 +31,5 @@ By configuring these settings, you ensure that your Kognetiks Chatbot maintains 
 
 ---
 
+- **[Back to API Nvidia Settings](api-nvidia-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

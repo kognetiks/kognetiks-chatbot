@@ -236,4 +236,5 @@ See [Chatbots and Assistants](support/chatbots-and-assistants.md) for more detai
 
 ---
 
+- **[Back to Managing Assistants and Agents](manage-assistants.md)**
 - **[Back to the Overview](/overview.md)**

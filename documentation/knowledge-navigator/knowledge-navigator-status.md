@@ -45,4 +45,5 @@ By understanding and utilizing the Knowledge Navigator Status settings, you can 
 
 ---
 
+- **[Back to Knowledge Navigator Settings](knowledge-navigator.md)**
 - **[Back to the Overview](/overview.md)**

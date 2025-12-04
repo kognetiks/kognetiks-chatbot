@@ -32,4 +32,5 @@ Icons for functions supported by your AI platform of choice and those that you h
 
 ---
 
+- **[Back to Appearance Settings]](appearance.md)**
 - **[Back to the Overview](/overview.md)**

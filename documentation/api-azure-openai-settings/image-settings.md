@@ -72,4 +72,5 @@ By configuring these settings, you ensure that your Kognetiks Chatbot can effect
 
 ---
 
+- **[Back to API Azure OpenAI Settings](api-azure-openai-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

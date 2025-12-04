@@ -33,4 +33,5 @@ By configuring this setting, you ensure that the data collected from the knowled
 
 ---
 
+- **[Back to Knowledge Navigator Settings](knowledge-navigator.md)**
 - **[Back to the Overview](/overview.md)**

@@ -53,4 +53,5 @@ By configuring these settings, you can enhance the chatbot's responses with addi
 
 ---
 
+- **[Back to Knowledge Navigator Settings](knowledge-navigator.md)**
 - **[Back to the Overview](/overview.md)**

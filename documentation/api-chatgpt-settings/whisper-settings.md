@@ -39,4 +39,5 @@ By configuring these settings, you ensure that your Kognetiks Chatbot can effect
 
 ---
 
+- **[Back to API ChatGPT Settings](api-chatgpt-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

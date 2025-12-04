@@ -61,4 +61,5 @@ By configuring these settings, you ensure that your Kognetiks Chatbot stays up-t
 
 ---
 
+- **[Back to Knowledge Navigator Settings](knowledge-navigator.md)**
 - **[Back to the Overview](/overview.md)**

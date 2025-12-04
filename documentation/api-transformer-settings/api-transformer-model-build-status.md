@@ -72,5 +72,6 @@
 
 ---
 
+- **[Back to Transformer Model Settings](api-transformer-model-settings.md)**
 - **[Back to the Overview](/overview.md)**
 

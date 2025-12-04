@@ -31,22 +31,16 @@ To ensure your Kognetiks Chatbot functions optimally, you need to configure the 
 
 ## Example Shortcodes
 
-- **Default Chat Model**:
-  `
-  [chatbot]
-  `
+- **Default Chat Model**: `[chatbot]`
+
   - **Description**: Uses the default chat model with a floating style.
   
-- **Floating Style, Specific Model**:
-  `
-  [chatbot style="floating" model="mistral-small-latest"]
-  `
+- **Floating Style, Specific Model**: `[chatbot style="floating" model="mistral-small-latest"]`
+
   - **Description**: Uses a floating style with a specified model (`mistral-small-latest` in this case).
 
-- **Embedded Style, Default Chat Model**:
-  `
-  [chatbot style="embedded" model="mistral-small-latest"]
-  `
+- **Embedded Style, Default Chat Model**: `[chatbot style="embedded" model="mistral-small-latest"]
+`
   - **Description**: Uses an embedded style with the default chat model.
 
 ## Steps to Configure
@@ -77,4 +71,5 @@ By following these steps and tips, you can ensure that your Kognetiks Chatbot is
 
 ---
 
+- **[Back to API Mistral Settings](api-mistral-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

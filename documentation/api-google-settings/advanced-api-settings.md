@@ -31,4 +31,5 @@ By configuring these settings, you ensure that your Kognetiks Chatbot maintains 
 
 ---
 
+- **[Back to API Google Gemini Settings](api-googe-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

@@ -31,4 +31,5 @@ By configuring these settings, you ensure that your Kognetiks Chatbot maintains 
 
 ---
 
+- **[Back to API Anthropic Settings](api-anthropic-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

@@ -31,4 +31,5 @@ By configuring these settings, you ensure that your Kognetiks Chatbot maintains 
 
 ---
 
+- **[Back to API Mistral Settings](api-mistral-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

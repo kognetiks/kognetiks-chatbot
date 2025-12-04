@@ -23,4 +23,5 @@ The **Kognetiks Chatbot** plugin requires proper configuration to function corre
 
 ---
 
+- **[Back to API Azure OpenAI Settings](api-azure-openai-model-settings.md)**
 - **[Back to the Overview](/overview.md)**
