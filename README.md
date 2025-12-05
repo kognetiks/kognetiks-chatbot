@@ -104,7 +104,7 @@ By using this plugin, you agree to abide by each service's terms of service and 
 | **DeepSeek** | [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html) | [API Key](https://platform.deepseek.com/sign_in)
 | **Mistral** | [Terms of Service](https://mistral.ai/terms#terms-of-service) | [Privacy Policy](https://mistral.ai/terms#privacy-policy) | [API Key](https://console.mistral.ai/api-keys)
 | **Google** | [Terms of Use](https://ai.google.dev/gemini-api/terms) | [Privacy Policy](https://policies.google.com/privacy) | [API Keys](https://aistudio.google.com/api-keys)
-| **JAN.AI** | [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy) | [API Key](https://www.jan.ai/docs/desktop/api-server)
+| **JAN.AI** | [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy) | [API Keys](https://www.jan.ai/docs/desktop/api-server)
 
 **Note:** You are responsible for any fees associated with the use of third-party APIs.
 
@@ -120,9 +120,7 @@ Need help? Visit [https://kognetiks.com/plugin-support/](https://kognetiks.com/p
 
 ## ⚠️ Disclaimer
 
-WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. DeepSeek and related trademarks are the property of DeepSeek. Mistral and related trademarks are the property of Mistral. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek or Mistral.
-
-
+WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. DeepSeek and related trademarks are the property of DeepSeek. Mistral and related trademarks are the property of Mistral. Google Gemini and related trademarks are the property of Google. JAN.AI and related trademarks are the property of JAN.AI. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek, Mistral, Google, JAN.AI.
 
 ## ❤️ Thank You
 
