@@ -158,6 +158,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 = 2.4.0 - TBD =
 
+* **Duplicate Request Detection Error**: Fixed duplicate request detection errors and clear conversation failures by properly clearing message UUID transients and improving session validation, plus resolved SQL injection vulnerabilities in transient cleanup functions.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.9.
 
 = 2.3.9 - Released 2025-12-03 =
