@@ -760,7 +760,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     }
 
     // Lock check removed - main send function handles locking
-    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+    set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // See if there is a $thread_id
     if (empty($thread_id)) {

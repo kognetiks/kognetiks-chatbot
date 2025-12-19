@@ -178,7 +178,7 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     }
 
     // Lock check removed - main send function handles locking
-    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+    set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 2.2.2
     // back_trace( 'NOTICE', 'chatbot_call_mistral_agent_call_api()');

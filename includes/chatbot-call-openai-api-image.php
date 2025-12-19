@@ -65,7 +65,7 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     }
 
     // Lock check removed - main send function handles locking
-    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+    set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // Ensure API key is set
     if (empty($api_key)) {

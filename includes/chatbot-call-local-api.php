@@ -48,7 +48,7 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     }
 
     // Lock check removed - main send function handles locking
-    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+    set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // Jan.ai Download
     // https://jan.ai/download

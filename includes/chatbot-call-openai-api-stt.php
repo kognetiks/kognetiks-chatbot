@@ -51,7 +51,7 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     }
 
     // Lock check removed - main send function handles locking
-    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+    set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // Check for the API key
     if (empty($api_key) || $api_key == '[private]') {

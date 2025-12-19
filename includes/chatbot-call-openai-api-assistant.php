@@ -941,7 +941,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
     // Lock check removed - main send function handles locking
     
     // Lock setting removed - main send function handles locking
-    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+    set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
     
     // Log the start of the request
     // DIAG - Diagnostics - Ver 2.3.5
