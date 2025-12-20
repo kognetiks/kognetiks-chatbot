@@ -763,6 +763,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
     // back_trace( 'NOTICE', '$chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
 
+    // Define $kchat_settings_json before it's used in Hot Prompt block - Fix for undefined variable warning
+    // Ver 2.4.0 - Fix for undefined $kchat_settings_json variable
+    if (!isset($kchat_settings_json)) {
+        $kchat_settings_json = wp_json_encode($kchat_settings);
+    }
+
     // Hot Prompt the Chatbot - Ver 1.9.0
     if (!empty($chatbot_chatgpt_hot_bot_prompt)) {
         // back_trace( 'NOTICE', 'Hot Prompting the Chatbot');
