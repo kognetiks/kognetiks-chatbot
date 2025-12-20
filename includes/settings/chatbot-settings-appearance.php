@@ -470,20 +470,36 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings() {
     // }
 
     // Inject the custom css settings
-    $chatbotChatGPTAppearanceCSS = $GLOBALS['chatbotChatGPTAppearanceCSS'];
-    $chatbotChatGPTAppearanceCSS = implode("\n", $chatbotChatGPTAppearanceCSS); // Prepend spaces for indentation
-
-    ?>
-    <style>
-        <?php
-        echo "\t\t" . $chatbot_chatgpt_appearance_user_css_setting . "\n"; // Put user CSS settings at the top
-        // Loop through each CSS rule and output it with indentation
+    // Ver 2.4.0.1 - Only output class-based CSS rules to avoid conflicts with instance-specific ID-based CSS
+    // Filter out any CSS rules that contain ID selectors (#chatbot-chatgpt, etc.)
+    $class_based_css_rules = [];
+    if (isset($GLOBALS['chatbotChatGPTAppearanceCSS']) && is_array($GLOBALS['chatbotChatGPTAppearanceCSS'])) {
         foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
-            echo "\t\t" . $cssRule . "\n"; // Add spaces before each rule for indentation
+            // Only include rules that don't contain ID selectors for chatbot elements
+            // Allow class-based selectors like .chatbot-wide, .chatbot-narrow, .chatbot-bubble, etc.
+            if (strpos($cssRule, '#chatbot-chatgpt') === false) {
+                $class_based_css_rules[] = $cssRule;
+            }
         }
+    }
+
+    // Only output if there are class-based rules or user CSS
+    if (!empty($class_based_css_rules) || !empty($chatbot_chatgpt_appearance_user_css_setting)) {
         ?>
-    </style>
-    <?php
+        <style>
+            <?php
+            // Output user CSS only if it doesn't contain ID selectors (to avoid conflicts)
+            if (!empty($chatbot_chatgpt_appearance_user_css_setting) && strpos($chatbot_chatgpt_appearance_user_css_setting, '#chatbot-chatgpt') === false) {
+                echo "\t\t" . $chatbot_chatgpt_appearance_user_css_setting . "\n";
+            }
+            // Loop through each class-based CSS rule and output it with indentation
+            foreach ($class_based_css_rules as $cssRule) {
+                echo "\t\t" . $cssRule . "\n"; // Add spaces before each rule for indentation
+            }
+            ?>
+        </style>
+        <?php
+    }
     
 }
 // Hook into wp_footer

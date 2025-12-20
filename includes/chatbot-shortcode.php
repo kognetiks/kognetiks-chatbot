@@ -13,6 +13,147 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+/**
+ * Output instance-specific CSS for chatbot instances - Ver 2.4.0.1
+ * 
+ * This function takes the global CSS rules and makes them instance-specific
+ * by replacing generic IDs with instance-suffixed IDs.
+ * 
+ * @param string $id_suffix The instance ID suffix (e.g., '-instance_123')
+ */
+function chatbot_chatgpt_output_instance_css( $id_suffix ) {
+    // Manually trigger CSS setup functions to ensure CSS is loaded - Ver 2.4.0.1
+    // These are normally called via wp_head/wp_footer hooks, but we need them now
+    if ( ! isset( $GLOBALS['chatbotChatGPTAppearanceCSS'] ) || ! is_array( $GLOBALS['chatbotChatGPTAppearanceCSS'] ) ) {
+        // Initialize the array if it doesn't exist
+        $GLOBALS['chatbotChatGPTAppearanceCSS'] = [];
+    }
+    
+    // Call the CSS setup functions to populate the global array (only if they exist)
+    if ( function_exists( 'chatbot_chatgpt_appearance_background_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_background_custom_css_settings();
+    }
+    if ( function_exists( 'chatbot_chatgpt_appearance_header_background_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_header_background_custom_css_settings();
+    }
+    if ( function_exists( 'chatbot_chatgpt_appearance_text_color_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_text_color_custom_css_settings();
+    }
+    if ( function_exists( 'chatbot_chatgpt_appearance_user_text_background_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_user_text_background_custom_css_settings();
+    }
+    if ( function_exists( 'chatbot_chatgpt_appearance_bot_text_background_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_bot_text_background_custom_css_settings();
+    }
+    if ( function_exists( 'chatbot_chatgpt_appearance_greeting_text_color_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_greeting_text_color_custom_css_settings();
+    }
+    if ( function_exists( 'chatbot_chatgpt_appearance_header_text_color_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_header_text_color_custom_css_settings();
+    }
+    if ( function_exists( 'chatbot_chatgpt_appearance_width_wide_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_width_wide_custom_css_settings();
+    }
+    if ( function_exists( 'chatbot_chatgpt_appearance_width_narrow_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_width_narrow_custom_css_settings();
+    }
+    if ( function_exists( 'chatbot_chatgpt_appearance_image_width_custom_css_settings' ) ) {
+        chatbot_chatgpt_appearance_image_width_custom_css_settings();
+    }
+    
+    // Ensure we have CSS rules
+    if ( empty( $GLOBALS['chatbotChatGPTAppearanceCSS'] ) ) {
+        return;
+    }
+    
+    // Get user CSS settings
+    $chatbot_chatgpt_appearance_user_css_setting = esc_attr(get_option('chatbot_chatgpt_appearance_user_css_setting', ''));
+    $chatbot_chatgpt_appearance_user_css_setting = trim($chatbot_chatgpt_appearance_user_css_setting);
+    $chatbot_chatgpt_appearance_user_css_setting = preg_replace('/\s+/', ' ', $chatbot_chatgpt_appearance_user_css_setting);
+    $chatbot_chatgpt_appearance_user_css_setting = str_replace(array("\r", "\n"), '', $chatbot_chatgpt_appearance_user_css_setting);
+    
+    // Escape the ID suffix for use in CSS
+    $escaped_id_suffix = esc_attr($id_suffix);
+    
+    // Helper function to replace generic IDs with instance-specific IDs in CSS
+    // Ver 2.4.0.1 - Improved to prevent double suffixing
+    $replace_css_ids = function($css) use ($escaped_id_suffix) {
+        // First, check if the CSS already contains the suffix to avoid double replacement
+        // If it does, return as-is (shouldn't happen, but safety check)
+        if (strpos($css, $escaped_id_suffix) !== false) {
+            // Already contains suffix, but we still need to handle cases where only some IDs were replaced
+            // So we'll continue with the replacement logic
+        }
+        
+        // Replace specific element IDs first (longest/most specific first to avoid partial matches)
+        // Use word boundaries or specific patterns to ensure exact matches
+        $replacements = [
+            '#chatbot-chatgpt-header-embedded' => '#chatbot-chatgpt-header-embedded' . $escaped_id_suffix,
+            '#chatbot-chatgpt-download-transcript-btn' => '#chatbot-chatgpt-download-transcript-btn' . $escaped_id_suffix,
+            '#chatbot-chatgpt-text-to-speech-btn' => '#chatbot-chatgpt-text-to-speech-btn' . $escaped_id_suffix,
+            '#chatbot-chatgpt-upload-file' => '#chatbot-chatgpt-upload-file' . $escaped_id_suffix,
+            '#chatbot-chatgpt-erase-btn' => '#chatbot-chatgpt-erase-btn' . $escaped_id_suffix,
+            '#chatbot-chatgpt-header' => '#chatbot-chatgpt-header' . $escaped_id_suffix,
+            '#chatbot-chatgpt-submit' => '#chatbot-chatgpt-submit' . $escaped_id_suffix,
+            '#chatbot-chatgpt-title.title' => '#chatbot-chatgpt-title' . $escaped_id_suffix . '.title',
+            '#chatbot-chatgpt-message' => '#chatbot-chatgpt-message' . $escaped_id_suffix,
+            '#chatbot-chatgpt-conversation' => '#chatbot-chatgpt-conversation' . $escaped_id_suffix,
+            '#chatbot-chatgpt-input-area' => '#chatbot-chatgpt-input-area' . $escaped_id_suffix,
+            '#chatbot-chatgpt-input' => '#chatbot-chatgpt-input' . $escaped_id_suffix,
+            '#chatbot-chatgpt-buttons-container' => '#chatbot-chatgpt-buttons-container' . $escaped_id_suffix,
+        ];
+        
+        // Apply replacements in order (most specific first)
+        foreach ($replacements as $search => $replace) {
+            // Only replace if the search string exists and hasn't already been replaced
+            if (strpos($css, $search) !== false && strpos($css, $search . $escaped_id_suffix) === false) {
+                $css = str_replace($search, $replace, $css);
+            }
+        }
+        
+        // Replace #chatbot-chatgpt (standalone or with classes like .wide, .narrow, .image-width) with instance-specific version
+        // Use negative lookahead to avoid matching IDs that already have the suffix or are part of other IDs
+        // Also ensure we don't match if the suffix is already present
+        $css = preg_replace('/#chatbot-chatgpt(?![-\w]|' . preg_quote($escaped_id_suffix, '/') . ')/', '#chatbot-chatgpt' . $escaped_id_suffix, $css);
+        
+        return $css;
+    };
+    
+    ?>
+    <style>
+        <?php
+        // Output user CSS at the top if present, with instance-specific IDs
+        if ( ! empty( $chatbot_chatgpt_appearance_user_css_setting ) ) {
+            $user_css_processed = $replace_css_ids($chatbot_chatgpt_appearance_user_css_setting);
+            echo "\t\t" . $user_css_processed . "\n";
+        }
+        
+        // Process each CSS rule and make it instance-specific
+        foreach ( $GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule ) {
+            // Skip empty rules
+            if ( empty( trim( $cssRule ) ) ) {
+                continue;
+            }
+            
+            // Only modify ID-based selectors, leave class-based selectors unchanged
+            // Class selectors like .chatbot-bubble, .chatbot-embedded-style should apply to all instances
+            $instance_css = $cssRule;
+            
+            // Check if this rule contains an ID selector (starts with #)
+            if ( strpos( $cssRule, '#' ) !== false ) {
+                // Use the helper function to replace all generic IDs with instance-specific IDs
+                $instance_css = $replace_css_ids($cssRule);
+            }
+            // If it's a class-based selector, output it as-is (applies to all instances)
+            
+            // Output the CSS rule (modified if ID-based, unchanged if class-based)
+            echo "\t\t" . $instance_css . "\n";
+        }
+        ?>
+    </style>
+    <?php
+}
+
 // Main Chatbot Shortcode
 function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
 
@@ -44,6 +185,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $kchat_settings = [];
 
     global $kflow_data;
+
+    // Generate unique instance ID for multiple chatbots on same page - Ver 2.4.0.1
+    // Use tag + timestamp + random to ensure uniqueness
+    $instance_id = sanitize_key($tag . '_' . time() . '_' . wp_generate_password(8, false));
+    // Store instance counter in static variable to ensure sequential IDs
+    static $instance_counter = 0;
+    $instance_counter++;
+    $instance_id = sanitize_key($tag . '_' . $instance_counter . '_' . substr(md5($tag . $instance_counter . time()), 0, 8));
 
     // header("Cache-Control: no-cache, must-revalidate, max-age=0");
     // header("Pragma: no-cache");
@@ -654,13 +803,16 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     //     return;
     // }
 
-    set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
-    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
+    // Store instance_id in transient - Ver 2.4.0.1
+    set_chatbot_chatgpt_transients( 'instance_id', $instance_id, $user_id, $page_id, $session_id, null, null, null, $instance_id );
     
-    set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null);
-    set_chatbot_chatgpt_transients( 'thread_id', $thread_id, $user_id, $page_id, $session_id, null);
+    set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null, null, null, $instance_id );
+    set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null, null, null, $instance_id );
+    
+    set_chatbot_chatgpt_transients( 'assistant_id', $assistant_id, $user_id, $page_id, $session_id, null, null, null, $instance_id);
+    set_chatbot_chatgpt_transients( 'thread_id', $thread_id, $user_id, $page_id, $session_id, null, null, null, $instance_id);
 
-    set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null);
+    set_chatbot_chatgpt_transients( 'additional_instructions', $additional_instructions, $user_id, $page_id, $session_id, null, null, null, $instance_id);
 
     // back_trace( 'NOTICE', '$chatbot_chatgpt_display_style: ' . $chatbot_chatgpt_display_style);
 
@@ -678,7 +830,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     }
 
     // Localize the data for the chatbot - Ver 2.1.1.1 - 2024 08 28 - THIS IS THE SPOT
+    // Added instance_id - Ver 2.4.0.1
     $kchat_settings = array_merge($kchat_settings, array(
+        'instance_id' => $instance_id,
         'chatbot_chatgpt_display_style' => $chatbot_chatgpt_display_style,
         'chatbot_chatgpt_version' => $chatbot_chatgpt_plugin_version,
         'plugins_url' => $chatbot_chatgpt_plugin_dir_url,
@@ -881,8 +1035,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         set_transient('kflow_step', 0);
 
         // Set transients
-        set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id);
-        set_chatbot_chatgpt_transients('kflow_step', 0, null, null, $session_id);
+        set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id, null, null, null, $instance_id);
+        set_chatbot_chatgpt_transients('kflow_step', 0, null, null, $session_id, null, null, null, $instance_id);
 
         // Get the first prompt
         $kflow_prompt = $kflow_data['Prompts'][0];
@@ -896,8 +1050,8 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         if ( $kflow_prompt != '' ) {
 
             // Set transients
-            set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id);
-            set_chatbot_chatgpt_transients('kflow_step', -1, null, null, $session_id); // Start at -1 not 0
+            set_chatbot_chatgpt_transients('kflow_sequence', $sequence_id, null, null, $session_id, null, null, null, $instance_id);
+            set_chatbot_chatgpt_transients('kflow_step', -1, null, null, $session_id, null, null, null, $instance_id); // Start at -1 not 0
 
             // Get the first prompt
             $kflow_prompt = $kflow_data['Prompts'][0];
@@ -994,7 +1148,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     $assistant_details['voice'] = !empty($assistant_details['voice']) ? $assistant_details['voice'] : esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
     $kchat_settings['chatbot_chatgpt_voice_option'] = $assistant_details['voice'];
     $kchat_settings['voice'] = $assistant_details['voice'];
-    set_chatbot_chatgpt_transients('voice', $assistant_details['voice'], $user_id, $page_id, $session_id, null);
+    set_chatbot_chatgpt_transients('voice', $assistant_details['voice'], $user_id, $page_id, $session_id, null, null, null, $instance_id);
 
     // DIAG - Diagnostics - Ver 2.0.5
     // back_trace( 'NOTICE', 'AFTER: $assistant_details[\'voice\']: ' . $assistant_details['voice']);
@@ -1035,8 +1189,11 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // THIS WAS HIGHER UP
     $kchat_settings['chatbot_chatgpt_version'] = $chatbot_chatgpt_plugin_version;
     $kchat_settings_json = wp_json_encode($kchat_settings);
-    wp_add_inline_script('chatbot-chatgpt-local-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
-    wp_add_inline_script('chatbot-chatgpt-js', 'if (typeof kchat_settings === "undefined") { var kchat_settings = ' . $kchat_settings_json . '; } else { kchat_settings = ' . $kchat_settings_json . '; }', 'before');
+    $escaped_instance_id = esc_js($instance_id);
+    // Store settings per instance to avoid overwriting - Ver 2.4.0.1
+    $js_code = 'if (typeof kchat_settings_instances === "undefined") { var kchat_settings_instances = {}; } kchat_settings_instances["' . $escaped_instance_id . '"] = ' . $kchat_settings_json . '; if (typeof kchat_settings === "undefined") { var kchat_settings = kchat_settings_instances["' . $escaped_instance_id . '"]; }';
+    wp_add_inline_script('chatbot-chatgpt-local-js', $js_code, 'before');
+    wp_add_inline_script('chatbot-chatgpt-js', $js_code, 'before');
     
     // DIAG - Diagnostics - Ver 2.1.0
     // back_trace( 'NOTICE', '========================================');
@@ -1050,7 +1207,9 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     ?>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
-            let kchat_settings = <?php echo json_encode($kchat_settings); ?>;
+            // Get instance-specific settings - Ver 2.4.0.1
+            let instance_id = <?php echo json_encode($instance_id); ?>;
+            let kchat_settings = (typeof kchat_settings_instances !== "undefined" && kchat_settings_instances[instance_id]) ? kchat_settings_instances[instance_id] : <?php echo json_encode($kchat_settings); ?>;
             if (kchat_settings && typeof kchat_settings === "object") {
                 // Resolve LocalStorage - Ver 2.1.1.1.R2
                 const includeKeys = [
@@ -1100,18 +1259,26 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     if ($chatbot_chatgpt_display_style == 'embedded') {
         // Code for embed style ('embedded' is the alternative style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
-        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, $session_id, null);
-        set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, $session_id, null);
-        set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, $session_id, null);
+        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null, null, null, $instance_id );
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null, null, null, $instance_id );
+        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, $session_id, null, null, null, $instance_id);
+        set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, $session_id, null, null, null, $instance_id);
+        set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, $session_id, null, null, null, $instance_id);
         // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
+        // Create ID suffix with instance_id - Ver 2.4.0.1
+        $id_suffix = '-' . esc_attr($instance_id);
+        
+        // Determine width class based on width setting - Ver 2.4.0.1
+        $width_class = (strtolower($chatbot_chatgpt_width_setting) === 'wide') ? 'chatbot-wide' : 'chatbot-narrow';
+        
+        // Output instance-specific CSS - Ver 2.4.0.1
+        chatbot_chatgpt_output_instance_css($id_suffix);
         ?>
-        <div id="chatbot-chatgpt" style="display: flex;" class="chatbot-embedded-style chatbot-full" data-cache-buster="<?php echo time(); ?>">
+        <div id="chatbot-chatgpt<?php echo $id_suffix; ?>" style="display: flex;" class="chatbot-embedded-style chatbot-full <?php echo esc_attr($width_class); ?>" data-instance-id="<?php echo esc_attr($instance_id); ?>" data-cache-buster="<?php echo time(); ?>">
         <script>
             jQuery(document).ready(function($) {
-                $('#chatbot-chatgpt').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
+                $('#chatbot-chatgpt<?php echo $id_suffix; ?>').removeClass('chatbot-floating-style').addClass('chatbot-embedded-style');
             });
         </script>
         <!-- REMOVED FOR EMBEDDED -->
@@ -1121,15 +1288,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         //     echo '<div id="chatbot-chatgpt-title" class="title">' . strip_tags($bot_name) . '</div>';
         //     echo '</div>';
         // } else {
-            echo '<div id="chatbot-chatgpt-header-embedded">';
-            echo '<div id="chatbot-chatgpt-title" class="title">' . strip_tags($bot_name) . '</div>';
+            echo '<div id="chatbot-chatgpt-header-embedded' . $id_suffix . '">';
+            echo '<div id="chatbot-chatgpt-title' . $id_suffix . '" class="title">' . strip_tags($bot_name) . '</div>';
             echo '</div>';
         // }
         ?>
-        <div id="chatbot-chatgpt-conversation"></div>
-        <div id="chatbot-chatgpt-input">
-            <div id="chatbot-chatgpt-input-area">
-                <label for="chatbot-chatgpt-message"></label>
+        <div id="chatbot-chatgpt-conversation<?php echo $id_suffix; ?>"></div>
+        <div id="chatbot-chatgpt-input<?php echo $id_suffix; ?>">
+            <div id="chatbot-chatgpt-input-area<?php echo $id_suffix; ?>">
+                <label for="chatbot-chatgpt-message<?php echo $id_suffix; ?>"></label>
                 <?php
                     // FIXME - ADD THIS TO FLOATING STYLE BELOW - Ver 1.9.5
                     // Kick off Flow - Ver 1.9.5
@@ -1137,12 +1304,12 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         // back_trace( 'NOTICE', 'Kick off Flow');
                         // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                         // Store the prompt in a hidden input instead of directly in the textarea
-                        echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
+                        echo "<input type='hidden' id='chatbot-chatgpt-message" . $id_suffix . "' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
                         // echo "<textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
-                            var hiddenInput = document.getElementById('chatbot-chatgpt-message');
-                            var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                            var hiddenInput = document.getElementById('chatbot-chatgpt-message" . $id_suffix . "');
+                            var submitButton = document.getElementById('chatbot-chatgpt-submit" . $id_suffix . "');
                             if (submitButton) {
                                 submitButton.addEventListener('click', function() {
                                     // Use the value from the hidden input when submitting
@@ -1164,15 +1331,15 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                         $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                         $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
                         $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
-                        echo "<textarea id='chatbot-chatgpt-message' rows='". htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . $chatbot_chatgpt_hot_bot_prompt . "</textarea>";
+                        echo "<textarea id='chatbot-chatgpt-message" . $id_suffix . "' rows='". htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . $chatbot_chatgpt_hot_bot_prompt . "</textarea>";
                         echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
-                            var textarea = document.getElementById('chatbot-chatgpt-message');
+                            var textarea = document.getElementById('chatbot-chatgpt-message" . $id_suffix . "');
                             textarea.value += '\\n';
                             textarea.focus();
 
                             setTimeout(function() {
-                                var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                                var submitButton = document.getElementById('chatbot-chatgpt-submit" . $id_suffix . "');
                                 if (submitButton) {
                                     submitButton.click(); // Use plain JS click
                                 }
@@ -1189,52 +1356,52 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             $chatbot_chatgpt_bot_prompt = $assistant_details['placeholder_prompt'];
                         }
                         $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
-                        echo "<center><textarea id='chatbot-chatgpt-message' rows='" . htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
+                        echo "<center><textarea id='chatbot-chatgpt-message" . $id_suffix . "' rows='" . htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
                     }
                 ?>
             </div>
         </div>
-        <div id="chatbot-chatgpt-buttons-container">
-            <button id="chatbot-chatgpt-submit" title="Send Message">
+        <div id="chatbot-chatgpt-buttons-container<?php echo $id_suffix; ?>">
+            <button id="chatbot-chatgpt-submit<?php echo $id_suffix; ?>" title="Send Message">
                 <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send">
             </button>
             <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
-                <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
-                <button id="chatbot-chatgpt-upload-file" title="Upload Files">
+                <input type="file" id="chatbot-chatgpt-upload-file-input<?php echo $id_suffix; ?>" name="file[]" style="display: none;" multiple="multiple" />
+                <button id="chatbot-chatgpt-upload-file<?php echo $id_suffix; ?>" title="Upload Files">
                     <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload File">
                 </button>
                 <script type="text/javascript">
-                    document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                    document.getElementById('chatbot-chatgpt-upload-file<?php echo $id_suffix; ?>').addEventListener('click', function() {
+                        document.getElementById('chatbot-chatgpt-upload-file-input<?php echo $id_suffix; ?>').click();
                     });
                 </script>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
-                <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
-                <button id="chatbot-chatgpt-upload-mp3" title="Upload an Audio/Video">
+                <input type="file" id="chatbot-chatgpt-upload-mp3-input<?php echo $id_suffix; ?>" name="file[]" style="display: none;" />
+                <button id="chatbot-chatgpt-upload-mp3<?php echo $id_suffix; ?>" title="Upload an Audio/Video">
                     <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload MP3">
                 </button>
                 <script type="text/javascript">
-                    document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
-                        document.getElementById('chatbot-chatgpt-upload-mp3-input').click();
+                    document.getElementById('chatbot-chatgpt-upload-mp3<?php echo $id_suffix; ?>').addEventListener('click', function() {
+                        document.getElementById('chatbot-chatgpt-upload-mp3-input<?php echo $id_suffix; ?>').click();
                     });
                 </script>
             <?php endif; ?>
-            <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
+            <button id="chatbot-chatgpt-erase-btn<?php echo $id_suffix; ?>" title="Clear Conversation">
                 <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Conversation">
             </button>
             <?php if ($chatbot_chatgpt_read_aloud_option == 'yes' && $voice != 'none'): ?>
-                <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
+                <button id="chatbot-chatgpt-text-to-speech-btn<?php echo $id_suffix; ?>" title="Read Aloud">
                     <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Out Loud">
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
-                <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
+                <button id="chatbot-chatgpt-speech-recognition-btn<?php echo $id_suffix; ?>" title="Use your microphone">
                     <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>" alt="Speech Recognition">
                 </button>
             <?php endif; ?>
             <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
-                <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                <button id="chatbot-chatgpt-download-transcript-btn<?php echo $id_suffix; ?>" title="Download Transcript">
                     <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Transcript">
                 </button>
             <?php endif; ?>
@@ -1242,13 +1409,13 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <?php
             $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
             if ($chatbot_chatgpt_enable_custom_buttons == 'Embedded' || $chatbot_chatgpt_enable_custom_buttons == 'Both') {
-                chatbot_chatgpt_custom_buttons_display();
+                chatbot_chatgpt_custom_buttons_display($instance_id);
             }
             // Attribution - Ver 2.0.5
             chatbot_chatgpt_attribution();
             ?>
         </div>
-        <button id="chatgpt-open-btn" style="display: none;">
+        <button id="chatgpt-open-btn<?php echo $id_suffix; ?>" style="display: none;">
         <i class="chatbot-open-icon"></i>
         </button>
         <?php
@@ -1256,34 +1423,42 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     } elseif ($chatbot_chatgpt_display_style == 'floating') {
         // Code for bot style ('floating' is the default style)
         // Store the style and the assistant value - Ver 1.7.2
-        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null );
-        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null );
-        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, $session_id, null);
-        set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, $session_id, null);
-        set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, $session_id, null);
+        set_chatbot_chatgpt_transients( 'display_style' , $chatbot_chatgpt_display_style, $user_id, $page_id, $session_id, null, null, null, $instance_id );
+        set_chatbot_chatgpt_transients( 'assistant_alias' , $chatbot_chatgpt_assistant_alias, $user_id, $page_id, $session_id, null, null, null, $instance_id );
+        set_chatbot_chatgpt_transients( 'model' , $model, $user_id, $page_id, $session_id, null, null, null, $instance_id);
+        set_chatbot_chatgpt_transients( 'voice' , $voice, $user_id, $page_id, $session_id, null, null, null, $instance_id);
+        set_chatbot_chatgpt_transients( 'assistant_name' , $bot_name, $user_id, $page_id, $session_id, null, null, null, $instance_id);
         // OUTSIDE THE IF STATEMENT - Ver 2.0.5 - 2024 07 05
         // ob_start();
+        // Create ID suffix with instance_id - Ver 2.4.0.1
+        $id_suffix = '-' . esc_attr($instance_id);
+        
+        // Determine width class based on width setting - Ver 2.4.0.1
+        $width_class = (strtolower($chatbot_chatgpt_width_setting) === 'wide') ? 'chatbot-wide' : 'chatbot-narrow';
+        
+        // Output instance-specific CSS - Ver 2.4.0.1
+        chatbot_chatgpt_output_instance_css($id_suffix);
         ?>
-        <div id="chatbot-chatgpt">
-            <div id="chatbot-chatgpt-header" data-cache-buster="<?php echo time(); ?>">
-                <div id="chatbot-chatgpt-title" class="title"><?php echo htmlspecialchars($bot_name); ?></div>
+        <div id="chatbot-chatgpt<?php echo $id_suffix; ?>" class="<?php echo esc_attr($width_class); ?>">
+            <div id="chatbot-chatgpt-header<?php echo $id_suffix; ?>" data-instance-id="<?php echo esc_attr($instance_id); ?>" data-cache-buster="<?php echo time(); ?>">
+                <div id="chatbot-chatgpt-title<?php echo $id_suffix; ?>" class="title"><?php echo htmlspecialchars($bot_name); ?></div>
             </div>
-            <div id="chatbot-chatgpt-conversation"></div>
-            <div id="chatbot-chatgpt-input">
-                <div id="chatbot-chatgpt-input-area">
-                    <label for="chatbot-chatgpt-message"></label>
+            <div id="chatbot-chatgpt-conversation<?php echo $id_suffix; ?>"></div>
+            <div id="chatbot-chatgpt-input<?php echo $id_suffix; ?>">
+                <div id="chatbot-chatgpt-input-area<?php echo $id_suffix; ?>">
+                    <label for="chatbot-chatgpt-message<?php echo $id_suffix; ?>"></label>
                     <?php
                         // Kick off Flow - Ver 1.9.5
                         if ($kflow_enabled == true and !empty($sequence_id)) {
                             // back_trace( 'NOTICE', 'Kick off Flow');
                             // back_trace( 'NOTICE', 'chatbot_chatgpt_hot_bot_prompt: ' . $chatbot_chatgpt_hot_bot_prompt);
                             // Store the prompt in a hidden input instead of directly in the textarea
-                            echo "<input type='hidden' id='chatbot-chatgpt-message' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
+                            echo "<input type='hidden' id='chatbot-chatgpt-message" . $id_suffix . "' value='" . htmlspecialchars($chatbot_chatgpt_hot_bot_prompt, ENT_QUOTES) . "'>";
                             // echo "<textarea id='chatbot-chatgpt-message' rows='2' placeholder='$chatbot_chatgpt_bot_prompt' style='width: 95%;'></textarea>";
                             echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                var hiddenInput = document.getElementById('chatbot-chatgpt-message');
-                                var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                                var hiddenInput = document.getElementById('chatbot-chatgpt-message" . $id_suffix . "');
+                                var submitButton = document.getElementById('chatbot-chatgpt-submit" . $id_suffix . "');
                                 if (submitButton) {
                                     submitButton.addEventListener('click', function() {
                                         // Use the value from the hidden input when submitting
@@ -1304,14 +1479,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             $rows = esc_attr(get_option('chatbot_chatgpt_input_rows', '2'));
                             $chatbot_chatgpt_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_bot_prompt));
                             $chatbot_chatgpt_hot_bot_prompt = esc_attr(sanitize_text_field($chatbot_chatgpt_hot_bot_prompt));
-                            echo "<center><textarea id='chatbot-chatgpt-message' rows='". htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . $chatbot_chatgpt_hot_bot_prompt . "</textarea>";
+                            echo "<center><textarea id='chatbot-chatgpt-message" . $id_suffix . "' rows='". htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'>" . $chatbot_chatgpt_hot_bot_prompt . "</textarea>";
                             echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                var textarea = document.getElementById('chatbot-chatgpt-message');
+                                var textarea = document.getElementById('chatbot-chatgpt-message" . $id_suffix . "');
                                 textarea.value += '\\n';
                                 textarea.focus();
                                 setTimeout(function() {
-                                    var submitButton = document.getElementById('chatbot-chatgpt-submit');
+                                    var submitButton = document.getElementById('chatbot-chatgpt-submit" . $id_suffix . "');
                                     if (submitButton) {
                                         submitButton.click(); // Use plain JS click
                                     }
@@ -1324,52 +1499,52 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
                             if ( !empty($assistant_details['placeholder_prompt']) ) {
                                 $chatbot_chatgpt_bot_prompt = $assistant_details['placeholder_prompt'];
                             }
-                            echo "<center><textarea id='chatbot-chatgpt-message' rows='" . htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
+                            echo "<center><textarea id='chatbot-chatgpt-message" . $id_suffix . "' rows='" . htmlspecialchars($rows) . "' placeholder='" . htmlspecialchars($chatbot_chatgpt_bot_prompt) . "' style='width: 95%;'></textarea></center>";
                         }
                     ?>
                 </div>
             </div>
-            <div id="chatbot-chatgpt-buttons-container">
-                <button id="chatbot-chatgpt-submit" title="Send Message">
+            <div id="chatbot-chatgpt-buttons-container<?php echo $id_suffix; ?>">
+                <button id="chatbot-chatgpt-submit<?php echo $id_suffix; ?>" title="Send Message">
                 <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('send_icon'); ?>" alt="Send">
                 </button>
                 <?php if ($chatbot_chatgpt_allow_file_uploads == 'Yes'): ?>
-                    <input type="file" id="chatbot-chatgpt-upload-file-input" name="file[]" style="display: none;" multiple="multiple" />
-                    <button id="chatbot-chatgpt-upload-file" title="Upload Files">
+                    <input type="file" id="chatbot-chatgpt-upload-file-input<?php echo $id_suffix; ?>" name="file[]" style="display: none;" multiple="multiple" />
+                    <button id="chatbot-chatgpt-upload-file<?php echo $id_suffix; ?>" title="Upload Files">
                         <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload File">
                     </button>
                     <script type="text/javascript">
-                        document.getElementById('chatbot-chatgpt-upload-file').addEventListener('click', function() {
-                            document.getElementById('chatbot-chatgpt-upload-file-input').click();
+                        document.getElementById('chatbot-chatgpt-upload-file<?php echo $id_suffix; ?>').addEventListener('click', function() {
+                            document.getElementById('chatbot-chatgpt-upload-file-input<?php echo $id_suffix; ?>').click();
                         });
                     </script>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_allow_mp3_uploads == 'Yes'): ?>
-                    <input type="file" id="chatbot-chatgpt-upload-mp3-input" name="file[]" style="display: none;" />
-                    <button id="chatbot-chatgpt-upload-mp3" title="Upload MP3">
+                    <input type="file" id="chatbot-chatgpt-upload-mp3-input<?php echo $id_suffix; ?>" name="file[]" style="display: none;" />
+                    <button id="chatbot-chatgpt-upload-mp3<?php echo $id_suffix; ?>" title="Upload MP3">
                         <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('attach_icon'); ?>" alt="Upload MP3">
                     </button>
                     <script type="text/javascript">
-                        document.getElementById('chatbot-chatgpt-upload-mp3').addEventListener('click', function() {
-                            document.getElementById('chatbot-chatgpt-upload-mp3-input').click();
+                        document.getElementById('chatbot-chatgpt-upload-mp3<?php echo $id_suffix; ?>').addEventListener('click', function() {
+                            document.getElementById('chatbot-chatgpt-upload-mp3-input<?php echo $id_suffix; ?>').click();
                         });
                     </script>
                 <?php endif; ?>
-                <button id="chatbot-chatgpt-erase-btn" title="Clear Conversation">
+                <button id="chatbot-chatgpt-erase-btn<?php echo $id_suffix; ?>" title="Clear Conversation">
                     <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('erase_icon'); ?>" alt="Erase Conversation">
                 </button>
                 <?php if ($chatbot_chatgpt_read_aloud_option == 'yes' && $voice != 'none'): ?>
-                    <button id="chatbot-chatgpt-text-to-speech-btn" title="Read Aloud">
+                    <button id="chatbot-chatgpt-text-to-speech-btn<?php echo $id_suffix; ?>" title="Read Aloud">
                         <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('read_aloud_icon'); ?>" alt="Read Out Loud">
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_speech_recognition == 'Yes'): ?>
-                    <button id="chatbot-chatgpt-speech-recognition-btn" title="Use your microphone">
+                    <button id="chatbot-chatgpt-speech-recognition-btn<?php echo $id_suffix; ?>" title="Use your microphone">
                         <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('mic_enabled_icon'); ?>" alt="Speech Recognition">
                     </button>
                 <?php endif; ?>
                 <?php if ($chatbot_chatgpt_allow_download_transcript == 'Yes'): ?>
-                    <button id="chatbot-chatgpt-download-transcript-btn" title="Download Transcript">
+                    <button id="chatbot-chatgpt-download-transcript-btn<?php echo $id_suffix; ?>" title="Download Transcript">
                         <img decoding="async" src="<?php echo chatbot_chatgpt_appearance_icon_path('download_icon'); ?>" alt="Download Transcript">
                     </button>
                 <?php endif; ?>
@@ -1377,14 +1552,14 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
             <?php
             $chatbot_chatgpt_enable_custom_buttons = esc_attr(get_option('chatbot_chatgpt_enable_custom_buttons', 'Off'));
             if ($chatbot_chatgpt_enable_custom_buttons == 'On' || $chatbot_chatgpt_enable_custom_buttons == 'Floating' || $chatbot_chatgpt_enable_custom_buttons == 'Both') {
-                chatbot_chatgpt_custom_buttons_display();
+                chatbot_chatgpt_custom_buttons_display($instance_id);
             }
             // Attribution - Ver 2.0.5
             chatbot_chatgpt_attribution();
             ?>
         </div>
         <div>
-            <button id="chatgpt-open-btn" style="display: none;" aria-hidden="true">
+            <button id="chatgpt-open-btn<?php echo $id_suffix; ?>" style="display: none;" aria-hidden="true">
                 <i class="chatbot-open-icon"></i>
             </button>
         </div>
@@ -1470,9 +1645,11 @@ function register_chatbot_shortcodes($number_of_shortcodes = null) {
 add_action('init', 'register_chatbot_shortcodes');
 
 // Custom Buttons - Ver 2.0.5
-function chatbot_chatgpt_custom_buttons_display() {
+// Updated Ver 2.4.0.1: Added instance_id parameter for multiple chatbots
+function chatbot_chatgpt_custom_buttons_display($instance_id = '') {
+    $id_suffix = !empty($instance_id) ? '-' . esc_attr($instance_id) : '';
     ?>
-    <div id="chatbot-chatgpt-custom-buttons">
+    <div id="chatbot-chatgpt-custom-buttons<?php echo $id_suffix; ?>">
         <?php
         $button_names = [];
         $button_urls = [];

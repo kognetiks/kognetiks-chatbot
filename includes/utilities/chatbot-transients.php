@@ -121,7 +121,8 @@ function chatbot_chatgpt_get_consolidated_transient_data ( $page_id , $user_id ,
 
 // Set the transients based on the type - Ver 1.8.1
 // Updated Ver 2.3.6: Always use session_id in transient keys for consistency between logged-in and anonymous users
-function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null, $thread_id = null, $sequence_id = null, $step_id = null) {
+// Updated Ver 2.4.0.1: Added instance_id parameter to support multiple chatbots on same page
+function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $user_id = null, $page_id = null, $session_id = null, $thread_id = null, $sequence_id = null, $step_id = null, $instance_id = null) {
 
     // Always use session_id for transient keys - Ver 2.3.6
     // session_id is always available for both logged-in and anonymous users
@@ -137,31 +138,38 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
         }
     }
 
+    // Add instance_id to transient keys if provided - Ver 2.4.0.1
+    $instance_suffix = !empty($instance_id) ? '_' . sanitize_key($instance_id) : '';
+
     // Set the transient based on the type - Always use session_id in keys - Ver 2.3.6
+    // Include instance_id in keys when provided - Ver 2.4.0.1
     if ( $transient_type == 'display_style' ) {
-        $transient_key = 'chatbot_chatgpt_style_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_style_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif (  $transient_type== 'assistant_alias' ) {
-        $transient_key = 'chatbot_chatgpt_assistant_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_assistant_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'file_id' ) {
-        $transient_key = 'chatbot_chatgpt_file_id_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_file_id_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'chatbot_chatgpt_assistant_file_id') {
-        $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'model' ) {
-        $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'voice') {
-        $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'kflow_sequence' ) {
-        $transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'kflow_step' ) {
-        $transient_key = 'chatbot_chatgpt_kflow_step_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_kflow_step_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'assistant_name' ) {
-        $transient_key = 'chatbot_chatgpt_assistant_name_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_assistant_name_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'assistant_id' ) {
-        $transient_key = 'chatbot_chatgpt_assistant_id_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_assistant_id_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'thread_id' ) {
-        $transient_key = 'chatbot_chatgpt_thread_id_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_thread_id_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ( $transient_type == 'additional_instructions' ) {
-        $transient_key = 'chatbot_chatgpt_additional_instructions_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_additional_instructions_' . $page_id . '_' . $session_id . $instance_suffix;
+    } elseif ( $transient_type == 'instance_id' ) {
+        // Store instance_id itself for retrieval
+        $transient_key = 'chatbot_chatgpt_instance_id_' . $page_id . '_' . $session_id . $instance_suffix;
     } else {
         return;
     }
@@ -181,7 +189,8 @@ function set_chatbot_chatgpt_transients( $transient_type , $transient_value , $u
 
 // Get the transients based on the type - Ver 1.8.1
 // Updated Ver 2.3.6: Always use session_id in transient keys for consistency between logged-in and anonymous users
-function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page_id = null, $session_id = null ): string {
+// Updated Ver 2.4.0.1: Added instance_id parameter to support multiple chatbots on same page
+function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page_id = null, $session_id = null, $instance_id = null ): string {
     
     // Always use session_id for transient keys - Ver 2.3.6
     // session_id is always available for both logged-in and anonymous users
@@ -197,6 +206,9 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
         }
     }
 
+    // Add instance_id to transient keys if provided - Ver 2.4.0.1
+    $instance_suffix = !empty($instance_id) ? '_' . sanitize_key($instance_id) : '';
+
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', '$transient_type ' . $transient_type);
     if ($transient_type == 'file_id' || $transient_type == 'chatbot_chatgpt_assistant_file_id') {
@@ -207,31 +219,34 @@ function get_chatbot_chatgpt_transients( $transient_type, $user_id = null, $page
     }
 
     // Construct the transient key based on the transient type - Always use session_id in keys - Ver 2.3.6
+    // Include instance_id in keys when provided - Ver 2.4.0.1
     $transient_key = '';
     if ($transient_type == 'display_style') {
-        $transient_key = 'chatbot_chatgpt_style_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_style_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'assistant_alias') {
-        $transient_key = 'chatbot_chatgpt_assistant_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_assistant_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'file_id') {
-        $transient_key = 'chatbot_chatgpt_file_id_'. $session_id;
+        $transient_key = 'chatbot_chatgpt_file_id_'. $session_id . $instance_suffix;
     } elseif ($transient_type == 'chatbot_chatgpt_assistant_file_id') {
-        $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_assistant_file_id_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'model') {
-        $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_model_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'voice') {
-        $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_voice_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'kflow_sequence') {
-        $transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_kflow_sequence_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'kflow_step') {
-        $transient_key = 'chatbot_chatgpt_kflow_step_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_kflow_step_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'assistant_name') {
-        $transient_key = 'chatbot_chatgpt_assistant_name_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_assistant_name_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'assistant_id') {
-        $transient_key = 'chatbot_chatgpt_assistant_id_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_assistant_id_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'thread_id') {
-        $transient_key = 'chatbot_chatgpt_thread_id_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_thread_id_' . $page_id . '_' . $session_id . $instance_suffix;
     } elseif ($transient_type == 'additional_instructions') {
-        $transient_key = 'chatbot_chatgpt_additional_instructions_' . $page_id . '_' . $session_id;
+        $transient_key = 'chatbot_chatgpt_additional_instructions_' . $page_id . '_' . $session_id . $instance_suffix;
+    } elseif ($transient_type == 'instance_id') {
+        $transient_key = 'chatbot_chatgpt_instance_id_' . $page_id . '_' . $session_id . $instance_suffix;
     } else {
         return '';
     }
