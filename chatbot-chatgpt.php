@@ -1872,8 +1872,36 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics - Ver 2.1.8
     // back_trace( 'NOTICE', '$model: ' . $model);
 
-    // Send only clean text via the API
+    // Send only clean text via the API - Ver 2.3.7
+    // Validate message exists in POST before sanitizing
+    if (!isset($_POST['message']) || empty($_POST['message'])) {
+        prod_trace('ERROR', 'Chatbot: Message is missing from POST data. POST keys: ' . implode(', ', array_keys($_POST)));
+        global $chatbot_chatgpt_fixed_literal_messages;
+        $default_message = 'Error: Message is required. Please enter a message and try again.';
+        $error_message = isset($chatbot_chatgpt_fixed_literal_messages[15]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[15] 
+            : $default_message;
+        wp_send_json_error($error_message);
+        return;
+    }
+    
     $message = sanitize_text_field($_POST['message']);
+    
+    // Additional validation - ensure message is not empty after sanitization
+    if (empty(trim($message))) {
+        prod_trace('ERROR', 'Chatbot: Message is empty after sanitization. Original POST message length: ' . strlen($_POST['message']));
+        global $chatbot_chatgpt_fixed_literal_messages;
+        $default_message = 'Error: Message cannot be empty. Please enter a message and try again.';
+        $error_message = isset($chatbot_chatgpt_fixed_literal_messages[15]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[15] 
+            : $default_message;
+        wp_send_json_error($error_message);
+        return;
+    }
+    
+    // Log the message being processed for debugging - Ver 2.3.7
+    // DIAG - Diagnostics - Uncomment for debugging
+    // prod_trace('NOTICE', 'Chatbot: Processing message - Length: ' . strlen($message) . ', First 50 chars: ' . substr($message, 0, 50));
     
     // Get client message ID if provided
     $client_message_id = isset($_POST['client_message_id']) ? sanitize_text_field($_POST['client_message_id']) : null;
@@ -1891,6 +1919,7 @@ function chatbot_chatgpt_send_message() {
             : $default_message;
         // Send error response
         wp_send_json_error($error_message);
+        return;
     }
     
     // Removed in Ver 1.8.6 - 2024 02 15
