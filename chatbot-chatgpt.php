@@ -50,14 +50,19 @@ global $session_id;
 global $user_id;
 
 // Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
+// Ver 2.3.7 - Fixed headers already sent warning by checking if headers can be sent
 function kognetiks_assign_unique_id() {
     if (!isset($_COOKIE['kognetiks_unique_id'])) {
         $unique_id = uniqid('kognetiks_', true);
         
-        // Set a cookie using the built-in setcookie function
-        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
+        // Check if headers have already been sent before trying to set cookie
+        // Ver 2.3.7 - Prevent "headers already sent" warning
+        if (!headers_sent()) {
+            // Set a cookie using the built-in setcookie function
+            setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
+        }
                 
-        // Ensure the cookie is set for the current request
+        // Ensure the cookie is set for the current request (works even if headers were already sent)
         $_COOKIE['kognetiks_unique_id'] = $unique_id;
     }
 }
