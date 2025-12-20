@@ -31,6 +31,8 @@ includes/analytics/DEFINITIONS.md
 FORUM-RESPONSE-TEXT.txt
 FORUM-RESPONSE.md
 TESTING-STRATEGY.md
+USER-ISSUE-DIAGNOSIS.md
+USER-ISSUE-RESPONSE.md
 
 # Ignore all files in the results folder
 results/*
