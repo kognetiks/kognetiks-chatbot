@@ -8,8 +8,27 @@
 
 ## 2.4.0 - TBD
 
-* **Duplicate Request Detection Error**: Fixed duplicate request detection errors and clear conversation failures by properly clearing message UUID transients and improving session validation, plus resolved SQL injection vulnerabilities in transient cleanup functions.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.9.
+### New Features
+* **Ukrainian Language Support**: Added comprehensive Ukrainian language translation support (`chatbot-globals-uk.php`) with 131+ translated strings for chatbot-user interaction messages, making the plugin accessible to Ukrainian-speaking users.
+
+### Bug Fixes
+* **Headers Already Sent Error**: Fixed "headers already sent" errors that were causing issues with assistant API calls and conversation handling.
+* **Infinite Retry Loop**: Resolved infinite retry loop issue with OpenAI and Azure assistants by implementing proper retry logic and error handling in assistant API calls.
+* **Translation File Fallback**: Improved graceful fallback handling when translation files are missing, preventing errors and ensuring the plugin continues to function properly even if translation files are unavailable.
+* **System Busy Processing Error**: Enhanced error handling for "system is busy processing" scenarios to provide better user feedback and prevent request failures.
+* **PHP 8.5.0 Compatibility**: Fixed deprecated error messages and warnings after upgrading to PHP 8.5.0, ensuring full compatibility with the latest PHP version.
+* **Duplicate Request Detection**: Fixed duplicate request detection errors and clear conversation failures by properly clearing message UUID transients and improving session validation across all API providers (OpenAI, Azure, Anthropic, DeepSeek, Google, Mistral, NVIDIA, Kognetiks, Local, and more).
+* **SQL Injection Prevention**: Resolved SQL injection vulnerabilities in transient cleanup functions by implementing proper sanitization and prepared statements.
+
+### Improvements
+* **Token Usage Display**: Adjusted Token Usage font styling in the dashboard widget to eliminate overflow issues and improve readability.
+* **Documentation Updates**: 
+  - Updated OpenAI documentation links for assistants and max tokens settings to reflect current API documentation.
+  - Added missing documentation links to parent pages across all API settings documentation.
+  - Fixed formatting issues by correcting triple backwards apostrophes to single apostrophes throughout documentation.
+  - Updated functional details documentation with improved clarity and accuracy.
+  - Minor corrections to README.md file for better accuracy.
+* **Code Quality**: Improved code organization and maintainability across multiple files.
 
 ## 2.3.9 - Released 2025-12-03
 
