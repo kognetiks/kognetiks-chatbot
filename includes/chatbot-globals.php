@@ -50,6 +50,9 @@ function chatbot_chatgpt_load_globals($language_code) {
     // error_log('[Chatbot] [chatbot-globals.php] Loading globals for language: ' . $language_code);
 
     // Define the file path for translations
+    // Supported languages: en, es, ru, uk, cs, de, fr, it, pl, pt
+    // The file path is constructed using the first 2 characters of the language code
+    // (e.g., 'uk_UA' -> 'uk' -> 'chatbot-globals-uk.php')
     $file_path = plugin_dir_path(__FILE__) . 'translations/chatbot-globals-' . substr(strtolower($language_code), 0, 2) . '.php';
 
     // Check if the file exists and include it, else log a warning
