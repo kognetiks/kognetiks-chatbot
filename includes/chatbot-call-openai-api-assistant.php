@@ -1104,6 +1104,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
 
     $retries = 0;
     $maxRetries = 10;
+    $consecutive_failures = 0; // Track consecutive failures to prevent infinite loops - Ver 2.4.0
+    $max_consecutive_failures = 3; // Stop after 3 consecutive failures - Ver 2.4.0
     $sleepTime = $sleepTime ?? 500000; // Default to 500 milliseconds if not set
 
     do {
@@ -1233,6 +1235,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
               // back_trace( 'NOTICE', 'Run completed successfully');
                 $run_completed = true;
                 $run_status = "completed";
+                $consecutive_failures = 0; // Reset consecutive failures on success - Ver 2.4.0
                 // Log run completion
                 // DIAG - Diagnostics - Ver 2.3.5
                 // prod_trace('NOTICE', 'Run completed - Thread: ' . $thread_id . ', Run ID: ' . $runId . ', Message UUID: ' . $message_uuid);
@@ -1242,6 +1245,7 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
             else if (isset($status_data['status']) && ($status_data['status'] === 'failed' || $status_data['status'] === 'expired')) {
               // back_trace( 'ERROR', 'Run ' . $status_data['status'] . ': ' . print_r($status_data['last_error'] ?? [], true));
                 $run_status = $status_data['status'];
+                $consecutive_failures++; // Increment consecutive failures - Ver 2.4.0
                 break;
             }
         }
@@ -1250,13 +1254,29 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         if ($check_count >= $max_status_checks && !$run_completed) {
           // back_trace( 'ERROR', 'Run monitoring timed out after ' . $max_status_checks . ' checks');
             $run_status = "timeout";
+            // Timeout is not counted as a consecutive failure, but we should still track it
         }
 
         $retries++;
 
-        if ($run_status == "failed" || $run_status == "incomplete" || $run_status == "timeout") {
+        // Check for consecutive failures to prevent infinite loops - Ver 2.4.0
+        if ($run_status == "failed" || $run_status == "expired") {
+            if ($consecutive_failures >= $max_consecutive_failures) {
+              // back_trace( 'ERROR', 'Stopping after ' . $consecutive_failures . ' consecutive failures');
+                // Clear both locks before returning error
+                $thread_lock = 'chatgpt_run_lock_' . $thread_id;
+                delete_transient($thread_lock);
+                delete_transient($conv_lock);
+                return "Error: Run failed after " . $consecutive_failures . " consecutive failures. Status: " . $run_status;
+            }
+        } else if ($run_status != "completed") {
+            // Reset consecutive failures for non-failed statuses (timeout, incomplete, etc.)
+            $consecutive_failures = 0;
+        }
+
+        if ($run_status == "failed" || $run_status == "incomplete" || $run_status == "timeout" || $run_status == "expired") {
           // back_trace( 'NOTICE', 'Run not completed. Status: ' . $run_status);
-          // back_trace( 'NOTICE', 'Retry ' . $retries . ' of ' . $maxRetries);
+          // back_trace( 'NOTICE', 'Retry ' . $retries . ' of ' . $maxRetries . ', Consecutive failures: ' . $consecutive_failures);
             usleep($sleepTime);
         }
 
