@@ -99,7 +99,7 @@ TIP: When using the `embedded` style, it's best to put the shortcode in a page o
    - **Description**: This setting determines the maximum number of tokens for the assistant's response.
    - **Options**: A numeric value between `1,000` and `100,000` (the default is `20000`).
    - **Selection**: Set this based on the level of detail you want in the responses. Higher values allow for longer responses.
-   - **Additional Info**: For a deeper explanation, please see [Max Completion and Max Prompt Tokens](https://platform.openai.com/docs/assistants/deep-dive/max-completion-and-max-prompt-tokens).
+   - **Additional Info**: For a deeper explanation, please see [Max Completion and Max Prompt Tokens](https://platform.openai.com/docs/assistants/deep-dive#max-completion-and-max-prompt-tokens).
 
 3. **Thread Retention Period (hrs)**:
     - **Description**: This setting specifies how long conversation threads are retained.
