@@ -41,7 +41,6 @@ The plugin supports multiple AI platforms, allowing users to choose the most sui
    - Capabilities: Text generation
    - API Endpoint: https://generativelanguage.googleapis.com/v1beta 
 
-
 6. **Mistral**
    - Models: Mistral-7B-Instruct, Mistral-8x7B-Instruct, Mistral-8x22B-Instruct
    - Capabilities: Text generation, agent functionality

@@ -6,7 +6,7 @@
 
 ---
 
-## 2.4.0 - TBD
+## 2.4.0 - Released 2025-12-23
 
 ### New Features
 * **Ukrainian Language Support**: Added comprehensive Ukrainian language translation support (`chatbot-globals-uk.php`) with 131+ translated strings for chatbot-user interaction messages, making the plugin accessible to Ukrainian-speaking users.
