@@ -1,5 +1,36 @@
 # Past Updates
 
+## What's new in Version 2.4.0
+
+### New Features
+* **Ukrainian Language Support**: Added comprehensive Ukrainian language translation support (`chatbot-globals-uk.php`) with 131+ translated strings for chatbot-user interaction messages, making the plugin accessible to Ukrainian-speaking users.
+
+### Bug Fixes
+* **Headers Already Sent Error**: Fixed "headers already sent" errors that were causing issues with assistant API calls and conversation handling.
+* **Infinite Retry Loop**: Resolved infinite retry loop issue with OpenAI and Azure assistants by implementing proper retry logic and error handling in assistant API calls.
+* **Translation File Fallback**: Improved graceful fallback handling when translation files are missing, preventing errors and ensuring the plugin continues to function properly even if translation files are unavailable.
+* **System Busy Processing Error**: Enhanced error handling for "system is busy processing" scenarios to provide better user feedback and prevent request failures.
+* **PHP 8.5.0 Compatibility**: Fixed deprecated error messages and warnings after upgrading to PHP 8.5.0, ensuring full compatibility with the latest PHP version.
+* **Duplicate Request Detection**: Fixed duplicate request detection errors and clear conversation failures by properly clearing message UUID transients and improving session validation across all API providers (OpenAI, Azure, Anthropic, DeepSeek, Google, Mistral, NVIDIA, Kognetiks, Local, and more).
+* **SQL Injection Prevention**: Resolved SQL injection vulnerabilities in transient cleanup functions by implementing proper sanitization and prepared statements.
+
+### Improvements
+* **Token Usage Display**: Adjusted Token Usage font styling in the dashboard widget to eliminate overflow issues and improve readability.
+* **Documentation Updates**: 
+  - Updated OpenAI documentation links for assistants and max tokens settings to reflect current API documentation.
+  - Added missing documentation links to parent pages across all API settings documentation.
+  - Fixed formatting issues by correcting triple backwards apostrophes to single apostrophes throughout documentation.
+  - Updated functional details documentation with improved clarity and accuracy.
+  - Minor corrections to README.md file for better accuracy.
+* **Code Quality**: Improved code organization and maintainability across multiple files.
+
+## What's new in Version 2.3.9
+
+* **Google API**: Added support for Google's API to provide advanced conversational capabilities for the chatbot.
+* **Conversation Digest**: Added a new feature to send a digest of the conversation to the site admin via email.
+* **Conversation History**: Improved the conversation history display to show the conversation history for the logged-in user.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.8.
+
 ## What's new in Version 2.3.8
 
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.7.
@@ -71,7 +102,7 @@
 
 ## What's New in Version 2.2.5
 
-* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site’s existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
+* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site's existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.4.
 
 ## What's New in Version 2.2.4
@@ -117,8 +148,8 @@
 
 ## What's new in Version 2.1.6
 
-* **Message Limit Periods**: Added options to set message limits periods for visitors and logged-in users, from ```Hourly```, ```Daily```, ```Weekly```, up to ```Lifetime```.
-* **Charset Fallback Adjustment**: Added fallback to ```utf8``` character set when ```utf8mb4``` is not supported, ensuring compatibility across different database configurations.
+* **Message Limit Periods**: Added options to set message limits periods for visitors and logged-in users, from `Hourly`, `Daily`, `Weekly`, up to `Lifetime`.
+* **Charset Fallback Adjustment**: Added fallback to `utf8` character set when `utf8mb4` is not supported, ensuring compatibility across different database configurations.
 * **Suppress Footer Chatbots**: Suppress chatbot in the footer when the chatbot is embedded on the page.
 
 ## What's new in Version 2.1.5
@@ -135,7 +166,7 @@
 ## What's new in Version 2.1.3
 
 * **Remote Server Access**: The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
-* **Improving Math Handling**: Integrated code enhances chatbot’s ability to render complex mathematical expressions.
+* **Improving Math Handling**: Integrated code enhances chatbot's ability to render complex mathematical expressions.
 * **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 ## What's New in Version 2.1.2

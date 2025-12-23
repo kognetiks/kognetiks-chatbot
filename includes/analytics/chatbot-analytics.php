@@ -15,20 +15,44 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Load the language-specific globals
+// Ver 2.3.7 - Fixed translation file lookup to handle locale formats properly
 function kognetiks_analytics_load_globals( $language_code ) {
 
     // Log the selected language code
     // error_log( '[Chatbot] [chatbot-analytics.php] Loading globals for language: ' . $language_code );
 
+    // Try the full locale first (e.g., 'uk_UA', 'en_US')
     $file_path = plugin_dir_path( __FILE__ ) . '/languages/' . $language_code . '.php';
 
     if ( file_exists( $file_path ) ) {
         require_once $file_path;
         // error_log( '[Chatbot] [chatbot-analytics.php] Loaded translation file: ' . $file_path );
-    } else {
-        $fallback_file = plugin_dir_path( __FILE__ ) . '/languages/en_US.php';
+        return;
+    }
+
+    // If full locale not found, try language code only (first 2 chars, e.g., 'uk' from 'uk_UA')
+    $lang_code_short = substr( strtolower( $language_code ), 0, 2 );
+    $file_path_short = plugin_dir_path( __FILE__ ) . '/languages/' . $lang_code_short . '.php';
+    
+    // Check if there's a matching file with full locale format (e.g., 'uk_UA.php' when looking for 'uk')
+    // First, try to find any file that starts with the language code
+    $languages_dir = plugin_dir_path( __FILE__ ) . '/languages/';
+    if ( is_dir( $languages_dir ) ) {
+        $files = glob( $languages_dir . $lang_code_short . '_*.php' );
+        if ( !empty( $files ) ) {
+            // Use the first matching file (e.g., 'uk_UA.php')
+            require_once $files[0];
+            // error_log( '[Chatbot] [chatbot-analytics.php] Loaded translation file: ' . $files[0] );
+            return;
+        }
+    }
+
+    // Fall back to English if no translation file found
+    $fallback_file = plugin_dir_path( __FILE__ ) . '/languages/en_US.php';
+    if ( file_exists( $fallback_file ) ) {
         require_once $fallback_file;
-        error_log( '[Chatbot] [chatbot-analytics.php] Translation file not found for ' . $language_code . '. Falling back to: ' . $fallback_file );
+        // Only log as notice, not error, since fallback is expected behavior for unsupported languages
+        // error_log( '[Chatbot] [chatbot-analytics.php] Translation file not found for ' . $language_code . '. Falling back to: ' . $fallback_file );
     }
 
 }

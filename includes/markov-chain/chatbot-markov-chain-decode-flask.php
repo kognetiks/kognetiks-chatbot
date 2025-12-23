@@ -99,7 +99,7 @@ function generate_markov_text_flask_model($startWords = [], $max_tokens = 500, $
     // Final cleanup and punctuation check to ensure sentence completion
     $response = implode(' ', $words);
 
-    // If it doesn’t end with a period, check for possible endings or add punctuation
+    // If it doesn't end with a period, check for possible endings or add punctuation
     if (!preg_match('/[.!?]$/', $response)) {
         $response = rtrim($response, ' ,;') . '.';
     }
@@ -358,7 +358,7 @@ function clean_up_markov_chain_response($response) {
     $response = preg_replace('/\s+/', ' ', $response);
 
     // Step 4: Basic punctuation cleanup
-    // Ensure there’s no space before punctuation and that spaces after punctuation are managed correctly
+    // Ensure there's no space before punctuation and that spaces after punctuation are managed correctly
     $response = preg_replace('/\s+([?.!,])/', '$1', $response);  // No space before punctuation
     $response = preg_replace('/([?.!,])([^\s?.!,])/', '$1 $2', $response);  // Space after punctuation
     $response = preg_replace('/([?.!,])\s+([\'"])/', '$1$2', $response);  // No space between punctuation and quote

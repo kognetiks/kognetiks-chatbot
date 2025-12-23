@@ -6,7 +6,7 @@
 
 1. **Scheduled to Run**:
    - **Description**: Indicates how frequently the **Transformer Model** is scheduled to run.
-   - **Example**: If it’s set to "Daily," the system will automatically analyze content every day.
+   - **Example**: If it's set to "Daily," the system will automatically analyze content every day.
    - **Use**: Verify that the schedule aligns with your content update frequency to keep the chatbot's knowledge current.
 
 2. **Status of Last Run**:
@@ -72,5 +72,6 @@
 
 ---
 
+- **[Back to Transformer Model Settings](api-transformer-model-settings.md)**
 - **[Back to the Overview](/overview.md)**
 

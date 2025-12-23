@@ -45,7 +45,7 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     }
 
     // Lock check removed - main send function handles locking
-    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+    set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 2.2.6
     // back_trace( 'NOTICE', 'chatbot_call_azure_openai_api()');

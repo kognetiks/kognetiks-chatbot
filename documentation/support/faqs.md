@@ -8,7 +8,7 @@ Kognetiks Chatbot is an AI-powered conversational agent developed to give conten
 
 No, you should **not** put more than one chatbot shortcode on the same page or post.
 
-For now, it will **not** work as expected if you put a floating chatbot using the ```[chatbot style=floating]``` in the footer **and** an embedded chatbot ```[chatbot style=embedded```] on the page or post.
+For now, it will **not** work as expected if you put a floating chatbot using the `[chatbot style=floating]` in the footer **and** an embedded chatbot `[chatbot style=embedded`] on the page or post.
 
 You can put as many different chatbot on different pages, as long as there is only one chatbot per page.
 
@@ -61,9 +61,9 @@ In an OpenAI help blog post this week (August 23, 2023), it appears that OpenAI 
 
 ## I've created an Assistant but the chatbot is responding generically.
 
-First, make sure to set the ```Use GPT Assistant Id``` to ```Yes``` on GTP Assistant tab in the Chatbot settings.
+First, make sure to set the `Use GPT Assistant Id` to `Yes` on GTP Assistant tab in the Chatbot settings.
 
-Be sure to use a valid ```Primary GPT Assistant Id``` or ```Alternate GPT Assistant Id```.  Assistant IDs are similar to ```asst_gs8KtljqS7F62mjXicjxnAPg``` and found [here](https://platform.openai.com/assistants).
+Be sure to use a valid `Primary GPT Assistant Id` or `Alternate GPT Assistant Id`.  Assistant IDs are similar to `asst_gs8KtljqS7F62mjXicjxnAPg` and found [here](https://platform.openai.com/assistants).
 
 Sometimes caching is the problem.  If so, in the case of WP Engine hosting, you might allow the following:
 
@@ -124,12 +124,12 @@ Follow these steps to enable conversation logging and inspect the logs:
     - Go to the Chatbot Settings.
     - Click on the Reporting tab.
     - Scroll to the bottom of the page.
-    - Set ```Enable Conversation Logging``` to ```On```.
+    - Set `Enable Conversation Logging` to `On`.
     - Click "Save Settings".
 
 2. **Refresh the Chatbot Page:**
     - Open the page where the chatbot resides.
-    - Use ```CTRL-SHIFT-R``` to refresh the page.
+    - Use `CTRL-SHIFT-R` to refresh the page.
 
 3. **Test the Chatbot:**
     - Enter your prompt and wait for the response.
@@ -137,9 +137,9 @@ Follow these steps to enable conversation logging and inspect the logs:
 4. **Download and Inspect Conversation Data:**
     - Go back to the Chatbot Settings.
     - Click on the Reporting tab again.
-    - Click ```Download Conversation Data```.
+    - Click `Download Conversation Data`.
 
-    You should notice that the ```Conversation items stored in your DB total NNNN rows``` where NNNN is the number of prompts and responses. When you click the ```Download Conversation Data```, you'll be prompted to save the CSV to your local machine. Once downloaded, you should be able to open it with either Excel or Sheets or any other CSV reader.
+    You should notice that the `Conversation items stored in your DB total NNNN rows` where NNNN is the number of prompts and responses. When you click the `Download Conversation Data`, you'll be prompted to save the CSV to your local machine. Once downloaded, you should be able to open it with either Excel or Sheets or any other CSV reader.
 
 5. **Check for Assistant Information:**
     - Ensure that columns G, H, and I in the CSV file are populated with your Assistant's information.

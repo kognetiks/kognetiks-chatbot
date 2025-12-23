@@ -23,12 +23,12 @@ From bloggers and educators to small business owners and agencies, Kognetiks Cha
 - **Simple Setup** - Install, activate, and start chatting in minutes.
 - **Multiple AI Engines** - Choose OpenAI, NVIDIA, Anthropic, Mistral, Google, DeepSeek, Azure, or run your own local JAN.AI server (no API fees, no external data transfer).
 - **Embedded or Floating Chat** - Place your chatbot anywhere using simple shortcodes.
-- **Knowledge Navigator** - Teach your chatbot your site’s content for smarter, context-aware answers.
+- **Knowledge Navigator** - Teach your chatbot your site's content for smarter, context-aware answers.
 - **Custom Assistants** - Create specialized assistants for support, sales, education, or internal knowledge.
 - **Conversation Logging** - Review interactions, export chat logs, and improve user experience.
 - **Sentiment Analysis** - Gain insights into visitor sentiment and overall engagement quality.
 - **Speech Recognition & Voice Replies** - Talk and listen for a natural, voice-enabled experience.
-- **Multi-Language Ready** - Automatically adapts to your WordPress site’s language.
+- **Multi-Language Ready** - Automatically adapts to your WordPress site's language.
 - **Privacy & Security First** - Manage API keys safely and keep data secure.
 
 ## 🌐 Why Choose Kognetiks Chatbot
@@ -93,7 +93,7 @@ Yes. You control which AI engine processes data, and local AI options keep all d
 
 The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality.
 
-By using this plugin, you agree to abide by each service’s terms of service and privacy policy.
+By using this plugin, you agree to abide by each service's terms of service and privacy policy.
 
 | Provider | Terms | Privacy | API Key |
 |--|--|-|-|
@@ -104,7 +104,7 @@ By using this plugin, you agree to abide by each service’s terms of service an
 | **DeepSeek** | [Terms of Use](https://chat.deepseek.com/downloads/DeepSeek%20User%20Agreement.html) | [Privacy Policy](https://chat.deepseek.com/downloads/DeepSeek%20Privacy%20Policy.html) | [API Key](https://platform.deepseek.com/sign_in)
 | **Mistral** | [Terms of Service](https://mistral.ai/terms#terms-of-service) | [Privacy Policy](https://mistral.ai/terms#privacy-policy) | [API Key](https://console.mistral.ai/api-keys)
 | **Google** | [Terms of Use](https://ai.google.dev/gemini-api/terms) | [Privacy Policy](https://policies.google.com/privacy) | [API Keys](https://aistudio.google.com/api-keys)
-| **JAN.AI** | [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy) | [API Key](https://www.jan.ai/docs/desktop/api-server)
+| **JAN.AI** | [About](https://jan.ai/about) | [Privacy Policy](https://jan.ai/docs/privacy-policy) | [API Keys](https://www.jan.ai/docs/desktop/api-server)
 
 **Note:** You are responsible for any fees associated with the use of third-party APIs.
 
@@ -120,9 +120,7 @@ Need help? Visit [https://kognetiks.com/plugin-support/](https://kognetiks.com/p
 
 ## ⚠️ Disclaimer
 
-WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. DeepSeek and related trademarks are the property of DeepSeek. Mistral and related trademarks are the property of Mistral. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek or Mistral.
-
-
+WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. DeepSeek and related trademarks are the property of DeepSeek. Mistral and related trademarks are the property of Mistral. Google Gemini and related trademarks are the property of Google. JAN.AI and related trademarks are the property of JAN.AI. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek, Mistral, Google, JAN.AI.
 
 ## ❤️ Thank You
 

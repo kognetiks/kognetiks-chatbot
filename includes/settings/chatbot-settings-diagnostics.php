@@ -650,9 +650,14 @@ function log_chatbot_error() {
         $ip_address = $_SERVER['REMOTE_ADDR'];
         $date_time = date('Y-m-d H:i:s');
 
-        // Construct the log message
+        // Construct the log message - Ver 2.3.7 - Fixed empty error message display
+        // Ensure error_message is not empty before logging
+        if (empty($error_message)) {
+            $error_message = 'Empty error message received';
+        }
+        
         $log_message = sprintf(
-            "[Chatbot] [ERROR] [%s] [Session ID: %s] [User ID: %s] [IP Address: %s] [%s] [%s]",
+            "[Chatbot] [ERROR] [%s] [Session ID: %s] [User ID: %s] [IP Address: %s] [Error: %s]%s",
             $date_time,
             $session_id ? $session_id : 'N/A',
             $user_id ? $user_id : 'N/A',

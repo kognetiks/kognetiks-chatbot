@@ -12,7 +12,7 @@
 
 Use the following example code to call the diagnostic function:
 
-```// back_trace( 'LEVEL' , 'Message' );```
+`// back_trace( 'LEVEL' , 'Message' );`
 
 - Where **LEVEL** is one of: **SUCCESS**, **NOTICE**, **WARNING**, **FAILURE**, or **ERROR**
 

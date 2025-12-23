@@ -1,6 +1,6 @@
 # Configuring the Knowledge Navigator Enhanced Response Settings
 
-The Enhanced Response settings allow you to customize how additional information is presented in the chatbot’s responses. These enhanced responses include links to related content on your site, helping users find more detailed information. Follow these steps to configure these options:
+The Enhanced Response settings allow you to customize how additional information is presented in the chatbot's responses. These enhanced responses include links to related content on your site, helping users find more detailed information. Follow these steps to configure these options:
 
 ![Knowledge Navigator Enhanced Response Setting](knowledge-navigator-enhanced-response-settings.png)
 
@@ -53,4 +53,5 @@ By configuring these settings, you can enhance the chatbot's responses with addi
 
 ---
 
+- **[Back to Knowledge Navigator Settings](knowledge-navigator.md)**
 - **[Back to the Overview](/overview.md)**

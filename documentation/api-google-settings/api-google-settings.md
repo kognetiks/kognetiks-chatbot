@@ -22,4 +22,5 @@ The **Kognetiks Chatbot** plugin requires proper configuration to function corre
 
 ---
 
+- **[Back to API Google Gemini Settings](api-googe-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

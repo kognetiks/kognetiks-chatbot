@@ -326,6 +326,39 @@ function chatbot_chatgpt_dashboard_widget_content() {
                 padding: 10px;
                 background: #f0f0f1;
                 border-radius: 4px;
+                overflow: hidden;
+                min-width: 0;
+            }
+            .chatbot-token-stat .chatbot-stat-value {
+                font-size: clamp(14px, 2.2vw, 18px);
+                word-break: break-word;
+                overflow-wrap: break-word;
+                line-height: 1.2;
+                max-width: 100%;
+                overflow: hidden;
+                box-sizing: border-box;
+                display: block;
+            }
+            .chatbot-token-stat .chatbot-stat-label {
+                font-size: clamp(11px, 1.5vw, 13px);
+                word-break: break-word;
+                overflow-wrap: break-word;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            /* Responsive adjustments for smaller screens */
+            @media (max-width: 1200px) {
+                .chatbot-token-stat .chatbot-stat-value {
+                    font-size: clamp(12px, 2vw, 16px);
+                }
+            }
+            @media (max-width: 782px) {
+                .chatbot-token-stats {
+                    grid-template-columns: 1fr;
+                }
+                .chatbot-token-stat .chatbot-stat-value {
+                    font-size: 16px;
+                }
             }
             .chatbot-graph {
                 background: #fff;

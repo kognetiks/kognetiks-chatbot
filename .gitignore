@@ -21,13 +21,15 @@ package.json
 /debug/
 # package.json is now needed for Snyk configuration
 # package.json
+COMPARISON_ANALYSIS.md
+DEPLOYMENT.md
+GIT-COMMANDS.md
+includes/analytics/DEFINITIONS.md
 QUERIES.md
+TESTING-STRATEGY.md
 TESTS.md
 TODO.md
-GIT-COMMANDS.md
-COMPARISON_ANALYSIS.md
-includes/utilities/chatbot-keyguard-key.php
-includes/analytics/DEFINITIONS.md
+
 
 # Ignore all files in the results folder
 results/*

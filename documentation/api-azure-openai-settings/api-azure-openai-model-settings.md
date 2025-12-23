@@ -10,12 +10,6 @@ More information about Azure OpenAI models and their capability can be found at 
 
 - [Chat Settings](chat-settings.md)
 
-- [Voice Settings (Text to Speech)](voice-settings.md)
-
-- [Whisper Settings (Speech to Text)](whisper-settings.md)
-
-- [Image Settings](image-settings.md)
-
 - [Advanced API Settings](advanced-api-settings.md)
 
 ---

@@ -17,7 +17,7 @@ If you're unsure about any of these steps, consult with a web professional or Wo
 
 1. **Enable Beta Features**:
    - **Description**: This setting determines if beta features included in the current release have been enabled.
-   - **Default Value**: The default value is ```NO```.
+   - **Default Value**: The default value is `NO`.
    - **Options**: `YES` or `NO`.
    - **Selection**: Choose `YES` to enable any beta features for this release mentioned below, otherwise choose to `NO` at any time to disable any beta features.
 

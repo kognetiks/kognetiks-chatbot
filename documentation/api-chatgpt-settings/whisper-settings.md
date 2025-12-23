@@ -31,7 +31,7 @@ Here are some example shortcodes you can use to customize the chatbot's speech-t
 
 ## Tips
 
-- **Model Selection**: Ensure the selected model provides the necessary accuracy and performance for your chatbot’s speech recognition tasks.
+- **Model Selection**: Ensure the selected model provides the necessary accuracy and performance for your chatbot's speech recognition tasks.
 
 - **Output Format**: Choose the output format that aligns with how you intend to use the transcribed speech data.
 
@@ -39,4 +39,5 @@ By configuring these settings, you ensure that your Kognetiks Chatbot can effect
 
 ---
 
+- **[Back to API ChatGPT Settings](api-chatgpt-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

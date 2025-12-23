@@ -1,10 +1,10 @@
 # Conversation History
 
-You can now add a shortcode on your site to retrieve the logged-in user’s conversation history.
+You can now add a shortcode on your site to retrieve the logged-in user's conversation history.
 
 Use the following format to invoke the conversation history anywhere you can include a shortcode:
 
-- ```[chatbot_chatgpt_history]```
+- `[chatbot_chatgpt_history]`
 
 # Conversation Logging Overview
 
@@ -83,7 +83,7 @@ The privacy policy should be regularly updated to reflect any changes in data ha
 
 ### Example Notification
 
-- "Please note that your interactions with our chatbot are logged for the purpose of improving our services and providing better support. We respect your privacy, and all data is handled in accordance with our privacy policy, which you can review ```<a href='https//...link to your privacy page ...'>here</a>```. Your continued use of the chatbot indicates your consent to these practices."
+- "Please note that your interactions with our chatbot are logged for the purpose of improving our services and providing better support. We respect your privacy, and all data is handled in accordance with our privacy policy, which you can review `<a href='https//...link to your privacy page ...'>here</a>`. Your continued use of the chatbot indicates your consent to these practices."
 
 ---
 

@@ -1,6 +1,6 @@
 # Tools
 
-This tab provides tools, tests and diagnostics that are enabled when the Chatbot Diagnostics are enabled on the ```Messages``` tab.
+This tab provides tools, tests and diagnostics that are enabled when the Chatbot Diagnostics are enabled on the `Messages` tab.
 
 There are three tools currently available:
 
@@ -21,7 +21,7 @@ Export the Chatbot options to a file.  This excludes sensitive information such 
 ### Steps:
 
 1. **Download Options Data**:
-   - Use the ```Download Options Data``` button to retrieve the chatbot options and download the file.
+   - Use the `Download Options Data` button to retrieve the chatbot options and download the file.
 
 ---
 
@@ -38,13 +38,13 @@ The Manage Error Logs section provides direct access to the chatbot's unique err
 ### Steps:
 
 1. **Download**
-    - Choose ```Download``` to retrieve and save locally the selected error log.
+    - Choose `Download` to retrieve and save locally the selected error log.
 
 2. **Delete**
-    - Choose ```Delete``` to delete the selected error log.
+    - Choose `Delete` to delete the selected error log.
 
 3. **Delete All**
-    - Chose ```Delete All``` to delete ALL error logs listed.
+    - Chose `Delete All` to delete ALL error logs listed.
 
 ---
 
@@ -61,13 +61,13 @@ The Manage Widget Access Logs section provides direct access to the chatbot's wi
 ### Steps:
 
 1. **Download**
-    - Choose ```Download``` to retrieve and save locally the selected widget access log.
+    - Choose `Download` to retrieve and save locally the selected widget access log.
 
 2. **Delete**
-    - Choose ```Delete``` to delete the selected widget access error log.
+    - Choose `Delete` to delete the selected widget access error log.
 
 3. **Delete All**
-    - Chose ```Delete All``` to delete ALL widget access logs listed.
+    - Chose `Delete All` to delete ALL widget access logs listed.
 
 ---
 

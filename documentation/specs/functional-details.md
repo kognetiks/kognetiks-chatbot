@@ -4,9 +4,9 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.3.6  
+**Version:** 2.4.0  
 **License:** GPLv3 or later  
-**WordPress Compatibility:** Tested up to WordPress 6.8.3
+**WordPress Compatibility:** Tested up to WordPress 6.9
 
 ## Core Functionality
 
@@ -17,45 +17,51 @@ The plugin supports multiple AI platforms, allowing users to choose the most sui
 #### Supported AI Platforms
 
 1. **OpenAI**
-   - Models: GPT-3.5-turbo, GPT-4, GPT-4-turbo, GPT-4o, GPT-4o-mini
+   - Models: GPT-3.5-turbo, GPT-4, GPT-4-turbo, GPT-4o, GPT-4o-mini, and variants
    - Capabilities: Text generation, image generation (DALL-E), speech synthesis (TTS), speech recognition (Whisper)
    - API Endpoint: https://api.openai.com/v1/
 
-2. **Azure OpenAI**
-   - Models: GPT-3.5-turbo, GPT-4, GPT-4-turbo variants
-   - Capabilities: Text generation, image generation, speech synthesis
-   - Integration with Microsoft Azure cloud services
-
-3. **NVIDIA NIM (NVIDIA Inference Microservices)**
-   - Models: Various NVIDIA-optimized models including Llama variants
-   - Capabilities: High-performance text generation
-   - Optimized for NVIDIA hardware
-
-4. **Anthropic Claude**
+2. **Anthropic Claude**
    - Models: Claude-3-5-sonnet-latest, Claude-3-opus, Claude-3-sonnet, Claude-3-haiku
    - Capabilities: Advanced text generation with safety features
    - API Endpoint: https://api.anthropic.com/
 
-5. **DeepSeek**
+3. **Azure OpenAI**
+   - Models: GPT-3.5-turbo, GPT-4, GPT-4-turbo variants
+   - Capabilities: Text generation, image generation, speech synthesis
+   - Integration with Microsoft Azure cloud services
+
+4. **DeepSeek**
    - Models: DeepSeek-chat, DeepSeek-reasoner (DeepSeek-R1)
    - Capabilities: Text generation, reasoning capabilities
    - API Endpoint: https://api.deepseek.com/
+
+5. **Google Gemini**
+   - Models: gemini-2.0-flash, gemini-3.0-flash, gemini-flash-latest and variants
+   - Capabilities: Text generation
+   - API Endpoint: https://generativelanguage.googleapis.com/v1beta 
 
 6. **Mistral**
    - Models: Mistral-7B-Instruct, Mistral-8x7B-Instruct, Mistral-8x22B-Instruct
    - Capabilities: Text generation, agent functionality
    - API Endpoint: https://api.mistral.ai/
+   
+7. **NVIDIA NIM (NVIDIA Inference Microservices)**
+   - Models: Various NVIDIA-optimized models including Llama variants
+   - Capabilities: High-performance text generation
+   - Optimized for NVIDIA hardware
 
-7. **Local Server (JAN.AI)**
+8. **Local Server (JAN.AI)**
    - Models: Various open-source models (Llama, Mistral, etc.)
    - Capabilities: Local processing, privacy-focused
    - No external API calls required
 
-8. **Markov Chain (Beta)**
+9. **Markov Chain (Beta)**
    - Capabilities: Basic text generation using statistical models
    - No external API required
 
-9. **Transformer Models (Beta)**
+10. **Transformer Models**
+   - Models: lexical-context-model, sentential-context-model, sentential-context-model-lite
    - Capabilities: Local transformer-based text generation
    - No external API required
 
@@ -183,7 +189,7 @@ Each AI platform requires specific configuration:
 
 ### WordPress Requirements
 
-- **WordPress Version**: 5.0 or higher (tested up to 6.8.3)
+- **WordPress Version**: 5.0 or higher
 - **PHP Version**: 7.4 or higher
 - **MySQL**: 5.6 or higher
 - **Memory**: Minimum 128MB PHP memory limit
@@ -283,23 +289,26 @@ The plugin creates several database tables:
 Users must agree to terms of service for each AI platform:
 
 - **OpenAI**: Terms of Use and Privacy Policy
-- **Azure OpenAI**: Microsoft Terms and Privacy Statement
-- **NVIDIA**: NVIDIA Terms and Privacy Policy
 - **Anthropic**: Anthropic Terms of Service and Privacy Policy
+- **Azure OpenAI**: Microsoft Terms and Privacy Statement
 - **DeepSeek**: DeepSeek User Agreement and Privacy Policy
+- **Google**: Google User Ageement and Privacy Policy
 - **Mistral**: Mistral Terms of Service and Privacy Policy
+- **NVIDIA**: NVIDIA Terms and Privacy Policy
 - **JAN.AI**: JAN.AI About and Privacy Policy
 
 ## Version History
 
-### Recent Updates (Version 2.3.6)
+### Recent Updates (Version 2.3.9)
 
-- **Analytics Package**: Comprehensive dashboard with conversation statistics, sentiment analysis, and engagement metrics
-- **Bug Fixes**: Resolved issues from previous versions
-- **Performance Improvements**: Enhanced response times and reliability
+* **Google API**: Added support for Google's API to provide advanced conversational capabilities for the chatbot.
+* **Conversation Digest**: Added a new feature to send a digest of the conversation to the site admin via email.
+* **Conversation History**: Improved the conversation history display to show the conversation history for the logged-in user.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.8.
 
 ### Key Milestones
 
+- **Version 2.3.8**: Google Gemini API integration
 - **Version 2.3.0**: Mistral API integration
 - **Version 2.2.9**: Message count display
 - **Version 2.2.6**: Azure OpenAI and Local Server support

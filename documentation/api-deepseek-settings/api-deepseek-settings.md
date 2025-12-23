@@ -23,4 +23,5 @@ The **Kognetiks Chatbot** plugin requires proper configuration to function corre
 
 ---
 
+- **[Back to API DeepSeek Settings](api-deepseep-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

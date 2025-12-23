@@ -760,7 +760,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     }
 
     // Lock check removed - main send function handles locking
-    set_transient($duplicate_key, true, 300); // 5 minutes to prevent duplicates
+    set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // See if there is a $thread_id
     if (empty($thread_id)) {
@@ -886,6 +886,8 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     $retries = 0;
     $maxRetries = 5;
+    $consecutive_failures = 0; // Track consecutive failures to prevent infinite loops - Ver 2.4.0
+    $max_consecutive_failures = 3; // Stop after 3 consecutive failures - Ver 2.4.0
     global $sleepTime; 
 
     do {
@@ -919,11 +921,27 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
         $retries++;
 
+        // Check for consecutive failures to prevent infinite loops - Ver 2.4.0
+        if ($run_status == "failed") {
+            $consecutive_failures++; // Increment consecutive failures
+            if ($consecutive_failures >= $max_consecutive_failures) {
+                // back_trace( 'ERROR', 'Stopping after ' . $consecutive_failures . ' consecutive failures');
+                // Clear locks on error
+                delete_transient($thread_lock);
+                return "Error: Run failed after " . $consecutive_failures . " consecutive failures. Status: " . $run_status;
+            }
+        } else if ($run_status == "completed") {
+            $consecutive_failures = 0; // Reset consecutive failures on success - Ver 2.4.0
+        } else {
+            // Reset consecutive failures for incomplete or other non-failed statuses
+            $consecutive_failures = 0;
+        }
+
         if ($run_status == "failed" || $run_status == "incomplete") {
             // back_trace( 'ERROR', 'Error - INSIDE DO WHILE LOOP - GPT Assistant - Step 5: ' . $run_status);
             // return "Error: Step 5 - " . $run_status;
             // back_trace( 'NOTICE', 'ALERT INSIDE DO LOOP - Sleeping for ' . $sleepTime . ' microseconds');
-            // back_trace( 'NOTICE', 'ALERT INSIDE DO LOOP - Retries: ' . $retries);
+            // back_trace( 'NOTICE', 'ALERT INSIDE DO LOOP - Retries: ' . $retries . ', Consecutive failures: ' . $consecutive_failures);
             usleep($sleepTime);
         }
 

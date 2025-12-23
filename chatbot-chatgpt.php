@@ -3,7 +3,7 @@
  * Plugin Name: Kognetiks Chatbot
  * Plugin URI:  https://github.com/kognetiks/kognetiks-chatbot
  * Description: This simple plugin adds an AI powered chatbot to your WordPress website.
- * Version:     2.3.9
+ * Version:     2.4.0
  * Author:      Kognetiks.com
  * Author URI:  https://www.kognetiks.com
  * License:     GPLv3 or later
@@ -32,7 +32,7 @@ ob_start();
 
 // Plugin version
 global $chatbot_chatgpt_plugin_version;
-$chatbot_chatgpt_plugin_version = '2.3.9';
+$chatbot_chatgpt_plugin_version = '2.4.0';
 
 // Plugin directory path
 global $chatbot_chatgpt_plugin_dir_path;
@@ -50,14 +50,22 @@ global $session_id;
 global $user_id;
 
 // Assign a unique ID to the visitor and logged-in users - Ver 2.0.4
+// Ver 2.3.7 - Fixed headers already sent warning by checking if headers can be sent
+// Ver 2.4.0 - Added @ operator to suppress warnings as additional safety measure
 function kognetiks_assign_unique_id() {
     if (!isset($_COOKIE['kognetiks_unique_id'])) {
         $unique_id = uniqid('kognetiks_', true);
         
-        // Set a cookie using the built-in setcookie function
-        setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
+        // Check if headers have already been sent before trying to set cookie
+        // Ver 2.3.7 - Prevent "headers already sent" warning
+        // Ver 2.4.0 - Use @ operator to suppress any warnings as additional safety measure
+        if (!headers_sent()) {
+            // Set a cookie using the built-in setcookie function
+            // Using @ operator to suppress warnings in case headers are sent between check and setcookie
+            @setcookie('kognetiks_unique_id', $unique_id, time() + (86400 * 30), "/", "", true, true); // HttpOnly and Secure flags set to true
+        }
                 
-        // Ensure the cookie is set for the current request
+        // Ensure the cookie is set for the current request (works even if headers were already sent)
         $_COOKIE['kognetiks_unique_id'] = $unique_id;
     }
 }
@@ -1872,8 +1880,36 @@ function chatbot_chatgpt_send_message() {
     // DIAG - Diagnostics - Ver 2.1.8
     // back_trace( 'NOTICE', '$model: ' . $model);
 
-    // Send only clean text via the API
+    // Send only clean text via the API - Ver 2.3.7
+    // Validate message exists in POST before sanitizing
+    if (!isset($_POST['message']) || empty($_POST['message'])) {
+        prod_trace('ERROR', 'Chatbot: Message is missing from POST data. POST keys: ' . implode(', ', array_keys($_POST)));
+        global $chatbot_chatgpt_fixed_literal_messages;
+        $default_message = 'Error: Message is required. Please enter a message and try again.';
+        $error_message = isset($chatbot_chatgpt_fixed_literal_messages[15]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[15] 
+            : $default_message;
+        wp_send_json_error($error_message);
+        return;
+    }
+    
     $message = sanitize_text_field($_POST['message']);
+    
+    // Additional validation - ensure message is not empty after sanitization
+    if (empty(trim($message))) {
+        prod_trace('ERROR', 'Chatbot: Message is empty after sanitization. Original POST message length: ' . strlen($_POST['message']));
+        global $chatbot_chatgpt_fixed_literal_messages;
+        $default_message = 'Error: Message cannot be empty. Please enter a message and try again.';
+        $error_message = isset($chatbot_chatgpt_fixed_literal_messages[15]) 
+            ? $chatbot_chatgpt_fixed_literal_messages[15] 
+            : $default_message;
+        wp_send_json_error($error_message);
+        return;
+    }
+    
+    // Log the message being processed for debugging - Ver 2.3.7
+    // DIAG - Diagnostics - Uncomment for debugging
+    // prod_trace('NOTICE', 'Chatbot: Processing message - Length: ' . strlen($message) . ', First 50 chars: ' . substr($message, 0, 50));
     
     // Get client message ID if provided
     $client_message_id = isset($_POST['client_message_id']) ? sanitize_text_field($_POST['client_message_id']) : null;
@@ -1891,6 +1927,7 @@ function chatbot_chatgpt_send_message() {
             : $default_message;
         // Send error response
         wp_send_json_error($error_message);
+        return;
     }
     
     // Removed in Ver 1.8.6 - 2024 02 15

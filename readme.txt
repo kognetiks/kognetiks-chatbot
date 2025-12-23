@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chat, chatbot, chatgpt, openai, ai
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.9
-Stable tag: 2.3.9
+Stable tag: 2.4.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -30,12 +30,12 @@ From bloggers and educators to small business owners and agencies, Kognetiks Cha
 * **Simple Setup** - Install, activate, and start chatting in minutes.
 * **Multiple AI Engines** - Choose OpenAI, NVIDIA, Anthropic, Mistral, DeepSeek, Azure, or run your own local JAN.AI server (no API fees, no external data transfer).
 * **Embedded or Floating Chat** - Place your chatbot anywhere using easy shortcodes.
-* **Knowledge Navigator** - Teach your chatbot your site’s content for smarter, context-aware answers.
+* **Knowledge Navigator** - Teach your chatbot your site's content for smarter, context-aware answers.
 * **Custom Assistants** - Create specialized assistants for support, sales, education, or internal knowledge.
 * **Conversation Logging** - Review interactions, export chat logs, and improve user experience.
 * **Sentiment Analysis** - Gain insights into visitor sentiment and improve your chatbot's performance.
 * **Speech Recognition & Voice Replies** - Talk and listen for a natural AI chat experience.
-* **Multi-Language Ready** - Automatically adapts to your WordPress site’s language.
+* **Multi-Language Ready** - Automatically adapts to your WordPress site's language.
 * **Privacy & Security First** - Manage API keys safely and keep data secure.
 
 ### 🌐 **Why Choose Kognetiks Chatbot**
@@ -56,7 +56,7 @@ Learn more at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-
 
 == External Services ==
 
-The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service’s terms of service and privacy policy:
+The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality. It sends user queries and related data to a third-party AI provider for processing and response generation. By using this plugin, you agree to abide by each service's terms of service and privacy policy:
 
 - **OpenAI**: [Terms of Use](https://platform.openai.com/terms) | [Privacy Policy](https://openai.com/policies/privacy-policy/)
 - **Azure OpenAI**: [Terms of Use](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/data-privacy?tabs=azure-portal) | [Privacy Polisy](https://www.microsoft.com/en-us/privacy/privacystatement)
@@ -84,10 +84,10 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 - By entering your API key from the AI provider of your choice and activating the chatbot, you:
 
    - Consent to sending user queries and related data to the selected AI provider for processing and response generation.
-   - Agree to abide by the provider’s terms of service, pricing, and privacy policy.
+   - Agree to abide by the provider's terms of service, pricing, and privacy policy.
    - Acknowledge that your data, including text submitted by users, may be transferred to and processed by the AI platform in accordance with its privacy policy.
 
-**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider’s pricing and usage policies before proceeding.
+**NOTE**: You are responsible for any fees associated with the use of the selected AI platform. Be sure to review each provider's pricing and usage policies before proceeding.
 
 == Installation ==
 
@@ -155,6 +155,30 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.4.0 - 2025-12-23 =
+
+### New Features
+* **Ukrainian Language Support**: Added comprehensive Ukrainian language translation support (`chatbot-globals-uk.php`) with 131+ translated strings for chatbot-user interaction messages, making the plugin accessible to Ukrainian-speaking users.
+
+### Bug Fixes
+* **Headers Already Sent Error**: Fixed "headers already sent" errors that were causing issues with assistant API calls and conversation handling.
+* **Infinite Retry Loop**: Resolved infinite retry loop issue with OpenAI and Azure assistants by implementing proper retry logic and error handling in assistant API calls.
+* **Translation File Fallback**: Improved graceful fallback handling when translation files are missing, preventing errors and ensuring the plugin continues to function properly even if translation files are unavailable.
+* **System Busy Processing Error**: Enhanced error handling for "system is busy processing" scenarios to provide better user feedback and prevent request failures.
+* **PHP 8.5.0 Compatibility**: Fixed deprecated error messages and warnings after upgrading to PHP 8.5.0, ensuring full compatibility with the latest PHP version.
+* **Duplicate Request Detection**: Fixed duplicate request detection errors and clear conversation failures by properly clearing message UUID transients and improving session validation across all API providers (OpenAI, Azure, Anthropic, DeepSeek, Google, Mistral, NVIDIA, Kognetiks, Local, and more).
+* **SQL Injection Prevention**: Resolved SQL injection vulnerabilities in transient cleanup functions by implementing proper sanitization and prepared statements.
+
+### Improvements
+* **Token Usage Display**: Adjusted Token Usage font styling in the dashboard widget to eliminate overflow issues and improve readability.
+* **Documentation Updates**: 
+  - Updated OpenAI documentation links for assistants and max tokens settings to reflect current API documentation.
+  - Added missing documentation links to parent pages across all API settings documentation.
+  - Fixed formatting issues by correcting triple backwards apostrophes to single apostrophes throughout documentation.
+  - Updated functional details documentation with improved clarity and accuracy.
+  - Minor corrections to README.md file for better accuracy.
+* **Code Quality**: Improved code organization and maintainability across multiple files.
 
 = 2.3.9 - Released 2025-12-03 =
 
@@ -234,7 +258,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 = 2.2.5 - Released 2025-02-16 =
 
-* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site’s existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
+* **Enhanced Context for Assistants**: Added option to enhance Assistant context with site content for improved responses. When enabled, this feature allows the chatbot to pull information from your site's existing content, such as posts, pages, products, and other custom post types, to provide richer and more accurate answers.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.2.4.
 
 = 2.2.4 - Released 2025-02-06 =
@@ -305,7 +329,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 = 2.1.3 - Released 2024-08-31 =
 
 * **Remote Server Access**: The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes.
-* **Improving Math Handling**: Integrated code enhances chatbot’s ability to render complex mathematical expressions.
+* **Improving Math Handling**: Integrated code enhances chatbot's ability to render complex mathematical expressions.
 * **Bug Fixes**: Resolved minor issues and bugs identified during the development process.
 
 = 2.1.2 - Released 2024-08-28 =

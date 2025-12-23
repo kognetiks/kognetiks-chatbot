@@ -8,7 +8,7 @@
 
 - ChatGPT is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited.
 
-- Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, **Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate OpenAI’s ChatGPT API into your website.
+- Coupling the power of ChatGPT or a GPT Assistant with the flexibility of WordPress, **Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate OpenAI's ChatGPT API into your website.
 
 - This provides a powerful, AI-driven chatbot for enhanced user experience and personalized support.
 For more information on using assistants, see https://beta.openai.com/docs/guides/assistants.
@@ -29,21 +29,21 @@ For more information on using assistants, see https://beta.openai.com/docs/guide
 
 Use one of the following formats to invoke the chatbot, or a primary or alternate Assistant:
 
-- ```[chatbot]``` - Default values, floating style, uses OpenAI's ChatGPT
+- `[chatbot]` - Default values, floating style, uses OpenAI's ChatGPT
 
-- ```[chatbot style="floating"]``` - Floating style, uses OpenAI's ChatGPT
+- `[chatbot style="floating"]` - Floating style, uses OpenAI's ChatGPT
 
-- ```[chatbot style="embedded"]``` - Embedded style, uses OpenAI's ChatGPT
+- `[chatbot style="embedded"]` - Embedded style, uses OpenAI's ChatGPT
 
-- ```[chatbot style="floating" assistant="primary"]``` - Floating style, GPT Assistant as set in Primary setting
+- `[chatbot style="floating" assistant="primary"]` - Floating style, GPT Assistant as set in Primary setting
 
-- ```[chatbot style="embedded" assistant="alternate"]``` - Embedded style, GPT Assistant as set in Alternate setting
+- `[chatbot style="embedded" assistant="alternate"]` - Embedded style, GPT Assistant as set in Alternate setting
 
 You can have an unlimited number of Assistants on you site if you reference them directly by their Assistant ID.
 
-- ```[chatbot style="floating" assistant="asst_...123"]``` - Floating style, GPT Assistant specified
+- `[chatbot style="floating" assistant="asst_...123"]` - Floating style, GPT Assistant specified
 
-- ```[chatbot style="embedded" assistant="asst_...456"]``` - Embedded style, GPT Assistant specified
+- `[chatbot style="embedded" assistant="asst_...456"]` - Embedded style, GPT Assistant specified
 
 ---
 

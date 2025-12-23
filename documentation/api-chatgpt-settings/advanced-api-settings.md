@@ -23,7 +23,7 @@ The Advanced API Settings allow you to configure critical parameters for the API
 
 ## Tips
 
-- **Avoid Unnecessary Changes**: Unless you have a specific reason, it’s best to leave the Base URL as the default provided by OpenAI.
+- **Avoid Unnecessary Changes**: Unless you have a specific reason, it's best to leave the Base URL as the default provided by OpenAI.
 - **Monitor Performance**: If you experience issues with response times or API connectivity, consider adjusting the timeout setting and monitor the performance impact.
 - **Consult Documentation**: For more information on API parameters and troubleshooting, refer to the [OpenAI API documentation](https://platform.openai.com/docs).
 
@@ -31,4 +31,5 @@ By configuring these settings, you ensure that your Kognetiks Chatbot maintains 
 
 ---
 
+- **[Back to API ChatGPT Settings](api-chatgpt-model-settings.md)**
 - **[Back to the Overview](/overview.md)**

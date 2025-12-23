@@ -148,7 +148,7 @@ Although there is no hard-coded maximum corpus size, the transformer models ulti
 
 1. **PHP Memory Usage**
    - Loading the compressed cache (`lexical_embeddings_cache.php.gz`) requires enough memory for the compressed blob, the decompressed blob, and the full PHP array produced by `unserialize()`.
-   - On large sites it’s easy to hit the default `memory_limit` (128 MB or 256 MB). If you see “Allowed memory size exhausted” errors, raise the limit in `wp-config.php` – e.g. `define('WP_MEMORY_LIMIT', '512M');`.
+   - On large sites it's easy to hit the default `memory_limit` (128 MB or 256 MB). If you see “Allowed memory size exhausted” errors, raise the limit in `wp-config.php` – e.g. `define('WP_MEMORY_LIMIT', '512M');`.
 
 2. **Corpus Size and PMI Generation**
    - Building the PMI matrix scales with both the number of words and the window size. Very large corpora (tens of thousands of long posts) can consume huge amounts of RAM/time when the cache is rebuilt.
