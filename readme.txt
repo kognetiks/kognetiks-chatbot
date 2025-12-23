@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chat, chatbot, chatgpt, openai, ai
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.9
-Stable tag: 2.4.0
+Stable tag: 2.4.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -156,7 +156,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.4.0 - 2025-12-23 =
+= 2.4.1 - Released TBD =
+
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.4.0.
+
+= 2.4.0 - Released 2025-12-23 =
 
 ### New Features
 * **Ukrainian Language Support**: Added comprehensive Ukrainian language translation support (`chatbot-globals-uk.php`) with 131+ translated strings for chatbot-user interaction messages, making the plugin accessible to Ukrainian-speaking users.
