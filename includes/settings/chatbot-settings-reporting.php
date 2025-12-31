@@ -282,13 +282,13 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
 
             <hr style="margin: 20px 0;">
 
-            <h3>🧠 Designed for Awareness, Not Noise</h3>
+            <h3>✅ Designed for Awareness, Not Noise</h3>
             <p>Conversation Digest is intentionally concise. It highlights what is happening, so you can decide when action is needed.</p>
 
             <hr style="margin: 20px 0;">
 
             <h3>✅ Ready to Upgrade?</h3>
-            <p>Once unlocked, you’ll be able to:
+            <p>Once unlocked, you\'ll be able to:
             <ul style="margin-left: 20px; list-style-type:disc;">
                 <li>Choose how often emails are sent (Hourly, Daily, Weekly)</li>
                 <li>Set the email address for delivery</li>

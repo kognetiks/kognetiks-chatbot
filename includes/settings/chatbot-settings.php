@@ -592,6 +592,10 @@ function chatbot_chatgpt_settings_page() {
                 echo '</div>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_conversation_digest');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_conversation_reporting');
                 echo '</div>';
 
@@ -605,10 +609,6 @@ function chatbot_chatgpt_settings_page() {
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_reporting');
-                echo '</div>';
-
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_chatgpt_conversation_digest');
                 echo '</div>';
 
             } elseif ($active_tab == 'diagnostics') { // AKA Messages tab
@@ -686,7 +686,7 @@ function chatbot_chatgpt_settings_page() {
                     
                     echo '<p>Your chatbot is having conversations whether you are watching or not.</p>';
                     echo '<p><b>Insights help you understand when converations are helping and when they need attention.</b></p>';
-                    echo '<p>Instead of digging through logs or guessing what’s happening, Insights highlights the signals that matter most.</p>';
+                    echo '<p>Instead of digging through logs or guessing what\'s happening, Insights highlights the signals that matter most.</p>';
                     echo '<p><b>With Insights, you can:</b></p>';
 
                     echo '<ul style="margin-left: 20px;">';
@@ -718,9 +718,7 @@ function chatbot_chatgpt_settings_page() {
                     echo '<h3>✅ Designed for Visibility, Not Guesswork</h3>';
 
                     echo '<p>Insights highlight what matters so you can decide when action is needed.<br>';
-                    echo 'It doesn’t replace judgment, it supports it.</p>';
-
-                    echo '</div>';
+                    echo 'It doesn\'t replace judgment, it supports it.</p>';
 
                     echo '<hr style="margin: 20px 0;">';
                     
@@ -730,6 +728,8 @@ function chatbot_chatgpt_settings_page() {
                     echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=insights-package&file=insights-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
                     echo '<a href="mailto:support@kognetiks.com">Contact Support</a>';
                     echo '</p>';
+
+                    echo '</div>';
                     echo '</div>';
                 }
                 
