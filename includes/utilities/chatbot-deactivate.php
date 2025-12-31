@@ -97,9 +97,9 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting Transformer options');
         $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'chatbot_transformer_model%'");
 
-        // Delete Analytics options
-        // back_trace( 'NOTICE', 'Deleting Analytics options');
-        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'kognetiks_analytics%'");
+        // Delete Insights options
+        // back_trace( 'NOTICE', 'Deleting Insights options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'kognetiks_insights%'");
 
         // Delete ChatGPT tables
         // back_trace( 'NOTICE', 'Deleting tables');
@@ -181,16 +181,16 @@ function chatbot_chatgpt_uninstall(){
         // back_trace( 'NOTICE', 'Deleting cron event: knowledge_navigator_scan_hook');
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook');
 
-        // Delete any analytics options
-        // back_trace( 'NOTICE', 'Deleting analytics options');
-        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'kognetiks_analytics%'");
+        // Delete any insights options
+        // back_trace( 'NOTICE', 'Deleting insights options');
+        $wpdb->query("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE 'kognetiks_insights%'");
 
-        // Delete any scheduled analytics cron events
-        // back_trace( 'NOTICE', 'Deleting analytics cron events');
+        // Delete any scheduled insights cron events
+        // back_trace( 'NOTICE', 'Deleting insights cron events');
         $crons = _get_cron_array();
         foreach ($crons as $timestamp => $cron) {
             foreach ($cron as $hook => $events) {
-                if (strpos($hook, 'kognetiks_analytics') !== false) {
+                if (strpos($hook, 'kognetiks_insights') !== false) {
                     foreach ($events as $event) {
                         wp_unschedule_event($timestamp, $hook, $event['args']);
                     }

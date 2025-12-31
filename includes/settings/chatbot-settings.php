@@ -141,7 +141,7 @@ function chatbot_chatgpt_settings_page() {
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
             <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
             <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
-            <a href="?page=chatbot-chatgpt&tab=analytics" class="nav-tab <?php echo $active_tab == 'analytics' ? 'nav-tab-active' : ''; ?>">Analytics</a>
+            <a href="?page=chatbot-chatgpt&tab=insights" class="nav-tab <?php echo $active_tab == 'insights' ? 'nav-tab-active' : ''; ?>">Insights</a>
             <a href="?page=chatbot-chatgpt&tab=tools" class="nav-tab <?php echo $active_tab == 'tools' ? 'nav-tab-active' : ''; ?>">Tools</a>
             <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Messages</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
@@ -659,15 +659,90 @@ function chatbot_chatgpt_settings_page() {
                 do_settings_sections('chatbot_chatgpt_appearance_icons');
                 echo '</div>';
 
-            } elseif ($active_tab == 'analytics') {
+            } elseif ($active_tab == 'insights') {
 
-                // Load the actual analytics functionality
-                if (function_exists('kognetiks_analytics_settings_page')) {
-                    kognetiks_analytics_settings_page();
+                // DIAG - Diagnostics - Ver 4.2.1
+                back_trace( 'NOTICE', 'Insights Tab');
+                back_trace( 'NOTICE', chatbot_chatgpt_freemius()->is_plan( 'premium' ));
+                back_trace( 'NOTICE', chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+
+                if ( chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
+                    if ( chatbot_chatgpt_freemius()->is_plan( 'premium' ) ) {
+                        // Load the actual insights functionality
+                        if (function_exists('kognetiks_insights_settings_page')) {
+                            kognetiks_insights_settings_page();
+                        } else {
+                            echo '<div class="notice notice-error" style="padding: 20px; margin: 20px 0;">';
+                            echo '<h2 style="margin-top: 0;">⚠️ Insights System Not Available</h2>';
+                            echo '<p>The insights system is not properly loaded. Please check that all insights files are present.</p>';
+                            echo '<div class="notice notice-error"><p>Insights functionality is not available. Please ensure the insights addon is activated.</p></div>';
+                        }
+                    }
                 } else {
-                    echo '<div class="notice notice-error" style="padding: 20px; margin: 20px 0;">';
-                    echo '<h2 style="margin-top: 0;">⚠️ Analytics System Not Available</h2>';
-                    echo '<p>The analytics system is not properly loaded. Please check that all analytics files are present.</p>';
+                    echo '<div class="kchat-insights-upgrade-notice" style="border: 1px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';
+
+                    echo '<div class="kchat-insights-upgrade-notice" style="border: 2px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';
+                    echo '<h2 style="margin-top: 0;">🚀 Unlock Actionable Insights from Your Chatbot <span style="color: #d54e21;">(Premium Feature)</span></h2>';
+                    
+                    echo '<p>Your chatbot is working around the clock.</p>';
+                    echo '<p><b>Insights help you understand when converations are helping and when they need attention.</b></p>';
+                    echo '<p>Instead of digging through logs or guessing what’s happening, Insights highlights the signals that matter most.</p>';
+                    echo '<p><b>With Insights, you can:</b></p>';
+
+                    echo '<ul style="margin-left: 20px;">';
+                    echo '<li>📊 See how conversations are trending<br>';
+                    echo 'Track total conversations, engagement patterns, and where users drop off.</li>';
+                    echo '<li>⚠️ Detect frustration early<br>';
+                    echo 'Identify conversations that show signs of confusion, dissatisfaction, or escalation risk.</li>';
+                    echo '<li>🔍 Review conversations that matter<br>';
+                    echo 'Filter by chatbot or visitor to understand both sides of key interactions.</li>';
+                    echo '<li>💡 Improve outcomes with confidence<br>';
+                    echo 'Learn what’s working, what’s not, and where small changes can make a big difference.</li>';
+                    echo '</ul>';
+                    
+                    echo '<hr style="margin: 20px 0;">';
+                    
+                    echo '<h3>🔒 Premium Insights Features</h3>';
+                    echo '<p>Insights is part of the <strong>Kognetiks Premium</strong> plan.</br>';
+                    echo 'Activate your license key to:</p>';
+                    
+                    echo '<ul style="margin-left: 20px;">';
+                    echo '<li>- Automated and manual conversation health scoring</li>';
+                    echo '<li>- Real-time engagement and frustration signals</li>';
+                    echo '<li>- Token usage visibility to help manage AI costs</li>';
+                    echo '<li>- Tools designed to support smarter, safer chatbot improvements</li>';
+                    echo '</ul>';
+
+                    echo '<hr style="margin: 20px 0;">';
+                    
+                    echo '<h3>✅ Built for Visibility, Not Guesswork</h3>';
+
+                    echo '<p>Insights is designed to keep humans in the loop.<br>';
+                    echo 'It doesn’t replace judgment, it supports it.</p>';
+
+                    echo '</div>';
+
+                    // echo '<div style="border: 2px solid #d54e21; background-color: #fff8f6; padding: 15px; margin: 15px 0; border-radius: 5px;">';
+                    // echo '<h3>🛑 BEFORE ACTIVATING THE PREMIUM VERSION</h3>';
+                    // echo '<p>You will need to follow these steps:</p>';
+                    // echo '<ul style="margin-left: 20px;">';
+                    // echo '<li>1. DEACTIVATE the free version of the Kognetiks Chatbot plugin.</li>';
+                    // echo '<li>2. From your WordPress Dashboard, click on Plugins > Installed Plugins > Kognetiks Chatbot > Deactivate</li>';
+                    // echo '<li>3. Then return here, click the Upgrade Now button to select the premium subscription.</li>';
+                    // echo '<li>4. After purchase, you will recieve an email with instructions to activated your account, you can download then download the premium version of the plugin.</li>';
+                    // echo '<li>5. From your WordPress Dashboard, click Plugins > Add Plugin > Upload Plugin > Choose File > Install Now > Activate</li>';
+                    // echo '<li>NOTE: You can choose to delete the free version of the plugin after you have upgraded to the premium version.</li>';
+                    // echo '</ul>';
+                    // echo '</div>';
+
+                    echo '<hr style="margin: 20px 0;">';
+                    
+                    echo '<h3>✅ Ready to Upgrade?</h3>';
+                    echo '<p>';
+                    echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">Upgrade Now</a>';
+                    echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=insights-package&file=insights-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
+                    echo '<a href="mailto:support@kognetiks.com">Contact Support</a>';
+                    echo '</p>';
                     echo '</div>';
                 }
                 

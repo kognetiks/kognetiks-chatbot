@@ -277,7 +277,7 @@ function append_message_to_conversation_log($session_id, $user_id, $page_id, $us
 
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
-    // Check if sentiment_score column exists and analytics module is available
+    // Check if sentiment_score column exists and insights module is available
     $include_sentiment_score = false;
     if (function_exists('chatbot_chatgpt_add_sentiment_score_column')) {
         // Try to add the column if it doesn't exist

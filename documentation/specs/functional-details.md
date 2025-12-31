@@ -122,9 +122,9 @@ An intelligent content analysis system that enhances chatbot responses:
 - **Enhanced Responses**: Provides contextually relevant links to site content
 - **Custom Post Type Support**: Works with WooCommerce products and other custom types
 
-### Analytics and Reporting
+### Insights and Reporting
 
-Comprehensive analytics package for monitoring chatbot performance:
+Comprehensive insights package for monitoring chatbot performance:
 
 - **Conversation Statistics**: Track user interactions and engagement
 - **Sentiment Analysis**: Analyze user sentiment in conversations
@@ -207,7 +207,7 @@ The plugin creates several database tables:
 
 - **Conversation Logs**: Stores chat interactions
 - **Knowledge Navigator Data**: Content analysis results
-- **Analytics Data**: Performance and usage metrics
+- **Insights Data**: Performance and usage metrics
 - **Assistant Threads**: OpenAI Assistant conversation threads
 
 ## Installation and Setup
@@ -265,7 +265,7 @@ The plugin creates several database tables:
 - **Settings**: Detailed configuration guides
 - **API Documentation**: Platform-specific setup instructions
 - **Assistants**: OpenAI Assistant configuration
-- **Analytics**: Reporting and analytics features
+- **Insights**: Reporting and insights features
 - **Support**: Troubleshooting and help resources
 
 ### Support Channels
@@ -318,7 +318,7 @@ Users must agree to terms of service for each AI platform:
 
 ## Summary
 
-The Kognetiks Chatbot provides a comprehensive, flexible solution for integrating AI-powered conversational experiences into WordPress websites. With support for multiple AI platforms, advanced features like Knowledge Navigator and Analytics, and extensive customization options, it offers both technical sophistication and user-friendly implementation for businesses, educators, and content creators seeking to enhance their website's interactive capabilities.
+The Kognetiks Chatbot provides a comprehensive, flexible solution for integrating AI-powered conversational experiences into WordPress websites. With support for multiple AI platforms, advanced features like Knowledge Navigator and Insights, and extensive customization options, it offers both technical sophistication and user-friendly implementation for businesses, educators, and content creators seeking to enhance their website's interactive capabilities.
 
 The plugin's modular architecture allows for easy maintenance and future enhancements, while its comprehensive documentation and support resources ensure successful deployment and ongoing management.
 

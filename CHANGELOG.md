@@ -45,7 +45,7 @@
 
 ## 2.3.6 - Released 2025-10-17
 
-* **Analytics**: Comprehensive dashboard providing conversation statistics, sentiment analysis, engagement metrics, and token usage tracking to help optimize chatbot performance and user experience.
+* **Insights**: Comprehensive dashboard providing conversation statistics, sentiment analysis, engagement metrics, and token usage tracking to help optimize chatbot performance and user experience.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.5.
 
 ## 2.3.5 - Released 2025-10-08

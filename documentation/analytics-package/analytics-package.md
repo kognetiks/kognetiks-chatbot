@@ -1,22 +1,22 @@
-# 📊 Analytics Package Overview
+# 📊 Insights Package Overview
 
-The **Analytics** tab in the Kognetiks Chatbot for WordPress plugin provides a powerful dashboard to help you track, measure, and optimize chatbot performance on your site.
+The **Insights** tab in the Kognetiks Chatbot for WordPress plugin provides a powerful dashboard to help you track, measure, and optimize chatbot performance on your site.
 
-The analytics package summarizes data for sentiment analysis, engagement analysis, message and session statistics, and token usage.  You can quickly evaluate period-over-period changes in total conversations, unique visitors, average sentiment scores, and positive conversations.  To give you further insights, you can filter for visitors only, chatbot responses only, or both together.
+The insights package summarizes data for sentiment analysis, engagement analysis, message and session statistics, and token usage.  You can quickly evaluate period-over-period changes in total conversations, unique visitors, average sentiment scores, and positive conversations.  To give you further insights, you can filter for visitors only, chatbot responses only, or both together.
 
 **Note**: Conversation logging must be enabled for message scoring.  Go to the Reporting tab, then scoll down to the Reporting Settings section to enable logging.
 
 ![Reporting Settings](reporting-settings.png)
 
-# Analytics Overview
+# Insights Overview
 
-![Analysis](analytics-package.png)
+![Analysis](insights-package.png)
 
-> ℹ️ **Note**: This feature is available to all users. Make sure conversation logging is enabled to see analytics data.
+> ℹ️ **Note**: This feature is available to all users. Make sure conversation logging is enabled to see insights data.
 
 ## 📅 Period & Filter Controls
 
-At the top of the Analytics tab, you'll find controls that allow you to:
+At the top of the Insights tab, you'll find controls that allow you to:
 
 - **Period Selector** – Choose the comparison windows like `Today vs Yesterday`, `This Week vs Last Week`, etc.
 - **Type Filter** – Filter results by conversation type, e.g., `All`, `Visitor`, `Chatbot`).
