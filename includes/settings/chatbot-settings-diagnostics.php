@@ -727,7 +727,7 @@ function chatbot_chatgpt_reset_cache_locks_callback($args) {
     ?>
     <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 10px 0; border-radius: 5px;">
         <p><strong>⚠️ Warning:</strong> This action will:</p>
-        <ul style="margin-left: 20px;">
+        <ul style="margin-left: 20px; list-style-type:disc;">
             <li>Clear all conversation locks</li>
             <li>Reset message queues</li>
             <li>Clean up expired transients</li>

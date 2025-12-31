@@ -682,22 +682,22 @@ function chatbot_chatgpt_settings_page() {
                     echo '<div class="kchat-insights-upgrade-notice" style="border: 1px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';
 
                     echo '<div class="kchat-insights-upgrade-notice" style="border: 2px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';
-                    echo '<h2 style="margin-top: 0;">🚀 Unlock Actionable Insights from Your Chatbot <span style="color: #d54e21;">(Premium Feature)</span></h2>';
+                    echo '<h2 style="margin-top: 0;">🚀 Unlock Conversation Insights <span>(Premium Feature)</span></h2>';
                     
-                    echo '<p>Your chatbot is working around the clock.</p>';
+                    echo '<p>Your chatbot is having conversations whether you are watching or not.</p>';
                     echo '<p><b>Insights help you understand when converations are helping and when they need attention.</b></p>';
                     echo '<p>Instead of digging through logs or guessing what’s happening, Insights highlights the signals that matter most.</p>';
                     echo '<p><b>With Insights, you can:</b></p>';
 
                     echo '<ul style="margin-left: 20px;">';
                     echo '<li>📊 See how conversations are trending<br>';
-                    echo 'Track total conversations, engagement patterns, and where users drop off.</li>';
-                    echo '<li>⚠️ Detect frustration early<br>';
-                    echo 'Identify conversations that show signs of confusion, dissatisfaction, or escalation risk.</li>';
+                    echo 'Understand engagement patterns, drop-off points, and recurring issues.</li>';
+                    echo '<li>⚠️ Detect when conversations need attention<br>';
+                    echo 'Identify signs of confusion, frustration, or escalation risk.</li>';
                     echo '<li>🔍 Review conversations that matter<br>';
-                    echo 'Filter by chatbot or visitor to understand both sides of key interactions.</li>';
+                    echo 'Focus on interactions that may require follow-up or improvement.</li>';
                     echo '<li>💡 Improve outcomes with confidence<br>';
-                    echo 'Learn what’s working, what’s not, and where small changes can make a big difference.</li>';
+                    echo 'Learn what is working, what is not, and where small changes can help.</li>';
                     echo '</ul>';
                     
                     echo '<hr style="margin: 20px 0;">';
@@ -706,40 +706,27 @@ function chatbot_chatgpt_settings_page() {
                     echo '<p>Insights is part of the <strong>Kognetiks Premium</strong> plan.</br>';
                     echo 'Activate your license key to:</p>';
                     
-                    echo '<ul style="margin-left: 20px;">';
-                    echo '<li>- Automated and manual conversation health scoring</li>';
-                    echo '<li>- Real-time engagement and frustration signals</li>';
-                    echo '<li>- Token usage visibility to help manage AI costs</li>';
-                    echo '<li>- Tools designed to support smarter, safer chatbot improvements</li>';
+                    echo '<ul style="margin-left: 20px; list-style-type:disc;">';
+                    echo '<li>Automated and manual conversation health scoring</li>';
+                    echo '<li>Real-time engagement and frustration signals</li>';
+                    echo '<li>Token usage visibility to help manage AI costs</li>';
+                    echo '<li>Tools designed to support smarter, safer chatbot improvements</li>';
                     echo '</ul>';
 
                     echo '<hr style="margin: 20px 0;">';
                     
-                    echo '<h3>✅ Built for Visibility, Not Guesswork</h3>';
+                    echo '<h3>✅ Designed for Visibility, Not Guesswork</h3>';
 
-                    echo '<p>Insights is designed to keep humans in the loop.<br>';
+                    echo '<p>Insights highlight what matters so you can decide when action is needed.<br>';
                     echo 'It doesn’t replace judgment, it supports it.</p>';
 
                     echo '</div>';
-
-                    // echo '<div style="border: 2px solid #d54e21; background-color: #fff8f6; padding: 15px; margin: 15px 0; border-radius: 5px;">';
-                    // echo '<h3>🛑 BEFORE ACTIVATING THE PREMIUM VERSION</h3>';
-                    // echo '<p>You will need to follow these steps:</p>';
-                    // echo '<ul style="margin-left: 20px;">';
-                    // echo '<li>1. DEACTIVATE the free version of the Kognetiks Chatbot plugin.</li>';
-                    // echo '<li>2. From your WordPress Dashboard, click on Plugins > Installed Plugins > Kognetiks Chatbot > Deactivate</li>';
-                    // echo '<li>3. Then return here, click the Upgrade Now button to select the premium subscription.</li>';
-                    // echo '<li>4. After purchase, you will recieve an email with instructions to activated your account, you can download then download the premium version of the plugin.</li>';
-                    // echo '<li>5. From your WordPress Dashboard, click Plugins > Add Plugin > Upload Plugin > Choose File > Install Now > Activate</li>';
-                    // echo '<li>NOTE: You can choose to delete the free version of the plugin after you have upgraded to the premium version.</li>';
-                    // echo '</ul>';
-                    // echo '</div>';
 
                     echo '<hr style="margin: 20px 0;">';
                     
                     echo '<h3>✅ Ready to Upgrade?</h3>';
                     echo '<p>';
-                    echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">Upgrade Now</a>';
+                    echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">🔓 Unlock Conversation Insights</a>';
                     echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=insights-package&file=insights-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
                     echo '<a href="mailto:support@kognetiks.com">Contact Support</a>';
                     echo '</p>';

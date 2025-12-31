@@ -273,7 +273,7 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             <p>Conversation Digest is part of the <strong>Kognetiks Premium</strong> plan.<br>
             Activate your license key to unlock this feature.</p>
 
-            <ul style="margin-left: 20px;">
+            <ul style="margin-left: 20px; list-style-type:disc;">
                 <li>Automated email digests with customizable frequency</li>
                 <li>Organized summaries grouped by conversation session</li>
                 <li>Built-in test email tools to verify delivery</li>
@@ -289,10 +289,10 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
 
             <h3>✅ Ready to Upgrade?</h3>
             <p>Once unlocked, you’ll be able to:
-            <ul style="margin-left: 20px;">
-                <li>- Choose how often emails are sent (Hourly, Daily, Weekly)</li>
-                <li>- Set the email address for delivery</li>
-                <li>- Enable or disable Conversation Digest</li>
+            <ul style="margin-left: 20px; list-style-type:disc;">
+                <li>Choose how often emails are sent (Hourly, Daily, Weekly)</li>
+                <li>Set the email address for delivery</li>
+                <li>Enable or disable Conversation Digest</li>
             </ul>
             <p><i>You can change or disable this at any time.</i></p>
                 <?php
