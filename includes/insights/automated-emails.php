@@ -310,11 +310,18 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
     $tables = kognetiks_insights_get_table_names();
     $log    = $tables['conversation_log'];
 
-    $start_dt = gmdate( 'Y-m-d H:i:s', $start_ts + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) );
-    $end_dt   = gmdate( 'Y-m-d H:i:s', $end_ts + ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) );
+    $offset   = (float) get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
+    $start_dt = gmdate( 'Y-m-d H:i:s', $start_ts + $offset );
+    $end_dt   = gmdate( 'Y-m-d H:i:s', $end_ts + $offset );
 
-    // Patterns that resemble your "I’m not following / rephrase" style messages.
-    // Tweak these later, or make them filterable.
+    // Allowlist for human messages
+    $human_types = [ 'Visitor', 'User' ];
+    $human_in    = implode( ',', array_fill( 0, count( $human_types ), '%s' ) );
+
+    /**
+     * Fallback patterns.
+     * You can expand this list over time or make it a filter.
+     */
     $fallback_like = [
         '%i\'m not following%',
         '%could you ask that%',
@@ -322,35 +329,56 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
         '%didn\'t quite catch%',
         '%could you try rephras%',
         '%could you rephrase%',
+        '%try phrasing%',
+        '%please clarify%',
     ];
-
     $like_sql = implode( ' OR ', array_fill( 0, count( $fallback_like ), 'c.message_text LIKE %s' ) );
 
-    // Pull candidate sessions/times where the chatbot gave a fallback response.
+    /**
+     * Strategy:
+     * - Find fallback chatbot rows "c" in window
+     * - Join to the prior human question "q" in same session at max time <= c.time
+     * - Group by q.message_text to get "top" unanswered questions
+     */
     $sql = "
         SELECT
-            v.message_text AS visitor_question
+            q.message_text AS question,
+            COUNT(*) AS hits
         FROM {$log} c
-        INNER JOIN {$log} v
-            ON v.session_id = c.session_id
+        INNER JOIN {$log} q
+            ON q.session_id = c.session_id
         WHERE
             c.user_type = 'Chatbot'
             AND c.interaction_time >= %s AND c.interaction_time <= %s
+            AND c.message_text IS NOT NULL
+            AND LENGTH(TRIM(c.message_text)) > 0
             AND ( {$like_sql} )
-            AND v.user_id = 0
-            AND v.interaction_time = (
-                SELECT MAX(v2.interaction_time)
-                FROM {$log} v2
-                WHERE v2.session_id = c.session_id
-                AND v2.user_id = 0
-                AND v2.interaction_time <= c.interaction_time
+
+            -- prior human question in same session
+            AND q.user_type IN ($human_in)
+            AND q.message_text IS NOT NULL
+            AND LENGTH(TRIM(q.message_text)) > 0
+            AND q.message_text NOT REGEXP '^[0-9]+$'
+            AND q.interaction_time = (
+                SELECT MAX(q2.interaction_time)
+                FROM {$log} q2
+                WHERE q2.session_id = c.session_id
+                  AND q2.user_type IN ($human_in)
+                  AND q2.message_text IS NOT NULL
+                  AND LENGTH(TRIM(q2.message_text)) > 0
+                  AND q2.message_text NOT REGEXP '^[0-9]+$'
+                  AND q2.interaction_time <= c.interaction_time
             )
+        GROUP BY q.message_text
+        ORDER BY hits DESC
         LIMIT %d
     ";
 
     $params = array_merge(
         [ $start_dt, $end_dt ],
         $fallback_like,
+        $human_types,          // for q.user_type IN (...)
+        $human_types,          // for q2.user_type IN (...) in subquery
         [ (int) $limit ]
     );
 
@@ -359,18 +387,143 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
     $out = [];
     if ( ! empty( $rows ) ) {
         foreach ( $rows as $r ) {
-            $q = isset( $r['visitor_question'] ) ? trim( (string) $r['visitor_question'] ) : '';
+            $q = isset( $r['question'] ) ? trim( (string) $r['question'] ) : '';
             if ( $q !== '' ) {
                 $out[] = wp_strip_all_tags( $q );
             }
         }
     }
 
-    // De-dupe while keeping order
-    $out = array_values( array_unique( $out ) );
-
     return apply_filters( 'kognetiks_insights_top_unanswered_questions', $out, $start_ts, $end_ts, $limit );
 }
+
+function kognetiks_insights_get_top_pages_by_activity( $start_ts, $end_ts, $limit = 5 ) {
+    global $wpdb;
+
+    $tables = kognetiks_insights_get_table_names();
+    $log    = $tables['conversation_log'];
+
+    $offset   = (float) get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
+    $start_dt = gmdate( 'Y-m-d H:i:s', $start_ts + $offset );
+    $end_dt   = gmdate( 'Y-m-d H:i:s', $end_ts + $offset );
+
+    $human_types = [ 'Visitor', 'User' ];
+    $human_in    = implode( ',', array_fill( 0, count( $human_types ), '%s' ) );
+
+    $sql = "
+        SELECT
+            page_id,
+            COUNT(DISTINCT session_id) AS conversations
+        FROM {$log}
+        WHERE interaction_time >= %s AND interaction_time <= %s
+          AND user_type IN ($human_in)
+          AND message_text IS NOT NULL
+          AND LENGTH(TRIM(message_text)) > 0
+          AND message_text NOT REGEXP '^[0-9]+$'
+          AND page_id IS NOT NULL
+          AND page_id <> 0
+        GROUP BY page_id
+        ORDER BY conversations DESC
+        LIMIT %d
+    ";
+
+    $params = array_merge(
+        [ $start_dt, $end_dt ],
+        $human_types,
+        [ (int) $limit ]
+    );
+
+    $rows = $wpdb->get_results( $wpdb->prepare( $sql, $params ), ARRAY_A );
+
+    $out = [];
+    foreach ( (array) $rows as $r ) {
+        $pid = isset( $r['page_id'] ) ? (int) $r['page_id'] : 0;
+        $cnt = isset( $r['conversations'] ) ? (int) $r['conversations'] : 0;
+        if ( $pid > 0 ) {
+            $out[] = [
+                'page_id'       => $pid,
+                'title'         => get_the_title( $pid ),
+                'url'           => get_permalink( $pid ),
+                'conversations' => $cnt,
+            ];
+        }
+    }
+
+    return apply_filters( 'kognetiks_insights_top_pages_by_activity', $out, $start_ts, $end_ts, $limit );
+}
+
+function kognetiks_insights_format_top_pages_bullets( $pages = [] ) {
+    if ( empty( $pages ) ) {
+        return [];
+    }
+
+    $bullets = [];
+    foreach ( $pages as $p ) {
+        $title = ! empty( $p['title'] ) ? $p['title'] : 'Untitled';
+        $cnt   = isset( $p['conversations'] ) ? (int) $p['conversations'] : 0;
+        $bullets[] = sprintf( '%s (%d conversations)', $title, $cnt );
+    }
+    return $bullets;
+}
+
+function kognetiks_insights_get_top_assistants_used( $start_ts, $end_ts, $limit = 5 ) {
+    global $wpdb;
+
+    $tables = kognetiks_insights_get_table_names();
+    $log    = $tables['conversation_log'];
+
+    $offset   = (float) get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
+    $start_dt = gmdate( 'Y-m-d H:i:s', $start_ts + $offset );
+    $end_dt   = gmdate( 'Y-m-d H:i:s', $end_ts + $offset );
+
+    // Count by session_id to avoid inflating from token rows.
+    $sql = "
+        SELECT
+            assistant_id,
+            assistant_name,
+            COUNT(DISTINCT session_id) AS conversations
+        FROM {$log}
+        WHERE interaction_time >= %s AND interaction_time <= %s
+          AND assistant_id IS NOT NULL
+          AND assistant_id <> ''
+          AND assistant_name IS NOT NULL
+          AND assistant_name <> ''
+        GROUP BY assistant_id, assistant_name
+        ORDER BY conversations DESC
+        LIMIT %d
+    ";
+
+    $rows = $wpdb->get_results(
+        $wpdb->prepare( $sql, $start_dt, $end_dt, (int) $limit ),
+        ARRAY_A
+    );
+
+    $out = [];
+    foreach ( (array) $rows as $r ) {
+        $out[] = [
+            'assistant_id'   => (string) $r['assistant_id'],
+            'assistant_name' => (string) $r['assistant_name'],
+            'conversations'  => (int) $r['conversations'],
+        ];
+    }
+
+    return apply_filters( 'kognetiks_insights_top_assistants_used', $out, $start_ts, $end_ts, $limit );
+}
+
+function kognetiks_insights_format_top_assistants_bullets( $assistants = [] ) {
+    if ( empty( $assistants ) ) {
+        return [];
+    }
+
+    $bullets = [];
+    foreach ( $assistants as $a ) {
+        $name = ! empty( $a['assistant_name'] ) ? $a['assistant_name'] : 'Assistant';
+        $cnt  = isset( $a['conversations'] ) ? (int) $a['conversations'] : 0;
+        $bullets[] = sprintf( '%s (%d conversations)', $name, $cnt );
+    }
+    return $bullets;
+}
+
 
 function kognetiks_insights_get_impact_metrics( $start_ts, $end_ts, $stats = [] ) {
 
@@ -545,6 +698,22 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
     $impact = kognetiks_insights_get_impact_metrics( $window['start'], $window['end'], $stats );
     $top_unanswered = kognetiks_insights_get_top_unanswered_questions( $window['start'], $window['end'], 5 );
 
+    $top_pages      = kognetiks_insights_get_top_pages_by_activity( $window['start'], $window['end'], 5 );
+    $top_assistants = kognetiks_insights_get_top_assistants_used( $window['start'], $window['end'], 5 );
+    
+    $top_unanswered = kognetiks_insights_get_top_unanswered_questions( $window['start'], $window['end'], 5 );
+    $top_pages      = kognetiks_insights_get_top_pages_by_activity( $window['start'], $window['end'], 5 );
+    $top_assistants = kognetiks_insights_get_top_assistants_used( $window['start'], $window['end'], 5 );    
+
+    $recommendations = kognetiks_insights_generate_recommendations(
+        $stats,
+        $impact,
+        $top_unanswered,
+        $top_pages,
+        $top_assistants,
+        5
+    );
+    
     $metric_items = [
         [
             'label' => 'Conversations',
@@ -577,6 +746,26 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
         $content .= '<p style="margin:8px 0 0 0;color:#444;">Consider adding content or knowledge base entries that address these questions.</p>';
     } else {
         $content .= '<p style="margin:10px 0 0 0;color:#444;"><strong>Top Unanswered Questions:</strong> No items detected for this period.</p>';
+    }
+
+    $pages_bullets = kognetiks_insights_format_top_pages_bullets( $top_pages );
+    if ( ! empty( $pages_bullets ) ) {
+        $content .= kognetiks_insights_bullets_html( 'Top Pages by Chat Activity', $pages_bullets );
+    }
+
+    $assist_bullets = kognetiks_insights_format_top_assistants_bullets( $top_assistants );
+    if ( ! empty( $assist_bullets ) ) {
+        $content .= kognetiks_insights_bullets_html( 'Top Assistants Used', $assist_bullets );
+    }
+
+    $pages_bullets = kognetiks_insights_format_top_pages_bullets( $top_pages );
+    if ( ! empty( $pages_bullets ) ) {
+        $content .= kognetiks_insights_bullets_html( 'Top Pages by Chat Activity', $pages_bullets );
+    }
+
+    $assist_bullets = kognetiks_insights_format_top_assistants_bullets( $top_assistants );
+    if ( ! empty( $assist_bullets ) ) {
+        $content .= kognetiks_insights_bullets_html( 'Top Assistants Used', $assist_bullets );
     }
 
     // Add a flexible “Recommendations” block (paid differentiator, populated via filter)
@@ -624,6 +813,21 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
         }
         $message_text .= "\n";
     }
+    if ( ! empty( $pages_bullets ) ) {
+        $message_text .= "Top pages by chat activity:\n";
+        foreach ( $pages_bullets as $b ) {
+            $message_text .= "- {$b}\n";
+        }
+        $message_text .= "\n";
+    }
+    
+    if ( ! empty( $assist_bullets ) ) {
+        $message_text .= "Top assistants used:\n";
+        foreach ( $assist_bullets as $b ) {
+            $message_text .= "- {$b}\n";
+        }
+        $message_text .= "\n";
+    }
 
     $payload = [
         'subject'       => apply_filters( 'kognetiks_insights_value_translation_subject', $subject, $window, $stats, $impact, $args ),
@@ -653,4 +857,88 @@ function kognetiks_insights_get_table_names() {
         'interactions'     => $wpdb->prefix . 'chatbot_chatgpt_interactions',
     ];
 }
+
+/**
+ * Paid: Generate 3–5 deterministic recommendations from stats/insights.
+ *
+ * @param array $stats
+ * @param array $impact
+ * @param array $top_unanswered array of strings
+ * @param array $top_pages array of ['page_id','title','url','conversations']
+ * @param array $top_assistants array of ['assistant_id','assistant_name','conversations']
+ * @param int   $max
+ * @return array array of recommendation strings
+ */
+function kognetiks_insights_generate_recommendations( $stats, $impact, $top_unanswered, $top_pages, $top_assistants, $max = 5 ) {
+
+    $recs = [];
+
+    $conversations = isset( $stats['conversations'] ) ? (int) $stats['conversations'] : 0;
+    $pages         = isset( $stats['pages'] ) ? (int) $stats['pages'] : 0;
+
+    // 1) Unanswered questions -> knowledge content
+    if ( ! empty( $top_unanswered ) ) {
+        $recs[] = 'Add a short FAQ or knowledge entry addressing the top unanswered questions to improve resolution rates.';
+    }
+
+    // 2) Concentrated activity on a page -> page-specific help
+    if ( ! empty( $top_pages ) && isset( $top_pages[0]['conversations'] ) ) {
+        $top_cnt = (int) $top_pages[0]['conversations'];
+        if ( $conversations > 0 ) {
+            $share = $top_cnt / $conversations; // 0..1
+            if ( $share >= 0.35 ) {
+                $title = ! empty( $top_pages[0]['title'] ) ? $top_pages[0]['title'] : 'your top page';
+                $recs[] = sprintf(
+                    'Your highest chat volume is on “%s”. Consider adding a short help section on that page and linking to the most relevant documentation.',
+                    $title
+                );
+            }
+        }
+    }
+
+    // 3) Many pages with chats -> navigation + discoverability
+    if ( $pages >= 5 ) {
+        $recs[] = 'Chats are happening across multiple pages. Consider adding a consistent “Help” or “Support” link in your header or footer to guide visitors to answers faster.';
+    }
+
+    // 4) Time saved present -> remind to staff-proof it
+    $hours_saved = isset( $impact['support_time_saved_hours'] ) ? (float) $impact['support_time_saved_hours'] : 0.0;
+    if ( $hours_saved >= 1.0 ) {
+        $recs[] = 'Since the chatbot is saving measurable time, consider routing common pre-sales and support questions into a dedicated assistant or knowledge set for consistency.';
+    }
+
+    // 5) Assistant concentration -> tune the dominant assistant
+    if ( ! empty( $top_assistants ) && isset( $top_assistants[0]['conversations'] ) ) {
+        $top_a_cnt = (int) $top_assistants[0]['conversations'];
+        if ( $conversations > 0 ) {
+            $a_share = $top_a_cnt / $conversations;
+            if ( $a_share >= 0.60 ) {
+                $name = ! empty( $top_assistants[0]['assistant_name'] ) ? $top_assistants[0]['assistant_name'] : 'your top assistant';
+                $recs[] = sprintf(
+                    'Most chats are handled by “%s”. Review its instructions and knowledge sources to make sure it reflects your latest FAQs and policies.',
+                    $name
+                );
+            }
+        }
+    }
+
+    // Ensure we always have at least 3 recommendations in paid.
+    // Add generic but still useful items, only if needed.
+    if ( count( $recs ) < 3 ) {
+        $recs[] = 'Review the most common topics visitors ask about and turn them into short, scannable answers on your site.';
+    }
+    if ( count( $recs ) < 3 ) {
+        $recs[] = 'If you use multiple assistants, consider assigning them by page or intent so visitors get more focused answers.';
+    }
+    if ( count( $recs ) < 3 ) {
+        $recs[] = 'Check your chatbot greeting and first suggested prompts. Small tweaks can increase engagement and reduce confusion.';
+    }
+
+    // Cap, deterministic order, de-dupe
+    $recs = array_values( array_unique( $recs ) );
+    $max  = max( 1, (int) $max );
+
+    return array_slice( $recs, 0, $max );
+}
+
 
