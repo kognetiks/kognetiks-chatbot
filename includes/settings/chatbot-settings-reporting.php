@@ -391,6 +391,31 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             <?php endif; ?>
         </div>
         
+        <!-- Card C: Upgrade CTA (Free users only) -->
+        <?php if ($is_free): ?>
+        <div class="kchat-email-card" id="kchat-upgrade-cta-card">
+            <div class="kchat-upgrade-cta" style="text-align: left;">
+                <p style="margin: 0 0 15px 0; font-size: 15px; font-weight: 600; color: #1e1e1e;">
+                    <span style="color: #00a32a; margin-right: 5px;">✓</span> Ready to Upgrade?
+                </p>
+                <?php
+                if (function_exists('chatbot_chatgpt_freemius')) {
+                    $upgrade_url = chatbot_chatgpt_freemius()->get_upgrade_url();
+                    ?>
+                    <a href="<?php echo esc_url($upgrade_url); ?>" class="button button-primary" style="background-color: #f56e28; border-color: #f56e28; color: #fff; text-decoration: none; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 10px;">
+                        <span style="margin-right: 5px;">🔓</span> Unlock Your Chatbot's Value
+                    </a>
+                    <?php
+                }
+                ?>
+                <div style="margin-top: 10px;">
+                    <a href="?page=chatbot-chatgpt&tab=support&dir=reporting&file=reporting.md" style="color: #2271b1; text-decoration: underline; margin-right: 15px;">Learn more</a>
+                    <a href="mailto:support@kognetiks.com" style="color: #2271b1; text-decoration: underline;">Contact Support</a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
         <?php
         // Prepare variables for JavaScript (outside conditional blocks)
         $insights_email_js = get_option('chatbot_chatgpt_insights_email_address', '');
@@ -1519,6 +1544,16 @@ add_action('update_option_chatbot_chatgpt_conversation_digest_frequency', 'chatb
 
 // Handle insights email cron scheduling when settings are saved
 function chatbot_chatgpt_handle_insights_email_scheduling($old_value, $new_value) {
+    // Ensure the automated-emails.php file is loaded
+    if (!function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
+        $automated_emails_file = plugin_dir_path(__FILE__) . '../insights/automated-emails.php';
+        if (file_exists($automated_emails_file)) {
+            require_once $automated_emails_file;
+        } else {
+            return; // File doesn't exist, can't proceed
+        }
+    }
+    
     // Get the current enabled value (this is the new value being saved)
     $enabled = $new_value;
     
@@ -1529,28 +1564,46 @@ function chatbot_chatgpt_handle_insights_email_scheduling($old_value, $new_value
     if ($old_enabled === 'No' && $enabled === 'Yes') {
         $period = get_option('chatbot_chatgpt_insights_email_period', 'weekly');
         $email = get_option('chatbot_chatgpt_insights_email_address', '');
-        kognetiks_insights_schedule_proof_of_value_email($period, $email);
+        if (function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
+            kognetiks_insights_schedule_proof_of_value_email($period, $email);
+        }
     }
     // If enabled changed from Yes to No, unschedule the cron
     elseif ($old_enabled === 'Yes' && $enabled === 'No') {
-        kognetiks_insights_unschedule_proof_of_value_email();
+        if (function_exists('kognetiks_insights_unschedule_proof_of_value_email')) {
+            kognetiks_insights_unschedule_proof_of_value_email();
+        }
     }
     // If enabled is Yes, check if we need to reschedule (period might have changed)
     elseif ($enabled === 'Yes') {
         $period = get_option('chatbot_chatgpt_insights_email_period', 'weekly');
         $email = get_option('chatbot_chatgpt_insights_email_address', '');
-        kognetiks_insights_schedule_proof_of_value_email($period, $email);
+        if (function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
+            kognetiks_insights_schedule_proof_of_value_email($period, $email);
+        }
     }
 }
 add_action('update_option_chatbot_chatgpt_insights_email_enabled', 'chatbot_chatgpt_handle_insights_email_scheduling', 10, 2);
 
 // Handle insights email period changes
 function chatbot_chatgpt_handle_insights_email_period_change($old_value, $new_value) {
+    // Ensure the automated-emails.php file is loaded
+    if (!function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
+        $automated_emails_file = plugin_dir_path(__FILE__) . '../insights/automated-emails.php';
+        if (file_exists($automated_emails_file)) {
+            require_once $automated_emails_file;
+        } else {
+            return; // File doesn't exist, can't proceed
+        }
+    }
+    
     // Only reschedule if insights email is enabled
     $enabled = get_option('chatbot_chatgpt_insights_email_enabled', 'No');
     if ($enabled === 'Yes' && $old_value !== $new_value) {
         $email = get_option('chatbot_chatgpt_insights_email_address', '');
-        kognetiks_insights_schedule_proof_of_value_email($new_value, $email);
+        if (function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
+            kognetiks_insights_schedule_proof_of_value_email($new_value, $email);
+        }
     }
 }
 add_action('update_option_chatbot_chatgpt_insights_email_period', 'chatbot_chatgpt_handle_insights_email_period_change', 10, 2);
