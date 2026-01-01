@@ -246,6 +246,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-downlo
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-helper.php';                  // Functions - Ver 2.0.3
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-file-upload.php';                  // Functions - Ver 1.7.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-filter-out-html-tags.php';         // Functions - Ver 1.9.6
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-helper-functions.php';             // Functions - Ver 1.0.0
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-keyguard.php';                     // Functions - Ver 2.2.6
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-link-and-image-handling.php';      // Globals - Ver 1.9.1
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-models.php';                       // Functions - Ver 1.9.4

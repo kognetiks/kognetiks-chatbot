@@ -938,3 +938,117 @@ function kognetiks_insights_generate_recommendations( $stats, $impact, $top_unan
 }
 
 
+/**
+ * Send the correct automated email based on license.
+ *
+ * @param array $args ['period' => 'weekly'|'monthly', 'email_to' => '', 'force_tier' => '' ]
+ * @return array payload returned from the email builder
+ */
+function kognetiks_insights_send_proof_of_value_email( $args = [] ) {
+
+    $defaults = [
+        'period'     => 'weekly',
+        'email_to'   => get_option( 'admin_email' ),
+        'force_tier' => '', // 'free' or 'paid' for testing
+    ];
+    $args = wp_parse_args( $args, $defaults );
+
+    $tier = 'free';
+
+    // Optional override for testing.
+    if ( $args['force_tier'] === 'paid' || $args['force_tier'] === 'free' ) {
+        $tier = $args['force_tier'];
+    } else {
+        // Replace this with your actual Freemius check.
+        // Example pattern:
+        // if ( function_exists( 'kognetiks_insights_fs' ) && kognetiks_insights_fs()->can_use_premium_code() ) { $tier = 'paid'; }
+        $tier = ( function_exists( 'kognetiks_insights_is_premium' ) && kognetiks_insights_is_premium() ) ? 'paid' : 'free';
+    }
+
+    $payload = ( $tier === 'paid' )
+        ? kognetiks_insights_value_translation_email( $args )
+        : kognetiks_insights_value_visibility_email( $args );
+
+    // Send (HTML + text alternative)
+    $to      = sanitize_email( $args['email_to'] );
+    $subject = $payload['subject'];
+
+    // Prefer HTML. Add headers accordingly.
+    $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
+
+    $sent = wp_mail( $to, $subject, $payload['message_html'], $headers );
+
+    // Optional: log the result somewhere
+    do_action( 'kognetiks_insights_automated_email_sent', $sent, $tier, $to, $payload, $args );
+
+    return $payload;
+}
+
+/**
+ * Add custom monthly cron interval.
+ *
+ * @param array $schedules Existing cron schedules
+ * @return array Modified schedules
+ */
+function kognetiks_insights_add_monthly_cron_interval( $schedules ) {
+    $schedules['monthly'] = [
+        'interval' => MONTH_IN_SECONDS, // 30 days
+        'display'  => __( 'Once Monthly', 'chatbot-chatgpt' ),
+    ];
+    return $schedules;
+}
+add_filter( 'cron_schedules', 'kognetiks_insights_add_monthly_cron_interval' );
+
+/**
+ * Schedule automated proof of value email cron job.
+ *
+ * @param string $period 'weekly' or 'monthly'
+ * @param string $email_to Email address to send to (optional, defaults to admin_email)
+ * @return void
+ */
+function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $email_to = '' ) {
+
+    // Clear any existing scheduled hooks
+    wp_clear_scheduled_hook( 'kognetiks_insights_send_proof_of_value_email_hook' );
+
+    // Map period to WordPress cron intervals
+    $interval_mapping = [
+        'weekly'  => 'weekly',
+        'monthly' => 'monthly',
+    ];
+
+    $interval = isset( $interval_mapping[ $period ] ) ? $interval_mapping[ $period ] : 'weekly';
+
+    // Schedule the event - start 60 seconds from now
+    $timestamp = time() + 60;
+    wp_schedule_event( $timestamp, $interval, 'kognetiks_insights_send_proof_of_value_email_hook', [ $period, $email_to ] );
+}
+
+/**
+ * Unschedule automated proof of value email cron job.
+ *
+ * @return void
+ */
+function kognetiks_insights_unschedule_proof_of_value_email() {
+    wp_clear_scheduled_hook( 'kognetiks_insights_send_proof_of_value_email_hook' );
+}
+
+/**
+ * Cron job callback function to send proof of value email.
+ *
+ * @param string $period 'weekly' or 'monthly'
+ * @param string $email_to Email address (optional)
+ * @return void
+ */
+function kognetiks_insights_send_proof_of_value_email_callback( $period = 'weekly', $email_to = '' ) {
+
+    $args = [
+        'period'   => $period,
+        'email_to' => ! empty( $email_to ) ? $email_to : get_option( 'admin_email' ),
+    ];
+
+    kognetiks_insights_send_proof_of_value_email( $args );
+}
+
+// Hook the callback to the cron event
+add_action( 'kognetiks_insights_send_proof_of_value_email_hook', 'kognetiks_insights_send_proof_of_value_email_callback', 10, 2 );
