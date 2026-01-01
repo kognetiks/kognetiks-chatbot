@@ -696,11 +696,7 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
     ];
 
     $impact = kognetiks_insights_get_impact_metrics( $window['start'], $window['end'], $stats );
-    $top_unanswered = kognetiks_insights_get_top_unanswered_questions( $window['start'], $window['end'], 5 );
 
-    $top_pages      = kognetiks_insights_get_top_pages_by_activity( $window['start'], $window['end'], 5 );
-    $top_assistants = kognetiks_insights_get_top_assistants_used( $window['start'], $window['end'], 5 );
-    
     $top_unanswered = kognetiks_insights_get_top_unanswered_questions( $window['start'], $window['end'], 5 );
     $top_pages      = kognetiks_insights_get_top_pages_by_activity( $window['start'], $window['end'], 5 );
     $top_assistants = kognetiks_insights_get_top_assistants_used( $window['start'], $window['end'], 5 );    
@@ -727,12 +723,12 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
         ],
         [
             'label' => 'Resolved Rate',
-            'value' => ( $impact['resolved_rate_pct'] === null ) ? '—' : ( rtrim( rtrim( number_format( (float) $impact['resolved_rate_pct'], 1, '.', '' ), '0' ), '.' ) . '%' ),
+            'value' => ( $impact['resolved_rate_pct'] === null ) ? '' : ( rtrim( rtrim( number_format( (float) $impact['resolved_rate_pct'], 1, '.', '' ), '0' ), '.' ) . '%' ),
             'hint'  => 'Answered without fallback',
         ],
         [
             'label' => 'Engagement Depth',
-            'value' => ( $impact['avg_messages_per_chat'] === null ) ? '—' : rtrim( rtrim( number_format( (float) $impact['avg_messages_per_chat'], 1, '.', '' ), '0' ), '.' ),
+            'value' => ( $impact['avg_messages_per_chat'] === null ) ? '' : rtrim( rtrim( number_format( (float) $impact['avg_messages_per_chat'], 1, '.', '' ), '0' ), '.' ),
             'hint'  => 'Avg messages per chat',
         ],
     ];
