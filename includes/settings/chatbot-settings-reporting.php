@@ -83,57 +83,59 @@ function chatbot_chatgpt_reporting_settings_init() {
         'chatbot_chatgpt_conversation_digest'
     );
 
-    // Only register Conversation Digest settings fields if premium is enabled
+    // Register Conversation Digest settings fields for both free and premium users
+    // Conversation Digest Settings Field - Enabled (shown in card, label handled there)
+    add_settings_field(
+        'chatbot_chatgpt_conversation_digest_enabled',
+        '',
+        'chatbot_chatgpt_conversation_digest_enabled_callback',
+        'chatbot_chatgpt_conversation_digest',
+        'chatbot_chatgpt_conversation_digest_section'
+    );
+
+    // Conversation Digest Settings Field - Frequency (shown in card, label handled there)
+    add_settings_field(
+        'chatbot_chatgpt_conversation_digest_frequency',
+        '',
+        'chatbot_chatgpt_conversation_digest_frequency_callback',
+        'chatbot_chatgpt_conversation_digest',
+        'chatbot_chatgpt_conversation_digest_section'
+    );
+
+    // Conversation Digest Settings Field - Email Address (shown in card, label handled there)
+    add_settings_field(
+        'chatbot_chatgpt_conversation_digest_email',
+        '',
+        'chatbot_chatgpt_conversation_digest_email_callback',
+        'chatbot_chatgpt_conversation_digest',
+        'chatbot_chatgpt_conversation_digest_section'
+    );
+    
+    // Only register premium-only fields if premium is enabled
     if (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only()) {
-        // Conversation Digest Settings Field - Enabled
-        add_settings_field(
-            'chatbot_chatgpt_conversation_digest_enabled',
-            'Enabled',
-            'chatbot_chatgpt_conversation_digest_enabled_callback',
-            'chatbot_chatgpt_conversation_digest',
-            'chatbot_chatgpt_conversation_digest_section'
-        );
-
-        // Conversation Digest Settings Field - Frequency
-        add_settings_field(
-            'chatbot_chatgpt_conversation_digest_frequency',
-            'Frequency',
-            'chatbot_chatgpt_conversation_digest_frequency_callback',
-            'chatbot_chatgpt_conversation_digest',
-            'chatbot_chatgpt_conversation_digest_section'
-        );
-
-        // Conversation Digest Settings Field - Email Address
-        add_settings_field(
-            'chatbot_chatgpt_conversation_digest_email',
-            'Email Address',
-            'chatbot_chatgpt_conversation_digest_email_callback',
-            'chatbot_chatgpt_conversation_digest',
-            'chatbot_chatgpt_conversation_digest_section'
-        );
         
-        // Insights Email Settings Field - Enabled
+        // Insights Email Settings Field - Enabled (shown in card, label handled there)
         add_settings_field(
             'chatbot_chatgpt_insights_email_enabled',
-            'Insights Email Enabled',
+            '',
             'chatbot_chatgpt_insights_email_enabled_callback',
             'chatbot_chatgpt_conversation_digest',
             'chatbot_chatgpt_conversation_digest_section'
         );
         
-        // Insights Email Settings Field - Period
+        // Insights Email Settings Field - Period (shown in card, label handled there)
         add_settings_field(
             'chatbot_chatgpt_insights_email_period',
-            'Insights Email Period',
+            '',
             'chatbot_chatgpt_insights_email_period_callback',
             'chatbot_chatgpt_conversation_digest',
             'chatbot_chatgpt_conversation_digest_section'
         );
         
-        // Insights Email Settings Field - Email Address
+        // Insights Email Settings Field - Email Address (shown in card, label handled there)
         add_settings_field(
             'chatbot_chatgpt_insights_email_address',
-            'Insights Email Address',
+            '',
             'chatbot_chatgpt_insights_email_address_callback',
             'chatbot_chatgpt_conversation_digest',
             'chatbot_chatgpt_conversation_digest_section'
@@ -216,173 +218,289 @@ function chatbot_chatgpt_reporting_section_callback($args) {
 
 function chatbot_chatgpt_conversation_digest_section_callback($args) {
     // Check if premium is enabled
-    if (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only()) {
-        // Premium user - show normal settings
+    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    $is_free = !$is_premium;
+    
+    // Get current values for conditional display
+    $digest_enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));
+    $insights_enabled = esc_attr(get_option('chatbot_chatgpt_insights_email_enabled', 'No'));
+    
+    if ($is_premium || $is_free) {
+        // Show settings for both premium and free (free users can use insights)
         ?>
-        <div>
-            <h4>Conversation Digest</h4>
-            <p>Configure conversation digest settings to receive periodic email summaries of new chatbot conversations.</p>
-            <p>When enabled, the system will check for new conversations and send a digest email to the specified address based on the selected frequency.</p>
+        <style>
+        /* Hide default WordPress settings table for this section - target the table that comes after our cards */
+        div:has(.kchat-email-card) + table.form-table,
+        div:has(.kchat-email-card) ~ table.form-table {
+            display: none !important;
+        }
+        
+        /* Also hide any table rows with empty labels (our fields have empty labels) */
+        table.form-table tr th:empty,
+        table.form-table tr:has(th:empty) {
+            display: none !important;
+        }
+        
+        .kchat-email-card {
+            border: 1px solid #ccd0d4;
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-shadow: 0 1px 1px rgba(0,0,0,.04);
+        }
+        .kchat-email-card h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .kchat-email-card .description {
+            color: #646970;
+            font-size: 13px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .kchat-email-card .settings-row {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            min-height: 32px;
+        }
+        .kchat-email-card .settings-row label {
+            min-width: 200px;
+            font-weight: 600;
+            padding-top: 5px;
+            display: block;
+            color: #1e1e1e;
+        }
+        .kchat-email-card .settings-row .field-wrapper {
+            flex: 1;
+        }
+        .kchat-email-card .settings-row .field-wrapper select,
+        .kchat-email-card .settings-row .field-wrapper input[type="email"] {
+            width: 100%;
+            max-width: 400px;
+        }
+        .kchat-email-card .test-button-wrapper {
+            margin-top: 15px;
+            text-align: right;
+            padding-top: 10px;
+        }
+        .kchat-email-card .conditional-field {
+            display: none;
+        }
+        .kchat-email-card.enabled .conditional-field {
+            display: flex;
+        }
+        .kchat-premium-note {
+            background-color: #f0f6fc;
+            border-left: 4px solid #2271b1;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #1e1e1e;
+        }
+        </style>
+        
+        <!-- Card A: Conversation Digest -->
+        <div class="kchat-email-card" id="kchat-digest-card" data-enabled="<?php echo esc_attr($digest_enabled); ?>">
+            <h3>Conversation Digest</h3>
+            <p class="description">Receive periodic summaries of new chatbot conversations. Great for monitoring new activity.</p>
             
-            <h4>Insights</h4>
-            <p>Configure insights settings to receive periodic proof-of-value reports with chatbot activity metrics, trends, and actionable insights.</p>
-            <p>When enabled, the system will send automated insight reports (weekly or monthly) to help you understand your chatbot's impact and performance.</p>
-            <p>
+            <div class="settings-row">
+                <label for="chatbot_chatgpt_conversation_digest_enabled">Enabled</label>
+                <div class="field-wrapper">
+                    <?php chatbot_chatgpt_conversation_digest_enabled_callback([]); ?>
+                </div>
+            </div>
+            
+            <div class="settings-row conditional-field" id="digest-frequency-row">
+                <label for="chatbot_chatgpt_conversation_digest_frequency">Digest Frequency</label>
+                <div class="field-wrapper">
+                    <?php chatbot_chatgpt_conversation_digest_frequency_callback([]); ?>
+                </div>
+            </div>
+            
+            <div class="settings-row conditional-field" id="digest-email-row">
+                <label for="chatbot_chatgpt_conversation_digest_email">Send Reports To</label>
+                <div class="field-wrapper">
+                    <?php chatbot_chatgpt_conversation_digest_email_callback([]); ?>
+                </div>
+            </div>
+            
+            <?php if (is_admin() && current_user_can('manage_options')): ?>
+            <div class="test-button-wrapper conditional-field" id="digest-test-row">
                 <?php
-                if (is_admin() && current_user_can('manage_options')) {
-                    $email_address = get_option('chatbot_chatgpt_conversation_digest_email', '');
-                    $email_display = !empty($email_address) ? $email_address : 'the configured email address';
-                    $nonce = wp_create_nonce('chatbot_chatgpt_test_conversation_digest');
-                    ?>
-                    <button type="button" id="chatbot-test-email-btn" class="button button-secondary" style="margin-top: 10px;" data-nonce="<?php echo esc_attr($nonce); ?>">Test Conversation Digest Email</button>
-                    <script type="text/javascript">
-                    jQuery(document).ready(function($) {
-                        $('#chatbot-test-email-btn').on('click', function(e) {
-                            e.preventDefault();
-                            var email = '<?php echo esc_js($email_display); ?>';
-                            if (!confirm('Send a test conversation digest email to ' + email + '?')) {
-                                return false;
-                            }
-                            var btn = $(this);
-                            var originalText = btn.text();
-                            btn.prop('disabled', true).text('Sending...');
-                            $.ajax({
-                                url: ajaxurl,
-                                type: 'POST',
-                                data: {
-                                    action: 'chatbot_chatgpt_test_conversation_digest',
-                                    nonce: btn.data('nonce')
-                                },
-                                success: function(response) {
-                                    if (response.success) {
-                                        alert('Test email sent successfully!');
-                                        location.reload();
-                                    } else {
-                                        alert('Error: ' + (response.data || 'Failed to send test email'));
-                                        btn.prop('disabled', false).text(originalText);
-                                    }
-                                },
-                                error: function() {
-                                    alert('Error: Failed to send test email. Please try again.');
-                                    btn.prop('disabled', false).text(originalText);
-                                }
-                            });
-                        });
-                    });
-                    </script>
-                    <?php
-                    
-                    // Add test button for insights email
-                    $insights_email = get_option('chatbot_chatgpt_insights_email_address', '');
-                    $insights_email_display = !empty($insights_email) ? $insights_email : get_option('admin_email');
-                    $insights_nonce = wp_create_nonce('chatbot_chatgpt_test_insights_email');
-                    ?>
-                    <button type="button" id="chatbot-test-insights-email-btn" class="button button-secondary" style="margin-top: 10px; margin-left: 10px;" data-nonce="<?php echo esc_attr($insights_nonce); ?>">Test Insights Email</button>
-                    <script type="text/javascript">
-                    jQuery(document).ready(function($) {
-                        $('#chatbot-test-insights-email-btn').on('click', function(e) {
-                            e.preventDefault();
-                            var email = '<?php echo esc_js($insights_email_display); ?>';
-                            if (!confirm('Send a test insights email to ' + email + '?')) {
-                                return false;
-                            }
-                            var btn = $(this);
-                            var originalText = btn.text();
-                            btn.prop('disabled', true).text('Sending...');
-                            $.ajax({
-                                url: ajaxurl,
-                                type: 'POST',
-                                data: {
-                                    action: 'chatbot_chatgpt_test_insights_email',
-                                    nonce: btn.data('nonce')
-                                },
-                                success: function(response) {
-                                    if (response.success) {
-                                        alert('Test insights email sent successfully!');
-                                        location.reload();
-                                    } else {
-                                        alert('Error: ' + (response.data || 'Failed to send test email'));
-                                        btn.prop('disabled', false).text(originalText);
-                                    }
-                                },
-                                error: function() {
-                                    alert('Error: Failed to send test email. Please try again.');
-                                    btn.prop('disabled', false).text(originalText);
-                                }
-                            });
-                        });
-                    });
-                    </script>
-                    <?php
-                }
+                $email_address = get_option('chatbot_chatgpt_conversation_digest_email', '');
+                $email_display = !empty($email_address) ? $email_address : 'the configured email address';
+                $nonce = wp_create_nonce('chatbot_chatgpt_test_conversation_digest');
                 ?>
-            </p>
+                <button type="button" id="chatbot-test-digest-email-btn" class="button button-secondary" data-nonce="<?php echo esc_attr($nonce); ?>">Test Conversation Digest Report</button>
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!$is_premium): ?>
+            <div class="kchat-premium-note">
+                <strong>Free tier:</strong> Weekly frequency with basic stats (conversation count, pages, visitors/users). <strong>Premium</strong> unlocks Daily/Hourly frequency and richer formatting with full conversation details.
+            </div>
+            <?php endif; ?>
         </div>
+        
+        <!-- Card B: Proof of Value Reports -->
+        <div class="kchat-email-card" id="kchat-insights-card" data-enabled="<?php echo esc_attr($insights_enabled); ?>">
+            <h3>Proof of Value Reports</h3>
+            <p class="description">Automated reports that show chatbot impact, trends, and actionable insights. Designed to help you measure ROI and improve performance.</p>
+            
+            <div class="settings-row">
+                <label for="chatbot_chatgpt_insights_email_enabled">Enabled</label>
+                <div class="field-wrapper">
+                    <?php chatbot_chatgpt_insights_email_enabled_callback([]); ?>
+                </div>
+            </div>
+            
+            <div class="settings-row conditional-field" id="insights-period-row">
+                <label for="chatbot_chatgpt_insights_email_period">Report Frequency</label>
+                <div class="field-wrapper">
+                    <?php chatbot_chatgpt_insights_email_period_callback([]); ?>
+                </div>
+            </div>
+            
+            <div class="settings-row conditional-field" id="insights-email-row">
+                <label for="chatbot_chatgpt_insights_email_address">Send Reports To</label>
+                <div class="field-wrapper">
+                    <?php chatbot_chatgpt_insights_email_address_callback([]); ?>
+                </div>
+            </div>
+            
+            <?php if (is_admin() && current_user_can('manage_options')): ?>
+            <div class="test-button-wrapper conditional-field" id="insights-test-row">
+                <?php
+                $insights_email = get_option('chatbot_chatgpt_insights_email_address', '');
+                $insights_email_display = !empty($insights_email) ? $insights_email : get_option('admin_email');
+                $insights_nonce = wp_create_nonce('chatbot_chatgpt_test_insights_email');
+                ?>
+                <button type="button" id="chatbot-test-insights-email-btn" class="button button-secondary" data-nonce="<?php echo esc_attr($insights_nonce); ?>">Test Proof of Value Report</button>
+            </div>
+            <?php endif; ?>
+            
+            <?php if ($is_free): ?>
+            <div class="kchat-premium-note">
+                <strong>Free reports include basic activity stats.</strong> Premium adds top unanswered questions, top pages, and recommended next steps.
+            </div>
+            <?php endif; ?>
+        </div>
+        
         <?php
-    } else {
-        // Not premium - show premium feature notice
+        // Prepare variables for JavaScript (outside conditional blocks)
+        $insights_email_js = get_option('chatbot_chatgpt_insights_email_address', '');
+        $insights_email_display_js = !empty($insights_email_js) ? $insights_email_js : get_option('admin_email');
         ?>
-        <div class="kchat-conversation-digest-upgrade-notice" style="border: 2px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">
-            <h2 style="margin-top: 0;">📬 Conversation Digest <span style="color: #d54e21;">(Premium Feature)</span></h2>
-
-            <p>Your chatbot is having conversations whether you are watching or not.</p>
-            <p><b>Conversation Digest keeps you informed without requiring constant oversight.</b></p>
-            <p>Instead of logging in to review logs or dashboards, receive clear, periodic summaries delivered directly to your inbox.</p>
-
-            <p><b>With Conversation Digest, you can:</b></p>
-
-            <ul style="margin-left: 20px;">
-                <li>📩 <b>Receive scheduled conversation summaries</b><br>
-                Get automated email digests of new chatbot conversations on your terms (Hourly, Daily, or Weekly).</li>
-
-                <li>👀 <b>Maintain visibility without micromanaging</b><br>
-                Stay aware of activity levels, conversation volume, and notable interactions.</li>
-
-                <li>⚠️ <b>Avoid missing important moments</b><br>
-                Know when new conversations occur, even if you are not actively monitoring your site.</li>
-
-                <li>📈 <b>Spot patterns over time</b><br>
-                Identify recurring topics and engagement trends that may need attention.</li>
-            </ul>
-
-            <p style="margin-top: 15px;"><i>Recommended for site owners who do not check WordPress every day.</i></p>
-
-            <hr style="margin: 20px 0;">
-
-            <h3>🔒 Premium Feature</h3>
-            <p>Conversation Digest is part of the <strong>Kognetiks Premium</strong> plan.<br>
-            Activate your license key to unlock this feature.</p>
-
-            <ul style="margin-left: 20px; list-style-type:disc;">
-                <li>Automated email digests with customizable frequency</li>
-                <li>Organized summaries grouped by conversation session</li>
-                <li>Built-in test email tools to verify delivery</li>
-                <li>Support for multiple digest frequencies (Hourly, Daily, Weekly)</li>
-            </ul>
-
-            <hr style="margin: 20px 0;">
-
-            <h3>✅ Designed for Awareness, Not Noise</h3>
-            <p>Conversation Digest is intentionally concise. It highlights what is happening, so you can decide when action is needed.</p>
-
-            <hr style="margin: 20px 0;">
-
-            <h3>✅ Ready to Upgrade?</h3>
-            <p>Once unlocked, you\'ll be able to:
-            <ul style="margin-left: 20px; list-style-type:disc;">
-                <li>Choose how often emails are sent (Hourly, Daily, Weekly)</li>
-                <li>Set the email address for delivery</li>
-                <li>Enable or disable Conversation Digest</li>
-            </ul>
-            <p><i>You can change or disable this at any time.</i></p>
-                <?php
-                if (function_exists('chatbot_chatgpt_freemius')) {
-                    echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">🔓 Unlock Conversation Digest</a>';
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            // Hide default WordPress settings table that appears after our cards
+            $('.kchat-email-card').closest('div').next('table.form-table').hide();
+            $('.kchat-email-card').closest('div').siblings('table.form-table').hide();
+            
+            // Also hide any table rows with empty th elements (our fields have empty labels)
+            $('table.form-table tr').each(function() {
+                var $th = $(this).find('th');
+                if ($th.length && ($th.text().trim() === '' || $th.html().trim() === '')) {
+                    $(this).hide();
                 }
-                ?>
-                <a href="mailto:support@kognetiks.com">Contact Support</a>
-            </p>
-        </div>
+            });
+            
+            // Function to toggle conditional fields
+            function toggleConditionalFields(cardId, enabled) {
+                var card = $('#' + cardId);
+                if (enabled === 'Yes') {
+                    card.addClass('enabled');
+                } else {
+                    card.removeClass('enabled');
+                }
+            }
+            
+            // Initialize on page load
+            toggleConditionalFields('kchat-digest-card', '<?php echo esc_js($digest_enabled); ?>');
+            toggleConditionalFields('kchat-insights-card', '<?php echo esc_js($insights_enabled); ?>');
+            
+            // Watch for changes to digest enabled
+            $('#chatbot_chatgpt_conversation_digest_enabled').on('change', function() {
+                toggleConditionalFields('kchat-digest-card', $(this).val());
+            });
+            
+            // Watch for changes to insights enabled
+            $('#chatbot_chatgpt_insights_email_enabled').on('change', function() {
+                toggleConditionalFields('kchat-insights-card', $(this).val());
+            });
+            
+            // Test Conversation Digest Email
+            $('#chatbot-test-digest-email-btn').on('click', function(e) {
+                e.preventDefault();
+                var email = '<?php echo esc_js($email_display); ?>';
+                if (!confirm('Send a test conversation digest email to ' + email + '?')) {
+                    return false;
+                }
+                var btn = $(this);
+                var originalText = btn.text();
+                btn.prop('disabled', true).text('Sending...');
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'chatbot_chatgpt_test_conversation_digest',
+                        nonce: btn.data('nonce')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Test email sent successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (response.data || 'Failed to send test email'));
+                            btn.prop('disabled', false).text(originalText);
+                        }
+                    },
+                    error: function() {
+                        alert('Error: Failed to send test email. Please try again.');
+                        btn.prop('disabled', false).text(originalText);
+                    }
+                });
+            });
+            
+            // Test Insights Email
+            $('#chatbot-test-insights-email-btn').on('click', function(e) {
+                e.preventDefault();
+                var email = '<?php echo esc_js($insights_email_display_js); ?>';
+                if (!confirm('Send a test proof of value report to ' + email + '?')) {
+                    return false;
+                }
+                var btn = $(this);
+                var originalText = btn.text();
+                btn.prop('disabled', true).text('Sending...');
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'chatbot_chatgpt_test_insights_email',
+                        nonce: btn.data('nonce')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Test report sent successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (response.data || 'Failed to send test email'));
+                            btn.prop('disabled', false).text(originalText);
+                        }
+                    },
+                    error: function() {
+                        alert('Error: Failed to send test email. Please try again.');
+                        btn.prop('disabled', false).text(originalText);
+                    }
+                });
+            });
+        });
+        </script>
         <?php
     }
 }
@@ -497,12 +615,6 @@ function chatbot_chatgpt_conversation_log_days_to_keep_callback($args) {
 
 // Conversation Digest Enabled - Ver 2.3.9
 function chatbot_chatgpt_conversation_digest_enabled_callback($args) {
-    // Check if premium is enabled
-    if (!function_exists('chatbot_chatgpt_freemius') || !chatbot_chatgpt_freemius()->can_use_premium_code__premium_only()) {
-        // echo '<p class="description" style="color: #d54e21;"><em>This feature requires a Premium license.</em></p>';
-        return;
-    }
-    
     // Get the saved chatbot_chatgpt_conversation_digest_enabled value or default to "No"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));
     ?>
@@ -516,30 +628,39 @@ function chatbot_chatgpt_conversation_digest_enabled_callback($args) {
 // Conversation Digest Frequency - Ver 2.3.9
 function chatbot_chatgpt_conversation_digest_frequency_callback($args) {
     // Check if premium is enabled
-    if (!function_exists('chatbot_chatgpt_freemius') || !chatbot_chatgpt_freemius()->can_use_premium_code__premium_only()) {
-        // echo '<p class="description" style="color: #d54e21;"><em>This feature requires a Premium license.</em></p>';
-        return;
-    }
+    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
     
-    // Get the saved chatbot_chatgpt_conversation_digest_frequency value or default to "Daily"
-    $output_choice = esc_attr(get_option('chatbot_chatgpt_conversation_digest_frequency', 'Daily'));
-    ?>
-    <select id="chatbot_chatgpt_conversation_digest_frequency" name="chatbot_chatgpt_conversation_digest_frequency">
-        <option value="<?php echo esc_attr( 'Hourly' ); ?>" <?php selected( $output_choice, 'Hourly' ); ?>><?php echo esc_html( 'Hourly' ); ?></option>
-        <option value="<?php echo esc_attr( 'Daily' ); ?>" <?php selected( $output_choice, 'Daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
-        <option value="<?php echo esc_attr( 'Weekly' ); ?>" <?php selected( $output_choice, 'Weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
-    </select>
-    <?php
+    // Get the saved chatbot_chatgpt_conversation_digest_frequency value
+    // For free users, default to Weekly and force Weekly
+    $saved_choice = esc_attr(get_option('chatbot_chatgpt_conversation_digest_frequency', 'Weekly'));
+    
+    // Free users can only use Weekly
+    if (!$is_premium) {
+        // Force Weekly for free users
+        if ($saved_choice !== 'Weekly') {
+            update_option('chatbot_chatgpt_conversation_digest_frequency', 'Weekly');
+            $saved_choice = 'Weekly';
+        }
+        ?>
+        <select id="chatbot_chatgpt_conversation_digest_frequency" name="chatbot_chatgpt_conversation_digest_frequency" disabled>
+            <option value="<?php echo esc_attr( 'Weekly' ); ?>" selected><?php echo esc_html( 'Weekly' ); ?> (Free)</option>
+        </select>
+        <p class="description" style="margin-top: 5px; color: #646970;">Daily and Hourly frequencies available with Premium.</p>
+        <?php
+    } else {
+        // Premium users get all options
+        ?>
+        <select id="chatbot_chatgpt_conversation_digest_frequency" name="chatbot_chatgpt_conversation_digest_frequency">
+            <option value="<?php echo esc_attr( 'Hourly' ); ?>" <?php selected( $saved_choice, 'Hourly' ); ?>><?php echo esc_html( 'Hourly' ); ?></option>
+            <option value="<?php echo esc_attr( 'Daily' ); ?>" <?php selected( $saved_choice, 'Daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
+            <option value="<?php echo esc_attr( 'Weekly' ); ?>" <?php selected( $saved_choice, 'Weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
+        </select>
+        <?php
+    }
 }
 
 // Conversation Digest Email Address - Ver 2.3.9
 function chatbot_chatgpt_conversation_digest_email_callback($args) {
-    // Check if premium is enabled
-    if (!function_exists('chatbot_chatgpt_freemius') || !chatbot_chatgpt_freemius()->can_use_premium_code__premium_only()) {
-        // echo '<p class="description" style="color: #d54e21;"><em>This feature requires a Premium license.</em></p>';
-        return;
-    }
-    
     // Get the saved chatbot_chatgpt_conversation_digest_email value or default to empty
     $email_value = esc_attr(get_option('chatbot_chatgpt_conversation_digest_email', ''));
     ?>
@@ -548,13 +669,8 @@ function chatbot_chatgpt_conversation_digest_email_callback($args) {
     <?php
 }
 
-// Insights Email Enabled
+// Insights Email Enabled (Proof of Value Reports)
 function chatbot_chatgpt_insights_email_enabled_callback($args) {
-    // Check if premium is enabled
-    if (!function_exists('chatbot_chatgpt_freemius') || !chatbot_chatgpt_freemius()->can_use_premium_code__premium_only()) {
-        return;
-    }
-    
     // Get the saved chatbot_chatgpt_insights_email_enabled value or default to "No"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_insights_email_enabled', 'No'));
     ?>
@@ -565,13 +681,8 @@ function chatbot_chatgpt_insights_email_enabled_callback($args) {
     <?php
 }
 
-// Insights Email Period
+// Insights Email Period (Report Period)
 function chatbot_chatgpt_insights_email_period_callback($args) {
-    // Check if premium is enabled
-    if (!function_exists('chatbot_chatgpt_freemius') || !chatbot_chatgpt_freemius()->can_use_premium_code__premium_only()) {
-        return;
-    }
-    
     // Get the saved chatbot_chatgpt_insights_email_period value or default to "weekly"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_insights_email_period', 'weekly'));
     ?>
@@ -579,22 +690,16 @@ function chatbot_chatgpt_insights_email_period_callback($args) {
         <option value="<?php echo esc_attr( 'weekly' ); ?>" <?php selected( $output_choice, 'weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
         <option value="<?php echo esc_attr( 'monthly' ); ?>" <?php selected( $output_choice, 'monthly' ); ?>><?php echo esc_html( 'Monthly' ); ?></option>
     </select>
-    <p class="description">Select how often to receive insights email reports.</p>
     <?php
 }
 
-// Insights Email Address
+// Insights Email Address (Send Reports To)
 function chatbot_chatgpt_insights_email_address_callback($args) {
-    // Check if premium is enabled
-    if (!function_exists('chatbot_chatgpt_freemius') || !chatbot_chatgpt_freemius()->can_use_premium_code__premium_only()) {
-        return;
-    }
-    
     // Get the saved chatbot_chatgpt_insights_email_address value or default to empty
     $email_value = esc_attr(get_option('chatbot_chatgpt_insights_email_address', ''));
     ?>
     <input type="email" id="chatbot_chatgpt_insights_email_address" name="chatbot_chatgpt_insights_email_address" value="<?php echo esc_attr($email_value); ?>" class="regular-text" />
-    <p class="description">Enter the email address where insights reports should be sent. Leave empty to use admin email.</p>
+    <p class="description">Enter the email address where proof of value reports should be sent.</p>
     <?php
 }
 

@@ -43,7 +43,14 @@ function chatbot_chatgpt_schedule_conversation_digest() {
     }
     
     // Get the frequency setting
-    $frequency = esc_attr(get_option('chatbot_chatgpt_conversation_digest_frequency', 'Daily'));
+    $frequency = esc_attr(get_option('chatbot_chatgpt_conversation_digest_frequency', 'Weekly'));
+    
+    // Check if premium - free users are limited to Weekly
+    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    if (!$is_premium) {
+        $frequency = 'Weekly'; // Force Weekly for free users
+        update_option('chatbot_chatgpt_conversation_digest_frequency', 'Weekly');
+    }
     
     // Clear any existing scheduled hooks
     wp_clear_scheduled_hook('chatbot_chatgpt_send_conversation_digest_hook');
@@ -55,7 +62,7 @@ function chatbot_chatgpt_schedule_conversation_digest() {
         'Weekly' => 'weekly'
     );
     
-    $interval = isset($interval_mapping[$frequency]) ? $interval_mapping[$frequency] : 'daily';
+    $interval = isset($interval_mapping[$frequency]) ? $interval_mapping[$frequency] : 'weekly';
     
     // Schedule the event
     $timestamp = time() + 60; // Start 60 seconds from now
@@ -116,57 +123,91 @@ function chatbot_chatgpt_send_conversation_digest() {
         return;
     }
     
+    // Check if premium - free users get limited content
+    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    
     // Organize conversations by session
     $conversations_by_session = array();
+    $page_ids = array();
+    $visitor_sessions = array();
+    $user_ids = array();
+    
     foreach ($conversations as $conversation) {
         $session_id = $conversation->session_id;
         if (!isset($conversations_by_session[$session_id])) {
             $conversations_by_session[$session_id] = array();
         }
         $conversations_by_session[$session_id][] = $conversation;
+        
+        // Collect stats for free users
+        if (!empty($conversation->page_id) && $conversation->page_id > 0) {
+            $page_ids[$conversation->page_id] = true;
+        }
+        if ($conversation->user_type === 'Visitor') {
+            $visitor_sessions[$session_id] = true;
+        }
+        if (!empty($conversation->user_id) && $conversation->user_id > 0) {
+            $user_ids[$conversation->user_id] = true;
+        }
     }
     
     // Build email content
     $subject = 'Chatbot Conversation Digest - ' . date('Y-m-d H:i:s');
-    $message = "New Chatbot Conversations Digest\n\n";
-    $message .= "Period: " . date('Y-m-d H:i:s', strtotime($start_time)) . " to " . current_time('mysql') . "\n\n";
-    $message .= "Total Conversations: " . count($conversations_by_session) . "\n";
-    $message .= "Total Messages: " . count($conversations) . "\n\n";
-    $message .= "---\n\n";
     
-    // Add each conversation session
-    $session_count = 0;
-    foreach ($conversations_by_session as $session_id => $session_conversations) {
-        $session_count++;
-        $message .= "Conversation #" . $session_count . " (Session ID: " . $session_id . ")\n";
+    if ($is_premium) {
+        // Premium: Full detailed content
+        $message = "New Chatbot Conversations Digest\n\n";
+        $message .= "Period: " . date('Y-m-d H:i:s', strtotime($start_time)) . " to " . current_time('mysql') . "\n\n";
+        $message .= "Total Conversations: " . count($conversations_by_session) . "\n";
+        $message .= "Total Messages: " . count($conversations) . "\n\n";
+        $message .= "---\n\n";
         
-        // Get session metadata from first message
-        $first_message = $session_conversations[0];
-        if (!empty($first_message->user_id)) {
-            $message .= "User ID: " . $first_message->user_id . "\n";
+        // Add each conversation session with full details
+        $session_count = 0;
+        foreach ($conversations_by_session as $session_id => $session_conversations) {
+            $session_count++;
+            $message .= "Conversation #" . $session_count . " (Session ID: " . $session_id . ")\n";
+            
+            // Get session metadata from first message
+            $first_message = $session_conversations[0];
+            if (!empty($first_message->user_id)) {
+                $message .= "User ID: " . $first_message->user_id . "\n";
+            }
+            if (!empty($first_message->page_id)) {
+                $message .= "Page ID: " . $first_message->page_id . "\n";
+            }
+            if (!empty($first_message->thread_id)) {
+                $message .= "Thread ID: " . $first_message->thread_id . "\n";
+            }
+            if (!empty($first_message->assistant_name)) {
+                $message .= "Assistant: " . $first_message->assistant_name . "\n";
+            }
+            $message .= "Started: " . $first_message->interaction_time . "\n";
+            $message .= "\n";
+            
+            // Add messages in chronological order
+            foreach ($session_conversations as $msg) {
+                $user_label = ($msg->user_type === 'Visitor') ? 'Visitor' : 'Chatbot';
+                $message .= "[" . $msg->interaction_time . "] " . $user_label . ": " . $msg->message_text . "\n";
+            }
+            
+            $message .= "\n---\n\n";
         }
-        if (!empty($first_message->page_id)) {
-            $message .= "Page ID: " . $first_message->page_id . "\n";
-        }
-        if (!empty($first_message->thread_id)) {
-            $message .= "Thread ID: " . $first_message->thread_id . "\n";
-        }
-        if (!empty($first_message->assistant_name)) {
-            $message .= "Assistant: " . $first_message->assistant_name . "\n";
-        }
-        $message .= "Started: " . $first_message->interaction_time . "\n";
-        $message .= "\n";
         
-        // Add messages in chronological order
-        foreach ($session_conversations as $msg) {
-            $user_label = ($msg->user_type === 'Visitor') ? 'Visitor' : 'Chatbot';
-            $message .= "[" . $msg->interaction_time . "] " . $user_label . ": " . $msg->message_text . "\n";
-        }
-        
-        $message .= "\n---\n\n";
+        $message .= "\nThis is an automated digest from your Chatbot Conversation Logging system.\n";
+    } else {
+        // Free: Limited content - just stats
+        $message = "Chatbot Conversation Digest (Weekly Summary)\n\n";
+        $message .= "Period: " . date('Y-m-d H:i:s', strtotime($start_time)) . " to " . current_time('mysql') . "\n\n";
+        $message .= "Summary Statistics:\n";
+        $message .= "• New Conversations: " . count($conversations_by_session) . "\n";
+        $message .= "• Pages Involved: " . count($page_ids) . "\n";
+        $message .= "• Visitors: " . count($visitor_sessions) . "\n";
+        $message .= "• Logged-in Users: " . count($user_ids) . "\n\n";
+        $message .= "---\n\n";
+        $message .= "Upgrade to Premium to receive detailed conversation transcripts, message-by-message breakdowns, and Daily/Hourly frequency options.\n\n";
+        $message .= "This is an automated digest from your Chatbot Conversation Logging system.\n";
     }
-    
-    $message .= "\nThis is an automated digest from your Chatbot Conversation Logging system.\n";
     
     // Send the email
     $sent = wp_mail($email_address, $subject, $message);
