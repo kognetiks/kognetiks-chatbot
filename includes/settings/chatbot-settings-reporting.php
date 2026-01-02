@@ -342,7 +342,7 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             
             <?php if (!$is_premium): ?>
             <div class="kchat-premium-note">
-                <strong>Free tier:</strong> Weekly frequency with basic stats (conversation count, pages, visitors/users). <strong>Premium</strong> unlocks Daily/Hourly frequency and richer formatting with full conversation details.
+                <strong>Free Reports</strong> are limited to weekly with basic stats (conversation count, pages, visitors/users). <strong>Premium Reports</strong> unlocks Daily/Hourly frequency and richer formatting with full conversation details.
             </div>
             <?php endif; ?>
         </div>
@@ -386,7 +386,7 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             
             <?php if ($is_free): ?>
             <div class="kchat-premium-note">
-                <strong>Free reports include basic activity stats.</strong> Premium adds top unanswered questions, top pages, and recommended next steps.
+                <strong>Free Reports</strong> include basic activity stats. <strong>Premium Reports</strong> adds top unanswered questions, top pages, and recommended next steps.
             </div>
             <?php endif; ?>
         </div>
@@ -1417,6 +1417,17 @@ function chatbot_chatgpt_test_insights_email_ajax() {
     // Verify nonce
     if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'chatbot_chatgpt_test_insights_email')) {
         wp_send_json_error('Security check failed. Please refresh the page and try again.');
+    }
+    
+    // Ensure the automated-emails.php file is loaded
+    if (!function_exists('kognetiks_insights_send_proof_of_value_email')) {
+        $automated_emails_file = plugin_dir_path(__FILE__) . '../insights/automated-emails.php';
+        if (file_exists($automated_emails_file)) {
+            require_once $automated_emails_file;
+        } else {
+            wp_send_json_error('Insights email function not available. Please ensure the insights module is loaded.');
+            return;
+        }
     }
     
     // Get the email address (use insights email or fall back to admin email)
