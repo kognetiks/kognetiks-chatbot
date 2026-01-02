@@ -29,11 +29,17 @@ function kognetiks_insights_is_premium() {
         return false;
     }
 
+    // Use the correct Freemius method that checks both is_premium() and can_use_premium_code()
+    if ( method_exists( $fs, 'can_use_premium_code__premium_only' ) ) {
+        return (bool) $fs->can_use_premium_code__premium_only();
+    }
+
+    // Fallback: check can_use_premium_code() if the premium-only method doesn't exist
     if ( method_exists( $fs, 'can_use_premium_code' ) ) {
         return (bool) $fs->can_use_premium_code();
     }
 
-    // Fallbacks (in case method availability differs by SDK version)
+    // Additional fallbacks (in case method availability differs by SDK version)
     if ( method_exists( $fs, 'has_active_valid_license' ) ) {
         return (bool) $fs->has_active_valid_license();
     }
@@ -43,6 +49,7 @@ function kognetiks_insights_is_premium() {
     }
 
     return false;
+    
 }
 
 

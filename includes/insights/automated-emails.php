@@ -26,16 +26,19 @@ function kognetiks_insights_get_period_window( $period = 'weekly' ) {
 
     $now = current_time( 'timestamp' ); // WP local time
     // Normalize to start-of-day for consistency.
-    $today = strtotime( date( 'Y-m-d 00:00:00', $now ) );
+    $today_start = strtotime( date( 'Y-m-d 00:00:00', $now ) );
+    // End of today (23:59:59) to ensure we include all of today's data
+    $today_end = strtotime( date( 'Y-m-d 23:59:59', $now ) );
 
     if ( $period === 'monthly' ) {
-        $start = strtotime( date( 'Y-m-01 00:00:00', $today ) );
-        $end   = $now;
-        $label = date_i18n( 'F Y', $today );
+        $start = strtotime( date( 'Y-m-01 00:00:00', $today_start ) );
+        $end   = $today_end; // Include full current day
+        $label = date_i18n( 'F Y', $today_start );
     } else {
         // Week window: last 7 days (including today), simple rolling window.
-        $start = strtotime( '-6 days', $today );
-        $end   = $now;
+        // Go back 6 days from start of today, so we get 7 days total (including today)
+        $start = strtotime( '-6 days', $today_start );
+        $end   = $today_end; // Include full current day
         $label = sprintf(
             '%s – %s',
             date_i18n( 'M j', $start ),
@@ -181,9 +184,8 @@ function kognetiks_insights_get_usage_stats( $start_ts, $end_ts ) {
     $tables = kognetiks_insights_get_table_names();
     $log    = $tables['conversation_log'];
 
-    // Convert timestamps to MySQL DATETIME strings
-    // Use WordPress current_time() format for consistency with database storage
-    // The timestamps are already in local time from current_time('timestamp')
+    // Convert timestamps to MySQL DATETIME strings using WordPress date functions
+    // WordPress stores dates in local time, so we need to ensure proper conversion
     $start_dt = date( 'Y-m-d H:i:s', $start_ts );
     $end_dt   = date( 'Y-m-d H:i:s', $end_ts );
 
@@ -194,66 +196,71 @@ function kognetiks_insights_get_usage_stats( $start_ts, $end_ts ) {
 
     $prev_start_dt = date( 'Y-m-d H:i:s', $prev_start_ts );
     $prev_end_dt   = date( 'Y-m-d H:i:s', $prev_end_ts );
-    
-    // Debug: Log the date range being queried (can be removed later)
-    // error_log( 'Insights query date range: ' . $start_dt . ' to ' . $end_dt );
-
-    // Explicit allowlist for human rows.
-    $human_types = [ 'Visitor', 'User' ];
-
-    // Placeholders for prepared statement
-    $human_in = implode( ',', array_fill( 0, count( $human_types ), '%s' ) );
 
     /**
-     * Human row predicate:
-     * - user_type in allowlist (Visitor or User)
-     * - message_text is present and not just whitespace
-     * - Exclude token/system rows (Chatbot, Prompt Tokens, Completion Tokens, Total Tokens)
-     * 
-     * Count conversations as distinct session_ids that have at least one human message
+     * Simplified query: Count distinct session_ids, page_ids, etc. for human messages
+     * Human messages are Visitor or User types with non-empty message_text
+     * Exclude Chatbot and token rows
+     * Using simpler WHERE clause instead of complex CASE statements for better reliability
      */
     $sql_window = "
         SELECT
-            COUNT(DISTINCT CASE
-                WHEN user_type IN ($human_in)
-                 AND user_type NOT IN ('Chatbot', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens')
-                 AND (message_text IS NOT NULL AND TRIM(message_text) != '')
-                THEN session_id END
-            ) AS conversations,
+            (SELECT COUNT(DISTINCT session_id)
+             FROM {$log}
+             WHERE interaction_time >= %s AND interaction_time <= %s
+             AND user_type IN ('Visitor', 'User')
+             AND message_text IS NOT NULL
+             AND TRIM(message_text) != '') AS conversations,
 
-            COUNT(DISTINCT CASE
-                WHEN user_type IN ($human_in)
-                 AND user_type NOT IN ('Chatbot', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens')
-                 AND (message_text IS NOT NULL AND TRIM(message_text) != '')
-                 AND page_id IS NOT NULL
-                 AND page_id > 0
-                THEN page_id END
-            ) AS pages,
+            (SELECT COUNT(DISTINCT page_id)
+             FROM {$log}
+             WHERE interaction_time >= %s AND interaction_time <= %s
+             AND user_type IN ('Visitor', 'User')
+             AND message_text IS NOT NULL
+             AND TRIM(message_text) != ''
+             AND page_id IS NOT NULL
+             AND page_id > 0) AS pages,
 
-            COUNT(DISTINCT CASE
-                WHEN user_type = 'Visitor'
-                 AND (user_id = 0 OR user_id IS NULL)
-                 AND (message_text IS NOT NULL AND TRIM(message_text) != '')
-                THEN session_id END
-            ) AS visitors,
+            (SELECT COUNT(DISTINCT session_id)
+             FROM {$log}
+             WHERE interaction_time >= %s AND interaction_time <= %s
+             AND user_type = 'Visitor'
+             AND (user_id = 0 OR user_id IS NULL)
+             AND message_text IS NOT NULL
+             AND TRIM(message_text) != '') AS visitors,
 
-            COUNT(DISTINCT CASE
-                WHEN user_id > 0
-                 AND user_type IN ($human_in)
-                 AND (message_text IS NOT NULL AND TRIM(message_text) != '')
-                THEN user_id END
-            ) AS users
-
-        FROM {$log}
-        WHERE interaction_time >= %s AND interaction_time <= %s
+            (SELECT COUNT(DISTINCT user_id)
+             FROM {$log}
+             WHERE interaction_time >= %s AND interaction_time <= %s
+             AND user_id > 0
+             AND user_id IS NOT NULL
+             AND user_type IN ('Visitor', 'User')
+             AND message_text IS NOT NULL
+             AND TRIM(message_text) != '') AS users
     ";
 
-    // Build params: human allowlist + date range
-    $params_current = array_merge( $human_types, [ $start_dt, $end_dt ] );
-    $cur = $wpdb->get_row( $wpdb->prepare( $sql_window, $params_current ), ARRAY_A );
+    // Build params: date range repeated for each subquery (4 subqueries, each needs start and end)
+    $cur = $wpdb->get_row( $wpdb->prepare( $sql_window, $start_dt, $end_dt, $start_dt, $end_dt, $start_dt, $end_dt, $start_dt, $end_dt ), ARRAY_A );
+    $prev = $wpdb->get_row( $wpdb->prepare( $sql_window, $prev_start_dt, $prev_end_dt, $prev_start_dt, $prev_end_dt, $prev_start_dt, $prev_end_dt, $prev_start_dt, $prev_end_dt ), ARRAY_A );
 
-    $params_prev = array_merge( $human_types, [ $prev_start_dt, $prev_end_dt ] );
-    $prev = $wpdb->get_row( $wpdb->prepare( $sql_window, $params_prev ), ARRAY_A );
+    // Debug: Log query details (temporary - remove after debugging)
+    if ( function_exists( 'back_trace' ) ) {
+        back_trace( 'NOTICE', 'Insights Stats Query - Date Range: ' . $start_dt . ' to ' . $end_dt );
+        back_trace( 'NOTICE', 'Insights Stats Query - SQL: ' . $wpdb->last_query );
+        back_trace( 'NOTICE', 'Insights Stats Query - Results: ' . print_r( $cur, true ) );
+        
+        // Also check if there's any data in the table at all
+        $total_check = $wpdb->get_var( "SELECT COUNT(*) FROM {$log} WHERE user_type IN ('Visitor', 'User') LIMIT 1" );
+        back_trace( 'NOTICE', 'Insights Stats Query - Total Visitor/User rows in table: ' . $total_check );
+        
+        // Check date range coverage
+        $date_check = $wpdb->get_var( $wpdb->prepare( 
+            "SELECT COUNT(*) FROM {$log} WHERE interaction_time >= %s AND interaction_time <= %s", 
+            $start_dt, 
+            $end_dt 
+        ) );
+        back_trace( 'NOTICE', 'Insights Stats Query - Total rows in date range: ' . $date_check );
+    }
 
     $c = [
         'conversations' => isset( $cur['conversations'] ) ? (int) $cur['conversations'] : 0,
