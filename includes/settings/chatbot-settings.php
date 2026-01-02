@@ -132,17 +132,22 @@ function chatbot_chatgpt_settings_page() {
                     return; // Form not found, exit
                 }
                 
+                // Store initial form values for comparison
+                var initialFormData;
+                
                 // Reset formChanged flag after successful save (when page reloads with settings-updated parameter)
                 if (window.location.search.indexOf('settings-updated=true') !== -1) {
                     formChanged = false;
-                    // Update initial form data after save
+                    // Wait for form to be fully rendered before capturing initial state
+                    // This prevents false positives when navigating away after a successful save
                     setTimeout(function() {
                         initialFormData = settingsForm.serialize();
-                    }, 100);
+                        formChanged = false; // Ensure flag stays false after capturing initial state
+                    }, 300);
+                } else {
+                    // Normal page load - capture initial state immediately
+                    initialFormData = settingsForm.serialize();
                 }
-                
-                // Store initial form values for comparison
-                var initialFormData = settingsForm.serialize();
                 
                 // Track form changes on all form inputs
                 settingsForm.on('input change keyup', 'input, select, textarea', function() {
@@ -157,6 +162,10 @@ function chatbot_chatgpt_settings_page() {
                 
                 // Also check if form has actually changed by comparing current state to initial
                 function checkFormChanged() {
+                    // If initialFormData hasn't been set yet (e.g., after a save reload), no changes detected
+                    if (typeof initialFormData === 'undefined') {
+                        return false;
+                    }
                     var currentFormData = settingsForm.serialize();
                     return currentFormData !== initialFormData;
                 }
@@ -171,7 +180,10 @@ function chatbot_chatgpt_settings_page() {
                 
                 // Warn before leaving page (browser navigation, refresh, close tab)
                 $(window).on('beforeunload', function(e) {
-                    if (formChanged && !formSubmitting) {
+                    // Only warn if form has actually changed and we're not submitting
+                    // Check both the flag and actual form state to avoid false positives
+                    var hasChanges = formChanged || checkFormChanged();
+                    if (hasChanges && !formSubmitting) {
                         e.preventDefault();
                         // Modern browsers ignore custom messages, but we still need to set returnValue
                         e.returnValue = '';

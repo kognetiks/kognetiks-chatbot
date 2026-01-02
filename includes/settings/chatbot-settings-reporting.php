@@ -225,6 +225,9 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
     $digest_enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));
     $insights_enabled = esc_attr(get_option('chatbot_chatgpt_insights_email_enabled', 'No'));
     
+    // IMPORTANT: Render the fields manually first, then WordPress will also try to render them
+    // We need to output the fields here so they're in the form, but we'll hide WordPress's automatic table
+    
     if ($is_premium || $is_free) {
         // Show settings for both premium and free (free users can use insights)
         ?>
@@ -238,6 +241,11 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
         /* Also hide any table rows with empty labels (our fields have empty labels) */
         table.form-table tr th:empty,
         table.form-table tr:has(th:empty) {
+            display: none !important;
+        }
+        
+        /* Hide the automatic WordPress table for this specific section */
+        #chatbot_chatgpt_conversation_digest_section + table.form-table {
             display: none !important;
         }
         
@@ -424,6 +432,8 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
         <script type="text/javascript">
         jQuery(document).ready(function($) {
             // Hide default WordPress settings table that appears after our cards
+            // WordPress automatically renders fields after the section callback, but we've already rendered them manually
+            // So we need to hide the automatic table to avoid duplicate fields
             $('.kchat-email-card').closest('div').next('table.form-table').hide();
             $('.kchat-email-card').closest('div').siblings('table.form-table').hide();
             
@@ -433,6 +443,14 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
                 if ($th.length && ($th.text().trim() === '' || $th.html().trim() === '')) {
                     $(this).hide();
                 }
+            });
+            
+            // Remove any duplicate fields that WordPress might have rendered automatically
+            // Keep only the ones in our custom cards
+            $('.kchat-email-card select[name], .kchat-email-card input[name]').each(function() {
+                var fieldName = $(this).attr('name');
+                var $duplicates = $('table.form-table select[name="' + fieldName + '"], table.form-table input[name="' + fieldName + '"]').not($(this));
+                $duplicates.closest('tr').remove();
             });
             
             // Function to toggle conditional fields
@@ -524,6 +542,7 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
                     }
                 });
             });
+            
         });
         </script>
         <?php
@@ -665,9 +684,10 @@ function chatbot_chatgpt_conversation_digest_frequency_callback($args) {
         // For free users, always show Weekly (but don't modify the DB value in the callback)
         $saved_choice = 'weekly';
         ?>
-        <select id="chatbot_chatgpt_conversation_digest_frequency" name="chatbot_chatgpt_conversation_digest_frequency" disabled>
+        <select id="chatbot_chatgpt_conversation_digest_frequency" disabled>
             <option value="<?php echo esc_attr( 'weekly' ); ?>" selected><?php echo esc_html( 'Weekly' ); ?> (Free)</option>
         </select>
+        <input type="hidden" name="chatbot_chatgpt_conversation_digest_frequency" value="weekly" />
         <p class="description" style="margin-top: 5px; color: #646970;">Daily and Hourly frequencies available with Premium.</p>
         <?php
     } else {
@@ -1467,22 +1487,22 @@ function chatbot_chatgpt_sanitize_conversation_digest_enabled($value) {
 
 // Sanitize conversation digest frequency setting - Ver 2.3.9
 function chatbot_chatgpt_sanitize_conversation_digest_frequency($value) {
-    // Check if premium is enabled
-    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
-    
-    // Always check POST first - WordPress might pass empty value
-    if (isset($_POST['chatbot_chatgpt_conversation_digest_frequency']) && !empty($_POST['chatbot_chatgpt_conversation_digest_frequency'])) {
+    // If value is empty, try to get it from POST directly (WordPress might pass empty)
+    if (empty($value) && isset($_POST['chatbot_chatgpt_conversation_digest_frequency'])) {
         $value = $_POST['chatbot_chatgpt_conversation_digest_frequency'];
     }
+    
+    // Check if premium is enabled
+    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
     
     // Sanitize and normalize to lowercase (best practice: store lowercase in DB)
     $value = sanitize_text_field($value);
     $value = strtolower(trim($value));
     
-    // If still empty after sanitization, return current value or default
+    // If still empty, return current value or default
     if (empty($value)) {
-        $current_value = get_option('chatbot_chatgpt_conversation_digest_frequency', 'weekly');
-        return strtolower($current_value);
+        $current = get_option('chatbot_chatgpt_conversation_digest_frequency', 'weekly');
+        return strtolower($current);
     }
     
     // Define allowed values based on premium status (all lowercase)
@@ -1499,8 +1519,8 @@ function chatbot_chatgpt_sanitize_conversation_digest_frequency($value) {
     }
     
     // If invalid value, return current value or default (always lowercase)
-    $current_value = get_option('chatbot_chatgpt_conversation_digest_frequency', 'weekly');
-    return strtolower($current_value);
+    $current = get_option('chatbot_chatgpt_conversation_digest_frequency', 'weekly');
+    return strtolower($current);
 }
 
 // Sanitize conversation digest email setting - Ver 2.3.9
@@ -1536,8 +1556,8 @@ function chatbot_chatgpt_sanitize_insights_email_enabled($value) {
 
 // Sanitize insights email frequency setting
 function chatbot_chatgpt_sanitize_insights_email_frequency($value) {
-    // Always check POST first - WordPress might pass empty value
-    if (isset($_POST['chatbot_chatgpt_insights_email_frequency']) && !empty($_POST['chatbot_chatgpt_insights_email_frequency'])) {
+    // If value is empty, try to get it from POST directly (WordPress might pass empty)
+    if (empty($value) && isset($_POST['chatbot_chatgpt_insights_email_frequency'])) {
         $value = $_POST['chatbot_chatgpt_insights_email_frequency'];
     }
     
@@ -1548,10 +1568,10 @@ function chatbot_chatgpt_sanitize_insights_email_frequency($value) {
     $value = sanitize_text_field($value);
     $value = strtolower(trim($value)); // Normalize to lowercase
     
-    // If still empty after sanitization, return current value or default
+    // If still empty, return current value or default
     if (empty($value)) {
-        $current_value = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
-        return strtolower($current_value);
+        $current = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
+        return strtolower($current);
     }
     
     if (in_array($value, $allowed_values)) {
@@ -1559,8 +1579,8 @@ function chatbot_chatgpt_sanitize_insights_email_frequency($value) {
     }
     
     // If invalid value, return current value or default
-    $current_value = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
-    return strtolower($current_value);
+    $current = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
+    return strtolower($current);
 }
 
 // Sanitize insights email address setting
@@ -1683,6 +1703,91 @@ function chatbot_chatgpt_handle_insights_email_frequency_change($old_value, $new
     }
 }
 add_action('update_option_chatbot_chatgpt_insights_email_frequency', 'chatbot_chatgpt_handle_insights_email_frequency_change', 10, 2);
+
+// Fallback: Ensure email report settings are saved when form is submitted
+// This runs after WordPress processes the form to catch any settings that weren't saved
+function chatbot_chatgpt_ensure_email_report_settings_saved() {
+    // Only run on the reporting tab
+    if (!isset($_GET['page']) || $_GET['page'] !== 'chatbot-chatgpt' || !isset($_GET['tab']) || $_GET['tab'] !== 'reporting') {
+        return;
+    }
+    
+    // Only run after form submission
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['option_page']) || $_POST['option_page'] !== 'chatbot_chatgpt_reporting') {
+        return;
+    }
+    
+    // Check user permissions
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    
+    // Verify nonce
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'chatbot_chatgpt_reporting-options')) {
+        return;
+    }
+    
+    // Save Conversation Digest settings if they're in POST
+    if (isset($_POST['chatbot_chatgpt_conversation_digest_enabled'])) {
+        $value = sanitize_text_field($_POST['chatbot_chatgpt_conversation_digest_enabled']);
+        if (in_array($value, array('Yes', 'No'))) {
+            $current = get_option('chatbot_chatgpt_conversation_digest_enabled');
+            if ($current !== $value) {
+                update_option('chatbot_chatgpt_conversation_digest_enabled', $value);
+            }
+        }
+    }
+    
+    if (isset($_POST['chatbot_chatgpt_conversation_digest_frequency'])) {
+        $value = strtolower(trim(sanitize_text_field($_POST['chatbot_chatgpt_conversation_digest_frequency'])));
+        $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+        $allowed = $is_premium ? array('hourly', 'daily', 'weekly') : array('weekly');
+        if (in_array($value, $allowed)) {
+            $current = get_option('chatbot_chatgpt_conversation_digest_frequency');
+            if ($current !== $value) {
+                update_option('chatbot_chatgpt_conversation_digest_frequency', $value);
+            }
+        }
+    }
+    
+    if (isset($_POST['chatbot_chatgpt_conversation_digest_email'])) {
+        $value = sanitize_email($_POST['chatbot_chatgpt_conversation_digest_email']);
+        $current = get_option('chatbot_chatgpt_conversation_digest_email');
+        if ($current !== $value) {
+            update_option('chatbot_chatgpt_conversation_digest_email', $value);
+        }
+    }
+    
+    // Save Insights Email settings if they're in POST
+    if (isset($_POST['chatbot_chatgpt_insights_email_enabled'])) {
+        $value = sanitize_text_field($_POST['chatbot_chatgpt_insights_email_enabled']);
+        if (in_array($value, array('Yes', 'No'))) {
+            $current = get_option('chatbot_chatgpt_insights_email_enabled');
+            if ($current !== $value) {
+                update_option('chatbot_chatgpt_insights_email_enabled', $value);
+            }
+        }
+    }
+    
+    if (isset($_POST['chatbot_chatgpt_insights_email_frequency'])) {
+        $value = strtolower(trim(sanitize_text_field($_POST['chatbot_chatgpt_insights_email_frequency'])));
+        if (in_array($value, array('weekly', 'monthly'))) {
+            $current = get_option('chatbot_chatgpt_insights_email_frequency');
+            if ($current !== $value) {
+                update_option('chatbot_chatgpt_insights_email_frequency', $value);
+            }
+        }
+    }
+    
+    if (isset($_POST['chatbot_chatgpt_insights_email_address'])) {
+        $value = sanitize_email($_POST['chatbot_chatgpt_insights_email_address']);
+        $current = get_option('chatbot_chatgpt_insights_email_address');
+        if ($current !== $value) {
+            update_option('chatbot_chatgpt_insights_email_address', $value);
+        }
+    }
+}
+add_action('admin_init', 'chatbot_chatgpt_ensure_email_report_settings_saved', 20);
 
 // Function to display the reporting message - Ver 1.7.9
 function chatbot_chatgpt_admin_notice() {
