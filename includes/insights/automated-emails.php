@@ -181,66 +181,66 @@ function kognetiks_insights_get_usage_stats( $start_ts, $end_ts ) {
     $tables = kognetiks_insights_get_table_names();
     $log    = $tables['conversation_log'];
 
-    // Convert to MySQL DATETIME strings in WP local time.
-    $offset   = (float) get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
-    $start_dt = gmdate( 'Y-m-d H:i:s', $start_ts + $offset );
-    $end_dt   = gmdate( 'Y-m-d H:i:s', $end_ts + $offset );
+    // Convert timestamps to MySQL DATETIME strings
+    // Use WordPress current_time() format for consistency with database storage
+    // The timestamps are already in local time from current_time('timestamp')
+    $start_dt = date( 'Y-m-d H:i:s', $start_ts );
+    $end_dt   = date( 'Y-m-d H:i:s', $end_ts );
 
     // Previous equal-length window immediately before start.
     $window_seconds = max( 1, (int) ( $end_ts - $start_ts ) );
     $prev_end_ts    = $start_ts;
     $prev_start_ts  = $start_ts - $window_seconds;
 
-    $prev_start_dt = gmdate( 'Y-m-d H:i:s', $prev_start_ts + $offset );
-    $prev_end_dt   = gmdate( 'Y-m-d H:i:s', $prev_end_ts + $offset );
+    $prev_start_dt = date( 'Y-m-d H:i:s', $prev_start_ts );
+    $prev_end_dt   = date( 'Y-m-d H:i:s', $prev_end_ts );
+    
+    // Debug: Log the date range being queried (can be removed later)
+    // error_log( 'Insights query date range: ' . $start_dt . ' to ' . $end_dt );
 
     // Explicit allowlist for human rows.
     $human_types = [ 'Visitor', 'User' ];
 
-    // Explicit denylist for known system/token rows (defense-in-depth).
-    $non_human_types = [ 'Chatbot', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens' ];
-
-    // Placeholders
+    // Placeholders for prepared statement
     $human_in = implode( ',', array_fill( 0, count( $human_types ), '%s' ) );
-    $deny_in  = implode( ',', array_fill( 0, count( $non_human_types ), '%s' ) );
 
     /**
      * Human row predicate:
-     * - user_type in allowlist
+     * - user_type in allowlist (Visitor or User)
      * - message_text is present and not just whitespace
-     * - (optional) exclude denylist, even though allowlist already protects us
+     * - Exclude token/system rows (Chatbot, Prompt Tokens, Completion Tokens, Total Tokens)
+     * 
+     * Count conversations as distinct session_ids that have at least one human message
      */
     $sql_window = "
         SELECT
             COUNT(DISTINCT CASE
                 WHEN user_type IN ($human_in)
-                 AND user_type NOT IN ($deny_in)
-                 AND message_text IS NOT NULL
-                 AND LENGTH(TRIM(message_text)) > 0
+                 AND user_type NOT IN ('Chatbot', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens')
+                 AND (message_text IS NOT NULL AND TRIM(message_text) != '')
                 THEN session_id END
             ) AS conversations,
 
             COUNT(DISTINCT CASE
                 WHEN user_type IN ($human_in)
-                 AND user_type NOT IN ($deny_in)
-                 AND message_text IS NOT NULL
-                 AND LENGTH(TRIM(message_text)) > 0
+                 AND user_type NOT IN ('Chatbot', 'Prompt Tokens', 'Completion Tokens', 'Total Tokens')
+                 AND (message_text IS NOT NULL AND TRIM(message_text) != '')
+                 AND page_id IS NOT NULL
+                 AND page_id > 0
                 THEN page_id END
             ) AS pages,
 
             COUNT(DISTINCT CASE
                 WHEN user_type = 'Visitor'
-                 AND user_id = 0
-                 AND message_text IS NOT NULL
-                 AND LENGTH(TRIM(message_text)) > 0
+                 AND (user_id = 0 OR user_id IS NULL)
+                 AND (message_text IS NOT NULL AND TRIM(message_text) != '')
                 THEN session_id END
             ) AS visitors,
 
             COUNT(DISTINCT CASE
                 WHEN user_id > 0
                  AND user_type IN ($human_in)
-                 AND message_text IS NOT NULL
-                 AND LENGTH(TRIM(message_text)) > 0
+                 AND (message_text IS NOT NULL AND TRIM(message_text) != '')
                 THEN user_id END
             ) AS users
 
@@ -248,11 +248,11 @@ function kognetiks_insights_get_usage_stats( $start_ts, $end_ts ) {
         WHERE interaction_time >= %s AND interaction_time <= %s
     ";
 
-    // Build params: human allowlist + denylist + date range
-    $params_current = array_merge( $human_types, $non_human_types, [ $start_dt, $end_dt ] );
+    // Build params: human allowlist + date range
+    $params_current = array_merge( $human_types, [ $start_dt, $end_dt ] );
     $cur = $wpdb->get_row( $wpdb->prepare( $sql_window, $params_current ), ARRAY_A );
 
-    $params_prev = array_merge( $human_types, $non_human_types, [ $prev_start_dt, $prev_end_dt ] );
+    $params_prev = array_merge( $human_types, [ $prev_start_dt, $prev_end_dt ] );
     $prev = $wpdb->get_row( $wpdb->prepare( $sql_window, $params_prev ), ARRAY_A );
 
     $c = [
@@ -310,9 +310,9 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
     $tables = kognetiks_insights_get_table_names();
     $log    = $tables['conversation_log'];
 
-    $offset   = (float) get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
-    $start_dt = gmdate( 'Y-m-d H:i:s', $start_ts + $offset );
-    $end_dt   = gmdate( 'Y-m-d H:i:s', $end_ts + $offset );
+    // Convert timestamps to MySQL DATETIME strings using WordPress date functions
+    $start_dt = date( 'Y-m-d H:i:s', $start_ts );
+    $end_dt   = date( 'Y-m-d H:i:s', $end_ts );
 
     // Allowlist for human messages
     $human_types = [ 'Visitor', 'User' ];
@@ -403,9 +403,9 @@ function kognetiks_insights_get_top_pages_by_activity( $start_ts, $end_ts, $limi
     $tables = kognetiks_insights_get_table_names();
     $log    = $tables['conversation_log'];
 
-    $offset   = (float) get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
-    $start_dt = gmdate( 'Y-m-d H:i:s', $start_ts + $offset );
-    $end_dt   = gmdate( 'Y-m-d H:i:s', $end_ts + $offset );
+    // Convert timestamps to MySQL DATETIME strings using WordPress date functions
+    $start_dt = date( 'Y-m-d H:i:s', $start_ts );
+    $end_dt   = date( 'Y-m-d H:i:s', $end_ts );
 
     $human_types = [ 'Visitor', 'User' ];
     $human_in    = implode( ',', array_fill( 0, count( $human_types ), '%s' ) );
@@ -472,9 +472,9 @@ function kognetiks_insights_get_top_assistants_used( $start_ts, $end_ts, $limit 
     $tables = kognetiks_insights_get_table_names();
     $log    = $tables['conversation_log'];
 
-    $offset   = (float) get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
-    $start_dt = gmdate( 'Y-m-d H:i:s', $start_ts + $offset );
-    $end_dt   = gmdate( 'Y-m-d H:i:s', $end_ts + $offset );
+    // Convert timestamps to MySQL DATETIME strings using WordPress date functions
+    $start_dt = date( 'Y-m-d H:i:s', $start_ts );
+    $end_dt   = date( 'Y-m-d H:i:s', $end_ts );
 
     // Count by session_id to avoid inflating from token rows.
     $sql = "
@@ -633,7 +633,7 @@ function kognetiks_insights_value_visibility_email( $args = [] ) {
         $content,
         [
             'period_label' => $window['label'],
-            'footer_note'  => 'You are receiving this email because automated reporting is enabled for Kognetiks Insights.',
+            'footer_note'  => 'You are receiving this email because free analytics reporting is enabled for the Kognetiks Chatbot. Unlock your chatbot\'s value by upgrading on the chatbot\'s Reporting or Insights settings tab.',
         ]
     );
 
@@ -754,16 +754,6 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
         $content .= kognetiks_insights_bullets_html( 'Top Assistants Used', $assist_bullets );
     }
 
-    $pages_bullets = kognetiks_insights_format_top_pages_bullets( $top_pages );
-    if ( ! empty( $pages_bullets ) ) {
-        $content .= kognetiks_insights_bullets_html( 'Top Pages by Chat Activity', $pages_bullets );
-    }
-
-    $assist_bullets = kognetiks_insights_format_top_assistants_bullets( $top_assistants );
-    if ( ! empty( $assist_bullets ) ) {
-        $content .= kognetiks_insights_bullets_html( 'Top Assistants Used', $assist_bullets );
-    }
-
     // Add a flexible “Recommendations” block (paid differentiator, populated via filter)
     $recommendations = apply_filters( 'kognetiks_insights_recommendations', [], $window['start'], $window['end'], $stats, $impact );
     if ( ! empty( $recommendations ) && is_array( $recommendations ) ) {
@@ -777,13 +767,19 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
 
     $subtitle = 'Actionable insights and impact metrics';
 
+    // Determine tier for footer message
+    $is_premium = ( function_exists( 'kognetiks_insights_is_premium' ) && kognetiks_insights_is_premium() );
+    $footer_note = $is_premium
+        ? 'You are receiving this email because premium analytics reporting is enabled for the Kognetiks Chatbot.'
+        : 'You are receiving this email because free analytics reporting is enabled for the Kognetiks Chatbot. Unlock your chatbot\'s value by upgrading on the chatbot\'s Reporting or Insights settings tab.';
+    
     $message_html = kognetiks_insights_build_email_html(
         'Chatbot Insights Report',
         $subtitle,
         $content,
         [
             'period_label' => $window['label'],
-            'footer_note'  => 'You are receiving this email because premium analytics reporting is enabled for Kognetiks Insights.',
+            'footer_note'  => $footer_note,
         ]
     );
 
