@@ -24,12 +24,12 @@ function chatbot_chatgpt_reporting_settings_init() {
     
     // Register settings for Conversation Digest
     register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_digest_enabled', 'chatbot_chatgpt_sanitize_conversation_digest_enabled');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_digest_frequency');
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_digest_frequency', 'chatbot_chatgpt_sanitize_conversation_digest_frequency');
     register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_conversation_digest_email', 'chatbot_chatgpt_sanitize_conversation_digest_email');
     
     // Register settings for Insights Email
     register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_insights_email_enabled', 'chatbot_chatgpt_sanitize_insights_email_enabled');
-    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_insights_email_period');
+    register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_insights_email_frequency', 'chatbot_chatgpt_sanitize_insights_email_frequency');
     register_setting('chatbot_chatgpt_reporting', 'chatbot_chatgpt_insights_email_address', 'chatbot_chatgpt_sanitize_insights_email_address');
 
     // Reporting Overview Section
@@ -123,11 +123,11 @@ function chatbot_chatgpt_reporting_settings_init() {
             'chatbot_chatgpt_conversation_digest_section'
         );
         
-        // Insights Email Settings Field - Period (shown in card, label handled there)
+        // Insights Email Settings Field - Frequency (shown in card, label handled there)
         add_settings_field(
-            'chatbot_chatgpt_insights_email_period',
+            'chatbot_chatgpt_insights_email_frequency',
             '',
-            'chatbot_chatgpt_insights_email_period_callback',
+            'chatbot_chatgpt_insights_email_frequency_callback',
             'chatbot_chatgpt_conversation_digest',
             'chatbot_chatgpt_conversation_digest_section'
         );
@@ -360,9 +360,9 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             </div>
             
             <div class="settings-row conditional-field" id="insights-period-row">
-                <label for="chatbot_chatgpt_insights_email_period">Report Frequency</label>
+                <label for="chatbot_chatgpt_insights_email_frequency">Report Frequency</label>
                 <div class="field-wrapper">
-                    <?php chatbot_chatgpt_insights_email_period_callback([]); ?>
+                    <?php chatbot_chatgpt_insights_email_frequency_callback([]); ?>
                 </div>
             </div>
             
@@ -655,30 +655,28 @@ function chatbot_chatgpt_conversation_digest_frequency_callback($args) {
     // Check if premium is enabled
     $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
     
-    // Get the saved chatbot_chatgpt_conversation_digest_frequency value
-    // For free users, default to Weekly and force Weekly
-    $saved_choice = esc_attr(get_option('chatbot_chatgpt_conversation_digest_frequency', 'Weekly'));
+    // Get the saved chatbot_chatgpt_conversation_digest_frequency value (stored as lowercase)
+    // Note: Do NOT modify the saved value here - only display it
+    // Validation and resetting should happen in the sanitization callback
+    $saved_choice = strtolower(esc_attr(get_option('chatbot_chatgpt_conversation_digest_frequency', 'weekly')));
     
-    // Free users can only use Weekly
+    // Free users can only use Weekly - but don't reset here, let sanitization handle it
     if (!$is_premium) {
-        // Force Weekly for free users
-        if ($saved_choice !== 'Weekly') {
-            update_option('chatbot_chatgpt_conversation_digest_frequency', 'Weekly');
-            $saved_choice = 'Weekly';
-        }
+        // For free users, always show Weekly (but don't modify the DB value in the callback)
+        $saved_choice = 'weekly';
         ?>
         <select id="chatbot_chatgpt_conversation_digest_frequency" name="chatbot_chatgpt_conversation_digest_frequency" disabled>
-            <option value="<?php echo esc_attr( 'Weekly' ); ?>" selected><?php echo esc_html( 'Weekly' ); ?> (Free)</option>
+            <option value="<?php echo esc_attr( 'weekly' ); ?>" selected><?php echo esc_html( 'Weekly' ); ?> (Free)</option>
         </select>
         <p class="description" style="margin-top: 5px; color: #646970;">Daily and Hourly frequencies available with Premium.</p>
         <?php
     } else {
-        // Premium users get all options
+        // Premium users get all options - display proper case but store lowercase
         ?>
         <select id="chatbot_chatgpt_conversation_digest_frequency" name="chatbot_chatgpt_conversation_digest_frequency">
-            <option value="<?php echo esc_attr( 'Hourly' ); ?>" <?php selected( $saved_choice, 'Hourly' ); ?>><?php echo esc_html( 'Hourly' ); ?></option>
-            <option value="<?php echo esc_attr( 'Daily' ); ?>" <?php selected( $saved_choice, 'Daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
-            <option value="<?php echo esc_attr( 'Weekly' ); ?>" <?php selected( $saved_choice, 'Weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
+            <option value="<?php echo esc_attr( 'hourly' ); ?>" <?php selected( $saved_choice, 'hourly' ); ?>><?php echo esc_html( 'Hourly' ); ?></option>
+            <option value="<?php echo esc_attr( 'daily' ); ?>" <?php selected( $saved_choice, 'daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
+            <option value="<?php echo esc_attr( 'weekly' ); ?>" <?php selected( $saved_choice, 'weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
         </select>
         <?php
     }
@@ -706,12 +704,12 @@ function chatbot_chatgpt_insights_email_enabled_callback($args) {
     <?php
 }
 
-// Insights Email Period (Report Period)
-function chatbot_chatgpt_insights_email_period_callback($args) {
-    // Get the saved chatbot_chatgpt_insights_email_period value or default to "weekly"
-    $output_choice = esc_attr(get_option('chatbot_chatgpt_insights_email_period', 'weekly'));
+// Insights Email Frequency (Report Frequency)
+function chatbot_chatgpt_insights_email_frequency_callback($args) {
+    // Get the saved chatbot_chatgpt_insights_email_frequency value or default to "weekly"
+    $output_choice = esc_attr(get_option('chatbot_chatgpt_insights_email_frequency', 'weekly'));
     ?>
-    <select id="chatbot_chatgpt_insights_email_period" name="chatbot_chatgpt_insights_email_period">
+    <select id="chatbot_chatgpt_insights_email_frequency" name="chatbot_chatgpt_insights_email_frequency">
         <option value="<?php echo esc_attr( 'weekly' ); ?>" <?php selected( $output_choice, 'weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
         <option value="<?php echo esc_attr( 'monthly' ); ?>" <?php selected( $output_choice, 'monthly' ); ?>><?php echo esc_html( 'Monthly' ); ?></option>
     </select>
@@ -1467,6 +1465,44 @@ function chatbot_chatgpt_sanitize_conversation_digest_enabled($value) {
     return 'No';
 }
 
+// Sanitize conversation digest frequency setting - Ver 2.3.9
+function chatbot_chatgpt_sanitize_conversation_digest_frequency($value) {
+    // Check if premium is enabled
+    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    
+    // Always check POST first - WordPress might pass empty value
+    if (isset($_POST['chatbot_chatgpt_conversation_digest_frequency']) && !empty($_POST['chatbot_chatgpt_conversation_digest_frequency'])) {
+        $value = $_POST['chatbot_chatgpt_conversation_digest_frequency'];
+    }
+    
+    // Sanitize and normalize to lowercase (best practice: store lowercase in DB)
+    $value = sanitize_text_field($value);
+    $value = strtolower(trim($value));
+    
+    // If still empty after sanitization, return current value or default
+    if (empty($value)) {
+        $current_value = get_option('chatbot_chatgpt_conversation_digest_frequency', 'weekly');
+        return strtolower($current_value);
+    }
+    
+    // Define allowed values based on premium status (all lowercase)
+    if ($is_premium) {
+        $allowed_values = array('hourly', 'daily', 'weekly');
+    } else {
+        // Free users can only use Weekly
+        $allowed_values = array('weekly');
+    }
+    
+    // Validate the value
+    if (in_array($value, $allowed_values)) {
+        return $value;
+    }
+    
+    // If invalid value, return current value or default (always lowercase)
+    $current_value = get_option('chatbot_chatgpt_conversation_digest_frequency', 'weekly');
+    return strtolower($current_value);
+}
+
 // Sanitize conversation digest email setting - Ver 2.3.9
 function chatbot_chatgpt_sanitize_conversation_digest_email($value) {
     $value = sanitize_email($value);
@@ -1496,6 +1532,35 @@ function chatbot_chatgpt_sanitize_insights_email_enabled($value) {
         return $value;
     }
     return 'No';
+}
+
+// Sanitize insights email frequency setting
+function chatbot_chatgpt_sanitize_insights_email_frequency($value) {
+    // Always check POST first - WordPress might pass empty value
+    if (isset($_POST['chatbot_chatgpt_insights_email_frequency']) && !empty($_POST['chatbot_chatgpt_insights_email_frequency'])) {
+        $value = $_POST['chatbot_chatgpt_insights_email_frequency'];
+    }
+    
+    // Define allowed values
+    $allowed_values = array('weekly', 'monthly');
+    
+    // Sanitize and validate the value
+    $value = sanitize_text_field($value);
+    $value = strtolower(trim($value)); // Normalize to lowercase
+    
+    // If still empty after sanitization, return current value or default
+    if (empty($value)) {
+        $current_value = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
+        return strtolower($current_value);
+    }
+    
+    if (in_array($value, $allowed_values)) {
+        return $value;
+    }
+    
+    // If invalid value, return current value or default
+    $current_value = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
+    return strtolower($current_value);
 }
 
 // Sanitize insights email address setting
@@ -1573,7 +1638,7 @@ function chatbot_chatgpt_handle_insights_email_scheduling($old_value, $new_value
     
     // If enabled changed from No to Yes, schedule the cron
     if ($old_enabled === 'No' && $enabled === 'Yes') {
-        $period = get_option('chatbot_chatgpt_insights_email_period', 'weekly');
+        $period = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
         $email = get_option('chatbot_chatgpt_insights_email_address', '');
         if (function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
             kognetiks_insights_schedule_proof_of_value_email($period, $email);
@@ -1587,7 +1652,7 @@ function chatbot_chatgpt_handle_insights_email_scheduling($old_value, $new_value
     }
     // If enabled is Yes, check if we need to reschedule (period might have changed)
     elseif ($enabled === 'Yes') {
-        $period = get_option('chatbot_chatgpt_insights_email_period', 'weekly');
+        $period = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
         $email = get_option('chatbot_chatgpt_insights_email_address', '');
         if (function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
             kognetiks_insights_schedule_proof_of_value_email($period, $email);
@@ -1596,8 +1661,8 @@ function chatbot_chatgpt_handle_insights_email_scheduling($old_value, $new_value
 }
 add_action('update_option_chatbot_chatgpt_insights_email_enabled', 'chatbot_chatgpt_handle_insights_email_scheduling', 10, 2);
 
-// Handle insights email period changes
-function chatbot_chatgpt_handle_insights_email_period_change($old_value, $new_value) {
+// Handle insights email frequency changes
+function chatbot_chatgpt_handle_insights_email_frequency_change($old_value, $new_value) {
     // Ensure the automated-emails.php file is loaded
     if (!function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
         $automated_emails_file = plugin_dir_path(__FILE__) . '../insights/automated-emails.php';
@@ -1617,7 +1682,7 @@ function chatbot_chatgpt_handle_insights_email_period_change($old_value, $new_va
         }
     }
 }
-add_action('update_option_chatbot_chatgpt_insights_email_period', 'chatbot_chatgpt_handle_insights_email_period_change', 10, 2);
+add_action('update_option_chatbot_chatgpt_insights_email_frequency', 'chatbot_chatgpt_handle_insights_email_frequency_change', 10, 2);
 
 // Function to display the reporting message - Ver 1.7.9
 function chatbot_chatgpt_admin_notice() {

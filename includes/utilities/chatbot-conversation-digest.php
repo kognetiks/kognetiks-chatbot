@@ -42,24 +42,25 @@ function chatbot_chatgpt_schedule_conversation_digest() {
         return;
     }
     
-    // Get the frequency setting
-    $frequency = esc_attr(get_option('chatbot_chatgpt_conversation_digest_frequency', 'Weekly'));
+    // Get the frequency setting (stored as lowercase: 'hourly', 'daily', 'weekly')
+    $frequency = strtolower(esc_attr(get_option('chatbot_chatgpt_conversation_digest_frequency', 'weekly')));
     
     // Check if premium - free users are limited to Weekly
+    // Note: Don't modify the saved value here - use it as-is for scheduling
+    // The sanitization callback will handle validation and resetting if needed
     $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
     if (!$is_premium) {
-        $frequency = 'Weekly'; // Force Weekly for free users
-        update_option('chatbot_chatgpt_conversation_digest_frequency', 'Weekly');
+        $frequency = 'weekly'; // Use Weekly for free users (but don't modify the DB value)
     }
     
     // Clear any existing scheduled hooks
     wp_clear_scheduled_hook('chatbot_chatgpt_send_conversation_digest_hook');
     
-    // Map frequency to WordPress cron intervals
+    // Map frequency to WordPress cron intervals (frequency is already lowercase)
     $interval_mapping = array(
-        'Hourly' => 'hourly',
-        'Daily' => 'daily',
-        'Weekly' => 'weekly'
+        'hourly' => 'hourly',
+        'daily' => 'daily',
+        'weekly' => 'weekly'
     );
     
     $interval = isset($interval_mapping[$frequency]) ? $interval_mapping[$frequency] : 'weekly';

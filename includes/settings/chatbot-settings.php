@@ -121,6 +121,93 @@ function chatbot_chatgpt_settings_page() {
             }
        </script>
 
+       <script type="text/javascript">
+            // Unsaved Changes Warning - Alert admin when navigating away without saving
+            jQuery(document).ready(function($) {
+                var formChanged = false;
+                var formSubmitting = false;
+                var settingsForm = $('#chatgpt-settings-form');
+                
+                if (!settingsForm.length) {
+                    return; // Form not found, exit
+                }
+                
+                // Reset formChanged flag after successful save (when page reloads with settings-updated parameter)
+                if (window.location.search.indexOf('settings-updated=true') !== -1) {
+                    formChanged = false;
+                    // Update initial form data after save
+                    setTimeout(function() {
+                        initialFormData = settingsForm.serialize();
+                    }, 100);
+                }
+                
+                // Store initial form values for comparison
+                var initialFormData = settingsForm.serialize();
+                
+                // Track form changes on all form inputs
+                settingsForm.on('input change keyup', 'input, select, textarea', function() {
+                    // Skip hidden inputs and buttons
+                    var inputType = $(this).attr('type');
+                    if (inputType !== 'hidden' && inputType !== 'submit' && inputType !== 'button') {
+                        if (!formSubmitting) {
+                            formChanged = true;
+                        }
+                    }
+                });
+                
+                // Also check if form has actually changed by comparing current state to initial
+                function checkFormChanged() {
+                    var currentFormData = settingsForm.serialize();
+                    return currentFormData !== initialFormData;
+                }
+                
+                // Reset flag when form is submitted
+                settingsForm.on('submit', function() {
+                    formSubmitting = true;
+                    formChanged = false;
+                    // Update initial form data on submit
+                    initialFormData = settingsForm.serialize();
+                });
+                
+                // Warn before leaving page (browser navigation, refresh, close tab)
+                $(window).on('beforeunload', function(e) {
+                    if (formChanged && !formSubmitting) {
+                        e.preventDefault();
+                        // Modern browsers ignore custom messages, but we still need to set returnValue
+                        e.returnValue = '';
+                        return '';
+                    }
+                });
+                
+                // Warn before clicking tab navigation links
+                // Use capture phase to catch the event before other handlers
+                document.addEventListener('click', function(e) {
+                    var target = e.target;
+                    // Check if clicked element is a nav tab or inside one
+                    var navTab = $(target).closest('.nav-tab');
+                    if (navTab.length && navTab.closest('.nav-tab-wrapper').length) {
+                        // Check both the flag and actual form state
+                        var hasChanges = formChanged || checkFormChanged();
+                        if (hasChanges && !formSubmitting) {
+                            var href = navTab.attr('href');
+                            // Only intercept if it's a settings page tab
+                            if (href && (href.indexOf('page=chatbot-chatgpt') !== -1 || href.indexOf('?page=chatbot-chatgpt') !== -1)) {
+                                if (!confirm('You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.')) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.stopImmediatePropagation();
+                                    return false;
+                                }
+                                // User confirmed, allow navigation
+                                formChanged = false;
+                                initialFormData = settingsForm.serialize(); // Update initial state
+                            }
+                        }
+                    }
+                }, true); // Use capture phase
+            });
+       </script>
+
        <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=general" class="nav-tab <?php echo $active_tab == 'general' ? 'nav-tab-active' : ''; ?>">General</a>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=api_chatgpt" class="nav-tab <?php echo $active_tab == 'api_chatgpt' ? 'nav-tab-active' : ''; ?>">API/ChatGPT</a> <?php } ?>
