@@ -20,6 +20,14 @@ function chatbot_chatgpt_deactivate() {
         chatbot_chatgpt_admin_notices();
     }
 
+    // Clean up insights email cron job on deactivation
+    if (function_exists('kognetiks_insights_unschedule_proof_of_value_email')) {
+        kognetiks_insights_unschedule_proof_of_value_email();
+    } else {
+        // Fallback: clear the hook directly if function doesn't exist
+        wp_clear_scheduled_hook('kognetiks_insights_send_proof_of_value_email_hook');
+    }
+
 }
 
 // Delete Plugin Data Notice - Ver 1.9.9

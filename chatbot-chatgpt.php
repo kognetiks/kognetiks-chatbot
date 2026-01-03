@@ -281,14 +281,13 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) &&
      chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() && 
      chatbot_chatgpt_freemius()->is_plan( 'Premium' ) ) {
 
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/insights-settings.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/chatbot-insights.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/languages/en_US.php';
     require_once plugin_dir_path(__FILE__) . 'includes/insights/scoring-models/sentiment-analysis.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/utilities.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/globals.php';
-
     require_once plugin_dir_path(__FILE__) . 'includes/insights/automated-emails.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/insights/chatbot-insights.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/insights/globals.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/insights/insights-settings.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/insights/languages/en_US.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/insights/utilities.php';
 
     add_action('admin_init', function() {
         if (

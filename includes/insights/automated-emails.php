@@ -1037,6 +1037,33 @@ function kognetiks_insights_unschedule_proof_of_value_email() {
 }
 
 /**
+ * Initialize and verify cron job status based on current settings.
+ * This ensures cron jobs are properly cleaned up if the feature is disabled.
+ *
+ * @return void
+ */
+function kognetiks_insights_init_proof_of_value_email_cron() {
+    $enabled = get_option( 'chatbot_chatgpt_insights_email_enabled', 'No' );
+    
+    if ( $enabled === 'Yes' ) {
+        // Feature is enabled, ensure cron is scheduled
+        $period = get_option( 'chatbot_chatgpt_insights_email_frequency', 'weekly' );
+        $email   = get_option( 'chatbot_chatgpt_insights_email_address', '' );
+        
+        // Check if cron is already scheduled
+        $scheduled = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
+        
+        if ( ! $scheduled ) {
+            // Not scheduled, schedule it
+            kognetiks_insights_schedule_proof_of_value_email( $period, $email );
+        }
+    } else {
+        // Feature is disabled, ensure cron is not scheduled
+        kognetiks_insights_unschedule_proof_of_value_email();
+    }
+}
+
+/**
  * Cron job callback function to send proof of value email.
  *
  * @param string $period 'weekly' or 'monthly'
@@ -1044,6 +1071,15 @@ function kognetiks_insights_unschedule_proof_of_value_email() {
  * @return void
  */
 function kognetiks_insights_send_proof_of_value_email_callback( $period = 'weekly', $email_to = '' ) {
+
+    // Verify the feature is still enabled before sending
+    $enabled = get_option( 'chatbot_chatgpt_insights_email_enabled', 'No' );
+    
+    if ( $enabled !== 'Yes' ) {
+        // Feature is disabled, unschedule the cron and exit
+        kognetiks_insights_unschedule_proof_of_value_email();
+        return;
+    }
 
     $args = [
         'period'   => $period,
@@ -1055,3 +1091,6 @@ function kognetiks_insights_send_proof_of_value_email_callback( $period = 'weekl
 
 // Hook the callback to the cron event
 add_action( 'kognetiks_insights_send_proof_of_value_email_hook', 'kognetiks_insights_send_proof_of_value_email_callback', 10, 2 );
+
+// Initialize cron job status on plugin load
+add_action( 'init', 'kognetiks_insights_init_proof_of_value_email_cron', 20 );

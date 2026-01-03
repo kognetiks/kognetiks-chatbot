@@ -166,6 +166,10 @@ The Conversation Digest is useful for:
 
 5. **Team Sharing**: Forward relevant conversations to team members who can help improve responses
 
+## Conversation Digest Email Example
+
+![Chatbot Conversation Digest - Example Email](conversation-digest-email-example.png)
+
 ## Troubleshooting
 
 ### Not Receiving Emails

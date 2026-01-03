@@ -66,6 +66,10 @@ The unanswered questions detection can be customized:
 - **Filter Results**: Results can be filtered or modified using WordPress filters
 - **Adjust Logic**: The detection logic can be adjusted if your chatbot uses a different fallback system
 
+### Proof of Value Email Example
+
+![Proof of Value Email Example](proof-of-value-email-example.png)
+
 ### Using This Information
 
 The "Top Unanswered Questions" section helps you:
