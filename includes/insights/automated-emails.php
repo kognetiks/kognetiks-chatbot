@@ -1018,7 +1018,7 @@ add_filter( 'cron_schedules', 'kognetiks_insights_add_monthly_cron_interval' );
  *
  * @param string $period 'weekly' or 'monthly'
  * @param string $email_to Email address to send to (optional, defaults to admin_email)
- * @return void
+ * @return bool True if scheduled successfully, false otherwise
  */
 function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $email_to = '' ) {
 
@@ -1059,6 +1059,13 @@ function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $
 
     $interval = isset( $interval_mapping[ $period ] ) ? $interval_mapping[ $period ] : 'weekly';
 
+    // Verify the interval is registered
+    $schedules = wp_get_schedules();
+    if ( ! isset( $schedules[ $interval ] ) ) {
+        // Interval not registered, fallback to weekly
+        $interval = 'weekly';
+    }
+
     // Only schedule if we're sure it's cleared
     $verify_cleared = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
     if ( ! $verify_cleared ) {
@@ -1066,8 +1073,26 @@ function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $
         // For weekly: schedule for next week at the same time
         // For monthly: schedule for next month at the same time
         $timestamp = time() + ( $interval === 'monthly' ? MONTH_IN_SECONDS : WEEK_IN_SECONDS );
-        wp_schedule_event( $timestamp, $interval, 'kognetiks_insights_send_proof_of_value_email_hook', [ $period, $email_to ] );
+        $result = wp_schedule_event( $timestamp, $interval, 'kognetiks_insights_send_proof_of_value_email_hook', [ $period, $email_to ] );
+        
+        // Check if scheduling succeeded
+        // wp_schedule_event() returns false on failure, or true/1 on success
+        // Trust the return value rather than immediately checking wp_next_scheduled()
+        // which may not find it due to timing or argument matching issues
+        if ( $result === false ) {
+            // Scheduling failed, return false
+            return false;
+        }
+        
+        // Scheduling succeeded - return true
+        // Note: We trust wp_schedule_event()'s return value rather than immediately
+        // checking wp_next_scheduled() which may have timing issues or argument matching problems
+        return true;
     }
+    
+    // If it was still scheduled after all clearing attempts, there's already a valid schedule
+    // Return true because the cron job exists (even if we couldn't replace it)
+    return true;
 }
 
 /**
@@ -1077,15 +1102,27 @@ function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $
  * @return void
  */
 function kognetiks_insights_unschedule_proof_of_value_email() {
-    // Use the simple method - wp_clear_scheduled_hook handles all instances
+    // Use the simple method first - wp_clear_scheduled_hook handles all instances
     wp_clear_scheduled_hook( 'kognetiks_insights_send_proof_of_value_email_hook' );
     
-    // Only do expensive check if absolutely necessary (and limit it)
+    // Force clear all instances using _get_cron_array to ensure complete cleanup
+    $crons = _get_cron_array();
+    if ( $crons ) {
+        foreach ( $crons as $timestamp => $cron ) {
+            if ( isset( $cron['kognetiks_insights_send_proof_of_value_email_hook'] ) ) {
+                foreach ( $cron['kognetiks_insights_send_proof_of_value_email_hook'] as $key => $event ) {
+                    wp_unschedule_event( $timestamp, 'kognetiks_insights_send_proof_of_value_email_hook', $event['args'] );
+                }
+            }
+        }
+    }
+    
+    // Final verification - if still scheduled, try one more aggressive clear
     $scheduled = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
     if ( $scheduled ) {
         // If still scheduled after clear, try one more time with a timeout protection
         // Limit the loop to prevent infinite loops
-        $max_iterations = 10;
+        $max_iterations = 20;
         $iterations = 0;
         
         while ( $scheduled && $iterations < $max_iterations ) {

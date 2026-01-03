@@ -1617,9 +1617,13 @@ function chatbot_chatgpt_handle_conversation_digest_scheduling($old_value, $new_
     if ($old_enabled === 'No' && $enabled === 'Yes') {
         chatbot_chatgpt_schedule_conversation_digest();
     }
+    // Also handle case where it's already Yes (in case it wasn't scheduled before)
+    elseif ($enabled === 'Yes') {
+        chatbot_chatgpt_schedule_conversation_digest();
+    }
     // If enabled changed from Yes to No, unschedule the cron
     elseif ($old_enabled === 'Yes' && $enabled === 'No') {
-        wp_clear_scheduled_hook('chatbot_chatgpt_send_conversation_digest_hook');
+        wp_clear_scheduled_hook('kognetiks_insights_send_conversation_digest_email_hook');
     }
     // If enabled is Yes, check if we need to reschedule (frequency might have changed)
     elseif ($enabled === 'Yes') {
@@ -1668,6 +1672,18 @@ function chatbot_chatgpt_handle_insights_email_scheduling($old_value, $new_value
     elseif ($old_enabled === 'Yes' && $enabled === 'No') {
         if (function_exists('kognetiks_insights_unschedule_proof_of_value_email')) {
             kognetiks_insights_unschedule_proof_of_value_email();
+        } else {
+            // Fallback: clear the hook directly if function doesn't exist
+            wp_clear_scheduled_hook('kognetiks_insights_send_proof_of_value_email_hook');
+        }
+    }
+    // Also handle case where it's already No (in case it wasn't cleared before)
+    elseif ($enabled === 'No') {
+        if (function_exists('kognetiks_insights_unschedule_proof_of_value_email')) {
+            kognetiks_insights_unschedule_proof_of_value_email();
+        } else {
+            // Fallback: clear the hook directly if function doesn't exist
+            wp_clear_scheduled_hook('kognetiks_insights_send_proof_of_value_email_hook');
         }
     }
     // If enabled is Yes, check if we need to reschedule (period might have changed)

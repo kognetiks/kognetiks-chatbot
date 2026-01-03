@@ -54,7 +54,7 @@ function chatbot_chatgpt_schedule_conversation_digest() {
     }
     
     // Clear any existing scheduled hooks
-    wp_clear_scheduled_hook('chatbot_chatgpt_send_conversation_digest_hook');
+    wp_clear_scheduled_hook('kognetiks_insights_send_conversation_digest_email_hook');
     
     // Map frequency to WordPress cron intervals (frequency is already lowercase)
     $interval_mapping = array(
@@ -67,7 +67,7 @@ function chatbot_chatgpt_schedule_conversation_digest() {
     
     // Schedule the event
     $timestamp = time() + 60; // Start 60 seconds from now
-    wp_schedule_event($timestamp, $interval, 'chatbot_chatgpt_send_conversation_digest_hook');
+    wp_schedule_event($timestamp, $interval, 'kognetiks_insights_send_conversation_digest_email_hook');
     
 }
 
@@ -221,6 +221,7 @@ function chatbot_chatgpt_send_conversation_digest() {
 }
 
 // Register the cron action hook - Ver 2.3.9
-add_action('chatbot_chatgpt_send_conversation_digest_hook', 'chatbot_chatgpt_send_conversation_digest');
+// Renamed to align with kognetiks_insights naming convention
+add_action('kognetiks_insights_send_conversation_digest_email_hook', 'chatbot_chatgpt_send_conversation_digest');
 
 
