@@ -4,7 +4,7 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.4.0  
+**Version:** 2.4.1  
 **License:** GPLv3 or later  
 **WordPress Compatibility:** Tested up to WordPress 6.9
 
@@ -124,14 +124,70 @@ An intelligent content analysis system that enhances chatbot responses:
 
 ### Insights and Reporting
 
-Comprehensive insights package for monitoring chatbot performance:
+Comprehensive analytics package for monitoring chatbot performance, consisting of three integrated components:
 
-- **Conversation Statistics**: Track user interactions and engagement
-- **Sentiment Analysis**: Analyze user sentiment in conversations
+#### Insights Dashboard
+
+Real-time analytics dashboard accessible directly in the WordPress admin panel:
+
+- **Conversation Statistics**: Track total conversations, unique visitors, and engagement metrics
+- **Sentiment Analysis**: Analyze user sentiment in conversations with automated or manual scoring
+  - Average sentiment scores (range: -1.0 to +1.0)
+  - Positive conversation percentages
+  - Separate analysis for visitor/user messages vs chatbot responses
+- **Engagement Analysis**: Evaluate chatbot effectiveness
+  - High engagement rate tracking
+  - Average messages before drop-off
+  - Session duration metrics
+- **Message Statistics**: Track message volume and types
+  - Total messages exchanged
+  - Visitor vs chatbot message breakdowns
 - **Token Usage Tracking**: Monitor API usage and costs
-- **Dashboard Widget**: Real-time statistics in WordPress admin
-- **Data Export**: CSV export of conversation and interaction data
+  - Daily token consumption
+  - Cost estimation capabilities
+- **Period Comparison**: Compare performance across different time periods (Today vs Yesterday, This Week vs Last Week, etc.)
+- **Data Export**: CSV export of conversation, interaction, and token data
 - **Performance Metrics**: Response times, success rates, error tracking
+
+#### Conversation Digest Email
+
+Automated email reports delivering conversation summaries and transcripts directly to your inbox:
+
+- **Automated Delivery**: Conversations automatically collected and sent at regular intervals
+- **Frequency Options**: 
+  - Free users: Weekly only
+  - Premium users: Hourly, Daily, or Weekly
+- **Free Tier Content**: Summary statistics including total conversations, pages with activity, unique visitors, and logged-in users
+- **Premium Tier Content**: Full conversation transcripts with:
+  - Complete message-by-message transcripts with timestamps
+  - Session IDs, user IDs, page IDs, and thread IDs
+  - Assistant names used
+  - Clear Visitor vs Chatbot message labeling
+- **Smart Tracking**: 
+  - Incremental time windows (no duplicates)
+  - Session-based grouping
+  - Filtered content (excludes token data and system messages)
+- **Use Cases**: Monitor activity without daily logins, quality assurance reviews, content planning, customer service follow-ups
+
+#### Proof of Value Reports Email
+
+Premium email reports providing actionable insights and performance metrics:
+
+- **Performance Metrics**: 
+  - Total conversations and messages
+  - Estimated time saved
+  - Resolved rate
+  - Engagement depth
+- **Top Pages by Chat Activity**: Identify which pages generate the most chatbot interactions
+- **Top Assistants Used**: Track which chatbot assistants are most frequently utilized
+- **Top Unanswered Questions**: Automatic detection of questions the chatbot couldn't answer
+  - Pattern-matching for fallback responses
+  - Question identification and frequency ranking
+  - Knowledge gap identification
+- **Suggested Next Steps**: Actionable recommendations based on chatbot performance
+- **Use Cases**: Identify knowledge gaps, improve knowledge base, track performance trends, measure optimization impact
+
+**Configuration**: All analytics features require conversation logging to be enabled. Configure email reports in **Chatbot Settings** → **Reporting** tab → **"Conversation Digest and Insight Settings"** section.
 
 ### User Experience Features
 
@@ -299,15 +355,17 @@ Users must agree to terms of service for each AI platform:
 
 ## Version History
 
-### Recent Updates (Version 2.3.9)
+### Recent Updates (Version 2.4.1)
 
-* **Google API**: Added support for Google's API to provide advanced conversational capabilities for the chatbot.
-* **Conversation Digest**: Added a new feature to send a digest of the conversation to the site admin via email.
-* **Conversation History**: Improved the conversation history display to show the conversation history for the logged-in user.
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.8.
+* **Analytics Package Enhancements**: Comprehensive improvements to the analytics and reporting system, including enhanced Insights Dashboard with improved sentiment analysis and engagement metrics.
+* **Proof of Value Reports**: Added premium email reports with actionable insights, performance metrics, top unanswered questions detection, and suggested next steps.
+* **Conversation Digest Improvements**: Enhanced conversation digest email functionality with better session tracking, improved filtering, and expanded premium tier features.
+* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.4.0.
 
 ### Key Milestones
 
+- **Version 2.4.0**: Analytics Package overhaul with Insights Dashboard, Conversation Digest Email, and Proof of Value Reports Email
+- **Version 2.3.9**: Google API support, Conversation Digest email feature, improved conversation history display
 - **Version 2.3.8**: Google Gemini API integration
 - **Version 2.3.0**: Mistral API integration
 - **Version 2.2.9**: Message count display
