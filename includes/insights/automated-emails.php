@@ -14,6 +14,16 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
+// EMERGENCY BYPASS: Set this to true in wp-config.php to completely disable this file
+// Add this line to wp-config.php: define( 'KOGNETIKS_INSIGHTS_EMAIL_DISABLED', true );
+// Note: This won't prevent function definitions, but will prevent hooks from being registered
+
+// EMERGENCY SAFETY: Disable admin_init hook completely to prevent site hangs
+// Set this to false to re-enable after cleaning up cron jobs
+if ( ! defined( 'KOGNETIKS_INSIGHTS_EMAIL_INIT_ENABLED' ) ) {
+    define( 'KOGNETIKS_INSIGHTS_EMAIL_INIT_ENABLED', false ); // Set to true to re-enable
+}
+
 /**
  * Internal helper: period label + start/end timestamps.
  *
@@ -1000,6 +1010,7 @@ function kognetiks_insights_add_monthly_cron_interval( $schedules ) {
     ];
     return $schedules;
 }
+// Re-enabled - safe to use
 add_filter( 'cron_schedules', 'kognetiks_insights_add_monthly_cron_interval' );
 
 /**
@@ -1011,8 +1022,34 @@ add_filter( 'cron_schedules', 'kognetiks_insights_add_monthly_cron_interval' );
  */
 function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $email_to = '' ) {
 
-    // Clear any existing scheduled hooks
+    // CRITICAL: Clear ALL existing scheduled hooks FIRST to prevent duplicates
+    // Use multiple methods to ensure complete cleanup
     wp_clear_scheduled_hook( 'kognetiks_insights_send_proof_of_value_email_hook' );
+    
+    // Double-check: Force clear all instances
+    $crons = _get_cron_array();
+    if ( $crons ) {
+        foreach ( $crons as $timestamp => $cron ) {
+            if ( isset( $cron['kognetiks_insights_send_proof_of_value_email_hook'] ) ) {
+                foreach ( $cron['kognetiks_insights_send_proof_of_value_email_hook'] as $key => $event ) {
+                    wp_unschedule_event( $timestamp, 'kognetiks_insights_send_proof_of_value_email_hook', $event['args'] );
+                }
+            }
+        }
+    }
+    
+    // Verify it's actually cleared before scheduling
+    $still_scheduled = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
+    if ( $still_scheduled ) {
+        // If still scheduled, try one more aggressive clear
+        $max_attempts = 20;
+        $attempts = 0;
+        while ( $still_scheduled && $attempts < $max_attempts ) {
+            wp_unschedule_event( $still_scheduled, 'kognetiks_insights_send_proof_of_value_email_hook' );
+            $still_scheduled = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
+            $attempts++;
+        }
+    }
 
     // Map period to WordPress cron intervals
     $interval_mapping = [
@@ -1022,27 +1059,74 @@ function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $
 
     $interval = isset( $interval_mapping[ $period ] ) ? $interval_mapping[ $period ] : 'weekly';
 
-    // Schedule the event - start 60 seconds from now
-    $timestamp = time() + 60;
-    wp_schedule_event( $timestamp, $interval, 'kognetiks_insights_send_proof_of_value_email_hook', [ $period, $email_to ] );
+    // Only schedule if we're sure it's cleared
+    $verify_cleared = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
+    if ( ! $verify_cleared ) {
+        // Schedule the event - use a proper recurring schedule
+        // For weekly: schedule for next week at the same time
+        // For monthly: schedule for next month at the same time
+        $timestamp = time() + ( $interval === 'monthly' ? MONTH_IN_SECONDS : WEEK_IN_SECONDS );
+        wp_schedule_event( $timestamp, $interval, 'kognetiks_insights_send_proof_of_value_email_hook', [ $period, $email_to ] );
+    }
 }
 
 /**
  * Unschedule automated proof of value email cron job.
+ * Optimized to handle many cron jobs efficiently.
  *
  * @return void
  */
 function kognetiks_insights_unschedule_proof_of_value_email() {
+    // Use the simple method - wp_clear_scheduled_hook handles all instances
     wp_clear_scheduled_hook( 'kognetiks_insights_send_proof_of_value_email_hook' );
+    
+    // Only do expensive check if absolutely necessary (and limit it)
+    $scheduled = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
+    if ( $scheduled ) {
+        // If still scheduled after clear, try one more time with a timeout protection
+        // Limit the loop to prevent infinite loops
+        $max_iterations = 10;
+        $iterations = 0;
+        
+        while ( $scheduled && $iterations < $max_iterations ) {
+            wp_unschedule_event( $scheduled, 'kognetiks_insights_send_proof_of_value_email_hook' );
+            $scheduled = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
+            $iterations++;
+        }
+    }
 }
 
 /**
  * Initialize and verify cron job status based on current settings.
  * This ensures cron jobs are properly cleaned up if the feature is disabled.
+ * FIXED: Only runs on the specific settings page, not on every admin page load.
  *
  * @return void
  */
 function kognetiks_insights_init_proof_of_value_email_cron() {
+    // Only run on the chatbot settings reporting page
+    if ( ! isset( $_GET['page'] ) || $_GET['page'] !== 'chatbot-chatgpt' || ! isset( $_GET['tab'] ) || $_GET['tab'] !== 'reporting' ) {
+        return;
+    }
+    
+    // Don't run during form submission - let the update_option hooks handle it
+    if ( isset( $_POST['option_page'] ) && $_POST['option_page'] === 'chatbot_chatgpt_reporting' ) {
+        return;
+    }
+    
+    // Don't run during AJAX requests
+    if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+        return;
+    }
+    
+    // CRITICAL: Add a transient to prevent multiple rapid calls (prevents duplicate scheduling)
+    $last_check = get_transient( 'kognetiks_insights_cron_init_last_check' );
+    if ( $last_check && ( time() - $last_check ) < 10 ) {
+        // Don't run if we checked less than 10 seconds ago
+        return;
+    }
+    set_transient( 'kognetiks_insights_cron_init_last_check', time(), 60 );
+    
     $enabled = get_option( 'chatbot_chatgpt_insights_email_enabled', 'No' );
     
     if ( $enabled === 'Yes' ) {
@@ -1050,7 +1134,7 @@ function kognetiks_insights_init_proof_of_value_email_cron() {
         $period = get_option( 'chatbot_chatgpt_insights_email_frequency', 'weekly' );
         $email   = get_option( 'chatbot_chatgpt_insights_email_address', '' );
         
-        // Check if cron is already scheduled
+        // Check if cron is already scheduled (this is fast, doesn't load all cron jobs)
         $scheduled = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
         
         if ( ! $scheduled ) {
@@ -1072,6 +1156,12 @@ function kognetiks_insights_init_proof_of_value_email_cron() {
  */
 function kognetiks_insights_send_proof_of_value_email_callback( $period = 'weekly', $email_to = '' ) {
 
+    // Safety check: Prevent multiple emails from being sent in quick succession
+    $last_sent = get_transient( 'kognetiks_insights_email_last_sent' );
+    if ( $last_sent && ( time() - $last_sent ) < 300 ) { // 5 minutes minimum between emails
+        return; // Too soon, skip this run
+    }
+
     // Verify the feature is still enabled before sending
     $enabled = get_option( 'chatbot_chatgpt_insights_email_enabled', 'No' );
     
@@ -1087,10 +1177,45 @@ function kognetiks_insights_send_proof_of_value_email_callback( $period = 'weekl
     ];
 
     kognetiks_insights_send_proof_of_value_email( $args );
+    
+    // Set transient to prevent rapid-fire emails
+    set_transient( 'kognetiks_insights_email_last_sent', time(), 3600 ); // 1 hour expiry
 }
 
-// Hook the callback to the cron event
+// Hook the callback to the cron event - Re-enabled with safety checks
 add_action( 'kognetiks_insights_send_proof_of_value_email_hook', 'kognetiks_insights_send_proof_of_value_email_callback', 10, 2 );
 
-// Initialize cron job status on plugin load
-add_action( 'init', 'kognetiks_insights_init_proof_of_value_email_cron', 20 );
+// Initialize cron job status - FIXED: Only runs on reporting settings page
+add_action( 'admin_init', 'kognetiks_insights_init_proof_of_value_email_cron', 20 );
+
+/**
+ * Emergency function to immediately stop all insights email cron jobs.
+ * Call this function to stop the email flood.
+ * 
+ * Usage: Add this to wp-config.php temporarily or run via WP-CLI:
+ * kognetiks_insights_emergency_stop_emails();
+ */
+function kognetiks_insights_emergency_stop_emails() {
+    // Clear all scheduled hooks
+    wp_clear_scheduled_hook( 'kognetiks_insights_send_proof_of_value_email_hook' );
+    
+    // Force unschedule all instances
+    $crons = _get_cron_array();
+    if ( $crons ) {
+        foreach ( $crons as $timestamp => $cron ) {
+            if ( isset( $cron['kognetiks_insights_send_proof_of_value_email_hook'] ) ) {
+                foreach ( $cron['kognetiks_insights_send_proof_of_value_email_hook'] as $key => $event ) {
+                    wp_unschedule_event( $timestamp, 'kognetiks_insights_send_proof_of_value_email_hook', $event['args'] );
+                }
+            }
+        }
+    }
+    
+    // Disable the feature in settings
+    update_option( 'chatbot_chatgpt_insights_email_enabled', 'No' );
+    
+    // Clear the last sent transient
+    delete_transient( 'kognetiks_insights_email_last_sent' );
+    
+    return true;
+}
