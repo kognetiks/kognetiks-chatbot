@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Global sentiment analysis variables
-global $sentiment_words, $negator_words, $intensifier_words;
+global $sentiment_words, $negator_words, $intensifier_words, $fallback_like, $fallback_failure_and_apology, $fallback_deflection_and_generic_assistant_behavior, $fallback_clarification_requests_beyond_rephrasing, $fallback_to_external_help, $fallback_safety_refusal_and_policy_related, $fallback_conversation_breakdown;
 
 // Initialize the Spanish language sentiment words dictionary
 $sentiment_words = array(
@@ -90,3 +90,95 @@ $intensifier_words = array(
     'completamente' => 1.5,
     'totalmente' => 1.5
 );
+
+/**
+ * Global unanswered questions patterns.
+ */
+$fallback_like = [
+    '%no estoy siguiendo%',
+    '%podrías preguntar eso%',
+    '%eso no está claro%',
+    '%no capté bien%',
+    '%podrías intentar reformular%',
+    '%podrías reformular%',
+    '%intenta formular%',
+    '%por favor aclara%',
+];
+
+/*
+ * Global explicit failure and apology patterns. 
+ */
+$fallback_failure_and_apology = [
+    '%no sé%',
+    '%no estoy seguro%',
+    '%no estoy segura%',
+    '%no puedo ayudar con eso%',
+    '%no puedo ayudar con eso%',
+    '%no tengo suficiente información%',
+    '%no tengo esa información%',
+    '%no tengo acceso%',
+    '%no tengo la capacidad%',
+    '%no tengo detalles%',
+    '%no puedo%',
+    '%no puedo responder%',
+    '%no puedo responder%',
+];
+
+/*
+ * Global deflection and generic assistant behavior patterns.
+ */
+$fallback_deflection_and_generic_assistant_behavior = [
+    '%como una ia%',
+    '%soy una ia%',
+    '%soy un modelo de lenguaje%',
+    '%no tengo opiniones personales%',
+    '%no tengo tiempo real%',
+    '%no tengo navegación%',
+    '%no tengo contexto%',
+];
+
+/*
+ * Global clarification requests beyond rephrasing patterns.
+ */
+$fallback_clarification_requests_beyond_rephrasing = [
+    '%puedes proporcionar más detalles%',
+    '%puedes dar más información%',
+    '%puedes ser más específico%',
+    '%qué quieres decir%',
+    '%puedes elaborar%',
+    '%necesito más contexto%',
+    '%no hay suficiente contexto%',
+];
+
+/*
+ * Global fallback to external help patterns.
+ */
+$fallback_to_external_help = [
+    '%quizás quieras contactar%',
+    '%deberías contactar%',
+    '%consulta con el servicio al cliente%',
+    '%comunícate con el soporte%',
+    '%consulta con un profesional%',
+    '%visita el sitio web oficial%',
+];
+
+/*
+ * Global safety, refusal, and policy related patterns.
+ */
+$fallback_safety_refusal_and_policy_related = [
+    '%no puedo ayudar con esa solicitud%',
+    '%no puedo ayudar con esta solicitud%',
+    '%no puedo cumplir%',
+    '%esta solicitud no está permitida%',
+    '%no puedo proporcionar eso%',
+];
+
+/*
+ * Global conversation breakdown patterns.
+ */
+$fallback_conversation_breakdown = [
+    '%cambiemos de tema%',
+    '%podría estar entendiendo mal%',
+    '%eso no parece relacionado%',
+    '%eso está fuera del alcance%',
+];

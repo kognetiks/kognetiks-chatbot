@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Global sentiment analysis variables
-global $sentiment_words, $negator_words, $intensifier_words;
+global $sentiment_words, $negator_words, $intensifier_words, $fallback_like, $fallback_failure_and_apology, $fallback_deflection_and_generic_assistant_behavior, $fallback_clarification_requests_beyond_rephrasing, $fallback_to_external_help, $fallback_safety_refusal_and_policy_related, $fallback_conversation_breakdown;
 
 // Initialize the Ukrainian language sentiment words dictionary
 $sentiment_words = array(
@@ -93,3 +93,94 @@ $intensifier_words = array(
     'цілком' => 1.5
 );
 
+/**
+ * Global unanswered questions patterns.
+ */
+$fallback_like = [
+    '%я не слідкую%',
+    '%чи могли б ви запитати це%',
+    '%це незрозуміло%',
+    '%не зовсім зрозумів%',
+    '%чи могли б ви спробувати переформулювати%',
+    '%чи могли б ви переформулювати%',
+    '%спробуйте сформулювати%',
+    '%будь ласка уточніть%',
+];
+
+/*
+ * Global explicit failure and apology patterns. 
+ */
+$fallback_failure_and_apology = [
+    '%я не знаю%',
+    '%я не впевнений%',
+    '%я не впевнена%',
+    '%я не можу допомогти з цим%',
+    '%я не можу допомогти з цим%',
+    '%у мене недостатньо інформації%',
+    '%у мене немає цієї інформації%',
+    '%у мене немає доступу%',
+    '%у мене немає здатності%',
+    '%у мене немає деталей%',
+    '%я не можу%',
+    '%я не можу відповісти%',
+    '%я не можу відповісти%',
+];
+
+/*
+ * Global deflection and generic assistant behavior patterns.
+ */
+$fallback_deflection_and_generic_assistant_behavior = [
+    '%як ші%',
+    '%я ші%',
+    '%я мова модель%',
+    '%у мене немає особистих думок%',
+    '%у мене немає реального часу%',
+    '%у мене немає перегляду%',
+    '%у мене немає контексту%',
+];
+
+/*
+ * Global clarification requests beyond rephrasing patterns.
+ */
+$fallback_clarification_requests_beyond_rephrasing = [
+    '%чи можете ви надати більше деталей%',
+    '%чи можете ви дати більше інформації%',
+    '%чи можете ви бути більш конкретним%',
+    '%що ви маєте на увазі%',
+    '%чи можете ви розвинути%',
+    '%мені потрібно більше контексту%',
+    '%недостатньо контексту%',
+];
+
+/*
+ * Global fallback to external help patterns.
+ */
+$fallback_to_external_help = [
+    '%ви можете зв\'язатися%',
+    '%вам слід зв\'язатися%',
+    '%перевірте зі службою підтримки%',
+    '%зверніться до служби підтримки%',
+    '%консультуйтеся зі спеціалістом%',
+    '%відвідайте офіційний веб-сайт%',
+];
+
+/*
+ * Global safety, refusal, and policy related patterns.
+ */
+$fallback_safety_refusal_and_policy_related = [
+    '%я не можу допомогти з цим запитом%',
+    '%я не можу допомогти з цим запитом%',
+    '%я не можу виконати%',
+    '%цей запит не дозволено%',
+    '%я не можу надати це%',
+];
+
+/*
+ * Global conversation breakdown patterns.
+ */
+$fallback_conversation_breakdown = [
+    '%давайте змінимо тему%',
+    '%я, можливо, неправильно розумію%',
+    '%це не здається пов\'язаним%',
+    '%це виходить за межі%',
+];

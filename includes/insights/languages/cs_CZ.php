@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Global sentiment analysis variables
-global $sentiment_words, $negator_words, $intensifier_words;
+global $sentiment_words, $negator_words, $intensifier_words, $fallback_like, $fallback_failure_and_apology, $fallback_deflection_and_generic_assistant_behavior, $fallback_clarification_requests_beyond_rephrasing, $fallback_to_external_help, $fallback_safety_refusal_and_policy_related, $fallback_conversation_breakdown;
 
 // Initialize the Czech language sentiment words dictionary
 $sentiment_words = array(
@@ -90,3 +90,95 @@ $intensifier_words = array(
     'zcela' => 1.5,
     'úplně' => 1.5
 );
+
+/**
+ * Global unanswered questions patterns.
+ */
+$fallback_like = [
+    '%nesleduji%',
+    '%můžete se zeptat%',
+    '%to je nejasné%',
+    '%docela nechytil%',
+    '%můžete zkusit přeformulovat%',
+    '%můžete přeformulovat%',
+    '%zkuste formulovat%',
+    '%prosím upřesněte%',
+];
+
+/*
+ * Global explicit failure and apology patterns. 
+ */
+$fallback_failure_and_apology = [
+    '%nevím%',
+    '%nejsem si jistý%',
+    '%nejsem si jistá%',
+    '%nemohu s tím pomoci%',
+    '%nemohu pomoci s tím%',
+    '%nemám dostatek informací%',
+    '%nemám tyto informace%',
+    '%nemám přístup%',
+    '%nemám schopnost%',
+    '%nemám podrobnosti%',
+    '%nejsem schopen%',
+    '%nemohu odpovědět%',
+    '%nemohu odpovědět%',
+];
+
+/*
+ * Global deflection and generic assistant behavior patterns.
+ */
+$fallback_deflection_and_generic_assistant_behavior = [
+    '%jako ai%',
+    '%jsem ai%',
+    '%jsem jazykový model%',
+    '%nemám osobní názory%',
+    '%nemám reálný čas%',
+    '%nemám procházení%',
+    '%nemám kontext%',
+];
+
+/*
+ * Global clarification requests beyond rephrasing patterns.
+ */
+$fallback_clarification_requests_beyond_rephrasing = [
+    '%můžete poskytnout více podrobností%',
+    '%můžete poskytnout více informací%',
+    '%můžete být konkrétnější%',
+    '%co myslíte%',
+    '%můžete rozvést%',
+    '%potřebuji více kontextu%',
+    '%nedostatek kontextu%',
+];
+
+/*
+ * Global fallback to external help patterns.
+ */
+$fallback_to_external_help = [
+    '%možná budete chtít kontaktovat%',
+    '%měli byste kontaktovat%',
+    '%zkontrolujte u zákaznického servisu%',
+    '%kontaktujte podporu%',
+    '%konzultujte s odborníkem%',
+    '%navštivte oficiální web%',
+];
+
+/*
+ * Global safety, refusal, and policy related patterns.
+ */
+$fallback_safety_refusal_and_policy_related = [
+    '%nemohu pomoci s tímto požadavkem%',
+    '%nemohu pomoci s tímto požadavkem%',
+    '%nejsem schopen vyhovět%',
+    '%tento požadavek není povolen%',
+    '%nemohu to poskytnout%',
+];
+
+/*
+ * Global conversation breakdown patterns.
+ */
+$fallback_conversation_breakdown = [
+    '%změňme téma%',
+    '%možná špatně rozumím%',
+    '%to se nezdá souviset%',
+    '%to je mimo rozsah%',
+];
