@@ -13,7 +13,7 @@ We make AI chat simple for WordPress. Add intelligent, conversational AI to your
 
 ### 💬 **AI Chat Made Simple**
 
-The **Kognetiks Chatbot** helps you turn your WordPress site into a smart, conversational experience - easily. Whether you want to answer customer questions, assist visitors, or showcase AI innovation, Kognetiks Chatbot makes it simple, secure, and scalable.
+The **Kognetiks Chatbot** helps you turn your WordPress site into a smart, conversational experience - easily. Whether you want to answer customer questions, assist visitors, or showcase AI innovation, the Kognetiks Chatbot makes it simple, secure, and scalable.
 
 **We make AI chat simple for WordPress.**
 

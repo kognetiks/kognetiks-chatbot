@@ -27,12 +27,13 @@ if ( ! defined( 'KOGNETIKS_INSIGHTS_EMAIL_INIT_ENABLED' ) ) {
 /**
  * Internal helper: period label + start/end timestamps.
  *
- * @param string $period 'weekly' or 'monthly'
+ * @param string $period 'daily', 'weekly', or 'monthly'
  * @return array
  */
 function kognetiks_insights_get_period_window( $period = 'weekly' ) {
 
-    $period = ( $period === 'monthly' ) ? 'monthly' : 'weekly';
+    // Normalize period: accept 'daily', 'monthly', default to 'weekly'
+    $period = ( $period === 'monthly' ) ? 'monthly' : ( ( $period === 'daily' ) ? 'daily' : 'weekly' );
 
     $now = current_time( 'timestamp' ); // WP local time
     // Normalize to start-of-day for consistency.
@@ -44,6 +45,11 @@ function kognetiks_insights_get_period_window( $period = 'weekly' ) {
         $start = strtotime( date( 'Y-m-01 00:00:00', $today_start ) );
         $end   = $today_end; // Include full current day
         $label = date_i18n( 'F Y', $today_start );
+    } elseif ( $period === 'daily' ) {
+        // Daily window: just today
+        $start = $today_start;
+        $end   = $today_end; // Include full current day
+        $label = date_i18n( 'F j, Y', $today_start );
     } else {
         // Week window: last 7 days (including today), simple rolling window.
         // Go back 6 days from start of today, so we get 7 days total (including today)
@@ -322,6 +328,7 @@ function kognetiks_insights_get_usage_stats( $start_ts, $end_ts ) {
  * @return array
  */
 function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $limit = 5 ) {
+
     global $wpdb;
 
     $tables = kognetiks_insights_get_table_names();
@@ -335,21 +342,18 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
     $human_types = [ 'Visitor', 'User' ];
     $human_in    = implode( ',', array_fill( 0, count( $human_types ), '%s' ) );
 
-    /**
-     * Fallback patterns.
-     * You can expand this list over time or make it a filter.
-     */
-    $fallback_like = [
-        '%i\'m not following%',
-        '%could you ask that%',
-        '%that\'s unclear%',
-        '%didn\'t quite catch%',
-        '%could you try rephras%',
-        '%could you rephrase%',
-        '%try phrasing%',
-        '%please clarify%',
-    ];
-    $like_sql = implode( ' OR ', array_fill( 0, count( $fallback_like ), 'c.message_text LIKE %s' ) );
+    // Global based on language file loaded
+    global $fallback_like, $fallback_failure_and_apology, $fallback_deflection_and_generic_assistant_behavior, $fallback_clarification_requests_beyond_rephrasing, $fallback_to_external_help, $fallback_safety_refusal_and_policy_related, $fallback_conversation_breakdown;
+
+    // Do a union of all fallback patterns
+    // TODO - Later on, we can do a more sophisticated approach to combine these patterns, but for now this is a good start.
+    $fallback_patterns = array_merge( $fallback_like, $fallback_failure_and_apology, $fallback_deflection_and_generic_assistant_behavior, $fallback_clarification_requests_beyond_rephrasing, $fallback_to_external_help, $fallback_safety_refusal_and_policy_related, $fallback_conversation_breakdown );
+    // Diagnostics - log the fallback patterns
+    if ( function_exists( 'back_trace' ) ) {
+        back_trace( 'NOTICE', 'Insights Top Unanswered Questions - Fallback Patterns: ' . print_r( $fallback_patterns, true ) );
+    }
+    
+    $like_sql = implode( ' OR ', array_fill( 0, count( $fallback_patterns ), 'c.message_text LIKE %s' ) );
 
     /**
      * Strategy:
@@ -393,7 +397,7 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
 
     $params = array_merge(
         [ $start_dt, $end_dt ],
-        $fallback_like,
+        $fallback_patterns,
         $human_types,          // for q.user_type IN (...)
         $human_types,          // for q2.user_type IN (...) in subquery
         [ (int) $limit ]
@@ -412,9 +416,23 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
     }
 
     return apply_filters( 'kognetiks_insights_top_unanswered_questions', $out, $start_ts, $end_ts, $limit );
+
 }
 
+/**
+ * Paid: Top Pages by Activity (best-effort based on your current logging)
+ *
+ * Definition:
+ * - Find the pages that have the most conversations
+ * - For each page, pull the most recent Visitor message_text from the same session before that time
+ *
+ * @param int $start_ts
+ * @param int $end_ts
+ * @param int $limit
+ * @return array
+ */
 function kognetiks_insights_get_top_pages_by_activity( $start_ts, $end_ts, $limit = 5 ) {
+
     global $wpdb;
 
     $tables = kognetiks_insights_get_table_names();
@@ -469,7 +487,14 @@ function kognetiks_insights_get_top_pages_by_activity( $start_ts, $end_ts, $limi
     return apply_filters( 'kognetiks_insights_top_pages_by_activity', $out, $start_ts, $end_ts, $limit );
 }
 
+/**
+ * Internal helper: format top pages bullets.
+ *
+ * @param array $pages
+ * @return array
+ */
 function kognetiks_insights_format_top_pages_bullets( $pages = [] ) {
+
     if ( empty( $pages ) ) {
         return [];
     }
@@ -481,9 +506,23 @@ function kognetiks_insights_format_top_pages_bullets( $pages = [] ) {
         $bullets[] = sprintf( '%s (%d conversations)', $title, $cnt );
     }
     return $bullets;
+
 }
 
+/**
+ * Paid: Top Assistants Used (best-effort based on your current logging)
+ *
+ * Definition:
+ * - Find the assistants that have the most conversations
+ * - For each assistant, pull the most recent Visitor message_text from the same session before that time
+ *
+ * @param int $start_ts
+ * @param int $end_ts
+ * @param int $limit
+ * @return array
+ */
 function kognetiks_insights_get_top_assistants_used( $start_ts, $end_ts, $limit = 5 ) {
+
     global $wpdb;
 
     $tables = kognetiks_insights_get_table_names();
@@ -527,7 +566,14 @@ function kognetiks_insights_get_top_assistants_used( $start_ts, $end_ts, $limit 
     return apply_filters( 'kognetiks_insights_top_assistants_used', $out, $start_ts, $end_ts, $limit );
 }
 
+/**
+ * Internal helper: format top assistants bullets.
+ *
+ * @param array $assistants
+ * @return array
+ */
 function kognetiks_insights_format_top_assistants_bullets( $assistants = [] ) {
+
     if ( empty( $assistants ) ) {
         return [];
     }
@@ -538,11 +584,23 @@ function kognetiks_insights_format_top_assistants_bullets( $assistants = [] ) {
         $cnt  = isset( $a['conversations'] ) ? (int) $a['conversations'] : 0;
         $bullets[] = sprintf( '%s (%d conversations)', $name, $cnt );
     }
+
     return $bullets;
+
 }
 
-
-function kognetiks_insights_get_impact_metrics( $start_ts, $end_ts, $stats = [] ) {
+/**
+ * Paid: Impact Metrics (best-effort based on your current logging)
+ *
+ * Definition:
+ * - Calculate the estimated time saved based on the number of conversations and the minutes saved per conversation
+ * - Calculate the resolved rate based on the number of conversations and the number of resolved conversations
+ * - Calculate the average messages per chat based on the number of conversations and the number of messages
+ *
+ * @param int $start_ts
+ * @param int $end_ts
+ */
+function kognetiks_insights_get_impact_metrics( $start_ts, $end_ts, $stats = [] ) { 
 
     // Default: 1.4 minutes saved per conversation (adjustable)
     $minutes_per_convo = (float) apply_filters( 'kognetiks_insights_minutes_saved_per_conversation', 1.4, $start_ts, $end_ts, $stats );
@@ -561,6 +619,7 @@ function kognetiks_insights_get_impact_metrics( $start_ts, $end_ts, $stats = [] 
     ];
 
     return apply_filters( 'kognetiks_insights_impact_metrics', $impact, $start_ts, $end_ts, $stats );
+
 }
 
 /**
@@ -578,6 +637,7 @@ function kognetiks_insights_trend_label( $pct ) {
     $pct = (float) $pct;
     $sign = ( $pct > 0 ) ? '+' : '';
     return $sign . rtrim( rtrim( number_format( $pct, 1, '.', '' ), '0' ), '.' ) . '%';
+
 }
 
 /**
@@ -585,7 +645,7 @@ function kognetiks_insights_trend_label( $pct ) {
  *
  * Free users get basic stats: pages, visitors, users, conversations + light trend.
  *
- * @param array $args Optional: ['period' => 'weekly'|'monthly', 'email_to' => 'someone@site.com']
+ * @param array $args Optional: ['period' => 'daily'|'weekly'|'monthly', 'email_to' => 'someone@site.com']
  * @return array {subject, message_html, message_text, meta}
  */
 function kognetiks_insights_value_visibility_email( $args = [] ) {
@@ -680,6 +740,7 @@ function kognetiks_insights_value_visibility_email( $args = [] ) {
     ];
 
     return $payload;
+
 }
 
 /**
@@ -690,7 +751,7 @@ function kognetiks_insights_value_visibility_email( $args = [] ) {
  * - top unanswered questions
  * - key engagement/quality signals (hooks for more)
  *
- * @param array $args Optional: ['period' => 'weekly'|'monthly', 'email_to' => 'someone@site.com']
+ * @param array $args Optional: ['period' => 'daily'|'weekly'|'monthly', 'email_to' => 'someone@site.com']
  * @return array {subject, message_html, message_text, meta}
  */
 function kognetiks_insights_value_translation_email( $args = [] ) {
@@ -851,6 +912,7 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
     ];
 
     return $payload;
+
 }
 
 /**
@@ -859,12 +921,14 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
  * @return array
  */
 function kognetiks_insights_get_table_names() {
+
     global $wpdb;
 
     return [
         'conversation_log' => $wpdb->prefix . 'chatbot_chatgpt_conversation_log',
         'interactions'     => $wpdb->prefix . 'chatbot_chatgpt_interactions',
     ];
+
 }
 
 /**
@@ -948,13 +1012,13 @@ function kognetiks_insights_generate_recommendations( $stats, $impact, $top_unan
     $max  = max( 1, (int) $max );
 
     return array_slice( $recs, 0, $max );
-}
 
+}
 
 /**
  * Send the correct automated email based on license.
  *
- * @param array $args ['period' => 'weekly'|'monthly', 'email_to' => '', 'force_tier' => '' ]
+ * @param array $args ['period' => 'daily'|'weekly'|'monthly', 'email_to' => '', 'force_tier' => '' ]
  * @return array payload returned from the email builder
  */
 function kognetiks_insights_send_proof_of_value_email( $args = [] ) {
@@ -995,6 +1059,7 @@ function kognetiks_insights_send_proof_of_value_email( $args = [] ) {
     do_action( 'kognetiks_insights_automated_email_sent', $sent, $tier, $to, $payload, $args );
 
     return $payload;
+
 }
 
 /**
@@ -1004,11 +1069,14 @@ function kognetiks_insights_send_proof_of_value_email( $args = [] ) {
  * @return array Modified schedules
  */
 function kognetiks_insights_add_monthly_cron_interval( $schedules ) {
+
     $schedules['monthly'] = [
         'interval' => MONTH_IN_SECONDS, // 30 days
         'display'  => __( 'Once Monthly', 'chatbot-chatgpt' ),
     ];
+
     return $schedules;
+
 }
 // Re-enabled - safe to use
 add_filter( 'cron_schedules', 'kognetiks_insights_add_monthly_cron_interval' );
@@ -1016,7 +1084,7 @@ add_filter( 'cron_schedules', 'kognetiks_insights_add_monthly_cron_interval' );
 /**
  * Schedule automated proof of value email cron job.
  *
- * @param string $period 'weekly' or 'monthly'
+ * @param string $period 'daily', 'weekly', or 'monthly'
  * @param string $email_to Email address to send to (optional, defaults to admin_email)
  * @return bool True if scheduled successfully, false otherwise
  */
@@ -1053,6 +1121,7 @@ function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $
 
     // Map period to WordPress cron intervals
     $interval_mapping = [
+        'daily'   => 'daily',
         'weekly'  => 'weekly',
         'monthly' => 'monthly',
     ];
@@ -1070,9 +1139,16 @@ function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $
     $verify_cleared = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
     if ( ! $verify_cleared ) {
         // Schedule the event - use a proper recurring schedule
+        // For daily: schedule for next day at the same time
         // For weekly: schedule for next week at the same time
         // For monthly: schedule for next month at the same time
-        $timestamp = time() + ( $interval === 'monthly' ? MONTH_IN_SECONDS : WEEK_IN_SECONDS );
+        if ( $interval === 'monthly' ) {
+            $timestamp = time() + MONTH_IN_SECONDS;
+        } elseif ( $interval === 'daily' ) {
+            $timestamp = time() + DAY_IN_SECONDS;
+        } else {
+            $timestamp = time() + WEEK_IN_SECONDS;
+        }
         $result = wp_schedule_event( $timestamp, $interval, 'kognetiks_insights_send_proof_of_value_email_hook', [ $period, $email_to ] );
         
         // Check if scheduling succeeded
@@ -1093,6 +1169,7 @@ function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $
     // If it was still scheduled after all clearing attempts, there's already a valid schedule
     // Return true because the cron job exists (even if we couldn't replace it)
     return true;
+
 }
 
 /**
@@ -1102,6 +1179,7 @@ function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $
  * @return void
  */
 function kognetiks_insights_unschedule_proof_of_value_email() {
+
     // Use the simple method first - wp_clear_scheduled_hook handles all instances
     wp_clear_scheduled_hook( 'kognetiks_insights_send_proof_of_value_email_hook' );
     
@@ -1131,6 +1209,7 @@ function kognetiks_insights_unschedule_proof_of_value_email() {
             $iterations++;
         }
     }
+
 }
 
 /**
@@ -1182,12 +1261,13 @@ function kognetiks_insights_init_proof_of_value_email_cron() {
         // Feature is disabled, ensure cron is not scheduled
         kognetiks_insights_unschedule_proof_of_value_email();
     }
+
 }
 
 /**
  * Cron job callback function to send proof of value email.
  *
- * @param string $period 'weekly' or 'monthly'
+ * @param string $period 'daily', 'weekly', or 'monthly'
  * @param string $email_to Email address (optional)
  * @return void
  */
@@ -1217,12 +1297,13 @@ function kognetiks_insights_send_proof_of_value_email_callback( $period = 'weekl
     
     // Set transient to prevent rapid-fire emails
     set_transient( 'kognetiks_insights_email_last_sent', time(), 3600 ); // 1 hour expiry
+
 }
 
 // Hook the callback to the cron event - Re-enabled with safety checks
 add_action( 'kognetiks_insights_send_proof_of_value_email_hook', 'kognetiks_insights_send_proof_of_value_email_callback', 10, 2 );
 
-// Initialize cron job status - FIXED: Only runs on reporting settings page
+// Initialize cron job status - Only runs on reporting settings page
 add_action( 'admin_init', 'kognetiks_insights_init_proof_of_value_email_cron', 20 );
 
 /**
@@ -1233,6 +1314,7 @@ add_action( 'admin_init', 'kognetiks_insights_init_proof_of_value_email_cron', 2
  * kognetiks_insights_emergency_stop_emails();
  */
 function kognetiks_insights_emergency_stop_emails() {
+
     // Clear all scheduled hooks
     wp_clear_scheduled_hook( 'kognetiks_insights_send_proof_of_value_email_hook' );
     
@@ -1255,4 +1337,5 @@ function kognetiks_insights_emergency_stop_emails() {
     delete_transient( 'kognetiks_insights_email_last_sent' );
     
     return true;
+
 }

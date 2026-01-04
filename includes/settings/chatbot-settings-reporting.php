@@ -730,6 +730,7 @@ function chatbot_chatgpt_insights_email_frequency_callback($args) {
     $output_choice = esc_attr(get_option('chatbot_chatgpt_insights_email_frequency', 'weekly'));
     ?>
     <select id="chatbot_chatgpt_insights_email_frequency" name="chatbot_chatgpt_insights_email_frequency">
+        <option value="<?php echo esc_attr( 'daily' ); ?>" <?php selected( $output_choice, 'daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
         <option value="<?php echo esc_attr( 'weekly' ); ?>" <?php selected( $output_choice, 'weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
         <option value="<?php echo esc_attr( 'monthly' ); ?>" <?php selected( $output_choice, 'monthly' ); ?>><?php echo esc_html( 'Monthly' ); ?></option>
     </select>
@@ -1562,7 +1563,7 @@ function chatbot_chatgpt_sanitize_insights_email_frequency($value) {
     }
     
     // Define allowed values
-    $allowed_values = array('weekly', 'monthly');
+    $allowed_values = array('daily', 'weekly', 'monthly');
     
     // Sanitize and validate the value
     $value = sanitize_text_field($value);
