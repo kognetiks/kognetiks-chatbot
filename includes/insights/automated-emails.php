@@ -406,15 +406,22 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
         LIMIT %d
     ";
 
-    // Parameters: date range, fallback patterns (for chatbot check), fallback patterns (for human check), human types (3x), limit
+    // Parameters must match SQL placeholder order exactly:
+    // 1. fallback_patterns for chatbot LIKE check (line 379)
+    // 2. human_types for c.user_type IN (line 382)
+    // 3. fallback_patterns for human LIKE check (line 383)
+    // 4. date range for interaction_time (line 385)
+    // 5. human_types for q.user_type IN (line 390)
+    // 6. human_types for q2.user_type IN subquery (line 398)
+    // 7. limit (line 406)
     $params = array_merge(
-        [ $start_dt, $end_dt ],
-        $fallback_patterns,     // for chatbot fallback pattern check
-        $fallback_patterns,     // for human clarification pattern check
-        $human_types,           // for c.user_type IN (...) in Scenario 2
-        $human_types,           // for q.user_type IN (...)
-        $human_types,           // for q2.user_type IN (...) in subquery
-        [ (int) $limit ]
+        $fallback_patterns,     // 1. for chatbot fallback pattern check (line 379)
+        $human_types,           // 2. for c.user_type IN (...) in Scenario 2 (line 382)
+        $fallback_patterns,     // 3. for human clarification pattern check (line 383)
+        [ $start_dt, $end_dt ], // 4. for interaction_time date range (line 385)
+        $human_types,           // 5. for q.user_type IN (...) (line 390)
+        $human_types,           // 6. for q2.user_type IN (...) in subquery (line 398)
+        [ (int) $limit ]        // 7. for LIMIT (line 406)
     );
 
     $rows = $wpdb->get_results( $wpdb->prepare( $sql, $params ), ARRAY_A );
