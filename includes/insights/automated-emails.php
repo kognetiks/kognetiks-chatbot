@@ -357,9 +357,13 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
 
     /**
      * Strategy:
-     * - Find fallback chatbot rows "c" in window
+     * - Find fallback chatbot rows "c" in window OR human messages with clarification/confusion patterns
      * - Join to the prior human question "q" in same session at max time <= c.time
      * - Group by q.message_text to get "top" unanswered questions
+     * 
+     * Two scenarios:
+     * 1. Chatbot responds with fallback pattern -> find prior human question
+     * 2. Human message contains clarification/confusion pattern -> find prior human question (original question)
      */
     $sql = "
         SELECT
@@ -369,11 +373,18 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
         INNER JOIN {$log} q
             ON q.session_id = c.session_id
         WHERE
-            c.user_type = 'Chatbot'
+            (
+                -- Scenario 1: Chatbot response matches fallback pattern
+                ( c.user_type = 'Chatbot'
+                  AND ( {$like_sql} ) )
+                OR
+                -- Scenario 2: Human message contains clarification/confusion pattern
+                ( c.user_type IN ($human_in)
+                  AND ( {$like_sql} ) )
+            )
             AND c.interaction_time >= %s AND c.interaction_time <= %s
             AND c.message_text IS NOT NULL
             AND LENGTH(TRIM(c.message_text)) > 0
-            AND ( {$like_sql} )
 
             -- prior human question in same session
             AND q.user_type IN ($human_in)
@@ -388,22 +399,34 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
                   AND q2.message_text IS NOT NULL
                   AND LENGTH(TRIM(q2.message_text)) > 0
                   AND q2.message_text NOT REGEXP '^[0-9]+$'
-                  AND q2.interaction_time <= c.interaction_time
+                  AND q2.interaction_time < c.interaction_time
             )
         GROUP BY q.message_text
         ORDER BY hits DESC
         LIMIT %d
     ";
 
+    // Parameters: date range, fallback patterns (for chatbot check), fallback patterns (for human check), human types (3x), limit
     $params = array_merge(
         [ $start_dt, $end_dt ],
-        $fallback_patterns,
-        $human_types,          // for q.user_type IN (...)
-        $human_types,          // for q2.user_type IN (...) in subquery
+        $fallback_patterns,     // for chatbot fallback pattern check
+        $fallback_patterns,     // for human clarification pattern check
+        $human_types,           // for c.user_type IN (...) in Scenario 2
+        $human_types,           // for q.user_type IN (...)
+        $human_types,           // for q2.user_type IN (...) in subquery
         [ (int) $limit ]
     );
 
     $rows = $wpdb->get_results( $wpdb->prepare( $sql, $params ), ARRAY_A );
+
+    // Debug: Log query details
+    if ( function_exists( 'back_trace' ) ) {
+        back_trace( 'NOTICE', 'Insights Top Unanswered Questions - SQL: ' . $wpdb->last_query );
+        back_trace( 'NOTICE', 'Insights Top Unanswered Questions - Results count: ' . count( $rows ) );
+        if ( ! empty( $rows ) ) {
+            back_trace( 'NOTICE', 'Insights Top Unanswered Questions - Results: ' . print_r( $rows, true ) );
+        }
+    }
 
     $out = [];
     if ( ! empty( $rows ) ) {
