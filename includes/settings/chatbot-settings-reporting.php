@@ -350,7 +350,7 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             
             <?php if (!$is_premium): ?>
             <div class="kchat-premium-note">
-                <strong>Free Reports</strong> are limited to weekly with basic stats (conversation count, pages, visitors/users). <strong>Premium Reports</strong> unlocks Daily/Hourly frequency and richer formatting with full conversation details.
+                <strong>Free Reports</strong> are limited to weekly with basic stats (conversation count, pages, visitors/users). <strong>Premium Reports</strong> surface risks sooner and highlight what to fix next.
             </div>
             <?php endif; ?>
         </div>
@@ -726,15 +726,35 @@ function chatbot_chatgpt_insights_email_enabled_callback($args) {
 
 // Insights Email Frequency (Report Frequency)
 function chatbot_chatgpt_insights_email_frequency_callback($args) {
-    // Get the saved chatbot_chatgpt_insights_email_frequency value or default to "weekly"
-    $output_choice = esc_attr(get_option('chatbot_chatgpt_insights_email_frequency', 'weekly'));
-    ?>
-    <select id="chatbot_chatgpt_insights_email_frequency" name="chatbot_chatgpt_insights_email_frequency">
-        <option value="<?php echo esc_attr( 'daily' ); ?>" <?php selected( $output_choice, 'daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
-        <option value="<?php echo esc_attr( 'weekly' ); ?>" <?php selected( $output_choice, 'weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
-        <option value="<?php echo esc_attr( 'monthly' ); ?>" <?php selected( $output_choice, 'monthly' ); ?>><?php echo esc_html( 'Monthly' ); ?></option>
-    </select>
-    <?php
+    // Check if premium is enabled
+    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    
+    // Get the saved chatbot_chatgpt_insights_email_frequency value (stored as lowercase)
+    // Note: Do NOT modify the saved value here - only display it
+    // Validation and resetting should happen in the sanitization callback
+    $saved_choice = strtolower(esc_attr(get_option('chatbot_chatgpt_insights_email_frequency', 'weekly')));
+    
+    // Free users can only use Weekly - but don't reset here, let sanitization handle it
+    if (!$is_premium) {
+        // For free users, always show Weekly (but don't modify the DB value in the callback)
+        $saved_choice = 'weekly';
+        ?>
+        <select id="chatbot_chatgpt_insights_email_frequency" disabled>
+            <option value="<?php echo esc_attr( 'weekly' ); ?>" selected><?php echo esc_html( 'Weekly' ); ?> (Free)</option>
+        </select>
+        <input type="hidden" name="chatbot_chatgpt_insights_email_frequency" value="weekly" />
+        <p class="description" style="margin-top: 5px; color: #646970;">Daily and Monthly frequencies available with Premium.</p>
+        <?php
+    } else {
+        // Premium users get all options
+        ?>
+        <select id="chatbot_chatgpt_insights_email_frequency" name="chatbot_chatgpt_insights_email_frequency">
+            <option value="<?php echo esc_attr( 'daily' ); ?>" <?php selected( $saved_choice, 'daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
+            <option value="<?php echo esc_attr( 'weekly' ); ?>" <?php selected( $saved_choice, 'weekly' ); ?>><?php echo esc_html( 'Weekly' ); ?></option>
+            <option value="<?php echo esc_attr( 'monthly' ); ?>" <?php selected( $saved_choice, 'monthly' ); ?>><?php echo esc_html( 'Monthly' ); ?></option>
+        </select>
+        <?php
+    }
 }
 
 // Insights Email Address (Send Reports To)
@@ -1562,12 +1582,12 @@ function chatbot_chatgpt_sanitize_insights_email_frequency($value) {
         $value = $_POST['chatbot_chatgpt_insights_email_frequency'];
     }
     
-    // Define allowed values
-    $allowed_values = array('daily', 'weekly', 'monthly');
+    // Check if premium is enabled
+    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
     
-    // Sanitize and validate the value
+    // Sanitize and normalize to lowercase (best practice: store lowercase in DB)
     $value = sanitize_text_field($value);
-    $value = strtolower(trim($value)); // Normalize to lowercase
+    $value = strtolower(trim($value));
     
     // If still empty, return current value or default
     if (empty($value)) {
@@ -1575,11 +1595,20 @@ function chatbot_chatgpt_sanitize_insights_email_frequency($value) {
         return strtolower($current);
     }
     
+    // Define allowed values based on premium status (all lowercase)
+    if ($is_premium) {
+        $allowed_values = array('daily', 'weekly', 'monthly');
+    } else {
+        // Free users can only use Weekly
+        $allowed_values = array('weekly');
+    }
+    
+    // Validate the value
     if (in_array($value, $allowed_values)) {
         return $value;
     }
     
-    // If invalid value, return current value or default
+    // If invalid value, return current value or default (always lowercase)
     $current = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
     return strtolower($current);
 }

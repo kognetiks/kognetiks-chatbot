@@ -847,7 +847,7 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
     // Insights section
     if ( ! empty( $top_unanswered ) ) {
         $content .= kognetiks_insights_bullets_html( 'Top Unanswered Questions', $top_unanswered );
-        $content .= '<p style="margin:8px 0 0 0;color:#444;">Consider adding content or knowledge base entries that address these questions.</p>';
+        $content .= '<p style="margin:8px 0 0 0;color:#444;">Consider adding content or knowledge base entries that address these questions. Without the chatbot, these conversations would likely have gone unanswered.</p>';
     } else {
         $content .= '<p style="margin:10px 0 0 0;color:#444;"><strong>Top Unanswered Questions:</strong> No items detected for this period.</p>';
     }
@@ -1149,6 +1149,14 @@ function kognetiks_insights_schedule_proof_of_value_email( $period = 'weekly', $
         }
     }
 
+    // Check if premium - free users are limited to Weekly
+    // Note: Don't modify the saved value here - use it as-is for scheduling
+    // The sanitization callback will handle validation and resetting if needed
+    $is_premium = ( function_exists( 'kognetiks_insights_is_premium' ) && kognetiks_insights_is_premium() );
+    if ( ! $is_premium ) {
+        $period = 'weekly'; // Use Weekly for free users (but don't modify the DB value)
+    }
+
     // Map period to WordPress cron intervals
     $interval_mapping = [
         'daily'   => 'daily',
@@ -1279,6 +1287,14 @@ function kognetiks_insights_init_proof_of_value_email_cron() {
         // Feature is enabled, ensure cron is scheduled
         $period = get_option( 'chatbot_chatgpt_insights_email_frequency', 'weekly' );
         $email   = get_option( 'chatbot_chatgpt_insights_email_address', '' );
+        
+        // Check if premium - free users are limited to Weekly
+        // Note: Don't modify the saved value here - use it as-is for scheduling
+        // The sanitization callback will handle validation and resetting if needed
+        $is_premium = ( function_exists( 'kognetiks_insights_is_premium' ) && kognetiks_insights_is_premium() );
+        if ( ! $is_premium ) {
+            $period = 'weekly'; // Use Weekly for free users (but don't modify the DB value)
+        }
         
         // Check if cron is already scheduled (this is fast, doesn't load all cron jobs)
         $scheduled = wp_next_scheduled( 'kognetiks_insights_send_proof_of_value_email_hook' );
