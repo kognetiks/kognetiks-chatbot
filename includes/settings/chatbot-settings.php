@@ -255,6 +255,10 @@ function chatbot_chatgpt_settings_page() {
 
                 settings_fields('chatbot_chatgpt_settings');
 
+                // Breadcrumb info line - Ver 2.4.1
+                $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
+                echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
+
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_bot_settings_general');
                 echo '</div>';
@@ -868,6 +872,10 @@ function chatbot_chatgpt_settings_page() {
             } elseif ($active_tab == 'support') {
 
                 settings_fields('chatbot_chatgpt_support');
+
+                // Breadcrumb info line - Ver 2.4.1
+                $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
+                echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_support');
