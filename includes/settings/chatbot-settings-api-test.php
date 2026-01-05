@@ -346,7 +346,7 @@ function kchat_fetch_api_status($api_key, $model) {
             if (is_wp_error($response)) {
 
                 // DIAG - Diagnostics
-                prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
+                // back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
                 return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
 
             }
@@ -490,7 +490,7 @@ function kchat_fetch_api_status($api_key, $model) {
             // Model and message for testing
             $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
             
-            // The current DeepSeek API URL endpoint
+            // The current Mistral API URL endpoint
             $api_url = 'https://api.mistral.ai/v1/chat/completions';
 
             // Set the headers
@@ -526,42 +526,82 @@ function kchat_fetch_api_status($api_key, $model) {
             // Call the API
             $response = wp_remote_post($api_url, array(
                 'headers' => $headers,
-                'body' => $body
+                'body' => $body,
+                'timeout' => 50
             ));
 
+            // Handle WP Error
+            if (is_wp_error($response)) {
+                // DIAG - Diagnostics
+                // back_trace('ERROR', 'Mistral API WP_Error: ' . $response->get_error_message());
+                $updated_status = 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your Mistral account for additional information.';
+                update_option('chatbot_mistral_api_status', $updated_status);
+                return $updated_status;
+            }
+
+            // Check HTTP response code
+            $response_code = wp_remote_retrieve_response_code($response);
+            $response_body_raw = wp_remote_retrieve_body($response);
+
+            // DIAG - Diagnostics - Log raw response for debugging
+            // back_trace('NOTICE', 'Mistral API Response Code: ' . $response_code);
+            // back_trace('NOTICE', 'Mistral API Response Body: ' . $response_body_raw);
+
+            // Check for HTTP errors
+            if ($response_code >= 400) {
+                $response_data = json_decode($response_body_raw, true);
+                if (isset($response_data['error'])) {
+                    $error_type = $response_data['error']['type'] ?? 'Unknown Error Type';
+                    $error_message = $response_data['error']['message'] ?? 'No additional information.';
+                    $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
+                } elseif (isset($response_data['object']) && $response_data['object'] === 'error') {
+                    // Mistral error format: {object: 'error', message: '...', type: '...'}
+                    $error_type = $response_data['type'] ?? 'Unknown Error Type';
+                    $error_message = $response_data['message'] ?? 'No additional information.';
+                    $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
+                } else {
+                    $updated_status = 'API Error: HTTP ' . $response_code . '. Response: ' . substr($response_body_raw, 0, 200);
+                }
+                update_option('chatbot_mistral_api_status', $updated_status);
+                return $updated_status;
+            }
+
             // Get the response body
-            $response_data = json_decode(wp_remote_retrieve_body($response));
+            $response_data = json_decode($response_body_raw, true);
+
+            // Check if JSON decode was successful
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                // back_trace('ERROR', 'Mistral API JSON decode error: ' . json_last_error_msg());
+                $updated_status = 'Error: Invalid JSON response from Mistral API. Raw response: ' . substr($response_body_raw, 0, 200);
+                update_option('chatbot_mistral_api_status', $updated_status);
+                return $updated_status;
+            }
 
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Response: ' . print_r($response_data, true));
+            // back_trace('NOTICE', 'Mistral API Response Data: ' . print_r($response_data, true));
 
-            // Check for API-specific errors
-            if (isset($response_data->error)) {
-
-                // Extract error type and message safely
-                $error_type = $response_data->error->type ?? 'Unknown Error Type';
-                $error_message = $response_data->error->message ?? 'No additional information.';
-            
-                // Handle error response
+            // Check for API-specific errors (Mistral uses 'object' => 'error' format or 'error' key)
+            if (isset($response_data['object']) && $response_data['object'] === 'error') {
+                // Mistral error response format: {object: 'error', message: '...', type: '...', code: ...}
+                $error_type = $response_data['type'] ?? 'Unknown Error Type';
+                $error_message = $response_data['message'] ?? 'No additional information.';
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
-            
-            } elseif (isset($response_data->choices[0]->message)) {
-
-                // Handle successful response
-                $content_type = $response_data->choices[0]->message->role ?? 'Unknown Content Type';
-                $content_text = $response_data->choices[0]->message->content ?? 'No content available.';
-            
+                // back_trace('ERROR', 'Mistral API Status: ' . $updated_status);
+            } elseif (isset($response_data['error'])) {
+                // Alternative error format
+                $error_type = $response_data['error']['type'] ?? 'Unknown Error Type';
+                $error_message = $response_data['error']['message'] ?? 'No additional information.';
+                $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
+                // back_trace('ERROR', 'Mistral API Status: ' . $updated_status);
+            } elseif (isset($response_data['choices']) && isset($response_data['choices'][0]['message'])) {
                 // Handle successful response
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
-
+                // back_trace('SUCCESS', 'Mistral API Status: ' . $updated_status);
             } else {
-
                 // Handle unexpected response structure
-                $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
-
+                // back_trace('ERROR', 'Mistral API unexpected response structure. Response: ' . print_r($response_data, true));
+                $response_keys = is_array($response_data) ? array_keys($response_data) : 'null or non-array';
+                $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information. Response keys: ' . json_encode($response_keys);
             }
             
             update_option('chatbot_mistral_api_status', $updated_status);
@@ -636,7 +676,7 @@ function kchat_fetch_api_status($api_key, $model) {
             // Handle WP Error
             if (is_wp_error($response)) {
                 // DIAG - Diagnostics
-                prod_trace( 'ERROR', 'Error: ' . $response->get_error_message());
+                // back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
                 return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your Google account for additional information.';
             }
 

@@ -260,23 +260,23 @@ function kognetiks_insights_get_usage_stats( $start_ts, $end_ts ) {
     $prev = $wpdb->get_row( $wpdb->prepare( $sql_window, $prev_start_dt, $prev_end_dt, $prev_start_dt, $prev_end_dt, $prev_start_dt, $prev_end_dt, $prev_start_dt, $prev_end_dt ), ARRAY_A );
 
     // Debug: Log query details (temporary - remove after debugging)
-    if ( function_exists( 'back_trace' ) ) {
-        back_trace( 'NOTICE', 'Insights Stats Query - Date Range: ' . $start_dt . ' to ' . $end_dt );
-        back_trace( 'NOTICE', 'Insights Stats Query - SQL: ' . $wpdb->last_query );
-        back_trace( 'NOTICE', 'Insights Stats Query - Results: ' . print_r( $cur, true ) );
+    // if ( function_exists( 'back_trace' ) ) {
+        // back_trace( 'NOTICE', 'Insights Stats Query - Date Range: ' . $start_dt . ' to ' . $end_dt );
+        // back_trace( 'NOTICE', 'Insights Stats Query - SQL: ' . $wpdb->last_query );
+        // back_trace( 'NOTICE', 'Insights Stats Query - Results: ' . print_r( $cur, true ) );
         
         // Also check if there's any data in the table at all
-        $total_check = $wpdb->get_var( "SELECT COUNT(*) FROM {$log} WHERE user_type IN ('Visitor', 'User') LIMIT 1" );
-        back_trace( 'NOTICE', 'Insights Stats Query - Total Visitor/User rows in table: ' . $total_check );
+        // $total_check = $wpdb->get_var( "SELECT COUNT(*) FROM {$log} WHERE user_type IN ('Visitor', 'User') LIMIT 1" );
+        // back_trace( 'NOTICE', 'Insights Stats Query - Total Visitor/User rows in table: ' . $total_check );
         
         // Check date range coverage
-        $date_check = $wpdb->get_var( $wpdb->prepare( 
-            "SELECT COUNT(*) FROM {$log} WHERE interaction_time >= %s AND interaction_time <= %s", 
-            $start_dt, 
-            $end_dt 
-        ) );
-        back_trace( 'NOTICE', 'Insights Stats Query - Total rows in date range: ' . $date_check );
-    }
+        // $date_check = $wpdb->get_var( $wpdb->prepare( 
+        //     "SELECT COUNT(*) FROM {$log} WHERE interaction_time >= %s AND interaction_time <= %s", 
+        //     $start_dt, 
+        //     $end_dt 
+        // ) );
+        // back_trace( 'NOTICE', 'Insights Stats Query - Total rows in date range: ' . $date_check );
+    // }
 
     $c = [
         'conversations' => isset( $cur['conversations'] ) ? (int) $cur['conversations'] : 0,
@@ -349,9 +349,9 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
     // TODO - Later on, we can do a more sophisticated approach to combine these patterns, but for now this is a good start.
     $fallback_patterns = array_merge( $fallback_like, $fallback_failure_and_apology, $fallback_deflection_and_generic_assistant_behavior, $fallback_clarification_requests_beyond_rephrasing, $fallback_to_external_help, $fallback_safety_refusal_and_policy_related, $fallback_conversation_breakdown );
     // Diagnostics - log the fallback patterns
-    if ( function_exists( 'back_trace' ) ) {
-        back_trace( 'NOTICE', 'Insights Top Unanswered Questions - Fallback Patterns: ' . print_r( $fallback_patterns, true ) );
-    }
+    // if ( function_exists( 'back_trace' ) ) {
+        //back_trace( 'NOTICE', 'Insights Top Unanswered Questions - Fallback Patterns: ' . print_r( $fallback_patterns, true ) );
+    // }
     
     $like_sql = implode( ' OR ', array_fill( 0, count( $fallback_patterns ), 'c.message_text LIKE %s' ) );
 
@@ -427,13 +427,13 @@ function kognetiks_insights_get_top_unanswered_questions( $start_ts, $end_ts, $l
     $rows = $wpdb->get_results( $wpdb->prepare( $sql, $params ), ARRAY_A );
 
     // Debug: Log query details
-    if ( function_exists( 'back_trace' ) ) {
-        back_trace( 'NOTICE', 'Insights Top Unanswered Questions - SQL: ' . $wpdb->last_query );
-        back_trace( 'NOTICE', 'Insights Top Unanswered Questions - Results count: ' . count( $rows ) );
-        if ( ! empty( $rows ) ) {
-            back_trace( 'NOTICE', 'Insights Top Unanswered Questions - Results: ' . print_r( $rows, true ) );
-        }
-    }
+    // if ( function_exists( 'back_trace' ) ) {
+        // back_trace( 'NOTICE', 'Insights Top Unanswered Questions - SQL: ' . $wpdb->last_query );
+        // back_trace( 'NOTICE', 'Insights Top Unanswered Questions - Results count: ' . count( $rows ) );
+        // if ( ! empty( $rows ) ) {
+            // back_trace( 'NOTICE', 'Insights Top Unanswered Questions - Results: ' . print_r( $rows, true ) );
+        // }
+    // }
 
     $out = [];
     if ( ! empty( $rows ) ) {
