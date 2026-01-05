@@ -21,7 +21,9 @@ package.json
 /debug/
 # package.json is now needed for Snyk configuration
 # package.json
-COMPARISON_ANALYSIS.md
+COMPARISON-ANALYSIS.md
+CHANGELOG-ENTRY.md
+CHANGELOG-GENERATOR.md
 DEPLOYMENT.md
 GIT-COMMANDS.md
 includes/insights/DEFINITIONS.md

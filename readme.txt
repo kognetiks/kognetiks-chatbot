@@ -156,6 +156,28 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
+= 2.4.1 - Released 2026-01-06 =
+
+### New Features
+* **Automated Email Reports**: Added Conversation Digest and Proof of Value Reports email functionality with scheduling options
+* **Enhanced Fallback Pattern Matching**: Improved detection of unanswered questions by including human messages with clarification/confusion patterns in top unanswered questions query
+* **Unsaved Changes Modal**: Added modal to warn users about unsaved changes in settings
+* **Insights Tab UI Enhancements**: Minor UI upgrades to the Insights tab for better user experience
+
+### Improvements
+* **Email Scheduling**: Enhanced scheduling system for Conversation Digest and Proof of Value emails with proper enable/disable functionality
+* **Query Execution**: Added detailed comments and debug logging for SQL query execution in fallback pattern matching
+* **Internationalization**: Added global translations for fallback pattern values to various language files
+* **Terminology Update**: Renamed "analytics" to "insights" throughout the codebase for better clarity
+* **Documentation**: Updated documentation including proof of value email examples and conversation digest email guides
+* **Settings UI**: Added links to view reports, "remind me later", and dismiss buttons for better user workflow
+
+### Bug Fixes
+* Fixed options saving functionality in settings
+* Fixed unscheduling of automated emails when disabled
+* Corrected footer content for free and premium tiers in Proof of Value reports
+* Removed redundant sections from Proof of Value reporting
+
 = 2.4 - Released 2025-12-23 =
 
 ### New Features
