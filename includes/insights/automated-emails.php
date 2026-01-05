@@ -869,7 +869,7 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
     }
 
     $subject = sprintf(
-        'Your chatbot insights report (%s)',
+        'Your Kognetiks Chatbot Insights Report (%s)',
         $window['label']
     );
 
@@ -882,7 +882,7 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
         : 'You are receiving this email because free analytics reporting is enabled for the Kognetiks Chatbot. Unlock your chatbot\'s value by upgrading on the chatbot\'s Reporting or Insights settings tab.';
     
     $message_html = kognetiks_insights_build_email_html(
-        'Chatbot Insights Report',
+        'Kognetiks Chatbot Insights Report',
         $subtitle,
         $content,
         [
@@ -891,7 +891,7 @@ function kognetiks_insights_value_translation_email( $args = [] ) {
         ]
     );
 
-    $message_text  = "Chatbot Insights Report\n";
+    $message_text  = "Kognetiks Chatbot Insights Report\n";
     $message_text .= "Reporting period: {$window['label']}\n\n";
     $message_text .= "Conversations: " . intval( $stats['conversations'] ) . "\n";
     $message_text .= "Estimated time saved: " . number_format( (float) $impact['support_time_saved_hours'], 1, '.', '' ) . " hrs\n";

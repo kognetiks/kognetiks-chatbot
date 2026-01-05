@@ -497,6 +497,8 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
                     success: function(response) {
                         if (response.success) {
                             alert('Test email sent successfully!');
+                            // Set flag to prevent beforeunload warning on programmatic reload
+                            window.programmaticReload = true;
                             location.reload();
                         } else {
                             alert('Error: ' + (response.data || 'Failed to send test email'));
@@ -530,6 +532,8 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
                     success: function(response) {
                         if (response.success) {
                             alert('Test report sent successfully!');
+                            // Set flag to prevent beforeunload warning on programmatic reload
+                            window.programmaticReload = true;
                             location.reload();
                         } else {
                             alert('Error: ' + (response.data || 'Failed to send test email'));
@@ -1351,8 +1355,8 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     $conversations = $wpdb->get_results($query);
     
     // Build email content
-    $subject = 'Test: Chatbot Conversation Digest - ' . date('Y-m-d H:i:s');
-    $message = "TEST EMAIL - Chatbot Conversation Digest\n\n";
+    $subject = 'Test: Kognetiks Chatbot Conversation Digest - ' . date('Y-m-d H:i:s');
+    $message = "TEST EMAIL - Kognetiks Chatbot Conversation Digest\n\n";
     $message .= "This is a test email to verify your Conversation Digest settings are working correctly.\n\n";
     $message .= "Period: " . date('Y-m-d H:i:s', strtotime($start_time)) . " to " . current_time('mysql') . "\n\n";
     
@@ -1407,8 +1411,8 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
         $message .= "This is normal if conversation logging has just been enabled or if there have been no recent chatbot interactions.\n\n";
     }
     
-    $message .= "\nThis is a test email from your Chatbot Conversation Digest system.\n";
-    $message .= "If you receive this email, your Conversation Digest settings are configured correctly.\n";
+    $message .= "\nThis is a test email from your Kognetiks Chatbot Conversation Digest system.\n";
+    $message .= "If you receive this email, your Kognetiks Chatbot Conversation Digest settings are configured correctly.\n";
     
     // Log email attempt
     if (function_exists('back_trace')) {

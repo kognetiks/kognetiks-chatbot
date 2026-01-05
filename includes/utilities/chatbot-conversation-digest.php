@@ -153,11 +153,11 @@ function chatbot_chatgpt_send_conversation_digest() {
     }
     
     // Build email content
-    $subject = 'Chatbot Conversation Digest - ' . date('Y-m-d H:i:s');
+    $subject = 'Kognetiks Chatbot Conversation Digest - ' . date('Y-m-d H:i:s');
     
     if ($is_premium) {
         // Premium: Full detailed content
-        $message = "New Chatbot Conversations Digest\n\n";
+        $message = "New Kognetiks Chatbot Conversations Digest\n\n";
         $message .= "Period: " . date('Y-m-d H:i:s', strtotime($start_time)) . " to " . current_time('mysql') . "\n\n";
         $message .= "Total Conversations: " . count($conversations_by_session) . "\n";
         $message .= "Total Messages: " . count($conversations) . "\n\n";

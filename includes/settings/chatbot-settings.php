@@ -135,18 +135,17 @@ function chatbot_chatgpt_settings_page() {
                 // Store initial form values for comparison
                 var initialFormData;
                 
+                // Capture initial form state after all JavaScript has finished initializing
+                // This prevents false positives from dynamic content that loads after page load
+                // Use a delay to ensure all tab-specific JavaScript (like conditional field toggling) has run
+                setTimeout(function() {
+                    initialFormData = settingsForm.serialize();
+                    formChanged = false; // Ensure flag is false after capturing initial state
+                }, 500);
+                
                 // Reset formChanged flag after successful save (when page reloads with settings-updated parameter)
                 if (window.location.search.indexOf('settings-updated=true') !== -1) {
                     formChanged = false;
-                    // Wait for form to be fully rendered before capturing initial state
-                    // This prevents false positives when navigating away after a successful save
-                    setTimeout(function() {
-                        initialFormData = settingsForm.serialize();
-                        formChanged = false; // Ensure flag stays false after capturing initial state
-                    }, 300);
-                } else {
-                    // Normal page load - capture initial state immediately
-                    initialFormData = settingsForm.serialize();
                 }
                 
                 // Track form changes on all form inputs
@@ -180,6 +179,10 @@ function chatbot_chatgpt_settings_page() {
                 
                 // Warn before leaving page (browser navigation, refresh, close tab)
                 $(window).on('beforeunload', function(e) {
+                    // Skip warning if this is a programmatic reload (e.g., from Test buttons)
+                    if (window.programmaticReload) {
+                        return;
+                    }
                     // Only warn if form has actually changed and we're not submitting
                     // Check both the flag and actual form state to avoid false positives
                     var hasChanges = formChanged || checkFormChanged();
@@ -198,8 +201,9 @@ function chatbot_chatgpt_settings_page() {
                     // Check if clicked element is a nav tab or inside one
                     var navTab = $(target).closest('.nav-tab');
                     if (navTab.length && navTab.closest('.nav-tab-wrapper').length) {
-                        // Check both the flag and actual form state
-                        var hasChanges = formChanged || checkFormChanged();
+                        // Only check actual form state, not the flag (which can have false positives)
+                        // If form hasn't actually changed, reset the flag to prevent future false positives
+                        var hasChanges = checkFormChanged();
                         if (hasChanges && !formSubmitting) {
                             var href = navTab.attr('href');
                             // Only intercept if it's a settings page tab
@@ -214,6 +218,9 @@ function chatbot_chatgpt_settings_page() {
                                 formChanged = false;
                                 initialFormData = settingsForm.serialize(); // Update initial state
                             }
+                        } else if (!hasChanges) {
+                            // Form hasn't actually changed, reset the flag to prevent false positives
+                            formChanged = false;
                         }
                     }
                 }, true); // Use capture phase

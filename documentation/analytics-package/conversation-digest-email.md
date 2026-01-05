@@ -76,7 +76,7 @@ This detailed format allows you to:
 
 The Conversation Digest is sent as a plain text email with:
 
-- **Subject Line**: "Chatbot Conversation Digest - [Date and Time]"
+- **Subject Line**: "Kognetiks Chatbot Conversation Digest - [Date and Time]"
 - **Body**: Formatted text with clear sections and separators
 - **Chronological Order**: Messages are presented in the order they occurred
 
