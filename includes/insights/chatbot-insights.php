@@ -1,12 +1,12 @@
 <?php
 /**
- * Kognetiks Analytics - Ver 1.0.0
+ * Kognetiks Insights - Ver 1.0.0
  *
- * This file contains the code for the Kognetiks Analytics package.
+ * This file contains the code for the Kognetiks Insights package.
  * 
  * 
  * 
- * @package kognetiks-analytics
+ * @package kognetiks-insights
  */
 
 // If this file is called directly, abort.
@@ -16,17 +16,17 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Load the language-specific globals
 // Ver 2.3.7 - Fixed translation file lookup to handle locale formats properly
-function kognetiks_analytics_load_globals( $language_code ) {
+function kognetiks_insights_load_globals( $language_code ) {
 
     // Log the selected language code
-    // error_log( '[Chatbot] [chatbot-analytics.php] Loading globals for language: ' . $language_code );
+    // error_log( '[Chatbot] [chatbot-insights.php] Loading globals for language: ' . $language_code );
 
     // Try the full locale first (e.g., 'uk_UA', 'en_US')
     $file_path = plugin_dir_path( __FILE__ ) . '/languages/' . $language_code . '.php';
 
     if ( file_exists( $file_path ) ) {
         require_once $file_path;
-        // error_log( '[Chatbot] [chatbot-analytics.php] Loaded translation file: ' . $file_path );
+        // error_log( '[Chatbot] [chatbot-insights.php] Loaded translation file: ' . $file_path );
         return;
     }
 
@@ -42,7 +42,7 @@ function kognetiks_analytics_load_globals( $language_code ) {
         if ( !empty( $files ) ) {
             // Use the first matching file (e.g., 'uk_UA.php')
             require_once $files[0];
-            // error_log( '[Chatbot] [chatbot-analytics.php] Loaded translation file: ' . $files[0] );
+            // error_log( '[Chatbot] [chatbot-insights.php] Loaded translation file: ' . $files[0] );
             return;
         }
     }
@@ -52,7 +52,7 @@ function kognetiks_analytics_load_globals( $language_code ) {
     if ( file_exists( $fallback_file ) ) {
         require_once $fallback_file;
         // Only log as notice, not error, since fallback is expected behavior for unsupported languages
-        // error_log( '[Chatbot] [chatbot-analytics.php] Translation file not found for ' . $language_code . '. Falling back to: ' . $fallback_file );
+        // error_log( '[Chatbot] [chatbot-insights.php] Translation file not found for ' . $language_code . '. Falling back to: ' . $fallback_file );
     }
 
 }
@@ -67,9 +67,9 @@ if ( empty( $chatbot_chatgpt_installed_language_code ) ) {
 
 }
 // Load the language-specific globals
-kognetiks_analytics_load_globals( $chatbot_chatgpt_installed_language_code );
+kognetiks_insights_load_globals( $chatbot_chatgpt_installed_language_code );
 
-// Automatically add the sentiment_score column when analytics is loaded
+// Automatically add the sentiment_score column when insights is loaded
 if (function_exists('chatbot_chatgpt_add_sentiment_score_column')) {
     chatbot_chatgpt_add_sentiment_score_column();
 }

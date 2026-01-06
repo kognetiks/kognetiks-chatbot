@@ -731,17 +731,23 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
 
     // // ORIGINAL APPROACH
     // Use a sliding window to group words
+    // Build LIKE conditions using prepared statements for security
+    $like_condition_parts = [];
+    $like_condition_values = [];
+    
     for ($i = 0; $i <= count($final_words) - $window_size; $i++) {
         $group = array_slice($final_words, $i, $window_size);
         $group_clauses = [];
         foreach ($group as $word) {
             $escaped_word = $wpdb->esc_like($word);
-            $group_clauses[] = "post_content LIKE '%" . esc_sql($escaped_word) . "%'";
+            $group_clauses[] = "post_content LIKE %s";
+            $like_condition_values[] = '%' . $escaped_word . '%';
         }
-        $like_conditions[] = '(' . implode(' AND ', $group_clauses) . ')';
+        $like_condition_parts[] = '(' . implode(' AND ', $group_clauses) . ')';
     }
+    
     // Combine all groups with OR
-    $like_condition = implode(' OR ', $like_conditions);
+    $like_condition_template = implode(' OR ', $like_condition_parts);
 
     // // VERION 2
     // for ($i = 0; $i <= count($final_words) - $window_size; $i++) {
@@ -778,19 +784,24 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     // back_trace( 'NOTICE', 'Like Condition: ' . $like_condition);
 
     // Handle error for no matching content
-    if (empty($like_condition)) {
+    if (empty($like_condition_template) || empty($like_condition_values)) {
         return $no_matching_content_response[array_rand($no_matching_content_response)];
     }
 
     // Step 5 - Fetch WordPress content
-    $sql = $wpdb->prepare("
+    // Build the complete SQL query with proper parameterization
+    // Combine base query placeholders with LIKE condition placeholders
+    $sql_template = "
         SELECT post_content
         FROM {$wpdb->posts}
         WHERE post_status = %s
         AND (post_type = %s OR post_type = %s)
-    ", 'publish', 'post', 'page');
-
-    $sql .= " AND ({$like_condition})";
+        AND (" . $like_condition_template . ")
+    ";
+    
+    // Prepare the complete query with all values
+    $prepare_args = array_merge(['publish', 'post', 'page'], $like_condition_values);
+    $sql = call_user_func_array([$wpdb, 'prepare'], array_merge([$sql_template], $prepare_args));
 
     $results = $wpdb->get_results($sql, ARRAY_A);
 

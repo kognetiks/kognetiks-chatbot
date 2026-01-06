@@ -318,7 +318,34 @@ function chatbot_chatgpt_upgrade() {
     // Add/update the option - chatbot_chatgpt_plugin_version
     global $chatbot_chatgpt_plugin_version;
     $plugin_version = $chatbot_chatgpt_plugin_version;
+    $old_version = get_option('chatbot_chatgpt_plugin_version', '');
     update_option('chatbot_chatgpt_plugin_version', $plugin_version);
+    
+    // Track installed version for upgrade detection - Ver 2.4.1
+    // Use multisite-aware options if plugin is network-activated
+    $is_network = false;
+    if (is_multisite()) {
+        // Try to detect if plugin is network-activated
+        if (!function_exists('is_plugin_active_for_network')) {
+            require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+        }
+        $plugin_file = 'chatbot-chatgpt/chatbot-chatgpt.php';
+        $is_network = is_plugin_active_for_network($plugin_file);
+    }
+    
+    $get_opt = $is_network ? 'get_site_option' : 'get_option';
+    $update_opt = $is_network ? 'update_site_option' : 'update_option';
+    $delete_opt = $is_network ? 'delete_site_option' : 'delete_option';
+    
+    $installed_version = call_user_func($get_opt, 'chatbot_chatgpt_version_installed', '');
+    if ($installed_version !== $plugin_version) {
+        call_user_func($update_opt, 'chatbot_chatgpt_version_installed', $plugin_version);
+        // If version changed (upgrade scenario), clear reporting notice dismissal and snooze
+        if (!empty($installed_version) && $installed_version !== $plugin_version) {
+            call_user_func($update_opt, 'chatbot_chatgpt_reporting_notice_dismissed', '0');
+            call_user_func($delete_opt, 'chatbot_chatgpt_reporting_notice_snooze_until');
+        }
+    }
     // DIAG - Log the plugin version
     // back_trace( 'NOTICE', 'chatbot_chatgpt_plugin_version option created');
 

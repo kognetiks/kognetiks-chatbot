@@ -1,12 +1,12 @@
 <?php
 /**
- * Kognetiks Analytics - Utilities - Ver 1.0.0
+ * Kognetiks Insights - Utilities - Ver 1.0.0
  *
- * This file contains the code for the Kognetiks Analytics utilities.
+ * This file contains the code for the Kognetiks Insights utilities.
  * 
  * 
  * 
- * @package kognetiks-analytics
+ * @package kognetiks-insights
  */
 
 // If this file is called directly, abort.
@@ -15,7 +15,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // SQL Query to get the data from the chatbot_chatgpt_conversation_log table
-function kognetiks_analytics_get_chatbot_chatgpt_conversation_log_data() {
+function kognetiks_insights_get_chatbot_chatgpt_conversation_log_data() {
 
     global $wpdb;
 
@@ -33,7 +33,7 @@ function kognetiks_analytics_get_chatbot_chatgpt_conversation_log_data() {
 }
 
 // SQL Query to count the number of rows in the chatbot_chatgpt_conversation_log table
-function kognetiks_analytics_count_chatbot_chatgpt_conversation_log_data() {
+function kognetiks_insights_count_chatbot_chatgpt_conversation_log_data() {
 
     global $wpdb;
 
@@ -51,7 +51,7 @@ function kognetiks_analytics_count_chatbot_chatgpt_conversation_log_data() {
 }
 
 // Compute the total tokens
-function kognetiks_analytics_total_tokens() {
+function kognetiks_insights_total_tokens() {
 
     global $wpdb;
 
@@ -105,7 +105,7 @@ function kognetiks_analytics_total_tokens() {
         return "No data found";
     }
 
-    // Compute basic analytics
+    // Compute basic insights
     $total_tokens = $prompt_tokens_total + $completion_tokens_total;
     $total_tokens_per_prompt = $total_tokens / $visitor_count;
     $avearge_prompt_tokens_per_visitor = $prompt_tokens_total / $visitor_count;
@@ -139,7 +139,7 @@ function kognetiks_analytics_total_tokens() {
 }
 
 // Compute time-based conversation counts
-function kognetiks_analytics_get_time_based_conversation_counts($period = 'Today', $user_type = 'All') {
+function kognetiks_insights_get_time_based_conversation_counts($period = 'Today', $user_type = 'All') {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -235,7 +235,7 @@ function kognetiks_analytics_get_time_based_conversation_counts($period = 'Today
 }
 
 // Compute message statistics
-function kognetiks_analytics_get_message_statistics($period = 'Today', $user_type = 'All') {
+function kognetiks_insights_get_message_statistics($period = 'Today', $user_type = 'All') {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -336,7 +336,7 @@ function kognetiks_analytics_get_message_statistics($period = 'Today', $user_typ
 }
 
 // Compute session statistics
-function kognetiks_analytics_get_session_statistics($period = 'Today', $user_type = 'All') {
+function kognetiks_insights_get_session_statistics($period = 'Today', $user_type = 'All') {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -427,7 +427,7 @@ function kognetiks_analytics_get_session_statistics($period = 'Today', $user_typ
 }
 
 // Compute token statistics with period comparison
-function kognetiks_analytics_get_token_statistics($period = 'Today', $user_type = 'All') {
+function kognetiks_insights_get_token_statistics($period = 'Today', $user_type = 'All') {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -505,7 +505,7 @@ function kognetiks_analytics_get_token_statistics($period = 'Today', $user_type 
 }
 
 // Compute visitor statistics
-function kognetiks_analytics_get_visitor_statistics($period = 'Today', $user_type = 'All') {
+function kognetiks_insights_get_visitor_statistics($period = 'Today', $user_type = 'All') {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -604,7 +604,7 @@ function kognetiks_analytics_get_visitor_statistics($period = 'Today', $user_typ
 }
 
 // Compute engagement statistics
-function kognetiks_analytics_get_engagement_statistics($period = 'Today', $user_type = 'All') {
+function kognetiks_insights_get_engagement_statistics($period = 'Today', $user_type = 'All') {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -717,7 +717,7 @@ function kognetiks_analytics_get_engagement_statistics($period = 'Today', $user_
 }
 
 // Compute sentiment statistics
-function kognetiks_analytics_get_sentiment_statistics($period = 'Today', $user_type = 'All') {
+function kognetiks_insights_get_sentiment_statistics($period = 'Today', $user_type = 'All') {
     
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
@@ -804,7 +804,7 @@ function kognetiks_analytics_get_sentiment_statistics($period = 'Today', $user_t
 }
 
 // Helper function to calculate the statistics median
-function kognetiks_analytics_median_computation($numbers) {
+function kognetiks_insights_median_computation($numbers) {
 
     sort($numbers);
     $count = count($numbers);

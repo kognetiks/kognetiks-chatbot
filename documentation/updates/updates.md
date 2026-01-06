@@ -1,5 +1,27 @@
 # Past Updates
 
+## What's new in Version 2.4.1
+
+### New Features
+* **Automated Email Reports**: Added Conversation Digest and Proof of Value Reports email functionality with scheduling options
+* **Enhanced Fallback Pattern Matching**: Improved detection of unanswered questions by including human messages with clarification/confusion patterns in top unanswered questions query
+* **Unsaved Changes Modal**: Added modal to warn users about unsaved changes in settings
+* **Insights Tab UI Enhancements**: Minor UI upgrades to the Insights tab for better user experience
+
+### Improvements
+* **Email Scheduling**: Enhanced scheduling system for Conversation Digest and Proof of Value emails with proper enable/disable functionality
+* **Query Execution**: Added detailed comments and debug logging for SQL query execution in fallback pattern matching
+* **Internationalization**: Added global translations for fallback pattern values to various language files
+* **Terminology Update**: Renamed "analytics" to "insights" throughout the codebase for better clarity
+* **Documentation**: Updated documentation including proof of value email examples and conversation digest email guides
+* **Settings UI**: Added links to view reports, "remind me later", and dismiss buttons for better user workflow
+
+### Bug Fixes
+* Fixed options saving functionality in settings
+* Fixed unscheduling of automated emails when disabled
+* Corrected footer content for free and premium tiers in Proof of Value reports
+* Removed redundant sections from Proof of Value reporting
+
 ## What's new in Version 2.4.0
 
 ### New Features
@@ -41,7 +63,7 @@
 
 ## What's new in Version 2.3.6
 
-* **Analytics**: Comprehensive dashboard providing conversation statistics, sentiment analysis, engagement metrics, and token usage tracking to help optimize chatbot performance and user experience.
+* **Insights**: Comprehensive dashboard providing conversation statistics, sentiment analysis, engagement metrics, and token usage tracking to help optimize chatbot performance and user experience.
 * **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.3.5.
 
 ## What's new in Version 2.3.5

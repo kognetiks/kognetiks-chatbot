@@ -121,6 +121,112 @@ function chatbot_chatgpt_settings_page() {
             }
        </script>
 
+       <script type="text/javascript">
+            // Unsaved Changes Warning - Alert admin when navigating away without saving
+            jQuery(document).ready(function($) {
+                var formChanged = false;
+                var formSubmitting = false;
+                var settingsForm = $('#chatgpt-settings-form');
+                
+                if (!settingsForm.length) {
+                    return; // Form not found, exit
+                }
+                
+                // Store initial form values for comparison
+                var initialFormData;
+                
+                // Capture initial form state after all JavaScript has finished initializing
+                // This prevents false positives from dynamic content that loads after page load
+                // Use a delay to ensure all tab-specific JavaScript (like conditional field toggling) has run
+                setTimeout(function() {
+                    initialFormData = settingsForm.serialize();
+                    formChanged = false; // Ensure flag is false after capturing initial state
+                }, 500);
+                
+                // Reset formChanged flag after successful save (when page reloads with settings-updated parameter)
+                if (window.location.search.indexOf('settings-updated=true') !== -1) {
+                    formChanged = false;
+                }
+                
+                // Track form changes on all form inputs
+                settingsForm.on('input change keyup', 'input, select, textarea', function() {
+                    // Skip hidden inputs and buttons
+                    var inputType = $(this).attr('type');
+                    if (inputType !== 'hidden' && inputType !== 'submit' && inputType !== 'button') {
+                        if (!formSubmitting) {
+                            formChanged = true;
+                        }
+                    }
+                });
+                
+                // Also check if form has actually changed by comparing current state to initial
+                function checkFormChanged() {
+                    // If initialFormData hasn't been set yet (e.g., after a save reload), no changes detected
+                    if (typeof initialFormData === 'undefined') {
+                        return false;
+                    }
+                    var currentFormData = settingsForm.serialize();
+                    return currentFormData !== initialFormData;
+                }
+                
+                // Reset flag when form is submitted
+                settingsForm.on('submit', function() {
+                    formSubmitting = true;
+                    formChanged = false;
+                    // Update initial form data on submit
+                    initialFormData = settingsForm.serialize();
+                });
+                
+                // Warn before leaving page (browser navigation, refresh, close tab)
+                $(window).on('beforeunload', function(e) {
+                    // Skip warning if this is a programmatic reload (e.g., from Test buttons)
+                    if (window.programmaticReload) {
+                        return;
+                    }
+                    // Only warn if form has actually changed and we're not submitting
+                    // Check both the flag and actual form state to avoid false positives
+                    var hasChanges = formChanged || checkFormChanged();
+                    if (hasChanges && !formSubmitting) {
+                        e.preventDefault();
+                        // Modern browsers ignore custom messages, but we still need to set returnValue
+                        e.returnValue = '';
+                        return '';
+                    }
+                });
+                
+                // Warn before clicking tab navigation links
+                // Use capture phase to catch the event before other handlers
+                document.addEventListener('click', function(e) {
+                    var target = e.target;
+                    // Check if clicked element is a nav tab or inside one
+                    var navTab = $(target).closest('.nav-tab');
+                    if (navTab.length && navTab.closest('.nav-tab-wrapper').length) {
+                        // Only check actual form state, not the flag (which can have false positives)
+                        // If form hasn't actually changed, reset the flag to prevent future false positives
+                        var hasChanges = checkFormChanged();
+                        if (hasChanges && !formSubmitting) {
+                            var href = navTab.attr('href');
+                            // Only intercept if it's a settings page tab
+                            if (href && (href.indexOf('page=chatbot-chatgpt') !== -1 || href.indexOf('?page=chatbot-chatgpt') !== -1)) {
+                                if (!confirm('You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.')) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.stopImmediatePropagation();
+                                    return false;
+                                }
+                                // User confirmed, allow navigation
+                                formChanged = false;
+                                initialFormData = settingsForm.serialize(); // Update initial state
+                            }
+                        } else if (!hasChanges) {
+                            // Form hasn't actually changed, reset the flag to prevent false positives
+                            formChanged = false;
+                        }
+                    }
+                }, true); // Use capture phase
+            });
+       </script>
+
        <h2 class="nav-tab-wrapper">
             <a href="?page=chatbot-chatgpt&tab=general" class="nav-tab <?php echo $active_tab == 'general' ? 'nav-tab-active' : ''; ?>">General</a>
             <?php if (esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')) == 'OpenAI') { ?><a href="?page=chatbot-chatgpt&tab=api_chatgpt" class="nav-tab <?php echo $active_tab == 'api_chatgpt' ? 'nav-tab-active' : ''; ?>">API/ChatGPT</a> <?php } ?>
@@ -141,7 +247,7 @@ function chatbot_chatgpt_settings_page() {
             <a href="?page=chatbot-chatgpt&tab=custom_buttons" class="nav-tab <?php echo $active_tab == 'custom_buttons' ? 'nav-tab-active' : ''; ?>">Buttons</a>
             <a href="?page=chatbot-chatgpt&tab=kn_acquire" class="nav-tab <?php echo $active_tab == 'kn_acquire' ? 'nav-tab-active' : ''; ?>">Knowledge Navigator</a>
             <a href="?page=chatbot-chatgpt&tab=reporting" class="nav-tab <?php echo $active_tab == 'reporting' ? 'nav-tab-active' : ''; ?>">Reporting</a>
-            <a href="?page=chatbot-chatgpt&tab=analytics" class="nav-tab <?php echo $active_tab == 'analytics' ? 'nav-tab-active' : ''; ?>">Analytics</a>
+            <a href="?page=chatbot-chatgpt&tab=insights" class="nav-tab <?php echo $active_tab == 'insights' ? 'nav-tab-active' : ''; ?>">Insights</a>
             <a href="?page=chatbot-chatgpt&tab=tools" class="nav-tab <?php echo $active_tab == 'tools' ? 'nav-tab-active' : ''; ?>">Tools</a>
             <a href="?page=chatbot-chatgpt&tab=diagnostics" class="nav-tab <?php echo $active_tab == 'diagnostics' ? 'nav-tab-active' : ''; ?>">Messages</a>
             <a href="?page=chatbot-chatgpt&tab=support" class="nav-tab <?php echo $active_tab == 'support' ? 'nav-tab-active' : ''; ?>">Support</a>
@@ -155,6 +261,10 @@ function chatbot_chatgpt_settings_page() {
             if ($active_tab == 'general') {
 
                 settings_fields('chatbot_chatgpt_settings');
+
+                // Breadcrumb info line - Ver 2.4.1
+                $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
+                echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_bot_settings_general');
@@ -592,6 +702,10 @@ function chatbot_chatgpt_settings_page() {
                 echo '</div>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
+                do_settings_sections('chatbot_chatgpt_conversation_digest');
+                echo '</div>';
+
+                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_conversation_reporting');
                 echo '</div>';
 
@@ -605,10 +719,6 @@ function chatbot_chatgpt_settings_page() {
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_reporting');
-                echo '</div>';
-
-                echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
-                do_settings_sections('chatbot_chatgpt_conversation_digest');
                 echo '</div>';
 
             } elseif ($active_tab == 'diagnostics') { // AKA Messages tab
@@ -659,15 +769,78 @@ function chatbot_chatgpt_settings_page() {
                 do_settings_sections('chatbot_chatgpt_appearance_icons');
                 echo '</div>';
 
-            } elseif ($active_tab == 'analytics') {
+            } elseif ($active_tab == 'insights') {
 
-                // Load the actual analytics functionality
-                if (function_exists('kognetiks_analytics_settings_page')) {
-                    kognetiks_analytics_settings_page();
+                // DIAG - Diagnostics - Ver 4.2.1
+                // back_trace( 'NOTICE', 'Insights Tab');
+                // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->is_plan( 'premium' ));
+                // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+
+                if ( chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
+                    if ( chatbot_chatgpt_freemius()->is_plan( 'premium' ) ) {
+                        // Load the actual insights functionality
+                        if (function_exists('kognetiks_insights_settings_page')) {
+                            kognetiks_insights_settings_page();
+                        } else {
+                            echo '<div class="notice notice-error" style="padding: 20px; margin: 20px 0;">';
+                            echo '<h2 style="margin-top: 0;">⚠️ Insights System Not Available</h2>';
+                            echo '<p>The insights system is not properly loaded. Please check that all insights files are present.</p>';
+                            echo '<div class="notice notice-error"><p>Insights functionality is not available. Please ensure the insights addon is activated.</p></div>';
+                        }
+                    }
                 } else {
-                    echo '<div class="notice notice-error" style="padding: 20px; margin: 20px 0;">';
-                    echo '<h2 style="margin-top: 0;">⚠️ Analytics System Not Available</h2>';
-                    echo '<p>The analytics system is not properly loaded. Please check that all analytics files are present.</p>';
+                    echo '<div class="kchat-insights-upgrade-notice" style="border: 1px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';
+
+                    echo '<div class="kchat-insights-upgrade-notice" style="border: 2px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';
+                    echo '<h2 style="margin-top: 0;">🚀 Unlock Conversation Insights <span>(Premium Feature)</span></h2>';
+                    
+                    echo '<p>Your chatbot is having conversations whether you are watching or not.</p>';
+                    echo '<p><b>Insights help you understand when converations are helping and when they need attention.</b></p>';
+                    echo '<p>Instead of digging through logs or guessing what\'s happening, Insights highlights the signals that matter most.</p>';
+                    echo '<p><b>With Insights, you can:</b></p>';
+
+                    echo '<ul style="margin-left: 20px;">';
+                    echo '<li>📊 See how conversations are trending<br>';
+                    echo 'Understand engagement patterns, drop-off points, and recurring issues.</li>';
+                    echo '<li>⚠️ Detect when conversations need attention<br>';
+                    echo 'Identify signs of confusion, frustration, or escalation risk.</li>';
+                    echo '<li>🔍 Review conversations that matter<br>';
+                    echo 'Focus on interactions that may require follow-up or improvement.</li>';
+                    echo '<li>💡 Improve outcomes with confidence<br>';
+                    echo 'Learn what is working, what is not, and where small changes can help.</li>';
+                    echo '</ul>';
+                    
+                    echo '<hr style="margin: 20px 0;">';
+                    
+                    echo '<h3>🔒 Premium Insights Features</h3>';
+                    echo '<p>Insights is part of the <strong>Kognetiks Premium</strong> plan.</br>';
+                    echo 'Activate your license key to:</p>';
+                    
+                    echo '<ul style="margin-left: 20px; list-style-type:disc;">';
+                    echo '<li>Automated and manual conversation health scoring</li>';
+                    echo '<li>Real-time engagement and frustration signals</li>';
+                    echo '<li>Token usage visibility to help manage AI costs</li>';
+                    echo '<li>Tools designed to support smarter, safer chatbot improvements</li>';
+                    echo '</ul>';
+
+                    echo '<hr style="margin: 20px 0;">';
+                    
+                    echo '<h3>✅ Designed for Visibility, Not Guesswork</h3>';
+
+                    echo '<p>Insights highlight what matters so you can decide when action is needed.<br>';
+                    echo 'It doesn\'t replace judgment, it supports it.</p>';
+
+                    echo '<hr style="margin: 20px 0;">';
+                    
+                    echo '<h3>✅ Ready to Upgrade?</h3>';
+                    echo '<p>Reports delivered automatically. No dashboard monitoring required.</p>';
+                    echo '<p>';
+                    echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">🔓 Unlock Conversation Insights</a>';
+                    echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=insights-package&file=insights-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
+                    echo '<a href="mailto:support@kognetiks.com">Contact Support</a>';
+                    echo '</p>';
+
+                    echo '</div>';
                     echo '</div>';
                 }
                 
@@ -706,6 +879,10 @@ function chatbot_chatgpt_settings_page() {
             } elseif ($active_tab == 'support') {
 
                 settings_fields('chatbot_chatgpt_support');
+
+                // Breadcrumb info line - Ver 2.4.1
+                $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
+                echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_support');

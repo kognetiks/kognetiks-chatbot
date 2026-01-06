@@ -1,12 +1,12 @@
 <?php
 /**
- * Kognetiks Analytics - Sentiment Analysis - Ver 1.0.0
+ * Kognetiks Insights - Sentiment Analysis - Ver 1.0.0
  *
  * This file contains the code for the Kognetiks Sentiment Analysis.
  * It handles the sentiment analysis of the conversation.
  * 
  * 
- * @package kognetiks-analytics
+ * @package kognetiks-insights
  */
 
 // If this file is called directly, abort.
@@ -15,62 +15,62 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Add status tracking option
-function kognetiks_analytics_get_scoring_status() {
+function kognetiks_insights_get_scoring_status() {
     
-    return get_option('kognetiks_analytics_scoring_status', 'stopped');
+    return get_option('kognetiks_insights_scoring_status', 'stopped');
 
 }
 
-function kognetiks_analytics_set_scoring_status($status) {
+function kognetiks_insights_set_scoring_status($status) {
 
-    update_option('kognetiks_analytics_scoring_status', $status);
+    update_option('kognetiks_insights_scoring_status', $status);
 
 }
 
 // Scoring lock helpers
-function kognetiks_analytics_is_scoring_locked() {
+function kognetiks_insights_is_scoring_locked() {
 
-    return get_option('kognetiks_analytics_scoring_lock', false) === '1';
+    return get_option('kognetiks_insights_scoring_lock', false) === '1';
 
 }
 
-function kognetiks_analytics_set_scoring_lock($locked = true) {
+function kognetiks_insights_set_scoring_lock($locked = true) {
 
-    update_option('kognetiks_analytics_scoring_lock', $locked ? '1' : '0');
+    update_option('kognetiks_insights_scoring_lock', $locked ? '1' : '0');
 
 }
 
 // Stop the scoring process
-function kognetiks_analytics_stop_scoring() {
+function kognetiks_insights_stop_scoring() {
 
-    kognetiks_analytics_set_scoring_status('stopped');
-    kognetiks_analytics_set_scoring_lock(false); // Clear lock on stop
+    kognetiks_insights_set_scoring_status('stopped');
+    kognetiks_insights_set_scoring_lock(false); // Clear lock on stop
     // back_trace( 'NOTICE', 'Sentiment scoring process stopped');
 
 }
 
 // Reset all sentiment scores
-function kognetiks_analytics_reset_scoring() {
+function kognetiks_insights_reset_scoring() {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
     // Reset all sentiment scores to NULL
     $wpdb->query("UPDATE $table_name SET sentiment_score = NULL WHERE user_type IN ('Visitor', 'Chatbot')");
-    kognetiks_analytics_set_scoring_lock(false); // Clear lock on reset
+    kognetiks_insights_set_scoring_lock(false); // Clear lock on reset
     // back_trace( 'NOTICE', 'All sentiment scores have been reset');
 
 }
 
 // Restart the scoring process
-function kognetiks_analytics_restart_scoring() {
+function kognetiks_insights_restart_scoring() {
 
-    kognetiks_analytics_set_scoring_status('running');
+    kognetiks_insights_set_scoring_status('running');
     // back_trace( 'NOTICE', 'Sentiment scoring process restarted');
 
 }
 
 // Score conversations without a sentiment score
-function kognetiks_analytics_score_conversations_without_sentiment_score() {
+function kognetiks_insights_score_conversations_without_sentiment_score() {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Starting simple sentiment scoring process');
@@ -80,24 +80,24 @@ function kognetiks_analytics_score_conversations_without_sentiment_score() {
     $batch_size = 100; // Process 100 records at a time
 
     // Get the last scoring date
-    $last_scoring_date = get_option('kognetiks_analytics_last_scoring_date');
+    $last_scoring_date = get_option('kognetiks_insights_last_scoring_date');
     $date_condition = '';
     if (!empty($last_scoring_date)) {
         $date_condition = $wpdb->prepare(" AND c.interaction_time >= %s", $last_scoring_date);
     }
 
     // Prevent concurrent runs
-    if (kognetiks_analytics_is_scoring_locked()) {
+    if (kognetiks_insights_is_scoring_locked()) {
         // back_trace( 'NOTICE', 'Scoring is already running. Exiting.');
         return;
     }
 
-    kognetiks_analytics_set_scoring_lock(true);
+    kognetiks_insights_set_scoring_lock(true);
 
     // Check if scoring is stopped
-    if (kognetiks_analytics_get_scoring_status() === 'stopped') {
+    if (kognetiks_insights_get_scoring_status() === 'stopped') {
         // back_trace( 'NOTICE', 'Sentiment scoring process is stopped');
-        kognetiks_analytics_set_scoring_lock(false);
+        kognetiks_insights_set_scoring_lock(false);
         return;
     }
 
@@ -110,7 +110,7 @@ function kognetiks_analytics_score_conversations_without_sentiment_score() {
 
     do {
         // Check if scoring has been stopped
-        if (kognetiks_analytics_get_scoring_status() === 'stopped') {
+        if (kognetiks_insights_get_scoring_status() === 'stopped') {
             // back_trace( 'NOTICE', 'Sentiment scoring process stopped after processing ' . $total_processed . ' conversations');
             break;
         }
@@ -140,12 +140,12 @@ function kognetiks_analytics_score_conversations_without_sentiment_score() {
 
         foreach ($conversations as $conversation) {
             // Check if scoring has been stopped
-            if (kognetiks_analytics_get_scoring_status() === 'stopped') {
+            if (kognetiks_insights_get_scoring_status() === 'stopped') {
                 break;
             }
 
             $message_text = $conversation['message_text'];
-            $sentiment_score = kognetiks_analytics_compute_sentiment_score($message_text);
+            $sentiment_score = kognetiks_insights_compute_sentiment_score($message_text);
 
             // Update the conversation with the sentiment score
             $wpdb->update(
@@ -173,11 +173,11 @@ function kognetiks_analytics_score_conversations_without_sentiment_score() {
     $wpdb->query("DROP TEMPORARY TABLE IF EXISTS $temp_table");
 
     // Set status to stopped when complete
-    kognetiks_analytics_set_scoring_status('stopped');
-    kognetiks_analytics_set_scoring_lock(false); // Clear lock at end
+    kognetiks_insights_set_scoring_status('stopped');
+    kognetiks_insights_set_scoring_lock(false); // Clear lock at end
 
     // Set the last scoring date/time in the options table
-    update_option('kognetiks_analytics_last_scoring_date', date('Y-m-d H:i:s'));
+    update_option('kognetiks_insights_last_scoring_date', date('Y-m-d H:i:s'));
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Completed scoring ' . $total_processed . ' conversations without a sentiment score');
@@ -188,7 +188,7 @@ function kognetiks_analytics_score_conversations_without_sentiment_score() {
 }
 
 // Score conversations without a sentiment score
-function kognetiks_analytics_score_conversations_without_sentiment_score_ai_based() {
+function kognetiks_insights_score_conversations_without_sentiment_score_ai_based() {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Starting AI-basedsentiment scoring process');
@@ -198,23 +198,23 @@ function kognetiks_analytics_score_conversations_without_sentiment_score_ai_base
     $batch_size = 100; // Process 100 records at a time
 
     // Get the last scoring date
-    $last_scoring_date = get_option('kognetiks_analytics_last_scoring_date');
+    $last_scoring_date = get_option('kognetiks_insights_last_scoring_date');
     $date_condition = '';
     if (!empty($last_scoring_date)) {
         $date_condition = $wpdb->prepare(" AND interaction_time >= %s", $last_scoring_date);
     }
 
     // Prevent concurrent runs
-    if (kognetiks_analytics_is_scoring_locked()) {
+    if (kognetiks_insights_is_scoring_locked()) {
         // back_trace( 'NOTICE', 'Scoring is already running. Exiting.');
         return;
     }
-    kognetiks_analytics_set_scoring_lock(true);
+    kognetiks_insights_set_scoring_lock(true);
 
     // Check if scoring is stopped
-    if (kognetiks_analytics_get_scoring_status() === 'stopped') {
+    if (kognetiks_insights_get_scoring_status() === 'stopped') {
         // back_trace( 'NOTICE', 'Sentiment scoring process is stopped');
-        kognetiks_analytics_set_scoring_lock(false);
+        kognetiks_insights_set_scoring_lock(false);
         return;
     }
 
@@ -234,21 +234,21 @@ function kognetiks_analytics_score_conversations_without_sentiment_score_ai_base
 
     // If there are no conversations to score, set the status to stopped
     if (empty($conversations)) {
-        kognetiks_analytics_set_scoring_status('stopped');
-        kognetiks_analytics_set_scoring_lock(false);
+        kognetiks_insights_set_scoring_status('stopped');
+        kognetiks_insights_set_scoring_lock(false);
         // back_trace( 'NOTICE', 'No conversations to score');
         return;
     }
 
     // If there are conversations to score, set the status to running
-    kognetiks_analytics_set_scoring_status('running');
+    kognetiks_insights_set_scoring_status('running');
 
     $total_processed = 0;
     $batch_number = 1;
 
     do {
         // Check if scoring has been stopped
-        if (kognetiks_analytics_get_scoring_status() === 'stopped') {
+        if (kognetiks_insights_get_scoring_status() === 'stopped') {
             // back_trace( 'NOTICE', 'Sentiment scoring process stopped after processing ' . $total_processed . ' conversations');
             break;
         }
@@ -272,13 +272,13 @@ function kognetiks_analytics_score_conversations_without_sentiment_score_ai_base
         }
         foreach ($conversations as $conversation) {
             // Check if scoring has been stopped
-            if (kognetiks_analytics_get_scoring_status() === 'stopped') {
+            if (kognetiks_insights_get_scoring_status() === 'stopped') {
                 break;
             }
             $message_text = $conversation['message_text'];
             $sentiment_score = $conversation['sentiment_score'];
             // Score the conversation using the sentiment analysis model
-            $sentiment_score = kognetiks_analytics_compute_sentiment_score_ai_based($message_text);
+            $sentiment_score = kognetiks_insights_compute_sentiment_score_ai_based($message_text);
             // Update the conversation with the sentiment score
             $wpdb->update(
                 $table_name,
@@ -295,8 +295,8 @@ function kognetiks_analytics_score_conversations_without_sentiment_score_ai_base
     } while (count($conversations) > 0);
 
     // Set status to stopped when complete
-    kognetiks_analytics_set_scoring_status('stopped');
-    kognetiks_analytics_set_scoring_lock(false); // Clear lock at end
+    kognetiks_insights_set_scoring_status('stopped');
+    kognetiks_insights_set_scoring_lock(false); // Clear lock at end
     
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Completed scoring ' . $total_processed . ' conversations without a sentiment score');
@@ -307,67 +307,67 @@ function kognetiks_analytics_score_conversations_without_sentiment_score_ai_base
 }
 
 // Get the scoring control mode (Manual/Automated)
-function kognetiks_analytics_get_scoring_control_mode() {
+function kognetiks_insights_get_scoring_control_mode() {
     
-    return get_option('kognetiks_analytics_scoring_control', 'Manual');
+    return get_option('kognetiks_insights_scoring_control', 'Manual');
 
 }
 
 // Schedule the automated scoring cron job
-function kognetiks_analytics_schedule_scoring_cron() {
+function kognetiks_insights_schedule_scoring_cron() {
 
-    if (!wp_next_scheduled('kognetiks_analytics_automated_scoring')) {
-        wp_schedule_event(time(), 'hourly', 'kognetiks_analytics_automated_scoring');
+    if (!wp_next_scheduled('kognetiks_insights_automated_scoring')) {
+        wp_schedule_event(time(), 'hourly', 'kognetiks_insights_automated_scoring');
         // back_trace( 'NOTICE', 'Automated scoring cron job scheduled');
     }
 
 }
 
 // Unschedule the automated scoring cron job
-function kognetiks_analytics_unschedule_scoring_cron() {
+function kognetiks_insights_unschedule_scoring_cron() {
 
-    $timestamp = wp_next_scheduled('kognetiks_analytics_automated_scoring');
+    $timestamp = wp_next_scheduled('kognetiks_insights_automated_scoring');
     if ($timestamp) {
-        wp_unschedule_event($timestamp, 'kognetiks_analytics_automated_scoring');
+        wp_unschedule_event($timestamp, 'kognetiks_insights_automated_scoring');
         // back_trace( 'NOTICE', 'Automated scoring cron job unscheduled');
     }
 
 }
 
 // Cron job callback function
-function kognetiks_analytics_automated_scoring_callback() {
+function kognetiks_insights_automated_scoring_callback() {
 
     // Only run if scoring control is set to Automated
-    if (kognetiks_analytics_get_scoring_control_mode() === 'Automated') {
+    if (kognetiks_insights_get_scoring_control_mode() === 'Automated') {
         // back_trace( 'NOTICE', 'Running automated scoring cron job');
-        kognetiks_analytics_score_conversations_without_sentiment_score();
+        kognetiks_insights_score_conversations_without_sentiment_score();
     } else {
         // If somehow the cron job is still running but mode is Manual, unschedule it
-        kognetiks_analytics_unschedule_scoring_cron();
+        kognetiks_insights_unschedule_scoring_cron();
     }
 
 }
-add_action('kognetiks_analytics_automated_scoring', 'kognetiks_analytics_automated_scoring_callback');
+add_action('kognetiks_insights_automated_scoring', 'kognetiks_insights_automated_scoring_callback');
 
 // Set the scoring control mode (Manual/Automated)
-function kognetiks_analytics_set_scoring_control_mode($mode) {
+function kognetiks_insights_set_scoring_control_mode($mode) {
 
     if (!in_array($mode, ['Manual', 'Automated'])) {
         return false;
     }
 
-    $current_mode = kognetiks_analytics_get_scoring_control_mode();
+    $current_mode = kognetiks_insights_get_scoring_control_mode();
     
     // Update the option in the database
-    update_option('kognetiks_analytics_scoring_control', $mode);
+    update_option('kognetiks_insights_scoring_control', $mode);
 
     // Handle cron job based on mode change
     if ($mode === 'Automated' && $current_mode !== 'Automated') {
         // Switching to Automated - schedule the cron job
-        kognetiks_analytics_schedule_scoring_cron();
+        kognetiks_insights_schedule_scoring_cron();
     } elseif ($mode === 'Manual' && $current_mode !== 'Manual') {
         // Switching to Manual - unschedule the cron job
-        kognetiks_analytics_unschedule_scoring_cron();
+        kognetiks_insights_unschedule_scoring_cron();
     }
 
     return true;
@@ -375,24 +375,24 @@ function kognetiks_analytics_set_scoring_control_mode($mode) {
 }
 
 // Cleanup function to unschedule cron job on plugin deactivation
-function kognetiks_analytics_deactivate() {
+function kognetiks_insights_deactivate() {
 
-    kognetiks_analytics_unschedule_scoring_cron();
+    kognetiks_insights_unschedule_scoring_cron();
 
 }
-register_deactivation_hook(__FILE__, 'kognetiks_analytics_deactivate');
+register_deactivation_hook(__FILE__, 'kognetiks_insights_deactivate');
 
 // Wrapper function to compute sentiment score using either simple or AI-based method
-function kognetiks_analytics_compute_sentiment_score($message_text) {
+function kognetiks_insights_compute_sentiment_score($message_text) {
 
     // Get the scoring method from options
-    $scoring_method = get_option('kognetiks_analytics_scoring_method', 'simple');
+    $scoring_method = get_option('kognetiks_insights_scoring_method', 'simple');
     
     if ($scoring_method === 'ai_based') {
         // FIXME - AI-based scoring is future functionality
-        // $score = kognetiks_analytics_compute_sentiment_score_ai_based($message_text);
+        // $score = kognetiks_insights_compute_sentiment_score_ai_based($message_text);
     } else {
-        $score = kognetiks_analytics_compute_sentiment_score_simple($message_text);
+        $score = kognetiks_insights_compute_sentiment_score_simple($message_text);
     }
     
     // Format score to one decimal place using standard rounding
@@ -401,7 +401,7 @@ function kognetiks_analytics_compute_sentiment_score($message_text) {
 }
 
 // Compute the sentiment score for a message using a simple algorithm
-function kognetiks_analytics_compute_sentiment_score_simple($message_text) {
+function kognetiks_insights_compute_sentiment_score_simple($message_text) {
 
     global $sentiment_words, $negator_words, $intensifier_words;
     
@@ -455,7 +455,7 @@ function kognetiks_analytics_compute_sentiment_score_simple($message_text) {
 }   
 
 // Compute the sentiment score for a message using an AI model
-function kognetiks_analytics_compute_sentiment_score_ai_based($message_text) {
+function kognetiks_insights_compute_sentiment_score_ai_based($message_text) {
 
     // DIAG - Diagnostics
     // back_trace( 'NOTICE', 'Analyzing sentiment of message: ' . $message_text);
@@ -505,56 +505,56 @@ function kognetiks_analytics_compute_sentiment_score_ai_based($message_text) {
             // Decrypt the API Key
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             // Call OpenAI API
-            $sentiment_score = kognetiks_analytics_openai_api_call($api_key, $sentiment_prompt . $message_text);
+            $sentiment_score = kognetiks_insights_openai_api_call($api_key, $sentiment_prompt . $message_text);
             break;
         case 'Anthropic':
             $api_key = get_option('chatbot_anthropic_api_key');
             // Decrypt the API Key
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             // Call Anthropic API
-            $sentiment_score = kognetiks_analytics_anthropic_api_call($api_key, $sentiment_prompt . $message_text);
+            $sentiment_score = kognetiks_insights_anthropic_api_call($api_key, $sentiment_prompt . $message_text);
             break;
         case 'Azure OpenAI':
             $api_key = get_option('chatbot_azure_api_key');
             // Decrypt the API Key
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             // Call Azure OpenAI API
-            $sentiment_score = kognetiks_analytics_azure_api_call($api_key, $sentiment_prompt . $message_text);
+            $sentiment_score = kognetiks_insights_azure_api_call($api_key, $sentiment_prompt . $message_text);
             break;
         case 'Google':
             $api_key = get_option('chatbot_google_api_key');
             // Decrypt the API Key
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             // Call Google API
-            $sentiment_score = kognetiks_analytics_google_api_call($api_key, $sentiment_prompt . $message_text);
+            $sentiment_score = kognetiks_insights_google_api_call($api_key, $sentiment_prompt . $message_text);
             break;
         case 'DeepSeek':
             $api_key = get_option('chatbot_deepseek_api_key');
             // Decrypt the API Key
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             // Call DeepSeek API
-            $sentiment_score = kognetiks_analytics_deepseek_api_call($api_key, $sentiment_prompt . $message_text);
+            $sentiment_score = kognetiks_insights_deepseek_api_call($api_key, $sentiment_prompt . $message_text);
             break;
         case 'Mistral':
             $api_key = get_option('chatbot_mistral_api_key');
             // Decrypt the API Key
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             // Call Mistral API
-            $sentiment_score = kognetiks_analytics_mistral_api_call($api_key, $sentiment_prompt . $message_text);
+            $sentiment_score = kognetiks_insights_mistral_api_call($api_key, $sentiment_prompt . $message_text);
             break;
         case 'NVIDIA':
             $api_key = get_option('chatbot_nvidia_api_key');
             // Decrypt the API Key
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             // Call NVIDIA API
-            $sentiment_score = kognetiks_analytics_nvidia_api_call($api_key, $sentiment_prompt . $message_text);
+            $sentiment_score = kognetiks_insights_nvidia_api_call($api_key, $sentiment_prompt . $message_text);
             break;
         case 'Local Server':
             $api_key = get_option('chatbot_local_server_api_key');
             // Decrypt the API Key
             $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
             // Call the Local Server API
-            $sentiment_score = kognetiks_analytics_local_api_call($api_key, $sentiment_prompt . $message_text);
+            $sentiment_score = kognetiks_insights_local_api_call($api_key, $sentiment_prompt . $message_text);
             break;
         default:
             // If no platform is selected, return neutral sentiment

@@ -1,12 +1,12 @@
 <?php
 /**
- * Kognetiks Analytics - Analytics Settings - Ver 1.0.0
+ * Kognetiks Insights - Insights Settings - Ver 1.0.0
  *
- * This file contains the code for the Kognetiks Analytics settings page.
+ * This file contains the code for the Kognetiks Insights settings page.
  * 
  * 
  * 
- * @package kognetiks-analytics
+ * @package kognetiks-insights
  */
 
 // If this file is called directly, abort.
@@ -15,21 +15,21 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Settings Page
-function kognetiks_analytics_settings_page() {
+function kognetiks_insights_settings_page() {
     
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Kognetiks Analytics Settings Page Loaded');
+    // back_trace( 'NOTICE', 'Kognetiks Insights Settings Page Loaded');
 
     // Determine active tab
-    $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'analytics';
+    $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'insights';
 
     // Tab navigation UI and page wrapper
-    echo '<div class="wrap" id="kognetiks-analytics">';
-    echo '<h1><span class="dashicons dashicons-chart-bar" style="font-size: 25px;"></span> Kognetiks Analytics</h1>';
-    echo '<p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Analytics and additional documentation please click <a href="?page=chatbot-chatgpt&file=analytics-package.md&tab=support&dir=analytics-package">here</a>.</b></p>';
+    echo '<div class="wrap" id="kognetiks-insights">';
+    echo '<h1><span class="dashicons dashicons-chart-bar" style="font-size: 25px;"></span> Kognetiks Insights</h1>';
+    echo '<p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use Insights and additional documentation please click <a href="?page=chatbot-chatgpt&file=insights-package.md&tab=support&dir=insights-package">here</a>.</b></p>';
     
     // Determine if the last scoring date/time is earlier than the current date/time, if so, then start the scoring process, else exit
-    $last_scoring_date = get_option('kognetiks_analytics_last_scoring_date');
+    $last_scoring_date = get_option('kognetiks_insights_last_scoring_date');
     $last_scoring_timestamp = strtotime($last_scoring_date);
     $current_timestamp = time();
 
@@ -46,24 +46,24 @@ function kognetiks_analytics_settings_page() {
     }
 
     // Tab content
-    if ($active_tab === 'analytics') {
+    if ($active_tab === 'insights') {
         // Handle scoring control actions
         if (isset($_POST['kap_scoring_action'])) {
             $action = $_POST['kap_scoring_action'];
-            if ($action === 'start' && isset($_POST['kognetiks_analytics_scoring_start_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_start_nonce'])), 'kognetiks_analytics_scoring_start')) {
+            if ($action === 'start' && isset($_POST['kognetiks_insights_scoring_start_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_insights_scoring_start_nonce'])), 'kognetiks_insights_scoring_start')) {
                 // back_trace( 'NOTICE', 'Starting scoring process');
-                kognetiks_analytics_start_scoring();
-                kognetiks_analytics_score_conversations_without_sentiment_score();
-            } elseif ($action === 'stop' && isset($_POST['kognetiks_analytics_scoring_stop_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_stop_nonce'])), 'kognetiks_analytics_scoring_stop')) {
+                kognetiks_insights_start_scoring();
+                kognetiks_insights_score_conversations_without_sentiment_score();
+            } elseif ($action === 'stop' && isset($_POST['kognetiks_insights_scoring_stop_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_insights_scoring_stop_nonce'])), 'kognetiks_insights_scoring_stop')) {
                 // back_trace( 'NOTICE', 'Stopping scoring process');
-                kognetiks_analytics_stop_scoring();
-            } elseif ($action === 'restart' && isset($_POST['kognetiks_analytics_scoring_restart_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_restart_nonce'])), 'kognetiks_analytics_scoring_restart')) {
+                kognetiks_insights_stop_scoring();
+            } elseif ($action === 'restart' && isset($_POST['kognetiks_insights_scoring_restart_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_insights_scoring_restart_nonce'])), 'kognetiks_insights_scoring_restart')) {
                 // back_trace( 'NOTICE', 'Restarting scoring process');
-                kognetiks_analytics_restart_scoring();
-                kognetiks_analytics_score_conversations_without_sentiment_score();
-            } elseif ($action === 'reset' && isset($_POST['kognetiks_analytics_scoring_reset_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_reset_nonce'])), 'kognetiks_analytics_scoring_reset')) {
+                kognetiks_insights_restart_scoring();
+                kognetiks_insights_score_conversations_without_sentiment_score();
+            } elseif ($action === 'reset' && isset($_POST['kognetiks_insights_scoring_reset_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_insights_scoring_reset_nonce'])), 'kognetiks_insights_scoring_reset')) {
                 // back_trace( 'NOTICE', 'Resetting scoring process');
-                kognetiks_analytics_reset_scoring();
+                kognetiks_insights_reset_scoring();
             }
             echo '<script>location.reload();</script>';
             exit;
@@ -79,7 +79,7 @@ function kognetiks_analytics_settings_page() {
             ?>
             <div class="notice notice-warning" style="padding: 20px; margin: 20px 0;">
                 <h2 style="margin-top: 0;">⚠️ Conversation Logging Required</h2>
-                <p>To use Kognetiks Analytics, you need to enable conversation logging in the Kognetiks Chatbot settings.</p>
+                <p>To use Kognetiks Insights, you need to enable conversation logging in the Kognetiks Chatbot settings.</p>
                 <p>Please follow these steps:</p>
                 <ol>
                     <li>Go to <a href="<?php echo esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=reporting')); ?>">Kognetiks Chatbot Settings</a></li>
@@ -88,7 +88,7 @@ function kognetiks_analytics_settings_page() {
                     <li>Choose the "Conversation Log Days to Keep" option to the number of days you want to keep the conversation logs (default is 30 days)</li>
                     <li>Save your changes by scrolling to the bottom of the page and clicking the "Save Changes" button</li>
                 </ol>
-                <p>Once conversation logging is enabled, you'll be able to view analytics data here.</p>
+                <p>Once conversation logging is enabled, you'll be able to view insights data here.</p>
             </div>
             <?php
             return;
@@ -101,14 +101,14 @@ function kognetiks_analytics_settings_page() {
 
         // Verify nonce for period filter form submission
         if (
-            isset($_POST['chatbot_chatgpt_analytics_period_filter_nonce']) &&
+            isset($_POST['chatbot_chatgpt_insights_period_filter_nonce']) &&
             wp_verify_nonce(
-                sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter_nonce'])),
-                'chatbot_chatgpt_analytics_period_filter_action'
+                sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_insights_period_filter_nonce'])),
+                'chatbot_chatgpt_insights_period_filter_action'
             )
         ) {
-            $selected_period = isset($_POST['chatbot_chatgpt_analytics_period_filter'])
-                ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_analytics_period_filter']))
+            $selected_period = isset($_POST['chatbot_chatgpt_insights_period_filter'])
+                ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_insights_period_filter']))
                 : 'Today';
         } else {
             $selected_period = get_transient('chatbot_chatgpt_selected_period');
@@ -118,49 +118,49 @@ function kognetiks_analytics_settings_page() {
         }
 
         // Verify nonce for user type filter form submission
-        if (isset($_POST['kognetiks_analytics_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_nonce'])), 'kognetiks_analytics_user_type_filter')) {
+        if (isset($_POST['kognetiks_insights_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_insights_nonce'])), 'kognetiks_insights_user_type_filter')) {
             // Get the selected user type from the form submission
-            $selected_user_type = isset($_POST['kognetiks_analytics_user_type_filter']) ? sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_user_type_filter'])) : 'All';
+            $selected_user_type = isset($_POST['kognetiks_insights_user_type_filter']) ? sanitize_text_field(wp_unslash($_POST['kognetiks_insights_user_type_filter'])) : 'All';
         } else {
             $selected_user_type = 'All';
         }
 
         // Verify nonce for scoring control form submission
-        if (isset($_POST['kognetiks_analytics_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_nonce'])), 'kognetiks_analytics_scoring_control')) {
+        if (isset($_POST['kognetiks_insights_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['kognetiks_insights_nonce'])), 'kognetiks_insights_scoring_control')) {
             // Get the selected scoring control from the form submission
-            $selected_scoring_control = isset($_POST['kognetiks_analytics_scoring_control']) ? sanitize_text_field(wp_unslash($_POST['kognetiks_analytics_scoring_control'])) : 'Manual';
+            $selected_scoring_control = isset($_POST['kognetiks_insights_scoring_control']) ? sanitize_text_field(wp_unslash($_POST['kognetiks_insights_scoring_control'])) : 'Manual';
             // Update the option in the database
-            kognetiks_analytics_set_scoring_control_mode($selected_scoring_control);
+            kognetiks_insights_set_scoring_control_mode($selected_scoring_control);
             // DIAG - Diagnostics
             // back_trace( 'NOTICE', 'Scoring control mode updated to: ' . $selected_scoring_control);
         } else {
             // Get the current scoring control mode from the database
-            $selected_scoring_control = kognetiks_analytics_get_scoring_control_mode();
+            $selected_scoring_control = kognetiks_insights_get_scoring_control_mode();
         }
 
         // Get all statistics
-        $time_based_counts = kognetiks_analytics_get_time_based_conversation_counts($selected_period, $selected_user_type);
-        $message_stats = kognetiks_analytics_get_message_statistics($selected_period, $selected_user_type);
-        $visitor_stats = kognetiks_analytics_get_visitor_statistics($selected_period, $selected_user_type);
-        $session_stats = kognetiks_analytics_get_session_statistics($selected_period, $selected_user_type);
-        $token_stats = kognetiks_analytics_get_token_statistics($selected_period, $selected_user_type);
-        $engagement_stats = kognetiks_analytics_get_engagement_statistics($selected_period, $selected_user_type);
-        $sentiment_stats = kognetiks_analytics_get_sentiment_statistics($selected_period, $selected_user_type);
+        $time_based_counts = kognetiks_insights_get_time_based_conversation_counts($selected_period, $selected_user_type);
+        $message_stats = kognetiks_insights_get_message_statistics($selected_period, $selected_user_type);
+        $visitor_stats = kognetiks_insights_get_visitor_statistics($selected_period, $selected_user_type);
+        $session_stats = kognetiks_insights_get_session_statistics($selected_period, $selected_user_type);
+        $token_stats = kognetiks_insights_get_token_statistics($selected_period, $selected_user_type);
+        $engagement_stats = kognetiks_insights_get_engagement_statistics($selected_period, $selected_user_type);
+        $sentiment_stats = kognetiks_insights_get_sentiment_statistics($selected_period, $selected_user_type);
 
         ?>
-        <div class="analytics-container">
+        <div class="insights-container">
             <!-- Period Filter and Scoring Controls -->
-            <div class="analytics-header-grid" style="display: grid; grid-template-columns: 220px 140px 140px 320px; gap: 16px; align-items: end; margin-bottom: 2px;">
+            <div class="insights-header-grid" style="display: grid; grid-template-columns: 220px 140px 140px 320px; gap: 16px; align-items: end; margin-bottom: 2px;">
                 <span style="font-weight: bold; color: #1d2327;">Period</span>
                 <span style="font-weight: bold; color: #1d2327;">Type</span>
                 <span style="font-weight: bold; color: #1d2327;">Scoring</span>
                 <span style="font-weight: bold; color: #1d2327;">Manual Controls</span>
             </div>
-            <div class="analytics-controls-grid" style="display: grid; grid-template-columns: 220px 140px 140px 320px; gap: 16px; align-items: center; height: 50px; margin-bottom: 16px;">
+            <div class="insights-controls-grid" style="display: grid; grid-template-columns: 220px 140px 140px 320px; gap: 16px; align-items: center; height: 50px; margin-bottom: 16px;">
                 <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=chatbot-chatgpt')); ?>" class="period-filter-form" style="margin-bottom: 0; min-width: 220px;">
-                    <?php wp_nonce_field('chatbot_chatgpt_analytics_period_filter_action', 'chatbot_chatgpt_analytics_period_filter_nonce'); ?>
-                    <input type="hidden" name="chatbot_chatgpt_analytics_action" value="period_filter" />
-                    <select name="chatbot_chatgpt_analytics_period_filter" id="chatbot_chatgpt_analytics_period_filter" onchange="this.form.submit()" style="width: 100%;">
+                    <?php wp_nonce_field('chatbot_chatgpt_insights_period_filter_action', 'chatbot_chatgpt_insights_period_filter_nonce'); ?>
+                    <input type="hidden" name="chatbot_chatgpt_insights_action" value="period_filter" />
+                    <select name="chatbot_chatgpt_insights_period_filter" id="chatbot_chatgpt_insights_period_filter" onchange="this.form.submit()" style="width: 100%;">
                         <option value="Today" <?php selected($selected_period, 'Today'); ?>>Today vs Yesterday</option>
                         <option value="Week" <?php selected($selected_period, 'Week'); ?>>This Week vs Last Week</option>
                         <option value="Month" <?php selected($selected_period, 'Month'); ?>>This Month vs Last Month</option>
@@ -169,41 +169,41 @@ function kognetiks_analytics_settings_page() {
                     </select>
                 </form>
                 <form method="post" action="" class="user-type-filter-form" style="margin-bottom: 20; min-width: 120px;">
-                    <?php wp_nonce_field('kognetiks_analytics_user_type_filter', 'kognetiks_analytics_nonce'); ?>
-                    <select name="kognetiks_analytics_user_type_filter" id="kognetiks_analytics_user_type_filter" onchange="this.form.submit()" style="width: 100%;">
+                    <?php wp_nonce_field('kognetiks_insights_user_type_filter', 'kognetiks_insights_nonce'); ?>
+                    <select name="kognetiks_insights_user_type_filter" id="kognetiks_insights_user_type_filter" onchange="this.form.submit()" style="width: 100%;">
                         <option value="All" <?php selected($selected_user_type, 'All'); ?>>All</option>
                         <option value="Visitor" <?php selected($selected_user_type, 'Visitor'); ?>>Visitor</option>
                         <option value="Chatbot" <?php selected($selected_user_type, 'Chatbot'); ?>>Chatbot</option>
                     </select>
                 </form>
                 <form method="post" action="" class="scoring-control-form" style="margin-bottom: 20; min-width: 120px;">
-                    <?php wp_nonce_field('kognetiks_analytics_scoring_control', 'kognetiks_analytics_nonce'); ?>
-                    <select name="kognetiks_analytics_scoring_control" id="kognetiks_analytics_scoring_control" onchange="this.form.submit()" style="width: 100%;">
+                    <?php wp_nonce_field('kognetiks_insights_scoring_control', 'kognetiks_insights_nonce'); ?>
+                    <select name="kognetiks_insights_scoring_control" id="kognetiks_insights_scoring_control" onchange="this.form.submit()" style="width: 100%;">
                         <option value="Manual" <?php selected($selected_scoring_control, 'Manual'); ?>>Manual</option>
                         <option value="Automated" <?php selected($selected_scoring_control, 'Automated'); ?>>Automated</option>
                     </select>
                 </form>
                 <div style="display: flex; gap: 8px; min-width: 320px;">
                     <form method="post" style="display:inline; margin-bottom: 0;">
-                        <?php wp_nonce_field('kognetiks_analytics_scoring_start', 'kognetiks_analytics_scoring_start_nonce'); ?>
+                        <?php wp_nonce_field('kognetiks_insights_scoring_start', 'kognetiks_insights_scoring_start_nonce'); ?>
                         <button type="submit" name="kap_scoring_action" value="start" class="button button-primary">Start</button>
                     </form>
                     <form method="post" style="display:inline; margin-bottom: 0;">
-                        <?php wp_nonce_field('kognetiks_analytics_scoring_stop', 'kognetiks_analytics_scoring_stop_nonce'); ?>
+                        <?php wp_nonce_field('kognetiks_insights_scoring_stop', 'kognetiks_insights_scoring_stop_nonce'); ?>
                         <button type="submit" name="kap_scoring_action" value="stop" class="button">Stop</button>
                     </form>
                     <form method="post" style="display:inline; margin-bottom: 0;">
-                        <?php wp_nonce_field('kognetiks_analytics_scoring_restart', 'kognetiks_analytics_scoring_restart_nonce'); ?>
+                        <?php wp_nonce_field('kognetiks_insights_scoring_restart', 'kognetiks_insights_scoring_restart_nonce'); ?>
                         <button type="submit" name="kap_scoring_action" value="restart" class="button">Restart</button>
                     </form>
                     <form method="post" style="display:inline; margin-bottom: 0;">
-                        <?php wp_nonce_field('kognetiks_analytics_scoring_reset', 'kognetiks_analytics_scoring_reset_nonce'); ?>
+                        <?php wp_nonce_field('kognetiks_insights_scoring_reset', 'kognetiks_insights_scoring_reset_nonce'); ?>
                         <button type="submit" name="kap_scoring_action" value="reset" class="button">Reset</button>
                     </form>
                 </div>
             </div>
 
-            <div class="analytics-container">
+            <div class="insights-container">
                 <!-- Section Header -->
                 <div class="section-header">
                     <h2>📊 Conversation Statistics</h2>
@@ -211,7 +211,7 @@ function kognetiks_analytics_settings_page() {
                 </div>
 
                 <!-- Conversation Statistics -->
-                <div class="analytics-section">
+                <div class="insights-section">
                     <h3>Overview</h3>
                     <div class="stats-grid">
                         <div class="stat-box">
@@ -269,14 +269,14 @@ function kognetiks_analytics_settings_page() {
                     </div>
                 </div>
 
-                <!-- Conversation Quality Analysis -->
+                <!-- Conversation Quality Insights -->
                 <div class="section-header">
-                    <h2>🧠 Conversation Quality Analysis</h2>
+                    <h2>🧠 Conversation Quality Insights</h2>
                     <p class="section-description">Insights into the effectiveness and sentiment of chatbot interactions.</p>
                 </div>
 
-                <div class="analytics-section">
-                    <h3>Sentiment Analysis</h3>
+                <div class="insights-section">
+                    <h3>Sentiment Insights</h3>
                     <div class="stats-grid">
                         <div class="stat-box">
                             <h3>Average Sentiment Score</h3>
@@ -333,8 +333,8 @@ function kognetiks_analytics_settings_page() {
                     </div>
                 </div>
 
-                <div class="analytics-section">
-                    <h3>Engagement Analysis</h3>
+                <div class="insights-section">
+                    <h3>Engagement Insights</h3>
                     <div class="stats-grid">
                         <div class="stat-box">
                             <h3>High Engagement Rate</h3>
@@ -392,7 +392,7 @@ function kognetiks_analytics_settings_page() {
                 </div>
 
                 <!-- Message Statistics -->
-                <div class="analytics-section">
+                <div class="insights-section">
                     <h2>Message Statistics</h2>
                     <div class="stats-grid">
                         <div class="stat-box">
@@ -477,7 +477,7 @@ function kognetiks_analytics_settings_page() {
                 </div>
 
                 <!-- Session Statistics -->
-                <div class="analytics-section">
+                <div class="insights-section">
                     <h2>Session Statistics</h2>
                     <div class="stats-grid">
                         <div class="stat-box">
@@ -510,7 +510,7 @@ function kognetiks_analytics_settings_page() {
                 </div>
 
                 <!-- Token Usage Statistics -->
-                <div class="analytics-section">
+                <div class="insights-section">
                     <h2>Token Usage Statistics</h2>
                     <div class="stats-grid">
                         <div class="stat-box">
@@ -544,7 +544,7 @@ function kognetiks_analytics_settings_page() {
             </div>
 
             <style>
-                .analytics-container {
+                .insights-container {
                     max-width: 1200px;
                     margin: 20px 0;
                 }
@@ -586,7 +586,7 @@ function kognetiks_analytics_settings_page() {
                 .scoring-control-form select {
                     vertical-align: middle;
                 }
-                .analytics-section {
+                .insights-section {
                     background: #fff;
                     padding: 20px;
                     margin-bottom: 20px;
@@ -718,12 +718,12 @@ function kognetiks_analytics_settings_page() {
 }
 
 // Function to start the scoring process
-function kognetiks_analytics_start_scoring() {
+function kognetiks_insights_start_scoring() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Kognetiks Analytics Start Scoring Function Loaded');
+    // back_trace( 'NOTICE', 'Kognetiks Insights Start Scoring Function Loaded');
 
-    kognetiks_analytics_set_scoring_status('running');
+    kognetiks_insights_set_scoring_status('running');
     // back_trace( 'NOTICE', 'Sentiment scoring process started');
 
 }

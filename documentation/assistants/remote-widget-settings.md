@@ -28,7 +28,7 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
 
     For example:
 
-    `
+    ```
     <iframe
         id="chatbot-widget-iframe"
         src="https://localhost/wpdev/wp-content/plugins/chatbot-chatgpt/widgets/chatbot-widget-endpoint.php?assistant=assistant-21"
@@ -55,7 +55,7 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
             document.getElementById("chatbot-widget-iframe").contentWindow.postMessage("resize", "*");
         });
     </script>
-    `
+    ```
 
     **NOTE**: Be sure to substitute your `domain name` for `localhost` in the above examples.
 
