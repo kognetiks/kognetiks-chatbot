@@ -6,6 +6,9 @@ assets/js/
 
 # Exclude vendor dependencies (already scanned by Snyk separately)
 vendor/
+vendor/**
+vendor/freemius/
+vendor/freemius/**
 
 # Exclude log files
 chatbot-logs/
