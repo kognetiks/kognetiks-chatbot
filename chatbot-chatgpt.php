@@ -21,6 +21,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Kognetiks Chatbot. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  * 
+ * @package chatbot-chatgpt
+ * @version 2.4.1
+ * @author Kognetiks.com
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -49,7 +52,7 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
                     'slug'                => 'chatbot-chatgpt',
                     'type'                => 'plugin',
                     'public_key'          => 'pk_ea667ce516b3acd5d3756a0c2530b',
-                    'is_premium'          => true,
+                    'is_premium'          => false,
                     'has_premium_version' => true,
                     'premium_suffix'      => 'Premium',
                     'has_paid_plans'      => true,
