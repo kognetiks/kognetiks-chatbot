@@ -315,6 +315,7 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
         <div class="kchat-email-card" id="kchat-digest-card" data-enabled="<?php echo esc_attr($digest_enabled); ?>">
             <h3>Conversation Digest</h3>
             <p class="description">Receive periodic summaries of new chatbot conversations. Great for monitoring new activity.</p>
+            <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Conversation Digest report please click <a href="?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=conversation-digest-email.md">here</a>.</b></p>
             
             <div class="settings-row">
                 <label for="chatbot_chatgpt_conversation_digest_enabled">Enabled</label>
@@ -359,6 +360,7 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
         <div class="kchat-email-card" id="kchat-insights-card" data-enabled="<?php echo esc_attr($insights_enabled); ?>">
             <h3>Proof of Value Reports</h3>
             <p class="description">Automated reports that show chatbot impact, trends, and actionable insights. Designed to help you measure ROI and improve performance.</p>
+            <p style="background-color: #e0f7fa; padding: 10px;"><b>For an explanation on how to use the Proof of Value report please click <a href="?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=proof-of-value-reports-email.md">here</a>.</b></p>
             
             <div class="settings-row">
                 <label for="chatbot_chatgpt_insights_email_enabled">Enabled</label>

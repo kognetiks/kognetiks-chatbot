@@ -222,10 +222,20 @@ function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcr
     // Prepare the request body
     $body = array(
         'model'       => $model,
-        'max_tokens'  => $max_tokens,
-        'temperature' => 0.5,
         'messages'    => $messages
     );
+    
+    // Only add temperature if the model supports it
+    if (!chatbot_openai_doesnt_support_temperature($model)) {
+        $body['temperature'] = 0.5;
+    }
+    
+    // Use max_completion_tokens for newer models, max_tokens for older models
+    if (chatbot_openai_requires_max_completion_tokens($model)) {
+        $body['max_completion_tokens'] = $max_tokens;
+    } else {
+        $body['max_tokens'] = $max_tokens;
+    }
 
     // Convert the body array to JSON
     $body_string = wp_json_encode($body);

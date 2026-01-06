@@ -97,7 +97,7 @@ The plugin uses WordPress shortcodes for easy integration:
 
 **Advanced Shortcodes:**
 - `[chatbot style="floating" model="gpt-4"]` - Specific AI model
-- `[chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]` - Custom assistant by ID
+- ```[chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` - Custom assistant by ID
 - `[chatbot style="embedded" assistant="primary"]` - Use primary assistant
 - `[chatbot style="embedded" assistant="alternate"]` - Use alternate assistant
 - `[chatbot style="floating" audience="logged-in"]` - Audience targeting (all, logged-in, visitors)

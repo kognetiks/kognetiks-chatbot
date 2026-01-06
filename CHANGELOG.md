@@ -434,8 +434,8 @@
 
 ## 1.7.3 - Released 2024-01-01
 * Added support for unlimited Assistants in addition to 'original', 'primary' and 'alternate' shortcode parameters.
-* Use [chatbot style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for floating Assistants.
-* Use [chatbot style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for embedded Assistants.
+* Use ```[chatbot style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` for floating Assistants.
+* Use ```[chatbot style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` for embedded Assistants.
 * Moved hard coded css from .js to the .css file for floating wide/narrow and embedded styling.
 * Fixed Updating Failed JSON error when editing pages where the Chatbot shortcode appears.
 

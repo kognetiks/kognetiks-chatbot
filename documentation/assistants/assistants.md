@@ -197,9 +197,9 @@ Use the following format to invoke the primary or alternate assistant:
 
 *-* `[chatbot style="embedded" assistant="alternate"]` - Embedded style, Assistant as set in Alternate setting
 
-*-* `[chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]` - Floating style, Assistant as set in Assistant ID setting
+*-* ```[chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` - Floating style, Assistant as set in Assistant ID setting
 
-*-* `[chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]` - Embedded style, Assistant as set in Assistant ID setting
+*-* ```[chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` - Embedded style, Assistant as set in Assistant ID setting
 Mix and match the style and assistant attributes to suit your needs.
 
 **NOTE**: When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.
@@ -214,19 +214,19 @@ Mix and match the style and assistant attributes to suit your needs.
 
 *-* **Audience Shortcode Parameter**: Use the 'audience' parameter to target specific user groups:
 
-  - `[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="all"]` - Available to all users.
+  - ```[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="all"]``` - Available to all users.
 
-  - `[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="logged-in"]` - Available only to logged-in users.
+  - ```[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="logged-in"]``` - Available only to logged-in users.
 
-  - `[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="visitors"]` - Available only to visitors.
+  - ```[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="visitors"]``` - Available only to visitors.
 
   or
 
-  - `[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="all"]` - Available to all users.
+  - ```[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="all"]``` - Available to all users.
 
-  - `[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="logged-in"]` - Available only to logged-in users.
+  - ```[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="logged-in"]``` - Available only to logged-in users.
 
-  - `[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="visitors"]` - Available only to visitors.
+  - ```[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="visitors"]``` - Available only to visitors.
 
 By configuring these settings, you ensure that your Kognetiks Chatbot can effectively utilize the Assistant to provide personalized and contextually aware interactions for your users.
 

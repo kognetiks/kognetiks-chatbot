@@ -130,13 +130,23 @@ function kchat_fetch_api_status($api_key, $model) {
 
             $body = array(
                 'model' => $model,
-                'max_tokens' => 100,
-                'temperature' => 0.5,
                 'messages' => array(
                     array('role' => 'system', 'content' => 'You are a test function for Chat.'),
                     array('role' => 'user', 'content' => $test_message)
                 ),
             );
+            
+            // Only add temperature if the model supports it
+            if (!chatbot_openai_doesnt_support_temperature($model)) {
+                $body['temperature'] = 0.5;
+            }
+            
+            // Use max_completion_tokens for newer models, max_tokens for older models
+            if (chatbot_openai_requires_max_completion_tokens($model)) {
+                $body['max_completion_tokens'] = 100;
+            } else {
+                $body['max_tokens'] = 100;
+            }
 
             // DIAG - Diagnostics - Ver 2.1.8
             // back_trace( 'NOTICE', 'API Body: ' . print_r(json_encode($body),true));
