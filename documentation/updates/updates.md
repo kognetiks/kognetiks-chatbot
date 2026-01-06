@@ -21,6 +21,7 @@
 * Fixed unscheduling of automated emails when disabled
 * Corrected footer content for free and premium tiers in Proof of Value reports
 * Removed redundant sections from Proof of Value reporting
+
 ## What's new in Version 2.4.0
 
 ### New Features
