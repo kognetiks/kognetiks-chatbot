@@ -69,6 +69,6 @@ LOCAL-AI MODEL.md
 *.old
 
 # Ignore third-party vendor libraries
-vendor/
+# vendor/
 
 
