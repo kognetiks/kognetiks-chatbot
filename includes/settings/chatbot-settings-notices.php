@@ -238,9 +238,15 @@ function chatbot_chatgpt_reporting_notice() {
         return;
     }
     
-    // Suppress notice for Premium users
-    if (chatbot_chatgpt_user_is_premium()) {
-        return;
+    // Suppress notice for Premium/trial users (any premium entitlement)
+    // If Freemius is available and user can use premium code, never show discovery notice
+    if (function_exists('chatbot_chatgpt_freemius')) {
+        $fs = chatbot_chatgpt_freemius();
+        if (is_object($fs) && is_callable([$fs, 'can_use_premium_code__premium_only'])) {
+            if ($fs->can_use_premium_code__premium_only()) {
+                return; // Premium/trial users: suppress discovery notice
+            }
+        }
     }
     
     // Check if notice was dismissed

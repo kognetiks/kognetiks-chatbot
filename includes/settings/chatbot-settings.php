@@ -777,16 +777,35 @@ function chatbot_chatgpt_settings_page() {
                 // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
 
                 if ( chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
-                    if ( chatbot_chatgpt_freemius()->is_plan( 'premium' ) ) {
-                        // Load the actual insights functionality
-                        if (function_exists('kognetiks_insights_settings_page')) {
-                            kognetiks_insights_settings_page();
-                        } else {
-                            echo '<div class="notice notice-error" style="padding: 20px; margin: 20px 0;">';
-                            echo '<h2 style="margin-top: 0;">⚠️ Insights System Not Available</h2>';
-                            echo '<p>The insights system is not properly loaded. Please check that all insights files are present.</p>';
-                            echo '<div class="notice notice-error"><p>Insights functionality is not available. Please ensure the insights addon is activated.</p></div>';
+                    // Ensure Insights files are loaded (in case they weren't loaded at plugin init)
+                    if ( ! function_exists( 'kognetiks_insights_settings_page' ) ) {
+                        $plugin_dir = dirname( dirname( __FILE__ ) );
+                        $insights_files = array(
+                            'includes/insights/scoring-models/sentiment-analysis.php',
+                            'includes/insights/automated-emails.php',
+                            'includes/insights/chatbot-insights.php',
+                            'includes/insights/globals.php',
+                            'includes/insights/insights-settings.php',
+                            'includes/insights/languages/en_US.php',
+                            'includes/insights/utilities.php'
+                        );
+                        
+                        foreach ( $insights_files as $file ) {
+                            $file_path = $plugin_dir . '/' . $file;
+                            if ( file_exists( $file_path ) ) {
+                                require_once $file_path;
+                            }
                         }
+                    }
+                    
+                    // Load the actual insights functionality
+                    if (function_exists('kognetiks_insights_settings_page')) {
+                        kognetiks_insights_settings_page();
+                    } else {
+                        echo '<div class="notice notice-error" style="padding: 20px; margin: 20px 0;">';
+                        echo '<h2 style="margin-top: 0;">⚠️ Insights System Not Available</h2>';
+                        echo '<p>The insights system is not properly loaded. Please check that all insights files are present.</p>';
+                        echo '<div class="notice notice-error"><p>Insights functionality is not available. Please ensure the insights addon is activated.</p></div>';
                     }
                 } else {
                     echo '<div class="kchat-insights-upgrade-notice" style="border: 1px solid #ccd0d4; background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 20px;">';

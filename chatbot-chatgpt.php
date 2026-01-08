@@ -281,8 +281,7 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.ph
 
 // Include Insights library - Premium Only
 if ( function_exists( 'chatbot_chatgpt_freemius' ) && 
-     chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() && 
-     chatbot_chatgpt_freemius()->is_plan( 'Premium' ) ) {
+     chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
 
     require_once plugin_dir_path(__FILE__) . 'includes/insights/scoring-models/sentiment-analysis.php';
     require_once plugin_dir_path(__FILE__) . 'includes/insights/automated-emails.php';
