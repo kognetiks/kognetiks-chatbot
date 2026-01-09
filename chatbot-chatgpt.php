@@ -362,9 +362,15 @@ function chatbot_chatgpt_insights_period_filter_handler() {
 }
 
 // Include Insights library - Premium Only (at plugin init)
-if ( function_exists( 'chatbot_chatgpt_freemius' ) && 
-     chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
+// Check for premium access including trial status (trial users should have premium access)
+if ( function_exists( 'chatbot_chatgpt_is_premium' ) && chatbot_chatgpt_is_premium() ) {
     chatbot_chatgpt_load_insights_files();
+} elseif ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
+    // Fallback: check can_use_premium_code for backward compatibility
+    $fs = chatbot_chatgpt_freemius();
+    if ( is_object( $fs ) && $fs->can_use_premium_code__premium_only() ) {
+        chatbot_chatgpt_load_insights_files();
+    }
 }
 
 // Handle plan changes and premium activation - Ver 2.4.2

@@ -26,13 +26,6 @@ if ( ! defined( 'WPINC' ) ) {
  * @since 2.4.2
  */
 function chatbot_chatgpt_is_premium() {
-    // DEV/TESTING ONLY: Allow forcing free mode for local testing via WordPress constant
-    // DO NOT USE IN PRODUCTION - This is only for development/testing environments
-    // Add to wp-config.php for testing: define('CHATBOT_CHATGPT_FORCE_FREE_MODE', true);
-    // Production code should rely solely on Freemius premium status checks below
-    if ( defined( 'CHATBOT_CHATGPT_FORCE_FREE_MODE' ) && CHATBOT_CHATGPT_FORCE_FREE_MODE ) {
-        return false;
-    }
     
     // PRODUCTION CODE: Follow Freemius best practices for premium status checks
     
@@ -45,23 +38,46 @@ function chatbot_chatgpt_is_premium() {
         return false;
     }
 
-    // Check if user can use premium code
-    $can_use_premium = false;
-    if ( method_exists( $fs, 'can_use_premium_code__premium_only' ) ) {
-        $can_use_premium = (bool) $fs->can_use_premium_code__premium_only();
-    } elseif ( method_exists( $fs, 'can_use_premium_code' ) ) {
-        $can_use_premium = (bool) $fs->can_use_premium_code();
+    // PRIMARY CHECK: can_use_premium_code() works with free codebase
+    // This returns true if user is in trial OR has a valid license
+    // This is the most reliable check for freemium model (same codebase, features unlock by license)
+    if ( method_exists( $fs, 'can_use_premium_code' ) ) {
+        if ( $fs->can_use_premium_code() ) {
+            return true; // User has trial or valid license - grant premium access
+        }
     }
 
-    // Also check if user is on Premium plan (in case they upgraded but premium code not activated yet)
+    // SECONDARY CHECK: is_paying_or_trial() - works with free codebase
+    // This checks if user is paying or in trial (requires registration)
+    if ( method_exists( $fs, 'is_paying_or_trial' ) ) {
+        if ( $fs->is_paying_or_trial() ) {
+            return true;
+        }
+    }
+
+    // TERTIARY CHECK: Check if user is on Premium plan (works with free codebase)
+    // This handles upgrades where plan changed but license not yet synced
     $is_premium_plan = false;
     if ( method_exists( $fs, 'is_plan' ) ) {
         $is_premium_plan = $fs->is_plan( 'premium', false ); // Check for premium or higher plans
     }
+    
+    // Also check trial plan specifically (for freemium model)
+    if ( ! $is_premium_plan && method_exists( $fs, 'is_trial_plan' ) ) {
+        $is_premium_plan = $fs->is_trial_plan( 'premium', false );
+    }
 
-    // Return true if user can use premium code OR is on Premium plan
-    if ( $can_use_premium || $is_premium_plan ) {
+    // Return true if user is on Premium plan
+    if ( $is_premium_plan ) {
         return true;
+    }
+
+    // FALLBACK: Check premium code access (requires premium codebase to be installed)
+    // This is checked last since it requires the premium plugin version
+    if ( method_exists( $fs, 'can_use_premium_code__premium_only' ) ) {
+        if ( $fs->can_use_premium_code__premium_only() ) {
+            return true;
+        }
     }
 
     // Additional fallbacks (in case method availability differs by SDK version)
