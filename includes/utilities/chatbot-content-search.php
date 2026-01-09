@@ -15,7 +15,6 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_content_search($search_prompt) {
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_content_search');
 
     global $wpdb;
 
@@ -41,7 +40,6 @@ function chatbot_chatgpt_content_search($search_prompt) {
     }
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'search_terms: ' . print_r($search_terms, true));
 
     $search_conditions = [];
     $search_values = [];
@@ -56,7 +54,6 @@ function chatbot_chatgpt_content_search($search_prompt) {
     $in_clause = implode(',', array_map(fn($type) => "'" . esc_sql($type) . "'", $post_types));
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'in_clause: ' . $in_clause);
 
     // === TRY: AND query ===
     $and_query = "
@@ -83,14 +80,12 @@ function chatbot_chatgpt_content_search($search_prompt) {
     }
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'results: ' . print_r($results, true));
 
     if (!empty($results)) {
         return chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page);
     }
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'FALLBACK: OR query');
 
     // === FALLBACK: OR query ===
     $or_query = "
@@ -106,7 +101,6 @@ function chatbot_chatgpt_content_search($search_prompt) {
     $or_placeholders = array_merge($search_values, [$per_page, $offset]);
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'or_placeholders: ' . print_r($or_placeholders, true));
 
     try {
         $prepared_query = $wpdb->prepare($or_query, ...$or_placeholders);
@@ -120,7 +114,6 @@ function chatbot_chatgpt_content_search($search_prompt) {
     }
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'results: ' . print_r($results, true));
 
     if (!empty($results)) {
         return chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page);
@@ -140,7 +133,6 @@ function chatbot_chatgpt_content_search($search_prompt) {
 function chatbot_chatgpt_format_search_results($results, $include_excerpt, $page, $per_page) {
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_format_search_results');
 
     $formatted_results = array_map(function ($post) use ($include_excerpt) {
         return [
@@ -198,7 +190,6 @@ function chatbot_chatgpt_get_searchable_post_types() {
     }
 
     // DIAG - Diagnostic - Ver 2.2.9
-    // back_trace( 'NOTICE', 'Searchable post types: ' . implode(', ', $post_types));
 
     return $post_types;
     
@@ -233,7 +224,6 @@ function chatbot_chatgpt_prepare_search_terms($search_prompt) {
     $terms = array_values(array_unique($words));
     
     // DIAG - Diagnostic - Ver 2.2.9
-    // back_trace( 'NOTICE', 'Final search terms: ' . implode(', ', $terms));
     
     return $terms;
 }
@@ -357,8 +347,6 @@ function chatbot_chatgpt_get_object_of_search_prompt($search_prompt) {
     }
 
     // DIAG - Diagnostic
-    // back_trace( 'NOTICE', 'Original prompt: ' . $prompt);
-    // back_trace( 'NOTICE', 'Extracted object: ' . $object);
 
     return $object;
 }

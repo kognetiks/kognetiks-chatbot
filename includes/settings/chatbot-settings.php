@@ -70,16 +70,11 @@ function chatbot_chatgpt_settings_page() {
     // Check if the user wants to reset the appearance settings to default - Ver 1.8.1
     $chatbot_chatgpt_appearance_reset = esc_attr(get_option('chatbot_chatgpt_appearance_reset', 'No'));
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_appearance_reset: ' . $chatbot_chatgpt_appearance_reset);
     if ( $chatbot_chatgpt_appearance_reset == 'Yes' ) {
         chatbot_chatgpt_appearance_restore_default_settings();
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_settings_page() - $active_tab: ' . $active_tab );
-    // back_trace( 'NOTICE', 'Current Page: ' . $_GET['page']);
-    // back_trace( 'NOTICE', 'Current Tab: ' . ($_GET['tab'] ?? 'No Tab Set'));
-    // back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')));
 
     ?>
     <div id="chatbot-chatgpt-settings" class="wrap">
@@ -775,14 +770,8 @@ function chatbot_chatgpt_settings_page() {
 
             } elseif ($active_tab == 'insights') {
 
-                // DIAG - Diagnostics - Ver 4.2.1
-                // back_trace( 'NOTICE', 'Insights Tab');
-                // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->is_plan( 'premium' ));
-                // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
-
                 // Check if user has premium access using the centralized helper function
                 // This follows Freemius best practices for premium status checks
-                // (CHATBOT_CHATGPT_FORCE_FREE_MODE is DEV/TESTING ONLY and not used in production)
                 $has_premium_access = function_exists( 'chatbot_chatgpt_is_premium' ) ? chatbot_chatgpt_is_premium() : false;
 
                 if ( $has_premium_access ) {

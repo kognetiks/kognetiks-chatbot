@@ -84,7 +84,6 @@ function chatbot_chatgpt_dashboard_widget_content() {
     }
     
     // Debug: Log the calculated start date
-    // back_trace( 'NOTICE', 'Dashboard widget - Period: ' . $period . ', Start date: ' . $start_date);
     
     // Get chat statistics
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';

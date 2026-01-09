@@ -122,7 +122,6 @@ function chatbot_azure_model_choice_callback($args) {
     $models = chatbot_azure_get_models();
 
     // DIAG - Ver 2.2.6
-    // back_trace( 'NOTICE', '$models: ' . print_r($models, true) );
 
     // Limit the models to chat models
     $models = array_filter($models, function($model) {
@@ -575,7 +574,6 @@ function chatbot_azure_whisper_response_format_callback($args) {
 function chatbot_azure_api_settings_init() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_azure_api_settings_init' );
 
     add_settings_section(
         'chatbot_azure_model_settings_section',

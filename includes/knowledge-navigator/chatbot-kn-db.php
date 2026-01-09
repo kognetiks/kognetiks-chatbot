@@ -216,7 +216,6 @@ function output_results() {
     global $topWords;
 
     // DIAG - Diagnostics - Ver 1.6.3
-    // back_trace( 'NOTICE', 'ENTER: output_results()');
 
     // Generate the directory path
     $results_dir_path = $chatbot_chatgpt_plugin_dir_path . 'results/';
@@ -224,7 +223,6 @@ function output_results() {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace( 'ERROR', 'Failed to create directory.');
         return;
     }
 
@@ -240,7 +238,6 @@ function output_results() {
             $f->fputcsv([$word, $tfidf]);
         }
     } catch (RuntimeException $e) {
-        // back_trace( 'ERROR', 'Failed to open CSV file for writing: ' . $e->getMessage());
     }
 
     // Write JSON
@@ -249,7 +246,6 @@ function output_results() {
             throw new Exception("Failed to write to JSON file.");
         }
     } catch (Exception $e) {
-        // back_trace( 'ERROR', $e->getMessage());
     }
 
     return;

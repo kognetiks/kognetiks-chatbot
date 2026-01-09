@@ -17,7 +17,6 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $user_id = null, $page_id = null, $session_id = null, $assistant_id = null, $client_message_id = null) {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_stt_api()' );
 
     global $chatbot_chatgpt_plugin_dir_path;
     global $session_id;
@@ -33,7 +32,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     global $errorResponses;
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_stt_api()');
 
     // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
@@ -46,7 +44,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -98,7 +95,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
 
     if (strpos($mime_type, 'audio/') === false && strpos($mime_type, 'video/') === false) {
         // DIAG - Diagnostics
-        // back_trace( 'ERROR', '$mime_type: ' . $mime_type);
         return "Error: The file is not an audio or video file. Please upload an audio or video file.";
     }
 
@@ -183,7 +179,6 @@ function chatbot_chatgpt_call_stt_api($api_key, $message, $stt_option = null, $u
 function chatbot_chatgpt_post_process_transcription($api_key, $message, $transcription, $session_id = null) {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_post_process_transcription()' );
 
     // Get API URL for text processing
     $api_url = get_chat_completions_api_url();

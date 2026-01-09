@@ -176,8 +176,6 @@ function chatbot_chatgpt_diagnostics_system_settings_section_callback($args) {
     global $chatbot_chatgpt_plugin_dir_path;
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_version: ' . $chatbot_chatgpt_plugin_version);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_plugin_dir_path: ' . $chatbot_chatgpt_plugin_dir_path);
     
     // Ensure the plugin version is set - fallback to reading from plugin header if global is not set
     // if (empty($chatbot_chatgpt_plugin_version)) {
@@ -338,21 +336,16 @@ function chatbot_chatgpt_enable_beta_features_callback($args) {
 function prod_trace($message_type = "NOTICE", $message = "No message") {
 
     // Trace production messages to the error log
-    back_trace($message_type, $message);
 
 }
 
 // Back Trace Function - Revised in Ver 2.0.7
-function back_trace($message_type = "NOTICE", $message = "No message") {
 
     // Usage Instructions
     // 
     // NOTE: Set WP_DEBUG and WP_DEBUG_LOG to true in wp-config.php to log messages to the debug.log file
     // 
-    // Call the function back_trace() from any file to log messages to your server's error log
     // 
-    // Uncomment the back_trace() function in the file(s) where you want to log messages
-    // Or add new back_trace() calls to log messages at any point in the code
     //
     // Go to the Chatbot Settings, then the Messages tab
     // Set the Chatbot Diagnotics to one of Off, Success, Notice, Failure, Warning, or Error
@@ -360,11 +353,6 @@ function back_trace($message_type = "NOTICE", $message = "No message") {
     // Each level will log messages based on the following criteria (Off will not log any messages)
     // [ERROR], [WARNING], [NOTICE], or [SUCCESS]
     // 
-    // Call this function using // back_trace( 'NOTICE', $message);
-    // back_trace( 'ERROR', 'Some message');
-    // back_trace( 'WARNING', 'Some message');
-    // back_trace( 'NOTICE', 'Some message');
-    // back_trace( 'SUCCESS', 'Some message');
 
     // Check if diagnostics is On
     $chatbot_chatgpt_diagnostics = esc_attr(get_option('chatbot_chatgpt_diagnostics', 'Error'));

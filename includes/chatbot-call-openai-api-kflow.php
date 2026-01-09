@@ -44,7 +44,6 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -52,12 +51,6 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_flow_api()');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Build conversation context using standardized function - Ver 2.3.9+
     // This function handles conversation history building, message cleaning, and conversation continuity
@@ -72,7 +65,6 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
     $kflow_data = kflow_get_sequence_data($kflow_sequence);
 
     // DIAG - Diagnostics - Ver 1.9.5
-    // back_trace( 'NOTICE', '$kflow_data: ' . print_r($kflow_data, true));
 
     // Count the number of 'Steps' in the KFlow data
     $kflow_data['total_steps'] = count($kflow_data['Steps']);
@@ -138,9 +130,7 @@ function chatbot_chatgpt_call_flow_api($api_key, $message, $user_id = null, $pag
 
     // Add message to conversation log
     // DIAG Diagnostics
-    // back_trace( 'NOTICE', '$message: ' . $message);
     $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
-    // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
     append_message_to_conversation_log($session_id, $user_id, $page_id, 'Chatbot', $thread_id, $assistant_id, null, $message);
 
     // Get the user ID and page ID
@@ -188,14 +178,12 @@ function chatbot_chatgpt_retrieve_answers($session_id, $user_id, $page_id, $assi
     // if $answers is empty, return an empty array
     if (empty($answers)) {
         // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_answers() - $answers is empty');
         return $answers_array;
     }
 
     // if $answer is an error, return an empty array
     if (is_wp_error($answers)) {
         // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_answers() - $answers is an error' . $answers->get_error_message());
         return $answers_array;
     }
 
@@ -218,7 +206,6 @@ function chatbot_chatgpt_parse_template($template, $answers) {
     // if $template is empty, return an empty string
     if (empty($template)) {
         // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'chatbot_chatgpt_parse_template() - $template is empty');
         return $message;
     }
 

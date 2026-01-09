@@ -70,7 +70,6 @@ $shortcode_param = isset($_GET['assistant']) ? sanitize_text_field($_GET['assist
 
 $chatbot_prompt = isset($_GET['chatbot_prompt']) ? sanitize_text_field($_GET['chatbot_prompt']) : '';
 $chatbot_prompt = preg_replace("/^\\\\'|\\\\'$/", '', $chatbot_prompt);
-// back_trace( 'NOTICE', 'Widget Endpoint - $chatbot_prompt: ' . $chatbot_prompt);
 
 // Retrieve the allowed pairs based on the ai platform choice
 if ($chatbot_ai_platform_choice === 'Azure OpenAI') {

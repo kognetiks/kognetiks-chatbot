@@ -19,8 +19,6 @@ if ( ! defined( 'WPINC' ) ) {
  * but premium code isn't active yet.
  *
  * IMPORTANT: This function follows Freemius best practices for checking premium status.
- * The CHATBOT_CHATGPT_FORCE_FREE_MODE constant is DEV/TESTING ONLY and should NEVER
- * be used in production. It's only for local development/testing purposes.
  *
  * @return bool True if user has premium access
  * @since 2.4.2
@@ -70,14 +68,6 @@ function chatbot_chatgpt_is_premium() {
     // Return true if user is on Premium plan
     if ( $is_premium_plan ) {
         return true;
-    }
-
-    // FALLBACK: Check premium code access (requires premium codebase to be installed)
-    // This is checked last since it requires the premium plugin version
-    if ( method_exists( $fs, 'can_use_premium_code__premium_only' ) ) {
-        if ( $fs->can_use_premium_code__premium_only() ) {
-            return true;
-        }
     }
 
     // Additional fallbacks (in case method availability differs by SDK version)

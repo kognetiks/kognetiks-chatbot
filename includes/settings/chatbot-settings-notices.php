@@ -68,7 +68,6 @@ function dismiss_chatgpt_notice() {
     if (isset($_GET['dismiss_kn_status_notice'])) {
         update_option('chatbot_chatgpt_kn_dismissed', '1');
         // DIAG - Diagnostics - Ver 2.0.4
-        // back_trace( 'NOTICE' , 'chatbot_chatgpt_kn_dismissed updated to 1');
     }
 }
 add_action('admin_init', 'dismiss_chatgpt_notice');
@@ -121,7 +120,7 @@ function chatbot_chatgpt_delete_option($option_name) {
 // Check if user/site is Premium (Freemius) - Ver 2.4.1
 // Updated to use centralized helper function for consistency
 function chatbot_chatgpt_user_is_premium() {
-    // Use the centralized helper function that respects CHATBOT_CHATGPT_FORCE_FREE_MODE
+    // Use the centralized helper function
     return function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
 }
 
@@ -223,22 +222,18 @@ function chatbot_chatgpt_reporting_notice() {
         return;
     }
     
-    // DEV/TESTING ONLY: Check if free mode is forced for local testing
-    // DO NOT USE IN PRODUCTION - This constant is for development/testing only
-    $force_free_mode = defined('CHATBOT_CHATGPT_FORCE_FREE_MODE') && CHATBOT_CHATGPT_FORCE_FREE_MODE;
-    
     // Suppress notice for Premium/trial users (any premium entitlement)
     // Check if user has premium access (either via premium code or Premium plan)
     // This handles the case where user upgraded to Premium but premium code isn't activated yet
     $is_premium_user = false;
-    if (!$force_free_mode && function_exists('chatbot_chatgpt_is_premium')) {
+    if (function_exists('chatbot_chatgpt_is_premium')) {
         $is_premium_user = chatbot_chatgpt_is_premium();
-    } elseif (!$force_free_mode && function_exists('chatbot_chatgpt_freemius')) {
+    } elseif (function_exists('chatbot_chatgpt_freemius')) {
         // Fallback to original check if helper function not available
         $fs = chatbot_chatgpt_freemius();
         if (is_object($fs)) {
-            if (is_callable([$fs, 'can_use_premium_code__premium_only'])) {
-                $is_premium_user = $fs->can_use_premium_code__premium_only();
+            if (is_callable([$fs, 'can_use_premium_code'])) {
+                $is_premium_user = $fs->can_use_premium_code();
             } elseif (is_callable([$fs, 'is_plan'])) {
                 // Also check plan status as fallback
                 $is_premium_user = $fs->is_plan('premium', false);
@@ -246,18 +241,12 @@ function chatbot_chatgpt_reporting_notice() {
         }
     }
     
-    // If user is premium (and not forcing free mode), automatically dismiss the notice and don't show it
-    if ($is_premium_user && !$force_free_mode) {
+    // If user is premium, automatically dismiss the notice and don't show it
+    if ($is_premium_user) {
         // Auto-dismiss for premium users to prevent it from reappearing
         chatbot_chatgpt_update_option('chatbot_chatgpt_reporting_notice_dismissed', '1');
         chatbot_chatgpt_delete_option('chatbot_chatgpt_reporting_notice_snooze_until');
         return; // Premium users: suppress discovery notice
-    }
-    
-    // If forcing free mode, clear any previous dismissal so notice can show for testing
-    if ($force_free_mode) {
-        chatbot_chatgpt_delete_option('chatbot_chatgpt_reporting_notice_dismissed');
-        chatbot_chatgpt_delete_option('chatbot_chatgpt_reporting_notice_snooze_until');
     }
     
     // Check if notice was dismissed

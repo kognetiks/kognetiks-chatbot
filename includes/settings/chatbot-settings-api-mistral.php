@@ -61,7 +61,6 @@ function chatbot_mistral_chat_model_choice_callback($args) {
     $models = chatbot_mistral_get_models();
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$models: ' . print_r($models, true) );
 
     // Remove the models not owned by Mistral
     $models = array_filter($models, function($model) {

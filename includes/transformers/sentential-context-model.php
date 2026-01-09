@@ -77,7 +77,6 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
 
     $prompt = preprocess_text($prompt);
     // DIAG - Diagnostic - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Prompt: ' . $prompt);
 
     $highest_score = 0;
     $best_match = "";
@@ -105,9 +104,7 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
 
         // Weight adjacency score higher (e.g., 70%) and frequency lower (30%)
         $adjacency_score_threshold = $similarity_threshold;
-        // back_trace( 'NOTICE', 'Adjacency Score Threshold: ' . $adjacency_score_threshold);
         $normalization_frequency_threshold = 1.0 - $adjacency_score_threshold;
-        // back_trace( 'NOTICE', 'Normalization Frequency Threshold: ' . $normalization_frequency_threshold);
 
         foreach ($results as $post) {
 
@@ -193,9 +190,6 @@ function transformer_model_sentential_context_model_response_lite($prompt, $max_
                         $best_match .= $sentences[$i] . ' ';
                     }
 
-                    // back_trace( 'NOTICE', 'Score: ' . $highest_score);
-                    // back_trace( 'NOTICE', 'Adjacency Score: ' . $adjacency_score);
-                    // back_trace( 'NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
 
                 }
             }
@@ -272,7 +266,6 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
 
     // Preprocess the prompt.
     $prompt = preprocess_text($prompt);
-    // back_trace( 'NOTICE', 'Prompt: ' . $prompt);
 
     // Initialize variables.
     $highest_score = 0;
@@ -373,9 +366,6 @@ function transformer_model_sentential_context_model_response_lite_version_two($p
                         $best_match .= $sentences[$i] . ' ';
                     }
     
-                    // back_trace( 'NOTICE', 'Score: ' . $highest_score);
-                    // back_trace( 'NOTICE', 'Adjacency Score: ' . $adjacency_score);
-                    // back_trace( 'NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
                 }
             }
         }
@@ -415,7 +405,6 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
     }
 
     $prompt = preprocess_text($prompt);
-    // back_trace( 'NOTICE', 'Prompt: ' . $prompt);
 
     // Reset variables
     $highest_score = 0;
@@ -466,7 +455,6 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
 
             $scoring_algorithm = 'pairwise'; // Set to 'average' or 'pairwise'
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Scoring Algorithm: ' . $scoring_algorithm);
 
             if ( $scoring_algorithm == 'average' ) { // ORIGINAL
 
@@ -569,7 +557,6 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
                     // Get store number of sentences around the matching sentence
                     $sentence_response_length = esc_attr(get_option('chatbot_transformer_model_sentence_response_length', 3));
                     // DIAG - Diagnostics
-                    // back_trace( 'NOTICE', 'Sentence Response Length: ' . $sentence_response_length);
                     $start_index = max(0, $sentence_index - 1);
                     $end_index = min($sentence_count - 1, $sentence_index + $sentence_response_length - 1);
 
@@ -584,9 +571,6 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
                     }
 
                     // DIAG - Diagnostics
-                    // back_trace( 'NOTICE', 'Score: ' . $highest_score);
-                    // back_trace( 'NOTICE', 'Adjacency Score: ' . $adjacency_score);
-                    // back_trace( 'NOTICE', 'Best Match: ' . preg_replace('/\s+/', ' ', strip_tags($best_match)));
 
                 }
             }
@@ -604,7 +588,6 @@ function transformer_model_sentential_context_model_response_lite_version_one($p
 function transformer_model_sentential_context_model_response($input, $responseCount = 500) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_model_sentential_context_response');
 
     // Normalize the input string - Ver 2.2.2
     if (class_exists('Normalizer')) {
@@ -618,17 +601,14 @@ function transformer_model_sentential_context_model_response($input, $responseCo
     // Set the window size for co-occurrence matrix
     $windowSize = intval(esc_attr(get_option('chatbot_transformer_model_word_content_window_size', 3)));
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace( 'NOTICE', 'Window Size: ' . $windowSize);
 
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace( 'NOTICE', 'Response Count: ' . $responseCount);
 
     // MOVED TO transformer-model-scheduler.php
     // Build embeddings (with caching for performance)
     $embeddings = transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize);
 
     // Generate contextual response
-    // back_trace( 'NOTICE', '$responseCount: ' . $responseCount);
     $response = transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $responseCount);
 
     return $response;
@@ -639,7 +619,6 @@ function transformer_model_sentential_context_model_response($input, $responseCo
 function transformer_model_sentential_context_fetch_wordpress_content($input = null) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_fetch_wordpress_content');
 
     global $wpdb;
     global $no_matching_content_response;
@@ -649,7 +628,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
         return '';
     }
     // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace( 'NOTICE', '$input: ' . $input);
 
     // Step 1 - Normalize and remove stop words
     // $input = preg_replace('/[^\w\s]/', '', $input);
@@ -662,7 +640,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     $all_words = $words;
 
     // DIAG - Diagnostic - Ver 2.2.4
-    // back_trace( 'NOTICE', 'Words: ' . implode(', ', $words));
 
     // Step 2 - Query the TF-IDF table for the highest-scoring words
     $table_name = $wpdb->prefix . 'chatbot_chatgpt_knowledge_base_tfidf';
@@ -696,7 +673,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
 
     // DIAG - Diagnostic - Ver 2.2.1 - Print the words and scores
     // for ($i = 0; $i < count($results); $i++) {
-    //     // back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
     // }
 
     // Ensure results meet the limit
@@ -717,7 +693,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
 
     // DIAG - Diagnostic - Ver 2.2.1 - Print the words and scores
     // for ($i = 0; $i < count($results); $i++) {
-    //     // back_trace( 'NOTICE', 'Word: ' . $results[$i]['word'] . ' - Score: ' . $results[$i]['score']);
     // }
 
     // Define the window size
@@ -781,7 +756,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
     // $like_condition = implode(' AND ', $like_conditions);
 
     // DIAG - Diagnostic - Ver 2.2.4
-    // back_trace( 'NOTICE', 'Like Condition: ' . $like_condition);
 
     // Handle error for no matching content
     if (empty($like_condition_template) || empty($like_condition_values)) {
@@ -827,7 +801,6 @@ function transformer_model_sentential_context_fetch_wordpress_content($input = n
 function transformer_model_sentential_context_get_cached_embeddings($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_get_cached_embeddings');
 
     $embeddings = transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize);
 
@@ -839,7 +812,6 @@ function transformer_model_sentential_context_get_cached_embeddings($corpus, $wi
 function transformer_model_sentential_context_build_cooccurrence_matrix($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_build_cooccurrence_matrix');
 
     $matrix = [];
     $words = preg_split('/\s+/', strtolower($corpus)); // Tokenize and normalize
@@ -872,7 +844,6 @@ function transformer_model_sentential_context_build_cooccurrence_matrix($corpus,
 function transformer_model_sentential_context_remove_stop_words($words) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_remove_stop_words');
 
     // Use global stop words list
     global $stopWords;
@@ -889,7 +860,6 @@ function transformer_model_sentential_context_remove_stop_words($words) {
 function transformer_model_sentential_context_cosine_similarity($vectorA, $vectorB) {
 
     // DIAG - Diagnostic - Ver 2.2.1
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cosine_similarity' );
 
     $commonKeys = array_intersect_key($vectorA, $vectorB);
 
@@ -923,8 +893,6 @@ function transformer_model_sentential_context_cosine_similarity($vectorA, $vecto
 function transformer_model_sentential_context_generate_contextual_response($input, $embeddings, $corpus, $maxTokens = 500) {
 
     // DIAG - Diagnostic - Ver 2.3.0
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_generate_contextual_response');
-    // back_trace( 'NOTICE', 'Max Tokens: ' . $maxTokens);
 
     // Tokenize the corpus into sentences
     $sentences = preg_split('/(?<=[.?!])\s+/', $corpus);
@@ -1065,13 +1033,6 @@ function transformer_model_sentential_context_generate_contextual_response($inpu
     $totalSentencesAnalyzed = count($sentences);
 
     // Before returning repsonse log the key stats
-    // back_trace( 'NOTICE', 'Key Stats:');
-    // back_trace( 'NOTICE', ' - Input: ' . $input);
-    // back_trace( 'NOTICE', ' - Similarity Threshold: ' . $similarityThreshold);
-    // back_trace( 'NOTICE', ' - Highest Similarity: ' . $highestSimilarity);
-    // back_trace( 'NOTICE', ' - Average Similarity: ' . $averageSimilarity);
-    // back_trace( 'NOTICE', ' - Matches Above Threshold: ' . $numMatchesAboveThreshold);
-    // back_trace( 'NOTICE', ' - Total Sentences Analyzed: ' . $totalSentencesAnalyzed);
 
     // Return the response
     return $response;

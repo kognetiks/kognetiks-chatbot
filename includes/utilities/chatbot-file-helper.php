@@ -93,8 +93,6 @@ function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version = 'ass
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE' , '$beta_version: ' . $beta_version );
-    // back_trace( 'NOTICE' , '$data: ' . print_r($data, true) );
 
     return $data;
 

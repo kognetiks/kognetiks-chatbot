@@ -113,7 +113,6 @@ function chatbot_chatgpt_reporting_settings_init() {
     
     // Only register premium-only fields if premium is enabled
     // Uses centralized helper function following Freemius best practices
-    // (CHATBOT_CHATGPT_FORCE_FREE_MODE is DEV/TESTING ONLY)
     $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
     if ($is_premium) {
         
@@ -221,7 +220,7 @@ function chatbot_chatgpt_reporting_section_callback($args) {
 
 function chatbot_chatgpt_conversation_digest_section_callback($args) {
     // Check if premium is enabled (includes Premium plan check for users who upgraded)
-    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
     $is_free = !$is_premium;
     
     // Get current values for conditional display
@@ -622,7 +621,6 @@ function chatbot_chatgpt_reporting_period_callback($args) {
     // Get the saved chatbot_chatgpt_reporting_period value or default to "Daily"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_reporting_period', 'Daily'));
     // DIAG - Log the output choice
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_reporting_period' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_reporting_period" name="chatbot_chatgpt_reporting_period">
         <option value="<?php echo esc_attr( 'Daily' ); ?>" <?php selected( $output_choice, 'Daily' ); ?>><?php echo esc_html( 'Daily' ); ?></option>
@@ -638,7 +636,6 @@ function  chatbot_chatgpt_enable_conversation_logging_callback($args) {
     // Get the saved chatbot_chatgpt_enable_conversation_logging value or default to "Off"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_enable_conversation_logging', 'Off'));
     // DIAG - Log the output choice
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_enable_conversation_logging' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_enable_conversation_logging" name="chatbot_chatgpt_enable_conversation_logging">
         <option value="<?php echo esc_attr( 'On' ); ?>" <?php selected( $output_choice, 'On' ); ?>><?php echo esc_html( 'On' ); ?></option>
@@ -652,7 +649,6 @@ function chatbot_chatgpt_conversation_log_days_to_keep_callback($args) {
     // Get the saved chatbot_chatgpt_conversation_log_days_to_keep value or default to "30"
     $output_choice = esc_attr(get_option('chatbot_chatgpt_conversation_log_days_to_keep', '30'));
     // DIAG - Log the output choice
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_conversation_log_days_to_keep' . $output_choice);
     ?>
     <select id="chatbot_chatgpt_conversation_log_days_to_keep" name="chatbot_chatgpt_conversation_log_days_to_keep">
         <option value="<?php echo esc_attr( '1' ); ?>" <?php selected( $output_choice, '7' ); ?>><?php echo esc_html( '1' ); ?></option>
@@ -681,7 +677,7 @@ function chatbot_chatgpt_conversation_digest_enabled_callback($args) {
 // Conversation Digest Frequency - Ver 2.3.9
 function chatbot_chatgpt_conversation_digest_frequency_callback($args) {
     // Check if premium is enabled (includes Premium plan check for users who upgraded)
-    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
     
     // Get the saved chatbot_chatgpt_conversation_digest_frequency value (stored as lowercase)
     // Note: Do NOT modify the saved value here - only display it
@@ -736,7 +732,7 @@ function chatbot_chatgpt_insights_email_enabled_callback($args) {
 // Insights Email Frequency (Report Frequency)
 function chatbot_chatgpt_insights_email_frequency_callback($args) {
     // Check if premium is enabled (includes Premium plan check for users who upgraded)
-    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
     
     // Get the saved chatbot_chatgpt_insights_email_frequency value (stored as lowercase)
     // Note: Do NOT modify the saved value here - only display it
@@ -878,10 +874,8 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
     if (!extension_loaded('gd')) {
         // GD Library is installed and loaded
         // DIAG - Log the output choice
-        // back_trace( 'NOTICE', 'GD Library is installed and loaded.');
         chatbot_chatgpt_general_admin_notice('Chatbot requires the GD Library to function correctly, but it is not installed or enabled on your server. Please install or enable the GD Library.');
         // DIAG - Log the output choice
-        // back_trace( 'NOTICE', 'GD Library is not installed! No chart will be displayed.');
         // Disable the shortcode functionality
         return;
     }
@@ -922,7 +916,6 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
         if(!empty($wpdb->last_error)) {
             // DIAG - Handle the error
-            // back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
             return;
         } else if(!empty($results)) {
             $labels = [];
@@ -1015,7 +1008,6 @@ function chatbot_chatgpt_interactions_table() {
 
     if(!empty($wpdb->last_error)) {
         // DIAG - Handle the error
-        // back_trace( 'ERROR', 'SQL query error ' . $wpdb->last_error);
         return '<p>Error retrieving interaction data. Please try again later.</p>';
     } else if(!empty($results)) {
         $labels = [];
@@ -1231,7 +1223,6 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($results_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace( 'ERROR', 'Failed to create directory.');
         return;
     }
 
@@ -1281,15 +1272,12 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace( 'NOTICE', 'File path: ' . $results_csv_file);
 
     if (!file_exists($results_csv_file)) {
-        // back_trace( 'ERROR', 'File does not exist: ' . $results_csv_file);
         return;
     }
     
     if (!is_readable($results_csv_file)) {
-        // back_trace( 'ERROR', 'File is not readable ' . $results_csv_file);
         return;
     }
     
@@ -1302,7 +1290,6 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     }
     
     if (!is_writable($results_csv_file)) {
-        // back_trace( 'ERROR', 'File is not writable: ' . $results_csv_file);
         return;
     }  
     
@@ -1421,7 +1408,6 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     
     // Log email attempt
     if (function_exists('back_trace')) {
-        // back_trace('NOTICE', 'Attempting to send test email to: ' . $email_address);
     }
     
     // Send the email
@@ -1430,13 +1416,10 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     // Log result
     if (function_exists('back_trace')) {
         if ($sent) {
-            // back_trace('NOTICE', 'Test email sent successfully to: ' . $email_address);
         } else {
-            // back_trace('ERROR', 'Failed to send test email to: ' . $email_address);
             // Check for PHP mail errors
             $last_error = error_get_last();
             if ($last_error && strpos($last_error['message'], 'mail') !== false) {
-                // back_trace('ERROR', 'PHP mail error: ' . $last_error['message']);
             }
         }
     }
@@ -1523,7 +1506,7 @@ function chatbot_chatgpt_sanitize_conversation_digest_frequency($value) {
     }
     
     // Check if premium is enabled (includes Premium plan check for users who upgraded)
-    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
     
     // Sanitize and normalize to lowercase (best practice: store lowercase in DB)
     $value = sanitize_text_field($value);
@@ -1592,7 +1575,7 @@ function chatbot_chatgpt_sanitize_insights_email_frequency($value) {
     }
     
     // Check if premium is enabled (includes Premium plan check for users who upgraded)
-    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
     
     // Sanitize and normalize to lowercase (best practice: store lowercase in DB)
     $value = sanitize_text_field($value);
@@ -1795,7 +1778,7 @@ function chatbot_chatgpt_ensure_email_report_settings_saved() {
     
     if (isset($_POST['chatbot_chatgpt_conversation_digest_frequency'])) {
         $value = strtolower(trim(sanitize_text_field($_POST['chatbot_chatgpt_conversation_digest_frequency'])));
-        $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+        $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
         $allowed = $is_premium ? array('hourly', 'daily', 'weekly') : array('weekly');
         if (in_array($value, $allowed)) {
             $current = get_option('chatbot_chatgpt_conversation_digest_frequency');

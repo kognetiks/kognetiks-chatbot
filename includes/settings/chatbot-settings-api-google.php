@@ -67,7 +67,6 @@ function chatbot_google_chat_model_choice_callback($args) {
     $models = chatbot_google_get_models();
 
     // DIAG - Ver 2.3.9
-    // back_trace( 'NOTICE', '$models: ' . print_r($models, true) );
 
     // Limit the models to Google/Gemini models
     $models = array_filter($models, function($model) {

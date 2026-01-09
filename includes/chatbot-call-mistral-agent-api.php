@@ -45,13 +45,11 @@ if ( ! defined( 'WPINC' ) ) {
 function create_mistral_websearch_agent($api_key) {
 
     // DIAG - Diagnostics - Ver 3.2.1
-    // back_trace( 'NOTICE', 'create_mistral_websearch_agent - start');
 
     // $api_url = 'https://api.mistral.ai/v1/agents/completions';
     $api_url = 'https://api.mistral.ai/v1/agents';
 
     // DIAG - Diagnostics - Ver 3.2.1
-    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
 
     // Get the model from settings or use default
     $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-medium-latest'));
@@ -76,7 +74,6 @@ function create_mistral_websearch_agent($api_key) {
         );
     } else {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'WARNING', 'Model ' . $model . ' does not support tools, skipping tool registration.');
     }
     
     $timeout = esc_attr(get_option('chatbot_mistral_timeout_setting', 240 ));
@@ -128,7 +125,6 @@ function create_mistral_websearch_agent($api_key) {
     // Also check for nested error structure (backward compatibility)
     if (isset($data['error'])) {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'ERROR', 'Mistral API Error creating agent: ' . $data['error']['message']);
         $error_message = isset($data['error']['message']) ? $data['error']['message'] : 'Unknown error occurred';
         prod_trace('ERROR', 'Mistral API Error creating agent: ' . $error_message);
         return false;
@@ -136,12 +132,10 @@ function create_mistral_websearch_agent($api_key) {
     
     if (isset($data['id'])) {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', 'Mistral agent created successfully with ID: ' . $data['id']);
         return $data['id'];
     }
     
     // DIAG - Diagnostics - Ver 2.3.1
-    // back_trace( 'ERROR', 'Failed to get agent ID from response: ' . print_r($data, true));
     return false;
 
 }
@@ -173,7 +167,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -181,14 +174,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 2.2.2
-    // back_trace( 'NOTICE', 'chatbot_call_mistral_agent_call_api()');
-    // back_trace( 'NOTICE', 'chatbot_call_mistral_api - start');
-    // back_trace( 'NOTICE', 'chatbot_call_mistral_api - $message: ' . $message);
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Check if we have a valid assistant_id, otherwise create a websearch agent
     if (
@@ -200,7 +185,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         ))
     ) {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', 'Assistant ID is missing or default, creating new websearch agent...');
 
         $assistant_id = create_mistral_websearch_agent($api_key);
 
@@ -209,7 +193,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         }
     } else {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', 'Using provided assistant_id: ' . $assistant_id);
     }
 
     // Mistral.com API Documentation
@@ -219,15 +202,12 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     if (strpos($assistant_id, 'ag:') === 0) {
         $api_url = 'https://api.mistral.ai/v1/agents/completions';
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', '$api_url: ' . $api_url);
     } else {
         $api_url = 'https://api.mistral.ai/v1/conversations';
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', '$api_url: ' . $api_url);
     }
 
     // DIAG - Diagnostics - Ver 2.2.2
-    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
 
     // Get the saved model from the settings or default to "mistral-small-latest"
     $model = esc_attr(get_option('chatbot_mistral_model_choice', 'mistral-small-latest'));
@@ -286,7 +266,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
             }
         }
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -299,8 +278,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     $chatbot_chatgpt_conversation_continuation = esc_attr(get_option('chatbot_chatgpt_conversation_continuation', 'Off'));
     
     // DIAG - Diagnostics - Ver 2.3.1
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_conversation_continuation: ' . $chatbot_chatgpt_conversation_continuation);
 
     if ($chatbot_chatgpt_conversation_continuation == 'On') {
         $conversation_history = chatbot_chatgpt_get_converation_history($session_id);
@@ -310,7 +287,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
     // DIAG - Diagnostics - Ver 2.3.1
-    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
     // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 65536; // Example: 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
@@ -324,10 +300,8 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
         }
         $context = $truncated_context;
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // FIXME - Set $context to null - Ver 2.2.2 - 2025-01-16
@@ -337,13 +311,11 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     $context = 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.';
 
     // DIAG - Diagnostics - Ver 2.3.1 - 2025-06-25
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
 
     // Prepare the request body for Mistral agent API
     if (strpos($assistant_id, 'ag:') === 0) {
         // Mistral Agent API
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', 'Mistral Agent API');
         $request_body = array(
             'messages' => array(
                 array(
@@ -356,7 +328,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     } else {
         // Mistral Websearch API
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'NOTICE', 'Mistral Websearch API');
         $request_body = array(
             'inputs' => $message,
             'agent_id' => $assistant_id,
@@ -382,7 +353,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     // Check for errors
     if (is_wp_error($response)) {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'ERROR', 'Mistral API Error: ' . $response->get_error_message());
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return 'Error: ' . $response->get_error_message();
@@ -430,7 +400,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     // Also check for nested error structure (backward compatibility)
     if (isset($data['error'])) {
         // DIAG - Diagnostics - Ver 2.3.1
-        // back_trace( 'ERROR', 'Mistral API Error: ' . $data['error']['message']);
         $error_message = isset($data['error']['message']) ? $data['error']['message'] : 'Unknown error occurred';
         prod_trace('ERROR', 'Mistral API Error: ' . $error_message);
         // Clear locks on error
@@ -439,7 +408,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
     }
 
     // DIAG - Diagnostics - Ver 2.3.1
-    // back_trace( 'NOTICE', '$data: ' . print_r($data, true));
 
     // Empty response text
     $response_text = '';
@@ -451,7 +419,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
             if (isset($data['choices'][0]['message']['content']) && !empty($data['choices'][0]['message']['content'])) {
                 $response_text = $data['choices'][0]['message']['content'];
                 // DIAG - Diagnostics - Ver 2.3.1
-                // back_trace( 'NOTICE', 'Extracted response from choices array');
             }
         }
         // Check for Mistral Agent API format (outputs array)
@@ -475,7 +442,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
                 }
             }
             // DIAG - Diagnostics - Ver 2.3.1
-            // back_trace( 'NOTICE', 'Extracted response from outputs array');
         }
     } else {
         // Websearch Agent Response handling (ag_ format)
@@ -499,7 +465,6 @@ function chatbot_mistral_agent_call_api($api_key, $message, $assistant_id, $thre
                 }
             }
             // DIAG - Diagnostics - Ver 2.3.1
-            // back_trace( 'NOTICE', 'Extracted response from websearch outputs array');
         }
     }
 
