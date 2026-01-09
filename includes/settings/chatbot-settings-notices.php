@@ -239,8 +239,14 @@ function chatbot_chatgpt_reporting_notice() {
     }
     
     // Suppress notice for Premium/trial users (any premium entitlement)
-    // If Freemius is available and user can use premium code, never show discovery notice
-    if (function_exists('chatbot_chatgpt_freemius')) {
+    // Check if user has premium access (either via premium code or Premium plan)
+    // This handles the case where user upgraded to Premium but premium code isn't activated yet
+    if (function_exists('chatbot_chatgpt_is_premium')) {
+        if (chatbot_chatgpt_is_premium()) {
+            return; // Premium users: suppress discovery notice
+        }
+    } elseif (function_exists('chatbot_chatgpt_freemius')) {
+        // Fallback to original check if helper function not available
         $fs = chatbot_chatgpt_freemius();
         if (is_object($fs) && is_callable([$fs, 'can_use_premium_code__premium_only'])) {
             if ($fs->can_use_premium_code__premium_only()) {

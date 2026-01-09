@@ -279,41 +279,123 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.ph
 // require_once plugin_dir_path(__FILE__) . 'includes/insights/utilities.php';
 // require_once plugin_dir_path(__FILE__) . 'includes/insights/globals.php';
 
-// Include Insights library - Premium Only
+/**
+ * Dynamically load Insights files when premium status is detected
+ * This function can be called on-demand to load Insights files after plan upgrades
+ * 
+ * @return bool True if files were loaded, false otherwise
+ * @since 2.4.2
+ */
+function chatbot_chatgpt_load_insights_files() {
+    // Check if files are already loaded
+    if ( function_exists( 'kognetiks_insights_settings_page' ) ) {
+        return true;
+    }
+    
+    // Check if user has premium access
+    if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
+        return false;
+    }
+    
+    $fs = chatbot_chatgpt_freemius();
+    if ( ! is_object( $fs ) ) {
+        return false;
+    }
+    
+    // Check if user can use premium code (either has premium code or is on Premium plan)
+    $can_use_premium = false;
+    if ( method_exists( $fs, 'can_use_premium_code__premium_only' ) ) {
+        $can_use_premium = $fs->can_use_premium_code__premium_only();
+    } elseif ( method_exists( $fs, 'can_use_premium_code' ) ) {
+        $can_use_premium = $fs->can_use_premium_code();
+    }
+    
+    // Also check if user is on Premium plan (in case they upgraded but premium code not activated yet)
+    $is_premium_plan = false;
+    if ( method_exists( $fs, 'is_plan' ) ) {
+        $is_premium_plan = $fs->is_plan( 'premium', false ); // Check for premium or higher plans
+    }
+    
+    // Load files if user has premium access OR is on Premium plan
+    if ( $can_use_premium || $is_premium_plan ) {
+        $plugin_dir = plugin_dir_path(__FILE__);
+        $insights_files = array(
+            'includes/insights/scoring-models/sentiment-analysis.php',
+            'includes/insights/automated-emails.php',
+            'includes/insights/chatbot-insights.php',
+            'includes/insights/globals.php',
+            'includes/insights/insights-settings.php',
+            'includes/insights/languages/en_US.php',
+            'includes/insights/utilities.php'
+        );
+        
+        foreach ( $insights_files as $file ) {
+            $file_path = $plugin_dir . $file;
+            if ( file_exists( $file_path ) ) {
+                require_once $file_path;
+            }
+        }
+        
+        // Register admin_init action for period filter if not already registered
+        if ( ! has_action( 'admin_init', 'chatbot_chatgpt_insights_period_filter_handler' ) ) {
+            add_action('admin_init', 'chatbot_chatgpt_insights_period_filter_handler');
+        }
+        
+        return true;
+    }
+    
+    return false;
+}
+
+/**
+ * Handle Insights period filter form submission
+ * 
+ * @since 2.4.2
+ */
+function chatbot_chatgpt_insights_period_filter_handler() {
+    if (
+        isset($_POST['chatbot_chatgpt_insights_action']) &&
+        $_POST['chatbot_chatgpt_insights_action'] === 'period_filter' &&
+        isset($_POST['chatbot_chatgpt_insights_period_filter_nonce']) &&
+        wp_verify_nonce(
+            sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_insights_period_filter_nonce'])),
+            'chatbot_chatgpt_insights_period_filter_action'
+        )
+    ) {
+        // Handle the period filter logic here
+        $selected_period = isset($_POST['chatbot_chatgpt_insights_period_filter'])
+            ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_insights_period_filter']))
+            : 'Today';
+        // Store in a transient or option, or pass as needed
+        set_transient('chatbot_chatgpt_selected_period', $selected_period, 60*5);
+        wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=insights'));
+        exit;
+    }
+}
+
+// Include Insights library - Premium Only (at plugin init)
 if ( function_exists( 'chatbot_chatgpt_freemius' ) && 
      chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
+    chatbot_chatgpt_load_insights_files();
+}
 
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/scoring-models/sentiment-analysis.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/automated-emails.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/chatbot-insights.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/globals.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/insights-settings.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/languages/en_US.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/insights/utilities.php';
+// Handle plan changes and premium activation - Ver 2.4.2
+// This ensures Insights files are loaded after plan upgrades
+add_action( 'fs_after_account_plan_sync_chatbot-chatgpt', function() {
+    // When plan is synced, try to load Insights files if premium status is detected
+    chatbot_chatgpt_load_insights_files();
+}, 10 );
 
-    add_action('admin_init', function() {
-        if (
-            isset($_POST['chatbot_chatgpt_insights_action']) &&
-            $_POST['chatbot_chatgpt_insights_action'] === 'period_filter' &&
-            isset($_POST['chatbot_chatgpt_insights_period_filter_nonce']) &&
-            wp_verify_nonce(
-                sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_insights_period_filter_nonce'])),
-                'chatbot_chatgpt_insights_period_filter_action'
-            )
-        ) {
-            // Handle the period filter logic here
-            // e.g., set a transient, update an option, or set a global variable
-            // Then redirect back to the settings page to prevent resubmission
-            $selected_period = isset($_POST['chatbot_chatgpt_insights_period_filter'])
-                ? sanitize_text_field(wp_unslash($_POST['chatbot_chatgpt_insights_period_filter']))
-                : 'Today';
-            // Store in a transient or option, or pass as needed
-            set_transient('chatbot_chatgpt_selected_period', $selected_period, 60*5);
-            wp_redirect(admin_url('admin.php?page=chatbot-chatgpt&tab=insights'));
-            exit;
-        }
-    });
+add_action( 'fs_after_license_change_chatbot-chatgpt', function() {
+    // When license changes, try to load Insights files if premium status is detected
+    chatbot_chatgpt_load_insights_files();
+}, 10 );
 
+// Also hook into Freemius after_premium_version_activation if available
+if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
+    chatbot_chatgpt_freemius()->add_action( 'after_premium_version_activation', function() {
+        chatbot_chatgpt_load_insights_files();
+    } );
 }
 
 // Include necessary files - Widgets - Ver 2.1.3

@@ -14,12 +14,14 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Returns true if premium code should run (Freemius).
+ * Check if user has premium access (either via premium code or Premium plan).
+ * This handles the case where user sees "Your plan was successfully changed to Premium" 
+ * but premium code isn't active yet.
  *
- * @return bool
+ * @return bool True if user has premium access
+ * @since 2.4.2
  */
-function kognetiks_insights_is_premium() {
-
+function chatbot_chatgpt_is_premium() {
     if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
         return false;
     }
@@ -29,14 +31,23 @@ function kognetiks_insights_is_premium() {
         return false;
     }
 
-    // Use the correct Freemius method that checks both is_premium() and can_use_premium_code()
+    // Check if user can use premium code
+    $can_use_premium = false;
     if ( method_exists( $fs, 'can_use_premium_code__premium_only' ) ) {
-        return (bool) $fs->can_use_premium_code__premium_only();
+        $can_use_premium = (bool) $fs->can_use_premium_code__premium_only();
+    } elseif ( method_exists( $fs, 'can_use_premium_code' ) ) {
+        $can_use_premium = (bool) $fs->can_use_premium_code();
     }
 
-    // Fallback: check can_use_premium_code() if the premium-only method doesn't exist
-    if ( method_exists( $fs, 'can_use_premium_code' ) ) {
-        return (bool) $fs->can_use_premium_code();
+    // Also check if user is on Premium plan (in case they upgraded but premium code not activated yet)
+    $is_premium_plan = false;
+    if ( method_exists( $fs, 'is_plan' ) ) {
+        $is_premium_plan = $fs->is_plan( 'premium', false ); // Check for premium or higher plans
+    }
+
+    // Return true if user can use premium code OR is on Premium plan
+    if ( $can_use_premium || $is_premium_plan ) {
+        return true;
     }
 
     // Additional fallbacks (in case method availability differs by SDK version)
@@ -49,7 +60,23 @@ function kognetiks_insights_is_premium() {
     }
 
     return false;
-    
+}
+
+/**
+ * Returns true if premium code should run (Freemius).
+ * Updated to also check Premium plan status for users who upgraded but haven't activated premium code yet.
+ *
+ * @return bool
+ * @since 2.4.2
+ */
+function kognetiks_insights_is_premium() {
+
+    if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
+        return false;
+    }
+
+    // Use the shared premium check function
+    return chatbot_chatgpt_is_premium();
 }
 
 

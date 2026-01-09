@@ -48,7 +48,7 @@ function chatbot_chatgpt_schedule_conversation_digest() {
     // Check if premium - free users are limited to Weekly
     // Note: Don't modify the saved value here - use it as-is for scheduling
     // The sanitization callback will handle validation and resetting if needed
-    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
     if (!$is_premium) {
         $frequency = 'weekly'; // Use Weekly for free users (but don't modify the DB value)
     }
@@ -125,7 +125,7 @@ function chatbot_chatgpt_send_conversation_digest() {
     }
     
     // Check if premium - free users get limited content
-    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
     
     // Organize conversations by session
     $conversations_by_session = array();

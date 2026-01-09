@@ -217,8 +217,8 @@ function chatbot_chatgpt_reporting_section_callback($args) {
 }
 
 function chatbot_chatgpt_conversation_digest_section_callback($args) {
-    // Check if premium is enabled
-    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    // Check if premium is enabled (includes Premium plan check for users who upgraded)
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
     $is_free = !$is_premium;
     
     // Get current values for conditional display
@@ -677,8 +677,8 @@ function chatbot_chatgpt_conversation_digest_enabled_callback($args) {
 
 // Conversation Digest Frequency - Ver 2.3.9
 function chatbot_chatgpt_conversation_digest_frequency_callback($args) {
-    // Check if premium is enabled
-    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    // Check if premium is enabled (includes Premium plan check for users who upgraded)
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
     
     // Get the saved chatbot_chatgpt_conversation_digest_frequency value (stored as lowercase)
     // Note: Do NOT modify the saved value here - only display it
@@ -732,8 +732,8 @@ function chatbot_chatgpt_insights_email_enabled_callback($args) {
 
 // Insights Email Frequency (Report Frequency)
 function chatbot_chatgpt_insights_email_frequency_callback($args) {
-    // Check if premium is enabled
-    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    // Check if premium is enabled (includes Premium plan check for users who upgraded)
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
     
     // Get the saved chatbot_chatgpt_insights_email_frequency value (stored as lowercase)
     // Note: Do NOT modify the saved value here - only display it
@@ -1519,8 +1519,8 @@ function chatbot_chatgpt_sanitize_conversation_digest_frequency($value) {
         $value = $_POST['chatbot_chatgpt_conversation_digest_frequency'];
     }
     
-    // Check if premium is enabled
-    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    // Check if premium is enabled (includes Premium plan check for users who upgraded)
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
     
     // Sanitize and normalize to lowercase (best practice: store lowercase in DB)
     $value = sanitize_text_field($value);
@@ -1588,8 +1588,8 @@ function chatbot_chatgpt_sanitize_insights_email_frequency($value) {
         $value = $_POST['chatbot_chatgpt_insights_email_frequency'];
     }
     
-    // Check if premium is enabled
-    $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+    // Check if premium is enabled (includes Premium plan check for users who upgraded)
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
     
     // Sanitize and normalize to lowercase (best practice: store lowercase in DB)
     $value = sanitize_text_field($value);
@@ -1792,7 +1792,7 @@ function chatbot_chatgpt_ensure_email_report_settings_saved() {
     
     if (isset($_POST['chatbot_chatgpt_conversation_digest_frequency'])) {
         $value = strtolower(trim(sanitize_text_field($_POST['chatbot_chatgpt_conversation_digest_frequency'])));
-        $is_premium = function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only();
+        $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
         $allowed = $is_premium ? array('hourly', 'daily', 'weekly') : array('weekly');
         if (in_array($value, $allowed)) {
             $current = get_option('chatbot_chatgpt_conversation_digest_frequency');

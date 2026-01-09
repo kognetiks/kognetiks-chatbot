@@ -776,27 +776,29 @@ function chatbot_chatgpt_settings_page() {
                 // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->is_plan( 'premium' ));
                 // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
 
-                if ( chatbot_chatgpt_freemius()->can_use_premium_code__premium_only() ) {
-                    // Ensure Insights files are loaded (in case they weren't loaded at plugin init)
-                    if ( ! function_exists( 'kognetiks_insights_settings_page' ) ) {
-                        $plugin_dir = dirname( dirname( __FILE__ ) );
-                        $insights_files = array(
-                            'includes/insights/scoring-models/sentiment-analysis.php',
-                            'includes/insights/automated-emails.php',
-                            'includes/insights/chatbot-insights.php',
-                            'includes/insights/globals.php',
-                            'includes/insights/insights-settings.php',
-                            'includes/insights/languages/en_US.php',
-                            'includes/insights/utilities.php'
-                        );
+                // Check if user has premium access (either via premium code or Premium plan)
+                $has_premium_access = false;
+                if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
+                    $fs = chatbot_chatgpt_freemius();
+                    if ( is_object( $fs ) ) {
+                        // Check if user can use premium code
+                        if ( method_exists( $fs, 'can_use_premium_code__premium_only' ) ) {
+                            $has_premium_access = $fs->can_use_premium_code__premium_only();
+                        } elseif ( method_exists( $fs, 'can_use_premium_code' ) ) {
+                            $has_premium_access = $fs->can_use_premium_code();
+                        }
                         
-                        foreach ( $insights_files as $file ) {
-                            $file_path = $plugin_dir . '/' . $file;
-                            if ( file_exists( $file_path ) ) {
-                                require_once $file_path;
-                            }
+                        // Also check if user is on Premium plan (in case they upgraded but premium code not activated yet)
+                        if ( ! $has_premium_access && method_exists( $fs, 'is_plan' ) ) {
+                            $has_premium_access = $fs->is_plan( 'premium', false ); // Check for premium or higher plans
                         }
                     }
+                }
+
+                if ( $has_premium_access ) {
+                    // Ensure Insights files are loaded (in case they weren't loaded at plugin init)
+                    // This handles the case where user upgraded but files weren't loaded yet
+                    chatbot_chatgpt_load_insights_files();
                     
                     // Load the actual insights functionality
                     if (function_exists('kognetiks_insights_settings_page')) {
