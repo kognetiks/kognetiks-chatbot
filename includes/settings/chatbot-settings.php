@@ -263,8 +263,12 @@ function chatbot_chatgpt_settings_page() {
                 settings_fields('chatbot_chatgpt_settings');
 
                 // Breadcrumb info line - Ver 2.4.1
-                $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
-                echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
+                // Only show to free users (Premium users already have access to these features)
+                $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
+                if (!$is_premium) {
+                    $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
+                    echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
+                }
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_bot_settings_general');
@@ -776,24 +780,10 @@ function chatbot_chatgpt_settings_page() {
                 // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->is_plan( 'premium' ));
                 // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
 
-                // Check if user has premium access (either via premium code or Premium plan)
-                $has_premium_access = false;
-                if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
-                    $fs = chatbot_chatgpt_freemius();
-                    if ( is_object( $fs ) ) {
-                        // Check if user can use premium code
-                        if ( method_exists( $fs, 'can_use_premium_code__premium_only' ) ) {
-                            $has_premium_access = $fs->can_use_premium_code__premium_only();
-                        } elseif ( method_exists( $fs, 'can_use_premium_code' ) ) {
-                            $has_premium_access = $fs->can_use_premium_code();
-                        }
-                        
-                        // Also check if user is on Premium plan (in case they upgraded but premium code not activated yet)
-                        if ( ! $has_premium_access && method_exists( $fs, 'is_plan' ) ) {
-                            $has_premium_access = $fs->is_plan( 'premium', false ); // Check for premium or higher plans
-                        }
-                    }
-                }
+                // Check if user has premium access using the centralized helper function
+                // This follows Freemius best practices for premium status checks
+                // (CHATBOT_CHATGPT_FORCE_FREE_MODE is DEV/TESTING ONLY and not used in production)
+                $has_premium_access = function_exists( 'chatbot_chatgpt_is_premium' ) ? chatbot_chatgpt_is_premium() : false;
 
                 if ( $has_premium_access ) {
                     // Ensure Insights files are loaded (in case they weren't loaded at plugin init)
@@ -902,8 +892,12 @@ function chatbot_chatgpt_settings_page() {
                 settings_fields('chatbot_chatgpt_support');
 
                 // Breadcrumb info line - Ver 2.4.1
-                $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
-                echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
+                // Only show to free users (Premium users already have access to these features)
+                $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
+                if (!$is_premium) {
+                    $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
+                    echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
+                }
 
                 echo '<div style="background-color: #f9f9f9; padding: 20px; margin-top: 10px; border: 1px solid #ccc;">';
                 do_settings_sections('chatbot_chatgpt_support');

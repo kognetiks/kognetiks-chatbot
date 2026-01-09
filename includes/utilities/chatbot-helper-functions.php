@@ -18,10 +18,24 @@ if ( ! defined( 'WPINC' ) ) {
  * This handles the case where user sees "Your plan was successfully changed to Premium" 
  * but premium code isn't active yet.
  *
+ * IMPORTANT: This function follows Freemius best practices for checking premium status.
+ * The CHATBOT_CHATGPT_FORCE_FREE_MODE constant is DEV/TESTING ONLY and should NEVER
+ * be used in production. It's only for local development/testing purposes.
+ *
  * @return bool True if user has premium access
  * @since 2.4.2
  */
 function chatbot_chatgpt_is_premium() {
+    // DEV/TESTING ONLY: Allow forcing free mode for local testing via WordPress constant
+    // DO NOT USE IN PRODUCTION - This is only for development/testing environments
+    // Add to wp-config.php for testing: define('CHATBOT_CHATGPT_FORCE_FREE_MODE', true);
+    // Production code should rely solely on Freemius premium status checks below
+    if ( defined( 'CHATBOT_CHATGPT_FORCE_FREE_MODE' ) && CHATBOT_CHATGPT_FORCE_FREE_MODE ) {
+        return false;
+    }
+    
+    // PRODUCTION CODE: Follow Freemius best practices for premium status checks
+    
     if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
         return false;
     }

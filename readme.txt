@@ -156,9 +156,11 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.4.2 - TBD =
+= 2.4.2 - Released 2026-01-09 =
 
-* **Bug Fixes**: Minor bug fixes and improvements.
+### Bug Fixes
+
+* **Bug Fixes**: Premimum features bug fixes and improvements.
 
 = 2.4.1 - Released 2026-01-06 =
 

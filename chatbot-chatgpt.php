@@ -283,6 +283,9 @@ require_once plugin_dir_path(__FILE__) . 'tools/chatbot-shortcode-tester-tool.ph
  * Dynamically load Insights files when premium status is detected
  * This function can be called on-demand to load Insights files after plan upgrades
  * 
+ * NOTE: Uses chatbot_chatgpt_is_premium() which follows Freemius best practices.
+ * The CHATBOT_CHATGPT_FORCE_FREE_MODE constant (if used) is DEV/TESTING ONLY.
+ * 
  * @return bool True if files were loaded, false otherwise
  * @since 2.4.2
  */
@@ -292,32 +295,17 @@ function chatbot_chatgpt_load_insights_files() {
         return true;
     }
     
-    // Check if user has premium access
-    if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
+    // Check if user has premium access using the centralized helper function
+    // This follows Freemius best practices and respects CHATBOT_CHATGPT_FORCE_FREE_MODE
+    // (which is DEV/TESTING ONLY and should never be used in production)
+    if ( ! function_exists( 'chatbot_chatgpt_is_premium' ) ) {
         return false;
     }
     
-    $fs = chatbot_chatgpt_freemius();
-    if ( ! is_object( $fs ) ) {
-        return false;
-    }
+    $has_premium_access = chatbot_chatgpt_is_premium();
     
-    // Check if user can use premium code (either has premium code or is on Premium plan)
-    $can_use_premium = false;
-    if ( method_exists( $fs, 'can_use_premium_code__premium_only' ) ) {
-        $can_use_premium = $fs->can_use_premium_code__premium_only();
-    } elseif ( method_exists( $fs, 'can_use_premium_code' ) ) {
-        $can_use_premium = $fs->can_use_premium_code();
-    }
-    
-    // Also check if user is on Premium plan (in case they upgraded but premium code not activated yet)
-    $is_premium_plan = false;
-    if ( method_exists( $fs, 'is_plan' ) ) {
-        $is_premium_plan = $fs->is_plan( 'premium', false ); // Check for premium or higher plans
-    }
-    
-    // Load files if user has premium access OR is on Premium plan
-    if ( $can_use_premium || $is_premium_plan ) {
+    // Load files if user has premium access
+    if ( $has_premium_access ) {
         $plugin_dir = plugin_dir_path(__FILE__);
         $insights_files = array(
             'includes/insights/scoring-models/sentiment-analysis.php',

@@ -112,7 +112,10 @@ function chatbot_chatgpt_reporting_settings_init() {
     );
     
     // Only register premium-only fields if premium is enabled
-    if (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only()) {
+    // Uses centralized helper function following Freemius best practices
+    // (CHATBOT_CHATGPT_FORCE_FREE_MODE is DEV/TESTING ONLY)
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
+    if ($is_premium) {
         
         // Insights Email Settings Field - Enabled (shown in card, label handled there)
         add_settings_field(
