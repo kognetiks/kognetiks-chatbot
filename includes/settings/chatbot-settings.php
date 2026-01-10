@@ -259,8 +259,13 @@ function chatbot_chatgpt_settings_page() {
 
                 // Breadcrumb info line - Ver 2.4.1
                 // Only show to free users (Premium users already have access to these features)
+                // Hide if admin notice was dismissed (linked to same discovery unit)
                 $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
-                if (!$is_premium) {
+                $dismissed  = function_exists('chatbot_chatgpt_get_option')
+                    ? chatbot_chatgpt_get_option('chatbot_chatgpt_reporting_notice_dismissed', '0')
+                    : get_option('chatbot_chatgpt_reporting_notice_dismissed', '0');
+                
+                if ( ! $is_premium && $dismissed !== '1' ) {
                     $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
                     echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
                 }
@@ -836,7 +841,7 @@ function chatbot_chatgpt_settings_page() {
                     echo '<p>Reports delivered automatically. No dashboard monitoring required.</p>';
                     echo '<p>';
                     echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">🔓 Unlock Conversation Insights</a>';
-                    echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=insights-package&file=insights-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
+                    echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=insights-package&file=analytics-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
                     echo '<a href="mailto:support@kognetiks.com">Contact Support</a>';
                     echo '</p>';
 
@@ -882,8 +887,13 @@ function chatbot_chatgpt_settings_page() {
 
                 // Breadcrumb info line - Ver 2.4.1
                 // Only show to free users (Premium users already have access to these features)
+                // Hide if admin notice was dismissed (linked to same discovery unit)
                 $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
-                if (!$is_premium) {
+                $dismissed  = function_exists('chatbot_chatgpt_get_option')
+                    ? chatbot_chatgpt_get_option('chatbot_chatgpt_reporting_notice_dismissed', '0')
+                    : get_option('chatbot_chatgpt_reporting_notice_dismissed', '0');
+                
+                if ( ! $is_premium && $dismissed !== '1' ) {
                     $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
                     echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
                 }

@@ -34,7 +34,7 @@ The **Insights** tab provides a powerful dashboard to help you track, measure, a
 
 The insights dashboard summarizes data for sentiment analysis, engagement analysis, message and session statistics, and token usage. You can quickly evaluate period-over-period changes in total conversations, unique visitors, average sentiment scores, and positive conversations. To give you further insights, you can filter for visitors only, chatbot responses only, or both together.
 
-![Analysis](insights-package.png)
+![Analysis](analytics-package.png)
 
 > ℹ️ **Note**: This feature is available to all users. Make sure conversation logging is enabled to see insights data.
 

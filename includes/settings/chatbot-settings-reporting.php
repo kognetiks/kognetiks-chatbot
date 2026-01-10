@@ -713,7 +713,7 @@ function chatbot_chatgpt_conversation_digest_email_callback($args) {
     $email_value = esc_attr(get_option('chatbot_chatgpt_conversation_digest_email', ''));
     ?>
     <input type="email" id="chatbot_chatgpt_conversation_digest_email" name="chatbot_chatgpt_conversation_digest_email" value="<?php echo esc_attr($email_value); ?>" class="regular-text" />
-    <p class="description">Enter the email address where conversation digests should be sent.</p>
+    <p class="description">Enter the email address where proof of value reports should be sent.</br>NOTE: Remember to 'Save Changes' after updating the email address.</p>
     <?php
 }
 
@@ -768,7 +768,7 @@ function chatbot_chatgpt_insights_email_address_callback($args) {
     $email_value = esc_attr(get_option('chatbot_chatgpt_insights_email_address', ''));
     ?>
     <input type="email" id="chatbot_chatgpt_insights_email_address" name="chatbot_chatgpt_insights_email_address" value="<?php echo esc_attr($email_value); ?>" class="regular-text" />
-    <p class="description">Enter the email address where proof of value reports should be sent.</p>
+    <p class="description">Enter the email address where proof of value reports should be sent.</br>NOTE: Remember to 'Save Changes' after updating the email address.</p>
     <?php
 }
 
@@ -1635,12 +1635,20 @@ function chatbot_chatgpt_handle_conversation_digest_scheduling($old_value, $new_
     // Get the old enabled value
     $old_enabled = $old_value;
     
-    // If enabled changed from No to Yes, schedule the cron
+    // If Conversation Digest is being enabled, automatically enable Conversation Logging
     if ($old_enabled === 'No' && $enabled === 'Yes') {
+        $logging_enabled = get_option('chatbot_chatgpt_enable_conversation_logging', 'Off');
+        if ($logging_enabled !== 'On') {
+            update_option('chatbot_chatgpt_enable_conversation_logging', 'On');
+        }
         chatbot_chatgpt_schedule_conversation_digest();
     }
     // Also handle case where it's already Yes (in case it wasn't scheduled before)
     elseif ($enabled === 'Yes') {
+        $logging_enabled = get_option('chatbot_chatgpt_enable_conversation_logging', 'Off');
+        if ($logging_enabled !== 'On') {
+            update_option('chatbot_chatgpt_enable_conversation_logging', 'On');
+        }
         chatbot_chatgpt_schedule_conversation_digest();
     }
     // If enabled changed from Yes to No, unschedule the cron
@@ -1682,8 +1690,12 @@ function chatbot_chatgpt_handle_insights_email_scheduling($old_value, $new_value
     // Get the old enabled value
     $old_enabled = $old_value;
     
-    // If enabled changed from No to Yes, schedule the cron
+    // If Proof of Value is being enabled, automatically enable Conversation Logging
     if ($old_enabled === 'No' && $enabled === 'Yes') {
+        $logging_enabled = get_option('chatbot_chatgpt_enable_conversation_logging', 'Off');
+        if ($logging_enabled !== 'On') {
+            update_option('chatbot_chatgpt_enable_conversation_logging', 'On');
+        }
         $period = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
         $email = get_option('chatbot_chatgpt_insights_email_address', '');
         if (function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
@@ -1710,6 +1722,10 @@ function chatbot_chatgpt_handle_insights_email_scheduling($old_value, $new_value
     }
     // If enabled is Yes, check if we need to reschedule (period might have changed)
     elseif ($enabled === 'Yes') {
+        $logging_enabled = get_option('chatbot_chatgpt_enable_conversation_logging', 'Off');
+        if ($logging_enabled !== 'On') {
+            update_option('chatbot_chatgpt_enable_conversation_logging', 'On');
+        }
         $period = get_option('chatbot_chatgpt_insights_email_frequency', 'weekly');
         $email = get_option('chatbot_chatgpt_insights_email_address', '');
         if (function_exists('kognetiks_insights_schedule_proof_of_value_email')) {
@@ -1772,6 +1788,13 @@ function chatbot_chatgpt_ensure_email_report_settings_saved() {
             $current = get_option('chatbot_chatgpt_conversation_digest_enabled');
             if ($current !== $value) {
                 update_option('chatbot_chatgpt_conversation_digest_enabled', $value);
+                // If Conversation Digest is being enabled, automatically enable Conversation Logging
+                if ($value === 'Yes') {
+                    $logging_enabled = get_option('chatbot_chatgpt_enable_conversation_logging', 'Off');
+                    if ($logging_enabled !== 'On') {
+                        update_option('chatbot_chatgpt_enable_conversation_logging', 'On');
+                    }
+                }
             }
         }
     }
@@ -1803,6 +1826,13 @@ function chatbot_chatgpt_ensure_email_report_settings_saved() {
             $current = get_option('chatbot_chatgpt_insights_email_enabled');
             if ($current !== $value) {
                 update_option('chatbot_chatgpt_insights_email_enabled', $value);
+                // If Proof of Value is being enabled, automatically enable Conversation Logging
+                if ($value === 'Yes') {
+                    $logging_enabled = get_option('chatbot_chatgpt_enable_conversation_logging', 'Off');
+                    if ($logging_enabled !== 'On') {
+                        update_option('chatbot_chatgpt_enable_conversation_logging', 'On');
+                    }
+                }
             }
         }
     }
