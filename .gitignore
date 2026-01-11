@@ -21,19 +21,17 @@ package.json
 /debug/
 # package.json is now needed for Snyk configuration
 # package.json
-COMPARISON-ANALYSIS.md
 CHANGELOG-ENTRY.md
 CHANGELOG-GENERATOR.md
 DEPLOYMENT-READINESS.md
 DEPLOYMENT.md
 GIT-COMMANDS.md
+LOCAL-AI MODEL.md
 includes/insights/DEFINITIONS.md
 QUERIES.md
 READINESS-REPORT.md
-TESTING-STRATEGY.md
 TESTS.md
 TODO.md
-
 
 # Ignore all files in the results folder
 results/*
@@ -60,8 +58,6 @@ includes/transformers/lexical_embeddings_cache/*
 includes/transformers/sentential_embeddings_cache.php
 includes/transformers/lexical_embeddings_cache.php
 includes/tools/test-jan-ai.php
-GIT-COMMANDS.md
-LOCAL-AI MODEL.md
 
 # Ignore compressed cache files
 *.gz
