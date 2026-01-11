@@ -364,10 +364,27 @@ function chatbot_chatgpt_insights_period_filter_handler() {
 if ( function_exists( 'chatbot_chatgpt_is_premium' ) && chatbot_chatgpt_is_premium() ) {
     chatbot_chatgpt_load_insights_files();
 } elseif ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
-    // Fallback: check can_use_premium_code for backward compatibility
+    // Fallback: use same logic as chatbot_chatgpt_is_premium()
     $fs = chatbot_chatgpt_freemius();
-    if ( is_object( $fs ) && method_exists( $fs, 'can_use_premium_code' ) && $fs->can_use_premium_code() ) {
-        chatbot_chatgpt_load_insights_files();
+    if ( is_object( $fs ) ) {
+        // Detect whether we are running inside the premium build
+        $running_premium_build = false;
+        if ( method_exists( $fs, 'is__premium_only' ) ) {
+            $running_premium_build = $fs->is__premium_only();
+        }
+        
+        // Check if paying
+        if ( method_exists( $fs, 'is_paying' ) && $fs->is_paying() ) {
+            chatbot_chatgpt_load_insights_files();
+        }
+        // Check if has active valid license
+        elseif ( method_exists( $fs, 'has_active_valid_license' ) && $fs->has_active_valid_license() ) {
+            chatbot_chatgpt_load_insights_files();
+        }
+        // Check if in trial (only grant access if running premium build)
+        elseif ( method_exists( $fs, 'is_trial' ) && $fs->is_trial() && $running_premium_build ) {
+            chatbot_chatgpt_load_insights_files();
+        }
     }
 }
 

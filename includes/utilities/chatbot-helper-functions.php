@@ -14,18 +14,21 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Check if user has premium access (either via premium code or Premium plan).
- * This handles the case where user sees "Your plan was successfully changed to Premium" 
- * but premium code isn't active yet.
+ * Check if user has premium access.
+ * 
+ * IMPORTANT: In the FREE plugin build, trial does NOT unlock premium features.
+ * Trial + premium functionality requires installing the premium ZIP/plugin.
+ * Paid license can still unlock premium (even in free build).
  *
- * IMPORTANT: This function follows Freemius best practices for checking premium status.
+ * Premium access rules:
+ * - If user is paying OR has active valid license: return true
+ * - If user is in trial: return true ONLY if running premium build
+ * - Otherwise return false
  *
  * @return bool True if user has premium access
  * @since 2.4.2
  */
 function chatbot_chatgpt_is_premium() {
-    
-    // PRODUCTION CODE: Follow Freemius best practices for premium status checks
     
     if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
         return false;
@@ -36,49 +39,38 @@ function chatbot_chatgpt_is_premium() {
         return false;
     }
 
-    // PRIMARY CHECK: can_use_premium_code() works with free codebase
-    // This returns true if user is in trial OR has a valid license
-    // This is the most reliable check for freemium model (same codebase, features unlock by license)
-    if ( method_exists( $fs, 'can_use_premium_code' ) ) {
-        if ( $fs->can_use_premium_code() ) {
-            return true; // User has trial or valid license - grant premium access
-        }
+    // Detect whether we are running inside the premium build
+    // Use safe checks: method_exists() so free build doesn't fatal
+    $running_premium_build = false;
+    if ( method_exists( $fs, 'is__premium_only' ) ) {
+        $running_premium_build = $fs->is__premium_only();
     }
 
-    // SECONDARY CHECK: is_paying_or_trial() - works with free codebase
-    // This checks if user is paying or in trial (requires registration)
-    if ( method_exists( $fs, 'is_paying_or_trial' ) ) {
-        if ( $fs->is_paying_or_trial() ) {
+    // PRIMARY CHECK: If user is paying, grant premium access
+    // This works in both free and premium builds
+    if ( method_exists( $fs, 'is_paying' ) ) {
+        if ( $fs->is_paying() ) {
             return true;
         }
     }
 
-    // TERTIARY CHECK: Check if user is on Premium plan (works with free codebase)
-    // This handles upgrades where plan changed but license not yet synced
-    $is_premium_plan = false;
-    if ( method_exists( $fs, 'is_plan' ) ) {
-        $is_premium_plan = $fs->is_plan( 'premium', false ); // Check for premium or higher plans
-    }
-    
-    // Also check trial plan specifically (for freemium model)
-    if ( ! $is_premium_plan && method_exists( $fs, 'is_trial_plan' ) ) {
-        $is_premium_plan = $fs->is_trial_plan( 'premium', false );
-    }
-
-    // Return true if user is on Premium plan
-    if ( $is_premium_plan ) {
-        return true;
-    }
-
-    // Additional fallbacks (in case method availability differs by SDK version)
+    // SECONDARY CHECK: If user has active valid license, grant premium access
+    // This works in both free and premium builds
     if ( method_exists( $fs, 'has_active_valid_license' ) ) {
-        return (bool) $fs->has_active_valid_license();
+        if ( $fs->has_active_valid_license() ) {
+            return true;
+        }
     }
 
-    if ( method_exists( $fs, 'is_paying' ) ) {
-        return (bool) $fs->is_paying();
+    // TERTIARY CHECK: If user is in trial, grant premium access ONLY if running premium build
+    // In free build, trial does NOT unlock premium features
+    if ( method_exists( $fs, 'is_trial' ) ) {
+        if ( $fs->is_trial() ) {
+            return $running_premium_build;
+        }
     }
 
+    // No premium access
     return false;
 }
 

@@ -306,3 +306,119 @@ function chatbot_chatgpt_reporting_notice() {
     echo '</div>';
 }
 add_action('admin_notices', 'chatbot_chatgpt_reporting_notice');
+
+// Display notice for users in trial but not running premium build - Ver 2.4.2
+function chatbot_chatgpt_trial_premium_build_notice() {
+    // Only show on plugin admin pages
+    if (!isset($_GET['page']) || $_GET['page'] !== 'chatbot-chatgpt') {
+        return;
+    }
+    
+    // Only show to users who can manage options
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    
+    // Check if Freemius is available
+    if (!function_exists('chatbot_chatgpt_freemius')) {
+        return;
+    }
+    
+    $fs = chatbot_chatgpt_freemius();
+    if (!is_object($fs)) {
+        return;
+    }
+    
+    // Detect if running premium build
+    $running_premium_build = false;
+    if (method_exists($fs, 'is__premium_only')) {
+        $running_premium_build = $fs->is__premium_only();
+    }
+    
+    // If running premium build, don't show notice
+    if ($running_premium_build) {
+        return;
+    }
+    
+    // Check if user is in trial
+    $is_trial = false;
+    if (method_exists($fs, 'is_trial')) {
+        $is_trial = $fs->is_trial();
+    }
+    
+    // If not in trial, don't show notice
+    if (!$is_trial) {
+        return;
+    }
+    
+    // Check if user is paying (if paying, they have premium access even in free build)
+    $is_paying = false;
+    if (method_exists($fs, 'is_paying')) {
+        $is_paying = $fs->is_paying();
+    }
+    
+    // If paying, don't show notice
+    if ($is_paying) {
+        return;
+    }
+    
+    // Check if notice was dismissed
+    $dismissed = chatbot_chatgpt_get_option('chatbot_chatgpt_trial_premium_build_notice_dismissed', '0');
+    if ($dismissed === '1') {
+        return;
+    }
+    
+    // Build dismiss URL
+    $current_tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : 'general';
+    $dismiss_url = add_query_arg(
+        array(
+            'page' => 'chatbot-chatgpt',
+            'tab' => $current_tab,
+            'kchat_dismiss_trial_premium_notice' => '1',
+            '_wpnonce' => wp_create_nonce('kchat_dismiss_trial_premium_notice'),
+        ),
+        admin_url('admin.php')
+    );
+    
+    // Display notice
+    echo '<div class="notice notice-info is-dismissible">';
+    echo '<p><strong>Kognetiks Chatbot:</strong> Your trial is active. Please install the Premium version to access trial features.</p>';
+    echo '<p>';
+    echo '<a href="' . esc_url($dismiss_url) . '" class="button">Dismiss</a>';
+    echo '</p>';
+    echo '</div>';
+}
+add_action('admin_notices', 'chatbot_chatgpt_trial_premium_build_notice');
+
+// Handle dismissal of trial premium build notice - Ver 2.4.2
+function chatbot_chatgpt_dismiss_trial_premium_notice() {
+    // Only process on plugin admin pages
+    if (!isset($_GET['page']) || $_GET['page'] !== 'chatbot-chatgpt') {
+        return;
+    }
+    
+    // Check if dismissal was requested
+    if (!isset($_GET['kchat_dismiss_trial_premium_notice']) || $_GET['kchat_dismiss_trial_premium_notice'] !== '1') {
+        return;
+    }
+    
+    // Verify user capability
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    
+    // Verify nonce
+    if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'kchat_dismiss_trial_premium_notice')) {
+        return;
+    }
+    
+    // Mark notice as dismissed
+    chatbot_chatgpt_update_option('chatbot_chatgpt_trial_premium_build_notice_dismissed', '1');
+    
+    // Redirect back to same page without query args
+    $current_tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : 'general';
+    $redirect_url = remove_query_arg(array('kchat_dismiss_trial_premium_notice', '_wpnonce'), admin_url('admin.php?page=chatbot-chatgpt&tab=' . $current_tab));
+    wp_safe_redirect($redirect_url);
+    exit;
+}
+add_action('admin_init', 'chatbot_chatgpt_dismiss_trial_premium_notice');
