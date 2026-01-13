@@ -1,10 +1,10 @@
 # **Kognetiks Chatbot** Plugin Documentation
 
-**Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate conversational chat from OpenAI, Azure, NVIDIA, Anthropic, DeepSeek, local models using open-source servers into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
+**Kognetiks Chatbot** is a plugin that allows you to effortlessly integrate conversational chat from OpenAI, Azure, Mistral, NVIDIA, Anthropic, DeepSeek, or local models using open-source servers into your website, providing a powerful, AI-driven chatbot for enhanced user experience and personalized support.
 
-Conversational AI platforms - like those from OpenAI, NVIDIA, and others - use natural language processing and machine learning algorithms to interact with users in a human-like manner. They are designed to answer questions, provide suggestions, and engage in conversations with users. This is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, these platforms can be used in various fields such as healthcare, education, finance, and many more.
+Conversational AI platforms - like those from OpenAI, Azure, Mistral, NVIDIA, Anthropic, DeepSeek, local AI servers, and others - use natural language processing and machine learning algorithms to interact with users in a human-like manner. They are designed to answer questions, provide suggestions, and engage in conversations with users. This is important because it can provide assistance and support to people who need it, especially in situations where human support is not available or is limited. It can also be used to automate customer service, reduce response times, and improve customer satisfaction. Moreover, these platforms can be used in various fields such as healthcare, education, finance, and many more.
 
-The **Kognetiks Chatbot** is powered by OpenAI, NVIDIA, Anthropic or other AI platforms, via their APIs and Models to bring artificial intelligence to life within your WordPress website.
+The **Kognetiks Chatbot** is powered by OpenAI, Azure, Mistral, NVIDIA, Anthropic, DeepSeek, or other AI platforms, via their APIs and Models to bring artificial intelligence to life within your WordPress website.
 
 ## External Services
 
@@ -48,13 +48,11 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 * **Bug Fixes**: Minor bug fixes and improvements.
 
-## What's new in Version 2.4.1
-
-* **Bug Fixes**: Resolved minor issues and bugs identified after release of version 2.4.0.
-
 ## Past Updates
 
 * Information about past updates can be found [here](updates/updates.md).
+
+---
 
 ## Quick Start
 
@@ -66,57 +64,89 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Frequently Asked Questions](support/faqs.md)
 
-## Sections
+---
 
-- [General](settings/settings.md)
+## 🧱 Core Setup  
+*Make it work*
 
-- [API/ChatGPT Settings](api-chatgpt-settings/api-chatgpt-model-settings.md)
-
-- [API/Azure OpenAI Settings](api-azure-openai-settings/api-azure-openai-model-settings.md)
-
-- [API/NVIDIA Settings](api-nvidia-settings/api-nvidia-model-settings.md)
-
-- [API/Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)
-
-- [API/DeepSeek Settings](api-deepseek-settings/api-deepseek-model-settings.md)
-
-- [API/Google Settings](api-google-settings/api-google-model-settings.md)
-
-- [API/Mistral Settings](api-mistral-settings/api-mistral-model-settings.md)
-
-- [API/Local Server Settings](api-local-settings/api-local-model-settings.md)
-
-- [Assistants](assistants/manage-assistants.md)
-
-- [Avatars](avatars/avatars.md)
-
-- [Appearance](appearance/appearance.md)
-
-- [Buttons](buttons/buttons.md)
-
-- [Knowledge Navigator](knowledge-navigator/knowledge-navigator.md)
-
-- [Knowledge Navigator Analysis](knowledge-navigator/knowledge-navigator-analysis.md)
-
-- [Dashboard Widget](dashboard/dashboard.md)
-
-- [Reporting](reporting/reporting.md)
-
-- [Tools](tools/tools.md)
-
+- [General](settings/settings.md)  
 - [Messages](messages/messages.md)
 
 ---
 
-## Premium Features
+## 🤖 AI Engines & Models  
+*Choose how the chatbot thinks*
 
-- [Insights & Reporting](analytics-package/analytics-package.md)
-- [Conversation Digest Email](conversation-digest-email.md) – Complete guide to conversation digest emails
-- [Proof of Value Reports Email](proof-of-value-reports-email.md) – Complete guide to proof of value reports
+- [API / ChatGPT Settings](api-chatgpt-settings/api-chatgpt-model-settings.md)  
+- [API / Azure OpenAI Settings](api-azure-openai-settings/api-azure-openai-model-settings.md)  
+- [API / NVIDIA Settings](api-nvidia-settings/api-nvidia-model-settings.md)  
+- [API / Anthropic Settings](api-anthropic-settings/api-anthropic-model-settings.md)  
+- [API / DeepSeek Settings](api-deepseek-settings/api-deepseek-model-settings.md)  
+- [API / Google Settings](api-google-settings/api-google-model-settings.md)  
+- [API / Mistral Settings](api-mistral-settings/api-mistral-model-settings.md)  
+- [API / Local Server Settings](api-local-settings/api-local-model-settings.md)
 
-## Premium Subscription
+---
 
-- [Premium Support](premium-support/premium-support.md)
+## 🧠 Assistants & Knowledge  
+*What the chatbot knows*
+
+- [Assistants](assistants/manage-assistants.md)  
+- [Knowledge Navigator](knowledge-navigator/knowledge-navigator.md)  
+- [Knowledge Navigator Analysis](knowledge-navigator/knowledge-navigator-analysis.md)
+
+---
+
+## 🎨 Experience & Interface  
+*How it looks and behaves for visitors*
+
+- [Avatars](avatars/avatars.md)  
+- [Appearance](appearance/appearance.md)  
+- [Buttons](buttons/buttons.md)
+
+---
+
+## 👀 Visibility & Oversight  
+*What’s happening and when it matters*
+
+- [Dashboard Widget](dashboard/dashboard.md)  
+- [Reporting](reporting/reporting.md)  
+- [Insights](analytics/analytics.md)  
+- Conversation Digest *(configured within Reporting & Insights)*
+
+---
+
+## 🛠️ Utilities & Management  
+*Advanced and supporting tools*
+
+- [Tools](tools/tools.md)
+
+---
+
+## 🔐 Premium Capabilities
+
+Kognetiks Premium is designed to help you **stay aware**, **act with confidence**, and **demonstrate real value** from your chatbot — without constant monitoring.
+
+- **🧠 Insights & Reporting**  
+  Understand how conversations are performing over time, identify patterns, and spot when attention is needed.  
+  → [Insights & Reporting Overview](analytics-package/analytics-package.md)
+
+- **📧 Conversation Digest Email**  
+  Stay informed automatically with scheduled summaries of new chatbot conversations delivered to your inbox.  
+  → [Conversation Digest Email](conversation-digest-email.md)
+
+- **💎 Proof of Value Reports Email**  
+  Turn chatbot activity into clear, executive-ready summaries that demonstrate impact, performance, and ROI.  
+  → [Proof of Value Reports Email](proof-of-value-reports-email.md)
+
+---
+
+## 🧩 Premium Subscription & Support
+
+- **🎧 Premium Support**  
+  Priority assistance, guidance, and troubleshooting for Premium users running production chatbots.  
+  → [Premium Support](premium-support/premium-support.md)
+
 
 ---
 
@@ -124,13 +154,17 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Functional Details](specs/functional-details.md)
 
+---
+
 ## Beta Support
 
 - [Enabling Beta Features](beta-features/beta-features.md)
 
 - [API/Transformer Settings](api-transformer-settings/api-transformer-model-settings.md) **BETA FEATURE**
 
-## Support
+--- 
+
+## Connect with Support
 
 - [How the Kognetiks Chatbot Works](support/how-it-works.md)
 
@@ -142,9 +176,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Diagnostics - For Developers](support/diagnostics.md)
 
-## Demos
-
-- Coming Soon
+---
 
 ## Notice
 
