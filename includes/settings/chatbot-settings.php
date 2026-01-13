@@ -840,7 +840,19 @@ function chatbot_chatgpt_settings_page() {
                     echo '<h3>✅ Ready to Upgrade?</h3>';
                     echo '<p>Reports delivered automatically. No dashboard monitoring required.</p>';
                     echo '<p>';
-                    echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">🔓 Unlock Conversation Insights</a>';
+                    // Trial-first CTA with safety guards
+                    if (function_exists('chatbot_chatgpt_freemius')) {
+                        $fs = chatbot_chatgpt_freemius();
+                        if (is_object($fs) && method_exists($fs, 'get_trial_url')) {
+                            $trial_url = $fs->get_trial_url();
+                            echo '<a href="' . esc_url($trial_url) . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">Start Free Trial</a>';
+                        }
+                        // Secondary "View Plans" link
+                        if (is_object($fs) && method_exists($fs, 'get_upgrade_url')) {
+                            $upgrade_url = $fs->get_upgrade_url();
+                            echo '<a href="' . esc_url($upgrade_url) . '" class="button button-secondary" style="text-decoration: none; margin-right: 10px;">View Plans</a>';
+                        }
+                    }
                     echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=analytics-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
                     echo '<a href="mailto:support@kognetiks.com">Contact Support</a>';
                     echo '</p>';

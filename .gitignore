@@ -50,6 +50,7 @@ includes/transformers/lexical_embeddings_cache/*
 includes/transformers/sentential_embeddings_cache.php
 includes/transformers/lexical_embeddings_cache.php
 includes/tools/test-jan-ai.php
+includes/insights/DEFINITIONS.md
 
 # Ignore compressed cache files
 *.gz

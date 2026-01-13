@@ -411,13 +411,29 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
                     <span style="color: #00a32a; margin-right: 5px;">✓</span> Ready to Upgrade?
                 </p>
                 <?php
+                // Trial-first CTA with safety guards
                 if (function_exists('chatbot_chatgpt_freemius')) {
-                    $upgrade_url = chatbot_chatgpt_freemius()->get_upgrade_url();
-                    ?>
-                    <a href="<?php echo esc_url($upgrade_url); ?>" class="button button-primary" style="background-color: #f56e28; border-color: #f56e28; color: #fff; text-decoration: none; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 10px;">
-                        <span style="margin-right: 5px;">🔓</span> Unlock Your Chatbot's Value
-                    </a>
-                    <?php
+                    $fs = chatbot_chatgpt_freemius();
+                    if (is_object($fs)) {
+                        // Primary: Start Free Trial button
+                        if (method_exists($fs, 'get_trial_url')) {
+                            $trial_url = $fs->get_trial_url();
+                            ?>
+                            <a href="<?php echo esc_url($trial_url); ?>" class="button button-primary" style="background-color: #f56e28; border-color: #f56e28; color: #fff; text-decoration: none; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 10px; margin-right: 10px;">
+                                Start Free Trial
+                            </a>
+                            <?php
+                        }
+                        // Secondary: View Plans link
+                        if (method_exists($fs, 'get_upgrade_url')) {
+                            $upgrade_url = $fs->get_upgrade_url();
+                            ?>
+                            <a href="<?php echo esc_url($upgrade_url); ?>" class="button button-secondary" style="text-decoration: none; padding: 8px 16px; font-size: 14px; display: inline-block; margin-bottom: 10px;">
+                                View Plans
+                            </a>
+                            <?php
+                        }
+                    }
                 }
                 ?>
                 <div style="margin-top: 10px;">

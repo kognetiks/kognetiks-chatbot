@@ -380,10 +380,21 @@ function chatbot_chatgpt_trial_premium_build_notice() {
         admin_url('admin.php')
     );
     
+    // Get account/download URL for premium ZIP
+    $account_url = '';
+    if (method_exists($fs, 'get_account_url')) {
+        // Use get_account_url with download_latest action to get download page
+        $account_url = $fs->get_account_url('download_latest');
+    }
+    
     // Display notice
     echo '<div class="notice notice-info is-dismissible">';
     echo '<p><strong>Kognetiks Chatbot:</strong> Your trial is active. Please install the Premium version to access trial features.</p>';
     echo '<p>';
+    // Add button to download/access premium ZIP
+    if (!empty($account_url)) {
+        echo '<a href="' . esc_url($account_url) . '" class="button button-primary" style="margin-right: 10px;">Download Premium Version</a>';
+    }
     echo '<a href="' . esc_url($dismiss_url) . '" class="button">Dismiss</a>';
     echo '</p>';
     echo '</div>';
