@@ -26,7 +26,7 @@ Assistants work with both 'floating' and 'embedded' styles.
 
 These settings allow you to configure the behavior and capabilities of the Assistant in your Kognetiks Chatbot. Follow these steps to set up these options:
 
-![Managing Assistants](managing-assistants.png)
+<img src="managing-assistants.png" alt="Managing Assistants" style="width:auto;height:auto;">
 
 1. **Assistant ID or Agent ID**:
    - **Description**: This field is for specifying the primary Assistant ID.
@@ -87,7 +87,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 ## Assistant General Settings
 
-![Assistant General Settings](assistant-general-settings.png)
+<img src="assistant-general-settings.png" alt="Assistant General Settings" style="width:auto;height:auto;">
 
 1. **Allow File Uploads**:
    - **Description**: This setting allows users to upload files through the chatbot interface.
@@ -110,7 +110,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 **NOTE**: Applies only to OpenAI and OpenAI Azure Assistants.
 
-![Advanced Additional Settings](advanced-additional-settings.png)
+<img src="advanced-additional-settings.png" alt="Advanced Additional Settings" style="width:auto;height:auto;">
 
 1. **Max Prompt Tokens**:
    - **Description**: This setting determines the maximum number of tokens for the input prompt.
@@ -138,7 +138,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes, for example `kognetiks.com,chatbot-4` which will only allow calls from kognetiks.com and only then to chatbot-4.  Your resources are valuable, take appropriate precautions when allowing remote server access.
 
-![Remote Widget Settings](remote-widget-settings.png)
+<img src="remote-widget-settings.png" alt="Remote Widget Settings" style="width:auto;height:auto;">
 
 ### Field Descriptions
 

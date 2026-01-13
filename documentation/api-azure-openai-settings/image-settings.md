@@ -2,7 +2,7 @@
 
 To enhance your Kognetiks Chatbot with image generation capabilities, follow these steps to configure the Image Settings:
 
-![Images Settings](image-settings.png)
+<img src="image-settings.png" alt="Images Settings" style="width:auto;height:auto;">
 
 1. **Image Model Default**:
    - **Description**: This dropdown allows you to select the default image generation model the chatbot will use.

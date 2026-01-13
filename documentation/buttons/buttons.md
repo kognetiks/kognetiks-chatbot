@@ -2,7 +2,7 @@
 
 The Custom Buttons settings allow you to add personalized buttons to your chatbot, linking to specific pages or actions. Follow these steps to configure these options:
 
-![Buttons Settings](buttons.png)
+<img src="buttons.png" alt="Buttons Settings" style="width:auto;height:auto;">
 
 1. **Custom Buttons (On/Off)**:
    - **Description**: This toggle allows you to enable or disable the custom buttons feature in the chatbot.

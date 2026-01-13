@@ -2,7 +2,7 @@
 
 The **Kognetiks Chatbot** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
 
-![Azure OpenAI API](api-settings.png)
+<img src="api-settings.png" alt="Azure OpenAI API" style="width:auto;height:auto;">
 
 1. **Azure OpenAI API Key**:
 

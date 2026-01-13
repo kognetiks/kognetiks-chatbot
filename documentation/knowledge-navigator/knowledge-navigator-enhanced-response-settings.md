@@ -2,7 +2,7 @@
 
 The Enhanced Response settings allow you to customize how additional information is presented in the chatbot's responses. These enhanced responses include links to related content on your site, helping users find more detailed information. Follow these steps to configure these options:
 
-![Knowledge Navigator Enhanced Response Setting](knowledge-navigator-enhanced-response-settings.png)
+<img src="knowledge-navigator-enhanced-response-settings.png" alt="Knowledge Navigator Enhanced Response Setting" style="width:auto;height:auto;">
 
 1. **Suppress Learnings Messages**:
    - **Description**: This setting controls whether to display or suppress learning messages in the chatbot's responses.

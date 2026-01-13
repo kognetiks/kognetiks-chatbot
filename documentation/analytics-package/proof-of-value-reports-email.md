@@ -68,7 +68,7 @@ The unanswered questions detection can be customized:
 
 ### Proof of Value Email Example
 
-![Proof of Value Email Example](proof-of-value-email-example.png)
+<img src="proof-of-value-email-example.png" alt="Proof of Value Email Example" style="width:auto;height:auto;">
 
 ### Using This Information
 

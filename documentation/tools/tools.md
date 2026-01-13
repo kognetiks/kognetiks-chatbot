@@ -16,7 +16,7 @@ Each tool is briefly described below.
 
 Export the Chatbot options to a file.  This excludes sensitive information such as your API key.
 
-![Options Exporter](options-exporter.png)
+<img src="options-exporter.png" alt="Options Exporter" style="width:auto;height:auto;">
 
 ### Steps:
 
@@ -29,11 +29,11 @@ Export the Chatbot options to a file.  This excludes sensitive information such 
 
 The Manage Error Logs section provides direct access to the chatbot's unique errors.  If you're experiencing a problem with the chatbot, please check the error logs to see if you can determine what might be the problem.
 
-![Manage Error Logs](manage-error-logs.png)
+<img src="manage-error-logs.png" alt="Manage Error Logs" style="width:auto;height:auto;">
 
 ## Example Error Log
 
-![Example Error Log](example-error-log.png)
+<img src="example-error-log.png" alt="Example Error Log" style="width:auto;height:auto;">
 
 ### Steps:
 
@@ -52,11 +52,11 @@ The Manage Error Logs section provides direct access to the chatbot's unique err
 
 The Manage Widget Access Logs section provides direct access to the chatbot's widget usage by remote sites.  If you've enabled access via a remote widget, and enabled logging to the widget, these logs will record allowed and disallowed access to whitelisted domains and OpenAI Assistants.
 
-![Manage Widget Access Logs](manage-widget-access-logs.png)
+<img src="manage-widget-access-logs.png" alt="Manage Widget Access Logs" style="width:auto;height:auto;">
 
 ## Example Widget Log
 
-![Example Widget Access Log](example-widget-access-log.png)
+<img src="example-widget-access-log.png" alt="Example Widget Access Log" style="width:auto;height:auto;">
 
 ### Steps:
 

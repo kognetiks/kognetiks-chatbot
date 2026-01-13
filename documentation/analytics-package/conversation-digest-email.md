@@ -168,7 +168,7 @@ The Conversation Digest is useful for:
 
 ## Conversation Digest Email Example
 
-![Chatbot Conversation Digest - Example Email](conversation-digest-email-example.png)
+<img src="conversation-digest-email-example.png" alt="Chatbot Conversation Digest - Example Email" style="width:auto;height:auto;">
 
 ## Troubleshooting
 
