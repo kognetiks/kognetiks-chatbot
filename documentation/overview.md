@@ -100,8 +100,6 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Dashboard Widget](dashboard/dashboard.md)
 
-- [Insights](analytics-package/analytics-package.md)
-
 - [Reporting](reporting/reporting.md)
 
 - [Tools](tools/tools.md)
@@ -110,7 +108,13 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ---
 
-## Premium Support
+## Premium Features
+
+- [Insights & Reporting](analytics-package/analytics-package.md)
+- [Conversation Digest Email](conversation-digest-email.md) – Complete guide to conversation digest emails
+- [Proof of Value Reports Email](proof-of-value-reports-email.md) – Complete guide to proof of value reports
+
+## Premium Subscription
 
 - [Premium Support](premium-support/premium-support.md)
 
@@ -120,7 +124,7 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Functional Details](specs/functional-details.md)
 
-## Beta Features
+## Beta Support
 
 - [Enabling Beta Features](beta-features/beta-features.md)
 

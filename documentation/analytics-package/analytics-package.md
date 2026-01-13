@@ -1,14 +1,16 @@
-# 📊 Analytics Package Overview
+# 📊 Insights & Reporting Overview
 
-The **Analytics Package** in the Kognetiks Chatbot for WordPress plugin provides comprehensive tools to track, measure, and optimize your chatbot's performance. The package consists of three powerful components that work together to give you complete visibility into your chatbot's interactions and effectiveness.
+The **Insights & Reporting Overview** features in Kognetiks Chatbot help you stay aware of how your chatbot is performing—across conversations, trends, and outcomes—without constant monitoring.
 
 ## Package Components
 
-The Analytics Package includes:
+Insights & Reporting includes three complementary components designed to help you understand chatbot activity, stay informed, and demonstrate real-world value:
 
 1. **📈 Insights Dashboard** – Real-time analytics dashboard accessible directly in your WordPress admin panel
 2. **📧 Conversation Digest Email** – Automated email reports delivering conversation summaries and transcripts to your inbox
 3. **💎 Proof of Value Reports Email** – Premium email reports with actionable insights, performance metrics, and improvement recommendations
+
+Together, these features help transform chatbot conversations into measurable awareness, accountability, and business insight.
 
 **Note**: Conversation logging must be enabled for all analytics features. Go to the **Reporting** tab, then scroll down to the **Reporting Settings** section to enable logging.
 
