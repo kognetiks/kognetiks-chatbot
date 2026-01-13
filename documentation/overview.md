@@ -108,7 +108,15 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 - [Messages](messages/messages.md)
 
-## Functinoal Details
+---
+
+## Premium Support
+
+- [Premium Support](premium-support/premium-support.md)
+
+---
+
+## Functional Details
 
 - [Functional Details](specs/functional-details.md)
 
