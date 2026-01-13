@@ -843,8 +843,9 @@ function chatbot_chatgpt_settings_page() {
                     // Trial-first CTA with safety guards
                     if (function_exists('chatbot_chatgpt_freemius')) {
                         $fs = chatbot_chatgpt_freemius();
-                        if (is_object($fs) && method_exists($fs, 'get_trial_url')) {
-                            $trial_url = $fs->get_trial_url();
+                        if (is_object($fs) && method_exists($fs, 'get_upgrade_url')) {
+                            // Use monthly billing cycle for trial
+                            $trial_url = $fs->get_upgrade_url( WP_FS__PERIOD_MONTHLY, true );
                             echo '<a href="' . esc_url($trial_url) . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">Start Free Trial</a>';
                         }
                         // Secondary "View Plans" link

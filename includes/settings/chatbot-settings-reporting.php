@@ -416,8 +416,9 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
                     $fs = chatbot_chatgpt_freemius();
                     if (is_object($fs)) {
                         // Primary: Start Free Trial button
-                        if (method_exists($fs, 'get_trial_url')) {
-                            $trial_url = $fs->get_trial_url();
+                        if (method_exists($fs, 'get_upgrade_url')) {
+                            // Use monthly billing cycle for trial
+                            $trial_url = $fs->get_upgrade_url( WP_FS__PERIOD_MONTHLY, true );
                             ?>
                             <a href="<?php echo esc_url($trial_url); ?>" class="button button-primary" style="background-color: #f56e28; border-color: #f56e28; color: #fff; text-decoration: none; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 10px; margin-right: 10px;">
                                 Start Free Trial
