@@ -250,8 +250,8 @@ All Analytics Package features work seamlessly with:
 
 ## Related Documentation
 
-- [Conversation Digest Email](./conversation-digest-email.md) – Complete guide to conversation digest emails
-- [Proof of Value Reports Email](./proof-of-value-reports-email.md) – Complete guide to proof of value reports
+- [Conversation Digest Email](conversation-digest-email.md) – Complete guide to conversation digest emails
+- [Proof of Value Reports Email](proof-of-value-reports-email.md) – Complete guide to proof of value reports
 
 ---
 

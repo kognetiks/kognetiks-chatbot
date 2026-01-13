@@ -14,7 +14,11 @@ Please review the section [Conversation Logging and History](../support/conversa
 
 - [Reporting Settings](reporting-settings.md)
 
-- [Conversation Digest Settings](conversation-digest.md)
+- [Analytics Package](analytics-package/analytics-package.md)
+
+- [Conversation Digest Settings](analytics-package/conversation-digest-email.md)
+
+- [Proof of Value Settings](analytics-package/proof-of-value-reports-email.md)
 
 
 ## How to Use Reporting Settings

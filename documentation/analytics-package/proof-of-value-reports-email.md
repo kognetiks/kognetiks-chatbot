@@ -97,8 +97,8 @@ The Proof of Value Report also includes:
 
 ## Related Documentation
 
-- [Analytics Package Overview](./analytics-package.md)
-- [Conversation Digest Settings](../settings/conversation-digest.md)
+- [Analytics Package Overview](analytics-package/analytics-package.md)
+- [Conversation Digest Settings](analytics-package/conversation-digest-email.md)
 
 ---
 

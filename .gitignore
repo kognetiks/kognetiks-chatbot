@@ -21,17 +21,9 @@ package.json
 /debug/
 # package.json is now needed for Snyk configuration
 # package.json
-CHANGELOG-ENTRY.md
-CHANGELOG-GENERATOR.md
-DEPLOYMENT-READINESS.md
-DEPLOYMENT.md
-GIT-COMMANDS.md
-LOCAL-AI MODEL.md
-includes/insights/DEFINITIONS.md
-QUERIES.md
-READINESS-REPORT.md
-TESTS.md
-TODO.md
+
+# Ignore internal folders and files
+/z-internal/
 
 # Ignore all files in the results folder
 results/*

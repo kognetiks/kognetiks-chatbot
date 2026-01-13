@@ -421,7 +421,7 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
                 }
                 ?>
                 <div style="margin-top: 10px;">
-                    <a href="?page=chatbot-chatgpt&tab=support&dir=reporting&file=reporting.md" style="color: #2271b1; text-decoration: underline; margin-right: 15px;">Learn more</a>
+                    <a href="?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=proof-of-value-reports-email.md" style="color: #2271b1; text-decoration: underline; margin-right: 15px;">Learn more</a>
                     <a href="mailto:support@kognetiks.com" style="color: #2271b1; text-decoration: underline;">Contact Support</a>
                 </div>
             </div>

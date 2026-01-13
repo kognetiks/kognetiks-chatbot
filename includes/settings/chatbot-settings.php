@@ -841,7 +841,7 @@ function chatbot_chatgpt_settings_page() {
                     echo '<p>Reports delivered automatically. No dashboard monitoring required.</p>';
                     echo '<p>';
                     echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">🔓 Unlock Conversation Insights</a>';
-                    echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=insights-package&file=analytics-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
+                    echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=analytics-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
                     echo '<a href="mailto:support@kognetiks.com">Contact Support</a>';
                     echo '</p>';
 
