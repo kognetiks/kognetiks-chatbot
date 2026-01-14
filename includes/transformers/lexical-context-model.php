@@ -16,7 +16,6 @@ if ( ! defined( 'WPINC' ) ) {
 function transformer_model_lexical_context_response( $input, $max_tokens = null ) {
 
     // DIAG - Diagnostics - Ver 2.3.0
-    // back_trace( 'NOTICE', 'transformer_model_lexical_context_response');
 
     // Maximum tokens - Fixed: removed hardcoded override
     if (empty($max_tokens) || !is_numeric($max_tokens)) {
@@ -59,7 +58,6 @@ function transformer_model_lexical_context_response( $input, $max_tokens = null 
 function transformer_model_lexical_context_get_cached_embeddings($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostics - Ver 2.3.0
-    // back_trace( 'NOTICE', 'transformer_model_lexical_context_get_cached_embeddings');
 
     // Cache directory path
     $cacheDir = __DIR__ . '/lexical_embeddings_cache';
@@ -126,7 +124,6 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
     global $wpdb;
 
     // DIAG - Diagnostics - Ver 2.3.0
-    // back_trace( 'NOTICE', 'transformer_model_lexical_context_fetch_wordpress_content' );
 
     // Query to get post and page content with better error handling
     $results = $wpdb->get_results(
@@ -162,7 +159,6 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
 function transformer_model_lexical_context_build_pmi_matrix($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostics - Ver 2.3.0
-    // back_trace( 'NOTICE', 'transformer_model_lexical_context_build_pmi_matrix' );
 
     if (empty($corpus)) {
         return [];
@@ -324,7 +320,6 @@ function transformer_model_lexical_context_save_cache($cacheFile, $embeddings) {
     }
     
     // Last resort: use var_export (original method, but should rarely be needed)
-    // back_trace('WARNING', 'Cache compression failed, using var_export fallback');
     $cacheContent = "<?php\n";
     $cacheContent .= "// Lexical embeddings cache (exported)\n";
     $cacheContent .= "// Created: {$createdAt}\n";
@@ -403,7 +398,6 @@ function transformer_model_lexical_context_get_cache_timestamps($cacheFile) {
 function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB) {
 
     // DIAG - Diagnostics - Ver 2.3.0
-    // back_trace( 'NOTICE', 'transformer_model_lexical_context_cosine_similarity' );
 
     $dotProduct = 0;
     $magnitudeA = 0;
@@ -435,7 +429,6 @@ function transformer_model_lexical_context_cosine_similarity($vectorA, $vectorB)
 function transformer_model_lexical_context_generate_contextual_response($input, $embeddings, $corpus, $responseLength = 50) {
 
     // DIAG - Diagnostics - Ver 2.3.0
-    // back_trace( 'NOTICE', 'transformer_model_lexical_context_generate_contextual_response');
 
     global $stopWords;
 

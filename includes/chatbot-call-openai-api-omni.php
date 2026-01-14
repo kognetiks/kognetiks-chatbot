@@ -60,7 +60,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -68,12 +67,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_omni()');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // The current ChatGPT API URL endpoint for gpt-3.5-turbo and gpt-4
     // $api_url = 'https://api.openai.com/v1/chat/completions';
@@ -119,7 +112,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     $sys_message = 'We previously have been talking about the following things: ';
 
     // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$context: ' . $context);
 
     //
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 1.9.6
@@ -127,7 +119,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     $use_enhanced_content_search = esc_attr(get_option('chatbot_chatgpt_use_advanced_content_search', 'No'));
 
     // DIAG Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$use_enhanced_content_search: ' . $use_enhanced_content_search);
 
     if ($use_enhanced_content_search == 'Yes') {
 
@@ -146,7 +137,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -206,15 +196,11 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace( 'NOTICE', '$body: ' . print_r($body, true));
 
     // Context History - Ver 1.6.1
     addEntry('chatbot_chatgpt_context_history', $message);
 
     // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
-    // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', '$message: ' . $message);  
 
     $args = array(
         'headers' => $headers,
@@ -225,11 +211,9 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     );
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace( 'NOTICE', '$args: ' . print_r($body, true));
 
     $response = wp_remote_post($api_url, $args);
     // DIAG - Diagnostics - Ver 1.6.7
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -240,7 +224,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', print_r($response, true));
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
@@ -252,7 +235,6 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -268,17 +250,9 @@ function chatbot_chatgpt_call_omni($api_key, $message, $user_id = null, $page_id
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // DIAG - Diagnostics - Ver 1.8.1
     // FIXME - ADD THE USAGE TO CONVERSATION TRACKER
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
     if ($response['response']['code'] == 200) {

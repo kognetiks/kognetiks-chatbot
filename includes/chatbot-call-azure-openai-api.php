@@ -40,7 +40,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -48,19 +47,12 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'chatbot_call_azure_openai_api()');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // The current Azure OpenAI API URL endpoint
     // $api_url = 'https://YOUR_RESOURCE_NAME.openai.azure.com/deployments/DEPLOYMENT_NAME/chat/completions?api-version=2024-08-01-preview';
     $api_url = get_chat_completions_api_url();
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
 
     $headers = array(
         'Content-Type' => 'application/json',
@@ -70,7 +62,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     // Select the OpenAI Model
     // Get the saved model from the settings or default to "gpt-3.5-turbo"
     $model = esc_attr(get_option('chatbot_azure_model_choice', 'gpt-3.5-turbo'));
-    // back_trace( 'NOTICE', '$model: ' . $model);
  
     // Max tokens - Ver 2.2.6
     $max_tokens = intval(esc_attr(get_option('chatbot_azure_max_tokens_setting', '1000')));
@@ -129,7 +120,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -146,7 +136,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
-    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
     // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 100000; // Estimate at 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
@@ -159,13 +148,10 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
-        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // DIAG Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$context: ' . $context);
 
     // Added Role, System, Content Static Variable - Ver 2.2.6
     // Build messages array with system message, conversation history, and current user message - Ver 2.3.9+
@@ -209,9 +195,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     addEntry('chatbot_azure_context_history', $message);
 
     // DIAG Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$storedc: ' . $chatbot_azure_kn_conversation_context);
-    // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', '$message: ' . $message);
 
     $chatbot_azure_timeout = intval(esc_attr(get_option('chatbot_azure_timeout_setting', '50')));
 
@@ -224,12 +207,10 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     );
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$args: ' . print_r($args, true));
 
     $response = wp_remote_post($api_url, $args);
  
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
 
     // Handle any errors that are returned from the chat engine
     if (is_wp_error($response)) {
@@ -239,7 +220,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     }
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', print_r($response, true));
 
     // Return json_decode(wp_remote_retrieve_body($response), true);
     $response_body = json_decode(wp_remote_retrieve_body($response), true);
@@ -251,7 +231,6 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     }
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -267,16 +246,8 @@ function chatbot_call_azure_openai_api($api_key, $message, $user_id = null, $pag
     }
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
     if ($response['response']['code'] == 200) {

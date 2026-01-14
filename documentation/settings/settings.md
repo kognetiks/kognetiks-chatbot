@@ -4,7 +4,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ## AI Platform Selection
 
-![AI Platform Selection](ai-platform-selection.png)
+<img src="ai-platform-selection.png" alt="AI Platform Selection" style="width:auto;height:auto;">
 
 1. **AI Platform Choice**:
 
@@ -19,7 +19,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ## General Settings
 
-![Chatbot Settings](general-settings.png)
+<img src="general-settings.png" alt="Chatbot Settings" style="width:auto;height:auto;">
 
 1. **Chatbot Name**:
    - **Description**: This field allows you to set the name of your chatbot.
@@ -37,7 +37,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ## Message Limit Settings
 
-![Message Limit Settings](message-limit-settings.png)
+<img src="message-limit-settings.png" alt="Message Limit Settings" style="width:auto;height:auto;">
 
 1. **Display Message Count**:
    - **Description**: This setting determines if the message count is displayed in the chatbot's response, such as `(29/50)`, i.e., 29 prompts out of 50 limited, to help visitors and logged-in users understand how many exchanges they have had with the chatbot.
@@ -82,7 +82,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ## Prompts and Greetings
 
-![Prompts and Greetings](prompts-and-greetings.png)
+<img src="prompts-and-greetings.png" alt="Prompts and Greetings" style="width:auto;height:auto;">
 
 1. **Chatbot Prompt**:
    - **Description**: This is the initial prompt that appears in the chatbot input field.
@@ -98,7 +98,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ## Additional Settings
 
-![Additional Settings](additional-settings.png)
+<img src="additional-settings.png" alt="Additional Settings" style="width:auto;height:auto;">
 
 1. **Allow Speech Recognition**:
    - **Description**: This toggle allows you to allow chatbot users to speak to the chatbot if support by their browser.
@@ -138,7 +138,7 @@ The General Settings allow you to customize the basic behavior and appearance of
 
 ## Advanced Search Settings
 
-![Advanced Search Settings](advanced-search-settings.png)
+<img src="advanced-search-settings.png" alt="Advanced Search Settings" style="width:auto;height:auto;">
 
 1. **Enable Advanced Content Search**:
 

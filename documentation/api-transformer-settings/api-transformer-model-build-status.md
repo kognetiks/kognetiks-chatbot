@@ -2,7 +2,7 @@
 
 ## Model Build Status
 
-![Transformer Model Build Status](transformer-model-build-status.png)
+<img src="transformer-model-build-status.png" alt="Transformer Model Build Status" style="width:auto;height:auto;">
 
 1. **Scheduled to Run**:
    - **Description**: Indicates how frequently the **Transformer Model** is scheduled to run.
@@ -21,7 +21,7 @@
 
    ## Advanced Settings
 
-![Transformer Model Advanced Settings](transformer-model-advanced-settings.png)
+<img src="transformer-model-advanced-settings.png" alt="Transformer Model Advanced Settings" style="width:auto;height:auto;">
 
 1. **Scheduled to Run**:
 

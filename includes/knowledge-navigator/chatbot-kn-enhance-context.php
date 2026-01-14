@@ -26,11 +26,9 @@ function kn_enhance_context( $message ) {
 
     // if (get_locale() !== "en_US") {
     //     // DIAG - Diagnostics - Ver 1.7.2.1
-    //     // back_trace( 'NOTICE', 'get_locale()' . get_locale());
     //     // $localized_stopWords = localize_global_stopwords(get_locale(), $stopWords);
     //     $localized_stopWords = get_localized_stopwords(get_locale(), $stopWords);
     //     // DIAG - Diagnostics - Ver 1.7.2.1
-    //     // back_trace( 'NOTICE',  '$localized_stopWords ' . $localized_stopWords);
     // } else {
     //     $localized_stopWords = $stopWords;
     // }
@@ -96,7 +94,6 @@ function kn_enhance_context( $message ) {
     $enhancedContext = implode(' ', $enhancedContext);
     $enhancedContext = implode(' ', chatbot_chatgpt_filter_out_html_tags($enhancedContext));
     // DIAG - Diagnostics - Ver 1.9.6
-    // back_trace( 'NOTICE', '$enhancedContext: ' . $enhancedContext);
 
     return $enhancedContext;
 

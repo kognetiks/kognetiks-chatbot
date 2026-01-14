@@ -23,7 +23,7 @@ To ensure your **Kognetiks Chatbot** functions optimally, you need to configure 
 
 ## Model Selection
 
-![Transformer Model Settings](transformer-model-settings.png)
+<img src="transformer-model-settings.png" alt="Transformer Model Settings" style="width:auto;height:auto;">
 
 1. **Transformer Model Choice**:
    - **Description**: This setting allows you to choose the default Transformer model your chatbot will use.
@@ -37,7 +37,7 @@ To ensure your **Kognetiks Chatbot** functions optimally, you need to configure 
 
 ## Advanced Settings
 
-![Transformer Model Advanced Settings](transformer-model-advanced-settings-no-status.png)
+<img src="transformer-model-advanced-settings-no-status.png" alt="Transformer Model Advanced Settings" style="width:auto;height:auto;">
 
 1. **Word Content Windows Size**:
     - **Description**: This sets the ngram size when building the transformer model.

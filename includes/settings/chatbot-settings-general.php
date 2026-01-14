@@ -29,7 +29,6 @@ function chatbot_chatgpt_bot_settings_section_callback($args) {
 function chatbot_ai_engine_section_callback($args) {
 
     // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', 'chatbot_ai_engine_section_callback');
 
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI'));
 
@@ -80,7 +79,6 @@ function chatbot_ai_platform_choice_callback($args) {
 function chatbot_chatgpt_name_section_callback($args) {
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_name_section_callback');
 
     ?>
     <p>Configure the name of the chatbot and start status for the Chatbot.</p>
@@ -99,7 +97,6 @@ function chatbot_chatgpt_message_limits_section_callback($args) {
 function chatbot_chatgpt_greetings_section_callback($args) {
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_greetings_section_callback');
 
     ?>
     <p>Configure the prompt and greetings for the Chatbot.</p>
@@ -189,7 +186,6 @@ function chatbot_chatgpt_visitor_message_limit_period_setting_callback($args) {
 function chatbot_chatgpt_additional_setup_section_callback($args) {
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_additional_setup_section_callback');
 
     ?>
     <p>Configure several additional settings for the Chatbot.</p>

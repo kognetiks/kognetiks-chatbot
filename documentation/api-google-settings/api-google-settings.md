@@ -2,7 +2,7 @@
 
 The **Kognetiks Chatbot** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
 
-![Google API](api-google-settings.png)
+<img src="api-google-settings.png" alt="Google API" style="width:auto;height:auto;">
 
 1. **Google API Key**:
 

@@ -6,7 +6,13 @@
 
 ---
 
-## 2.4.1.- Released 2026-01-06
+## 2.4.2 - Release 2026-01-14
+
+### Bug Fixes
+
+* **Bug Fixes**: Premimum features bug fixes and improvements.
+
+## 2.4.1 - Released 2026-01-06
 
 ### New Features
 * **Automated Email Reports**: Added Conversation Digest and Proof of Value Reports email functionality with scheduling options
@@ -434,8 +440,8 @@
 
 ## 1.7.3 - Released 2024-01-01
 * Added support for unlimited Assistants in addition to 'original', 'primary' and 'alternate' shortcode parameters.
-* Use [chatbot style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for floating Assistants.
-* Use [chatbot style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"] for embedded Assistants.
+* Use ```[chatbot style-"floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` for floating Assistants.
+* Use ```[chatbot style-"embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` for embedded Assistants.
 * Moved hard coded css from .js to the .css file for floating wide/narrow and embedded styling.
 * Fixed Updating Failed JSON error when editing pages where the Chatbot shortcode appears.
 

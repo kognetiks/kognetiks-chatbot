@@ -43,7 +43,6 @@ function chatbot_chatgpt_download_transcript() {
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($transcript_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace( 'ERROR', 'Failed to create directory.');
         return;
     }
 
@@ -52,7 +51,6 @@ function chatbot_chatgpt_download_transcript() {
     $transcriptFile = $transcript_dir . $transcriptFileName;
 
     // DIAG - Diagnostics - Ver 1.9.9
-    // back_trace( 'Notice', 'Transcript File: ' . $transcriptFile );
 
     // Attempt to write the content to the file
     if (file_put_contents($transcriptFile, $conversation_content) === false) {
@@ -64,7 +62,6 @@ function chatbot_chatgpt_download_transcript() {
     $url = plugins_url('transcripts/' . $transcriptFileName, $chatbot_chatgpt_plugin_dir_path . 'chatbot-chatgpt');
 
     // DIAG - Diagnostics - Ver 1.9.9
-    // back_trace( 'Notice', 'Transcript URL: ' . $url );
 
     wp_send_json_success($url);
 

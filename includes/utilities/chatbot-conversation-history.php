@@ -334,7 +334,6 @@ function chatbot_chatgpt_get_converation_history($session_id) {
         ORDER BY interaction_time ASC", $session_id));
 
     // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', 'Query Results: ' . print_r($results, true));
 
     // Filter results to stay within the 2.5 MB limit
     $limited_results = [];
@@ -347,7 +346,6 @@ function chatbot_chatgpt_get_converation_history($session_id) {
         
         $limited_results[] = $result;
         $total_size += $message_size;
-        // back_trace( 'NOTICE', 'Total Size: ' . $total_size);
     }
 
     $conversation_history = '';
@@ -359,7 +357,6 @@ function chatbot_chatgpt_get_converation_history($session_id) {
     $conversation_history = preg_replace('/\s+/', ' ', $conversation_history);
 
     // DIAG - Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$conversation_history: ' . $conversation_history);
 
     // Return the HTML output as a JSON response
     return($conversation_history);

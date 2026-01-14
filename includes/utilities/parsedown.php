@@ -2018,7 +2018,6 @@ class ParsedownCustom extends Parsedown {
         }
 
         // DIAG - Diagnostics - Ver 2.0.2.1
-        // back_trace( 'NOTICE', '$Link', print_r($Link, true));
 
         return $Link;
     }
@@ -2045,7 +2044,6 @@ class ParsedownCustom extends Parsedown {
         }
 
         // DIAG - Diagnostics - Ver 2.0.2.1
-        // back_trace( 'NOTICE', '$Link', print_r($image,true) );
 
         return $Image;
     }

@@ -2,7 +2,7 @@
 
 Imagine you are having a conversation with a helpful assistant on a website. This assistant, or chatbot, is designed to provide you with information and answers to your questions.
 
-![Architecture Overview](architecture-overview.png)
+<img src="architecture-overview.png" alt="Architecture Overview" style="width:auto;height:auto;">
 
 Here's how it all works, step by step, using the diagram as our guide:
 

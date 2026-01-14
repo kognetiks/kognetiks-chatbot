@@ -387,7 +387,6 @@ function chatbot_chatgpt_appearance_reset_callback() {
 function chatbot_chatgpt_appearance_restore_default_settings() {
 
     // DIAG - Enter function
-    // back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_restore_default_settings()');
 
     $chatbot_chatgpt_appearance_reset = 'No';
     update_option('chatbot_chatgpt_appearance_reset', $chatbot_chatgpt_appearance_reset);
@@ -414,7 +413,6 @@ function chatbot_chatgpt_appearance_restore_default_settings() {
     // update_option ('chatbot_chatgpt_width_setting', 'Narrow');
 
     // DIAG - Exit function
-    // back_trace( 'NOTICE', 'Exit function: chatbot_chatgpt_appearance_restore_default_settings()');
 
 }
 
@@ -450,8 +448,6 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings() {
     global $page_id;
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Injecting custom CSS settings...');
-    // back_trace( 'NOTICE', print_r($GLOBALS['chatbotChatGPTAppearanceCSS'], true));
 
     // Prepend any user CSS settings
     $chatbot_chatgpt_appearance_user_css_setting = esc_attr(get_option('chatbot_chatgpt_appearance_user_css_setting', ''));
@@ -466,7 +462,6 @@ function chatbot_chatgpt_appearance_inject_custom_css_settings() {
 
     // DIAG - Diagnostics - Ver 1.8.6
     // foreach ($GLOBALS['chatbotChatGPTAppearanceCSS'] as $cssRule) {
-    //     // back_trace( 'NOTICE', 'cssRule: ' . $cssRule);
     // }
 
     // Inject the custom css settings
@@ -603,8 +598,6 @@ function chatbot_chatgpt_appearance_download_icon_callback() {
 function chatbot_chatgpt_appearance_icon_path($icon_common_name) {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'Enter function: chatbot_chatgpt_appearance_icon_path()');
-    // back_trace( 'NOTICE', 'Icon Common Name: ' . $icon_common_name);
 
     switch ($icon_common_name) {
         case 'open_icon':

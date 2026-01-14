@@ -2,7 +2,7 @@
 
 The Custom Icons Settings allow you to customize the visual aspects the chatbot icons for opening, sending, attaching, downloading, another other actions.  This allow you to match your website's design and branding. Follow these steps to configure these options:
 
-![Custom Icons Settings](custom-icons-settings.png)
+<img src="custom-icons-settings.png" alt="Custom Icons Settings" style="width:auto;height:auto;">
 
 Next to each named icon is the default icon preloaded with the plugin.  Should you want to replace the icon with one of your own, you will need to add a valid URL to web location where that icon resides.  For example, if you want replace the Send Icon with the image of a paper airplane, you would enter `https://yoursite.com//wp-content/uploads/2025/01/paper-airplane.png` where the `yoursite.com` is the domain, and the rest of the path located the icon.  The icon will automatically be resized to 20 by 20 pixels.  If the path is valid, after you click the `Save Settings` at the bottom of the screen, your icon will be displayed next to the setting.  To revert back to the plugin's default icons, just remove the URL from the field and save the settings.
 

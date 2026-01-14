@@ -24,9 +24,9 @@ Use the following format to invoke the primary or alternate assistant:
 
 Use the following format to invoke an assistant directly by its ID
 
-- `[chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]` - Floating style, Assistant as set in Assistant ID setting
+- ```[chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` - Floating style, Assistant as set in Assistant ID setting
 
-- `[chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]` - Embedded style, Assistant as set in Assistant ID setting
+- ```[chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` - Embedded style, Assistant as set in Assistant ID setting
 Mix and match the style and assistant attributes to suit your needs.
 
 **NOTE:** When using the 'embedded' style, it's best to put the shortcode in a page or post, **not** in a footer.

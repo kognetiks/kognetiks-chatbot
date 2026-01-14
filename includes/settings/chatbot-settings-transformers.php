@@ -218,7 +218,6 @@ function chatbot_transformer_model_build_schedule_callback($args) {
     <?php
     
     // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'chatbot_transformer_model_build_schedule: ' . $chatbot_transformer_model_build_schedule );
     
 }
 

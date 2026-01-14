@@ -22,7 +22,6 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_enhance_with_tfidf');
 
     global $wpdb;
     global $learningMessages;
@@ -41,9 +40,6 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $results = array_values($results);
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', '=====================================');
-    // back_trace( 'NOTICE', '$results: ' . print_r($results, true));
-    // back_trace( 'NOTICE', '=====================================');
 
     // Select top three results
     $results = array_slice($results, 0, $limit);
@@ -56,11 +52,9 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
 
     // Debugging output to verify the structure of the results
-    // back_trace( 'NOTICE', 'Debugging $results: ' . print_r($results, true));
 
     foreach ($results as $result) {
         // Debugging output for each result
-        // back_trace( 'NOTICE', 'Processing result: ' . print_r($result, true));
 
         if (is_array($result) && isset($result['title'], $result['url'], $result['ID'])) {
             if ('yes' == $include_title) {
@@ -79,7 +73,6 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
     }
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'links: ' . print_r($links, true));
 
     if (!empty($links)) {
 
@@ -120,9 +113,7 @@ function chatbot_chatgpt_enhance_with_tfidf($message) {
 
     // DIAG - Diagnostics - Ver 2.2.9
     // if (!empty($enhanced_response)) {
-    //     // back_trace( 'NOTICE', '$enhanced_response: ' . print_r($enhanced_response, true));
     // } else {
-    //     // back_trace( 'NOTICE', 'No enhanced response found');
     // }
 
     return !empty($enhanced_response) ? $enhanced_response : null;
@@ -157,8 +148,6 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
     $words = array_diff($words, $stopWords);
 
     // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace( 'NOTICE', 'Input message: ' . $message);
-    // back_trace( 'NOTICE', 'Processed words: ' . implode(", ", $words));
 
     // Initialize arrays to hold word scores and results
     $word_scores = array();
@@ -174,7 +163,6 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
         // Store the word and its total score
         $word_scores[$word] = $total_score ? $total_score : 0;
         // DIAG - Diagnostics - Ver 2.2.1
-        // back_trace( 'NOTICE', 'Word: ' . $word . ', Score: ' . $word_scores[$word]);
     }
 
     // Sort words by their scores (lowest to highest)
@@ -206,14 +194,12 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
         $rows = $wpdb->get_results($query);
 
         // Diagnostics - Ver 2.2.1
-        // back_trace( 'NOTICE', 'SQL Query: ' . $query );
 
         // Check if matches are found
         if ($rows) {
             foreach ($rows as $row) {
 
                 // Diagnostics - Ver 2.2.1
-                // back_trace( 'INFO', 'Match found: PID=' . $row->pid . ', URL=' . $row->url . ', Title=' . $row->title . ', Score=' . $row->total_score . ', Word Matches=' . $row->word_match_count);
                 
                 $result_key = hash('sha256', $row->url);
                 if (!isset($results[$result_key])) {
@@ -233,7 +219,6 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
             }
         } else {
 
-            // back_trace( 'NOTICE', 'No matches found for num_words_to_match=' . $num_words_to_match);
             
         }
 
@@ -243,7 +228,6 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
 
     // DIAG - Diagnostics - Ver 2.2.1
     // foreach ($results as $result) {
-    //     // back_trace( 'NOTICE', 'Final result: PID=' . $result['pid'] . ', URL=' . $result['url'] . ', Title=' . $result['title'] . ', Score=' . $result['score'] . ', Word Matches=' . $result['word_match_count']);
     // }
 
     // Convert results to indexed array
@@ -260,13 +244,11 @@ function chatbot_chatgpt_enhance_with_tfidf_deprecated($message) {
     $include_post_or_page_excerpt = esc_attr(get_option('chatbot_chatgpt_enhanced_response_include_excerpts', 'No'));
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', 'Debugging $results: ' . print_r($results, true));
 
 
     foreach ($results as $result) {
 
         // DIAG - Diagnostics - Ver 2.2.9
-        // back_trace( 'NOTICE', 'Processing result: ' . print_r($result, true));
 
         if (is_object($result) && isset($result->post_title, $result->url, $result->ID)) {
             if ('yes' == $include_title) {

@@ -33,7 +33,6 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     global $voice;
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_image_api()');
     
     // Use parameter if provided (not null), otherwise use global
     if ($param_user_id !== null) {
@@ -60,7 +59,6 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -92,11 +90,9 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     if ( !empty($kchat_settings['model']) ) {
         $model = $kchat_settings['model'];
         // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
     } else {
         $model = esc_attr(get_option('chatbot_chatgpt_image_model_option', 'dall-e-2'));
         // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', '$model from get_option: ' . $model);
     }
 
     // Enforce message length constraints based on model
@@ -129,13 +125,6 @@ function chatbot_chatgpt_call_image_api($api_key, $message, $user_id = null, $pa
     $user_tracking = implode('-', [$session_id, $user_id, $page_id, $thread_id, $assistant_id]);
 
     // Diagnostics - Ver 1.9.5
-    // back_trace( 'NOTICE', 'chatbot_calll_image_api()');
-    // back_trace( 'NOTICE', 'BEGIN $message: ' . $message);
-    // back_trace( 'NOTICE', 'BEGIN $model: ' . $model);
-    // back_trace( 'NOTICE', 'BEGIN $quantity: ' . $quantity);
-    // back_trace( 'NOTICE', 'BEGIN $size: ' . $size);
-    // back_trace( 'NOTICE', 'BEGIN $quality: ' . $quality);
-    // back_trace( 'NOTICE', 'BEGIN $style: ' . $style);
 
     // Prepare the request body
     $body = [

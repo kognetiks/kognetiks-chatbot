@@ -130,16 +130,25 @@ function kchat_fetch_api_status($api_key, $model) {
 
             $body = array(
                 'model' => $model,
-                'max_tokens' => 100,
-                'temperature' => 0.5,
                 'messages' => array(
                     array('role' => 'system', 'content' => 'You are a test function for Chat.'),
                     array('role' => 'user', 'content' => $test_message)
                 ),
             );
+            
+            // Only add temperature if the model supports it
+            if (!chatbot_openai_doesnt_support_temperature($model)) {
+                $body['temperature'] = 0.5;
+            }
+            
+            // Use max_completion_tokens for newer models, max_tokens for older models
+            if (chatbot_openai_requires_max_completion_tokens($model)) {
+                $body['max_completion_tokens'] = 100;
+            } else {
+                $body['max_tokens'] = 100;
+            }
 
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'API Body: ' . print_r(json_encode($body),true));
 
             $args = array(
                 'headers' => $headers,
@@ -152,18 +161,15 @@ function kchat_fetch_api_status($api_key, $model) {
             $response = wp_remote_post($api_url, $args);
 
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'API Response: ' . print_r(json_encode($response),true));
 
             if (is_wp_error($response)) {
                 // DIAG - Log the response body
-                // back_trace( 'ERROR', $response->get_error_message());
                 return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your AI Platform vendor account for additional information.';
             }
 
             $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
             // DIAG - Log the response body
-            // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body,true));
 
             // Check for API-specific errors
             //
@@ -180,13 +186,11 @@ function kchat_fetch_api_status($api_key, $model) {
             } elseif (!empty($response_body['choices'])) {
 
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
 
             
             } else {
 
                 $updated_status = 'Error: Unable to fetch response from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
 
             }
 
@@ -226,7 +230,6 @@ function kchat_fetch_api_status($api_key, $model) {
             );
 
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'API Body: ' . print_r(json_encode($body),true));
 
             $args = array(
                 'headers' => $headers,
@@ -239,18 +242,15 @@ function kchat_fetch_api_status($api_key, $model) {
             $response = wp_remote_post($api_url, $args);
 
             // DIAG - Diagnostics - Ver 2.1.8
-            // back_trace( 'NOTICE', 'API Response: ' . print_r(json_encode($response),true));
 
             if (is_wp_error($response)) {
                 // DIAG - Log the response body
-                // back_trace( 'ERROR', $response->get_error_message());
                 return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your AI Platform vendor account for additional information.';
             }
 
             $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
             // DIAG - Log the response body
-            // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body,true));
 
             // Check for API-specific errors
             //
@@ -267,13 +267,11 @@ function kchat_fetch_api_status($api_key, $model) {
             } elseif (!empty($response_body['choices'])) {
 
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
 
             
             } else {
 
                 $updated_status = 'Error: Unable to fetch response from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
                 
             }
 
@@ -320,9 +318,6 @@ function kchat_fetch_api_status($api_key, $model) {
             $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
 
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'URL: ' . $api_url);
-            // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
-            // back_trace( 'NOTICE', 'Body: ' . $body);
 
             // Call the API
             $response = wp_remote_post($api_url, array(
@@ -346,7 +341,6 @@ function kchat_fetch_api_status($api_key, $model) {
             if (is_wp_error($response)) {
 
                 // DIAG - Diagnostics
-                // back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
                 return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
 
             }
@@ -364,7 +358,6 @@ function kchat_fetch_api_status($api_key, $model) {
             
                 // Handle error response
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
             
             } elseif (isset($response_data['type']) && $response_data['type'] === 'message') {
 
@@ -374,13 +367,11 @@ function kchat_fetch_api_status($api_key, $model) {
             
                 // Handle successful response
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
 
             } else {
 
                 // Handle unexpected response structure
                 $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
 
             }
             
@@ -429,9 +420,6 @@ function kchat_fetch_api_status($api_key, $model) {
             $body = json_encode($body);
 
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'URL: ' . $api_url);
-            // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
-            // back_trace( 'NOTICE', 'Body: ' . $body);
 
             // Call the API
             $response = wp_remote_post($api_url, array(
@@ -443,7 +431,6 @@ function kchat_fetch_api_status($api_key, $model) {
             $response_data = json_decode(wp_remote_retrieve_body($response));
 
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Response: ' . print_r($response_data, true));
 
             // Check for API-specific errors
             if (isset($response_data->error)) {
@@ -454,7 +441,6 @@ function kchat_fetch_api_status($api_key, $model) {
             
                 // Handle error response
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
             
             } elseif (isset($response_data->choices[0]->message)) {
 
@@ -464,13 +450,11 @@ function kchat_fetch_api_status($api_key, $model) {
             
                 // Handle successful response
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
 
             } else {
 
                 // Handle unexpected response structure
                 $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
 
             }
             
@@ -519,9 +503,6 @@ function kchat_fetch_api_status($api_key, $model) {
             $body = json_encode($body);
 
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'URL: ' . $api_url);
-            // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
-            // back_trace( 'NOTICE', 'Body: ' . $body);
 
             // Call the API
             $response = wp_remote_post($api_url, array(
@@ -533,7 +514,6 @@ function kchat_fetch_api_status($api_key, $model) {
             // Handle WP Error
             if (is_wp_error($response)) {
                 // DIAG - Diagnostics
-                // back_trace('ERROR', 'Mistral API WP_Error: ' . $response->get_error_message());
                 $updated_status = 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your Mistral account for additional information.';
                 update_option('chatbot_mistral_api_status', $updated_status);
                 return $updated_status;
@@ -544,8 +524,6 @@ function kchat_fetch_api_status($api_key, $model) {
             $response_body_raw = wp_remote_retrieve_body($response);
 
             // DIAG - Diagnostics - Log raw response for debugging
-            // back_trace('NOTICE', 'Mistral API Response Code: ' . $response_code);
-            // back_trace('NOTICE', 'Mistral API Response Body: ' . $response_body_raw);
 
             // Check for HTTP errors
             if ($response_code >= 400) {
@@ -571,14 +549,12 @@ function kchat_fetch_api_status($api_key, $model) {
 
             // Check if JSON decode was successful
             if (json_last_error() !== JSON_ERROR_NONE) {
-                // back_trace('ERROR', 'Mistral API JSON decode error: ' . json_last_error_msg());
                 $updated_status = 'Error: Invalid JSON response from Mistral API. Raw response: ' . substr($response_body_raw, 0, 200);
                 update_option('chatbot_mistral_api_status', $updated_status);
                 return $updated_status;
             }
 
             // DIAG - Diagnostics
-            // back_trace('NOTICE', 'Mistral API Response Data: ' . print_r($response_data, true));
 
             // Check for API-specific errors (Mistral uses 'object' => 'error' format or 'error' key)
             if (isset($response_data['object']) && $response_data['object'] === 'error') {
@@ -586,20 +562,16 @@ function kchat_fetch_api_status($api_key, $model) {
                 $error_type = $response_data['type'] ?? 'Unknown Error Type';
                 $error_message = $response_data['message'] ?? 'No additional information.';
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-                // back_trace('ERROR', 'Mistral API Status: ' . $updated_status);
             } elseif (isset($response_data['error'])) {
                 // Alternative error format
                 $error_type = $response_data['error']['type'] ?? 'Unknown Error Type';
                 $error_message = $response_data['error']['message'] ?? 'No additional information.';
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-                // back_trace('ERROR', 'Mistral API Status: ' . $updated_status);
             } elseif (isset($response_data['choices']) && isset($response_data['choices'][0]['message'])) {
                 // Handle successful response
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                // back_trace('SUCCESS', 'Mistral API Status: ' . $updated_status);
             } else {
                 // Handle unexpected response structure
-                // back_trace('ERROR', 'Mistral API unexpected response structure. Response: ' . print_r($response_data, true));
                 $response_keys = is_array($response_data) ? array_keys($response_data) : 'null or non-array';
                 $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information. Response keys: ' . json_encode($response_keys);
             }
@@ -662,9 +634,6 @@ function kchat_fetch_api_status($api_key, $model) {
             $body = json_encode($body);
 
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'URL: ' . $api_url);
-            // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
-            // back_trace( 'NOTICE', 'Body: ' . $body);
 
             // Call the API
             $response = wp_remote_post($api_url, array(
@@ -676,7 +645,6 @@ function kchat_fetch_api_status($api_key, $model) {
             // Handle WP Error
             if (is_wp_error($response)) {
                 // DIAG - Diagnostics
-                // back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
                 return 'WP_Error: ' . $response->get_error_message() . '. Please check Settings for a valid API key or your Google account for additional information.';
             }
 
@@ -684,7 +652,6 @@ function kchat_fetch_api_status($api_key, $model) {
             $response_data = json_decode(wp_remote_retrieve_body($response), true);
 
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Response: ' . print_r($response_data, true));
 
             // Check for API-specific errors
             if (isset($response_data['error'])) {
@@ -694,7 +661,6 @@ function kchat_fetch_api_status($api_key, $model) {
             
                 // Handle error response
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
             
             } elseif (isset($response_data['candidates'][0])) {
                 // Google API uses 'candidates' instead of 'choices'
@@ -703,17 +669,14 @@ function kchat_fetch_api_status($api_key, $model) {
                 if (isset($candidate['content']['parts'][0]['text']) || isset($candidate['content']['parts'])) {
                     // Handle successful response
                     $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                    // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
                 } else {
                     // Candidate exists but no valid content
                     $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-                    // back_trace( 'ERROR', 'API Status: ' . $updated_status);
                 }
 
             } else {
                 // Handle unexpected response structure
                 $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
 
             }
             
@@ -751,7 +714,6 @@ function kchat_fetch_api_status($api_key, $model) {
             // Retrieve model settings
             $model = esc_attr(get_option('chatbot_local_model_choice', 'llama3.2-3b-instruct'));
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', '$model: ' . $model);
             $max_tokens = intval(get_option('chatbot_local_max_tokens_setting', 1000));
             $temperature = floatval(get_option('chatbot_local_temperature', 0.8));
             $top_p = floatval(get_option('chatbot_local_top_p', 0.95));
@@ -816,9 +778,6 @@ function kchat_fetch_api_status($api_key, $model) {
             );
 
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'URL: ' . $api_url);
-            // back_trace( 'NOTICE', 'Headers: ' . print_r($headers, true));
-            // back_trace( 'NOTICE', 'Body: ' . $body);
 
             // Send request
             $response = wp_remote_post($api_url, $args);
@@ -827,7 +786,6 @@ function kchat_fetch_api_status($api_key, $model) {
             $response_data = json_decode(wp_remote_retrieve_body($response));
 
             // DIAG - Diagnostics
-            // back_trace( 'NOTICE', 'Response: ' . print_r($response_data, true));
 
             // Handle request errors
             if (is_wp_error($response)) {
@@ -843,7 +801,6 @@ function kchat_fetch_api_status($api_key, $model) {
             
                 // Handle error response
                 $updated_status = 'API Error Type: ' . $error_type . ' Message: ' . $error_message;
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
             
             } elseif (isset($response_data->choices[0]->message)) {
 
@@ -853,13 +810,11 @@ function kchat_fetch_api_status($api_key, $model) {
             
                 // Handle successful response
                 $updated_status = 'Success: Connection to the ' . $chatbot_ai_platform_choice . ' API was successful!';
-                // back_trace( 'SUCCESS', 'API Status: ' . $updated_status);
 
             } else {
 
                 // Handle unexpected response structure
                 $updated_status = 'Error: Unexpected response format from the ' . $chatbot_ai_platform_choice . ' API. Please check Settings for a valid API key or your ' . $chatbot_ai_platform_choice . ' account for additional information.';
-                // back_trace( 'ERROR', 'API Status: ' . $updated_status);
 
             }
             
@@ -902,12 +857,10 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
     }
 
     // DIAG - Log Function Call
-    // back_trace( 'NOTICE', 'chatgpt_option_updated() called');
 
     // FIXME Retrieve the current value of the chatbot_chatgpt_api_status option
     $chatbot_chatgpt_api_status = esc_attr(get_option('chatbot_chatgpt_api_status', 'NOT SET'));
     // DIAG - Log the current value of the chatbot_chatgpt_api_status option
-    // back_trace( 'NOTICE', $chatbot_chatgpt_api_status);
     
     // Check if the option updated is related to your plugin settings
     // if ($option_name === 'chatbot_chatgpt_model_choice' || $option_name === 'chatbot_chatgpt_api_key' || empty($chatbot_chatgpt_api_status)) {
@@ -919,7 +872,6 @@ function chatgpt_option_updated($option_name, $old_value, $new_value) {
         // Call your test function
         $test_result = kchat_test_api_status($api_key);
         // DIAG - Log the test result
-        // back_trace( 'WARNING', '$test_result' . $test_result);        
 
         // DIAG - Set the option in the admin_notice function uses to display messages
         update_option('chatbot_chatgpt_api_status', $test_result);

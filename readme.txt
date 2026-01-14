@@ -3,7 +3,7 @@ Contributors: Kognetiks
 Tags: chat, chatbot, chatgpt, openai, ai
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.9
-Stable tag: 2.4.1
+Stable tag: 2.4.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -155,6 +155,12 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 24. Chatbot Setting - Support
 
 == Changelog ==
+
+= 2.4.2 - Released 2026-01-14 =
+
+### Bug Fixes
+
+* **Bug Fixes**: Premimum features bug fixes and improvements.
 
 = 2.4.1 - Released 2026-01-06 =
 

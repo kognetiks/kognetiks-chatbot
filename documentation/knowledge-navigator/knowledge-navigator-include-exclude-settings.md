@@ -2,7 +2,7 @@
 
 The Include/Exclude settings allow you to specify which types of content the **Knowledge Navigator** should index. This helps you control the scope of the content that your chatbot can reference. Follow these steps to configure these options:
 
-![Knowledge Navigator Include/Exclude Settings](knowledge-navigator-include-exclude-settings.png)
+<img src="knowledge-navigator-include-exclude-settings.png" alt="Knowledge Navigator Include/Exclude Settings" style="width:auto;height:auto;">
 
 1. **Dynamic Post Type Selection**:
    - **Description**: The Knowledge Navigator automatically detects all public post types on your site that have published content.

@@ -23,9 +23,6 @@ function set_chatbot_chatgpt_transients_files( $transient_type, $transient_value
     // global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
-    // back_trace( 'NOTICE', 'SET $transient_type: ' . $transient_type);
-    // back_trace( 'NOTICE', 'SET $transient_value: ' . $transient_value);
-    // back_trace( 'NOTICE', 'SET $file_no: ' . $file_no);
 
     // Set the transient based on the type
     if ($transient_type == 'chatbot_chatgpt_assistant_file_ids') {
@@ -51,9 +48,6 @@ function get_chatbot_chatgpt_transients_files( $transient_type, $session_id, $fi
     // global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
-    // back_trace( 'NOTICE', 'GET $transient_type: ' . $transient_type);
-    // back_trace( 'NOTICE', 'GET $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'GET $file_no: ' . $file_no);
 
     // Construct the transient key based on the transient type
     $transient_key = '';
@@ -85,8 +79,6 @@ function delete_chatbot_chatgpt_transients_files( $transient_type, $session_id, 
     // global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
-    // back_trace( 'NOTICE', 'DEL $transient_type: ' . $transient_type);
-    // back_trace( 'NOTICE', 'DEL $file_no: ' . $file_no);
 
     // Construct the transient key based on the transient type
     if ($transient_type == 'chatbot_chatgpt_assistant_file_ids') {

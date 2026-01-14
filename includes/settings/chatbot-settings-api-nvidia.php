@@ -45,6 +45,7 @@ function chatbot_nvidia_api_key_callback($args) {
 function chatbot_nvidia_api_model_chat_settings_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using chat models. Depending on the NVIDIA model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://docs.api.nvidia.com/nim/reference/models-1" target="_blank">https://docs.api.nvidia.com/nim/reference/models-1</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
+    <p><b>NOTE:</b> Enter your API key (above), click <code>Save Settings</code> at the bottom of this page, in order to retrieve the full list of available models.</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
         <li><code>&#91;chatbot style="floating" model="nvidia/llama-3.1-nemotron-51b-instruct"&#93;</code> - Style is floating, specific model</li>

@@ -2,7 +2,7 @@
 
 To ensure your Kognetiks Chatbot functions optimally, you need to configure the chat settings appropriately. Here's a detailed guide on how to use these settings:
 
-![Chat Settings](chat-settings.png)
+<img src="chat-settings.png" alt="Chat Settings" style="width:auto;height:auto;">
 
 1. **Local Server Model Default**:
    - **Description**: This setting allows you to choose the default Local Server model your chatbot will use.

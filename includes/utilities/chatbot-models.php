@@ -136,7 +136,6 @@ function chatbot_openai_get_models() {
     }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
 
     // Return the list of models
     return $models;
@@ -239,7 +238,6 @@ function chatbot_azure_get_models() {
     $azure_models_url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/models?api-version=' . $chatbot_azure_api_version;
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE' , 'chatbot_azure_get_models: ' . $azure_models_url);
 
     // Set HTTP request arguments
     $args = array(
@@ -264,7 +262,6 @@ function chatbot_azure_get_models() {
     $data = json_decode(wp_remote_retrieve_body($response), true);
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE' , 'chatbot_azure_get_models: ' . print_r($data, true));
 
     // Check for API errors
     if (isset($data['error'])) {
@@ -294,7 +291,6 @@ function chatbot_azure_get_models() {
     }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
 
     // Return the list of models
     return $models;
@@ -398,7 +394,6 @@ function chatbot_nvidia_get_models() {
     }
 
     // DIAG - Diagnostics - Ver 2.0.2.1
-    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
 
     // Return the list of models
     return $models;
@@ -484,7 +479,6 @@ function chatbot_anthropic_get_models() {
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
 
     // Return the list of models
     return $models;
@@ -495,7 +489,6 @@ function chatbot_anthropic_get_models() {
 function chatbot_deepseek_get_models() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE' , 'chatbot_deepseek_get_models');
 
     $api_key = '';
 
@@ -539,7 +532,6 @@ function chatbot_deepseek_get_models() {
     $response = wp_remote_get($deepseek_models_url, $args);
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$response: ' . print_r($response, true));
     
     // Check for errors in the response
     if (is_wp_error($response)) {
@@ -581,7 +573,6 @@ function chatbot_deepseek_get_models() {
 function chatbot_mistral_get_models() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE' , 'chatbot_mistral_get_models');
 
     $api_key = '';
 
@@ -631,7 +622,6 @@ function chatbot_mistral_get_models() {
     $data = json_decode($body, true);
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$data: ' . print_r($data, true));
 
     // Check if the response is valid and contains data
     if (isset($data['data']) && is_array($data['data'])) {
@@ -664,7 +654,6 @@ function chatbot_mistral_get_models() {
 function chatbot_google_get_models() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE' , 'chatbot_google_get_models');
 
     $api_key = '';
 
@@ -752,7 +741,6 @@ function chatbot_google_get_models() {
     $data = json_decode($body, true);
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$data: ' . print_r($data, true));
 
     // Check for API errors
     if (isset($data['error'])) {
@@ -811,7 +799,6 @@ function chatbot_google_get_models() {
     }
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE' , '$models: ' . print_r($models, true));
 
     // Return the list of models
     return $models;

@@ -1,18 +1,20 @@
-# 📊 Analytics Package Overview
+# 📊 Insights & Reporting Overview
 
-The **Analytics Package** in the Kognetiks Chatbot for WordPress plugin provides comprehensive tools to track, measure, and optimize your chatbot's performance. The package consists of three powerful components that work together to give you complete visibility into your chatbot's interactions and effectiveness.
+The **Insights & Reporting Overview** features in Kognetiks Chatbot help you stay aware of how your chatbot is performing—across conversations, trends, and outcomes—without constant monitoring.
 
 ## Package Components
 
-The Analytics Package includes:
+Insights & Reporting includes three complementary components designed to help you understand chatbot activity, stay informed, and demonstrate real-world value:
 
 1. **📈 Insights Dashboard** – Real-time analytics dashboard accessible directly in your WordPress admin panel
 2. **📧 Conversation Digest Email** – Automated email reports delivering conversation summaries and transcripts to your inbox
 3. **💎 Proof of Value Reports Email** – Premium email reports with actionable insights, performance metrics, and improvement recommendations
 
+Together, these features help transform chatbot conversations into measurable awareness, accountability, and business insight.
+
 **Note**: Conversation logging must be enabled for all analytics features. Go to the **Reporting** tab, then scroll down to the **Reporting Settings** section to enable logging.
 
-![Reporting Settings](reporting-settings.png)
+<img src="reporting-settings.png" alt="Reporting Settings" style="width:auto;height:auto;">
 
 ---
 
@@ -34,7 +36,7 @@ The **Insights** tab provides a powerful dashboard to help you track, measure, a
 
 The insights dashboard summarizes data for sentiment analysis, engagement analysis, message and session statistics, and token usage. You can quickly evaluate period-over-period changes in total conversations, unique visitors, average sentiment scores, and positive conversations. To give you further insights, you can filter for visitors only, chatbot responses only, or both together.
 
-![Analysis](insights-package.png)
+<img src="analytics-package.png" alt="Analysis" styl="width:auto;height;auto;">
 
 > ℹ️ **Note**: This feature is available to all users. Make sure conversation logging is enabled to see insights data.
 
@@ -137,7 +139,7 @@ The ability to filter and analyze visitor/user sentiment separately from chatbot
 
 ## 📧 Conversation Digest Email
 
-![Conversation Digest and Insight Settings](conversation-digest-and-insight-settings.png)
+<img src="conversation-digest-and-insight-settings.png" alt="Conversation Digest and Insight Settings" style="width:auto;height:auto;">
 
 The Conversation Digest email is an automated email report that delivers summaries of your chatbot conversations directly to your inbox. This feature helps you stay informed about user interactions with your chatbot without needing to log into your WordPress admin panel.
 
@@ -250,8 +252,8 @@ All Analytics Package features work seamlessly with:
 
 ## Related Documentation
 
-- [Conversation Digest Email](./conversation-digest-email.md) – Complete guide to conversation digest emails
-- [Proof of Value Reports Email](./proof-of-value-reports-email.md) – Complete guide to proof of value reports
+- [Conversation Digest Email](conversation-digest-email.md) – Complete guide to conversation digest emails
+- [Proof of Value Reports Email](proof-of-value-reports-email.md) – Complete guide to proof of value reports
 
 ---
 

@@ -96,7 +96,6 @@ function chatbot_chatgpt_localize(){
         $default_value = $defaults[$key] ?? '';
         $kchat_settings[$key] = esc_attr(get_option($key, $default_value));
         // DIAG - Diagnostics - Ver 1.6.1
-        // back_trace( 'NOTICE', 'Key: ' . $key . ', Value: ' . $kchat_settings[$key]);
     }
 
 

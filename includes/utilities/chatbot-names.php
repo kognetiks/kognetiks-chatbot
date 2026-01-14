@@ -30,13 +30,11 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
     global $chatbot_chatgpt_assistant_alias;
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'get_chatbot_chatgpt_assistant_name() called with Assistant ID: ' . $assistant_id_lookup);
 
     $api_key = '';
 
     $chatbot_ai_platform_choice = esc_attr(get_option('chatbot_ai_platform_choice'), 'OpenAI');
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
 
     if ( $chatbot_ai_platform_choice == 'OpenAI' ) {
 
@@ -47,7 +45,6 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
         // Ensure API key is set
         if (empty($api_key)) {
-            // back_trace( 'ERROR', 'Missing API key for retrieving assistant name.');
             return false;
         }
 
@@ -67,7 +64,6 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
     } elseif ( $chatbot_ai_platform_choice == 'Azure OpenAI' ) {
 
         // DIAG - Diagnostics - Ver 2.2.6
-        // back_trace( 'NOTICE', '$chatbot_ai_platform_choice: ' . $chatbot_ai_platform_choice);
 
         // Retrieve the API key
         $api_key = esc_attr(get_option('chatbot_azure_api_key'));
@@ -97,7 +93,6 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
 
         // Look up the Agent's name in the Assistants table
         // DIAG - Diagnostics - Ver 2.3.0
-        // back_trace( 'NOTICE', '$assistant_id_lookup: ' . $assistant_id_lookup);
         
         // Prepare the query of the database
         global $wpdb;
@@ -105,21 +100,16 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
         $query = $wpdb->prepare("SELECT * FROM $table_name WHERE assistant_id = %s", $assistant_id_lookup);
         
         // DIAG - Diagnostics - Ver 2.3.0
-        // back_trace( 'NOTICE', 'Query: ' . $query);
-        // back_trace( 'NOTICE', 'Assistant ID Lookup: ' . $assistant_id_lookup);
         
         $result = $wpdb->get_results($query);
         
         // DIAG - Diagnostics - Ver 2.3.0
-        // back_trace( 'NOTICE', 'Result: ' . print_r($result, true));
-        // back_trace( 'NOTICE', 'Number of rows returned: ' . count($result));
 
         // Return the Agent's name
         return $result[0]->common_name;
 
     } else {
 
-        // back_trace( 'ERROR', 'Invalid AI platform choice.');
         return false;
 
     }
@@ -139,7 +129,6 @@ function get_chatbot_chatgpt_assistant_name($assistant_id_lookup) {
     // Decode JSON response
     $data = json_decode($response_body, true);
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'get_chatbot_chatgpt_assistant_name() response: ' . print_r($data, true));
 
     // Validate JSON
     if (json_last_error() !== JSON_ERROR_NONE) {

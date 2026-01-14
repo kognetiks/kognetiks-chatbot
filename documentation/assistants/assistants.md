@@ -26,7 +26,7 @@ Assistants work with both 'floating' and 'embedded' styles.
 
 These settings allow you to configure the behavior and capabilities of the Assistant in your Kognetiks Chatbot. Follow these steps to set up these options:
 
-![Managing Assistants](managing-assistants.png)
+<img src="managing-assistants.png" alt="Managing Assistants" style="width:auto;height:auto;">
 
 1. **Assistant ID or Agent ID**:
    - **Description**: This field is for specifying the primary Assistant ID.
@@ -87,7 +87,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 ## Assistant General Settings
 
-![Assistant General Settings](assistant-general-settings.png)
+<img src="assistant-general-settings.png" alt="Assistant General Settings" style="width:auto;height:auto;">
 
 1. **Allow File Uploads**:
    - **Description**: This setting allows users to upload files through the chatbot interface.
@@ -110,7 +110,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 **NOTE**: Applies only to OpenAI and OpenAI Azure Assistants.
 
-![Advanced Additional Settings](advanced-additional-settings.png)
+<img src="advanced-additional-settings.png" alt="Advanced Additional Settings" style="width:auto;height:auto;">
 
 1. **Max Prompt Tokens**:
    - **Description**: This setting determines the maximum number of tokens for the input prompt.
@@ -138,7 +138,7 @@ These settings allow you to configure the behavior and capabilities of the Assis
 
 The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes, for example `kognetiks.com,chatbot-4` which will only allow calls from kognetiks.com and only then to chatbot-4.  Your resources are valuable, take appropriate precautions when allowing remote server access.
 
-![Remote Widget Settings](remote-widget-settings.png)
+<img src="remote-widget-settings.png" alt="Remote Widget Settings" style="width:auto;height:auto;">
 
 ### Field Descriptions
 
@@ -197,9 +197,9 @@ Use the following format to invoke the primary or alternate assistant:
 
 *-* `[chatbot style="embedded" assistant="alternate"]` - Embedded style, Assistant as set in Alternate setting
 
-*-* `[chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]` - Floating style, Assistant as set in Assistant ID setting
+*-* ```[chatbot style="floating" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` - Floating style, Assistant as set in Assistant ID setting
 
-*-* `[chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]` - Embedded style, Assistant as set in Assistant ID setting
+*-* ```[chatbot style="embedded" assistant="asst_xxxxxxxxxxxxxxxxxxxxxxxx"]``` - Embedded style, Assistant as set in Assistant ID setting
 Mix and match the style and assistant attributes to suit your needs.
 
 **NOTE**: When using the 'embedded' style, it's best to put the shortcode in a page or post, not in a footer.
@@ -214,19 +214,19 @@ Mix and match the style and assistant attributes to suit your needs.
 
 *-* **Audience Shortcode Parameter**: Use the 'audience' parameter to target specific user groups:
 
-  - `[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="all"]` - Available to all users.
+  - ```[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="all"]``` - Available to all users.
 
-  - `[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="logged-in"]` - Available only to logged-in users.
+  - ```[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="logged-in"]``` - Available only to logged-in users.
 
-  - `[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="visitors"]` - Available only to visitors.
+  - ```[chatbot style="embedded" assistant="asst_123456789ASDFGHJKL" audience="visitors"]``` - Available only to visitors.
 
   or
 
-  - `[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="all"]` - Available to all users.
+  - ```[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="all"]``` - Available to all users.
 
-  - `[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="logged-in"]` - Available only to logged-in users.
+  - ```[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="logged-in"]``` - Available only to logged-in users.
 
-  - `[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="visitors"]` - Available only to visitors.
+  - ```[chatbot style="floating" assistant="asst_123456789ASDFGHJKL" audience="visitors"]``` - Available only to visitors.
 
 By configuring these settings, you ensure that your Kognetiks Chatbot can effectively utilize the Assistant to provide personalized and contextually aware interactions for your users.
 
