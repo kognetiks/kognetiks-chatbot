@@ -10,7 +10,7 @@
 
 ### Bug Fixes
 
-* **Bug Fixes**: Premimum features bug fixes and improvements.
+* **Bug Fixes**: Premium features bug fixes and improvements.
 
 ## 2.4.1 - Released 2026-01-06
 

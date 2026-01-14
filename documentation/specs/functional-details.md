@@ -566,7 +566,7 @@ Users must agree to terms of service for each AI platform:
 
 ### Recent Updates (Version 2.4.2)
 
-* **Bug Fixes**: Premimum features bug fixes and improvements.
+* **Bug Fixes**: Premium features bug fixes and improvements.
 
 ### Recent Updates (Version 2.4.1)
 
