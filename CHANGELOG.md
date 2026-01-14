@@ -6,7 +6,13 @@
 
 ---
 
-## 2.4.1.- Released 2026-01-06
+## 2.4.2 - Release 2026-01-14
+
+### Bug Fixes
+
+* **Bug Fixes**: Premimum features bug fixes and improvements.
+
+## 2.4.1 - Released 2026-01-06
 
 ### New Features
 * **Automated Email Reports**: Added Conversation Digest and Proof of Value Reports email functionality with scheduling options

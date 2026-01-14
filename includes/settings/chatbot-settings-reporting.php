@@ -1425,6 +1425,8 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     
     // Log email attempt
     if (function_exists('back_trace')) {
+        // prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Message: ' . $message );
+        prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Message');
     }
     
     // Send the email
@@ -1433,6 +1435,8 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
     // Log result
     if (function_exists('back_trace')) {
         if ($sent) {
+            // prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Sent: ' . $sent );
+            prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Sent');
         } else {
             // Check for PHP mail errors
             $last_error = error_get_last();

@@ -156,7 +156,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.4.2 - Released 2026-01-09 =
+= 2.4.2 - Released 2026-01-14 =
 
 ### Bug Fixes
 
