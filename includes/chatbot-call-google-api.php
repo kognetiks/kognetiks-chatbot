@@ -40,7 +40,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.9
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -48,12 +47,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', 'chatbot_call_google_api()');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Google Generative AI API Documentation
     // https://ai.google.dev/gemini-api/docs
@@ -87,11 +80,8 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     $is_gemini_2 = (stripos($model, 'gemini-2') !== false || stripos($model, 'gemini-2.0') !== false);
     
     // DIAG - Diagnostics - Ver 2.3.9+
-    // back_trace( 'NOTICE', 'Model: ' . $model . ' | Thinking: ' . ($is_thinking_model ? 'Yes' : 'No') . ' | Version: ' . ($is_gemini_3 ? '3.0' : ($is_gemini_2 ? '2.0' : 'Unknown')));
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
-    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Google API endpoint format: {base}/models/{model}:generateContent
     $api_url = $google_base_url . '/models/' . $model . ':generateContent';
@@ -160,8 +150,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     }
 
     // DIAG Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', 'Conversation history pairs: ' . count($conversation_contents) / 2);
 
     // Build the Google API request body
 
@@ -213,7 +201,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
 
     if (!empty($image_data) && is_array($image_data)) {
         // DIAG - Diagnostics - Ver 2.3.9+
-        // back_trace( 'NOTICE', 'Media Resolution setting: ' . $media_resolution);
         
         $user_message_parts[] = array(
             'inlineData' => array(
@@ -275,7 +262,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     // Note: API support for thinking level may vary between versions.
     if ($is_thinking_model) {
         // DIAG - Diagnostics - Ver 2.3.9+
-        // back_trace( 'NOTICE', 'Thinking model detected: ' . $model . ' | Thinking Level: ' . $thinking_level);
         
         // For thinking models, we can potentially add thinking-specific configuration
         // Gemini 2.0 and 3.0 thinking models may have different API support
@@ -297,7 +283,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     }
 
     // DIAG Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', '$body: ' . print_r($body, true));
 
     $timeout = intval(esc_attr(get_option('chatbot_google_timeout_setting', 240)));
 
@@ -305,9 +290,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     addEntry('chatbot_chatgpt_context_history', $message);
 
     // DIAG Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
-    // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', '$message: ' . $message);  
 
     // API Call
     $response = wp_remote_post($api_url, array(
@@ -320,7 +302,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     if (is_wp_error($response)) {
 
         // DIAG - Diagnostics - Ver 2.3.9
-        // back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'API Connection Error: ' . $response->get_error_message();
@@ -337,7 +318,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
         $error_msg = $response_body['error']['message'] ?? 'Unknown API Error';
 
         // DIAG - Diagnostics - Ver 2.3.9
-        // back_trace( 'ERROR', 'Gemini API Error: ' . $error_msg);
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'Error: ' . $error_msg;
@@ -345,7 +325,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     }
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -361,15 +340,9 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     }
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // Add the usage to the conversation tracker
     // Google API may return usage information in different format
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens if available
     $input_tokens = $response_body['usageMetadata']['promptTokenCount'] ?? 0;
@@ -377,9 +350,6 @@ function chatbot_call_google_api($api_key, $message, $user_id = null, $page_id =
     $total_tokens = $response_body['usageMetadata']['totalTokenCount'] ?? 0;
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $input_tokens);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $output_tokens);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $total_tokens);
 
     // Log Tokens
     if (isset($response['response']['code']) && $response['response']['code'] == 200) {

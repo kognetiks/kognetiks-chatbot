@@ -34,11 +34,11 @@ Now your website visitors can enjoy a seamless and personalized chat experience 
 
 # Floating Chatbot Example
 
-![Floating Chatbot Example](chatbot-floating-example.png)
+<img src="chatbot-floating-example.png" alt="Floating Chatbot Example" style="width:auto;height:auto;">
 
 # Embedded Chatbot Example
 
-![Embedded Chatbot Example](chatbot-embedded-example.png)
+<img src="chatbot-embedded-example.png" alt="Embedded Chatbot Example" style="width:auto;height:auto;">
 
 ---
 

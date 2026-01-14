@@ -2,7 +2,7 @@
 
 The Advanced API Settings allow you to configure critical parameters for the API connection used by the Kognetiks Chatbot. Follow these steps to ensure the plugin is properly set up:
 
-![Advanced API Settings](advanced-api-settings.png)
+<img src="advanced-api-settings.png" alt="Advanced API Settings" style="width:auto;height:auto;">
 
 1. **Base URL for API**:
    - **Description**: This field specifies the base URL for the Anthropic API. The plugin uses this URL to connect to the Anthropic servers.

@@ -2,7 +2,7 @@
 
 To enhance your Kognetiks Chatbot with text-to-speech capabilities, follow these steps to configure the Voice Settings:
 
-![Voice Settings](voice-settings.png)
+<img src="voice-settings.png" alt="Voice Settings" style="width:auto;height:auto;">
 
 1. **Voice Model Default**:
    - **Description**: This dropdown allows you to select the default text-to-speech model the chatbot will use.

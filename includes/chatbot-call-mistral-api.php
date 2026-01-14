@@ -40,7 +40,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -48,15 +47,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 2.2.2
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_mistral_api())');
-    // back_trace( 'NOTICE', 'chatbot_call_mistral_api - start');
-    // back_trace( 'NOTICE', 'chatbot_call_mistral_api - $api_key: ' . $api_key);
-    // back_trace( 'NOTICE', 'chatbot_call_mistral_api - $message: ' . $message);
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Mistral.com API Documentation
     // https://api.mistral.ai/v1/chat/completions
@@ -66,7 +56,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     $api_url = get_chat_completions_api_url();
 
     // DIAG - Diagnostics - Ver 2.2.2
-    // back_trace( 'NOTICE', '$api_url: ' . $api_url);
 
     // Select the Mistral Model
     // https://api-docs.mistral.com/quick_start/pricing
@@ -130,7 +119,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -147,7 +135,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
-    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
     // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 65536; // Example: 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
@@ -160,9 +147,7 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
-        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // FIXME - Set $context to null - Ver 2.2.2 - 2025-01-16
@@ -201,12 +186,8 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     addEntry('chatbot_chatgpt_context_history', $message);
 
     // DIAG - Diagnostics - Ver 2.2.2
-    // back_trace( 'NOTICE', '$body: ' . $body);
 
     // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
-    // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', '$message: ' . $message);  
 
     // API Call with exponential backoff retry for rate limits - Ver 2.3.9+
     $max_retries = 5;
@@ -326,7 +307,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -342,14 +322,8 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     }
 
     // DIAG - Diagnostics - Ver 2.2.2
-    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens
     $input_tokens = $response_body->usage->prompt_tokens ?? 0;
@@ -357,9 +331,6 @@ function chatbot_chatgpt_call_mistral_api($api_key, $message, $user_id = null, $
     $total_tokens = $input_tokens + $output_tokens;
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $input_tokens);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $output_tokens);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $total_tokens);
 
     // Check if the response content is not empty
     if (!empty($response_body->choices[0]->message->content)) {

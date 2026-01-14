@@ -2,7 +2,7 @@
 
 The **Kognetiks Chatbot** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
 
-![DeepSeek API](api-deepseek-settings.png)
+<img src="api-deepseek-settings.png" alt="DeepSeek API" style="width:auto;height:auto;">
 
 1. **DeepSeek API Key**:
 

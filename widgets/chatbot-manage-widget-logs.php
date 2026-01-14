@@ -56,7 +56,6 @@ function chatbot_manage_widget_logs() {
     }
 
     // DIAG - Log files for troubleshooting - Ver 2.0.7
-    // back_trace( 'NOTICE', 'chatbot_manage_widget_logs', 'Files: ' . print_r($files, true));
 
     // Start HTML output with styling
     $output = '<style>

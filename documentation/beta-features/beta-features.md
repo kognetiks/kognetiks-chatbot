@@ -13,7 +13,7 @@ Use at Your Own Risk: Kognetiks assumes no liability for issues arising from the
 
 If you're unsure about any of these steps, consult with a web professional or WordPress expert before proceeding.
 
-![Enabling Beta Features](beta-features.png)
+<img src="beta-features.png" alt="Enabling Beta Features" style="width:auto;height:auto;">
 
 1. **Enable Beta Features**:
    - **Description**: This setting determines if beta features included in the current release have been enabled.

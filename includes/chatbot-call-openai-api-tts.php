@@ -34,7 +34,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     global $errorResponses;
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
 
     // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
@@ -47,7 +46,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -55,16 +53,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '========================================');
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_call_tts_api()');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
-    // back_trace( 'NOTICE', 'BEGIN $model: ' . $model);
-    // back_trace( 'NOTICE', 'BEGIN $voice: ' . $voice);
-    // back_trace( 'NOTICE', 'BEGIN $message: ' . $message);
 
     // Check for the API key
     if (empty($api_key) or $api_key == '[private]') {
@@ -84,12 +72,10 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     // Generate directory path
     $audio_dir_path = $chatbot_chatgpt_plugin_dir_path . 'audio/';
-    // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace( 'ERROR', 'Failed to create directory.');
         return;
     }
 
@@ -111,11 +97,9 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     if ( !empty($kchat_settings['model']) ) {
         $model = $kchat_settings['model'];
         // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', '$model from script_data_array: ' . $model);
     } else {
         $model = esc_attr(get_option('chatbot_chatgpt_model_choice', 'tts-1-hd'));
         // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', '$model from get_option: ' . $model);
     }
 
     // Get the audio voice transient if it exists - Ver 1.9.5
@@ -126,16 +110,13 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     if ( !empty($voice) ) {
         $voice = $voice;
         // DIAG - Diagnostics - Ver 1.9.5
-        // back_trace( 'NOTICE', '$voice from transient: ' . $voice);
     } elseif ( !empty($kchat_settings['voice'])) {
         $voice = $kchat_settings['voice'];
         // DIAG - Diagnostics - Ver 1.9.5
-        // back_trace( 'NOTICE', '$voice from script_data_array: ' . $voice);
     } else {
         // Get the voice option from the settings (default is alloy)
         $voice = esc_attr(get_option('chatbot_chatgpt_voice_option', 'alloy'));
         // DIAG - Diagnostics - Ver 1.9.5
-        // back_trace( 'NOTICE', '$voice from get_option: ' . $voice);
     }
 
     // Belt and Suspender - Ver 1.9.5
@@ -149,10 +130,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     }
 
     // DIAG - Diagnostics - Ver 1.9.5
-    // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
-    // back_trace( 'NOTICE', '$model: ' . $model);
-    // back_trace( 'NOTICE', '$voice: ' . $voice);
-    // back_trace( 'NOTICE', '$audio_format: ' . $audio_format);
 
     // Build conversation context using standardized function - Ver 2.3.9+
     // Note: TTS API doesn't use conversation history in the API call itself,
@@ -227,7 +204,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     $audio_output .= "[Listen](" . esc_url($audio_file_url) . ")";
 
     // DIAG - Diagnostics - Ver 1.6.7
-    // back_trace( 'NOTICE', '$decoded: ' . $decoded);
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -245,9 +221,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
     if (!empty($audio_output)) {
 
         // DIAG - Diagnostics - Ver 1.9.4
-        // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $response_body["usage"]["prompt_tokens"]);
-        // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $response_body["usage"]["completion_tokens"]);
-        // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $response_body["usage"]["total_tokens"]);
 
         // Add the usage to the conversation tracker
         // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $response_body["usage"]["prompt_tokens"]);
@@ -261,7 +234,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
         chatbot_chatgpt_delete_audio_file_id( $audio_file_url );
 
         // DIAG - Diagnostics - Ver 1.9.5
-        // back_trace( 'NOTICE', '$audio_output: ' . $audio_output);
 
         // Clear locks on success
         // Lock clearing removed - main send function handles locking
@@ -269,7 +241,6 @@ function chatbot_chatgpt_call_tts_api($api_key, $message, $voice = null, $user_i
 
     } else {
         // FIXME - Decide what to return here - it's an error
-        // back_trace( 'ERROR', 'API ERROR ' . print_r($response_body, true));
         if (get_locale() !== "en_US") {
             $localized_errorResponses = get_localized_errorResponses(get_locale(), $errorResponses);
         } else {
@@ -342,14 +313,6 @@ function chatbot_chatgpt_read_aloud($message) {
     $kchat_settings['voice'] = $voice;
     
     // DIAG - Diagnostics - Ver 2.0.6
-    // back_trace( 'NOTICE', '========================================');
-    // back_trace( 'NOTICE', 'user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$t_model: ' . $t_model);
-    // back_trace( 'NOTICE', '$model: ' . $model);
-    // back_trace( 'NOTICE', '$t_voice: ' . $voice);
-    // back_trace( 'NOTICE', '$voice: ' . $voice);
 
     // Call the Text-to-Speech API
     $response = chatbot_chatgpt_call_tts_api($api_key, $message, $voice);
@@ -381,7 +344,6 @@ function chatbot_chatgpt_delete_audio_file_id( $file_id ) {
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
-    // back_trace( 'NOTICE', 'Setup deleting audio file after 2 hours: ' . $file_id);
 
     // Set a transient that expires in 2 hours
     $timeFrameForDelete = time() + 2 * 60 * 60;
@@ -407,16 +369,13 @@ function deleteAudioFile($file_id) {
     global $assistant_id;
 
     // DIAG - Diagnostics - Ver 1.9.2
-    // back_trace( 'NOTICE', 'Delete the audio file: ' . print_r($file_id, true));
 
     // Generate directory path
     $audio_dir_path = $chatbot_chatgpt_plugin_dir_path . 'audio/';
-    // back_trace( 'NOTICE', '$audio_dir_path: ' . $audio_dir_path);
 
     // Ensure the directory exists or attempt to create it
     if (!create_directory_and_index_file($audio_dir_path)) {
         // Error handling, e.g., log the error or handle the failure appropriately
-        // back_trace( 'ERROR', 'Failed to create directory.');
         return;
     }
 
@@ -429,19 +388,16 @@ function deleteAudioFile($file_id) {
     // Check if the file exists
     if (!file_exists($file_id)) {
         // DIAG - Diagnostics - Ver 1.9.9
-        // back_trace( 'ERROR', 'File does not exist: ' . $file_id);
         return;
     }
 
     // Try to delete the file
     if (!unlink($file_id)) {
         // DIAG - Diagnostics - Ver 1.9.9
-        // back_trace( 'ERROR', 'Failed to delete file: ' . $file_id);
         return;
     }
 
     // DIAG - Diagnostics - Ver 1.9.9
-    // back_trace( 'NOTICE', 'File deleted: ' . $file_id);
 
 }
 add_action( 'chatbot_chatgpt_delete_audio_file', 'deleteAudioFile' );

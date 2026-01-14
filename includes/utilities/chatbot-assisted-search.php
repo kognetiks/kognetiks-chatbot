@@ -17,7 +17,6 @@ if ( ! defined( 'WPINC' ) ) {
 add_action('rest_api_init', function () {
     
     // DIAG - Diagnostics - Ver 2.2.7
-    // back_trace( 'NOTICE', 'Registering assistant search endpoint');
     
     register_rest_route('assistant/v1', '/search', [
         'methods'  => 'GET',
@@ -77,13 +76,11 @@ function assistant_permission_callback( $request ) {
     
     if ( ! $exists ) {
         // DIAG - Diagnostics - Ver 2.2.7
-        // back_trace( 'ERROR', 'Invalid Assistant ID: ' . $assistant_id);
         // return new WP_Error( 'invalid_assistant_id', __('Invalid Assistant ID'), array( 'status' => 403 ) );
         return new WP_Error( 'unauthorized', __('Unauthorized'), array( 'status' => 403 ) );
     }
     
     // DIAG - Diagnostics - Ver 2.2.7
-    // back_trace( 'NOTICE', 'Assistant ID is valid: ' . $assistant_id);
 
     return true;
 }
@@ -92,10 +89,6 @@ function assistant_permission_callback( $request ) {
 function chatbot_assistant_search_handler($request) {
 
     // DIAG - Diagnostics - Ver 2.2.7
-    // back_trace( 'NOTICE', '====== SEARCH REQUEST RECEIVED ======');
-    // back_trace( 'NOTICE', 'Request parameters: ' . print_r($request->get_params(), true));
-    // back_trace( 'NOTICE', 'Request URL: ' . $request->get_route());
-    // back_trace( 'NOTICE', 'Request method: ' . $request->get_method());
     
     global $wpdb;
 

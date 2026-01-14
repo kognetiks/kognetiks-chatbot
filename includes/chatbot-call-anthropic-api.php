@@ -40,7 +40,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -48,12 +47,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     set_transient($duplicate_key, true, 120); // 2 minutes to prevent duplicates - Ver 2.3.7
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_call_anthropic_api()');
-    // back_trace( 'NOTICE', 'BEGIN $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'BEGIN $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'BEGIN $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'BEGIN $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'BEGIN $assistant_id: ' . $assistant_id);
 
     // Anthropic.com API Documentation
     // https://docs.anthropic.com/en/api/messages
@@ -79,8 +72,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     }
 
     // DIAG - Diagnostics - Ver 2.2.9
-    // back_trace( 'NOTICE', '$kchat_settings: ' . print_r($kchat_settings, true));
-    // back_trace( 'NOTICE', '$model: ' . $model);
  
     // Max tokens
     $max_tokens = intval(esc_attr(get_option('chatbot_anthropic_max_tokens_setting', '1000')));
@@ -133,7 +124,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
             }
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        // back_trace( 'NOTICE', '$context: ' . $context);
 
     } else {
 
@@ -153,7 +143,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
 
     // Check the length of the context and truncate if necessary - Ver 2.2.6
     $context_length = intval(strlen($context) / 4); // Assuming 1 token ≈ 4 characters
-    // back_trace( 'NOTICE', '$context_length: ' . $context_length);
     // FIXME - Define max context length (adjust based on model requirements)
     $max_context_length = 100000; // Estimate at 65536 characters ≈ 16384 tokens
     if ($context_length > $max_context_length) {
@@ -166,13 +155,10 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
             $truncated_context = substr($context, 0, $max_context_length);
         }
         $context = $truncated_context;
-        // back_trace( 'NOTICE', 'Context truncated to ' . strlen($context) . ' characters.');
     } else {
-        // back_trace( 'NOTICE', 'Context length is within limits.');
     }
 
     // DIAG Diagnostics - Ver 2.1.8
-    // back_trace( 'NOTICE', '$context: ' . $context);
 
     // Build the Anthropic API request body
 
@@ -189,7 +175,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     // Conversation Context - Ver 1.6.1
     $additional_instructions = esc_attr(get_option('chatbot_anthropic_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
     // DIAG Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
 
     // Build system message combining additional instructions and context - Ver 2.3.9+
     $system_message = $additional_instructions;
@@ -221,7 +206,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     ));
 
     // DIAG Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$body: ' . print_r($body, true));
 
     $timeout = esc_attr(get_option('chatbot_anthropic_timeout_setting', 240 ));
 
@@ -229,9 +213,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     addEntry('chatbot_chatgpt_context_history', $message);
 
     // DIAG Diagnostics - Ver 1.6.1
-    // back_trace( 'NOTICE', '$storedc: ' . $chatbot_chatgpt_kn_conversation_context);
-    // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', '$message: ' . $message);  
 
     // API Call
     $response = wp_remote_post($api_url, array(
@@ -244,7 +225,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     if (is_wp_error($response)) {
 
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'ERROR', 'Error: ' . $response->get_error_message());
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An API error occurred.';
@@ -262,7 +242,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
         $error_message = $response_body['error']['message'] ?? 'No additional information.';
 
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'ERROR', 'Error: Type: Type: ' . $error_type . ' Message: ' . $error_message);
         // Clear locks on error
         // Lock clearing removed - main send function handles locking
         return isset($errorResponses['api_error']) ? $errorResponses['api_error'] : 'An error occurred.';
@@ -270,7 +249,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     }
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body));
 
     // Get the user ID and page ID
     if (empty($user_id)) {
@@ -286,14 +264,8 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     }
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'AFTER $user_id: ' . $user_id);
-    // back_trace( 'NOTICE', 'AFTER $page_id: ' . $page_id);
-    // back_trace( 'NOTICE', 'AFTER $session_id: ' . $session_id);
-    // back_trace( 'NOTICE', 'AFTER $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'AFTER $assistant_id: ' . $assistant_id);   
 
     // Add the usage to the conversation tracker
-    // back_trace( 'NOTICE', '$response_body: ' . print_r($response_body, true));
 
     // Extract input and output tokens
     $input_tokens = $response_body['usage']['input_tokens'] ?? 0;
@@ -301,9 +273,6 @@ function chatbot_call_anthropic_api($api_key, $message, $user_id = null, $page_i
     $total_tokens = $input_tokens + $output_tokens;
 
     // DIAG - Diagnostics - Ver 1.8.1
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $input_tokens);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $output_tokens);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $total_tokens);
 
     if ($response['response']['code'] == 200) {
         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', null, null, null, $input_tokens);

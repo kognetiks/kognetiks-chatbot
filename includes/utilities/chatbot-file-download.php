@@ -25,7 +25,6 @@ function download_openai_file($file_id, $filename) {
     if (!create_directory_and_index_file($downloads_dir)) {
         // Error handling, e.g., log the error or handle the failure appropriately
         // DIAG - Diagnostics - Ver 2.0.3
-        // back_trace( 'ERROR', 'Failed to create download directory.');
         // FIXME - Return an error message
         return false;
     }
@@ -35,7 +34,6 @@ function download_openai_file($file_id, $filename) {
     $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
     if (empty($api_key)) {
         // DIAG - Diagnostics - Ver 2.0.3
-        // back_trace( 'ERROR', 'API key is missing.');
         // FIXME - Return an error message
         return false;
     }

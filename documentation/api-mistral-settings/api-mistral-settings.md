@@ -2,7 +2,7 @@
 
 The **Kognetiks Chatbot** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
 
-![Mistral API](api-mistral-settings.png)
+<img src="api-mistral-settings.png" alt="Mistral API" style="width:auto;height:auto;">
 
 1. **Mistral API Key**:
 

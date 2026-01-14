@@ -16,13 +16,11 @@ if ( ! defined( 'WPINC' ) ) {
 function runMarkovChatbotAndSaveChain() {
 
     // Diagnostics
-    // back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - Start');
 
     // Step 0: Force a full rebuild if necessary
     $force_rebuild = esc_attr(get_option('chatbot_markov_chain_force_rebuild', 'No'));
 
     if ($force_rebuild == 'Yes') {
-        // back_trace( 'NOTICE', 'Forcing a full rebuild of the Markov Chain');
         dropMarkovChainTable();
         update_option('chatbot_markov_chain_force_rebuild', 'No');
         // Reset the timestamp
@@ -35,7 +33,6 @@ function runMarkovChatbotAndSaveChain() {
     // Step 2: Get the last updated timestamp for the Markov Chain
     $last_updated = esc_attr(get_option('chatbot_markov_chain_last_updated', '2000-01-01 00:00:00'));
 
-    // back_trace( 'NOTICE', 'Last updated timestamp: ' . $last_updated);
 
     // Step 3: Initialize batch processing variables
     $batch_starting_points = get_transient('chatbot_markov_chain_batch_starting_points');
@@ -48,15 +45,12 @@ function runMarkovChatbotAndSaveChain() {
     }
 
     $batch_size = max(1, min(intval(esc_attr(get_option('chatbot_markov_chain_batch_size', 10))), 100)); // Limit batch size between 1 and 100
-    // back_trace( 'NOTICE', 'Batch size: ' . $batch_size);
 
     // Step 4: Get the total number of posts
     $total_posts = wp_count_posts('post')->publish;
-    // back_trace( 'NOTICE', 'Total number of posts: ' . $total_posts);
 
     // Step 5: Calculate the number of batches
     $total_batches = ceil($total_posts / $batch_size);
-    // back_trace( 'NOTICE', 'Total number of batches: ' . $total_batches);
 
     // Step 6: Set the maximum execution time
     ini_set('max_execution_time', 300);
@@ -71,7 +65,6 @@ function runMarkovChatbotAndSaveChain() {
         prod_trace( 'NOTICE', 'Database Size: ' . $stats['table_size_mb'] . ' MB');
     }
 
-    // back_trace( 'NOTICE', 'runMarkovChatbotAndSaveChain - End');
 }
 
 // Create or update the Markov Chain table
@@ -131,7 +124,6 @@ register_activation_hook(__FILE__, 'createMarkovChainTable');
 // Drop the Markov Chain table
 function dropMarkovChainTable() {
 
-    // back_trace( 'NOTICE', 'dropMarkovChainTable - Start');
 
     global $wpdb;
 
@@ -155,7 +147,6 @@ function dropMarkovChainTable() {
 // Process content in batches
 function processContentBatches($last_updated, $batch_starting_points, $batch_size) {
 
-    // back_trace( 'NOTICE', 'processContentBatches - Start');
 
     // FIXME - For now, we are only processing posts - 2.2.0
     // Process posts, comments, and synthetic data
@@ -191,7 +182,6 @@ function processContentBatches($last_updated, $batch_starting_points, $batch_siz
             if (!wp_schedule_single_event(time() + 60, 'chatbot_markov_chain_next_batch')) {
                 prod_trace( 'ERROR', 'Failed to schedule next batch for Markov Chain processing.');
             } else {
-                // back_trace( 'NOTICE', 'Next batch scheduled.');
             }
         }
 
@@ -202,7 +192,6 @@ function processContentBatches($last_updated, $batch_starting_points, $batch_siz
         update_option('chatbot_markov_chain_build_schedule', 'Completed');
         delete_transient('chatbot_markov_chain_batch_starting_points');
         delete_option('chatbot_markov_chain_build_schedule');
-        // back_trace( 'NOTICE', 'All temporary data cleaned up after completion.');
     }
 
     prod_trace( 'NOTICE', 'processContentBatches - End');
@@ -217,11 +206,8 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
 
     $offset = ($batch_starting_point - 1) * $batch_size;
 
-    // back_trace( 'NOTICE', '$last_updated: ' . $last_updated);
-    // back_trace( 'NOTICE', '$batch_starting_point: ' . $batch_starting_point);
 
     $last_updated_date = date('Y-m-d H:i:s', strtotime($last_updated));
-    // back_trace( 'NOTICE', '$last_updated_date: ' . $last_updated_date);
 
     if ($processing_type == 'posts') {
         // Fetch posts and pages
@@ -246,7 +232,6 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
 
         // Count of posts fetched
         $post_count = $query->post_count;
-        // back_trace( 'NOTICE', 'Number of posts fetched: ' . $post_count);
 
         if ($query->have_posts()) {
             while ($query->have_posts()) {
@@ -258,8 +243,6 @@ function getContentBatch($last_updated, $batch_starting_point, $batch_size, $pro
                 $clean_post_title = clean_up_training_data(get_the_title());
 
                 // DIAG - Diagnostics - Ver 2.2.0
-                // back_trace( 'NOTICE', 'Post ID: ' . get_the_ID());
-                // back_trace( 'NOTICE', 'Post Title: ' . get_the_title());                
 
                 $content .= ' ' . $clean_post_title . ' ' . $clean_content;
             }

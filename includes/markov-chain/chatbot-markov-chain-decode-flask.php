@@ -123,8 +123,6 @@ function checkKeyInDatabase($key, $attempts = 1) {
     $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word = %s", $key));
 
     // DIAG - Diagnostics - V 2.1.9
-    // back_trace( 'NOTICE', 'Checking key: ' . $key . ' - Result: ' . $result);
-    // back_trace( 'NOTICE', 'Attempts: ' . $attempts);
 
     // If no exact match is found, try using the wildcard approach
     if ($result === null) {
@@ -140,8 +138,6 @@ function checkKeyInDatabase($key, $attempts = 1) {
         $result = $wpdb->get_var($wpdb->prepare("SELECT word FROM $table_name WHERE word LIKE %s", $wildcardKey));
 
         // Diagnostic output to log the wildcard key generation and attempt number
-        // back_trace( 'NOTICE', 'Attempt ' . $attempts . ': Wildcard key after shuffle - ' . $wildcardKey);
-        // back_trace( 'NOTICE', 'Wildcard key result: ' . $result);
 
         // Recursive call with incremented attempts if no result is found
         if ($result === null) {
@@ -187,8 +183,6 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
     }
 
     // Diagnostic output
-    // back_trace( 'NOTICE', 'Checking current word: ' . $currentWord);
-    // back_trace( 'NOTICE', 'Attempts: ' . $attempts);
 
     // Query to get possible next words and their frequencies
     $results = $wpdb->get_results(
@@ -214,7 +208,6 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
     if ($approach === "Laplace Smoothing") {
 
         // Using Laplace smoothing to calculate probabilities and select the next word
-        // back_trace( 'NOTICE', 'Using Laplace Smoothing to calculate probabilities and select the next word' );
 
         // Implement Laplace smoothing to calculate probabilities
         // Calculate the vocabulary size (number of possible next words)
@@ -250,7 +243,6 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
     } else {
 
         // Using original (V2.1.9) approach to calculate probabilities and select the next word
-        // back_trace( 'NOTICE', 'Using Original (V2.1.9) approach to calculate probabilities and select the next word' );
 
         // Sort results by frequency to get the most common word
         usort($results, function($a, $b) {

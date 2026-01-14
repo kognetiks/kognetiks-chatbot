@@ -2,7 +2,7 @@
 
 The **Kognetiks Chatbot** now includes the advanced feature to allow access to your assistants from remote servers.  Coupled with security measures to control and monitor remote access to your chatbots, you must enable the **Remote Widget Access** feature.  This will allow specific remote servers to interact with your chatbot(s) via an endpoint. To ensure that only authorized servers and chatbots can access your resources, the system uses a whitelisting mechanism that pairs domains with specific chatbot shortcodes, for example `kognetiks.com,chatbot-4` which will only allow calls from kognetiks.com and only then to chatbot-4.  Your resources are valuable, take appropriate precautions when allowing remote server access.
 
-![Remote Widget Settings](remote-widget-settings.png)
+<img src="remote-widget-settings.png" alt="Remote Widget Settings" style="width:auto;height:auto;">
 
 ### Field Descriptions
 
@@ -67,7 +67,7 @@ The **Kognetiks Chatbot** now includes the advanced feature to allow access to y
 
 The screen capture below shows how to configure Remote Server Access using WPCode to embedded the iframe in a website's site-wide footer.  As illustrated, this will place a floating chatbot on a remote website for interaction with an Assistant.  **TIP**: This works best with a floating chatbot.
 
-![WPCode Remote Widget](wpcode-snippet.png)
+<img src="wpcode-snippet.png" alt="WPCode Remote Widget" style="width:auto;height:auto;">
 
 ---
 

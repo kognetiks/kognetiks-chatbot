@@ -24,7 +24,6 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_schedule_conversation_digest() {
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_schedule_conversation_digest()');
 
     // Get the enabled setting
     $enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));
@@ -48,7 +47,7 @@ function chatbot_chatgpt_schedule_conversation_digest() {
     // Check if premium - free users are limited to Weekly
     // Note: Don't modify the saved value here - use it as-is for scheduling
     // The sanitization callback will handle validation and resetting if needed
-    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
     if (!$is_premium) {
         $frequency = 'weekly'; // Use Weekly for free users (but don't modify the DB value)
     }
@@ -75,7 +74,6 @@ function chatbot_chatgpt_schedule_conversation_digest() {
 function chatbot_chatgpt_send_conversation_digest() {
 
     // DIAG - Diagnostics - Ver 2.3.9
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_send_conversation_digest()');
 
     // Get the enabled setting
     $enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));
@@ -125,7 +123,7 @@ function chatbot_chatgpt_send_conversation_digest() {
     }
     
     // Check if premium - free users get limited content
-    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : (function_exists('chatbot_chatgpt_freemius') && chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
+    $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
     
     // Organize conversations by session
     $conversations_by_session = array();

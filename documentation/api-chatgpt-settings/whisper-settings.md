@@ -2,7 +2,7 @@
 
 To enable and customize the speech-to-text capabilities of your Kognetiks Chatbot, follow these steps to configure the Whisper Settings:
 
-![Whisper Settings](whisper-settings.png)
+<img src="whisper-settings.png" alt="Whisper Settings" style="width:auto;height:auto;">
 
 1. **Whisper Model Default**:
    - **Description**: This dropdown allows you to select the default speech-to-text model the chatbot will use.

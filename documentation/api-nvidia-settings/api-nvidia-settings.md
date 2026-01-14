@@ -2,7 +2,7 @@
 
 The **Kognetiks Chatbot** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
 
-![NVIDIA API](api-nvidia-settings.png)
+<img src="api-nvidia-settings.png" alt="NVIDIA API" style="width:auto;height:auto;">
 
 1. **NVIDIA API Key**:
 

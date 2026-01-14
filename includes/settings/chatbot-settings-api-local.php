@@ -45,7 +45,8 @@ function chatbot_local_api_key_callback($args) {
 function chatbot_local_api_model_chat_settings_section_callback($args) {
     ?>
     <p>Configure the settings for the plugin when using chat models. Depending on the Local model you choose, the maximum tokens may be as high as 4097. The default is 150. For more information about the maximum tokens parameter, please see <a href="https://jan.ai/docs" target="_blank">https://jan.ai/docs</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
-    <p><strong>IMPORTANT</strong>: You can download and use any GGUF model from sources like <a href="https://huggingface.co/models?library=gguf&sort=downloads" target="_blank">Hugging Face</a>.  The plugin will work with any model that is compatible with the JAN.AI engine.</p>
+        <p><b>NOTE:</b> Enter your API key (above), click <code>Save Settings</code> at the bottom of this page, in order to retrieve the full list of available models.</p>
+        <p><strong>IMPORTANT</strong>: You can download and use any GGUF model from sources like <a href="https://huggingface.co/models?library=gguf&sort=downloads" target="_blank">Hugging Face</a>.  The plugin will work with any model that is compatible with the JAN.AI engine.</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
         <li><code>&#91;chatbot style="floating" model="llama3.2-3b-instruct"&#93;</code> - Style is floating, specific model</li>

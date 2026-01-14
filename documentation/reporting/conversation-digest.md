@@ -2,7 +2,7 @@
 
 The Conversation Digest Settings allow you to receive periodic email summaries of new chatbot conversations. This feature automatically checks for new conversations and sends a formatted digest email to a specified address based on your selected frequency. Follow these steps to configure these settings:
 
-![Conversation Digest Settings](conversation-digest.png)
+<img src="conversation-digest.png" alt="Conversation Digest Settings" style="width:auto;height:auto;">
 
 ## Settings Overview
 

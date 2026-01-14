@@ -2,11 +2,11 @@
 
 The Messages and Diagnostics Settings help you monitor the health and performance of the **Kognetiks Chatbot**, providing tools for error logging, API connection checks, and other diagnostics. Follow these steps to configure these options effectively:
 
-![Messages and Diagnotics Overview](messages-and-diagnostics-overiew.png)
+<img src="messages-and-diagnostics-overiew.png" alt="Messages and Diagnotics Overview" style="width:auto;height:auto;">
 
 # Platform Settings Details
 
-![Platform Settings](platform-settings.png)
+<img src="platform-settings.png" alt="Platform Settings" style="width:auto;height:auto;">
 
 1. **System and Plugin Information**:
    - **Description**: Displays key information about your system and the chatbot plugin, including PHP version, WordPress version, Chatbot version, and WordPress language code.
@@ -14,7 +14,7 @@ The Messages and Diagnostics Settings help you monitor the health and performanc
 
 # API Status and Results
 
-![API Status and Results](api-status-and-results.png)
+<img src="api-status-and-results.png" alt="API Status and Results" style="width:auto;height:auto;">
 
 1. **API Status and Results**:
    - **Description**: Shows the status of the connection to the OpenAI API.
@@ -23,7 +23,7 @@ The Messages and Diagnostics Settings help you monitor the health and performanc
 
 # Messages and Diagnostics Settings
 
-![Messages and Diagnostics Settings](messages-and-diagnostics-settings.png)
+<img src="messages-and-diagnostics-settings.png" alt="Messages and Diagnostics Settings" style="width:auto;height:auto;">
 
 1. **Chatbot Diagnostics**:
    - **Description**: Allows you to select the level of diagnostics to be logged.
@@ -160,7 +160,7 @@ Use these advanced features with caution. They can affect the performance and st
 
 ## Reset Cache/Locks
 
-![Reset Cache/Locks](messages-advanced-options.png)
+<img src="messages-advanced-options.png" alt="Reset Cache/Locks" style="width:auto;height:auto;">
 
 1. **Reset Cache/Locks**:
    - **Description**: A maintenance tool that allows you to clear various cached data and reset conversation locks that may be causing issues with your chatbot.
@@ -213,7 +213,7 @@ If you're unsure about any of these steps, consult with a web professional or Wo
 
 ## Enable Beta Features
 
-![Beta Feature Settings](messages-beta-features.png)
+<img src="messages-beta-features.png" alt="Beta Feature Settings" style="width:auto;height:auto;">
 
 1. **Enable Beta Features**:
    - **Description**: This setting allows you to enable experimental and beta features that are still in development. These features may provide new functionality but are not yet fully tested or stable.

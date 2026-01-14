@@ -2,7 +2,7 @@
 
 The Kognetiks Chatbot Dashboard Widget provides real-time insights into your chatbot's performance and usage statistics directly in your WordPress admin dashboard.
 
-![Admin Dashboard](admin-dashboard.png)
+<img src="admin-dashboard.png" alt="Admin Dashboard" style="width:auto;height:auto;">
 
 ## Overview
 

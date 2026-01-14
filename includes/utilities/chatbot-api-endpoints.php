@@ -106,7 +106,6 @@ function get_files_api_url() {
         $url = 'https://' . $chatbot_azure_resource_name . '.openai.azure.com/openai/files?api-version=' . $chatbot_azure_api_version;
 
         // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'Azure OpenAI endpoint $url is: ' . $url );
         return $url;
 
     }

@@ -68,7 +68,7 @@ The unanswered questions detection can be customized:
 
 ### Proof of Value Email Example
 
-![Proof of Value Email Example](proof-of-value-email-example.png)
+<img src="proof-of-value-email-example.png" alt="Proof of Value Email Example" style="width:auto;height:auto;">
 
 ### Using This Information
 
@@ -97,8 +97,8 @@ The Proof of Value Report also includes:
 
 ## Related Documentation
 
-- [Analytics Package Overview](./analytics-package.md)
-- [Conversation Digest Settings](../settings/conversation-digest.md)
+- [Analytics Package Overview](analytics-package/analytics-package.md)
+- [Conversation Digest Settings](analytics-package/conversation-digest-email.md)
 
 ---
 

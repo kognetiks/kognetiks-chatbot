@@ -70,16 +70,11 @@ function chatbot_chatgpt_settings_page() {
     // Check if the user wants to reset the appearance settings to default - Ver 1.8.1
     $chatbot_chatgpt_appearance_reset = esc_attr(get_option('chatbot_chatgpt_appearance_reset', 'No'));
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_appearance_reset: ' . $chatbot_chatgpt_appearance_reset);
     if ( $chatbot_chatgpt_appearance_reset == 'Yes' ) {
         chatbot_chatgpt_appearance_restore_default_settings();
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_settings_page() - $active_tab: ' . $active_tab );
-    // back_trace( 'NOTICE', 'Current Page: ' . $_GET['page']);
-    // back_trace( 'NOTICE', 'Current Tab: ' . ($_GET['tab'] ?? 'No Tab Set'));
-    // back_trace( 'NOTICE', 'chatbot_ai_platform_choice: ' . esc_attr(get_option('chatbot_ai_platform_choice', 'OpenAI')));
 
     ?>
     <div id="chatbot-chatgpt-settings" class="wrap">
@@ -264,8 +259,13 @@ function chatbot_chatgpt_settings_page() {
 
                 // Breadcrumb info line - Ver 2.4.1
                 // Only show to free users (Premium users already have access to these features)
+                // Hide if admin notice was dismissed (linked to same discovery unit)
                 $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
-                if (!$is_premium) {
+                $dismissed  = function_exists('chatbot_chatgpt_get_option')
+                    ? chatbot_chatgpt_get_option('chatbot_chatgpt_reporting_notice_dismissed', '0')
+                    : get_option('chatbot_chatgpt_reporting_notice_dismissed', '0');
+                
+                if ( ! $is_premium && $dismissed !== '1' ) {
                     $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
                     echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
                 }
@@ -775,14 +775,8 @@ function chatbot_chatgpt_settings_page() {
 
             } elseif ($active_tab == 'insights') {
 
-                // DIAG - Diagnostics - Ver 4.2.1
-                // back_trace( 'NOTICE', 'Insights Tab');
-                // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->is_plan( 'premium' ));
-                // back_trace( 'NOTICE', chatbot_chatgpt_freemius()->can_use_premium_code__premium_only());
-
                 // Check if user has premium access using the centralized helper function
                 // This follows Freemius best practices for premium status checks
-                // (CHATBOT_CHATGPT_FORCE_FREE_MODE is DEV/TESTING ONLY and not used in production)
                 $has_premium_access = function_exists( 'chatbot_chatgpt_is_premium' ) ? chatbot_chatgpt_is_premium() : false;
 
                 if ( $has_premium_access ) {
@@ -846,8 +840,21 @@ function chatbot_chatgpt_settings_page() {
                     echo '<h3>✅ Ready to Upgrade?</h3>';
                     echo '<p>Reports delivered automatically. No dashboard monitoring required.</p>';
                     echo '<p>';
-                    echo '<a href="' . chatbot_chatgpt_freemius()->get_upgrade_url() . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">🔓 Unlock Conversation Insights</a>';
-                    echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=insights-package&file=insights-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
+                    // Trial-first CTA with safety guards
+                    if (function_exists('chatbot_chatgpt_freemius')) {
+                        $fs = chatbot_chatgpt_freemius();
+                        if (is_object($fs) && method_exists($fs, 'get_upgrade_url')) {
+                            // Use monthly billing cycle for trial
+                            $trial_url = $fs->get_upgrade_url( WP_FS__PERIOD_MONTHLY, true );
+                            echo '<a href="' . esc_url($trial_url) . '" class="button button-primary" style="text-decoration: none; margin-right: 10px;">Start Free Trial</a>';
+                        }
+                        // Secondary "View Plans" link
+                        if (is_object($fs) && method_exists($fs, 'get_upgrade_url')) {
+                            $upgrade_url = $fs->get_upgrade_url();
+                            echo '<a href="' . esc_url($upgrade_url) . '" class="button button-secondary" style="text-decoration: none; margin-right: 10px;">View Plans</a>';
+                        }
+                    }
+                    echo '<a href="' . esc_url(admin_url('admin.php?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=analytics-package.md')) . '" style="margin-right: 10px;">Learn more</a>';
                     echo '<a href="mailto:support@kognetiks.com">Contact Support</a>';
                     echo '</p>';
 
@@ -893,8 +900,13 @@ function chatbot_chatgpt_settings_page() {
 
                 // Breadcrumb info line - Ver 2.4.1
                 // Only show to free users (Premium users already have access to these features)
+                // Hide if admin notice was dismissed (linked to same discovery unit)
                 $is_premium = function_exists('chatbot_chatgpt_is_premium') ? chatbot_chatgpt_is_premium() : false;
-                if (!$is_premium) {
+                $dismissed  = function_exists('chatbot_chatgpt_get_option')
+                    ? chatbot_chatgpt_get_option('chatbot_chatgpt_reporting_notice_dismissed', '0')
+                    : get_option('chatbot_chatgpt_reporting_notice_dismissed', '0');
+                
+                if ( ! $is_premium && $dismissed !== '1' ) {
                     $reporting_url = admin_url('admin.php?page=chatbot-chatgpt&tab=reporting');
                     echo '<p class="description" style="margin-bottom: 15px;">New: Conversation summaries and proof-of-value reports are now available under <a href="' . esc_url($reporting_url) . '">Reporting</a>.</p>';
                 }

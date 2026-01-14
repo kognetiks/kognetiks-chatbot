@@ -26,9 +26,6 @@ $max_top_words = esc_attr(get_option('chatbot_chatgpt_kn_maximum_top_words', 25)
 function chatbot_chatgpt_kn_results_callback($run_scanner) {
 
     // DIAG - Diagnostics - Ver 1.6.3
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_results_callback');
-    // back_trace( 'NOTICE', '$run_scanner: ' . $run_scanner);
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_kn_schedule: ' . esc_attr(get_option('chatbot_chatgpt_kn_schedule')));
 
     // NUCLEAR OPTION - OVERRIDE VALUE TO NO
     // update_option('chatbot_chatgpt_kn_schedule', 'No');
@@ -45,19 +42,13 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
     if (in_array($run_scanner, ['Now', 'Hourly', 'Daily', 'Twice Daily', 'Weekly', 'Disable', 'Cancel'])) {
 
         // DIAG - Diagnostics - Ver 1.6.3
-        // back_trace( 'NOTICE', "$run_scanner: " . $run_scanner);
-        // back_trace( 'NOTICE', "max_top_words: " . serialize($GLOBALS['max_top_words']));
-        // back_trace( 'NOTICE', "domain: " . serialize($GLOBALS['domain']));
-        // back_trace( 'NOTICE', "start_url: " . serialize($GLOBALS['start_url']));
 
         $chatbot_chatgpt_no_of_items_analyzed = 0;
         update_option('chatbot_chatgpt_no_of_items_analyzed', $chatbot_chatgpt_no_of_items_analyzed);
 
         // WP Cron Scheduler - VER 1.6.2
-        // back_trace( 'NOTICE', 'BEFORE wp_clear_scheduled_hook');
 
         wp_clear_scheduled_hook('knowledge_navigator_scan_hook'); // Clear before rescheduling
-        // back_trace( 'NOTICE', 'AFTER wp_clear_scheduled_hook');
 
         if ($run_scanner === 'Cancel') {
             update_option( 'chatbot_chatgpt_kn_schedule', 'No' );
@@ -79,7 +70,6 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
                 update_option('chatbot_chatgpt_kn_status', 'In Process');
 
                 // Log action to debug.log
-                // back_trace( 'NOTICE', 'BEFORE crawl_schedule_event_hook');
 
                 // IDEA WP Cron Scheduler - VER 1.6.2
                 // https://chat.openai.com/share/b1de5d84-966c-4f0f-b24d-329af3e55616
@@ -109,7 +99,6 @@ function chatbot_chatgpt_kn_results_callback($run_scanner) {
                 }
                 
                 // DIAG - Log action to debug.log
-                // back_trace( 'NOTICE', 'AFTER crawl_schedule_event_hook');
 
                 // Log scan interval - Ver 1.6.3
                 if ($interval === 'Now') {
@@ -200,7 +189,6 @@ function chatbot_chatgpt_kn_get_published_post_types() {
     }
     
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Final post types array: ' . print_r($published_types, true));
     
     return $published_types;
 
@@ -270,7 +258,6 @@ function chatbot_chatgpt_kn_include_exclude_section_callback($args) {
 
 function chatbot_chatgpt_kn_include_post_type_callback($args) {
     if (empty($args['option_name'])) {
-        // back_trace( 'ERROR', 'Missing option_name: ' . print_r($args, true));
         return;
     }
 

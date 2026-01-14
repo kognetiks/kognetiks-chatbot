@@ -18,7 +18,6 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_transformer_model_scheduler() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_transformer_model_scheduler - start');
 
     // Retrieve the schedule setting
     $chatbot_transformer_model_build_schedule = esc_attr(get_option('chatbot_transformer_model_build_schedule', 'Disable'));
@@ -44,7 +43,6 @@ function chatbot_transformer_model_scheduler() {
     if (in_array($chatbot_transformer_model_build_schedule, ['Now', 'Hourly', 'Twice Daily', 'Daily', 'Weekly'])) {
 
         // DIAG - Diagnostics
-        // back_trace( 'NOTICE', 'Scheduler started');
 
         // Update the status as 'In Process'
         update_option('chatbot_transformer_model_build_status', 'In Process');
@@ -67,7 +65,6 @@ function chatbot_transformer_model_scheduler() {
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_transformer_model_scheduler - end');
 
 }
 add_action('chatbot_transformer_model_scheduler_hook', 'chatbot_transformer_model_scheduler');
@@ -76,7 +73,6 @@ add_action('chatbot_transformer_model_scheduler_hook', 'chatbot_transformer_mode
 function transformer_model_sentential_context_reset_cache() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_reset_cache - start');
 
     // Log reset activity
     prod_trace( 'NOTICE', 'Transformer Model Content Cache Reset');
@@ -95,17 +91,14 @@ function transformer_model_sentential_context_reset_cache() {
         foreach ($files as $file) {
             if (is_file($file)) {
                 unlink($file); // Delete the file
-                // back_trace( 'NOTICE', "Deleted cache file: $file");
             }
         }
         // Optionally, delete the folder itself if required
         // rmdir($cacheDir); // Uncomment if you want to remove the folder
     } else {
-        // back_trace( 'NOTICE', "Cache directory not found: $cacheDir");
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_reset_cache - end');
 
 }
 
@@ -114,7 +107,6 @@ function transformer_model_sentential_context_reset_cache() {
 function chatbot_transformer_model_scan() {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_transformer_model_scan - start');
 
     // Retrieve current state
     $offset = intval(get_option('chatbot_transformer_model_offset', 0));
@@ -145,7 +137,6 @@ function chatbot_transformer_model_scan() {
     wp_schedule_single_event(time() + 10, 'chatbot_transformer_model_scan_hook');
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'chatbot_transformer_model_scan - end');
 
 }
 add_action('chatbot_transformer_model_scan_hook', 'chatbot_transformer_model_scan');
@@ -154,7 +145,6 @@ add_action('chatbot_transformer_model_scan_hook', 'chatbot_transformer_model_sca
 function transformer_model_sentential_context_fetch_content($offset, $batchSize) {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_fetch_content - start');
 
     global $wpdb;
 
@@ -168,7 +158,6 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 
     if (empty($results)) {
         update_option('chatbot_transformer_model_offset', 0);
-        // back_trace( 'NOTICE', 'No more posts to process.');
         return [];
     } else {
         // Schedule the next batch
@@ -176,7 +165,6 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
     }
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_fetch_content - end');
 
     return $results;
 
@@ -186,7 +174,6 @@ function transformer_model_sentential_context_fetch_content($offset, $batchSize)
 function transformer_model_sentential_context_cache_embeddings($corpus, $windowSize = 3) {
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - start');
 
     $cacheDir = __DIR__ . '/sentential_embeddings_cache/';
 
@@ -270,7 +257,6 @@ function transformer_model_sentential_context_cache_embeddings($corpus, $windowS
         file_put_contents($cacheFile, '<?php return ' . var_export($existingEmbeddings, true) . ';');
     }
 
-    // back_trace( 'NOTICE', 'transformer_model_sentential_context_cache_embeddings - end');
 
 }
 

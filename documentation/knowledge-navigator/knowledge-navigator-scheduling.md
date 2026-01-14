@@ -2,7 +2,7 @@
 
 The Knowledge Navigator Scheduling settings allow you to automate the content analysis process, ensuring that your chatbot's knowledge base remains current. Follow these steps to configure these options:
 
-![Knowledge Navigator Scheduling](knowledge-navigator-scheduling.png)
+<img src="knowledge-navigator-scheduling.png" alt="Knowledge Navigator Scheduling" style="width:auto;height:auto;">
 
 1. **Select Run Schedule**:
    - **Description**: This dropdown allows you to set the frequency at which the Knowledge Navigator scans your website content.

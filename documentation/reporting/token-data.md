@@ -2,7 +2,7 @@
 
 The Token Data settings allow you to monitor and export the token usage data collected by the **Kognetiks Chatbot**. Tokens represent the smallest units of text processed by the chatbot, and tracking their usage helps in managing API costs and understanding chatbot activity. Follow these steps to understand and use these settings:
 
-![Token Data](token-data.png)
+<img src="token-data.png" alt="Token Data" style="width:auto;height:auto;">
 
 1. **Token Data Overview**:
    - **Description**: This section provides a summary of the token usage data collected by the chatbot.

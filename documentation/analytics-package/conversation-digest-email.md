@@ -168,7 +168,7 @@ The Conversation Digest is useful for:
 
 ## Conversation Digest Email Example
 
-![Chatbot Conversation Digest - Example Email](conversation-digest-email-example.png)
+<img src="conversation-digest-email-example.png" alt="Chatbot Conversation Digest - Example Email" style="width:auto;height:auto;">
 
 ## Troubleshooting
 
@@ -199,9 +199,8 @@ Adjust the frequency setting:
 
 ## Related Documentation
 
-- [Analytics Package Overview](./analytics-package.md)
-- [Proof of Value Reports Email](./proof-of-value-reports-email.md)
-- [Conversation Digest Settings](../settings/conversation-digest.md)
+- [Analytics Package Overview](analytics-package/analytics-package.md)
+- [Proof of Value Reports Email](analytics-package/proof-of-value-reports-email.md)
 
 ---
 

@@ -74,7 +74,6 @@ function chatbot_markov_chain_build_schedule_callback($args) {
     <?php
     
     // DIAG - Diagnostics - Ver 2.1.6
-    // back_trace( 'NOTICE', 'chatbot_markov_chain_build_schedule: ' . $chatbot_markov_chain_build_schedule );
     
 }
 

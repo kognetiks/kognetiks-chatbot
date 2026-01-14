@@ -2,7 +2,7 @@
 
 The Output Format setting allows you to specify the format in which the **Knowledge Navigator** data will be exported. This setting is important for how you manage and analyze the data collected from the knowledge acquisition. Follow these steps to configure this option:
 
-![Analysis](knowledge-navigator-analysis.png)
+<img src="knowledge-navigator-analysis.png" alt="Analysis" style="width:auto;height:auto;">
 
 1. **Output Format**:
    - **Description**: This setting allows you to select the format in which the chatbot's data will be exported.

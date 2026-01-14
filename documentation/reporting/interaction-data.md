@@ -2,7 +2,7 @@
 
 The Interactions Data settings allow you to view, manage, and export the data related to user interactions with your **Kognetiks Chatbot**. This data includes the number of interactions per day, which can help you understand user engagement and activity patterns. Follow these steps to understand and use these settings:
 
-![Interaction Data](interaction-data.png)
+<img src="interaction-data.png" alt="Interaction Data" style="width:auto;height:auto;">
 
 
 1. **Interactions Data Overview**:

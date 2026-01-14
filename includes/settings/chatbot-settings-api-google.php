@@ -48,6 +48,7 @@ function chatbot_google_api_model_chat_settings_section_callback($args) {
 
     ?>
     <p>Configure the settings for the plugin when using chat models. Depending on the Google model you choose, the maximum tokens may be as high as 4097. The default is 500. For more information about the maximum tokens parameter, please see <a href="https://ai.google.dev/docs" target="_blank">https://ai.google.dev/docs</a>. Enter a conversation context to help the model understand the conversation. See the default for ideas. Some example shortcodes include:</p>
+    <p><b>NOTE:</b> Enter your API key (above), click <code>Save Settings</code> at the bottom of this page, in order to retrieve the full list of available models.</p>
     <ul style="list-style-type: disc; list-style-position: inside; padding-left: 1em;">
         <li><code>&#91;chatbot&#93;</code> - Default chat model, style is floating</li>
         <li><code>&#91;chatbot style="floating" model="gemini-2.0-flash"&#93;</code> - Style is floating, specific model</li>
@@ -67,7 +68,6 @@ function chatbot_google_chat_model_choice_callback($args) {
     $models = chatbot_google_get_models();
 
     // DIAG - Ver 2.3.9
-    // back_trace( 'NOTICE', '$models: ' . print_r($models, true) );
 
     // Limit the models to Google/Gemini models
     $models = array_filter($models, function($model) {

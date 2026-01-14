@@ -2,7 +2,7 @@
 
 The **Kognetiks Chatbot** plugin requires proper configuration to function correctly. Follow the steps below to set up your plugin:
 
-![Local Server API](api-local-settings.png)
+<img src="api-local-settings.png" alt="Local Server API" style="width:auto;height:auto;">
 
 1. **Local Server API Key**:
 

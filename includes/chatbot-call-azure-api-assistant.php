@@ -19,7 +19,6 @@ if ( ! defined( 'WPINC' ) ) {
 function create_an_azure_assistant($api_key) {
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 1 - create_an_azure_assistant()');
 
     // Set your API key and assistant ID here:
     $api_key = esc_attr(get_option('chatbot_azure_api_key', ''));
@@ -38,7 +37,6 @@ function create_an_azure_assistant($api_key) {
     );
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
 
     // Prepare common headers
     $headers = array(
@@ -53,24 +51,20 @@ function create_an_azure_assistant($api_key) {
 
     // Retrieve API response
     $body = wp_remote_retrieve_body($response);
-    // back_trace( 'NOTICE', 'Thread Response: ' . print_r($body, true));
 
     $thread_response = json_decode($body, true);
 
     // Handle API errors
     if (isset($thread_response['error'])) {
-        // back_trace( 'ERROR', 'OpenAI API Error: ' . json_encode($thread_response['error'], JSON_PRETTY_PRINT));
         return "Error: " . $thread_response['error']['message'];
     }
 
     // Ensure thread ID is present
     if (!isset($thread_response["id"])) {
-        // back_trace( 'ERROR', 'Thread ID Missing in Response: ' . print_r($thread_response, true));
         return "Error: Thread ID not returned.";
     }
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 1 - $thread_response["id"]: ' . $thread_response["id"]);
 
     return $thread_response;
 
@@ -86,11 +80,6 @@ function create_an_azure_assistant($api_key) {
 function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id = null, $message_uuid = null) {
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 3 - add_an_azure_message()');
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$prompt: ' . $prompt);
-    // back_trace( 'NOTICE', '$context: ' . $context);
-    // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     global $session_id;
 
@@ -112,7 +101,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
     );
 
     // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace( 'NOTICE', '$url: ' . $url);
 
     // Prepare common headers
     $headers = array(
@@ -126,7 +114,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
     if ( empty($file_id) ) {
 
         // DIAG - Diagnostics - Ver 2.2.6
-        // back_trace( 'NOTICE', 'No files attached, just send the prompt');
 
         // No files attached, just send the prompt
         $data = [
@@ -159,8 +146,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
         $file_type = $file_type ? $file_type : 'unknown';
     
         // DIAG - Diagnostics - Ver 2.0.3
-        // back_trace( 'NOTICE', 'Files attached, $file_id[0]: ' . $file_id[0]);
-        // back_trace( 'NOTICE', 'Files attached, $file_type: ' . $file_type);
 
         // *********************************************************************************
         // NON-IMAGE ATTACHMENTS - Ver 2.0.3
@@ -169,7 +154,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
         if ( $file_type == 'assistants' ) {
             $data = chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version);
             // DIAG - Diagnostics - Ver 2.2.6
-            // back_trace( 'NOTICE', 'Text Attachment - $data: ' . print_r($data, true));
         }
 
         // *********************************************************************************
@@ -179,7 +163,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
         if ( $file_type == 'vision' ) {
             $data = chatbot_chatgpt_image_attachment($prompt, $file_id, $beta_version);
             // DIAG - Diagnostics - Ver 2.2.6
-            // back_trace( 'NOTICE', 'Image Attachment - $data: ' . print_r($data, true));
         }
 
     }
@@ -201,7 +184,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
     $response_body = wp_remote_retrieve_body($response);
 
     // DIAG - Diagnostics
-    // back_trace( 'NOTICE', 'add_an_azure_message() - $response_body: ' . print_r($response_body, true));
     
     // Return the API response
     return json_decode($response_body, true);
@@ -214,8 +196,6 @@ function add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id 
 function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $message_uuid = null) {
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 4 - run_an_azure_assistant()');
-    // back_trace( 'NOTICE', 'Step 4 - $thread_id: ' . $thread_id);
 
     global $kchat_settings;
     
@@ -232,7 +212,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
     );
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
 
     // Prepare common headers
     $headers = array(
@@ -249,16 +228,9 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
     $additional_instruction = null;
     if (isset($kchat_settings['additional_instructions']) && $kchat_settings['additional_instructions'] !== null) {
         $additional_instructions = $kchat_settings['additional_instructions'];
-        // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
     }
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '========================================');
-    // back_trace( 'NOTICE', '$max_prompt_tokens: ' . $max_prompt_tokens);
-    // back_trace( 'NOTICE', '$max_completion_tokens: ' . $max_completion_tokens);
-    // back_trace( 'NOTICE', '$temperature: ' . $temperature);
-    // back_trace( 'NOTICE', '$top_p: ' . $top_p);
-    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
 
     $data = array(
         "assistant_id" => $assistant_id,
@@ -281,7 +253,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
     ]);
     
     // Log the full response for debugging
-    // back_trace( 'NOTICE', 'Step 4 - Full Response: ' . print_r($response, true));
     
     // Ensure the response is valid
     if (is_wp_error($response)) {
@@ -297,7 +268,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
     $response_data = json_decode($response_body, true);
     
     // Log the decoded response
-    // back_trace( 'NOTICE', 'Step 4 - Decoded Response: ' . print_r($response_data, true));
     
     // Retrieve the HTTP response code
     $http_code = wp_remote_retrieve_response_code($response);
@@ -310,7 +280,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
             if (preg_match('/active run (\S+)\.?/', $errorMessage, $matches)) {
                 $existingRunId = $matches[1];
                 $existingRunId = rtrim($existingRunId, '.');
-                // back_trace( 'NOTICE', "Using existing active run: {$existingRunId}");
                 // Return a structure with the run id so the polling logic can use it
                 return ['id' => $existingRunId, 'active' => true];
             }
@@ -330,7 +299,6 @@ function run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $
 function get_the_azure_run_status($thread_id, $runId, $api_key) {
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 5: get_the_azure_run_status');
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
@@ -346,7 +314,6 @@ function get_the_azure_run_status($thread_id, $runId, $api_key) {
     );
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
 
     // Headers
     $headers = [
@@ -376,8 +343,6 @@ function get_the_azure_run_status($thread_id, $runId, $api_key) {
 function get_the_azure_run_steps($thread_id, $runId, $api_key) {
 
     // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace( 'NOTICE', 'Step 6 - get_the_azure_run_steps()');
-    // back_trace( 'NOTICE', 'Step 6 - $thread_id: ' . $thread_id);
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
@@ -393,7 +358,6 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
     );
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
 
     // Prepare request headers
     $headers = array(
@@ -432,7 +396,6 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
     }
 
     // DIAG - Diagnostic - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 6 - Decoded Response: ' . print_r($response_data, true));
 
     return $response_data;
 
@@ -444,8 +407,6 @@ function get_the_azure_run_steps($thread_id, $runId, $api_key) {
 function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id) {
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 7 - get_the_azure_steps_status()');
-    // back_trace( 'NOTICE', 'Step 7 - $thread_id: ' . $thread_id);
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
@@ -461,7 +422,6 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
     );
     
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
 
     // Prepare request headers    
     $headers = array(
@@ -507,26 +467,17 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
         }
 
         // DIAG - Diagnostics - Ver 2.2.6
-        // back_trace( 'NOTICE', 'Step 7 - Decoded Response: ' . print_r($responseArray, true));
 
         // Updated check for "data" field
         if (isset($responseArray["data"][0]) && isset($responseArray["data"][0]["status"])) {
             if ($responseArray["data"][0]["status"] === "completed") {
                 // DIAG - Diagnostics - Ver 2.2.7
-                // back_trace( 'NOTICE', 'Step 7 - $responseArray: ' . print_r($responseArray, true));
                 if (isset($responseArray["data"][0]["usage"])) {
                     $prompt_tokens = $responseArray["data"][0]["usage"]["prompt_tokens"] ?? 0;
                     $completion_tokens = $responseArray["data"][0]["usage"]["completion_tokens"] ?? 0;
                     $total_tokens = $responseArray["data"][0]["usage"]["total_tokens"] ?? 0;
                     // DIAG - Diagnostics - Ver 2.2.6
-                    // back_trace( 'NOTICE' , 'Prompt Tokens: ' . $prompt_tokens );
-                    // back_trace( 'NOTICE' , 'Completion Tokens: ' . $completion_tokens );
-                    // back_trace( 'NOTICE' , 'Total Tokens: ' . $total_tokens );
                     if ( $total_tokens != 0 ) {
-                        // back_trace( 'NOTICE', 'Step 7 - Logging token usage.');
-                        // back_trace( 'NOTICE', 'Step 7 - $prompt_tokens: ' . $prompt_tokens );
-                        // back_trace( 'NOTICE', 'Step 7 - $completion_tokens: ' . $completion_tokens );
-                        // back_trace( 'NOTICE', 'Step 7 - $total_tokens: ' . $total_tokens );
                         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $prompt_tokens);
                         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Completion Tokens', $thread_id, $assistant_id, null, $completion_tokens);
                         append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, null, $total_tokens);
@@ -566,8 +517,6 @@ function get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $
 function get_the_azure_message($thread_id, $api_key, $run_id = null) {
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Step 8 - get_the_azure_message()');
-    // back_trace( 'NOTICE', 'Step 8 - $thread_id: ' . $thread_id);
 
     $chatbot_azure_resource_name = esc_attr(get_option('chatbot_azure_resource_name', 'YOUR_RESOURCE_NAME'));
     $chatbot_azure_deployment_name = esc_attr(get_option('chatbot_azure_deployment_name', 'DEPLOYMENT_NAME'));
@@ -582,7 +531,6 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
     );
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
 
     // Prepare request headers 
     $headers = array(
@@ -613,7 +561,6 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
     }
 
     // DIAG - Diagnostics - Ver 2.0.3
-    // back_trace( 'NOTICE', 'Step 8 - $response_data: ' . print_r($response_data, true));
 
     // Download any file attachments - Ver 2.0.3
     if (isset($response_data['data']) && is_array($response_data['data'])) {
@@ -634,7 +581,6 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
                             $value = $annotation['offset_key'];
                         } else {
                             // Handle the error appropriately
-                            // back_trace( 'NOTICE', '$annotation: offset_key does not exist');
                             continue;
                         }
 
@@ -648,13 +594,11 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
                         $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
 
                         // DIAG - Diagnostics - Ver 2.0.3
-                        // back_trace( 'NOTICE', '$file_id: ' . $file_id);
 
                         // Call the function to download the file
                         $file_url = download_openai_file($file_id, $file_name);
 
                         // DIAG - Diagnostics - Ver 2.0.3
-                        // back_trace( 'NOTICE', '$file_url: ' . $file_url);
 
                         if ($file_url) {
                             // Append the local URL to the message (modify as needed for your use case)
@@ -685,13 +629,11 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
                                 $file_name = 'download_' . generate_random_string() . '_' . basename($annotation['text']); // Extract the filename
 
                                 // DIAG - Diagnostics - Ver 2.0.3
-                                // back_trace( 'NOTICE', '$file_id: ' . $file_id . ', $file_name: ' . $file_name);
 
                                 // Call the function to download the file
                                 $file_url = download_openai_file($file_id, $file_name);
 
                                 // DIAG - Diagnostics - Ver 2.0.3
-                                // back_trace( 'NOTICE', '$file_url: ' . $file_url);
 
                                 if ($file_url) {
                                     // Replace the placeholder link with the actual URL
@@ -717,7 +659,6 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
     } else {
 
         // DIAG - Diagnostics - Ver 2.0.3
-        // back_trace( 'NOTICE', 'No data or attachments found in the response.');
 
     }
 
@@ -729,15 +670,6 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
 function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null) {
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', 'chatbot_azure_custom_gpt_call_api()' );
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    // back_trace( 'NOTICE', '$thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', '$message: ' . $message);
-    // back_trace( 'NOTICE', '$additional_instructions: ' . $additional_instructions);
-    // back_trace( 'NOTICE', '$model: ' . $model);
 
     // Globals added for Ver 1.7.2
     global $learningMessages;
@@ -755,7 +687,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     $duplicate_key = 'chatgpt_message_uuid_' . $message_uuid;
     if (get_transient($duplicate_key)) {
         // DIAG - Diagnostics - Ver 2.3.4
-        // back_trace( 'NOTICE', 'Duplicate message UUID detected: ' . $message_uuid);
         return "Error: Duplicate request detected. Please try again.";
     }
 
@@ -764,38 +695,27 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     // See if there is a $thread_id
     if (empty($thread_id)) {
-        // back_trace( 'NOTICE', '$thread_id is empty');
         $thread_id = get_chatbot_chatgpt_threads($user_id, $session_id, $page_id, $assistant_id);
         if (empty($thread_id)) {
-            // back_trace( 'NOTICE', '$thread_id was empty');
         } else {
-            // back_trace( 'NOTICE', '$thread_id was empty but found a $thread_id: ' . $thread_id);
         }
     } else {
-        // back_trace( 'NOTICE', '$thread_id was NOT empty but passed as $thread_id: ' . $thread_id);
     }
 
     // If the thread_id is not set, create a new thread
     if (empty($thread_id)) {
 
         // Step 1 - Create an Assistant
-        // back_trace( 'NOTICE', 'Step 1: Create an Assistant');
         $api_key = esc_attr(get_option('chatbot_azure_api_key', ''));
         // Decrypt the API key - Ver 2.2.6
         $api_key = chatbot_chatgpt_decrypt_api_key($api_key);
         $assistants_response = create_an_azure_assistant($api_key);
         // DIAG - Diagnostics - Ver 2.2.3
-        // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
         // Step 2 - Get The Thread ID
-        // back_trace( 'NOTICE', 'Step 2: Get The Thread ID');
         $thread_id = $assistants_response["id"];
         $kchat_settings['thread_id'] = $thread_id; // ADDED FOR VER 2.1.1.1 - 2024-08-26
         // DIAG - Diagnostics - Ver 2.2.3
-        // back_trace( 'NOTICE', '$thread_id ' . $thread_id);
-        // back_trace( 'NOTICE', '$assistant_id ' . $assistant_id);
-        // back_trace( 'NOTICE', '$user_id ' . $user_id);
-        // back_trace( 'NOTICE', '$page_id ' . $page_id);
         set_chatbot_chatgpt_threads($thread_id, $assistant_id, $user_id, $page_id);
         
     } else {
@@ -823,33 +743,23 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     $context = esc_attr(get_option('chatbot_azure_conversation_context', 'You are a versatile, friendly, and helpful assistant designed to support me in a variety of tasks that responds in Markdown.'));
  
     // Step 3: Add a Message to a Thread
-    // back_trace( 'NOTICE', 'Step 3 - Add a Message to a Thread');
     $prompt = $message;
         
     // Fetch the file id - Ver 2.23
     $file_id = chatbot_chatgpt_retrieve_file_id($user_id, $page_id);
 
     // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
 
     // DIAG - Diagnostics - Ver 2.3.3
     for ($i = 0; $i < count($file_id); $i++) {
         if (isset($file_id[$i])) {
-            // back_trace( 'NOTICE', '$file_id[' . $i . ']: ' . $file_id[$i]);
         } else {
             // Handle the error appropriately
-            // back_trace( 'NOTICE', '$file_id[' . $i . ']: index does not exist');
             unset($file_id[$i]); // Remove the non-existent key
         }
     }
 
     // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to add_an_azure_message - $thread_id: ' . $thread_id);
-    // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to add_an_azure_message - $prompt: ' . $prompt);
-    // back_trace( 'NOTICE', 'RIGHT BEFORE CALL to add_an_azure_message - $content: ' . $context);
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . print_r($file_id, true));
 
     // ENHANCED CONTEXT - Select some context to send with the message - Ver 2.2.4 - Updated Ver 2.2.9
     if ($use_enhanced_content_search == 'Yes') {
@@ -869,19 +779,14 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
             $prompt = $prompt . ' When answering the prompt, please consider the following information: ' . $formatted_results;
         }
         // DIAG Diagnostics - Ver 2.2.4 - 2025-02-04
-        // back_trace( 'NOTICE', '$prompt: ' . $prompt);
 
     }
     if (empty($file_id)) {
-        // back_trace( 'NOTICE', 'No file to retrieve');
         $assistants_response = add_an_azure_message($thread_id, $prompt, $context, $api_key, '', $message_uuid);
     } else {
         //DIAG - Diagnostics - Ver 1.7.9
-        // back_trace( 'NOTICE', 'File to retrieve');
-        // back_trace( 'NOTICE', '$file_id ' . print_r($file_id, true));
         $assistants_response = add_an_azure_message($thread_id, $prompt, $context, $api_key, $file_id, $message_uuid);
         // DIAG - Print the response
-        // back_trace( 'NOTICE', $assistants_response);
     }
 
     $retries = 0;
@@ -895,12 +800,10 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         $run_status = '';
 
         // Step 4: Run the Assistant
-        // back_trace( 'NOTICE', 'Step 4 - Run the Assistant');
         $assistants_response = run_an_azure_assistant($thread_id, $assistant_id, $context, $api_key, $message_uuid);
 
         // Check if the response is not an array or is a string indicating an error
         if (!is_array($assistants_response) || is_string($assistants_response)) {
-            // back_trace( 'ERROR', 'Invalid response format or error occurred');
             return "Error: Invalid response format or error occurred.";
         }
 
@@ -908,15 +811,12 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         if (isset($assistants_response["id"])) {
             $runId = $assistants_response["id"];
         } else {
-            // back_trace( 'ERROR', 'runId key not found in response');
             return "Error: 'id' key not found in response.";
         }
 
         // DIAG - Print the response
-        // back_trace( 'NOTICE', $assistants_response);
 
         // Step 5: Get the Run's Status
-        // back_trace( 'NOTICE', 'Step 5 - Get the Run\'s Status');
         $run_status = get_the_azure_run_status($thread_id, $runId, $api_key);
 
         $retries++;
@@ -925,7 +825,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         if ($run_status == "failed") {
             $consecutive_failures++; // Increment consecutive failures
             if ($consecutive_failures >= $max_consecutive_failures) {
-                // back_trace( 'ERROR', 'Stopping after ' . $consecutive_failures . ' consecutive failures');
                 // Clear locks on error
                 delete_transient($thread_lock);
                 return "Error: Run failed after " . $consecutive_failures . " consecutive failures. Status: " . $run_status;
@@ -938,10 +837,7 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
         }
 
         if ($run_status == "failed" || $run_status == "incomplete") {
-            // back_trace( 'ERROR', 'Error - INSIDE DO WHILE LOOP - GPT Assistant - Step 5: ' . $run_status);
             // return "Error: Step 5 - " . $run_status;
-            // back_trace( 'NOTICE', 'ALERT INSIDE DO LOOP - Sleeping for ' . $sleepTime . ' microseconds');
-            // back_trace( 'NOTICE', 'ALERT INSIDE DO LOOP - Retries: ' . $retries . ', Consecutive failures: ' . $consecutive_failures);
             usleep($sleepTime);
         }
 
@@ -949,7 +845,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 
     // Failed after multiple retries
     if ($run_status == "failed" || $run_status == "incomplete") {
-        // back_trace( 'ERROR', 'Error - FAILED AFTER MULTIPLE RETRIES - GPT Assistant - Step 5: ' . $run_status);
         // Clear locks on error
         delete_transient($thread_lock);
         // Lock clearing removed - main send function handles locking
@@ -957,15 +852,10 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     }
 
     // Step 6: Get the Run's Steps
-    // back_trace( 'NOTICE', 'Step 6 - Get the Run\'s Steps');
     $assistants_response = get_the_azure_run_steps($thread_id, $runId, $api_key);
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $assistants_response["data"][0]["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
     // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
@@ -973,7 +863,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Total Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Step 7: Get the Step's Status
-    // back_trace( 'NOTICE', 'Step 7 - Get the Step\'s Status');
     // get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id);
 
     $max_retries = 10; // Max retries before giving up
@@ -983,7 +872,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     while (($retry_count < $max_retries) && (($step_status = get_the_azure_steps_status($thread_id, $runId, $api_key, $session_id, $user_id, $page_id, $assistant_id)) !== "completed")) {
         $retry_count++;
         usleep($sleep_time); 
-        // back_trace( 'NOTICE', 'Step 7: retry ' . $retry_count . ' - get_the_azure_steps_status() returned: ' . step_status);
     }
 
     if ($retry_count!=0) {
@@ -995,16 +883,11 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     }
 
     // Step 8: Get the Message
-    // back_trace( 'NOTICE', 'Step 8: Get the Message');
     $assistants_response = get_the_azure_message($thread_id, $api_key, $runId);
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
     // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace( 'NOTICE', 'Usage - Prompt Tokens: ' . $assistants_response["data"][0]["usage"]["prompt_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Completion Tokens: ' . $assistants_response["data"][0]["usage"]["completion_tokens"]);
-    // back_trace( 'NOTICE', 'Usage - Total Tokens: ' . $assistants_response["data"][0]["usage"]["total_tokens"]);
 
     // Add the usage to the conversation tracker
     // append_message_to_conversation_log($session_id, $user_id, $page_id, 'Prompt Tokens', $thread_id, $assistant_id, null, $assistants_response["data"][0]["usage"]["prompt_tokens"]);
@@ -1029,7 +912,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
     }
 
     // DIAG - Diagnostics - Ver 2.2.1
-    // back_trace( 'NOTICE', '$assistants_response: ' . print_r($assistants_response, true));
 
     // Verify that "data" exists and is an array.
     if (!isset($assistants_response["data"]) || !is_array($assistants_response["data"])) {
@@ -1089,7 +971,6 @@ function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $t
 function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
 
     // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_id(): ' . $user_id . ', ' . $page_id);
 
     global $session_id;
     global $user_id;
@@ -1105,8 +986,6 @@ function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
     $file_types = get_chatbot_chatgpt_transients_files('chatbot_chatgpt_assistant_file_types', $session_id, $file_id);
 
     // DIAG - Diagnostics - Ver 2.0.3
-    // back_trace( 'NOTICE', '$file_id: ' . print_r($file_id, true));
-    // back_trace( 'NOTICE', '$file_types: ' . print_r($file_types, true));
 
     while (!empty($file_id)) {
         // Delete the transient
@@ -1140,13 +1019,11 @@ function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
 
     // Join the file ids into a comma-separated string and return it
     // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . implode(',', $file_ids));
 
     // return implode(',', $file_ids);
 
     // Join the file ids into a comma-separated string and return it
     // DIAG - Diagnostics - Ver 2.2.3
-    // back_trace( 'NOTICE', 'chatbot_chatgpt_retrieve_file_ids(): ' . print_r($file_ids, true));
 
     return $file_ids;
 
@@ -1158,7 +1035,6 @@ function chatbot_azure_retrieve_file_id( $user_id, $page_id ) {
 function delete_azure_uploaded_file($file_id) {
 
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', 'delete_azure_uploaded_file(): ' . $file_id);
 
     // Get the Azure API key
     $api_key = esc_attr(get_option('chatbot_azure_api_key'));
@@ -1177,7 +1053,6 @@ function delete_azure_uploaded_file($file_id) {
     );
     
     // DIAG - Diagnostics - Ver 2.2.6
-    // back_trace( 'NOTICE', '$url: ' . $url);
 
     $headers = array(
         'Content-Type' => 'application/json',
@@ -1201,7 +1076,6 @@ function delete_azure_uploaded_file($file_id) {
     $http_status_code = wp_remote_retrieve_response_code($response);
     
     if ($http_status_code == 200 || $http_status_code == 204) {
-        // back_trace( 'NOTICE', 'File deleted successfully.');
         return true;
     } else {
         prod_trace('ERROR', 'HTTP status code: ' . $http_status_code );

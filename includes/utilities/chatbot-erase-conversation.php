@@ -85,9 +85,6 @@ function chatbot_chatgpt_erase_conversation_handler() {
     }
 
     // DIAG - Diagnostics - Ver 1.9.1
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     $transient_type = 'assistant_alias';
     
@@ -122,7 +119,6 @@ function chatbot_chatgpt_erase_conversation_handler() {
     clear_duplicate_message_uuids($user_id, $page_id, $session_id);
 
     // DIAG - Diagnostics - Ver 2.0.4
-    // back_trace( 'NOTICE', '$chatbot_chatgpt_force_page_reload: ' . $chatbot_chatgpt_force_page_reload);
 
     if ($chatbot_chatgpt_force_page_reload == 'Yes') {
         global $chatbot_chatgpt_fixed_literal_messages;
@@ -146,12 +142,6 @@ function chatbot_chatgpt_erase_conversation_handler() {
 
 
     // DIAG - Diagnostics - Ver 1.8.6
-    // back_trace( 'NOTICE', '$reset_type: ' . $reset_type);
-    // back_trace( 'NOTICE', '$assistant_id: ' . $assistant_id);
-    // back_trace( 'NOTICE', '$user_id: ' . $user_id);
-    // back_trace( 'NOTICE', '$page_id: ' . $page_id);
-    // back_trace( 'NOTICE', '$transient_type: ' . $transient_type);
-    // back_trace( 'NOTICE', '$session_id: ' . $session_id);
 
     global $chatbot_chatgpt_fixed_literal_messages;
         
@@ -294,7 +284,6 @@ function clear_duplicate_message_uuids($user_id, $page_id, $session_id) {
     $deleted = $wpdb->query($sql);
     
     // DIAG - Diagnostics - Ver 2.3.7
-    // back_trace('NOTICE', 'Cleared ' . $deleted . ' duplicate message UUID transients');
     
     return $deleted;
 }
