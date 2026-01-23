@@ -409,6 +409,7 @@ function chatbot_mistral_assistants_scripts() {
                 // Send the update request via AJAX
                 jQuery.post(ajaxurl, data, function(response) {
                     alert('Assistant updated successfully!');
+                    window.programmaticReload = true;
                     location.reload();  // Reload the page to reflect the deletion
                 });
             }
@@ -425,6 +426,7 @@ function chatbot_mistral_assistants_scripts() {
                 // Send the delete request via AJAX
                 jQuery.post(ajaxurl, data, function(response) {
                     alert('Assistant deleted successfully!');
+                    window.programmaticReload = true;
                     location.reload();  // Reload the page to reflect the deletion
                 });
             }
@@ -452,6 +454,7 @@ function chatbot_mistral_assistants_scripts() {
                 // Send the add request via AJAX
                 jQuery.post(ajaxurl, data, function(response) {
                     alert('New assistant added successfully!');
+                    window.programmaticReload = true;
                     location.reload();  // Reload the page to reflect the addition
                 });
             }
