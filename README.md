@@ -1,53 +1,95 @@
 # Kognetiks Chatbot for WordPress
 
-### 💬 We make AI chat simple for WordPress.
+### Turn chatbot conversations into insight, not just answers.
 
-Add intelligent, conversational AI to your WordPress site in minutes - no coding required.
+Conversational AI is easy. Understanding its impact is not — until now.
 
-## 🚀 AI Chat Made Simple
+The **Kognetiks Chatbot** helps WordPress site owners go beyond simply adding AI chat by turning real conversations into **clear, actionable insight**.
 
-The **Kognetiks Chatbot** helps you turn your WordPress site into a smart, conversational experience - easily. Whether you want to answer customer questions, assist visitors, or showcase AI innovation, the Kognetiks Chatbot makes it simple, secure, and scalable.
+Instead of wondering whether your chatbot is helping, you’ll *see* what visitors are asking, *understand* why they’re asking it, and *prove* the value AI is delivering — automatically.
 
-## ⚡ Get Started Fast
+---
 
-Install the plugin, connect your preferred AI engine (OpenAI, NVIDIA, Anthropic, Mistral, Google, DeepSeek, Azure, or JAN.AI), and start chatting.
+## Why Kognetiks Chatbot Exists
 
-No complex setup. No developer required. Just plug, connect, and chat.
+Adding AI chat is easy.
 
-## 🧠 Built for Every WordPress User
+Understanding whether it’s *helping* is not.
 
-From bloggers and educators to small business owners and agencies, Kognetiks Chatbot helps you deliver engaging, real-time conversations that delight your visitors and simplify support.
+Kognetiks is built for WordPress site owners who want visibility, accountability, and measurable value from conversational AI — not a black box.
 
-## ✨ Key Features
+---
 
-- **Simple Setup** - Install, activate, and start chatting in minutes.
-- **Multiple AI Engines** - Choose OpenAI, NVIDIA, Anthropic, Mistral, Google, DeepSeek, Azure, or run your own local JAN.AI server (no API fees, no external data transfer).
-- **Embedded or Floating Chat** - Place your chatbot anywhere using simple shortcodes.
-- **Knowledge Navigator** - Teach your chatbot your site's content for smarter, context-aware answers.
-- **Custom Assistants** - Create specialized assistants for support, sales, education, or internal knowledge.
-- **Conversation Logging** - Review interactions, export chat logs, and improve user experience.
-- **Sentiment Analysis** - Gain insights into visitor sentiment and overall engagement quality.
-- **Speech Recognition & Voice Replies** - Talk and listen for a natural, voice-enabled experience.
-- **Multi-Language Ready** - Automatically adapts to your WordPress site's language.
-- **Privacy & Security First** - Manage API keys safely and keep data secure.
+## Conversation Digest
 
-## 🌐 Why Choose Kognetiks Chatbot
+Automatically receive summarized insights from real chatbot conversations:
+- Common questions and themes
+- Emerging visitor intent
+- Signals of confusion, friction, or opportunity
+- High-level sentiment and engagement indicators
 
-- **Simple by Design** - Every feature is built for clarity and ease of use.
-- **Works Everywhere** - Fully responsive on mobile, tablet, and desktop.
-- **Flexible by Nature** - Works with leading AI engines and open-source models.
-- **Trusted by Creators** - Designed for site owners, developers, and agencies who want to offer AI without complexity.
-- **Powerful Yet Affordable** - Use APIs or local AI servers to control costs.
+No dashboards to babysit.  
+No transcripts to read.  
+Just insight delivered to you.
 
-## 🧩 We Make AI Chat Simple
+---
 
-Add intelligence, not complexity.
+## Proof-of-Value Reporting
 
-With Kognetiks Chatbot, your WordPress site becomes a smart, conversational hub that engages, informs, and supports - all with just a few clicks.
+AI is only useful if it creates value you can see.
 
-Learn more at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-chatbot/)
+Kognetiks generates proof-of-value summaries that help you:
+- Understand usage and engagement trends
+- Identify where AI is reducing repetitive work
+- See where responses are strong — and where to improve
+- Make informed decisions about prompts, content, and assistants
 
-## ⚙️ Installation
+---
+
+## How It Works
+
+1. Visitors interact with your chatbot
+2. Conversations are logged securely
+3. Key signals are extracted and summarized
+4. Insight and value reports are delivered automatically
+5. You stay informed and in control
+
+---
+
+## Who This Is For
+
+Kognetiks Chatbot is for you if:
+
+- You want **visibility** into what visitors are actually asking
+- You care about **understanding intent**, not just answering questions
+- You want AI that supports **human decision-making**
+- You value transparency, control, and measurable outcomes
+- You want insight delivered automatically, not buried in dashboards
+
+---
+
+## Who This Is Not For
+
+Kognetiks Chatbot may not be a fit if:
+
+- You only want a novelty chatbot with no interest in insight
+- You prefer opaque, autonomous AI systems
+- You don’t want visibility into how AI is being used
+- You expect AI to replace judgment rather than support it
+
+---
+
+## Capabilities That Support the Outcome
+
+- Multiple AI engines: OpenAI, Azure OpenAI, NVIDIA, Anthropic, Mistral, DeepSeek, Google, or local JAN.AI
+- Knowledge Navigator for site-aware responses
+- Custom assistants for specific purposes
+- Conversation logging with export options
+- Sentiment and engagement signals
+- Optional speech recognition and voice replies
+- Embedded or floating chat via shortcode
+
+## Installation
 
 1. **Upload the Plugin**
    Go to *Plugins → Add New → Upload Plugin*.
@@ -71,7 +113,7 @@ Learn more at [Kognetiks.com](https://kognetiks.com/wordpress-plugins/kognetiks-
 5. **Teach Your Chatbot**
    Use the **Knowledge Navigator** to scan your site and make responses context-aware.
 
-## ❓ Frequently Asked Questions
+## Frequently Asked Questions
 
 **Does it require coding?**
 
@@ -89,7 +131,7 @@ Absolutely. You can personalize greetings, avatars, colors, and layout to match 
 
 Yes. You control which AI engine processes data, and local AI options keep all data on your server.
 
-## 🔐 External Services
+## External Services
 
 The **Kognetiks Chatbot** plugin relies on external AI services to provide chatbot functionality.
 
@@ -108,20 +150,20 @@ By using this plugin, you agree to abide by each service's terms of service and 
 
 **Note:** You are responsible for any fees associated with the use of third-party APIs.
 
-## 🧾 License
+## License
 
 - **License:** GPLv3 or latet
 
 - **License URI:** [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html)
 
-## 💬 Support
+## Support
 
 Need help? Visit [https://kognetiks.com/plugin-support/](https://kognetiks.com/plugin-support/)
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 WordPress is a registered trademark of the WordPress Foundation. OpenAI, ChatGPT, and related trademarks are the property of OpenAI. NVIDIA, NIM, and related trademarks are the property of NVIDIA. Anthropic, Claude, and related trademarks are the property of Anthropic. DeepSeek and related trademarks are the property of DeepSeek. Mistral and related trademarks are the property of Mistral. Google Gemini and related trademarks are the property of Google. JAN.AI and related trademarks are the property of JAN.AI. Kognetiks is an independent entity and is not affiliated with, endorsed by, or sponsored by WordPress Foundation, OpenAI, NVIDIA, Anthropic, DeepSeek, Mistral, Google, JAN.AI.
 
-## ❤️ Thank You
+## Thank You
 
-Thank you for choosing **Kognetiks Chatbot** because **we make AI chat simple for WordPress.**
+The **Kognetiks Chatbot** is designed around human oversight. AI assists. Humans decide.
