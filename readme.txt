@@ -156,7 +156,7 @@ The **Kognetiks Chatbot** is designed around human oversight. AI assists. Humans
 
 ### Bug Fixes
 
-* **Bug Fixes**: Premium features bug fixes and improvements.
+* **Bug Fixes**: Fixed unsaved changes modal and assistant management.
 
 = 2.4.2 - Released 2026-01-14 =
 
