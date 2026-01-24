@@ -1,11 +1,13 @@
 === Kognetiks Chatbot for WordPress ===
 Contributors: kognetiks
-Tags: ai chatbot, chatgpt, conversational ai, reporting, insights
-Requires at least: 6.0
+Tags: chat, chatgpt, ai, reporting, insights
+Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.9
-Stable tag: 2.4.3
+Stable tag: 2.4.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
+
+We make AI chat simple for WordPress. Add a site-aware AI assistant in minutes to answer visitors, capture insights, and prove real business value.
 
 == Description ==
 
@@ -151,6 +153,12 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 The **Kognetiks Chatbot** is designed around human oversight. AI assists. Humans decide.
 
 == Changelog ==
+
+- 2.4.4 - Released TBD =
+
+### Bug Fixes
+
+* **Bug Fixes**: Minor bug fixes and improvements to version 2.4.3.
 
 = 2.4.3 - Released 2026-01-24 =
 

@@ -2,7 +2,7 @@
 
 ## What's new in Version 2.4.3
 
-* **Bug Fixes**: Minor bug fixes and improvements.
+* **Bug Fixes**: Fixed unsaved changes modal and assistant management.
 
 ## What's new in Version 2.4.2
 
