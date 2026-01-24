@@ -6,6 +6,12 @@
 
 ---
 
+## 2.4.3 - Released 2026-01-24
+
+### Bug Fixes
+
+* **Bug Fixes**: Fixed unsaved changes modal and assistant management.
+
 ## 2.4.2 - Release 2026-01-14
 
 ### Bug Fixes
