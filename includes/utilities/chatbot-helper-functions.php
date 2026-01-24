@@ -29,7 +29,54 @@ if ( ! defined( 'WPINC' ) ) {
  * @since 2.4.2
  */
 function chatbot_chatgpt_is_premium() {
-    
+
+    /* ============================================================
+     * DEV OVERRIDE (LOCALHOST / DEV ENV ONLY)
+     * ============================================================ */
+
+    // Kill-switch: allow real licensing tests when defined
+    $dev_override_enabled =
+        ! defined('KCHAT_DISABLE_DEV_PREMIUM_OVERRIDE') ||
+        KCHAT_DISABLE_DEV_PREMIUM_OVERRIDE === false;
+
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $server_addr = $_SERVER['SERVER_ADDR'] ?? '';
+
+    // Normalize host (strip port if present, e.g. localhost:8080)
+    $host_no_port = preg_replace('/:\d+$/', '', $host);
+
+    $is_local_host =
+        $host_no_port === 'localhost' ||
+        $host_no_port === '127.0.0.1' ||
+        substr($host_no_port, -6) === '.local';
+
+    // Private LAN ranges (covers many local/dev setups)
+    $is_private_ip = false;
+    if ( $server_addr !== '' ) {
+        $is_valid_ip = filter_var($server_addr, FILTER_VALIDATE_IP) !== false;
+        if ( $is_valid_ip ) {
+            $is_private_ip =
+                filter_var(
+                    $server_addr,
+                    FILTER_VALIDATE_IP,
+                    FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+                ) === false;
+        }
+    }
+
+    if (
+        $dev_override_enabled &&
+        defined('WP_DEBUG') && WP_DEBUG === true &&
+        ( $is_local_host || $is_private_ip )
+    ) {
+        return true;
+    }
+
+    /* ============================================================
+     * PRODUCTION LOGIC (FREEMIUS)
+     * ============================================================ */
+
+    // Freemius not loaded → not premium
     if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
         return false;
     }
@@ -39,40 +86,20 @@ function chatbot_chatgpt_is_premium() {
         return false;
     }
 
-    // Detect whether we are running inside the premium build
-    // Use safe checks: method_exists() so free build doesn't fatal
-    $running_premium_build = false;
-    if ( method_exists( $fs, 'is__premium_only' ) ) {
-        $running_premium_build = $fs->is__premium_only();
+    // Must be running the premium build
+    if ( ! method_exists( $fs, 'is__premium_only' ) || ! $fs->is__premium_only() ) {
+        return false;
     }
 
-    // PRIMARY CHECK: If user is paying, grant premium access
-    // This works in both free and premium builds
-    if ( method_exists( $fs, 'is_paying' ) ) {
-        if ( $fs->is_paying() ) {
-            return true;
-        }
+    // Final authority: Freemius says premium code is allowed
+    if ( method_exists( $fs, 'can_use_premium_code' ) ) {
+        return (bool) $fs->can_use_premium_code();
     }
 
-    // SECONDARY CHECK: If user has active valid license, grant premium access
-    // This works in both free and premium builds
-    if ( method_exists( $fs, 'has_active_valid_license' ) ) {
-        if ( $fs->has_active_valid_license() ) {
-            return true;
-        }
-    }
-
-    // TERTIARY CHECK: If user is in trial, grant premium access ONLY if running premium build
-    // In free build, trial does NOT unlock premium features
-    if ( method_exists( $fs, 'is_trial' ) ) {
-        if ( $fs->is_trial() ) {
-            return $running_premium_build;
-        }
-    }
-
-    // No premium access
     return false;
 }
+
+
 
 /**
  * Returns true if premium code should run (Freemius).

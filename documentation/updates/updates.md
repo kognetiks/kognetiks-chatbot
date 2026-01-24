@@ -1,5 +1,9 @@
 # Past Updates
 
+## What's new in Version 2.4.3
+
+* **Bug Fixes**: Minor bug fixes and improvements.
+
 ## What's new in Version 2.4.2
 
 * **Bug Fixes**: Minor bug fixes and improvements.
