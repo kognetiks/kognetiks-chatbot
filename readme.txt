@@ -152,7 +152,7 @@ The **Kognetiks Chatbot** is designed around human oversight. AI assists. Humans
 
 == Changelog ==
 
-= 2.4.3 - Released2026-01-24 =
+= 2.4.3 - Released 2026-01-24 =
 
 ### Bug Fixes
 
