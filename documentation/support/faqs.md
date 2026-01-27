@@ -67,16 +67,48 @@ Be sure to use a valid `Primary GPT Assistant Id` or `Alternate GPT Assistant Id
 
 Sometimes caching is the problem.  If so, in the case of WP Engine hosting, you might allow the following:
 
-Action: Set
-Name: Cache-Control
-Value: max-age=604800, must-revalidate
-When: Only on successes
+- Action: Set
+- Name: Cache-Control
+- Value: max-age=604800, must-revalidate
+- When: Only on successes
 
 You can try using the cache-control header.  This setting controls how long browsers and intermediary caches store a copy of the resource before checking back with the server.  While it primarily affects the browser's caching behavior, it can also influence the caching policies of intermediary caches.
 
 In the case of hosting on WP Engine, you would set this in the web rules section: [WP Engine Web Rules Engine](https://wpengine.com/support/web-rules-engine/#Header_Rules).
 
 If you're using a different hosting provider, check their documentation for similar cache-control settings.
+
+## Will the Kognetiks Chatbot work on a multisite WordPress install?
+
+Yes, the Kognetiks Chatbot can work on a multisite WordPress installation. This capability allows you to manage the chatbot across multiple sites within a WordPress network, providing centralized control and configuration options. For specific setup instructions or considerations, refer to the official documentation or support resources provided by Kognetiks. You can find that [here](https://kognetiks.com/docs/overview-2-4-2/).
+
+## My integration stopped working after the last update. What's the fix?
+
+To address potential integration issues with the Kognetiks Chatbot after an update, it's important to check for any specific troubleshooting steps or updates provided in the latest documentation.
+
+If you are experiencing issues, consider these general steps:
+
+1. Check for Plugin Updates: Ensure that all related plugins and dependencies are up to date.
+
+2. Review Change Logs: Look for any notes on changes that might affect integrations in the update logs.
+
+3. Reconfigure Settings: Sometimes, reconfiguring the chatbot settings can resolve issues introduced by updates.
+
+4. Consult Support: If the problem persists, reach out our support team or check out our support forums for specific solutions.
+
+If more help is needed, please contact us at [support@kogneitks.com](mailto:support@kognetiks.com)
+
+## What is the best plan if I expect high traffic?
+
+If you anticipate high traffic for your Kognetiks Chatbot, the Premium Plan would likely be the best choice. This plan offers several advantages that can accommodate high traffic scenarios:
+
+- Comprehensive Conversation Transcripts: The premium plan provides detailed message-by-message conversation transcripts, which can be crucial for analyzing interactions during high traffic periods.
+
+- Frequent Updates: It allows for more frequent updates with options for hourly, daily, or weekly digests, enabling you to stay informed about chatbot activity in real-time.
+
+- Detailed Insights: The plan includes detailed insights into user interactions, including session IDs, user IDs, page IDs, and thread IDs, which can help in managing and optimizing high traffic.
+
+These features make the Premium Plan well-suited for handling and analyzing large volumes of interactions effectively.
 
 ### Diagnosing the Issue:
 

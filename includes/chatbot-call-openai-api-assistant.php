@@ -24,6 +24,35 @@ function chatbot_chatgpt_get_assistant_timeout() {
     return $assistant_timeout;
 }
 
+// Helper function to temporarily increase PHP max_execution_time for long-running API calls - Ver 2.4.5
+function chatbot_chatgpt_increase_execution_time($timeout, $retry_count = 0, $max_sleep_time = 0) {
+    $current_max_execution_time = ini_get('max_execution_time');
+    
+    // Calculate required execution time
+    if ($retry_count > 0 && $max_sleep_time > 0) {
+        // For retry loops: (timeout * retries) + (sleep time accumulation) + buffer
+        $required_execution_time = ($timeout * 2) + ($max_sleep_time * $retry_count) + 30;
+    } else {
+        // For single requests: timeout + buffer
+        $required_execution_time = $timeout + 10;
+    }
+    
+    // Only increase if needed and if current limit is set (> 0 means unlimited)
+    if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
+        @set_time_limit($required_execution_time);
+        return $current_max_execution_time; // Return original value for restoration
+    }
+    
+    return false; // No change needed
+}
+
+// Helper function to restore PHP max_execution_time - Ver 2.4.5
+function chatbot_chatgpt_restore_execution_time($original_time) {
+    if ($original_time !== false && $original_time > 0) {
+        @set_time_limit($original_time);
+    }
+}
+
 // -------------------------------------------------------------------------
 // Step 1: Create a thread
 // -------------------------------------------------------------------------
@@ -357,6 +386,12 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
 
     $status = "";
 
+    // Fix for timeout exceeding PHP max_execution_time - Ver 2.4.5
+    // Retry loop can take a long time (100 retries * up to 30s = 3000+ seconds)
+    $assistant_timeout = chatbot_chatgpt_get_assistant_timeout();
+    $max_sleep_time_seconds = 30; // Maximum sleep time in seconds
+    $original_execution_time = chatbot_chatgpt_increase_execution_time($assistant_timeout, 100, $max_sleep_time_seconds);
+
     // Exponential backoff parameters - Ver 2.2.0 (Enhanced for slow servers)
     $initialSleep = 2000000;       // Initial sleep time in microseconds (2 seconds) - increased for slow servers
     $maxSleep = 30000000;          // Maximum sleep time in microseconds (30 seconds) - increased for slow servers
@@ -417,10 +452,11 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
                     if (preg_match('/Please try again in (\d+\.\d+)s/', $message, $matches)) {
                         $sleepTime = (int) ceil(($matches[1] + 0.5) * 1000000);
                         prod_trace('ERROR', 'ALERT - RATE LIMIT REACHED - Sleeping for ' . $sleepTime . ' microseconds');
-                        break;
+                        // Don't break here - continue retrying
                     } else {
                         prod_trace('ERROR', 'Exiting Step 5 - UNABLE TO PARSE RETRY TIME');
-                        break;
+                        chatbot_chatgpt_restore_execution_time($original_execution_time);
+                        return "Error: Rate limit exceeded. Please try again later.";
                     }
                 }
             }
@@ -429,7 +465,7 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
             if ($status == "incomplete") {
                 if (isset($responseArray["incomplete_details"])) {
                     prod_trace('ERROR', "Error - Step 5: " . print_r($responseArray["incomplete_details"], true));
-                    break;
+                    // Continue retrying, don't break
                 }
             }
     
@@ -454,6 +490,9 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
             }
         }
     }
+    
+    // Restore original execution time limit - Ver 2.4.5
+    chatbot_chatgpt_restore_execution_time($original_execution_time);
     
     return $status;
     
@@ -547,6 +586,19 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
         "Authorization" => "Bearer " . $api_key
     ];
 
+    // Fix for timeout exceeding PHP max_execution_time - Ver 2.4.5
+    // Retry loop can take a long time (60 retries * up to 10s = 600+ seconds)
+    // Temporarily increase PHP's max_execution_time to prevent fatal errors
+    $current_max_execution_time = ini_get('max_execution_time');
+    $assistant_timeout = chatbot_chatgpt_get_assistant_timeout();
+    // Calculate worst-case scenario: (timeout * retries) + (sleep time accumulation)
+    // Simplified: timeout per request + max sleep time * retries + buffer
+    $max_sleep_time = 10; // Maximum sleep time in seconds
+    $required_execution_time = ($assistant_timeout * 2) + ($max_sleep_time * 60) + 30; // Add 30s buffer
+    if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
+        @set_time_limit($required_execution_time);
+    }
+
     // Retry settings (Enhanced for slow servers)
     $max_retries = 60; // Max retries before giving up (increased for slow servers)
     $retry_count = 0;
@@ -589,6 +641,10 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
         if (isset($responseArray["data"]) && is_array($responseArray["data"])) {
             foreach ($responseArray["data"] as $item) {
                 if (isset($item["status"]) && $item["status"] === "completed") {
+                    // Restore original execution time limit before returning - Ver 2.4.5
+                    if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
+                        @set_time_limit($current_max_execution_time);
+                    }
                     return "completed";
                 }
             }
@@ -604,6 +660,11 @@ function getTheStepsStatus($thread_id, $runId, $api_key) {
         
         // Increase sleep time progressively (2s, 4s, 6s, 8s, 10s max)
         $sleep_time = min($sleep_time + 2000000, 10000000); // Add 2s each time, max 10s
+    }
+
+    // Restore original execution time limit - Ver 2.4.5
+    if ($current_max_execution_time > 0 && $required_execution_time > $current_max_execution_time) {
+        @set_time_limit($current_max_execution_time);
     }
 
     // ✅ Log and return failure if retries exceeded

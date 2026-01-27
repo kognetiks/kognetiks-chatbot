@@ -116,7 +116,7 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 **IMPORTANT**:
 
-- This plugin requires an API key from OpenAI, NVIDIA, Anthropic or DeepSeek to function. Without an API key, the chatbot cannot process user queries.
+- This plugin requires an API key from OpenAI, NVIDIA, Anthropic, DeepSeek, Mistral, Google, or JAN.AI to function. Without an API key, the chatbot cannot process user queries.
 
 - Obtain API keys here:
 
@@ -155,6 +155,9 @@ The **Kognetiks Chatbot** is designed around human oversight. AI assists. Humans
 == Changelog ==
 
 - 2.4.4 - Released TBD =
+
+### Improvements
+* **Documentation**: Added Unanswered Questions Detection Analysis documentation.
 
 ### Bug Fixes
 

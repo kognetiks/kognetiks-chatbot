@@ -6,6 +6,15 @@
 
 ---
 
+## 2.4.4 - Released TBD
+
+### Improvements
+* **Documentation**: Added Unanswered Questions Detection Analysis documentation.
+
+### Bug Fixes
+
+* **Bug Fixes**: Minor bug fixes and improvements to version 2.4.3.
+
 ## 2.4.3 - Released 2026-01-24
 
 ### Bug Fixes

@@ -109,6 +109,7 @@ $fallback_like = [
  * Global explicit failure and apology patterns. 
  */
 $fallback_failure_and_apology = [
+    '%promiňte%',
     '%nevím%',
     '%nejsem si jistý%',
     '%nejsem si jistá%',
