@@ -70,16 +70,6 @@ function kognetiks_chatbot_register_menus() {
 
     }
 
-    // Add Debug Tools submenu - Ver 2.4.4
-    add_submenu_page(
-        'kognetiks_main_menu',                      // Parent slug
-        'Unanswered Questions Debug',               // Page title
-        'Unanswered Questions Debug',               // Menu title
-        'manage_options',                           // Capability
-        'chatbot-unanswered-questions-debug',      // Menu slug
-        'chatbot_unanswered_questions_debug_page'  // Callback function
-    );
-
 };
 
 // Remove the extra submenu page
@@ -88,18 +78,4 @@ function chatbot_chatgpt_remove_extra_submenu() {
 
     remove_submenu_page('kognetiks_main_menu', 'kognetiks_main_menu');
 
-}
-
-// Debug tool admin page callback - Ver 2.4.4
-function chatbot_unanswered_questions_debug_page() {
-    // Include the debug tool file
-    $debug_file = plugin_dir_path( __FILE__ ) . '../../debug/chatbot-unanswered-questions-debug.php';
-    if ( file_exists( $debug_file ) ) {
-        // WordPress is already loaded, so we can include the file directly
-        // The file will skip the WordPress loading section since ABSPATH is defined
-        include $debug_file;
-    } else {
-        echo '<div class="wrap"><h1>Unanswered Questions Debug Tool</h1>';
-        echo '<div class="notice notice-error"><p>Debug tool file not found at: ' . esc_html( $debug_file ) . '</p></div></div>';
-    }
 }
