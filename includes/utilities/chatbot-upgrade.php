@@ -304,6 +304,9 @@ function chatbot_chatgpt_upgrade() {
     $update_opt = $is_network ? 'update_site_option' : 'update_option';
     $delete_opt = $is_network ? 'delete_site_option' : 'delete_option';
     
+    global $chatbot_chatgpt_plugin_version;
+    $plugin_version = isset($chatbot_chatgpt_plugin_version) ? $chatbot_chatgpt_plugin_version : '';
+    
     $installed_version = call_user_func($get_opt, 'chatbot_chatgpt_version_installed', '');
     if ($installed_version !== $plugin_version) {
         call_user_func($update_opt, 'chatbot_chatgpt_version_installed', $plugin_version);
