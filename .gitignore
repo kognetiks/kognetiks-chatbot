@@ -58,6 +58,9 @@ includes/insights/DEFINITIONS.md
 *.old
 
 # Ignore third-party vendor libraries
-# vendor/
+vendor/
+
+# Ignore Git directory (should not be in plugin distribution)
+.git/
 
 
