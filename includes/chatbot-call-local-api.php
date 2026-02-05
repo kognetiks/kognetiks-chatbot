@@ -29,7 +29,14 @@ function chatbot_chatgpt_call_local_model_api($message, $user_id = null, $page_i
     
     global $errorResponses;
 
-    // DIAG - Diagnostics
+    // DIAG - Diagnostics - Ver 2.4.4
+    // back_trace("NOTICE", "Starting Local API call");
+    // back_trace("NOTICE", "Message: " . $message);
+    // back_trace("NOTICE", "User ID: " . $user_id);
+    // back_trace("NOTICE", "Page ID: " . $page_id);
+    // back_trace("NOTICE", "Session ID: " . $session_id);
+    // back_trace("NOTICE", "Assistant ID: " . $assistant_id);
+    // back_trace("NOTICE", "Client Message ID: " . $client_message_id);
 
     // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();

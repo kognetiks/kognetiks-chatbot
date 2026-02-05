@@ -669,13 +669,20 @@ function get_the_azure_message($thread_id, $api_key, $run_id = null) {
 // CustomGPT - Assistants - Ver 1.7.2
 function chatbot_azure_custom_gpt_call_api($api_key, $message, $assistant_id, $thread_id, $session_id, $user_id, $page_id, $client_message_id = null) {
 
-    // DIAG - Diagnostics - Ver 1.8.6
-
     // Globals added for Ver 1.7.2
     global $learningMessages;
     global $errorResponses;
     global $stopWords;
 
+    // DIAG - Diagnostics - Ver 2.4.4
+    // back_trace("NOTICE", "Starting Azure AssistantAPI call");
+    // back_trace("NOTICE", "Message: " . $message);
+    // back_trace("NOTICE", "User ID: " . $user_id);
+    // back_trace("NOTICE", "Page ID: " . $page_id);
+    // back_trace("NOTICE", "Session ID: " . $session_id);
+    // back_trace("NOTICE", "Assistant ID: " . $assistant_id);
+    // back_trace("NOTICE", "Client Message ID: " . $client_message_id);
+    
     // Use client_message_id if provided, otherwise generate a unique message UUID for idempotency
     $message_uuid = $client_message_id ? $client_message_id : wp_generate_uuid4();
 

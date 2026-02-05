@@ -15,9 +15,17 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Test API for status and errors - Ver 1.6.3 - Update Ver 2.2.1
- function kchat_test_api_status() {
+ function kchat_test_api_status($chatbot_chatbot_ai_platform_choice = null) {
 
-    $chatbot_chatbot_ai_platform_choice = esc_attr(get_option('chatbot_chatbot_ai_platform_choice', 'OpenAI'));
+    // DIAG - Diagnostics - Ver 2.4.4
+    // back_trace("NOTICE", "Starting API Test");
+    // back_trace("NOTICE", "Chatbot AI Platform Choice: " . $chatbot_chatbot_ai_platform_choice);
+
+    // $chatbot_chatbot_ai_platform_choice = esc_attr(get_option('chatbot_chatbot_ai_platform_choice', 'OpenAI'));
+
+    if ($chatbot_chatbot_ai_platform_choice === null) {
+        $chatbot_chatbot_ai_platform_choice = esc_attr(get_option('chatbot_chatbot_ai_platform_choice', 'OpenAI'));
+    }
 
     // Reset Status and Error
     if ($chatbot_chatbot_ai_platform_choice == 'OpenAI') {
