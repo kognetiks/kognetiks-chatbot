@@ -3223,6 +3223,8 @@ function enqueue_color_picker($hook_suffix) {
 add_action('admin_enqueue_scripts', 'enqueue_color_picker');
 
 // Determine if the plugin is installed
+// NOTE: This function is deprecated. Version tracking is now handled via chatbot_chatgpt_version_installed option.
+// Kept for backward compatibility but no longer updates the legacy chatbot_chatgpt_plugin_version option.
 function kchat_get_plugin_version() {
 
     global $chatbot_chatgpt_plugin_version;
@@ -3232,13 +3234,9 @@ function kchat_get_plugin_version() {
     }
 
     $plugin_data = get_plugin_data(plugin_dir_path(__FILE__) . 'chatbot-chatgpt.php');
-    // DIAG - Print the plugin data
-    // $plugin_version = $plugin_data['chatbot_chatgpt_version'];
     $plugin_version = $plugin_data['Version'];
-    // $plugin_version = $chatbot_chatgpt_plugin_version;
-    update_option('chatbot_chatgpt_plugin_version', $plugin_version);
-    // DIAG - Log the plugin version
-
+    
+    // Return version without updating legacy option (chatbot_chatgpt_plugin_version is deprecated)
     return $plugin_version;
 
 }
