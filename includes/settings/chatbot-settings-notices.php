@@ -296,10 +296,11 @@ function chatbot_chatgpt_reporting_notice() {
     
     // Display notice
     echo '<div class="notice notice-info is-dismissible">';
-    echo '<p><strong>Your chatbot is already having conversations.</strong></p>';
-    echo '<p>We\'ve added a new Reporting section that summarizes activity and highlights where attention may be needed.</p>';
+    echo '<p><strong>Your site had conversations you didn&apos;t see.</strong></p>';
+    echo '<p>Your first Conversation Digest and Proof-of-Value reports turn those interactions into clear insight, automatically. No dashboards. No guesswork.</p>';
+    echo '<p><em>Want stronger signals?</em> Insights highlights confusion, drop-offs, and recurring issues that may need attention.</p>';
     echo '<p>';
-    echo '<a href="' . esc_url($reporting_url) . '" class="button button-primary">View Reports</a> ';
+    echo '<a href="' . esc_url($reporting_url) . '" class="button button-primary">View Your First Digest</a> ';
     echo '<a href="' . esc_url($snooze_url) . '" class="button">Remind me later</a> ';
     echo '<a href="' . esc_url($dismiss_url) . '" class="button">Dismiss</a>';
     echo '</p>';
