@@ -1074,7 +1074,8 @@ function kognetiks_insights_send_proof_of_value_email( $args = [] ) {
     // Prefer HTML. Add headers accordingly.
     $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
 
-    $sent = wp_mail( $to, $subject, $payload['message_html'], $headers );
+    // Use safe wrapper to prevent timeout errors (e.g., on localhost without SMTP)
+    $sent = chatbot_chatgpt_safe_wp_mail( $to, $subject, $payload['message_html'], $headers );
 
     // Optional: log the result somewhere
     do_action( 'kognetiks_insights_automated_email_sent', $sent, $tier, $to, $payload, $args );

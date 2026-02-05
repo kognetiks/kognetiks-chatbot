@@ -1328,7 +1328,8 @@ function chatbot_chatgpt_custom_gpt_call_api($api_key, $message, $assistant_id, 
         // Now send the $conversation_transcript via email to the email address specified in the option
         $email_address = esc_attr(get_option('chatbot_chatgpt_conversation_transcript_email', ''));
         if (!empty($email_address)) {
-            wp_mail($email_address, 'Conversation Transcript', $conversation_transcript);
+            // Use safe wrapper to prevent timeout errors (e.g., on localhost without SMTP)
+            chatbot_chatgpt_safe_wp_mail($email_address, 'Conversation Transcript', $conversation_transcript);
         }
         
         // Then remove the "[conversation_transcript]" from the response

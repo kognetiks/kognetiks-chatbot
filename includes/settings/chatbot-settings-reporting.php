@@ -226,6 +226,25 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
     // Get current values for conditional display
     $digest_enabled = esc_attr(get_option('chatbot_chatgpt_conversation_digest_enabled', 'No'));
     $insights_enabled = esc_attr(get_option('chatbot_chatgpt_insights_email_enabled', 'No'));
+    $logging_enabled = esc_attr(get_option('chatbot_chatgpt_enable_conversation_logging', 'Off'));
+    
+    // Check if either Conversation Digest or Proof of Value Reports is enabled but Conversation Logging is disabled
+    if (($digest_enabled === 'Yes' || $insights_enabled === 'Yes') && $logging_enabled !== 'On') {
+        ?>
+        <div class="notice notice-warning conversation-logging-warning" style="padding: 20px; margin: 20px 0; border-left: 4px solid #dba617;">
+            <h2 style="margin-top: 0;">▲ Conversation Logging Required</h2>
+            <p>To use <?php echo ($digest_enabled === 'Yes' && $insights_enabled === 'Yes') ? 'Conversation Digest and Proof of Value Reports' : ($digest_enabled === 'Yes' ? 'Conversation Digest' : 'Proof of Value Reports'); ?>, you need to enable conversation logging.</p>
+            <p>Please follow these steps:</p>
+            <ol>
+                <li>Scroll down to the bottom of this <strong>Reporting</strong> tab to the <strong>Reporting Settings</strong> section</li>
+                <li>Set the <strong>Enable Conversation Logging</strong> option to <strong>On</strong></li>
+                <li>Choose the <strong>Conversation Log Days to Keep</strong> option to the number of days you want to keep the conversation logs (default is 30 days)</li>
+                <li>Save your changes by scrolling to the bottom of the page and clicking the <strong>Save Changes</strong> button</li>
+            </ol>
+            <p>Once conversation logging is enabled, <?php echo ($digest_enabled === 'Yes' && $insights_enabled === 'Yes') ? 'these reports' : 'this report'; ?> will function properly.</p>
+        </div>
+        <?php
+    }
     
     // IMPORTANT: Render the fields manually first, then WordPress will also try to render them
     // We need to output the fields here so they're in the form, but we'll hide WordPress's automatic table
@@ -488,15 +507,62 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             toggleConditionalFields('kchat-digest-card', '<?php echo esc_js($digest_enabled); ?>');
             toggleConditionalFields('kchat-insights-card', '<?php echo esc_js($insights_enabled); ?>');
             
+            // Function to check and show/hide conversation logging warning
+            function checkConversationLoggingWarning() {
+                var digestEnabled = $('#chatbot_chatgpt_conversation_digest_enabled').val();
+                var insightsEnabled = $('#chatbot_chatgpt_insights_email_enabled').val();
+                var loggingEnabled = $('#chatbot_chatgpt_enable_conversation_logging').val();
+                
+                // Check if either report is enabled but logging is disabled
+                if ((digestEnabled === 'Yes' || insightsEnabled === 'Yes') && loggingEnabled !== 'On') {
+                    // Show warning if it doesn't exist
+                    if ($('.conversation-logging-warning').length === 0) {
+                        var reportNames = [];
+                        if (digestEnabled === 'Yes') reportNames.push('Conversation Digest');
+                        if (insightsEnabled === 'Yes') reportNames.push('Proof of Value Reports');
+                        var reportText = reportNames.join(' and ');
+                        
+                        var warningHtml = '<div class="notice notice-warning conversation-logging-warning" style="padding: 20px; margin: 20px 0; border-left: 4px solid #dba617;">' +
+                            '<h2 style="margin-top: 0;">▲ Conversation Logging Required</h2>' +
+                            '<p>To use ' + reportText + ', you need to enable conversation logging.</p>' +
+                            '<p>Please follow these steps:</p>' +
+                            '<ol>' +
+                            '<li>Scroll down to the bottom of this <strong>Reporting</strong> tab to the <strong>Reporting Settings</strong> section</li>' +
+                            '<li>Set the <strong>Enable Conversation Logging</strong> option to <strong>On</strong></li>' +
+                            '<li>Choose the <strong>Conversation Log Days to Keep</strong> option to the number of days you want to keep the conversation logs (default is 30 days)</li>' +
+                            '<li>Save your changes by scrolling to the bottom of the page and clicking the <strong>Save Changes</strong> button</li>' +
+                            '</ol>' +
+                            '<p>Once conversation logging is enabled, ' + (reportNames.length > 1 ? 'these reports' : 'this report') + ' will function properly.</p>' +
+                            '</div>';
+                        
+                        // Insert warning before the email cards section
+                        $('.kchat-email-card').first().before(warningHtml);
+                    }
+                } else {
+                    // Hide warning if logging is enabled or both reports are disabled
+                    $('.conversation-logging-warning').remove();
+                }
+            }
+            
             // Watch for changes to digest enabled
             $('#chatbot_chatgpt_conversation_digest_enabled').on('change', function() {
                 toggleConditionalFields('kchat-digest-card', $(this).val());
+                checkConversationLoggingWarning();
             });
             
             // Watch for changes to insights enabled
             $('#chatbot_chatgpt_insights_email_enabled').on('change', function() {
                 toggleConditionalFields('kchat-insights-card', $(this).val());
+                checkConversationLoggingWarning();
             });
+            
+            // Watch for changes to conversation logging
+            $('#chatbot_chatgpt_enable_conversation_logging').on('change', function() {
+                checkConversationLoggingWarning();
+            });
+            
+            // Check on page load
+            checkConversationLoggingWarning();
             
             // Test Conversation Digest Email
             $('#chatbot-test-digest-email-btn').on('click', function(e) {
@@ -1429,8 +1495,8 @@ function chatbot_chatgpt_test_conversation_digest_ajax() {
         prod_trace( 'NOTICE', 'Test Conversation Digest Email - Ver 2.4.2 - Message');
     }
     
-    // Send the email
-    $sent = wp_mail($email_address, $subject, $message);
+    // Send the email using safe wrapper to prevent timeout errors
+    $sent = chatbot_chatgpt_safe_wp_mail($email_address, $subject, $message);
     
     // Log result
     if (function_exists('back_trace')) {

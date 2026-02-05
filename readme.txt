@@ -2,7 +2,7 @@
 Contributors: kognetiks
 Tags: chat, chatgpt, ai, reporting, insights
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
-Tested up to: 6.9
+Tested up to: 6.9.1
 Stable tag: 2.4.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
