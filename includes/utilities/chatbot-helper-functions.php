@@ -31,44 +31,10 @@ if ( ! defined( 'WPINC' ) ) {
 function chatbot_chatgpt_is_premium() {
 
     /* ============================================================
-     * DEV OVERRIDE (LOCALHOST / DEV ENV ONLY)
+     * EXTERNAL OVERRIDE (e.g. dev plugin)
      * ============================================================ */
-
-    // Kill-switch: allow real licensing tests when defined
-    $dev_override_enabled =
-        ! defined('KCHAT_DISABLE_DEV_PREMIUM_OVERRIDE') ||
-        KCHAT_DISABLE_DEV_PREMIUM_OVERRIDE === false;
-
-    $host = $_SERVER['HTTP_HOST'] ?? '';
-    $server_addr = $_SERVER['SERVER_ADDR'] ?? '';
-
-    // Normalize host (strip port if present, e.g. localhost:8080)
-    $host_no_port = preg_replace('/:\d+$/', '', $host);
-
-    $is_local_host =
-        $host_no_port === 'localhost' ||
-        $host_no_port === '127.0.0.1' ||
-        substr($host_no_port, -6) === '.local';
-
-    // Private LAN ranges (covers many local/dev setups)
-    $is_private_ip = false;
-    if ( $server_addr !== '' ) {
-        $is_valid_ip = filter_var($server_addr, FILTER_VALIDATE_IP) !== false;
-        if ( $is_valid_ip ) {
-            $is_private_ip =
-                filter_var(
-                    $server_addr,
-                    FILTER_VALIDATE_IP,
-                    FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-                ) === false;
-        }
-    }
-
-    if (
-        $dev_override_enabled &&
-        defined('WP_DEBUG') && WP_DEBUG === true &&
-        ( $is_local_host || $is_private_ip )
-    ) {
+    $override = apply_filters( 'chatbot_chatgpt_is_premium_override', null );
+    if ( $override === true ) {
         return true;
     }
 

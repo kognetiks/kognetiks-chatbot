@@ -405,6 +405,9 @@ if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
     chatbot_chatgpt_freemius()->add_action( 'after_premium_version_activation', function() {
         chatbot_chatgpt_load_insights_files();
     } );
+    // Freemius overwrites the plugin's uninstall hook on deactivation. Hook into Freemius's
+    // after_uninstall so our data cleanup runs when the user has set chatbot_chatgpt_delete_data = yes.
+    chatbot_chatgpt_freemius()->add_action( 'after_uninstall', 'chatbot_chatgpt_uninstall' );
 }
 
 // Include necessary files - Widgets - Ver 2.1.3
