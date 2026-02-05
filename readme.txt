@@ -174,10 +174,10 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Screenshots ==
 
-1. Floating chatbot
-2. Embedded chatbot
-3. Conversation Digest summary
-4. Proof-of-value reporting
+1. Proof-of-value reporting
+2. Conversation Digest summary
+3. Floating chatbot
+4. Embedded chatbot
 5. Chatbot settings and configuration
 
 == Changelog ==
