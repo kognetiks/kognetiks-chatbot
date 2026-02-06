@@ -64,3 +64,24 @@ if ( function_exists( 'kchat_fs' ) ) {
 
 }
 
+// Disable auto-trial prompts and make trails user-initiated only
+function kchat_require_trial_for_action() {
+    // Only here do we offer trial
+    if ( chatbot_chatgpt_is_premium() ) return;
+
+    if ( kchat_fs()->is_trial() ) return;
+
+    // render your calm modal/page explaining the outcome
+    // and provide a single button that starts the trial
+}
+
+// Reduce venddor upgrade everywhere
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), function($links){
+    // Remove any auto-injected upgrade/trial links (keep Settings)
+    return array_filter($links, function($link){
+        $l = strtolower(strip_tags($link));
+        return !(strpos($l, 'trial') !== false || strpos($l, 'upgrade') !== false);
+    });
+});
+
+
