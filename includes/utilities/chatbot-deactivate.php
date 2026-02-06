@@ -16,7 +16,8 @@ if ( ! defined( 'WPINC' ) ) {
 // Deactivation Hook - Revised 1.9.9
 function chatbot_chatgpt_deactivate() {
 
-    if (empty(esc_attr(get_option('chatbot_chatgpt_delete_data')))) {      
+    $delete_data = get_option('chatbot_chatgpt_delete_data');
+    if ( empty( $delete_data ) ) {
         chatbot_chatgpt_admin_notices();
     }
 
@@ -37,12 +38,15 @@ function chatbot_chatgpt_deactivate() {
 add_action('admin_notices', 'chatbot_chatgpt_admin_notices');
 function chatbot_chatgpt_admin_notices() {
 
-    if (empty(esc_attr(get_option('chatbot_chatgpt_delete_data')))) {     
+    $delete_data = get_option('chatbot_chatgpt_delete_data');
+    // Only show notice when option is empty (user has never set a preference).
+    // Do NOT set to 'no' here - that would cause uninstall to skip cleanup for users
+    // who never explicitly chose to keep data.
+    if ( empty( $delete_data ) ) {
 
         echo '<div class="notice notice-warning is-dismissible">
             <p><strong>Kognetiks Chatbot:</strong> Remember to set your data deletion preferences in the plugin settings on the Messages tab if you plan to uninstall the plugin.</p>
         </div>';
-        update_option('chatbot_chatgpt_delete_data', 'no');
 
     }
 
@@ -51,7 +55,9 @@ function chatbot_chatgpt_admin_notices() {
 // Uninstall Logic - Revised 2.4.4
 function chatbot_chatgpt_uninstall(){
 
-    // Security check: Only allow uninstall via WordPress
+    // Security check: Only allow uninstall via WordPress (uninstall.php) or Freemius after_uninstall.
+    // Note: WP_UNINSTALL_PLUGIN is defined when uninstall.php runs, but NOT when using
+    // register_uninstall_hook. We use uninstall.php as the primary method.
     if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
         return;
     }
@@ -61,10 +67,11 @@ function chatbot_chatgpt_uninstall(){
     // Log the uninstall attempt
     error_log('[Chatbot] [chatbot-deactivate.php] Uninstall function called');
 
-    // Check if the data should be removed, if not return
+    // When the plugin is deleted, always remove data unless the user explicitly chose to keep it.
+    // Default to deleting: the act of deleting the plugin implies intent to remove everything.
     $delete_data = get_option('chatbot_chatgpt_delete_data');
-    if (empty($delete_data) || esc_attr($delete_data) != 'yes') {
-        error_log('[Chatbot] [chatbot-deactivate.php] Data deletion not requested, skipping cleanup');
+    if ( $delete_data === 'no' ) {
+        error_log('[Chatbot] [chatbot-deactivate.php] User chose to keep data, skipping cleanup');
         return;
     }
 
