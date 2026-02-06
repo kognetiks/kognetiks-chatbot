@@ -96,6 +96,11 @@ $chatbot_chatgpt_plugin_dir_path = plugin_dir_path( __FILE__ );
 global $chatbot_chatgpt_plugin_dir_url;
 $chatbot_chatgpt_plugin_dir_url = plugins_url( '/', __FILE__ );
 
+// Main plugin file pointer (used by vendor-management hooks, etc.)
+if ( ! defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' ) ) {
+    define( 'CHATBOT_CHATGPT_PLUGIN_FILE', __FILE__ );
+}
+
 // Declare Globals
 global $wpdb;
 
