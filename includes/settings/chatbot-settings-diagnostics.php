@@ -490,16 +490,16 @@ function chatbot_error_log($message) {
             $creds = request_filesystem_credentials(site_url() . '/wp-admin/', '', false, false, array());
             if (WP_Filesystem($creds)) {
                 // Filesystem initialized successfully
-                error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem initialized successfully');
+                // error_log('[Chatbot] [chatbot-settings-diagnotics.php] WordPress filesystem initialized successfully');
             } else {
                 // Fallback to file_put_contents if filesystem initialization fails
-                error_log('[Chatbot] [chatbot-settings-diagnotics.php] Falling back to native file_put_contents');
+                //error_log('[Chatbot] [chatbot-settings-diagnotics.php] Falling back to native file_put_contents');
                 file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
                 return;
             }
         } else {
             // Fallback to file_put_contents if direct access is not available
-            error_log('[Chatbot] [chatbot-settings-diagnotics.php] Direct access not available, using native file_put_contents');
+            // error_log('[Chatbot] [chatbot-settings-diagnotics.php] Direct access not available, using native file_put_contents');
             file_put_contents($log_file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
             return;
         }

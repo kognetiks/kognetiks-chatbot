@@ -122,7 +122,7 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
     // Allow override via constant if needed for testing
     if ( $is_localhost && ! $smtp_configured && ! defined( 'CHATBOT_CHATGPT_FORCE_EMAIL_ON_LOCALHOST' ) ) {
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
-            error_log( 'Chatbot ChatGPT: Skipping email send on localhost without SMTP configuration. Email would have been sent to: ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) );
+            back_trace('ERROR', 'Skipping email send on localhost without SMTP configuration. Email would have been sent to: ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) );
         }
         return false; // Return false to indicate email was not sent
     }
@@ -150,7 +150,7 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
         
         // Log failure if email didn't send and we're in debug mode
         if ( ! $result && defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
-            error_log( 'Chatbot ChatGPT: Failed to send email to ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) . '. This may be due to missing SMTP configuration.' );
+            back_trace('ERROR', 'Failed to send email to ' . ( is_array( $to ) ? implode( ', ', $to ) : $to ) . '. This may be due to missing SMTP configuration.' );
         }
         
         return $result;
@@ -163,7 +163,7 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
         
         // Log the exception
         if ( function_exists( 'error_log' ) ) {
-            error_log( 'Chatbot ChatGPT: Email sending exception: ' . $e->getMessage() );
+            back_trace('ERROR', 'Email sending exception: ' . $e->getMessage() );
         }
         
         return false;
@@ -175,7 +175,7 @@ function chatbot_chatgpt_safe_wp_mail( $to, $subject, $message, $headers = '', $
         }
         
         if ( function_exists( 'error_log' ) ) {
-            error_log( 'Chatbot ChatGPT: Email sending error: ' . $e->getMessage() );
+            back_trace('ERROR', 'Email sending error: ' . $e->getMessage() );
         }
         
         return false;

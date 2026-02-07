@@ -40,13 +40,11 @@ function create_chatbot_chatgpt_interactions_table() {
 
     // Check for errors after dbDelta
     if ($wpdb->last_error) {
-        // logErrorToServer('Failed to create table: ' . $table_name);
-        // logErrorToServer('SQL: ' . $sql);
-        // logErrorToServer('Error details: ' . $wpdb->last_error);
-        error_log('[Chatbot] [chatbot-db-management.php] Failed to insert row into table: ' . $table_name);
-        error_log('[Chatbot] [chatbot-db-management.php] Failed to create table: ' . $table_name);
-        error_log('[Chatbot] [chatbot-db-management.php] SQL: ' . $sql);
-        error_log('[Chatbot] [chatbot-db-management.php] Error details: ' . $wpdb->last_error);
+
+        back_trace('ERROR', 'Failed to insert row into table: ' . $table_name);
+        back_trace('ERROR', 'Failed to create table: ' . $table_name);
+        back_trace('ERROR', 'SQL: ' . $sql);
+        back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
     }
 
@@ -215,9 +213,9 @@ function create_conversation_logging_table() {
 
         // Check for errors after dbDelta
         if ($wpdb->last_error) {
-            error_log('[Chatbot] [chatbot-db-management.php] Failed to create table: ' . $table_name);
-            error_log('[Chatbot] [chatbot-db-management.php] SQL: ' . $sql);
-            error_log('[Chatbot] [chatbot-db-management.php] Error details: ' . $wpdb->last_error);
+            back_trace('ERROR', 'Failed to create table: ' . $table_name);
+            back_trace('ERROR', 'SQL: ' . $sql);
+            back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
             return false;  // Table creation failed
         }
     }
@@ -423,7 +421,7 @@ function chatbot_chatgpt_add_sentiment_score_column() {
     $result = $wpdb->query($sql);
     
     if ($result === false) {
-        error_log('[Chatbot] [chatbot-db-management.php] Error adding sentiment_score column: ' . $wpdb->last_error);
+        back_trace('ERROR', 'Error adding sentiment_score column: ' . $wpdb->last_error);
         return false;
     }
     

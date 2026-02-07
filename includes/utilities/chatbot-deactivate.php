@@ -67,11 +67,11 @@ function chatbot_chatgpt_uninstall(){
     // Log the uninstall attempt
     error_log('[Chatbot] [chatbot-deactivate.php] Uninstall function called');
 
-    // When the plugin is deleted, always remove data unless the user explicitly chose to keep it.
-    // Default to deleting: the act of deleting the plugin implies intent to remove everything.
+    // Only remove data when the user has explicitly set chatbot_chatgpt_delete_data = yes.
+    // If no or empty, keep all options and tables.
     $delete_data = get_option('chatbot_chatgpt_delete_data');
-    if ( $delete_data === 'no' ) {
-        error_log('[Chatbot] [chatbot-deactivate.php] User chose to keep data, skipping cleanup');
+    if ( empty( $delete_data ) || $delete_data !== 'yes' ) {
+        error_log('[Chatbot] [chatbot-deactivate.php] Data deletion not requested (chatbot_chatgpt_delete_data != yes), skipping cleanup');
         return;
     }
 
@@ -217,6 +217,30 @@ function chatbot_chatgpt_uninstall(){
     $execute_query(
         $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_transformer_model%', '_transient_timeout_chatbot_transformer_model%'),
         'deleting Transformer transients'
+    );
+
+    // Delete Mistral transients
+    $execute_query(
+        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_mistral%', '_transient_timeout_chatbot_mistral%'),
+        'deleting Mistral transients'
+    );
+
+    // Delete Local transients
+    $execute_query(
+        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_local%', '_transient_timeout_chatbot_local%'),
+        'deleting Local transients'
+    );
+
+    // Delete Azure OpenAI transients
+    $execute_query(
+        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_chatbot_azure%', '_transient_timeout_chatbot_azure%'),
+        'deleting Azure OpenAI transients'
+    );
+
+    // Delete any kchat transients
+    $execute_query(
+        $wpdb->prepare("DELETE FROM {$wpdb->prefix}options WHERE option_name LIKE %s OR option_name LIKE %s", '_transient_kchat%', '_transient_timeout_kchat%'),
+        'deleting kchat transients'
     );
 
     // Delete any scheduled cron events

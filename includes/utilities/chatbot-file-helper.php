@@ -45,9 +45,9 @@ function chatbot_chatgpt_text_attachment($prompt, $file_id, $beta_version = 'ass
     if ( !empty($file_id) && is_array($file_id) && !empty($file_id[0]) ) {
         
         // DEBUG: Log what files are being sent to the API
-        error_log('API REQUEST DEBUG: Sending files to OpenAI API');
-        error_log('API REQUEST DEBUG: File count: ' . count($file_id));
-        error_log('API REQUEST DEBUG: Files: ' . print_r($file_id, true));
+        back_trace('ERROR', 'Sending files to OpenAI API');
+        back_trace('ERROR', 'File count: ' . count($file_id));
+        back_trace('ERROR', 'Files: ' . print_r($file_id, true));
         if ( $beta_version == 'assistants=v0') {
             // assistants=v2 - Ver 1.9.6 - 2024 04 24
             $data = $data + [

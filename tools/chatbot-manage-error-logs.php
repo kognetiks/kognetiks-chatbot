@@ -127,22 +127,23 @@ function chatbot_chatgpt_manage_error_logs() {
         .error-log-templates-display th {
             background-color: #f2f2f2;
         }
-        .notice {
+        /* Scope notice styles to error-log section only to avoid overriding WordPress admin notices */
+        .error-log-templates-display .notice {
             padding: 10px;
             margin: 10px 0;
             border-radius: 4px;
         }
-        .notice-success {
+        .error-log-templates-display .notice-success {
             background-color: #d4edda;
             border: 1px solid #c3e6cb;
             color: #155724;
         }
-        .notice-error {
+        .error-log-templates-display .notice-error {
             background-color: #f8d7da;
             border: 1px solid #f5c6cb;
             color: #721c24;
         }
-        .notice-warning {
+        .error-log-templates-display .notice-warning {
             background-color: #fff3cd;
             border: 1px solid #ffeaa7;
             color: #856404;

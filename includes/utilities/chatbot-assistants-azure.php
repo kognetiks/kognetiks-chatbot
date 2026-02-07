@@ -64,12 +64,9 @@ function create_chatbot_azure_assistants_table() {
 
     // Check for errors after dbDelta
     if ($wpdb->last_error) {
-        // logErrorToServer('Failed to create table: ' . $table_name);
-        // logErrorToServer('SQL: ' . $sql);
-        // logErrorToServer('Error details: ' . $wpdb->last_error);
-        error_log('[Chatbot] [chatbot-assistants-azure.php] Failed to insert row into table: ' . $table_name);
-        error_log('[Chatbot] [chatbot-assistants-azure.php] SQL: ' . $sql);
-        error_log('[Chatbot] [chatbot-assistants-azure.php] Error details: ' . $wpdb->last_error);
+        back_trace('ERROR', 'Failed to insert row into table: ' . $table_name);
+        back_trace('ERROR', 'SQL: ' . $sql);
+        back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
         return false;  // Table creation failed
     }
 
@@ -518,8 +515,8 @@ function azure_update_assistant() {
 
     // Check for errors after update
     if ($wpdb->last_error) {
-        error_log('[Chatbot] [chatbot-assistants-azure.php] Failed to update row in table: ' . $table_name);
-        error_log('[Chatbot] [chatbot-assistants-azure.php] Error details: ' . $wpdb->last_error);
+        back_trace('ERROR', 'Failed to update row in table: ' . $table_name);
+        back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
         return false;  // Row update failed
     }
 
@@ -549,8 +546,8 @@ function azure_delete_assistant() {
 
     // Check for errors after delete
     if ($wpdb->last_error) {
-        error_log('[Chatbot] [chatbot-assistants-azure.php] Failed to delete row from table: ' . $table_name);
-        error_log('[Chatbot] [chatbot-assistants-azure.php] Error details: ' . $wpdb->last_error);
+        back_trace('ERROR', 'Failed to delete row from table: ' . $table_name);
+        back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
         return false;  // Row deletion failed
     }
 
@@ -613,8 +610,8 @@ function azure_add_new_assistant() {
 
     // Check for errors after insert
     if ($wpdb->last_error) {
-        error_log('[Chatbot] [chatbot-assistants-azure.php] Failed to insert row into table: ' . $table_name);
-        error_log('[Chatbot] [chatbot-assistants-azure.php] Error details: ' . $wpdb->last_error);
+        back_trace('ERROR', 'Failed to insert row into table: ' . $table_name);
+        back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
         return false;  // Row insertion failed
     }
 
@@ -660,8 +657,8 @@ function upgrade_chatbot_azure_assistants_table() {
 
         // Check for errors after insert
         if ($wpdb->last_error) {
-            error_log('[Chatbot] [chatbot-assistants-azure.php] Failed to insert row into table: ' . $table_name);
-            error_log('[Chatbot] [chatbot-assistants-azure.php] Error details: ' . $wpdb->last_error);
+            back_trace('ERROR', 'Failed to insert row into table: ' . $table_name);
+            back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
             return false;  // Row insertion failed
         }
 
@@ -688,8 +685,8 @@ function upgrade_chatbot_azure_assistants_table() {
 
         // Check for errors after insert
         if ($wpdb->last_error) {
-            error_log('[Chatbot] [chatbot-assistants-azure.php] Failed to insert row into table: ' . $table_name);
-            error_log('[Chatbot] [chatbot-assistants-azure.php] Error details: ' . $wpdb->last_error);
+            back_trace('ERROR', 'Failed to insert row into table: ' . $table_name);
+            back_trace('ERROR', 'Error details: ' . $wpdb->last_error);
             return false;  // Row insertion failed
         }
         
