@@ -55,9 +55,9 @@ function chatbot_chatgpt_admin_notices() {
 // Uninstall Logic - Revised 2.4.4
 function chatbot_chatgpt_uninstall(){
 
-    // Security check: Only allow uninstall via WordPress (uninstall.php) or Freemius after_uninstall.
-    // Note: WP_UNINSTALL_PLUGIN is defined when uninstall.php runs, but NOT when using
-    // register_uninstall_hook. We use uninstall.php as the primary method.
+    // Security check: Only allow uninstall via Freemius after_uninstall.
+    // We have no uninstall.php so Freemius can track the uninstall event and collect user feedback.
+    // WP_UNINSTALL_PLUGIN is defined by WordPress during the uninstall flow.
     if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
         return;
     }
