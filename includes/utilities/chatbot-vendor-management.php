@@ -24,31 +24,33 @@ if ( ! defined( 'KCHAT_FREEMIUS_QUIET_MODE' ) ) {
 }
 
 // Proof Unlocked
-function kchat_has_unlock_proof() {
-    global $wpdb;
+if ( ! function_exists( 'kchat_has_unlock_proof' ) ) {
+    function kchat_has_unlock_proof() {
+        global $wpdb;
 
-    // Must have logging enabled
-    if ( get_option('chatbot_chatgpt_enable_conversation_logging', 'Off') !== 'On' ) {
-        return false;
+        // Must have logging enabled
+        if ( get_option('chatbot_chatgpt_enable_conversation_logging', 'Off') !== 'On' ) {
+            return false;
+        }
+
+        $table = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
+
+        // If table doesn't exist yet, no proof
+        $exists = $wpdb->get_var( $wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $table
+        ) );
+
+        if ( empty( $exists ) ) {
+            return false;
+        }
+
+        // 5 rows per conversation
+        $row_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+        $conversation_count = (int) floor( $row_count / 5 );
+
+        return ( $conversation_count >= 10 );
     }
-
-    $table = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
-
-    // If table doesn't exist yet, no proof
-    $exists = $wpdb->get_var( $wpdb->prepare(
-        "SHOW TABLES LIKE %s",
-        $table
-    ) );
-
-    if ( empty( $exists ) ) {
-        return false;
-    }
-
-    // 5 rows per conversation
-    $row_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
-    $conversation_count = (int) floor( $row_count / 5 );
-
-    return ( $conversation_count >= 10 );
 }
 
 /**
@@ -103,10 +105,9 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
     } );
 
     /**
-     * BOTH WORLDS PART 2: Gate marketing notices behind proof.
+     * BOTH WORLDS PART 2: Block marketing notices when in quiet mode.
      * - Allow critical notices (errors/warnings) always
-     * - Block trial/upgrade/discount style notices until proof gate passes
-     * - Once proof gate passes, allow Freemius to show (but still throttled by timing above)
+     * - Block trial/upgrade/discount style notices entirely when KCHAT_FREEMIUS_QUIET_MODE is true
      */
     $fs->add_filter( 'show_admin_notice', function ( $show, $notice ) {
 
@@ -163,7 +164,9 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
             }
         }
 
-        // If it looks marketing, only show it after proof gate passes.
+        // If it looks marketing, block it when in quiet mode.
+        // When KCHAT_FREEMIUS_QUIET_MODE is true, always hide marketing (trial, upgrade, etc.)
+        // regardless of proof, so the admin stays quiet.
         if ( $looks_marketing ) {
             return kchat_freemius_proof_gate();
         }

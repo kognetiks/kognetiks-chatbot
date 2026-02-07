@@ -30,6 +30,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// Load vendor management early so it can register for chatbot_chatgpt_freemius_loaded (before do_action runs)
+require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-vendor-management.php';
+
 if ( function_exists( 'chatbot_chatgpt_freemius' ) ) {
     chatbot_chatgpt_freemius()->set_basename( true, __FILE__ );
 } else {
@@ -265,7 +268,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients-
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-transients.php';                   // Ver 1.7.2
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-upgrade.php';                      // Ver 1.6.7
 // chatbot-utilities.php moved above to be loaded before API files - Ver 2.3.9
-require_once plugin_dir_path(__FILE__) . 'includes/utilities/chatbot-vendor-management.php';            // Vendor Management - Ver 2.4.4
+// chatbot-vendor-management.php loaded at top of file (before Freemius init) - Ver 2.4.4
 
 // Third-party libraries
 require_once plugin_dir_path(__FILE__) . 'includes/utilities/parsedown.php';                            // Version 2.0.2.1
