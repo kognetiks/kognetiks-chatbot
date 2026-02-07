@@ -967,7 +967,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
 
     // Parsing shortcode attributes
     $a = shortcode_atts( array(
-        'name' => 'visitorsChart_' . rand(100, 999),
+        'name' => 'visitorsChart_' . wp_rand( 100, 999 ),
         'type' => 'bar',
         'labels' => 'label',
         ), $atts );

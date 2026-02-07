@@ -958,7 +958,7 @@ function transformer_model_lexical_context_build_structured_response($topWords, 
     $response = '';
     $currentPhrase = [];
     $phraseLength = 0;
-    $targetPhraseLength = rand(8, 15); // Variable phrase length for naturalness
+    $targetPhraseLength = wp_rand( 8, 15 ); // Variable phrase length for naturalness
     $stopWordsLower = is_array($stopWords) ? array_map('strtolower', $stopWords) : [];
     
     foreach ($words as $index => $word) {
@@ -993,7 +993,7 @@ function transformer_model_lexical_context_build_structured_response($topWords, 
             // Add punctuation (period, comma, or question mark based on position)
             if ($index < count($words) - 1) {
                 // Not the last phrase - use comma or period randomly
-                $response .= (rand(0, 2) == 0 ? ',' : '.');
+                $response .= (wp_rand( 0, 2 ) === 0 ? ',' : '.');
             } else {
                 // Last phrase - always end with period
                 $response .= '.';
@@ -1002,7 +1002,7 @@ function transformer_model_lexical_context_build_structured_response($topWords, 
             // Reset for next phrase
             $currentPhrase = [];
             $phraseLength = 0;
-            $targetPhraseLength = rand(8, 15);
+            $targetPhraseLength = wp_rand( 8, 15 );
         }
     }
     
