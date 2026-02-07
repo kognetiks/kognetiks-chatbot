@@ -4,9 +4,9 @@
 
 The **Kognetiks Chatbot** is a comprehensive WordPress plugin that integrates advanced AI capabilities into WordPress websites. It provides intelligent conversational experiences through multiple AI platforms, offering both cloud-based and local AI solutions for enhanced visitor engagement, customer support, and interactive assistance.
 
-**Version:** 2.4.3
+**Version:** 2.4.4
 **License:** GPLv3 or later  
-**WordPress Compatibility:** Tested up to WordPress 6.9
+**WordPress Compatibility:** Tested up to WordPress 6.9.1
 
 ## Core Functionality
 
@@ -562,22 +562,41 @@ Users must agree to terms of service for each AI platform:
 
 ## Version History
 
+## What's new in Version 2.4.4
+
+### Improvements
+* **Documentation**: Added Unanswered Questions Detection Analysis documentation.
+* **Vendor management**: Refined free→trial→premium upgrade path and messaging.
+* **Reporting**: Modal prompts conversation logging when enabling digest or proof-of-value reports.
+* **Uninstall**: Improved uninstall process and version handling.
+
 ### Bug Fixes
+* Suppressed vendor notices and quieted third-party warnings.
+* Replaced select error_log calls with back_trace for cleaner debugging.
 
-### Recent Updates (Version 2.4.2)
+## What's new in Version 2.4.3
 
-* **Bug Fixes**: Premium features bug fixes and improvements.
+* **Bug Fixes**: Fixed unsaved changes modal and assistant management.
 
-### Recent Updates (Version 2.4.1)
+## What's new in Version 2.4.2
 
+* **Bug Fixes**: Minor bug fixes and improvements.
+
+## What's new in Version 2.4.1
+
+### New Features
 * **Automated Email Reports**: Added Conversation Digest and Proof of Value Reports email functionality with scheduling options
 * **Enhanced Fallback Pattern Matching**: Improved detection of unanswered questions by including human messages with clarification/confusion patterns
 * **Unsaved Changes Modal**: Added modal to warn users about unsaved changes in settings
 * **Insights Tab UI Enhancements**: Minor UI upgrades to the Insights tab for better user experience
+
+### Improvements
 * **Email Scheduling**: Enhanced scheduling system for Conversation Digest and Proof of Value emails with proper enable/disable functionality
 * **Internationalization**: Added global translations for fallback pattern values to various language files
 * **Terminology Update**: Renamed "analytics" to "insights" throughout the codebase for better clarity
-* **Bug Fixes**: Fixed options saving functionality, unscheduling of automated emails, and corrected footer content for free and premium tiers
+
+### Bug Fixes
+* Fixed options saving functionality, unscheduling of automated emails, and corrected footer content for free and premium tiers
 
 ### Key Milestones
 

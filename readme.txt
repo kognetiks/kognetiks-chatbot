@@ -182,7 +182,7 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-= 2.4.4 - Released 2026-07-07 =
+= 2.4.4 - Released 2026-02-07 =
 
 ### Improvements
 * **Documentation**: Added Unanswered Questions Detection Analysis documentation.
