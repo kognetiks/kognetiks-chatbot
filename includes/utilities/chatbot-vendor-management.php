@@ -67,6 +67,16 @@ if ( ! function_exists( 'kchat_freemius_proof_gate' ) ) {
 // Freemius: suppress marketing UI surfaces
 add_action( 'chatbot_chatgpt_freemius_loaded', function () {
 
+    // Fix: Ensure fs_logger table exists when storage logging is enabled (prevents "Table doesn't exist" errors)
+    if ( 1 == get_option( 'fs_storage_logger', 0 ) ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'fs_logger';
+        $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+        if ( empty( $exists ) && class_exists( 'FS_Logger' ) ) {
+            FS_Logger::_set_storage_logging( true );
+        }
+    }
+
     // if ( function_exists( 'back_trace' ) ) {
     //     back_trace( "NOTICE", "Freemius loaded (vendor management - UI OFF)" );
     // }
