@@ -648,7 +648,7 @@ function chatbot_chatgpt_conversation_reporting_section_callback($args) {
         <?php
             if (is_admin()) {
                 $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_conversation_data')) . '">Download Conversation Data</a>';
+                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_conversation_data' ), 'chatbot_chatgpt_download_conversation_data' ) ) . '">Download Conversation Data</a>';
                 echo $header;
             }
         ?>
@@ -666,7 +666,7 @@ function chatbot_chatgpt_interaction_reporting_section_callback($args) {
         <?php
             if (is_admin()) {
                 $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_interactions_data')) . '">Download Interaction Data</a>';
+                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_interactions_data' ), 'chatbot_chatgpt_download_interactions_data' ) ) . '">Download Interaction Data</a>';
                 echo $header;
             }
         ?>
@@ -682,7 +682,7 @@ function chatbot_chatgpt_token_reporting_section_callback($args) {
         <?php
             if (is_admin()) {
                 $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_token_usage_data')) . '">Download Token Usage Data</a>';
+                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_token_usage_data' ), 'chatbot_chatgpt_download_token_usage_data' ) ) . '">Download Token Usage Data</a>';
                 echo $header;
             }
         ?>
@@ -978,7 +978,7 @@ function chatbot_chatgpt_simple_chart_shortcode_function( $atts ) {
         $table_name = $wpdb->prefix . 'chatbot_chatgpt_interactions';
         
         // Get the reporting period from the options
-        $reporting_period = gesc_attr(et_option('chatbot_chatgpt_reporting_period'));
+        $reporting_period = esc_attr(get_option('chatbot_chatgpt_reporting_period'));
         
         // Calculate the start date and group by clause based on the reporting period
         if($reporting_period === 'Daily') {
@@ -1246,22 +1246,52 @@ function chatbot_chatgpt_total_tokens() {
 
 function chatbot_chatgpt_download_interactions_data() {
 
+    // Security: Check capability
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ), 403 );
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'chatbot_chatgpt_download_interactions_data' ) ) {
+        wp_die( esc_html__( 'Security check failed. Please refresh the page and try again.', 'chatbot-chatgpt' ), 403 );
+    }
+
     // Export data from the chatbot_chatgpt_interactions table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_interactions', 'Chatbot-ChatGPT-Interactions');
+    chatbot_chatgpt_export_data( 'chatbot_chatgpt_interactions', 'Chatbot-ChatGPT-Interactions' );
 
 }
 
 function chatbot_chatgpt_download_conversation_data() {
 
+    // Security: Check capability
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ), 403 );
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'chatbot_chatgpt_download_conversation_data' ) ) {
+        wp_die( esc_html__( 'Security check failed. Please refresh the page and try again.', 'chatbot-chatgpt' ), 403 );
+    }
+
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Conversation Logs');
-    
+    chatbot_chatgpt_export_data( 'chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Conversation Logs' );
+
 }
 
 function chatbot_chatgpt_download_token_usage_data() {
 
+    // Security: Check capability
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ), 403 );
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'chatbot_chatgpt_download_token_usage_data' ) ) {
+        wp_die( esc_html__( 'Security check failed. Please refresh the page and try again.', 'chatbot-chatgpt' ), 403 );
+    }
+
     // Export data from the chatbot_chatgpt_conversation_log table to a csv file
-    chatbot_chatgpt_export_data('chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Token Usage');
+    chatbot_chatgpt_export_data( 'chatbot_chatgpt_conversation_log', 'Chatbot-ChatGPT-Token Usage' );
 
 }
 

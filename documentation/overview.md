@@ -46,7 +46,15 @@ The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Co
 
 ## What's new in Version 2.4.4
 
-* **Bug Fixes**: Minor bug fixes and improvements to version 2.4.3.
+### Improvements
+* **Documentation**: Added Unanswered Questions Detection Analysis documentation.
+* **Vendor management**: Refined free→trial→premium upgrade path and messaging.
+* **Reporting**: Modal prompts conversation logging when enabling digest or proof-of-value reports.
+* **Uninstall**: Improved uninstall process and version handling.
+
+### Bug Fixes
+* Suppressed vendor notices and quieted third-party warnings.
+* Replaced select error_log calls with back_trace for cleaner debugging.
 
 ## Past Updates
 

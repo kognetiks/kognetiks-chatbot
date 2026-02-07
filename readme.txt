@@ -182,14 +182,17 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 
 == Changelog ==
 
-- 2.4.4 - Released TBD =
+= 2.4.4 - Released 2026-07-07 =
 
 ### Improvements
 * **Documentation**: Added Unanswered Questions Detection Analysis documentation.
+* **Vendor management**: Refined free→trial→premium upgrade path and messaging.
+* **Reporting**: Modal prompts conversation logging when enabling digest or proof-of-value reports.
+* **Uninstall**: Improved uninstall process and version handling.
 
 ### Bug Fixes
-
-* **Bug Fixes**: Minor bug fixes and improvements to version 2.4.3.
+* Suppressed vendor notices and quieted third-party warnings.
+* Replaced select error_log calls with back_trace for cleaner debugging.
 
 = 2.4.3 - Released 2026-01-24 =
 

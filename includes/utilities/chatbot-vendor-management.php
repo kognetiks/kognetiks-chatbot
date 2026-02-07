@@ -22,17 +22,11 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-/* ============================================================
- * Tunables
- * ============================================================ */
+// Tunables
 if ( ! defined( 'KCHAT_FREEMIUS_QUIET_MODE' ) ) {
     // When true: suppress Freemius marketing UI surfaces
     define( 'KCHAT_FREEMIUS_QUIET_MODE', true );
 }
-
-/* ============================================================
- * Proof helpers (used by YOUR in-plugin unlock messaging)
- * ============================================================ */
 
 // Proof Unlocked
 if ( ! function_exists( 'kchat_has_unlock_proof' ) ) {
@@ -70,14 +64,12 @@ if ( ! function_exists( 'kchat_freemius_proof_gate' ) ) {
     }
 }
 
-/* ============================================================
- * Freemius: suppress marketing UI surfaces
- * ============================================================ */
+// Freemius: suppress marketing UI surfaces
 add_action( 'chatbot_chatgpt_freemius_loaded', function () {
 
-    if ( function_exists( 'back_trace' ) ) {
-        back_trace( "NOTICE", "Freemius loaded (vendor management - UI OFF)" );
-    }
+    // if ( function_exists( 'back_trace' ) ) {
+    //     back_trace( "NOTICE", "Freemius loaded (vendor management - UI OFF)" );
+    // }
 
     if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {
         return;
@@ -151,20 +143,16 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
 
     }, 10, 2 );
 
-    /**
-     * 2) Suppress deactivation feedback / cancellation nags (optional but “quiet”).
-     */
+    // 2) Suppress deactivation feedback / cancellation nags (optional but “quiet”).
     $fs->add_filter( 'show_deactivation_feedback_form', '__return_false' );
     $fs->add_filter( 'show_deactivation_subscription_cancellation', '__return_false' );
 
 }, 20 );
 
-/**
- * 3) CSS fallback to hide Freemius top banners that bypass show_admin_notice.
- *    This is the banner you showed: "Hey! How do you like ... Start free trial"
- *
- * We scope this to wp-admin. If you want it only on specific screens, we can narrow it.
- */
+// 3) CSS fallback to hide Freemius top banners that bypass show_admin_notice.
+//    This is the banner you showed: "Hey! How do you like ... Start free trial"
+//
+// We scope this to wp-admin. If you want it only on specific screens, we can narrow it.
 add_action( 'admin_head', function () {
 
     if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {
@@ -199,18 +187,16 @@ add_action( 'admin_head', function () {
     </style>';
 }, 50 );
 
-/* ============================================================
- * Remove upgrade/trial links from Plugins list action links
- * ============================================================ */
+// Remove upgrade/trial links from Plugins list action links
 add_action( 'admin_init', function () {
 
     if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {
         return;
     }
 
-    if ( function_exists( 'back_trace' ) ) {
-        back_trace( "NOTICE", "Admin init - Remove upgrade/trial links from Plugins list action links" );
-    }
+    // if ( function_exists( 'back_trace' ) ) {
+    //     back_trace( "NOTICE", "Admin init - Remove upgrade/trial links from Plugins list action links" );
+    // }
 
     if ( defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' ) ) {
         $plugin_file = CHATBOT_CHATGPT_PLUGIN_FILE;

@@ -40,8 +40,8 @@ function chatbot_chatgpt_upload_files() {
     global $voice;
     
     if (empty($session_id) || $session_id == 0) {
-        $session_id = isset($_POST['session_id']) ? $_POST['session_id'] : null;
-        $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
+        $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : null;
+        $user_id = isset($_POST['user_id']) ? sanitize_text_field(wp_unslash($_POST['user_id'])) : null;
     }
     
     global $chatbot_chatgpt_display_style;
