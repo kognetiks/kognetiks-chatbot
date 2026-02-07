@@ -1,5 +1,10 @@
 # Past Updates
 
+## What's new in Version 2.4.5
+
+### Bug Fixes
+* **Bug Fixes**: Fixes and improvements to version 2.4.4.
+
 ## What's new in Version 2.4.4
 
 ### Improvements

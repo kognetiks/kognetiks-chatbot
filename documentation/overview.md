@@ -44,19 +44,11 @@ The **Kognetiks Chatbot** plugin relies on external AI services to provide chatb
 
 The **Kognetiks Chatbot** plugin now includes a novel feature: the Sentential Context Model.  This new **beta feature** allows the chatbot to generate intelligent responses by leveraging your website's content - no AI platform connection required.  It's perfect for localized use or content-focused applications, this feature makes the chatbot more versatile than ever.
 
-## What's new in Version 2.4.4
-
-### Improvements
-* **Documentation**: Added Unanswered Questions Detection Analysis documentation.
-* **Vendor management**: Refined free→trial→premium upgrade path and messaging.
-* **Reporting**: Modal prompts conversation logging when enabling digest or proof-of-value reports.
-* **Uninstall**: Improved uninstall process and version handling.
+## What's new in Version 2.4.5
 
 ### Bug Fixes
-* Suppressed vendor notices and quieted third-party warnings.
-* Replaced select error_log calls with back_trace for cleaner debugging.
 
-## Past Updates
+* **Bug Fixes**: Fixes and improvements to version 2.4.4.
 
 * Information about past updates can be found [here](updates/updates.md).
 

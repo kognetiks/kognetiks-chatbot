@@ -3,7 +3,7 @@ Contributors: kognetiks
 Tags: chat, chatgpt, ai, reporting, insights
 Donate link: https://kognetiks.com/wordpress-plugins/donate/
 Tested up to: 6.9.1
-Stable tag: 2.4.4
+Stable tag: 2.4.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -181,6 +181,12 @@ WordPress, OpenAI, ChatGPT, NVIDIA, NIM, Anthropic, Claude, DeepSeek, Mistral, A
 5. Chatbot settings and configuration
 
 == Changelog ==
+
+= 2.4.5 - Released TBD =
+
+### Bug Fixes
+
+* **Bug Fixes**: Fixes and improvements to version 2.4.4.
 
 = 2.4.4 - Released 2026-02-07 =
 

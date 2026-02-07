@@ -6,6 +6,11 @@
 
 ---
 
+## 2.4.5 - Released TBD
+
+### Bug Fixes
+* **Bug Fixes**: Fixes and improvements to version 2.4.4.
+
 ## 2.4.4 - Released 2026-02-07
 
 ### Improvements
