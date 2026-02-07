@@ -18,7 +18,7 @@ function generate_markov_text_flask_model($startWords = [], $max_tokens = 500, $
     global $chatbot_markov_chain_fallback_response;
 
     // Vary the $minLength between the chain length the the maximum tokens - Ver 2.1.9.1
-    $minLength = rand($minLength, $max_tokens / 2);
+    $minLength = wp_rand( $minLength, (int) ( $max_tokens / 2 ) );
 
     $chainLength = esc_attr(get_option('chatbot_markov_chain_length', 3));
 
@@ -227,7 +227,7 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
         });
 
         // Use the probabilities to select the next word
-        $random = mt_rand() / mt_getrandmax(); // Generate a random float between 0 and 1
+        $random = wp_rand( 0, 1000000 ) / 1000000; // Generate a random float between 0 and 1
         $cumulative = 0;
 
         foreach ($results as $row) {
@@ -254,13 +254,13 @@ function getNextWordFromDatabase($currentWord, $attempts = 1, $randomWordAttempt
         $probabilityThreshold = esc_attr(get_option('chatbot_markov_chain_probability_threshold', 95));
 
         // Probability or chance to select the most frequent word
-        if (mt_rand(1, 100) <= $probabilityThreshold) {
+        if (wp_rand( 1, 100 ) <= $probabilityThreshold) {
             return $results[0]['next_word']; // Return the most frequent word
         }
 
         // Otherwise, use the probabilistic approach
         $totalProbability = array_sum(array_column($results, 'frequency'));
-        $random = mt_rand(1, $totalProbability);
+        $random = wp_rand( 1, $totalProbability );
 
         $cumulative = 0;
         foreach ($results as $row) {

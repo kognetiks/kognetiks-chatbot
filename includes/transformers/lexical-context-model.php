@@ -147,7 +147,7 @@ function transformer_model_lexical_context_fetch_wordpress_content() {
     }
 
     // Clean and normalize content
-    $content = strip_tags($content); // Remove HTML tags
+    $content = wp_strip_all_tags( $content ); // Remove HTML tags
     $content = preg_replace('/\s+/', ' ', $content); // Normalize whitespace
     $content = trim($content);
 

@@ -31,7 +31,7 @@ function chatbot_chatgpt_download_options_data() {
 
     // Ensure no output is sent before headers
     if (headers_sent()) {
-        wp_die(__('Headers already sent. Cannot proceed with the download.', 'chatbot-chatgpt'));
+        wp_die( esc_html__( 'Headers already sent. Cannot proceed with the download.', 'chatbot-chatgpt' ) );
     }
 
     $debug_dir_path = $chatbot_chatgpt_plugin_dir_path . 'debug/';
@@ -39,7 +39,7 @@ function chatbot_chatgpt_download_options_data() {
     // Create debug directory if it doesn't exist
     if (!file_exists($debug_dir_path)) {
         if (!mkdir($debug_dir_path, 0777, true)) {
-            wp_die(__('Failed to create debug directory.', 'chatbot-chatgpt'));
+            wp_die( esc_html__( 'Failed to create debug directory.', 'chatbot-chatgpt' ) );
         }
     }
 
@@ -59,7 +59,7 @@ function chatbot_chatgpt_download_options_data() {
         // Write options to JSON file
         $options_data = json_encode($options, JSON_PRETTY_PRINT);
         if (file_put_contents($options_file, $options_data) === false) {
-            wp_die(__('Failed to write options to file.', 'chatbot-chatgpt'));
+            wp_die( esc_html__( 'Failed to write options to file.', 'chatbot-chatgpt' ) );
         }
 
     } elseif ($output_choice == 'csv') {
@@ -70,7 +70,7 @@ function chatbot_chatgpt_download_options_data() {
 
         // Check if the file was opened successfully
         if ($fileHandle === false) {
-            wp_die(__('Failed to open file for writing', 'chatbot-chatgpt'));
+            wp_die( esc_html__( 'Failed to open file for writing', 'chatbot-chatgpt' ) );
         }
 
         // Write the CSV header
@@ -102,13 +102,14 @@ function chatbot_chatgpt_download_options_data() {
     // Read file contents
     $options_data = file_get_contents($options_file);
     if ($options_data === false) {
-        wp_die(__('Failed to read options file.', 'chatbot-chatgpt'));
+        wp_die( esc_html__( 'Failed to read options file.', 'chatbot-chatgpt' ) );
     }
 
     // Deliver the file for download
     if ($output_choice === 'json') {
         header('Content-Type: application/json');
         header('Content-Disposition: attachment; filename="chatbot-chatgpt-options.json"');
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON output for file download, escaping would corrupt the data.
         echo $options_data;
     } elseif ($output_choice === 'csv') {
         header('Content-Type: text/csv');

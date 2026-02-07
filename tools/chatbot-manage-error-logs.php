@@ -197,7 +197,7 @@ function chatbot_chatgpt_manage_error_logs() {
     $output .= '</form>';
     $output .= '</div>';
 
-    echo $output; // Output the generated HTML
+    echo wp_kses_post( $output ); // Output the generated HTML
 
     return;
 

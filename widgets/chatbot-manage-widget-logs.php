@@ -108,7 +108,7 @@ function chatbot_manage_widget_logs() {
     $output .= '</form>';
     $output .= '</div>';
 
-    echo $output; // Output the generated HTML
+    echo wp_kses_post( $output ); // Output the generated HTML
 
     return;
 }

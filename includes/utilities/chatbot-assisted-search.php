@@ -58,7 +58,7 @@ function assistant_permission_callback( $request ) {
     
     if ( empty( $assistant_id ) ) {
         // return new WP_Error( 'missing_assistant_id', __('Missing Assistant ID'), array( 'status' => 403 ) );
-        return new WP_Error( 'unauthorized', __('Unauthorized'), array( 'status' => 403 ) );
+        return new WP_Error( 'unauthorized', __('Unauthorized', 'chatbot-chatgpt'), array( 'status' => 403 ) );
     }
     
     // Sanitize the assistant ID
@@ -77,7 +77,7 @@ function assistant_permission_callback( $request ) {
     if ( ! $exists ) {
         // DIAG - Diagnostics - Ver 2.2.7
         // return new WP_Error( 'invalid_assistant_id', __('Invalid Assistant ID'), array( 'status' => 403 ) );
-        return new WP_Error( 'unauthorized', __('Unauthorized'), array( 'status' => 403 ) );
+        return new WP_Error( 'unauthorized', __('Unauthorized', 'chatbot-chatgpt'), array( 'status' => 403 ) );
     }
     
     // DIAG - Diagnostics - Ver 2.2.7

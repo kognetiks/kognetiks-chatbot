@@ -1320,7 +1320,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
 
     // Check for errors
     if (!empty($wpdb->last_error)) {
-        $message = __( 'Error reading table: ' . $wpdb->last_error, 'chatbot-chatgpt' );
+        $message = sprintf( __( 'Error reading table: %s', 'chatbot-chatgpt' ), $wpdb->last_error );
         set_transient('chatbot_chatgpt_admin_error', $message, 60); // Expires in 60 seconds
         wp_safe_redirect(admin_url('options-general.php?page=chatbot-chatgpt&tab=reporting')); // Redirect to your settings page
         exit;
@@ -1377,7 +1377,7 @@ function chatbot_chatgpt_export_data( $t_table_name, $t_file_name ) {
     // Exit early if the file doesn't exist
     if (!file_exists($results_csv_file)) {
         $class = 'notice notice-error';
-        $message = __( 'File not found!' . $results_csv_file, 'chatbot-chatgpt' );
+        $message = sprintf( __( 'File not found: %s', 'chatbot-chatgpt' ), $results_csv_file );
         // printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
         chatbot_chatgpt_general_admin_notice($message);
         return;

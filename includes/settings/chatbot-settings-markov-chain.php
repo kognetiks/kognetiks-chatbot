@@ -166,10 +166,10 @@ function chatbot_markov_chain_status_section_callback($args) {
     ?>
         <div class="wrap">
             <div style="background-color: white; border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block;">
-                <p><b>Scheduled to Run: </b><?php echo $chatbot_markov_chain_current_build_schedule; ?></p>
+                <p><b>Scheduled to Run: </b><?php echo esc_html( $chatbot_markov_chain_current_build_schedule ); ?></p>
                 <p><b>Status of Last Run: </b><?php echo esc_attr(get_option('chatbot_markov_chain_last_updated', 'Please select a Build Schedule below.')); ?></p>
-                <p><b>Row Count: </b><?php echo $chatbot_markov_chain_row_count; ?></p>
-                <p><b>Table Size: </b><?php echo $chatbot_markov_chain_table_size_mb; ?> MB</p>
+                <p><b>Row Count: </b><?php echo esc_html( $chatbot_markov_chain_row_count ); ?></p>
+                <p><b>Table Size: </b><?php echo esc_html( $chatbot_markov_chain_table_size_mb ); ?> MB</p>
             </div>
             <p>Refresh this page to determine the progress and status of Markov Chain build process!</p>
         </div>

@@ -478,7 +478,7 @@ function getTheRunsStatus($thread_id, $runId, $api_key) {
             $totalRetryCount++;
     
             if ($retryCount >= $maxRetriesBeforeReset) {
-                $sleepTime = rand($resetRangeMin, $resetRangeMax);
+                $sleepTime = wp_rand( $resetRangeMin, $resetRangeMax );
                 $retryCount = 0;
             } else {
                 $sleepTime = min($sleepTime * 2, $maxSleep);

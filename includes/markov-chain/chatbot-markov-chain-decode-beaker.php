@@ -192,7 +192,7 @@ function markov_chain_beaker_get_next_word($currentKey, $markov_chain_table) {
     $totalFrequency = array_sum(array_column($results, 'frequency'));
 
     // Generate a random number between 1 and total frequency
-    $rand = mt_rand(1, $totalFrequency);
+    $rand = wp_rand( 1, $totalFrequency );
 
     // Select next word based on weighted probability
     $cumulative = 0;

@@ -358,7 +358,7 @@ function chatbot_mistral_thread_retention_period_callback($args) {
     <select id="chatbot_mistral_thread_retention_period" name="chatbot_mistral_thread_retention_period">
         <?php
         for ($i = 6; $i <= 720; $i += 6) {
-            echo '<option value="' . $i . '" ' . selected($chatbot_mistral_thread_retention_period, (string)$i) . '>' . esc_html($i) . '</option>';
+            echo '<option value="' . esc_attr( $i ) . '" ' . selected($chatbot_mistral_thread_retention_period, (string)$i) . '>' . esc_html( $i ) . '</option>';
         }
         ?>
     </select>
@@ -372,7 +372,7 @@ function chatbot_mistral_max_prompt_tokens_callback($args) {
     <select id="chatbot_mistral_max_prompt_tokens" name="chatbot_mistral_max_prompt_tokens">
         <?php
         for ($i = 1000; $i <= 100000; $i += 1000) {
-            echo '<option value="' . $i . '" ' . selected($max_prompt_tokens, (string)$i) . '>' . esc_html($i) . '</option>';
+            echo '<option value="' . esc_attr( $i ) . '" ' . selected($max_prompt_tokens, (string)$i) . '>' . esc_html( $i ) . '</option>';
         }
         ?>
     </select>
@@ -386,7 +386,7 @@ function chatbot_mistral_max_completion_tokens_callback($args) {
     <select id="chatbot_mistral_max_completion_tokens" name="chatbot_mistral_max_completion_tokens">
         <?php
         for ($i = 1000; $i <= 100000; $i += 1000) {
-            echo '<option value="' . $i . '" ' . selected($max_completion_tokens, (string)$i) . '>' . esc_html($i) . '</option>';
+            echo '<option value="' . esc_attr( $i ) . '" ' . selected($max_completion_tokens, (string)$i) . '>' . esc_html( $i ) . '</option>';
         }
     ?>
     </select>

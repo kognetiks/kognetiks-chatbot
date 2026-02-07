@@ -132,7 +132,7 @@ function chatbot_nvidia_temperature_callback($args) {
     <select id="chatbot_nvidia_temperature" name="chatbot_nvidia_temperature">
         <?php
         for ($i = 0.01; $i <= 2.01; $i += 0.01) {
-            echo '<option value="' . $i . '" ' . selected($temperature, (string)$i) . '>' . esc_html($i) . '</option>';
+            echo '<option value="' . esc_attr( $i ) . '" ' . selected($temperature, (string)$i) . '>' . esc_html( $i ) . '</option>';
         }
         ?>
     </select>
@@ -146,7 +146,7 @@ function chatbot_nvidia_top_p_callback($args) {
     <select id="chatbot_nvidia_top_p" name="chatbot_nvidia_top_p">
         <?php
         for ($i = 0.01; $i <= 1.01; $i += 0.01) {
-            echo '<option value="' . $i . '" ' . selected($top_p, (string)$i) . '>' . esc_html($i) . '</option>';
+            echo '<option value="' . esc_attr( $i ) . '" ' . selected($top_p, (string)$i) . '>' . esc_html( $i ) . '</option>';
         }
         ?>
     </select>

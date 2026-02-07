@@ -145,7 +145,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
     // Cross Site Scripting (XSS) vulnerability patch for 62801a58-b1ba-4c5a-bf93-7315d3553bb8
     foreach ($atts as $key => $value) {
         $atts[$key] = sanitize_text_field($value);
-        $atts[$key] = htmlspecialchars(strip_tags($atts[$key] ?? ''), ENT_QUOTES, 'UTF-8');
+        $atts[$key] = htmlspecialchars(wp_strip_all_tags($atts[$key] ?? ''), ENT_QUOTES, 'UTF-8');
         // DIAG - Diagnostics - Ver 2.0.6
     }
 
@@ -967,7 +967,7 @@ function chatbot_chatgpt_shortcode( $atts = [], $content = null, $tag = '' ) {
         //     echo '</div>';
         // } else {
             echo '<div id="chatbot-chatgpt-header-embedded">';
-            echo '<div id="chatbot-chatgpt-title" class="title">' . strip_tags($bot_name) . '</div>';
+            echo '<div id="chatbot-chatgpt-title" class="title">' . esc_html( wp_strip_all_tags( $bot_name ) ) . '</div>';
             echo '</div>';
         // }
         ?>
