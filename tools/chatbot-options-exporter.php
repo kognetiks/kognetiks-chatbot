@@ -19,9 +19,14 @@ function chatbot_chatgpt_download_options_data() {
 
     global $wpdb;
 
-    // Ensure the current user has the capability to export options
-    if (!current_user_can('manage_options')) {
-        wp_die(__('You do not have sufficient permissions to access this page.', 'chatbot-chatgpt'));
+    // Security: Check capability
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ), 403 );
+    }
+
+    // Security: Verify nonce for CSRF protection
+    if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'chatbot_chatgpt_download_options_data' ) ) {
+        wp_die( esc_html__( 'Security check failed. Please refresh the page and try again.', 'chatbot-chatgpt' ), 403 );
     }
 
     // Ensure no output is sent before headers

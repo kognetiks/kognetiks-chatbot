@@ -837,7 +837,7 @@ function chatbot_chatgpt_settings_page() {
 
                     echo '<hr style="margin: 20px 0;">';
                     
-                    echo '<h3>🔍 Want deeper insights?</h3>';
+                    echo '<h3>🔍 Curious about deeper signals or faster feedback?</h3>';
                     echo '<p>Weekly reports show what happened. Insights highlights patterns, risks, and what to improve next.</p>';
                     echo '<p>';
                     // Trial-first CTA with safety guards

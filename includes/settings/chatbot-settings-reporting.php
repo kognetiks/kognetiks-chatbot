@@ -332,6 +332,47 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
         }
         </style>
         
+        <!-- Card C: Upgrade CTA (Free users only) -->
+        <?php if ($is_free): ?>
+        <div class="kchat-email-card" id="kchat-upgrade-cta-card">
+            <div class="kchat-upgrade-cta" style="text-align: left;">
+                <h3>Curious about deeper signals or faster feedback?</h3>
+                <p>Weekly reports show what happened.<br>Insights highlights <i>what to do next</i>.</p>
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <?php
+                // Trial-first CTA with safety guards
+                if (function_exists('chatbot_chatgpt_freemius')) {
+                    $fs = chatbot_chatgpt_freemius();
+                    if (is_object($fs)) {
+                        // Primary: Start Free Trial button changed to Unlock Deeper Insights button
+                        if (method_exists($fs, 'get_upgrade_url')) {
+                            // Use monthly billing cycle for trial
+                            $trial_url = $fs->get_upgrade_url( WP_FS__PERIOD_MONTHLY, true );
+                            ?>
+                            <a href="<?php echo esc_url($trial_url); ?>" class="button button-primary" style="background-color: #f56e28; border-color: #f56e28; color: #fff; text-decoration: none; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 0;">
+                                Unlock Deeper Insights
+                            </a>
+                            <?php
+                        }
+                        // Secondary: View Plans link
+                        if (method_exists($fs, 'get_upgrade_url')) {
+                            $upgrade_url = $fs->get_upgrade_url();
+                            ?>
+                            <a href="<?php echo esc_url($upgrade_url); ?>" class="button button-secondary" style="text-decoration: none; padding: 8px 16px; font-size: 14px; display: inline-block; margin-bottom: 0;">
+                                View Plans
+                            </a>
+                            <?php
+                        }
+                    }
+                }
+                ?>
+                    <a href="?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=proof-of-value-reports-email.md" style="color: #2271b1; text-decoration: underline;">Learn more</a>
+                    <a href="mailto:support@kognetiks.com" style="color: #2271b1; text-decoration: underline;">Contact Support</a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
         <!-- Card A: Conversation Digest -->
         <div class="kchat-email-card" id="kchat-digest-card" data-enabled="<?php echo esc_attr($digest_enabled); ?>">
             <h3>Conversation Digest</h3>
@@ -421,47 +462,6 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
             </div>
             <?php endif; ?>
         </div>
-        
-        <!-- Card C: Upgrade CTA (Free users only) -->
-        <?php if ($is_free): ?>
-        <div class="kchat-email-card" id="kchat-upgrade-cta-card">
-            <div class="kchat-upgrade-cta" style="text-align: left;">
-                <h3>Want deeper signals or faster feedback?</h3>
-                <p>Weekly reports show what happened.<br>Insights highlights <i>what to do next</i>.</p>
-                <?php
-                // Trial-first CTA with safety guards
-                if (function_exists('chatbot_chatgpt_freemius')) {
-                    $fs = chatbot_chatgpt_freemius();
-                    if (is_object($fs)) {
-                        // Primary: Start Free Trial button changed to Unlock Deeper Insights button
-                        if (method_exists($fs, 'get_upgrade_url')) {
-                            // Use monthly billing cycle for trial
-                            $trial_url = $fs->get_upgrade_url( WP_FS__PERIOD_MONTHLY, true );
-                            ?>
-                            <a href="<?php echo esc_url($trial_url); ?>" class="button button-primary" style="background-color: #f56e28; border-color: #f56e28; color: #fff; text-decoration: none; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 10px; margin-right: 10px;">
-                                Unlock Deeper Insights
-                            </a>
-                            <?php
-                        }
-                        // Secondary: View Plans link
-                        if (method_exists($fs, 'get_upgrade_url')) {
-                            $upgrade_url = $fs->get_upgrade_url();
-                            ?>
-                            <a href="<?php echo esc_url($upgrade_url); ?>" class="button button-secondary" style="text-decoration: none; padding: 8px 16px; font-size: 14px; display: inline-block; margin-bottom: 10px;">
-                                View Plans
-                            </a>
-                            <?php
-                        }
-                    }
-                }
-                ?>
-                <div style="margin-top: 10px;">
-                    <a href="?page=chatbot-chatgpt&tab=support&dir=analytics-package&file=proof-of-value-reports-email.md" style="color: #2271b1; text-decoration: underline; margin-right: 15px;">Learn more</a>
-                    <a href="mailto:support@kognetiks.com" style="color: #2271b1; text-decoration: underline;">Contact Support</a>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
         
         <?php
         // Prepare variables for JavaScript (outside conditional blocks)

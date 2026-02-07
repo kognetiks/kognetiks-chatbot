@@ -136,7 +136,7 @@ function chatbot_chatgpt_options_exporter_button_callback() {
         <?php
             if (is_admin()) {
                 $header = " ";
-                $header .= '<a class="button button-primary" href="' . esc_url(admin_url('admin-post.php?action=chatbot_chatgpt_download_options_data')) . '">Download Options Data</a>';
+                $header .= '<a class="button button-primary" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=chatbot_chatgpt_download_options_data' ), 'chatbot_chatgpt_download_options_data' ) ) . '">Download Options Data</a>';
                 echo $header;
             }
         ?>

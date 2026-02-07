@@ -208,6 +208,11 @@ function handle_log_actions() {
 
     global $chatbot_chatgpt_plugin_dir_path;
 
+    // Security: Require admin capability - log management is admin-only
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'chatbot-chatgpt' ), 403 );
+    }
+
     if (!isset($_GET['action']) || !isset($_GET['_wpnonce'])) {
         return;
     }
@@ -350,11 +355,8 @@ function handle_log_actions() {
     }
     
 }
-add_action('admin_post_nopriv_download_log', 'handle_log_actions');
+// Admin-only: no admin_post_nopriv_* - unauthenticated users cannot manage logs
 add_action('admin_post_download_log', 'handle_log_actions');
-add_action('admin_post_nopriv_delete_log', 'handle_log_actions');
 add_action('admin_post_delete_log', 'handle_log_actions');
-add_action('admin_post_nopriv_delete_all_logs', 'handle_log_actions');
 add_action('admin_post_delete_all_logs', 'handle_log_actions');
-add_action('admin_post_nopriv_fix_permissions', 'handle_log_actions');
 add_action('admin_post_fix_permissions', 'handle_log_actions');
