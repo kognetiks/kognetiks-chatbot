@@ -426,21 +426,20 @@ function chatbot_chatgpt_conversation_digest_section_callback($args) {
         <?php if ($is_free): ?>
         <div class="kchat-email-card" id="kchat-upgrade-cta-card">
             <div class="kchat-upgrade-cta" style="text-align: left;">
-                <p style="margin: 0 0 15px 0; font-size: 15px; font-weight: 600; color: #1e1e1e;">
-                    <span style="color: #00a32a; margin-right: 5px;">✓</span> Ready to Upgrade?
-                </p>
+                <h3>Want deeper signals or faster feedback?</h3>
+                <p>Weekly reports show what happened.<br>Insights highlights <i>what to do next</i>.</p>
                 <?php
                 // Trial-first CTA with safety guards
                 if (function_exists('chatbot_chatgpt_freemius')) {
                     $fs = chatbot_chatgpt_freemius();
                     if (is_object($fs)) {
-                        // Primary: Start Free Trial button
+                        // Primary: Start Free Trial button changed to Unlock Deeper Insights button
                         if (method_exists($fs, 'get_upgrade_url')) {
                             // Use monthly billing cycle for trial
                             $trial_url = $fs->get_upgrade_url( WP_FS__PERIOD_MONTHLY, true );
                             ?>
                             <a href="<?php echo esc_url($trial_url); ?>" class="button button-primary" style="background-color: #f56e28; border-color: #f56e28; color: #fff; text-decoration: none; padding: 8px 16px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 10px; margin-right: 10px;">
-                                Start Free Trial
+                                Unlock Deeper Insights
                             </a>
                             <?php
                         }

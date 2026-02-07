@@ -1,12 +1,16 @@
 <?php
 /**
- * Kognetiks Chatbot - Vendor Management (Freemius “Quiet Proof” Controls) - Ver 2.4.4
+ * Kognetiks Chatbot - Vendor Management (Freemius UI OFF + Quiet Proof Foundation) - Ver 2.4.4
  *
- * BOTH WORLDS MODE:
- * - Throttle Freemius trial promo timing (first show + reshow cadence)
- * - Gate ANY Freemius trial promo / marketing notices behind “proof”
- * - Keep critical notices (errors/warnings)
- * - Remove Freemius upgrade/trial links from the Plugins list action links
+ * Goal:
+ * - Freemius remains the licensing + checkout rail.
+ * - Freemius stops acting like the product’s marketing voice.
+ *
+ * What this file does:
+ * - Suppresses Freemius promotional surfaces (banners/notices/nags)
+ * - Keeps critical notices (errors/warnings)
+ * - Removes Freemius upgrade/trial links from Plugins list action links
+ * - Provides "proof" helpers you will use for your own Proof → Unlock → Trial flow
  *
  * Assumes Freemius is bootstrapped in the main plugin file and that file calls:
  * do_action( 'chatbot_chatgpt_freemius_loaded' );
@@ -18,10 +22,17 @@ if ( ! defined( 'WPINC' ) ) {
     die();
 }
 
-// Tunables - Ver 2.4.4
+/* ============================================================
+ * Tunables
+ * ============================================================ */
 if ( ! defined( 'KCHAT_FREEMIUS_QUIET_MODE' ) ) {
+    // When true: suppress Freemius marketing UI surfaces
     define( 'KCHAT_FREEMIUS_QUIET_MODE', true );
 }
+
+/* ============================================================
+ * Proof helpers (used by YOUR in-plugin unlock messaging)
+ * ============================================================ */
 
 // Proof Unlocked
 if ( ! function_exists( 'kchat_has_unlock_proof' ) ) {
@@ -29,23 +40,22 @@ if ( ! function_exists( 'kchat_has_unlock_proof' ) ) {
         global $wpdb;
 
         // Must have logging enabled
-        if ( get_option('chatbot_chatgpt_enable_conversation_logging', 'Off') !== 'On' ) {
+        if ( get_option( 'chatbot_chatgpt_enable_conversation_logging', 'Off' ) !== 'On' ) {
             return false;
         }
 
         $table = $wpdb->prefix . 'chatbot_chatgpt_conversation_log';
 
         // If table doesn't exist yet, no proof
-        $exists = $wpdb->get_var( $wpdb->prepare(
-            "SHOW TABLES LIKE %s",
-            $table
-        ) );
+        $exists = $wpdb->get_var(
+            $wpdb->prepare( "SHOW TABLES LIKE %s", $table )
+        );
 
         if ( empty( $exists ) ) {
             return false;
         }
 
-        // 5 rows per conversation
+        // Current assumption: 5 rows per conversation
         $row_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
         $conversation_count = (int) floor( $row_count / 5 );
 
@@ -53,29 +63,20 @@ if ( ! function_exists( 'kchat_has_unlock_proof' ) ) {
     }
 }
 
-/**
- * Proof gate:
- * Return true only when you want Freemius to be allowed to surface conversion messaging.
- *
- * Default behavior (safe):
- * - If kchat_has_unlock_proof() exists (your “>= 10 conversations + logging enabled” check), use it.
- * - Otherwise, return false (stay quiet).
- */
+// Proof gate (you’ll use this for your own notices/UX)
 if ( ! function_exists( 'kchat_freemius_proof_gate' ) ) {
     function kchat_freemius_proof_gate() {
-        if ( function_exists( 'kchat_has_unlock_proof' ) ) {
-            return (bool) kchat_has_unlock_proof();
-        }
-        return false;
+        return function_exists( 'kchat_has_unlock_proof' ) ? (bool) kchat_has_unlock_proof() : false;
     }
 }
 
-// Quiet Proof controls (runs after Freemius loads) - Ver 2.4.4
+/* ============================================================
+ * Freemius: suppress marketing UI surfaces
+ * ============================================================ */
 add_action( 'chatbot_chatgpt_freemius_loaded', function () {
 
-    // DIAG - Diagnostics - Ver 2.4.4
     if ( function_exists( 'back_trace' ) ) {
-        back_trace( "NOTICE", "Freemius loaded (vendor management)" );
+        back_trace( "NOTICE", "Freemius loaded (vendor management - UI OFF)" );
     }
 
     if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {
@@ -92,22 +93,8 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
     }
 
     /**
-     * BOTH WORLDS PART 1: Throttle trial promo timing.
-     * - First trial promo: delay to 14 days
-     * - Reshow after dismissal: 180 days
-     */
-    $fs->add_filter( 'show_first_trial_after_n_sec', function( $default_sec ) {
-        return 14 * 24 * 60 * 60;
-    } );
-
-    $fs->add_filter( 'reshow_trial_after_every_n_sec', function( $default_sec ) {
-        return 180 * 24 * 60 * 60;
-    } );
-
-    /**
-     * BOTH WORLDS PART 2: Block marketing notices when in quiet mode.
-     * - Allow critical notices (errors/warnings) always
-     * - Block trial/upgrade/discount style notices entirely when KCHAT_FREEMIUS_QUIET_MODE is true
+     * 1) Suppress Freemius admin notices that are marketing.
+     *    Keep errors/warnings.
      */
     $fs->add_filter( 'show_admin_notice', function ( $show, $notice ) {
 
@@ -126,15 +113,11 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
             return $show;
         }
 
-        // Identify if this looks like marketing / conversion.
+        // Block promotional notices.
         $id   = strtolower( (string) ( $notice['id']   ?? '' ) );
         $slug = strtolower( (string) ( $notice['slug'] ?? '' ) );
         $msg  = strtolower( wp_strip_all_tags( (string) ( $notice['message'] ?? '' ) ) );
 
-        // Freemius “trial promotion” notice id (known).
-        $is_trial_promo = ( isset( $notice['id'] ) && 'trial_promotion' === $notice['id'] );
-
-        // General marketing signals (avoid blocking everything unnecessarily).
         $marketing_signals = array(
             'trial',
             'start trial',
@@ -150,51 +133,88 @@ add_action( 'chatbot_chatgpt_freemius_loaded', function () {
             'plans',
         );
 
-        $looks_marketing = $is_trial_promo;
-
-        if ( ! $looks_marketing ) {
-            foreach ( $marketing_signals as $s ) {
-                if (
-                    $s !== '' &&
-                    ( strpos( $id, $s ) !== false || strpos( $slug, $s ) !== false || strpos( $msg, $s ) !== false )
-                ) {
-                    $looks_marketing = true;
-                    break;
-                }
-            }
+        // Known Freemius trial promo notice id
+        if ( isset( $notice['id'] ) && 'trial_promotion' === $notice['id'] ) {
+            return false;
         }
 
-        // If it looks marketing, block it when in quiet mode.
-        // When KCHAT_FREEMIUS_QUIET_MODE is true, always hide marketing (trial, upgrade, etc.)
-        // regardless of proof, so the admin stays quiet.
-        if ( $looks_marketing ) {
-            return kchat_freemius_proof_gate();
+        foreach ( $marketing_signals as $s ) {
+            if (
+                $s !== '' &&
+                ( strpos( $id, $s ) !== false || strpos( $slug, $s ) !== false || strpos( $msg, $s ) !== false )
+            ) {
+                return false;
+            }
         }
 
         return $show;
 
     }, 10, 2 );
 
+    /**
+     * 2) Suppress deactivation feedback / cancellation nags (optional but “quiet”).
+     */
+    $fs->add_filter( 'show_deactivation_feedback_form', '__return_false' );
+    $fs->add_filter( 'show_deactivation_subscription_cancellation', '__return_false' );
+
 }, 20 );
 
-// Remove upgrade/trial links from Plugins list action links - Ver 2.4.4
+/**
+ * 3) CSS fallback to hide Freemius top banners that bypass show_admin_notice.
+ *    This is the banner you showed: "Hey! How do you like ... Start free trial"
+ *
+ * We scope this to wp-admin. If you want it only on specific screens, we can narrow it.
+ */
+add_action( 'admin_head', function () {
+
+    if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {
+        return;
+    }
+
+    // Only in wp-admin
+    if ( ! is_admin() ) {
+        return;
+    }
+
+    // If Freemius isn't present, nothing to do
+    if ( ! function_exists( 'chatbot_chatgpt_freemius' ) ) {
+        return;
+    }
+
+    echo '<style>
+        /* Freemius marketing banner / promo surfaces (best-effort selectors) */
+        .fs-notice, 
+        .fs-admin-notice, 
+        .fs-admin-notice-wrapper,
+        .fs-upgrade-notice,
+        .fs-trial-notice,
+        .fs-promo-notice,
+        .fs-trial-promotion,
+        #fs_connect, 
+        #fs_connect_wrapper,
+        .fs-plugin-tab-upgrade,
+        .fs-upgrade,
+        .fs-trial
+        { display: none !important; }
+    </style>';
+}, 50 );
+
+/* ============================================================
+ * Remove upgrade/trial links from Plugins list action links
+ * ============================================================ */
 add_action( 'admin_init', function () {
 
     if ( ! KCHAT_FREEMIUS_QUIET_MODE ) {
         return;
     }
 
-    // DIAG - Diagnostics - Ver 2.4.4
     if ( function_exists( 'back_trace' ) ) {
         back_trace( "NOTICE", "Admin init - Remove upgrade/trial links from Plugins list action links" );
     }
 
-    // Strongly preferred: set this in your main plugin file:
-    // define( 'CHATBOT_CHATGPT_PLUGIN_FILE', __FILE__ );
     if ( defined( 'CHATBOT_CHATGPT_PLUGIN_FILE' ) ) {
         $plugin_file = CHATBOT_CHATGPT_PLUGIN_FILE;
     } else {
-        // Safe fallback (works, but less ideal than the constant)
         $plugin_file = dirname( __FILE__ ) . '/chatbot-chatgpt.php';
         if ( ! file_exists( $plugin_file ) ) {
             return;
@@ -225,4 +245,3 @@ add_action( 'admin_init', function () {
     }, 100 );
 
 }, 20 );
-
